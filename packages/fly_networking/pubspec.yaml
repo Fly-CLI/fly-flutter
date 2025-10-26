@@ -1,0 +1,35 @@
+name: fly_networking
+description: HTTP client package for Fly CLI with Dio integration and Riverpod providers
+version: 0.1.0
+homepage: https://github.com/fly-cli/fly
+repository: https://github.com/fly-cli/fly.git
+issue_tracker: https://github.com/fly-cli/fly/issues
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.4.0
+  riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.0
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.8.1
+  fly_core:
+    path: ../fly_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  very_good_analysis: ^5.1.0
+  build_runner: ^2.4.7
+  riverpod_generator: ^3.0.0
+  freezed: ^3.0.0
+  json_serializable: ^6.7.1
+  mocktail: ^1.0.0
+
+flutter:
+  uses-material-design: true

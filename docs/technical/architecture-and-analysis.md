@@ -1298,7 +1298,7 @@ def create_flutter_project(requirements: str):
         text=True
     )
     
-    plan_data = json.loads(result.stdout)
+    plan_data = json.loads(result.stdout as String)
     
     # 3. Execute if valid
     if plan_data["valid"]:

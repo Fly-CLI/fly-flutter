@@ -1,0 +1,42 @@
+name: riverpod_example
+description: A production-ready Riverpod Flutter app created with Fly CLI
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Navigation
+  go_router: ^12.1.0
+  
+  # State Management
+  flutter_riverpod: ^3.0.3
+  riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.0
+  
+  # Fly packages
+  fly_core:
+    path: ../../packages/fly_core
+  fly_networking:
+    path: ../../packages/fly_networking
+  fly_state:
+    path: ../../packages/fly_state
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Code Generation
+  build_runner: ^2.4.7
+  riverpod_generator: ^3.0.0
+  
+  # Linting
+  flutter_lints: ^3.0.0
+  very_good_analysis: ^5.1.0
+
+flutter:
+  uses-material-design: true

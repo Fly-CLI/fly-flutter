@@ -3,6 +3,19 @@ description: Tools for Fly CLI development
 version: 0.1.0
 environment:
   sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
 
 dependencies:
   yaml: ^3.1.2
+  path: ^1.8.3
+  process: ^4.2.4
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  test: ^1.24.6
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  very_good_analysis: ^5.1.0
+  mocktail: ^1.0.0

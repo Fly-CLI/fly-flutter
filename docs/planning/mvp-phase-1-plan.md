@@ -438,7 +438,7 @@ test('riverpod template generates buildable project', () async {
 test('JSON output format is valid', () async {
   final result = await runCli(['create', 'test_app', '--output=json', '--plan']);
   
-  final jsonData = json.decode(result.stdout);
+  final jsonData = json.decode(result.stdout as String);
   expect(jsonData['success'], isA<bool>());
   expect(jsonData['command'], equals('create'));
   expect(jsonData['data'], isA<Map<String, dynamic>>());

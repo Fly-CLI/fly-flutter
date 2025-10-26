@@ -1,0 +1,41 @@
+name: riverpod
+version: 1.0.0
+description: Production-ready Riverpod architecture with best practices
+min_flutter_sdk: "3.10.0"
+min_dart_sdk: "3.0.0"
+
+variables:
+  project_name:
+    type: string
+    required: true
+    description: "Name of the project"
+  organization:
+    type: string
+    required: true
+    default: "com.example"
+    description: "Organization identifier"
+  platforms:
+    type: list
+    required: true
+    default: ["ios", "android"]
+    choices: ["ios", "android", "web", "macos", "windows", "linux"]
+    description: "Target platforms"
+  description:
+    type: string
+    default: "A new Flutter project"
+    description: "Project description"
+
+features:
+  - state_management
+  - routing
+  - error_handling
+  - theming
+  - networking
+
+packages:
+  - fly_core
+  - fly_networking
+  - fly_state
+  - riverpod
+  - riverpod_annotation
+  - go_router

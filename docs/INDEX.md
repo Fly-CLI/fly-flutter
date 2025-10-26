@@ -1,80 +1,88 @@
-# Fly CLI Documentation Index
+---
+layout: home
 
-Quick navigation to key documents and sections.
+hero:
+  name: "Fly CLI"
+  text: "The first AI-native Flutter CLI tool"
+  tagline: "Develop at the speed of thought with AI-powered project generation"
+  image:
+    src: /hero-image.png
+    alt: Fly CLI Logo
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guide/getting-started
+    - theme: alt
+      text: View on GitHub
+      link: https://github.com/fly-cli/fly
 
-## 📋 Implementation Plans & Roadmaps
-
-- **[MVP Phase 1 Plan](planning/mvp-phase-1-plan.md)** (31KB)
-  - Complete 9-10 week implementation plan
-  - Architecture, templates, packages, CLI commands
-  - Testing strategy, launch plan, success metrics
-
-## 🔧 Technical Analysis & Architecture
-
-- **[Architecture & Analysis](technical/architecture-and-analysis.md)** (74KB)
-  - Comprehensive technical analysis
-  - Competitive positioning and market gaps
-  - Foundation package architecture
-  - AI-friendly integration features
-  - Risk assessment and mitigation
-  - 20 critical gaps analysis
-
-## 🚀 Quick Start
-
-1. **New to the project?**
-   → Read [technical/architecture-and-analysis.md](technical/architecture-and-analysis.md)
-
-2. **Ready to implement?**
-   → Follow [planning/mvp-phase-1-plan.md](planning/mvp-phase-1-plan.md)
-
-3. **Looking for specific info?**
-   → Use the document structure below
-
-## 📚 Document Map
-
-### Planning Documents
-- `planning/mvp-phase-1-plan.md` - Phase 1 MVP implementation (9-10 weeks)
-
-### Technical Documents
-- `technical/architecture-and-analysis.md` - Technical analysis and architecture decisions
-
-### Reference Documents
-- *(To be added as project develops)*
-
-## 🔍 Find Information By Topic
-
-### Architecture Decisions
-- Technology stack → `technical/architecture-and-analysis.md` §1, §4
-- Foundation packages → `technical/architecture-and-analysis.md` §3
-- Template system → `planning/mvp-phase-1-plan.md` §3
-
-### Implementation Timeline
-- Week-by-week breakdown → `planning/mvp-phase-1-plan.md` §14
-- Milestones → `planning/mvp-phase-1-plan.md` §11
-- Timeline impact → `technical/architecture-and-analysis.md` §21
-
-### AI Integration
-- Core AI features → `technical/architecture-and-analysis.md` §21
-- Manifest format → `planning/mvp-phase-1-plan.md` §16
-- JSON output schemas → `planning/mvp-phase-1-plan.md` §4
-
-### Risk & Mitigation
-- Technical risks → `planning/mvp-phase-1-plan.md` §9, `technical/architecture-and-analysis.md` §12
-- Security considerations → `technical/architecture-and-analysis.md` §Gap 4
-- Market risks → `planning/mvp-phase-1-plan.md` §9
-
-### Launch Strategy
-- Pre-launch → `planning/mvp-phase-1-plan.md` §13
-- Success metrics → `planning/mvp-phase-1-plan.md` §8
-- Post-launch → `planning/mvp-phase-1-plan.md` §13
-
-## 📝 Document Status
-
-| Document | Status | Last Updated | Size |
-|----------|--------|--------------|------|
-| MVP Phase 1 Plan | ✅ Complete | Initial | 31KB |
-| Architecture & Analysis | ✅ Complete | Initial | 74KB |
-| Index (this file) | ✅ Complete | Initial | - |
+features:
+  - icon: 🤖
+    title: AI-Native Architecture
+    details: Built from the ground up for AI coding assistants. Every command outputs machine-readable JSON, making it perfect for Cursor, Copilot, and ChatGPT integration.
+  
+  - icon: 🏗️
+    title: Multi-Architecture Support
+    details: Choose from minimal or Riverpod templates. Generate production-ready Flutter apps with best practices built-in, from simple MVVM to complex state management.
+  
+  - icon: ⚡
+    title: Lightning Fast
+    details: Create a complete Flutter project in under 30 seconds. Optimized for speed with intelligent caching and parallel processing.
+  
+  - icon: 🔧
+    title: Developer Experience
+    details: Interactive wizards, shell completion, progress indicators, and comprehensive error messages with actionable suggestions.
+  
+  - icon: 📦
+    title: Foundation Packages
+    details: Built-in packages for networking, state management, and core abstractions. No need to reinvent the wheel - focus on your app logic.
+  
+  - icon: 🌐
+    title: Cross-Platform
+    details: Works seamlessly on Windows, macOS, and Linux. Generate projects that run on iOS, Android, Web, macOS, Windows, and Linux.
 
 ---
-*Last updated: Initial creation*
+
+## Why Fly CLI?
+
+### 🚀 **Built for the AI Era**
+
+Fly CLI is the first Flutter CLI tool designed specifically for AI coding assistants. Every command outputs structured JSON, making it easy for AI tools to understand and integrate with your development workflow.
+
+### 🎯 **Production-Ready Templates**
+
+Start with battle-tested templates that follow Flutter best practices:
+
+- **Minimal**: Clean, simple structure for learning and prototyping
+- **Riverpod**: Production-ready with state management, routing, and networking
+
+### 🔄 **Seamless Integration**
+
+Works perfectly with your favorite tools:
+
+- **AI Assistants**: Cursor, GitHub Copilot, ChatGPT Code Interpreter
+- **IDEs**: VS Code, Android Studio, IntelliJ IDEA
+- **CI/CD**: GitHub Actions, GitLab CI, Jenkins
+
+## Quick Start
+
+```bash
+# Install Fly CLI
+dart pub global activate fly_cli
+
+# Create a new project
+fly create my_app --template=riverpod
+
+# Add a new screen
+fly add screen home --feature=auth
+
+# Export project context for AI
+fly context export
+```
+
+## What's Next?
+
+- **[Installation Guide](/guide/installation)** - Get Fly CLI up and running
+- **[AI Integration](/ai-integration/overview)** - Learn how to integrate with AI tools
+- **[Templates](/guide/templates)** - Explore available project templates
+- **[Migration Guides](/migration/very-good-cli)** - Migrate from other CLI tools
