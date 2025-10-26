@@ -1,0 +1,136 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+*.g.dart
+*.mocks.dart
+*.freezed.dart
+*.drift.dart
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/*
+!.idea/runConfigurations/
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_ar.dart
+lib/l10n/app_localizations_en.dart
+
+flutter_data_port/lib/l10n/data_port_localizations.dart
+flutter_data_port/lib/l10n/data_port_localizations_ar.dart
+flutter_data_port/lib/l10n/data_port_localizations_en.dart
+
+# macOS system files
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+/LOGS.md
+/DATA.md
+
+/ignored
+
+# Test coverage
+coverage/
+*.lcov
+*.info
+
+# Configuration secrets - NEVER commit these!
+.env
+.env.*
+!.env.example
+config/*.json
+!config/*.example.json
+config/environments/*.json
+!config/environments/*.example.json
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/.env
+fastlane/.env.*
+!fastlane/.env.example
+
+# Fastlane build artifacts
+*.ipa
+*.dSYM.zip
+*.app.dSYM.zip
+
+# Match (code signing)
+fastlane/certs/
+fastlane/profiles/
+
+# Firebase configurations (add real files, ignore placeholders)
+# Root-level Firebase configs (should be moved to flavor/environment directories)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Flavor/Environment-specific Firebase configs
+android/app/src/*/google-services.json
+!android/app/src/*/README.md
+ios/Runner/Firebase/*/GoogleService-Info.plist
+!ios/Runner/Firebase/*/README.md
+
+# Firebase CLI configuration files (OPTIONAL - not needed by Flutter app)
+# These files are only used by Firebase CLI commands (deploy, functions, etc.)
+# Your Flutter app uses lib/firebase_options*.dart instead via --dart-define ENV=<env>
+# They can be regenerated with: ./scripts/firebase/setup_firebase_projects.sh
+.firebaserc
+firebase.json
+# Note: If your team needs these committed for Firebase CLI operations, remove them from .gitignore
+
+# Keystore files (never commit!)
+*.jks
+*.keystore
+android/app/upload-keystore.jks
+android/app/key-store-info.txt
+
+# iOS signing
+*.mobileprovision
+*.p12
+*.cer
+
+# App Store Connect API Key
+*.p8
+AuthKey_*.p8
