@@ -1,0 +1,325 @@
+import 'dart:io';
+import 'package:args/args.dart';
+
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/templates/models/brick_info.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
+
+/// AddScreenCommand using new architecture
+class AddScreenCommand extends FlyCommand {
+  AddScreenCommand(CommandContext context) : super(context);
+
+  @override
+  String get name => 'screen';
+
+  @override
+  String get description => 'Add a screen to your project';
+
+  @override
+  ArgParser get argParser {
+    final parser = super.argParser;
+    parser
+      ..addOption(
+        'feature',
+        help: 'Feature name',
+        defaultsTo: 'home',
+      )
+      ..addOption(
+        'type',
+        abbr: 't',
+        help: 'Screen type',
+        allowed: ['list', 'detail', 'form', 'auth', 'settings'],
+        defaultsTo: 'list',
+      )
+      ..addFlag(
+        'with-viewmodel',
+        help: 'Include viewmodel/provider',
+      )
+      ..addFlag(
+        'with-tests',
+        help: 'Include test files',
+      )
+      ..addFlag(
+        'interactive',
+        abbr: 'i',
+        help: 'Run in interactive mode',
+        negatable: false,
+      )
+      ..addFlag(
+        'with-validation',
+        help: 'Include form validation (for form screens)',
+      )
+      ..addFlag(
+        'with-navigation',
+        help: 'Include navigation logic',
+        defaultsTo: true,
+      );
+    return parser;
+  }
+
+  @override
+  List<CommandValidator> get validators => [
+    RequiredArgumentValidator('screen_name'),
+    FlutterProjectValidator(),
+    DirectoryWritableValidator(),
+  ];
+
+  @override
+  List<CommandMiddleware> get middleware => [
+    LoggingMiddleware(),
+    MetricsMiddleware(),
+    DryRunMiddleware(),
+  ];
+
+  @override
+  Future<CommandResult> execute() async {
+    final interactive = argResults!['interactive'] as bool? ?? false;
+    
+    if (interactive) {
+      return _runInteractiveMode();
+    }
+    
+    return _runNonInteractiveMode();
+  }
+
+  /// Run in interactive mode
+  Future<CommandResult> _runInteractiveMode() async {
+    try {
+      final prompter = context.interactivePrompt;
+      
+      logger.info('🎬 Adding a new screen');
+      logger.info('');
+      
+      // 1. Screen name
+      final screenName = await prompter.promptString(
+        prompt: 'Screen name',
+        validator: isValidName,
+        validationError: 'Screen name must contain only lowercase letters, numbers, and underscores',
+      );
+      
+      // 2. Feature
+      final feature = await prompter.promptString(
+        prompt: 'Feature name',
+        defaultValue: 'home',
+        validator: isValidName,
+        validationError: 'Feature name must contain only lowercase letters, numbers, and underscores',
+      );
+      
+      // 3. Screen type
+      final screenType = await prompter.promptChoice(
+        prompt: 'Screen type',
+        choices: ['list', 'detail', 'form', 'auth', 'settings'],
+        defaultChoice: 'list',
+      );
+      
+      // 4. ViewModel
+      final withViewModel = await prompter.promptConfirm(
+        prompt: 'Include ViewModel/Provider?',
+      );
+      
+      // 5. Tests
+      final withTests = await prompter.promptConfirm(
+        prompt: 'Include test files?',
+      );
+      
+      // 6. Additional options based on screen type
+      var withValidation = false;
+      if (screenType == 'form') {
+        withValidation = await prompter.promptConfirm(
+          prompt: 'Include form validation?',
+        );
+      }
+      
+      final withNavigation = await prompter.promptConfirm(
+        prompt: 'Include navigation logic?',
+      );
+      
+      // 7. Confirmation
+      logger.info('');
+      logger.info('Screen Configuration:');
+      logger.info('  Name: $screenName');
+      logger.info('  Feature: $feature');
+      logger.info('  Type: $screenType');
+      logger.info('  With ViewModel: $withViewModel');
+      logger.info('  With Tests: $withTests');
+      if (screenType == 'form') {
+        logger.info('  With Validation: $withValidation');
+      }
+      logger.info('  With Navigation: $withNavigation');
+      
+      final confirmed = await prompter.promptConfirm(
+        prompt: '\nCreate screen with this configuration?',
+      );
+      
+      if (!confirmed) {
+        return CommandResult.error(
+          message: 'Screen creation cancelled',
+          suggestion: 'Run the command again to start over',
+        );
+      }
+      
+      // Generate screen using Mason brick
+      return await _generateScreenWithMason(
+        screenName: screenName,
+        feature: feature,
+        screenType: screenType,
+        withViewModel: withViewModel,
+        withTests: withTests,
+        withValidation: withValidation,
+        withNavigation: withNavigation,
+      );
+    } catch (e) {
+      return CommandResult.error(
+        message: 'Interactive mode failed: $e',
+        suggestion: 'Try running without --interactive flag',
+      );
+    }
+  }
+
+  /// Run in non-interactive mode
+  Future<CommandResult> _runNonInteractiveMode() async {
+    final screenName = argResults!.rest.first;
+    final feature = argResults!['feature'] as String? ?? 'home';
+    final screenType = argResults!['type'] as String? ?? 'list';
+    final withViewModel = argResults!['with-viewmodel'] as bool? ?? false;
+    final withTests = argResults!['with-tests'] as bool? ?? false;
+    final withValidation = argResults!['with-validation'] as bool? ?? false;
+    final withNavigation = argResults!['with-navigation'] as bool? ?? true;
+
+    return _generateScreenWithMason(
+      screenName: screenName,
+      feature: feature,
+      screenType: screenType,
+      withViewModel: withViewModel,
+      withTests: withTests,
+      withValidation: withValidation,
+      withNavigation: withNavigation,
+    );
+  }
+
+  /// Generate screen using Mason brick
+  Future<CommandResult> _generateScreenWithMason({
+    required String screenName,
+    required String feature,
+    required String screenType,
+    required bool withViewModel,
+    required bool withTests,
+    required bool withValidation,
+    required bool withNavigation,
+  }) async {
+    try {
+      final stopwatch = Stopwatch()..start();
+      
+      logger.info('Adding screen: $screenName');
+      logger.info('Feature: $feature');
+      logger.info('Type: $screenType');
+      logger.info('With viewmodel: $withViewModel');
+      logger.info('With tests: $withTests');
+      if (screenType == 'form') {
+        logger.info('With validation: $withValidation');
+      }
+      logger.info('With navigation: $withNavigation');
+
+      // Use injected template manager
+      final templateManager = context.templateManager;
+
+      // Create screen configuration for Mason brick
+      final screenConfig = <String, dynamic>{
+        'screen_name': screenName,
+        'feature': feature,
+        'screen_type': screenType,
+        'with_viewmodel': withViewModel,
+        'with_tests': withTests,
+        'with_validation': withValidation,
+        'with_navigation': withNavigation,
+      };
+
+      // Generate screen using TemplateManager
+      final result = await templateManager.generateComponent(
+        componentName: screenName,
+        componentType: BrickType.screen,
+        config: screenConfig,
+        targetPath: context.workingDirectory,
+      );
+
+      stopwatch.stop();
+
+      if (result is TemplateGenerationFailure) {
+        return CommandResult.error(
+          message: 'Failed to generate screen: ${result.error}',
+          suggestion: 'Check screen brick availability and try again',
+        );
+      }
+
+      if (result is! TemplateGenerationSuccess) {
+        return CommandResult.error(
+          message: 'Unexpected generation result',
+          suggestion: 'Try again or contact support',
+        );
+      }
+
+      // Count generated files
+      var filesGenerated = result.filesGenerated;
+
+      return CommandResult.success(
+        command: 'add screen',
+        message: 'Screen added successfully',
+        data: {
+          'screen_name': screenName,
+          'feature': feature,
+          'screen_type': screenType,
+          'with_viewmodel': withViewModel,
+          'with_tests': withTests,
+          'with_validation': withValidation,
+          'with_navigation': withNavigation,
+          'files_generated': filesGenerated,
+          'duration_ms': stopwatch.elapsedMilliseconds,
+        },
+        nextSteps: [
+          const NextStep(
+            command: 'flutter run',
+            description: 'Run the application to see the new screen',
+          ),
+        ],
+      );
+    } catch (e) {
+      return CommandResult.error(
+        message: 'Failed to add screen: $e',
+        suggestion: 'Check your project structure and try again',
+      );
+    }
+  }
+
+  bool isValidName(String name) {
+    if (name.isEmpty || name.length < 2 || name.length > 50) {
+      return false;
+    }
+    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
+    return regex.hasMatch(name);
+  }
+
+  // Lifecycle hooks implementation
+  @override
+  Future<void> onBeforeExecute(CommandContext context) async {
+    logger.info('🔧 Preparing to add screen...');
+  }
+
+  @override
+  Future<void> onAfterExecute(CommandContext context, CommandResult result) async {
+    if (result.success) {
+      logger.info('🎉 Screen added successfully!');
+    }
+  }
+
+  @override
+  Future<void> onError(CommandContext context, Object error, StackTrace stackTrace) async {
+    logger.err('💥 Screen creation failed: $error');
+    if (context.verbose) {
+      logger.err('Stack trace: $stackTrace');
+    }
+  }
+}

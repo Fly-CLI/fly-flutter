@@ -2214,7 +2214,7 @@ test('fly_core and fly_networking work together', () async {
 test('create command JSON output is valid', () async {
   final result = await runCli(['create', 'test_app', '--output=json', '--plan']);
   
-  final jsonData = json.decode(result.stdout);
+  final jsonData = json.decode(result.stdout as String);
   
   // Validate schema
   expect(jsonData['success'], isA<bool>());
@@ -2238,7 +2238,7 @@ platforms: [ios, android]
   final result = await runCli(['create', '--from-stdin', '--output=json'], 
                               input: manifest);
   
-  final jsonData = json.decode(result.stdout);
+  final jsonData = json.decode(result.stdout as String);
   expect(jsonData['success'], true);
   expect(jsonData['data']['template'], equals('riverpod'));
 });
@@ -2250,7 +2250,7 @@ platforms: [ios, android]
 test('schema export generates valid JSON schema', () async {
   final result = await runCli(['schema', 'export', '--output=json']);
   
-  final schema = json.decode(result.stdout);
+  final schema = json.decode(result.stdout as String);
   
   // Validate schema structure
   expect(schema['commands'], isA<Map<String, dynamic>>());

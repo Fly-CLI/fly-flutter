@@ -1,0 +1,5 @@
+# Minimal Project Manifest
+name: simple_app
+template: minimal
+organization: com.simple
+platforms: [ios, android]

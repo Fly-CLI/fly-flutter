@@ -1,0 +1,46 @@
+name: fly_service
+description: Generate a Flutter service with different types and optional tests/mocks
+version: 1.0.0
+
+vars:
+  service_name:
+    type: string
+    description: Name of the service (snake_case)
+    prompt: What is the service name?
+    default: api_service
+  feature:
+    type: string
+    description: Feature module name
+    prompt: Which feature does this service belong to?
+    default: core
+  service_type:
+    type: enum
+    description: Type of service to generate
+    values:
+      - api
+      - local
+      - cache
+      - analytics
+      - storage
+    prompt: What type of service is this?
+    default: api
+  with_tests:
+    type: boolean
+    description: Include unit tests
+    prompt: Include test files?
+    default: true
+  with_mocks:
+    type: boolean
+    description: Include mock implementations
+    prompt: Include mock files?
+    default: false
+  with_interceptors:
+    type: boolean
+    description: Include HTTP interceptors (for API services)
+    prompt: Include HTTP interceptors?
+    default: false
+  base_url:
+    type: string
+    description: Base URL for API services
+    prompt: What is the base URL?
+    default: https://api.example.com

@@ -1,0 +1,25 @@
+#compdef fly
+
+_fly() {
+    local context state line
+    typeset -A opt_args
+    
+    _arguments -C \
+        '1: :->command' \
+        '*::arg:->args'
+        && return 0
+    
+    case $state in
+        command)
+            local commands=(
+            )
+            _describe 'commands' commands
+            ;;
+        args)
+            case $line[1] in
+            esac
+            ;;
+    esac
+}
+
+_fly "$@"

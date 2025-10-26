@@ -1,0 +1,81 @@
+# Fly CLI zsh completion script
+
+_fly() {
+    local context state line
+    typeset -A opt_args
+
+    _arguments -C \
+        '1: :->command' \
+        '2: :->subcommand' \
+        '*::arg:->args' \
+        '--help[Show help information]' \
+        '--version[Show version information]' \
+        '--verbose[Enable verbose output]' \
+        '--quiet[Suppress output]' \
+        '--output=[Output format]:format:(human json)' \
+        '--plan[Show execution plan without running]' && return 0
+
+    case $state in
+        command)
+            _values 'fly commands' \
+                'create[Create a new Flutter project]' \
+                'add[Add components to your project]' \
+                'doctor[Show information about the installed tooling]' \
+                'version[Print the current version]' \
+                'schema[Export CLI command schemas for AI integration]' \
+                'context[Export project context for AI integration]'
+            ;;
+        subcommand)
+            case $line[1] in
+                add)
+                    _values 'add subcommands' \
+                        'screen[Add a new screen]' \
+                        'service[Add a new service]'
+                    ;;
+                create)
+                    _arguments \
+                        '--template=[Project template to use]:template:(minimal riverpod)' \
+                        '--organization=[Organization identifier]:org' \
+                        '--platforms=[Target platforms]:platforms:(ios android web macos windows linux)' \
+                        '--interactive[Run in interactive mode]' \
+                        '--from-manifest=[Create project from manifest file]:file'
+                    ;;
+                schema)
+                    _arguments \
+                        '--command=[Specify a command to export its schema]:command'
+                    ;;
+                context)
+                    _arguments \
+                        '--include-dependencies[Include dependency information]' \
+                        '--include-structure[Include project structure]' \
+                        '--include-conventions[Include coding conventions]'
+                    ;;
+            esac
+            ;;
+        args)
+            case $line[1] in
+                add)
+                    case $line[2] in
+                        screen)
+                            _arguments \
+                                '--feature=[Feature module name]:feature' \
+                                '--type=[Screen type]:type:(list detail form settings)' \
+                                '--with-viewmodel[Include ViewModel for state management]' \
+                                '--with-tests[Include widget tests]'
+                            ;;
+                        service)
+                            _arguments \
+                                '--feature=[Feature module name]:feature' \
+                                '--type=[Service type]:type:(api repository storage analytics)' \
+                                '--base-url=[Base URL for API services]:url' \
+                                '--with-tests[Include unit tests]' \
+                                '--with-mocks[Include mock implementations]'
+                            ;;
+                    esac
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_fly "$@"

@@ -1,13 +1,14 @@
 import 'dart:io';
+
+import 'package:fly_cli/src/core/utils/platform_utils.dart';
 import 'package:test/test.dart';
-import 'package:fly_cli/src/platform/platform_utils.dart';
 
 void main() {
   group('Platform Integration Tests', () {
     group('Cross-Platform Path Handling', () {
       test('path normalization works across platforms', () {
-        final windowsPath = 'lib\\src\\main.dart';
-        final unixPath = 'lib/src/main.dart';
+        const windowsPath = r'lib\src\main.dart';
+        const unixPath = 'lib/src/main.dart';
         
         final normalizedWindows = PlatformUtils.normalizePath(windowsPath);
         final normalizedUnix = PlatformUtils.normalizePath(unixPath);
@@ -17,7 +18,7 @@ void main() {
       });
 
       test('mixed separators are handled correctly', () {
-        final mixedPath = 'lib\\src/main.dart';
+        const mixedPath = r'lib\src/main.dart';
         final normalized = PlatformUtils.normalizePath(mixedPath);
         
         expect(normalized, 'lib/src/main.dart');

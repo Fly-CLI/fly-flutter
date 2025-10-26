@@ -1,0 +1,46 @@
+name: fly_screen
+description: Generate a Flutter screen with optional viewmodel and tests
+version: 1.0.0
+
+vars:
+  screen_name:
+    type: string
+    description: Name of the screen (snake_case)
+    prompt: What is the screen name?
+    default: home
+  feature:
+    type: string
+    description: Feature module name
+    prompt: Which feature does this screen belong to?
+    default: home
+  screen_type:
+    type: enum
+    description: Type of screen to generate
+    values:
+      - list
+      - detail
+      - form
+      - auth
+      - settings
+    prompt: What type of screen is this?
+    default: list
+  with_viewmodel:
+    type: boolean
+    description: Include Riverpod viewmodel/provider
+    prompt: Include ViewModel/Provider?
+    default: true
+  with_tests:
+    type: boolean
+    description: Include widget tests
+    prompt: Include test files?
+    default: true
+  with_validation:
+    type: boolean
+    description: Include form validation (for form screens)
+    prompt: Include form validation?
+    default: false
+  with_navigation:
+    type: boolean
+    description: Include navigation logic
+    prompt: Include navigation?
+    default: true

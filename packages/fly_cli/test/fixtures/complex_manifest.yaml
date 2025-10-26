@@ -1,0 +1,46 @@
+# Riverpod Project with Full Features
+name: production_app
+template: riverpod
+organization: com.company
+platforms: [ios, android, web]
+description: "Production-ready Flutter app"
+
+screens:
+  - name: splash
+    type: auth
+  - name: login
+    type: auth
+    features: [validation, biometric_auth]
+  - name: home
+    type: list
+    features: [pull_to_refresh, infinite_scroll]
+  - name: profile
+    type: detail
+    features: [edit_mode]
+
+services:
+  - name: auth_service
+    api_base: https://api.company.com
+    type: api
+    features: [token_refresh, offline_support]
+  - name: user_service
+    api_base: https://api.company.com
+    type: api
+    features: [caching]
+
+packages:
+  - firebase_core
+  - firebase_auth
+  - google_sign_in
+  - shared_preferences
+
+config:
+  min_sdk_version: 21
+  target_sdk_version: 34
+  ios_deployment_target: "12.0"
+  code_generation:
+    generate_tests: true
+    generate_docs: true
+  ai_integration:
+    generate_context: true
+    include_examples: true

@@ -1,0 +1,11 @@
+include: ../../analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "templates/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.mocks.dart"
+    - "**/build/**"
+    - "**/.dart_tool/**"
+    - "**/coverage/**"

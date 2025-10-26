@@ -1,0 +1,39 @@
+{
+  "name": "fly-cli-docs",
+  "version": "1.0.0",
+  "description": "Documentation website for Fly CLI",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx,.mjs --fix --ignore-path .gitignore",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vitepress": "^1.0.0-rc.31"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fly-cli/fly.git",
+    "directory": "docs"
+  },
+  "keywords": [
+    "flutter",
+    "cli",
+    "ai",
+    "documentation",
+    "vitepress"
+  ],
+  "author": "Fly CLI Team",
+  "license": "MIT"
+}
