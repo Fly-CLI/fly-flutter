@@ -1,0 +1,25 @@
+name: License Check
+on: [push, pull_request]
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+      
+      - name: Install dependencies
+        run: dart pub get
+        working-directory: packages/fly_cli
+      
+      - name: Check license compatibility
+        run: dart run tools/license_checker.dart
+      
+      - name: Validate NOTICE file exists
+        run: |
+          if [ ! -f "NOTICE" ]; then
+            echo "NOTICE file is missing"
+            exit 1
+          fi

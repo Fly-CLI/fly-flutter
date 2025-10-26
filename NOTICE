@@ -1,0 +1,38 @@
+# NOTICE
+
+Fly CLI - Flutter Development Tool
+Copyright (c) 2025 Fly CLI Contributors
+
+This project uses the following open source packages:
+
+---
+
+## Dart Args Package
+- License: BSD-3-Clause License
+- Copyright: (c) 2012, the Dart project authors
+- Source: https://github.com/dart-lang/args
+
+## Path Package
+- License: BSD-3-Clause License
+- Copyright: (c) 2014, the Dart project authors
+- Source: https://github.com/dart-lang/path
+
+## HTTP Package
+- License: BSD-3-Clause License
+- Copyright: (c) 2015, the Dart project authors
+- Source: https://github.com/dart-lang/http
+
+## YAML Package
+- License: MIT License
+- Copyright: (c) 2014, the Dart project authors
+- Source: https://github.com/dart-lang/yaml
+
+## Test Package
+- License: BSD-3-Clause License
+- Copyright: (c) 2014, the Dart project authors
+- Source: https://github.com/dart-lang/test
+
+## Mockito
+- License: Apache License 2.0
+- Copyright: (c) 2017
+- Source: https://github.com/dart-lang/mockito

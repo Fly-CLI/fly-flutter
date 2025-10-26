@@ -1,0 +1,8 @@
+name: fly_tools
+description: Tools for Fly CLI development
+version: 0.1.0
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  yaml: ^3.1.2
