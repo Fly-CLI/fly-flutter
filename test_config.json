@@ -1,0 +1,6 @@
+{
+  "project_name": "test_app3",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "description": "Test app"
+}

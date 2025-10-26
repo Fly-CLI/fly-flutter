@@ -22,7 +22,7 @@ class CacheInfo {
       };
 
   factory CacheInfo.fromJson(Map<String, dynamic> json) => CacheInfo(
-        downloadedAt: DateTime.parse(json['downloaded_at']),
+        downloadedAt: DateTime.parse(json['downloaded_at'] as String),
         version: json['version'] as String,
         checksum: json['checksum'] as String,
       );

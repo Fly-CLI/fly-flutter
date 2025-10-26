@@ -49,6 +49,19 @@ class PlatformUtils {
     return path.join(configDir, 'cache');
   }
 
+  /// Get default cache directory synchronously (for constructor)
+  static String getDefaultCacheDirectory() {
+    final home = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '';
+    if (isWindows) {
+      return path.join(home, 'AppData', 'Local', 'fly_cli', 'cache');
+    } else if (isMacOS) {
+      return path.join(home, 'Library', 'Application Support', 'fly_cli', 'cache');
+    } else {
+      // Linux and other Unix-like systems
+      return path.join(home, '.config', 'fly_cli', 'cache');
+    }
+  }
+
   /// Get templates directory
   static Future<String> getTemplatesDirectory() async {
     final configDir = await getConfigDirectory();

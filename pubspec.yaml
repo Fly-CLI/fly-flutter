@@ -1,8 +1,129 @@
 name: fly_tools
 description: Tools for Fly CLI development
 version: 0.1.0
+publish_to: none
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '^3.9.2'
+  flutter: ">=3.10.0"
+
+workspace:
+  - packages/fly_cli
+  - packages/fly_core
+  - packages/fly_networking
+  - packages/fly_state
 
 dependencies:
   yaml: ^3.1.2
+  path: ^1.8.3
+  process: ^5.0.0
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  test: ^1.24.6
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  very_good_analysis: ^5.1.0
+  mocktail: ^1.0.0
+  melos: ^7.3.0
+
+melos:
+  repository: https://github.com/fly-cli/fly.git
+  
+  command:
+    bootstrap:
+      runPubGetInParallel: true
+      environment:
+        sdk: ">=3.5.0 <4.0.0"
+        flutter: ">=3.10.0"
+      
+    version:
+      linkToCommits: true
+      workspaceChangelog: true
+      commitMessageFormat: "chore: bump version to {{version}}"
+      
+  scripts:
+    # Analysis and formatting
+    analyze:
+      run: melos exec -- flutter analyze
+      description: Run analysis on all packages
+      
+    format:
+      run: melos exec -- dart format --set-exit-if-changed .
+      description: Format all Dart files
+      
+    format:check:
+      run: melos exec -- dart format --set-exit-if-changed .
+      description: Check formatting without changing files
+      
+    # Testing
+    test:
+      run: melos exec -- flutter test --coverage
+      description: Run tests with coverage
+      packageFilters:
+        dirExists: test
+        
+    test:changed:
+      run: melos exec -- flutter test
+      description: Test only changed packages
+      packageFilters:
+        diff: HEAD~1
+        
+    # Code generation
+    build_runner:
+      run: melos exec -- dart run build_runner build --delete-conflicting-outputs
+      description: Run code generation for all packages
+      
+    # Publishing
+    publish:dry-run:
+      run: melos publish --dry-run --yes
+      description: Dry run publish to verify packages
+      
+    # CLI specific
+    install:
+      run: dart pub global activate --source path packages/fly_cli
+      description: Install Fly CLI locally for development
+      
+    # Examples
+    build:examples:
+      run: melos exec -- flutter build apk
+      description: Build all example apps
+      packageFilters:
+        scope: '*example*'
+        
+    # AI Integration
+    schema:export:
+      run: dart run packages/fly_cli/bin/fly.dart schema export --output=json
+      description: Export CLI schema for AI integration
+      
+    # Development utilities
+    clean:
+      run: melos exec -- flutter clean
+      description: Clean all packages
+      
+    get:
+      run: melos exec -- flutter pub get
+      description: Get dependencies for all packages
+      
+    outdated:
+      run: melos exec -- flutter pub outdated
+      description: Check for outdated dependencies
+      
+    # Security and compliance
+    license:check:
+      run: dart run tools/license_checker.dart
+      description: Check license compatibility
+      
+    security:scan:
+      run: melos exec -- dart run packages/fly_cli/lib/src/security/template_validator.dart
+      description: Run security validation on templates
+
+  # Ignore patterns
+  ignore:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.mocks.dart"
+    - "**/build/**"
+    - "**/.dart_tool/**"
+    - "**/coverage/**"

@@ -1,0 +1,184 @@
+# Fly CLI Project Manifest Format Specification
+# Version: 1.0
+# Date: January 2025
+
+# This document defines the fly_project.yaml manifest format for declarative
+# project creation with AI integration support.
+
+---
+
+# Basic Project Information
+name: my_app                    # Required: Project name (snake_case)
+template: riverpod              # Required: Template to use (minimal, riverpod)
+organization: com.example       # Optional: Organization identifier (default: com.example)
+description: "My awesome app"  # Optional: Project description
+
+# Target Platforms
+platforms:                      # Optional: Target platforms (default: [ios, android])
+  - ios
+  - android
+  - web
+  - macos
+  - windows
+  - linux
+
+# Project Structure
+screens:                        # Optional: Screens to generate
+  - name: login                 # Required: Screen name
+    type: auth                  # Optional: Screen type (auth, list, detail, form)
+    features:                   # Optional: Screen-specific features
+      - validation
+      - biometric_auth
+  - name: home
+    type: list
+    features:
+      - pull_to_refresh
+      - infinite_scroll
+  - name: profile
+    type: detail
+    features:
+      - edit_mode
+
+# Services and APIs
+services:                       # Optional: Services to generate
+  - name: auth_service          # Required: Service name
+    api_base: https://api.example.com  # Optional: API base URL
+    features:                    # Optional: Service features
+      - token_refresh
+      - offline_support
+  - name: user_service
+    api_base: https://api.example.com
+    features:
+      - caching
+
+# Dependencies and Packages
+packages:                       # Optional: Additional packages
+  - firebase_core
+  - firebase_auth
+  - google_sign_in
+  - shared_preferences
+
+# Configuration
+config:                         # Optional: Project configuration
+  min_sdk_version: 21          # Optional: Minimum Android SDK version
+  target_sdk_version: 34       # Optional: Target Android SDK version
+  ios_deployment_target: "12.0" # Optional: iOS deployment target
+  
+  # Code generation
+  code_generation:              # Optional: Code generation settings
+    generate_tests: true        # Optional: Generate test files (default: true)
+    generate_docs: true         # Optional: Generate documentation (default: false)
+    
+  # AI Integration
+  ai_integration:               # Optional: AI-specific settings
+    generate_context: true      # Optional: Generate .ai/project_context.md (default: true)
+    include_examples: true      # Optional: Include AI examples (default: false)
+
+# Environment Configuration
+environments:                   # Optional: Environment-specific settings
+  development:
+    api_base: https://dev-api.example.com
+    debug_mode: true
+  staging:
+    api_base: https://staging-api.example.com
+    debug_mode: false
+  production:
+    api_base: https://api.example.com
+    debug_mode: false
+
+# Custom Templates (Advanced)
+custom_templates:               # Optional: Custom template overrides
+  screens:
+    auth_screen: "custom_auth_template"
+  services:
+    api_service: "custom_api_template"
+
+# Migration Settings
+migration:                      # Optional: Migration from other tools
+  from_tool: "very_good_cli"   # Optional: Source tool for migration
+  preserve_structure: true      # Optional: Preserve existing structure (default: false)
+
+---
+
+# Example Manifest Files
+
+# Minimal Project
+name: simple_app
+template: minimal
+organization: com.simple
+platforms: [ios, android]
+
+# Riverpod Project with Full Features
+name: production_app
+template: riverpod
+organization: com.company
+platforms: [ios, android, web]
+description: "Production-ready Flutter app"
+
+screens:
+  - name: splash
+    type: auth
+  - name: login
+    type: auth
+    features: [validation, biometric_auth]
+  - name: home
+    type: list
+    features: [pull_to_refresh, infinite_scroll]
+  - name: profile
+    type: detail
+    features: [edit_mode]
+
+services:
+  - name: auth_service
+    api_base: https://api.company.com
+    features: [token_refresh, offline_support]
+  - name: user_service
+    api_base: https://api.company.com
+    features: [caching]
+
+packages:
+  - firebase_core
+  - firebase_auth
+  - google_sign_in
+  - shared_preferences
+
+config:
+  min_sdk_version: 21
+  target_sdk_version: 34
+  ios_deployment_target: "12.0"
+  code_generation:
+    generate_tests: true
+    generate_docs: true
+  ai_integration:
+    generate_context: true
+    include_examples: true
+
+environments:
+  development:
+    api_base: https://dev-api.company.com
+    debug_mode: true
+  production:
+    api_base: https://api.company.com
+    debug_mode: false
+
+# AI-Generated Project (Example)
+name: ai_generated_app
+template: riverpod
+organization: com.ai
+platforms: [ios, android, web]
+
+screens:
+  - name: onboarding
+    type: auth
+  - name: dashboard
+    type: list
+  - name: settings
+    type: detail
+
+services:
+  - name: api_service
+    api_base: https://api.ai.com
+
+ai_integration:
+  generate_context: true
+  include_examples: true
