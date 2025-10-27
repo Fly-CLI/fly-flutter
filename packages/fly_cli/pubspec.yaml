@@ -12,7 +12,7 @@ resolution: workspace
 
 dependencies:
   args: ^2.4.2
-  mason_logger: ^0.2.8
+  mason_logger: ^0.3.3
   mason: ^0.1.0-dev.50
   path: ^1.8.3
   yaml: ^3.1.2
