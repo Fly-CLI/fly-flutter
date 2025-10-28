@@ -2,15 +2,15 @@ import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:mason_logger/mason_logger.dart';
-
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_lifecycle.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-
-import '../../../features/schema/domain/command_definition.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/errors/error_codes.dart';
+import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// Enhanced base command class following SOLID principles
 abstract class FlyCommand extends Command<int> implements CommandLifecycle {
@@ -34,8 +34,14 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   /// Whether to output AI-optimized format
   bool get aiOutput => argResults?['output'] == 'ai';
 
+  /// Whether to run in debug mode with verbose error output
+  bool get debugMode => argResults?['debug'] == true;
+
   /// Whether to run in plan mode (dry-run)
   bool get planMode => argResults?['plan'] == true;
+
+  /// Whether to run in verbose mode
+  bool get verboseMode => argResults?['verbose'] == true || debugMode;
 
   /// Logger instance (respects output format settings)
   Logger get logger =>
@@ -50,6 +56,18 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
         allowed: ['human', 'json', 'ai'],
         defaultsTo: 'human',
         help: 'Output format (human, json, or ai)',
+      )
+      ..addFlag(
+        'debug',
+        abbr: 'd',
+        help: 'Enable debug mode with verbose error output',
+      )..addFlag(
+        'verbose',
+        abbr: 'v',
+        help: 'Enable verbose output',
+      )..addFlag(
+        'plan',
+        help: 'Run in plan mode (dry-run)',
       );
     return parser;
   }
@@ -86,9 +104,15 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       // 6. Handle errors with lifecycle hook
       await onError(context, e, stackTrace);
 
+      // Simple error result with context
       final errorResult = CommandResult.error(
-        message: 'Unexpected error: $e',
+        message: 'Error: $e',
         suggestion: _getErrorSuggestion(e),
+        errorCode: _classifyError(e),
+        context: ErrorContext.forCommand(
+          name,
+          arguments: argResults?.arguments,
+        ),
       );
 
       return _handleResult(errorResult);
@@ -145,10 +169,12 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     final errorResult = CommandResult.error(
       message: 'Validation failed: ${result.errors.join(', ')}',
       suggestion: 'Check your command arguments and try again',
-      metadata: {
-        'validation_errors': result.errors,
-        'validation_warnings': result.warnings,
-      },
+      errorCode: ErrorCode.invalidArgumentValue,
+      context: ErrorContext.forValidation(
+        'command_arguments',
+        argResults?.arguments,
+        'Validation failed',
+      ),
     );
 
     return _handleResult(errorResult);
@@ -160,6 +186,8 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       print(json.encode(result.toJson()));
     } else if (aiOutput) {
       print(json.encode(result.toAiJson()));
+    } else if (debugMode) {
+      print('DEBUG: ${json.encode(result.toJson())}');
     } else {
       result.displayHuman();
     }
@@ -167,21 +195,38 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     return result.exitCode;
   }
 
-  /// Get helpful suggestion for common errors
+  /// Simple error classification based on error message
+  ErrorCode? _classifyError(Object error) {
+    final errorStr = error.toString().toLowerCase();
+
+    if (errorStr.contains('permission')) return ErrorCode.permissionDenied;
+    if (errorStr.contains('network')) return ErrorCode.networkError;
+    if (errorStr.contains('template')) return ErrorCode.templateNotFound;
+    if (errorStr.contains('validation')) return ErrorCode.invalidArgumentValue;
+    if (errorStr.contains('flutter')) return ErrorCode.flutterSdkNotFound;
+    if (errorStr.contains('file')) return ErrorCode.fileSystemError;
+    if (errorStr.contains('timeout')) return ErrorCode.timeoutError;
+
+    return ErrorCode.unknownError;
+  }
+
+  /// Get helpful suggestion for common errors using error codes
   String _getErrorSuggestion(Object error) {
     final errorString = error.toString().toLowerCase();
 
     if (errorString.contains('permission')) {
-      return 'Try running with elevated permissions or check file permissions';
+      return ErrorCode.permissionDenied.defaultSuggestion;
     } else if (errorString.contains('network')) {
-      return 'Check your internet connection and try again';
+      return ErrorCode.networkError.defaultSuggestion;
     } else if (errorString.contains('not found')) {
-      return 'Make sure Flutter is installed and in your PATH';
+      return ErrorCode.flutterSdkNotFound.defaultSuggestion;
     } else if (errorString.contains('template')) {
-      return 'Run "fly doctor" to check your setup or try a different template';
+      return ErrorCode.templateNotFound.defaultSuggestion;
+    } else if (errorString.contains('validation')) {
+      return ErrorCode.invalidArgumentValue.defaultSuggestion;
     }
 
-    return 'Run "fly doctor" to diagnose system issues';
+    return ErrorCode.unknownError.defaultSuggestion;
   }
 
   // CommandLifecycle implementation with default no-op behavior

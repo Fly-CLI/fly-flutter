@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/features/screen/application/add_screen_command.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -19,7 +20,7 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Add a screen to your project'));
+        expect(command.description, equals('Add a new screen component to the current project'));
       });
 
       test('should have required arguments', () {
@@ -46,20 +47,20 @@ void main() {
 
     group('Screen Name Validation', () {
       test('should accept valid screen names', () {
-        expect(command.isValidName('home'), isTrue);
-        expect(command.isValidName('user_profile'), isTrue);
-        expect(command.isValidName('settings_screen'), isTrue);
-        expect(command.isValidName('screen123'), isTrue);
+        expect(NameValidationRule.isValidScreenName('home'), isTrue);
+        expect(NameValidationRule.isValidScreenName('user_profile'), isTrue);
+        expect(NameValidationRule.isValidScreenName('settings_screen'), isTrue);
+        expect(NameValidationRule.isValidScreenName('screen123'), isTrue);
       });
 
       test('should reject invalid screen names', () {
-        expect(command.isValidName(''), isFalse);
-        expect(command.isValidName('Home'), isFalse); // uppercase
-        expect(command.isValidName('user-profile'), isFalse); // hyphen
-        expect(command.isValidName('user.profile'), isFalse); // dot
-        expect(command.isValidName('123screen'), isFalse); // starts with number
-        expect(command.isValidName('a'), isFalse); // too short
-        expect(command.isValidName('a' * 51), isFalse); // too long
+        expect(NameValidationRule.isValidScreenName(''), isFalse);
+        expect(NameValidationRule.isValidScreenName('Home'), isFalse); // uppercase
+        expect(NameValidationRule.isValidScreenName('user-profile'), isFalse); // hyphen
+        expect(NameValidationRule.isValidScreenName('user.profile'), isFalse); // dot
+        expect(NameValidationRule.isValidScreenName('123screen'), isFalse); // starts with number
+        expect(NameValidationRule.isValidScreenName('a'), isFalse); // too short
+        expect(NameValidationRule.isValidScreenName('a' * 51), isFalse); // too long
       });
     });
 

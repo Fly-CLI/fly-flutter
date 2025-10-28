@@ -112,6 +112,7 @@ class TemplateManager {
 
       // Generate preview if dry run
       if (dryRun) {
+        logger.detail('Generating dry run preview for brick: $brickName');
         final preview = await _previewService.generatePreview(
           brickName: brickName,
           brickType: brickType,
@@ -147,10 +148,10 @@ class TemplateManager {
       String brickName;
       switch (componentType) {
         case BrickType.screen:
-          brickName = 'screen';
+          brickName = 'fly_screen';
 
         case BrickType.service:
-          brickName = 'service';
+          brickName = 'fly_service';
 
         case BrickType.project:
         case BrickType.component:
@@ -455,13 +456,32 @@ class TemplateManager {
       
       // Note: Brick validation will be enhanced once Mason API access to brick files is available
       
-      // Check template metadata - treat empty or whitespace-only strings as missing
-      if (template.description.trim().isEmpty) {
-        issues.add('Missing template description');
-      }
+      // Check template metadata by reading the original YAML file
+      final templatePath = path.join(templatesDirectory, templateName);
+      final templateYamlPath = path.join(templatePath, 'template.yaml');
+      final templateYamlFile = File(templateYamlPath);
       
-      if (template.version.trim().isEmpty) {
-        issues.add('Missing template version');
+      if (await templateYamlFile.exists()) {
+        try {
+          final yamlContent = await templateYamlFile.readAsString();
+          final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
+          
+          // Check if description is missing or empty in original YAML
+          final description = yaml['description'] as String?;
+          if (description == null || description.trim().isEmpty) {
+            issues.add('Missing template description');
+          }
+          
+          // Check if version is missing or empty in original YAML
+          final version = yaml['version'] as String?;
+          if (version == null || version.trim().isEmpty) {
+            issues.add('Missing template version');
+          }
+        } catch (e) {
+          issues.add('Invalid template.yaml format: $e');
+        }
+      } else {
+        issues.add('template.yaml file not found');
       }
       
       return TemplateValidationResult(
@@ -594,6 +614,11 @@ class TemplateManager {
     
     return result;
   }
+  
+  /// Clear template cache
+  Future<void> clearTemplateCache() async {
+    await _cacheManager.clearCache();
+  }
 }
 
 
@@ -610,9 +635,9 @@ class TemplateVariables {
 
   /// Create TemplateVariables from JSON
   factory TemplateVariables.fromJson(Map<String, dynamic> json) => TemplateVariables(
-      projectName: json['projectName'] as String,
-      organization: json['organization'] as String,
-      platforms: (json['platforms'] as List).cast<String>(),
+      projectName: json['projectName'] as String? ?? json['project_name'] as String? ?? '',
+      organization: json['organization'] as String? ?? '',
+      platforms: (json['platforms'] as List?)?.cast<String>() ?? const [],
       description: json['description'] as String? ?? '',
       features: (json['features'] as List?)?.cast<String>() ?? const [],
     );

@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
-import '../utils/platform_utils.dart';
+import 'package:fly_cli/src/core/utils/platform_utils.dart';
 import 'cache_models.dart';
 
 /// Manages template caching with expiration, validation, and size management
@@ -18,12 +18,14 @@ class TemplateCacheManager {
     int? maxSizeBytes,
   })  : _logger = logger ?? Logger(),
         _cacheDirectory = cacheDirectory ?? PlatformUtils.getDefaultCacheDirectory(),
-        _expirationDays = expirationDays ?? (cacheDuration?.inDays ?? 7),
+        _expirationDays = expirationDays ?? (cacheDuration != null ? (cacheDuration.inDays > 0 ? cacheDuration.inDays : 1) : 7),
+        _cacheDuration = cacheDuration ?? const Duration(days: 7),
         _maxSizeBytes = maxSizeBytes ?? 100 * 1024 * 1024; // 100MB
 
   final Logger _logger;
   final String _cacheDirectory;
   final int _expirationDays;
+  final Duration _cacheDuration;
   final int _maxSizeBytes;
 
   /// Get the cache directory path
@@ -81,7 +83,7 @@ class TemplateCacheManager {
         name: name,
         version: data['version'] as String? ?? '1.0.0',
         cachedAt: DateTime.now(),
-        expiresAt: DateTime.now().add(Duration(days: _expirationDays)),
+        expiresAt: DateTime.now().add(_cacheDuration),
         checksum: checksum,
         templateData: data,
       );

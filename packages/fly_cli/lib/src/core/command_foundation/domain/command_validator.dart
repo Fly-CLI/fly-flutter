@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:args/args.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
+
 import 'command_context.dart';
-import 'command_result.dart';
 
 /// Validation result for command arguments and environment
 class ValidationResult {
@@ -66,6 +66,9 @@ abstract class CommandValidator {
   
   /// Whether this validator should run for the given command
   bool shouldRun(CommandContext context, String commandName) => true;
+
+  /// Whether this validator supports async operations
+  bool get isAsync => false;
 }
 
 /// Validates that a required positional argument is present and not empty.
@@ -87,6 +90,9 @@ class RequiredArgumentValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => false;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
     final argValue = args[argumentName];
     if (argValue == null || (argValue is String && argValue.isEmpty)) {
@@ -98,7 +104,7 @@ class RequiredArgumentValidator implements CommandValidator {
   }
 }
 
-/// Validates that the command is run within a Flutter project context.
+/// Validates that the command is run within a Flutter project context using centralized validation rules
 class FlutterProjectValidator implements CommandValidator {
   @override
   int get priority => 10;
@@ -107,19 +113,16 @@ class FlutterProjectValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => false;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    // Check if pubspec.yaml exists
-    final pubspecFile = File('pubspec.yaml');
-    if (!pubspecFile.existsSync()) {
-      return ValidationResult.failure([
-        'Not in a Flutter project directory',
-      ]);
-    }
-    return ValidationResult.success();
+    final rule = FlutterProjectValidationRule();
+    return rule.validate(context.workingDirectory);
   }
 }
 
-/// Validates project name format.
+/// Validates project name format using centralized validation rules
 class ProjectNameValidator implements CommandValidator {
   @override
   int get priority => 5;
@@ -128,23 +131,19 @@ class ProjectNameValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => false;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
     final projectName = args.rest.isNotEmpty ? args.rest.first : null;
-    if (projectName != null && !_isValidProjectName(projectName)) {
-      return ValidationResult.failure([
-        'Invalid project name: $projectName',
-      ]);
+    if (projectName == null) {
+      return ValidationResult.failure(['Project name is required']);
     }
-    return ValidationResult.success();
-  }
-
-  bool _isValidProjectName(String name) {
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name) && name.length <= 50;
+    return NameValidationRule.validateProjectName(projectName);
   }
 }
 
-/// Validates that a directory is writable.
+/// Validates that a directory is writable using centralized validation rules
 class DirectoryWritableValidator implements CommandValidator {
   final String? targetDirectory;
 
@@ -157,29 +156,17 @@ class DirectoryWritableValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => false;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    final dir = Directory(targetDirectory ?? context.workingDirectory);
-    if (!dir.existsSync()) {
-      return ValidationResult.failure([
-        'Directory does not exist: ${dir.path}',
-      ]);
-    }
-    
-    // Check if directory is writable by trying to create a test file
-    try {
-      final testFile = File('${dir.path}/.fly_test_write');
-      testFile.writeAsStringSync('test');
-      testFile.deleteSync();
-      return ValidationResult.success();
-    } catch (e) {
-      return ValidationResult.failure([
-        'Directory is not writable: ${dir.path}',
-      ]);
-    }
+    final directoryPath = targetDirectory ?? context.workingDirectory;
+    final rule = DirectoryValidationRule(targetDirectory);
+    return rule.validate(directoryPath);
   }
 }
 
-/// Validates that a template exists.
+/// Validates that a template exists using centralized async validation rules
 class TemplateExistsValidator implements CommandValidator {
   final String? templateName;
 
@@ -192,13 +179,19 @@ class TemplateExistsValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => true;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    // For now, just return success - template validation would be more complex
-    return ValidationResult.success();
+    final template = templateName ?? args['template'] as String?;
+    if (template == null) return ValidationResult.success();
+
+    final rule = TemplateValidationRule(context);
+    return rule.validate(template);
   }
 }
 
-/// Validates environment prerequisites.
+/// Validates environment prerequisites using centralized async validation rules
 class EnvironmentValidator implements CommandValidator {
   @override
   int get priority => 25;
@@ -207,13 +200,16 @@ class EnvironmentValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => true;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    // For now, just return success - environment validation would be more complex
-    return ValidationResult.success();
+    final rule = EnvironmentValidationRule();
+    return rule.validate(null);
   }
 }
 
-/// Validates network connectivity.
+/// Validates network connectivity using centralized async validation rules
 class NetworkValidator implements CommandValidator {
   final List<String> requiredHosts;
 
@@ -226,8 +222,84 @@ class NetworkValidator implements CommandValidator {
   bool shouldRun(CommandContext context, String commandName) => true;
 
   @override
+  bool get isAsync => true;
+
+  @override
+  Future<ValidationResult> validate(CommandContext context,
+      ArgResults args) async {
+    final rule = NetworkValidationRule(requiredHosts: requiredHosts);
+    final results = <ValidationResult>[];
+
+    for (final host in requiredHosts) {
+      final result = await rule.validate(host);
+      results.add(result);
+    }
+
+    return ValidationResult.combine(results);
+  }
+}
+
+/// Validates screen name format using centralized validation rules
+class ScreenNameValidator implements CommandValidator {
+  @override
+  int get priority => 5;
+
+  @override
+  bool shouldRun(CommandContext context, String commandName) => true;
+
+  @override
+  bool get isAsync => false;
+
+  @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    // For now, just return success - network validation would be more complex
-    return ValidationResult.success();
+    final screenName = args.rest.isNotEmpty ? args.rest.first : null;
+    if (screenName == null) {
+      return ValidationResult.failure(['Screen name is required']);
+    }
+    return NameValidationRule.validateScreenName(screenName);
+  }
+}
+
+/// Validates service name format using centralized validation rules
+class ServiceNameValidator implements CommandValidator {
+  @override
+  int get priority => 5;
+
+  @override
+  bool shouldRun(CommandContext context, String commandName) => true;
+
+  @override
+  bool get isAsync => false;
+
+  @override
+  Future<ValidationResult> validate(CommandContext context,
+      ArgResults args) async {
+    final serviceName = args.rest.isNotEmpty ? args.rest.first : null;
+    if (serviceName == null) {
+      return ValidationResult.failure(['Service name is required']);
+    }
+    return NameValidationRule.validateServiceName(serviceName);
+  }
+}
+
+/// Validates feature name format using centralized validation rules
+class FeatureNameValidator implements CommandValidator {
+  @override
+  int get priority => 5;
+
+  @override
+  bool shouldRun(CommandContext context, String commandName) => true;
+
+  @override
+  bool get isAsync => false;
+
+  @override
+  Future<ValidationResult> validate(CommandContext context,
+      ArgResults args) async {
+    final featureName = args['feature'] as String?;
+    if (featureName == null) {
+      return ValidationResult.failure(['Feature name is required']);
+    }
+    return NameValidationRule.validateFeatureName(featureName);
   }
 }

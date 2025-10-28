@@ -1,28 +1,30 @@
-import 'dart:io';
 import 'package:args/args.dart';
-
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
 /// AddServiceCommand using new architecture
 class AddServiceCommand extends FlyCommand {
-  AddServiceCommand(CommandContext context) : super(context);
+  AddServiceCommand(super.context);
+
+  /// Factory constructor for enum-based command creation
+  factory AddServiceCommand.create(CommandContext context) => AddServiceCommand(context);
 
   @override
   String get name => 'service';
 
   @override
-  String get description => 'Add a service to your project';
+  String get description => 'Add a new service component to the current project';
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser;
-    parser
+    final parser = super.argParser
+
       ..addOption(
         'feature',
         help: 'Feature name',
@@ -64,6 +66,7 @@ class AddServiceCommand extends FlyCommand {
   @override
   List<CommandValidator> get validators => [
     RequiredArgumentValidator('service_name'),
+    ServiceNameValidator(),
     FlutterProjectValidator(),
     DirectoryWritableValidator(),
   ];
@@ -97,7 +100,7 @@ class AddServiceCommand extends FlyCommand {
       // 1. Service name
       final serviceName = await prompter.promptString(
         prompt: 'Service name',
-        validator: isValidName,
+        validator: NameValidationRule.isValidServiceName,
         validationError: 'Service name must contain only lowercase letters, numbers, and underscores',
       );
       
@@ -105,7 +108,7 @@ class AddServiceCommand extends FlyCommand {
       final feature = await prompter.promptString(
         prompt: 'Feature name',
         defaultValue: 'core',
-        validator: isValidName,
+        validator: NameValidationRule.isValidFeatureName,
         validationError: 'Feature name must contain only lowercase letters, numbers, and underscores',
       );
       
@@ -268,7 +271,7 @@ class AddServiceCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'add service',
+        command: 'service',
         message: 'Service added successfully',
         data: {
           'service_name': serviceName,
@@ -294,14 +297,6 @@ class AddServiceCommand extends FlyCommand {
         suggestion: 'Check your project structure and try again',
       );
     }
-  }
-
-  bool isValidName(String name) {
-    if (name.isEmpty || name.length < 2 || name.length > 50) {
-      return false;
-    }
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name);
   }
 
   // Lifecycle hooks implementation

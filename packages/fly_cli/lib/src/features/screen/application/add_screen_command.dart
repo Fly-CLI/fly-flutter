@@ -6,6 +6,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 
@@ -13,11 +14,14 @@ import 'package:fly_cli/src/core/templates/template_manager.dart';
 class AddScreenCommand extends FlyCommand {
   AddScreenCommand(CommandContext context) : super(context);
 
+  /// Factory constructor for enum-based command creation
+  factory AddScreenCommand.create(CommandContext context) => AddScreenCommand(context);
+
   @override
   String get name => 'screen';
 
   @override
-  String get description => 'Add a screen to your project';
+  String get description => 'Add a new screen component to the current project';
 
   @override
   ArgParser get argParser {
@@ -64,6 +68,7 @@ class AddScreenCommand extends FlyCommand {
   @override
   List<CommandValidator> get validators => [
     RequiredArgumentValidator('screen_name'),
+    ScreenNameValidator(),
     FlutterProjectValidator(),
     DirectoryWritableValidator(),
   ];
@@ -97,7 +102,7 @@ class AddScreenCommand extends FlyCommand {
       // 1. Screen name
       final screenName = await prompter.promptString(
         prompt: 'Screen name',
-        validator: isValidName,
+        validator: NameValidationRule.isValidScreenName,
         validationError: 'Screen name must contain only lowercase letters, numbers, and underscores',
       );
       
@@ -105,7 +110,7 @@ class AddScreenCommand extends FlyCommand {
       final feature = await prompter.promptString(
         prompt: 'Feature name',
         defaultValue: 'home',
-        validator: isValidName,
+        validator: NameValidationRule.isValidFeatureName,
         validationError: 'Feature name must contain only lowercase letters, numbers, and underscores',
       );
       
@@ -266,7 +271,7 @@ class AddScreenCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'add screen',
+        command: 'screen',
         message: 'Screen added successfully',
         data: {
           'screen_name': screenName,
@@ -292,14 +297,6 @@ class AddScreenCommand extends FlyCommand {
         suggestion: 'Check your project structure and try again',
       );
     }
-  }
-
-  bool isValidName(String name) {
-    if (name.isEmpty || name.length < 2 || name.length > 50) {
-      return false;
-    }
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name);
   }
 
   // Lifecycle hooks implementation

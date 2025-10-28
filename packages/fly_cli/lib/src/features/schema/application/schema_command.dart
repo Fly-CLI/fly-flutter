@@ -1,19 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import '../domain/command_registry.dart';
-import '../domain/export_format.dart';
-import '../infrastructure/exporters/schema_exporter.dart';
-import '../infrastructure/exporters/schema_exporter_factory.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/features/schema/domain/export_format.dart';
+import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter.dart';
+import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter_factory.dart';
 
 /// SchemaCommand using new architecture
 class SchemaCommand extends FlyCommand {
   SchemaCommand(CommandContext context) : super(context);
+
+  /// Factory constructor for enum-based command creation
+  factory SchemaCommand.create(CommandContext context) => SchemaCommand(context);
 
   @override
   String get name => 'schema';
@@ -101,14 +105,8 @@ class SchemaCommand extends FlyCommand {
         prettyPrint: prettyPrint,
       );
 
-      // Get command registry and initialize if needed
+      // Get command registry (lazy initialization happens automatically when metadata is accessed)
       final registry = CommandMetadataRegistry.instance;
-      if (!registry.isInitialized) {
-        // Initialize registry with current command runner
-        // Note: In a real implementation, we'd need access to the command runner
-        // For now, we'll assume it's already initialized or handle gracefully
-        logger.warn('Command registry not initialized - some commands may be missing');
-      }
 
       // Get exporter
       final exporter = SchemaExporterFactory.getExporter(format);

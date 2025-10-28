@@ -3,13 +3,18 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
-import '../../domain/models/models.dart';
+import 'package:fly_cli/src/features/context/domain/models/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/analysis/base/utils.dart';
 
-/// Enhanced dependency analyzer with pub.dev API integration
+/// Enhanced dependency health analyzer with parallel API calls and caching
 class DependencyHealthAnalyzer {
+  static final Map<String, DependencyHealth> _cache = {};
+  static final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheExpiry = Duration(hours: 24);
+
   const DependencyHealthAnalyzer();
 
-  /// Analyze dependency health for a project
+  /// Analyze dependency health for a project with parallel API calls
   Future<List<DependencyHealth>> analyzeDependencyHealth(Directory projectDir) async {
     final healthReports = <DependencyHealth>[];
     
@@ -17,25 +22,105 @@ class DependencyHealthAnalyzer {
       final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
       if (!await pubspecFile.exists()) return healthReports;
       
-      final content = await pubspecFile.readAsString();
+      final content = await FileUtils.readFile(pubspecFile);
+      if (content == null) return healthReports;
+      
       final dependencies = _extractDependencies(content);
       
-      // Analyze each dependency
-      for (final dependency in dependencies) {
-        try {
-          final health = await _analyzeDependency(dependency);
-          healthReports.add(health);
-        } catch (e) {
-          // Skip dependencies that can't be analyzed
-          continue;
-        }
+      // Filter out Flutter SDK dependencies
+      final externalDependencies = dependencies.where((dep) => 
+          !dep.startsWith('flutter') && !dep.startsWith('dart:')).toList();
+      
+      // Analyze dependencies in parallel batches
+      final batchSize = 10; // Process 10 dependencies at a time
+      for (int i = 0; i < externalDependencies.length; i += batchSize) {
+        final batch = externalDependencies.skip(i).take(batchSize).toList();
+        final batchResults = await _analyzeBatch(batch);
+        healthReports.addAll(batchResults);
       }
       
     } catch (e) {
-      // Return empty list if analysis fails
+      ErrorHandler.handleAnalyzerError('DependencyHealthAnalyzer', e);
     }
     
     return healthReports;
+  }
+
+  /// Analyze a batch of dependencies in parallel
+  Future<List<DependencyHealth>> _analyzeBatch(List<String> dependencies) async {
+    final futures = dependencies.map((dependency) => 
+        () => _analyzeDependency(dependency)).toList();
+    
+    final results = await RetryUtils.retryAll<DependencyHealth>(futures);
+    
+    return results.whereType<DependencyHealth>().toList();
+  }
+
+  /// Analyze a single dependency using pub.dev API with caching
+  Future<DependencyHealth> _analyzeDependency(String packageName) async {
+    // Check cache first
+    if (_cache.containsKey(packageName)) {
+      final timestamp = _cacheTimestamps[packageName]!;
+      if (DateTime.now().difference(timestamp) < _cacheExpiry) {
+        return _cache[packageName]!;
+      } else {
+        _cache.remove(packageName);
+        _cacheTimestamps.remove(packageName);
+      }
+    }
+
+    try {
+      // Skip Flutter SDK dependencies
+      if (packageName.startsWith('flutter') || packageName.startsWith('dart:')) {
+        return DependencyHealth(
+          package: packageName,
+          healthScore: 100.0,
+          vulnerabilities: [],
+          license: 'BSD-3-Clause',
+          isMaintained: true,
+          popularity: 100,
+        );
+      }
+      
+      // Fetch package info from pub.dev API with timeout
+      final response = await http.get(
+        Uri.parse('https://pub.dev/api/packages/$packageName'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final health = _parsePackageData(packageName, data);
+        
+        // Cache the result
+        _cache[packageName] = health;
+        _cacheTimestamps[packageName] = DateTime.now();
+        
+        return health;
+      } else {
+        // Return default health for packages that can't be fetched
+        return DependencyHealth(
+          package: packageName,
+          healthScore: 50.0,
+          vulnerabilities: [],
+          license: 'Unknown',
+          isMaintained: false,
+          popularity: 0,
+        );
+      }
+    } catch (e) {
+      ErrorHandler.handleNetworkError('GET', 'https://pub.dev/api/packages/$packageName', e);
+      
+      // Return default health if API call fails
+      return DependencyHealth(
+        package: packageName,
+        healthScore: 50.0,
+        vulnerabilities: [],
+        license: 'Unknown',
+        isMaintained: false,
+        popularity: 0,
+      );
+    }
   }
 
   /// Extract dependencies from pubspec.yaml content
@@ -70,54 +155,6 @@ class DependencyHealthAnalyzer {
     }
     
     return dependencies;
-  }
-
-  /// Analyze a single dependency using pub.dev API
-  Future<DependencyHealth> _analyzeDependency(String packageName) async {
-    try {
-      // Skip Flutter SDK dependencies
-      if (packageName.startsWith('flutter') || packageName.startsWith('dart:')) {
-        return DependencyHealth(
-          package: packageName,
-          healthScore: 100.0,
-          vulnerabilities: [],
-          license: 'BSD-3-Clause',
-          isMaintained: true,
-          popularity: 100,
-        );
-      }
-      
-      // Fetch package info from pub.dev API
-      final response = await http.get(
-        Uri.parse('https://pub.dev/api/packages/$packageName'),
-        headers: {'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
-      
-      if (response.statusCode == 200) {
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      return _parsePackageData(packageName, data);
-      } else {
-        // Return default health for packages that can't be fetched
-        return DependencyHealth(
-          package: packageName,
-          healthScore: 50.0,
-          vulnerabilities: [],
-          license: 'Unknown',
-          isMaintained: false,
-          popularity: 0,
-        );
-      }
-    } catch (e) {
-      // Return default health if API call fails
-      return DependencyHealth(
-        package: packageName,
-        healthScore: 50.0,
-        vulnerabilities: [],
-        license: 'Unknown',
-        isMaintained: false,
-        popularity: 0,
-      );
-    }
   }
 
   /// Parse package data from pub.dev API response
@@ -247,5 +284,22 @@ class DependencyHealthAnalyzer {
     }
     
     return 0;
+  }
+
+  /// Clear the cache
+  static void clearCache() {
+    _cache.clear();
+    _cacheTimestamps.clear();
+  }
+
+  /// Get cache statistics
+  static Map<String, dynamic> getCacheStats() {
+    return {
+      'cached_packages': _cache.length,
+      'cache_hit_rate': _cache.length > 0 ? 'N/A' : '0%', // Would need hit/miss tracking
+      'oldest_entry': _cacheTimestamps.values.isNotEmpty 
+          ? _cacheTimestamps.values.reduce((a, b) => a.isBefore(b) ? a : b).toIso8601String()
+          : null,
+    };
   }
 }

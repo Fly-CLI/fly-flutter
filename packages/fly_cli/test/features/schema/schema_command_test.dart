@@ -33,7 +33,7 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Export CLI schema and command specifications'));
+        expect(command.description, equals('Export command schema in various formats'));
       });
 
       test('should have required arguments', () {
@@ -48,7 +48,7 @@ void main() {
       test('should have correct default values', () {
         final parser = command.argParser;
         
-        expect(parser.options['include-examples']!.defaultsTo, equals(false));
+        expect(parser.options['include-examples']!.defaultsTo, equals(true));
       });
     });
 
@@ -58,7 +58,7 @@ void main() {
         final result = parser.parse([]);
         
         expect(result['file'], isNull);
-        expect(result['include-examples'], equals(false));
+        expect(result['include-examples'], equals(true));
       });
 
       test('should handle file output', () {
@@ -109,7 +109,7 @@ void main() {
         final result = parser.parse([]);
         
         expect(result['file'], isNull);
-        expect(result['include-examples'], equals(false));
+        expect(result['include-examples'], equals(true));
       });
     });
 

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 
-import '../utils/platform_utils.dart';
+import 'package:fly_cli/src/core/utils/platform_utils.dart';
 
 /// Cache metadata structure
 class CacheInfo {

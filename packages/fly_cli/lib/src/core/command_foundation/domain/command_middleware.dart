@@ -16,6 +16,11 @@ abstract class CommandMiddleware {
 
   /// Priority for middleware execution (lower numbers execute first).
   int get priority => 0;
+
+  /// Cleanup method for middleware resources.
+  /// Called when middleware is no longer needed (e.g., command completion).
+  /// Default implementation does nothing.
+  void dispose() {}
 }
 
 /// Type alias for the next middleware function in the pipeline.
@@ -72,6 +77,11 @@ class LoggingMiddleware implements CommandMiddleware {
       rethrow;
     }
   }
+
+  @override
+  void dispose() {
+    // No resources to clean up
+  }
 }
 
 /// Middleware for collecting performance metrics.
@@ -104,6 +114,11 @@ class MetricsMiddleware implements CommandMiddleware {
       rethrow;
     }
   }
+
+  @override
+  void dispose() {
+    // No resources to clean up
+  }
 }
 
 /// Middleware to handle 'plan' mode (dry-run).
@@ -135,6 +150,11 @@ class DryRunMiddleware implements CommandMiddleware {
       );
     }
     return next();
+  }
+
+  @override
+  void dispose() {
+    // No resources to clean up
   }
 }
 
@@ -173,6 +193,11 @@ class CachingMiddleware implements CommandMiddleware {
     final args = context.argResults.arguments.join(' ');
     return '$commandName:$args';
   }
+
+  @override
+  void dispose() {
+    _cache.clear();
+  }
 }
 
 /// Middleware for rate limiting commands.
@@ -205,5 +230,10 @@ class RateLimitingMiddleware implements CommandMiddleware {
     
     _lastExecution[commandName] = now;
     return next();
+  }
+
+  @override
+  void dispose() {
+    _lastExecution.clear();
   }
 }

@@ -16,7 +16,7 @@ void main() {
       cacheManager = BrickCacheManager(logger: logger);
       brickRegistry = BrickRegistry(logger: logger);
       templateManager = TemplateManager(
-        templatesDirectory: 'templates',
+        templatesDirectory: '../../templates',
         logger: logger,
         brickCacheManager: cacheManager,
       );

@@ -208,6 +208,68 @@ final result = ValidationResult.combine([
 ]);
 ```
 
+## Command Context Data Sharing
+
+The `CommandContext` provides a data sharing mechanism through `setData()` and `getData()` methods that allows middleware and lifecycle hooks to share execution metadata and state throughout the command lifecycle.
+
+### How It Works
+
+Data set using `setData()` persists for the duration of the command execution and can be accessed by any middleware or lifecycle hook that runs after the data is set. This enables cross-cutting concerns to share information without tight coupling.
+
+### Real-World Example
+
+The `LoggingMiddleware` demonstrates this pattern by sharing execution metadata:
+
+```dart
+class LoggingMiddleware extends CommandMiddleware {
+  @override
+  Future<CommandResult?> handle(CommandContext context, NextMiddleware next) async {
+    final stopwatch = Stopwatch()..start();
+    
+    try {
+      final result = await next();
+      
+      // Share execution metadata
+      context.setData('execution_time_ms', stopwatch.elapsedMilliseconds);
+      context.setData('command_name', context.argResults.command?.name ?? 'root');
+      
+      return result;
+    } catch (e) {
+      // Share error information
+      context.setData('execution_time_ms', stopwatch.elapsedMilliseconds);
+      context.setData('error', e.toString());
+      rethrow;
+    }
+  }
+}
+```
+
+### Best Practices
+
+1. **Key Naming Conventions**
+   - Use descriptive keys with prefixes to avoid collisions
+   - Examples: `metrics.execution_time`, `validation.errors`, `cache.hit_count`
+
+2. **Data Types**
+   - Store only serializable data types (String, int, bool, Map, List)
+   - Avoid storing complex objects or closures
+
+3. **Thread Safety**
+   - Data may be modified by multiple middleware running concurrently
+   - Use defensive programming when accessing shared data
+
+4. **Cleanup**
+   - Clean up sensitive data after use
+   - Consider data lifecycle and when it's no longer needed
+
+### Common Use Cases
+
+- **Performance Metrics**: Share execution times, memory usage, API call counts
+- **Validation Results**: Store validation errors/warnings for later middleware
+- **Cache Keys**: Generate and share cache keys across middleware
+- **Request Correlation**: Track request IDs for debugging and logging
+- **Feature Flags**: Share feature toggle states across command execution
+
 ## Middleware System Usage
 
 ### Custom Middleware

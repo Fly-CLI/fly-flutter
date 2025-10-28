@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:mason_logger/mason_logger.dart';
 
-/// Utility for interactive command-line prompting
+/// Infrastructure for interactive command-line prompting
 /// 
 /// Provides functions for prompting users for various types of input
 /// including strings, choices, multi-choices, and confirmations.

@@ -1,11 +1,11 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
-import 'package:fly_cli/src/features/schema/domain/command_definition.dart';
-import 'package:fly_cli/src/features/schema/domain/command_registry.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -13,29 +13,24 @@ void main() {
     late CommandMetadataRegistry registry;
 
     setUp(() {
-      registry = CommandMetadataRegistry.instance;
-      registry.clear();
-      
-      // Setup test registry with sample commands using CommandRunner
-      final runner = CommandRunner<int>('test', 'Test runner');
-      runner.argParser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
-      runner.argParser.addOption('output', abbr: 'o', help: 'Output format', allowed: ['human', 'json']);
-      
-      // Add test commands with specific options and subcommands
-      final createCommand = _TestCommandWithOptions('create', 'Create a new Flutter project', [
-        const OptionDefinition(name: 'template', description: 'Project template', type: OptionType.value, allowedValues: ['minimal', 'riverpod']),
-      ]);
-      
-      final addCommand = _TestCommandWithSubcommands('add', 'Add components to project', [
-        const SubcommandDefinition(name: 'screen', description: 'Add a screen'),
-        const SubcommandDefinition(name: 'service', description: 'Add a service'),
-      ]);
-      
-      runner.addCommand(createCommand);
-      runner.addCommand(addCommand);
-      runner.addCommand(_TestCommand('doctor', 'Check system setup'));
-      
-      registry.initialize(runner);
+      registry = CommandMetadataRegistry.instance
+        ..clear();
+
+      // Setup test registry with enum-based initialization
+      final context = CommandContextFactory.createForMetadataExtraction();
+      final globalParser = ArgParser()
+        ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
+        ..addOption(
+          'output',
+          abbr: 'o',
+          help: 'Output format',
+          allowed: ['human', 'json'],
+        );
+
+      registry.initializeFromEnum(
+        context: context,
+        globalOptionsParser: globalParser,
+      );
     });
 
     tearDown(() {
@@ -110,7 +105,10 @@ void main() {
           const OptionDefinition(name: 'verbose', description: 'Verbose'),
           const OptionDefinition(name: 'output', description: 'Output'),
         ];
-        expect(generator.generateOptionsCompletion(options), equals('--verbose --output'));
+        expect(
+          generator.generateOptionsCompletion(options),
+          equals('--verbose --output'),
+        );
       });
 
       test('generateSubcommandsCompletion returns subcommand names', () {
@@ -118,7 +116,10 @@ void main() {
           const SubcommandDefinition(name: 'screen', description: 'Screen'),
           const SubcommandDefinition(name: 'service', description: 'Service'),
         ];
-        expect(generator.generateSubcommandsCompletion(subcommands), equals('screen service'));
+        expect(
+          generator.generateSubcommandsCompletion(subcommands),
+          equals('screen service'),
+        );
       });
 
       test('generateOptionValuesCompletion returns allowed values', () {
@@ -127,13 +128,22 @@ void main() {
           description: 'Template',
           allowedValues: ['minimal', 'riverpod'],
         );
-        expect(generator.generateOptionValuesCompletion(option), equals('minimal riverpod'));
+        expect(
+          generator.generateOptionValuesCompletion(option),
+          equals('minimal riverpod'),
+        );
       });
 
-      test('generateOptionValuesCompletion returns empty for no allowed values', () {
-        const option = OptionDefinition(name: 'verbose', description: 'Verbose');
-        expect(generator.generateOptionValuesCompletion(option), equals(''));
-      });
+      test(
+        'generateOptionValuesCompletion returns empty for no allowed values',
+        () {
+          const option = OptionDefinition(
+            name: 'verbose',
+            description: 'Verbose',
+          );
+          expect(generator.generateOptionValuesCompletion(option), equals(''));
+        },
+      );
     });
 
     group('ZshCompletionGenerator', () {
@@ -275,7 +285,10 @@ void main() {
       });
 
       test('escape handles backticks and quotes', () {
-        expect(generator.escape("text`with'quotes"), equals("text``with''quotes"));
+        expect(
+          generator.escape("text`with'quotes"),
+          equals("text``with''quotes"),
+        );
       });
 
       test('quote wraps text in single quotes', () {
@@ -297,11 +310,15 @@ void main() {
 
       test('handles commands with no options or subcommands', () {
         final simpleRegistry = _TestCommandMetadataRegistry();
-        simpleRegistry.addCommand('simple', const CommandDefinition(
-          name: 'simple',
-          description: 'Simple command',
-        ),);
-        simpleRegistry.setInitialized(true);
+        simpleRegistry
+          ..addCommand(
+            'simple',
+            const CommandDefinition(
+              name: 'simple',
+              description: 'Simple command',
+            ),
+          )
+          ..isInitialized = true;
 
         const generator = BashCompletionGenerator();
         final script = generator.generate(simpleRegistry);
@@ -312,11 +329,15 @@ void main() {
 
       test('handles commands with special characters in names', () {
         final specialRegistry = _TestCommandMetadataRegistry();
-        specialRegistry.addCommand('test-command', const CommandDefinition(
-          name: 'test-command',
-          description: 'Test command with dashes',
-        ),);
-        specialRegistry.setInitialized(true);
+        specialRegistry
+          ..addCommand(
+            'test-command',
+            const CommandDefinition(
+              name: 'test-command',
+              description: 'Test command with dashes',
+            ),
+          )
+          ..isInitialized = true;
 
         const generator = BashCompletionGenerator();
         final script = generator.generate(specialRegistry);
@@ -327,18 +348,26 @@ void main() {
 
       test('handles options with special characters in values', () {
         final specialRegistry = _TestCommandMetadataRegistry();
-        specialRegistry.addCommand('test', const CommandDefinition(
-          name: 'test',
-          description: 'Test command',
-          options: [
-            OptionDefinition(
-              name: 'option',
-              description: 'Option with special values',
-              allowedValues: ['value with spaces', 'value-with-dashes', 'value.with.dots'],
+        specialRegistry
+          ..addCommand(
+            'test',
+            const CommandDefinition(
+              name: 'test',
+              description: 'Test command',
+              options: [
+                OptionDefinition(
+                  name: 'option',
+                  description: 'Option with special values',
+                  allowedValues: [
+                    'value with spaces',
+                    'value-with-dashes',
+                    'value.with.dots',
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),);
-        specialRegistry.setInitialized(true);
+          )
+          ..isInitialized = true;
 
         const generator = BashCompletionGenerator();
         final script = generator.generate(specialRegistry);
@@ -364,12 +393,23 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
     _globalOptions.addAll(options);
   }
 
-  void setInitialized(bool value) {
+  @override
+  bool get isInitialized => _initialized;
+
+  void set isInitialized(bool value) {
     _initialized = value;
   }
 
   @override
-  bool get isInitialized => _initialized;
+  void initializeFromEnum({
+    required CommandContext context,
+    required ArgParser globalOptionsParser,
+  }) {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+  }
 
   @override
   bool hasCommand(String name) => _commands.containsKey(name);
@@ -378,7 +418,8 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   CommandDefinition? getCommand(String name) => _commands[name];
 
   @override
-  Map<String, CommandDefinition> getAllCommands() => Map.unmodifiable(_commands);
+  Map<String, CommandDefinition> getAllCommands() =>
+      Map.unmodifiable(_commands);
 
   @override
   List<String> getCommandNames() => _commands.keys.toList();
@@ -390,24 +431,20 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   }
 
   @override
-  List<OptionDefinition> getGlobalOptions() => List.unmodifiable(_globalOptions);
+  List<OptionDefinition> getGlobalOptions() =>
+      List.unmodifiable(_globalOptions);
 
   @override
   Map<String, dynamic> toJson() => {
-      'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
-      'global_options': _globalOptions.map((o) => o.toJson()).toList(),
-    };
+        'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
+        'global_options': _globalOptions.map((o) => o.toJson()).toList(),
+      };
 
   @override
   void clear() {
     _commands.clear();
     _globalOptions.clear();
     _initialized = false;
-  }
-
-  @override
-  void initialize(CommandRunner<int> runner) {
-    // Not implemented for test
   }
 }
 
@@ -449,9 +486,18 @@ class _TestCommandWithOptions extends Command<int> {
     final parser = ArgParser();
     for (final option in _options) {
       if (option.type == OptionType.flag) {
-        parser.addFlag(option.name, abbr: option.short, help: option.description);
+        parser.addFlag(
+          option.name,
+          abbr: option.short,
+          help: option.description,
+        );
       } else {
-        parser.addOption(option.name, abbr: option.short, help: option.description, allowed: option.allowedValues);
+        parser.addOption(
+          option.name,
+          abbr: option.short,
+          help: option.description,
+          allowed: option.allowedValues,
+        );
       }
     }
     return parser;

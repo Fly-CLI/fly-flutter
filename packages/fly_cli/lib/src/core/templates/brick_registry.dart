@@ -58,6 +58,8 @@ class BrickRegistry {
   /// Default brick search paths
   static const List<String> _defaultBrickPaths = [
     'templates',
+    '../templates',
+    '../../templates',
     'packages/fly_cli/templates',
   ];
 
@@ -123,9 +125,16 @@ class BrickRegistry {
   /// Load brick information from a directory
   Future<BrickInfo?> _loadBrickFromDirectory(String brickPath) async {
     try {
-      // Check if brick.yaml exists
+      // Check if brick.yaml or template.yaml exists
       final brickYamlFile = File(path.join(brickPath, 'brick.yaml'));
-      if (!await brickYamlFile.exists()) {
+      final templateYamlFile = File(path.join(brickPath, 'template.yaml'));
+      
+      File? yamlFile;
+      if (await brickYamlFile.exists()) {
+        yamlFile = brickYamlFile;
+      } else if (await templateYamlFile.exists()) {
+        yamlFile = templateYamlFile;
+      } else {
         return null;
       }
 
@@ -136,8 +145,8 @@ class BrickRegistry {
         return null;
       }
 
-      // Parse brick.yaml
-      final yamlContent = await brickYamlFile.readAsString();
+      // Parse yaml file
+      final yamlContent = await yamlFile!.readAsString();
       final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
 
       // Determine brick type based on path
@@ -177,28 +186,32 @@ class BrickRegistry {
   /// Determine brick type based on path
   BrickType _determineBrickType(String brickPath) {
     final pathSegments = path.split(brickPath);
+    final brickName = pathSegments.last;
 
-    // Check if it's in the main templates directory (project templates)
-    if (pathSegments.contains('templates') &&
-        !pathSegments.contains('fly_cli')) {
-      return BrickType.project;
-    }
+    // Check brick name first to determine type
+    switch (brickName) {
+      case 'screen':
+        return BrickType.screen;
+      case 'service':
+        return BrickType.service;
+      case 'minimal':
+      case 'riverpod':
+        return BrickType.project;
+      default:
+        // Check if it's in the main templates directory (project templates)
+        if (pathSegments.contains('templates') &&
+            !pathSegments.contains('fly_cli')) {
+          return BrickType.project;
+        }
 
-    // Check if it's in fly_cli templates (component templates)
-    if (pathSegments.contains('fly_cli') &&
-        pathSegments.contains('templates')) {
-      final brickName = pathSegments.last;
-      switch (brickName) {
-        case 'screen':
-          return BrickType.screen;
-        case 'service':
-          return BrickType.service;
-        default:
+        // Check if it's in fly_cli templates (component templates)
+        if (pathSegments.contains('fly_cli') &&
+            pathSegments.contains('templates')) {
           return BrickType.component;
-      }
-    }
+        }
 
-    return BrickType.custom;
+        return BrickType.custom;
+    }
   }
 
   /// Get brick by name
@@ -271,13 +284,22 @@ class BrickRegistry {
             'Brick content directory does not exist: ${brick.brickContentPath}');
       }
 
-      // Check if brick.yaml exists and is valid
+      // Check if brick.yaml or template.yaml exists and is valid
       final brickYamlFile = File(path.join(brick.path, 'brick.yaml'));
-      if (!await brickYamlFile.exists()) {
-        errors.add('brick.yaml file does not exist');
+      final templateYamlFile = File(path.join(brick.path, 'template.yaml'));
+      
+      File? yamlFile;
+      if (await brickYamlFile.exists()) {
+        yamlFile = brickYamlFile;
+      } else if (await templateYamlFile.exists()) {
+        yamlFile = templateYamlFile;
       } else {
+        errors.add('brick.yaml or template.yaml file does not exist');
+      }
+      
+      if (yamlFile != null && await yamlFile.exists()) {
         try {
-          final yamlContent = await brickYamlFile.readAsString();
+          final yamlContent = await yamlFile.readAsString();
           final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
 
           // Validate required fields
@@ -290,7 +312,7 @@ class BrickRegistry {
             warnings.add('Brick description is missing');
           }
         } catch (e) {
-          errors.add('Invalid brick.yaml format: $e');
+          errors.add('Invalid yaml format: $e');
         }
       }
 

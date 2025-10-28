@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/features/service/application/add_service_command.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -18,7 +19,7 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Add a service to your project'));
+        expect(command.description, equals('Add a new service component to the current project'));
       });
 
       test('should have required arguments', () {
@@ -45,20 +46,20 @@ void main() {
 
     group('Service Name Validation', () {
       test('should accept valid service names', () {
-        expect(command.isValidName('api_service'), isTrue);
-        expect(command.isValidName('user_service'), isTrue);
-        expect(command.isValidName('cache_service'), isTrue);
-        expect(command.isValidName('service123'), isTrue);
+        expect(NameValidationRule.isValidServiceName('api_service'), isTrue);
+        expect(NameValidationRule.isValidServiceName('user_service'), isTrue);
+        expect(NameValidationRule.isValidServiceName('cache_service'), isTrue);
+        expect(NameValidationRule.isValidServiceName('service123'), isTrue);
       });
 
       test('should reject invalid service names', () {
-        expect(command.isValidName(''), isFalse);
-        expect(command.isValidName('ApiService'), isFalse); // uppercase
-        expect(command.isValidName('api-service'), isFalse); // hyphen
-        expect(command.isValidName('api.service'), isFalse); // dot
-        expect(command.isValidName('123service'), isFalse); // starts with number
-        expect(command.isValidName('a'), isFalse); // too short
-        expect(command.isValidName('a' * 51), isFalse); // too long
+        expect(NameValidationRule.isValidServiceName(''), isFalse);
+        expect(NameValidationRule.isValidServiceName('ApiService'), isFalse); // uppercase
+        expect(NameValidationRule.isValidServiceName('api-service'), isFalse); // hyphen
+        expect(NameValidationRule.isValidServiceName('api.service'), isFalse); // dot
+        expect(NameValidationRule.isValidServiceName('123service'), isFalse); // starts with number
+        expect(NameValidationRule.isValidServiceName('a'), isFalse); // too short
+        expect(NameValidationRule.isValidServiceName('a' * 51), isFalse); // too long
       });
     });
 

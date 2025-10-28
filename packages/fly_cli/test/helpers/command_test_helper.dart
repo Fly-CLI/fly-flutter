@@ -11,8 +11,8 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/features/doctor/domain/system_checker.dart';
-import 'package:fly_cli/src/core/utils/interactive_prompt.dart';
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 
 import 'mock_logger.dart';
 

@@ -24,7 +24,7 @@ import '../features/command_foundation/application/command_base.dart';
 import '../features/command_foundation/domain/command_context.dart';
 import '../features/command_foundation/domain/command_result.dart';
 import '../features/validation/validators/common_validators.dart';
-import '../features/middleware/middleware/built_in_middleware.dart';
+import '../features/command_foundation/domain/command_middleware.dart';
 
 /// Deploy command for deploying Flutter applications
 class DeployCommand extends FlyCommand {

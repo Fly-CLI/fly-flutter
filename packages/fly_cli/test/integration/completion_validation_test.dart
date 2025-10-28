@@ -1,9 +1,9 @@
 import 'package:fly_cli/src/command_runner.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
-import 'package:fly_cli/src/features/schema/domain/command_registry.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -148,10 +148,10 @@ void main() {
         const generator = FishCompletionGenerator();
         final script = generator.generate(registry);
         
-        // Completion command should have subcommands
-        expect(script, contains('__fish_seen_subcommand_from completion'));
-        expect(script, contains('-a "install"'));
-        expect(script, contains('-a "generate"'));
+        // Add command should have subcommands
+        expect(script, contains('__fish_seen_subcommand_from add'));
+        expect(script, contains('-a "screen"'));
+        expect(script, contains('-a "service"'));
       });
     });
 

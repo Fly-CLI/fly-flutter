@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:yaml/yaml.dart';
 
-import '../templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
 
 /// Exception thrown when manifest parsing fails
 class ManifestException implements Exception {

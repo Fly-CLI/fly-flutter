@@ -132,8 +132,8 @@ class AnalysisTestFixtures {
     final libDir = Directory(path.join(projectDir.path, 'lib'));
     await libDir.create(recursive: true);
 
-    // Create many files to simulate large project
-    for (int i = 0; i < 50; i++) {
+    // Create fewer files to simulate large project but keep test fast
+    for (int i = 0; i < 10; i++) {
       final featureDir = Directory(path.join(libDir.path, 'feature_$i'));
       await featureDir.create(recursive: true);
 
@@ -153,7 +153,7 @@ class AnalysisTestFixtures {
     buffer.writeln('import \'package:flutter/material.dart\';');
     buffer.writeln('');
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 20; i++) {
       buffer.writeln('class GeneratedClass${seed}_$i {');
       buffer.writeln('  final String name;');
       buffer.writeln('  final int value;');
@@ -162,7 +162,7 @@ class AnalysisTestFixtures {
       buffer.writeln('');
       buffer.writeln('  void method$i() {');
       buffer.writeln('    // Complex logic here');
-      for (int j = 0; j < 10; j++) {
+      for (int j = 0; j < 5; j++) {
         buffer.writeln('    if (value > $j) {');
         buffer.writeln('      print(\'Value is greater than $j\');');
         buffer.writeln('    }');

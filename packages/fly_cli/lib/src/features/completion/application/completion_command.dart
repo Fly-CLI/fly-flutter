@@ -6,17 +6,20 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/features/schema/domain/command_registry.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 
-import '../domain/completion_generator.dart';
-import '../infrastructure/generators/bash_generator.dart';
-import '../infrastructure/generators/fish_generator.dart';
-import '../infrastructure/generators/powershell_generator.dart';
-import '../infrastructure/generators/zsh_generator.dart';
+import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
+import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
+import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
+import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
+import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
 
 /// CompletionCommand using new architecture
 class CompletionCommand extends FlyCommand {
   CompletionCommand(CommandContext context) : super(context);
+
+  /// Factory constructor for enum-based command creation
+  factory CompletionCommand.create(CommandContext context) => CompletionCommand(context);
 
   @override
   String get name => 'completion';
@@ -67,12 +70,8 @@ class CompletionCommand extends FlyCommand {
 
       logger.info('🔧 Generating $shell completion script...');
 
-      // Get command registry and initialize if needed
+      // Get command registry (lazy initialization happens automatically when metadata is accessed)
       final registry = CommandMetadataRegistry.instance;
-      if (!registry.isInitialized) {
-        logger.warn(
-            'Command registry not initialized - some commands may be missing');
-      }
 
       // Get appropriate generator
       final generator = _getGenerator(shell);

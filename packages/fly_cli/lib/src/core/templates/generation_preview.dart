@@ -159,6 +159,8 @@ class GenerationPreviewService {
     required Map<String, dynamic> variables,
     String? projectName,
   }) async {
+    logger.detail('_generateNewPreview called with projectName: $projectName');
+    
     final warnings = <String>[];
     final filesToGenerate = <String>[];
     final directoriesToCreate = <String>[];
@@ -167,6 +169,8 @@ class GenerationPreviewService {
     final targetDir = projectName != null
         ? path.join(outputDirectory, projectName)
         : outputDirectory;
+    
+    logger.detail('Target directory determined: $targetDir');
 
     // Analyze brick content
     final brickPath = _getBrickPath(brickName, brickType);
@@ -296,11 +300,37 @@ class GenerationPreviewService {
   String? _getBrickPath(String brickName, BrickType brickType) {
     switch (brickType) {
       case BrickType.project:
-        return 'templates/$brickName';
+        // Try different possible paths for project bricks
+        final possiblePaths = [
+          'templates/$brickName',
+          '../templates/$brickName',
+          '../../templates/$brickName',
+        ];
+        
+        for (final possiblePath in possiblePaths) {
+          final dir = Directory(possiblePath);
+          if (dir.existsSync()) {
+            return possiblePath;
+          }
+        }
+        return null;
       case BrickType.screen:
       case BrickType.service:
       case BrickType.component:
-        return 'packages/fly_cli/templates/$brickName';
+        // Try different possible paths for component bricks
+        final possiblePaths = [
+          'packages/fly_cli/templates/$brickName',
+          'templates/$brickName',
+          '../templates/$brickName',
+        ];
+        
+        for (final possiblePath in possiblePaths) {
+          final dir = Directory(possiblePath);
+          if (dir.existsSync()) {
+            return possiblePath;
+          }
+        }
+        return null;
       case BrickType.custom:
         return null; // Custom paths would need to be provided
     }
@@ -345,4 +375,9 @@ class GenerationPreviewService {
         'warnings_count': preview.warnings.length,
         'variables_count': preview.variables.length,
       };
+
+  /// Clear the generation cache
+  Future<void> clearCache() async {
+    await _cacheManager.clearCache();
+  }
 }

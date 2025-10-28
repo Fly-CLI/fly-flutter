@@ -4,8 +4,8 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/features/doctor/domain/system_checker.dart';
-import 'package:fly_cli/src/core/utils/interactive_prompt.dart';
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 
 /// Environment information for command execution
 class Environment {
@@ -96,11 +96,6 @@ class CommandContextImpl implements CommandContext {
   @override
   bool get planMode => argResults['plan'] == true;
 
-  @override
-  String get currentDirectory => workingDirectory;
-
-  @override
-  Map<String, dynamic> get globalConfig => config;
 
   @override
   String getErrorSuggestion(Object error) => _getErrorSuggestion(error);

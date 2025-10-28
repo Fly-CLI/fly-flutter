@@ -34,8 +34,7 @@ graph TB
     
     subgraph "Application Layer"
         CMD[FlyCommand]
-        FACTORY[CommandFactory]
-        REGISTRY[PluginRegistry]
+        // PluginRegistry - moved to future implementation
     end
     
     subgraph "Domain Layer"
@@ -95,7 +94,7 @@ Factory-based dependency injection system for managing service lifecycles and de
 - **`ServiceLifetime`** - Service lifetime management (transient, scoped, singleton)
 
 #### Application Layer
-- **`CommandFactory`** - Factory for creating commands with injected dependencies
+- **`FlyCommand`** - Enhanced base command class with integrated features
 
 ### 3. Validation System (`core/validation/`)
 
@@ -126,12 +125,12 @@ Pipeline-based middleware for cross-cutting concerns.
 Extensible plugin architecture for third-party command registration.
 
 #### Domain Layer
-- **`FlyPlugin`** - Base plugin interface
-- **`PluginContext`** - Plugin initialization context
-- **`PluginConfig`** - Plugin configuration model
+- **`FlyPlugin`** - Base plugin interface (moved to future implementation)
+- **`PluginContext`** - Plugin initialization context (moved to future implementation)
+- **`PluginConfig`** - Plugin configuration model (moved to future implementation)
 
 #### Application Layer
-- **`PluginRegistry`** - Plugin discovery, loading, and lifecycle management
+- **`PluginRegistry`** - Plugin discovery, loading, and lifecycle management (moved to future implementation)
 
 ## Command Execution Flow
 

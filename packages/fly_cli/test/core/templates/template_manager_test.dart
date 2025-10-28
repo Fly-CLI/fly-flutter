@@ -136,7 +136,16 @@ features: []
 packages: []
 ''');
 
-        final result = await templateManager.validateTemplate('minimal');
+        // Create a new template manager with the test directory
+        final testTemplateManager = TemplateManager(
+          templatesDirectory: tempDir.path,
+          logger: mockLogger,
+        );
+
+        // Clear any cache to ensure we load from the test directory
+        await testTemplateManager.clearTemplateCache();
+
+        final result = await testTemplateManager.validateTemplate('minimal');
         expect(result.isValid, false);
         expect(result.issues, contains('Missing template description'));
         expect(result.issues, contains('Missing template version'));

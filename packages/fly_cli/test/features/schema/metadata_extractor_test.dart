@@ -2,8 +2,7 @@ import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
-import 'package:fly_cli/src/features/schema/domain/command_definition.dart';
-import 'package:fly_cli/src/features/schema/infrastructure/metadata_extractor.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -201,7 +200,7 @@ void main() {
         runner.argParser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
         runner.argParser.addOption('output', help: 'Output format', allowed: ['human', 'json']);
 
-        final globalOptions = extractor.extractGlobalOptions(runner);
+        final globalOptions = extractor.extractGlobalOptions(runner.argParser);
 
         expect(globalOptions, hasLength(3)); // help, verbose, output
 
@@ -216,7 +215,7 @@ void main() {
 
       test('handles CommandRunner without global options', () {
         final runner = CommandRunner<int>('test', 'Test runner');
-        final globalOptions = extractor.extractGlobalOptions(runner);
+        final globalOptions = extractor.extractGlobalOptions(runner.argParser);
 
         expect(globalOptions, hasLength(1)); // help is always added
       });

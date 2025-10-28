@@ -6,7 +6,10 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 
 /// VersionCommand using new architecture
 class VersionCommand extends FlyCommand {
-  VersionCommand(CommandContext context) : super(context);
+  VersionCommand(super.context);
+
+  /// Factory constructor for enum-based command creation
+  factory VersionCommand.create(CommandContext context) => VersionCommand(context);
 
   @override
   String get name => 'version';
@@ -16,8 +19,8 @@ class VersionCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser;
-    parser.addFlag(
+    final parser = super.argParser
+    ..addFlag(
       'check-updates',
       help: 'Check for available updates',
       negatable: false,

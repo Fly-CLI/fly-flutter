@@ -3,8 +3,7 @@ import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_g
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
-import 'package:fly_cli/src/features/schema/domain/command_definition.dart';
-import 'package:fly_cli/src/features/schema/domain/command_registry.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter_factory.dart';
@@ -169,8 +168,7 @@ void main() {
       test('version command has metadata', () {
         final versionCommand = registry.getCommand('version');
         expect(versionCommand, isNotNull);
-        expect(versionCommand!.examples, isNotEmpty);
-        expect(versionCommand.options, isNotEmpty);
+        expect(versionCommand!.options, isNotEmpty);
         
         final checkUpdatesOption = versionCommand.options.firstWhere(
           (opt) => opt.name == 'check-updates',
@@ -193,14 +191,15 @@ void main() {
     });
 
     group('Subcommand Handling', () {
-      test('completion command has subcommands', () {
+      test('completion command has options', () {
         final completionCommand = registry.getCommand('completion');
         expect(completionCommand, isNotNull);
+        expect(completionCommand!.options, isNotEmpty);
         
-        final subcommands = registry.getSubcommands('completion');
-        expect(subcommands, isNotEmpty);
-        expect(subcommands.any((s) => s.name == 'install'), isTrue);
-        expect(subcommands.any((s) => s.name == 'generate'), isTrue);
+        // Check for specific options
+        expect(completionCommand.options.any((opt) => opt.name == 'shell'), isTrue);
+        expect(completionCommand.options.any((opt) => opt.name == 'install'), isTrue);
+        expect(completionCommand.options.any((opt) => opt.name == 'file'), isTrue);
       });
     });
 

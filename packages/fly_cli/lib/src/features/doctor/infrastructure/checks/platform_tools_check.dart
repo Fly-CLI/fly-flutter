@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:fly_cli/src/features/doctor/domain/system_checker.dart';
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 
 /// Check for platform-specific development tools
 class PlatformToolsCheck extends SystemCheck {

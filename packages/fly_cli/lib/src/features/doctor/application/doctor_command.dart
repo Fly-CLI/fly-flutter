@@ -1,23 +1,28 @@
 import 'dart:io';
-import 'package:args/args.dart' hide OptionType;
 
+import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
-import '../../schema/domain/command_definition.dart' show CommandDefinition, CommandExample, OptionDefinition, OptionType;
-import 'package:fly_cli/src/features/doctor/infrastructure/checks/flutter_sdk_check.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart' show CommandDefinition, CommandExample, OptionDefinition;
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_cli/src/core/errors/error_codes.dart';
+import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/dart_sdk_check.dart';
-import 'package:fly_cli/src/features/doctor/infrastructure/checks/platform_tools_check.dart';
+import 'package:fly_cli/src/features/doctor/infrastructure/checks/flutter_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/network_check.dart';
-import 'package:path/path.dart' as path;
+import 'package:fly_cli/src/features/doctor/infrastructure/checks/platform_tools_check.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/template_check.dart';
-import 'package:fly_cli/src/features/doctor/domain/system_checker.dart';
+import 'package:path/path.dart' as path;
 
 /// DoctorCommand using new architecture
 class DoctorCommand extends FlyCommand {
   DoctorCommand(CommandContext context) : super(context);
+
+  /// Factory constructor for enum-based command creation
+  factory DoctorCommand.create(CommandContext context) => DoctorCommand(context);
 
   @override
   String get name => 'doctor';
@@ -49,8 +54,8 @@ class DoctorCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser;
-    parser.addFlag(
+    final parser = super.argParser
+    ..addFlag(
       'fix',
       help: 'Attempt to fix common issues',
       negatable: false,
@@ -109,6 +114,11 @@ class DoctorCommand extends FlyCommand {
         return CommandResult.error(
           message: 'Found ${issues.length} system issues ($errorCount errors, $warningCount warnings)',
           suggestion: fix ? 'Attempting to fix issues...' : 'Run "fly doctor --fix" to attempt fixes',
+          errorCode: ErrorCode.environmentError,
+          context: ErrorContext.forSystemError(
+            'system_diagnostics',
+            error: 'Found $errorCount errors and $warningCount warnings',
+          ),
           metadata: {
             'total_checks': totalChecks,
             'healthy_checks': healthyChecks,
@@ -124,6 +134,12 @@ class DoctorCommand extends FlyCommand {
       return CommandResult.error(
         message: 'Failed to run system checks: $e',
         suggestion: 'Check your system configuration and try again',
+        errorCode: ErrorCode.environmentError,
+        context: ErrorContext.forCommand(
+          'doctor',
+          arguments: argResults?.arguments,
+          extra: {'error': e.toString()},
+        ),
       );
     }
   }

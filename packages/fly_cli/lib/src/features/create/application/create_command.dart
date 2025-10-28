@@ -1,17 +1,24 @@
-import 'dart:io';
 import 'package:args/args.dart' hide OptionType;
 
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
-import '../../schema/domain/command_definition.dart' show ArgumentDefinition, CommandDefinition, CommandExample, OptionDefinition, OptionType;
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/errors/error_codes.dart';
+import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
 /// CreateCommand using new architecture
 class CreateCommand extends FlyCommand {
-  CreateCommand(CommandContext context) : super(context);
+  /// Creates a new CreateCommand instance
+  CreateCommand(super.context);
+
+  /// Factory constructor for enum-based command creation
+  factory CreateCommand.create(CommandContext context) => 
+      CreateCommand(context);
 
   @override
   String get name => 'create';
@@ -64,7 +71,8 @@ class CreateCommand extends FlyCommand {
         description: 'Create a minimal Flutter project',
       ),
       const CommandExample(
-        command: 'fly create my_app --template=riverpod --platforms=ios,android,web',
+        command: 'fly create my_app --template=riverpod '
+            '--platforms=ios,android,web',
         description: 'Create a Riverpod project with multiple platforms',
       ),
     ],
@@ -72,8 +80,8 @@ class CreateCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser;
-    parser
+    final parser = super.argParser
+
       ..addOption(
         'template',
         abbr: 't',
@@ -128,10 +136,14 @@ class CreateCommand extends FlyCommand {
     final interactive = argResults!['interactive'] as bool;
 
     if (interactive) {
-      return _runInteractiveMode(projectName, template, organization, platforms);
+      return _runInteractiveMode(
+        projectName, template, organization, platforms,
+      );
     }
 
-    return _createProject(projectName, template, organization, platforms);
+    return _createProject(
+      projectName, template, organization, platforms,
+    );
   }
 
   /// Run in interactive mode
@@ -141,8 +153,8 @@ class CreateCommand extends FlyCommand {
     String organization,
     List<String> platforms,
   ) async {
-    logger.info('🚀 Welcome to Fly CLI Interactive Mode');
-    logger.info("Let's create your Flutter project step by step.\n");
+    logger..info('🚀 Welcome to Fly CLI Interactive Mode')
+    ..info("Let's create your Flutter project step by step.\n");
 
     try {
       // Use injected interactive prompt
@@ -152,8 +164,9 @@ class CreateCommand extends FlyCommand {
       final finalProjectName = await prompter.promptString(
         prompt: 'Project name',
         defaultValue: projectName,
-        validator: _isValidProjectName,
-        validationError: 'Project name must contain only lowercase letters, numbers, and underscores',
+        validator: NameValidationRule.isValidProjectName,
+        validationError: 'Project name must contain only lowercase letters, '
+            'numbers, and underscores',
       );
 
       // 2. Template selection
@@ -177,11 +190,11 @@ class CreateCommand extends FlyCommand {
       );
 
       // 5. Display summary
-      logger.info('\n📋 Project Configuration:');
-      logger.info('  Name: $finalProjectName');
-      logger.info('  Template: $finalTemplate');
-      logger.info('  Organization: $finalOrganization');
-      logger.info('  Platforms: ${finalPlatforms.join(', ')}');
+      logger..info('\n📋 Project Configuration:')
+      ..info('  Name: $finalProjectName')
+      ..info('  Template: $finalTemplate')
+      ..info('  Organization: $finalOrganization')
+      ..info('  Platforms: ${finalPlatforms.join(', ')}');
 
       // 6. Confirmation
       final confirmed = await prompter.promptConfirm(
@@ -192,16 +205,30 @@ class CreateCommand extends FlyCommand {
         return CommandResult.error(
           message: 'Project creation cancelled',
           suggestion: 'Run the command again to start over',
+          errorCode: ErrorCode.invalidArgumentValue,
+          context: ErrorContext.forCommand(
+            'create',
+            arguments: argResults?.arguments,
+            extra: {'interactive': true, 'cancelled': true},
+          ),
         );
       }
 
       logger.info('\nGenerating project...\n');
 
-      return _createProject(finalProjectName, finalTemplate, finalOrganization, finalPlatforms);
+      return _createProject(
+        finalProjectName, finalTemplate, finalOrganization, finalPlatforms,
+      );
     } catch (e) {
       return CommandResult.error(
         message: 'Interactive mode failed: $e',
         suggestion: 'Try running without --interactive flag',
+        errorCode: ErrorCode.internalError,
+        context: ErrorContext.forCommand(
+          'create',
+          arguments: argResults?.arguments,
+          extra: {'interactive': true, 'error': e.toString()},
+        ),
       );
     }
   }
@@ -216,10 +243,10 @@ class CreateCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Creating Flutter project...');
-      logger.info('Template: $template');
-      logger.info('Organization: $organization');
-      logger.info('Platforms: ${platforms.join(', ')}');
+      logger..info('Creating Flutter project...')
+      ..info('Template: $template')
+      ..info('Organization: $organization')
+      ..info('Platforms: ${platforms.join(', ')}');
 
       // Use injected template manager
       final templateManager = context.templateManager;
@@ -243,6 +270,13 @@ class CreateCommand extends FlyCommand {
         return CommandResult.error(
           message: 'Failed to generate project: ${generationResult.error}',
           suggestion: 'Check template availability and try again',
+          errorCode: ErrorCode.templateGenerationFailed,
+          context: ErrorContext.forTemplateOperation(
+            'generate_project',
+            template,
+            outputPath: projectName,
+            variables: templateVariables.toMasonVars(),
+          ),
         );
       }
 
@@ -250,6 +284,12 @@ class CreateCommand extends FlyCommand {
         return CommandResult.error(
           message: 'Unexpected generation result',
           suggestion: 'Try again or contact support',
+          errorCode: ErrorCode.internalError,
+          context: ErrorContext.forTemplateOperation(
+            'generate_project',
+            template,
+            outputPath: projectName,
+          ),
         );
       }
 
@@ -282,14 +322,14 @@ class CreateCommand extends FlyCommand {
       return CommandResult.error(
         message: 'Failed to create project: $e',
         suggestion: 'Check your Flutter installation and try again',
+        errorCode: ErrorCode.templateGenerationFailed,
+        context: ErrorContext.forProjectOperation(
+          'create_project',
+          projectName,
+          projectType: template,
+        ),
       );
     }
-  }
-
-  /// Validate project name
-  bool _isValidProjectName(String name) {
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name) && name.length <= 50;
   }
 
   // Lifecycle hooks implementation
@@ -299,14 +339,21 @@ class CreateCommand extends FlyCommand {
   }
 
   @override
-  Future<void> onAfterExecute(CommandContext context, CommandResult result) async {
+  Future<void> onAfterExecute(
+    CommandContext context, 
+    CommandResult result,
+  ) async {
     if (result.success) {
       logger.info('🎉 Project creation completed successfully!');
     }
   }
 
   @override
-  Future<void> onError(CommandContext context, Object error, StackTrace stackTrace) async {
+  Future<void> onError(
+    CommandContext context, 
+    Object error, 
+    StackTrace stackTrace,
+  ) async {
     logger.err('💥 Project creation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');

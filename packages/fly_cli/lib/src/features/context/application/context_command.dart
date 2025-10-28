@@ -8,12 +8,15 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 
-import '../domain/models/models.dart';
-import '../infrastructure/analysis/context_generator.dart';
+import 'package:fly_cli/src/features/context/domain/models/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/analysis/enhanced/context_generator.dart';
 
 /// ContextCommand using new architecture
 class ContextCommand extends FlyCommand {
   ContextCommand(CommandContext context) : super(context);
+
+  /// Factory constructor for enum-based command creation
+  factory ContextCommand.create(CommandContext context) => ContextCommand(context);
 
   @override
   String get name => 'context';
@@ -103,7 +106,7 @@ class ContextCommand extends FlyCommand {
         includeGenerated: false,
       );
 
-      // Generate context using the actual context generator
+      // Generate context using the enhanced context generator
       final contextGenerator = ContextGenerator(logger: logger);
       final projectDir = Directory(context.workingDirectory);
 

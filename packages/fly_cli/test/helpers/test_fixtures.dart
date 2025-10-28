@@ -1,4 +1,6 @@
 /// Test fixtures and sample data for Fly CLI tests
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
+
 class TestFixtures {
   /// Sample project names for testing
   static const List<String> validProjectNames = [
@@ -307,13 +309,13 @@ packages:
   }
 
   /// Validate project name format
+  /// @deprecated Use NameValidationRule.isValidProjectName() instead
   static bool isValidProjectName(String name) {
-    if (name.isEmpty || name.length > 50) return false;
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name);
+    return NameValidationRule.isValidProjectName(name);
   }
 
   /// Validate organization format
+  /// @deprecated Use a dedicated OrganizationValidationRule instead
   static bool isValidOrganization(String org) {
     if (org.isEmpty || org.length > 100) return false;
     final regex = RegExp(r'^[a-z][a-z0-9.]*$');
@@ -321,16 +323,14 @@ packages:
   }
 
   /// Validate screen name format
+  /// @deprecated Use NameValidationRule.isValidScreenName() instead
   static bool isValidScreenName(String name) {
-    if (name.isEmpty || name.length < 2 || name.length > 50) return false;
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name);
+    return NameValidationRule.isValidScreenName(name);
   }
 
   /// Validate service name format
+  /// @deprecated Use NameValidationRule.isValidServiceName() instead
   static bool isValidServiceName(String name) {
-    if (name.isEmpty || name.length < 2 || name.length > 50) return false;
-    final regex = RegExp(r'^[a-z][a-z0-9_]*$');
-    return regex.hasMatch(name);
+    return NameValidationRule.isValidServiceName(name);
   }
 }

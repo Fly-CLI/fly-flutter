@@ -9,7 +9,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 
-import '../../features/doctor/domain/system_checker.dart';
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 
 /// Performance metrics collector
 class PerformanceMetrics {

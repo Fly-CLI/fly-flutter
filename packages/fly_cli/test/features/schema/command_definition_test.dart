@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/features/schema/domain/command_definition.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:test/test.dart';
 
 void main() {

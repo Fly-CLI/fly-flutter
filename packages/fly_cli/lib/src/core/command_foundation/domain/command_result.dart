@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Result of a command execution with AI-friendly structure
@@ -11,6 +11,8 @@ class CommandResult {
     this.nextSteps,
     this.suggestion,
     this.metadata,
+    this.errorCode,
+    this.errorContext,
   });
 
   factory CommandResult.success({
@@ -32,12 +34,16 @@ class CommandResult {
     required String message,
     String? suggestion,
     Map<String, dynamic>? metadata,
+    ErrorCode? errorCode,
+    Map<String, dynamic>? context,
   }) => CommandResult(
       success: false,
       command: 'error',
       message: message,
       suggestion: suggestion,
       metadata: metadata,
+      errorCode: errorCode,
+      errorContext: context,
     );
 
   final bool success;
@@ -47,6 +53,8 @@ class CommandResult {
   final List<NextStep>? nextSteps;
   final String? suggestion;
   final Map<String, dynamic>? metadata;
+  final ErrorCode? errorCode;
+  final Map<String, dynamic>? errorContext;
 
   int get exitCode => success ? 0 : 1;
 
@@ -58,6 +66,8 @@ class CommandResult {
       if (data != null) 'data': data,
       if (nextSteps != null) 'next_steps': nextSteps?.map((e) => e.toJson()).toList(),
       if (suggestion != null) 'suggestion': suggestion,
+      if (errorCode != null) 'error_code': errorCode!.code,
+      if (errorContext != null) 'error_context': errorContext,
       'metadata': {
         'cli_version': '0.1.0',
         'timestamp': DateTime.now().toIso8601String(),
@@ -77,6 +87,8 @@ class CommandResult {
         'type': 'terminal_command',
       }).toList(),
       if (suggestion != null) 'recommendation': suggestion,
+      if (errorCode != null) 'error_code': errorCode!.code,
+      if (errorContext != null) 'error_context': errorContext,
       'context': {
         'tool': 'fly_cli',
         'version': '0.1.0',
@@ -100,8 +112,20 @@ class CommandResult {
       }
     } else {
       logger.err('❌ $message');
+      
+      if (errorCode != null) {
+        logger.err('Error Code: ${errorCode!.code}');
+      }
+      
       if (suggestion != null) {
         logger.info('\n💡 Suggestion: $suggestion');
+      }
+      
+      if (errorContext != null && errorContext!.isNotEmpty) {
+        logger.info('\nContext:');
+        for (final entry in errorContext!.entries) {
+          logger.info('  ${entry.key}: ${entry.value}');
+        }
       }
     }
   }
