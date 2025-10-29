@@ -104,9 +104,57 @@ class AnalysisTestFixtures {
     final projectDir = Directory(path.join(tempDir.path, 'problematic_project'));
     await projectDir.create(recursive: true);
 
-    // Create malformed pubspec.yaml
+    // Create pubspec.yaml with conflicts
     final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
     await pubspecFile.writeAsString(malformedPubspecContent);
+
+    // Create lib directory with files containing conflicting patterns
+    final libDir = Directory(path.join(projectDir.path, 'lib'));
+    await libDir.create();
+
+    // Create file with riverpod pattern
+    final riverpodFile = File(path.join(libDir.path, 'riverpod_file.dart'));
+    await riverpodFile.writeAsString('''
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class RiverpodWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container();
+  }
+}
+''');
+
+    // Create file with bloc pattern
+    final blocFile = File(path.join(libDir.path, 'bloc_file.dart'));
+    await blocFile.writeAsString('''
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class BlocWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CounterBloc, CounterState>(
+      builder: (context, state) => Container(),
+    );
+  }
+}
+''');
+
+    // Create file with provider pattern
+    final providerFile = File(path.join(libDir.path, 'provider_file.dart'));
+    await providerFile.writeAsString('''
+import 'package:provider/provider.dart';
+
+class ProviderWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => MyModel(),
+      child: Container(),
+    );
+  }
+}
+''');
 
     return projectDir;
   }
@@ -155,7 +203,7 @@ dev_dependencies:
   static const String complexPubspecContent = '''
 name: complex_test
 description: A complex test project
-version: 1.0.0+1
+version: 2.0.0+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -186,6 +234,8 @@ dependencies:
   flutter:
     sdk: flutter
   fly_core: ^0.1.0
+  fly_state: ^0.1.0
+  fly_networking: ^0.1.0
 
 dev_dependencies:
   flutter_test:
@@ -194,7 +244,7 @@ dev_dependencies:
 
   static const String malformedPubspecContent = '''
 name: malformed_test
-description: A malformed test project
+description: A problematic test project with conflicts
 version: 1.0.0+1
 
 environment:
@@ -204,7 +254,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  invalid_dependency: ^invalid_version
+  flutter_riverpod: ^2.4.0
+  flutter_bloc: ^8.1.0
+  provider: ^6.0.0
+  dio: ^5.3.0
+  http: ^1.0.0
 
 dev_dependencies:
   flutter_test:

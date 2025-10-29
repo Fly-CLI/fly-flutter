@@ -191,7 +191,11 @@ class ErrorHandler {
     T? defaultValue,
     bool logError = true,
   }) {
-    if (logError) {
+    // Don't log PathNotFoundException for directory listing - it's expected
+    // when directories are deleted during test cleanup or concurrent operations
+    final shouldLog = logError && !_isExpectedPathError(error);
+
+    if (shouldLog) {
       // In a real implementation, this would use a proper logger
       print('Error in $analyzerName: $error');
     }
@@ -201,6 +205,40 @@ class ErrorHandler {
     }
 
     throw AnalyzerException('$analyzerName failed: $error');
+  }
+
+  /// Check if an error is an expected PathNotFoundException for directory operations
+  static bool _isExpectedPathError(Object error) {
+    // FileSystemException with OS error 2 (ENOENT - No such file or directory)
+    // is expected when directories are deleted during concurrent operations
+    if (error is FileSystemException) {
+      final osError = error.osError;
+      if (osError != null && osError.errorCode == 2) {
+        final errorString = error.toString().toLowerCase();
+        if (errorString.contains('directory listing') ||
+            errorString.contains('directory')) {
+          return true;
+        }
+      }
+    }
+    
+    final errorString = error.toString().toLowerCase();
+    
+    // Check if it's a PathNotFoundException related to directory listing
+    if (errorString.contains('pathnotfoundexception') &&
+        (errorString.contains('directory listing') ||
+         errorString.contains('directory'))) {
+      return true;
+    }
+    
+    // Check for common patterns indicating expected directory deletion
+    if (errorString.contains('no such file or directory') &&
+        (errorString.contains('directory') ||
+         errorString.contains('directory listing'))) {
+      return true;
+    }
+    
+    return false;
   }
 
   /// Handle file operation errors

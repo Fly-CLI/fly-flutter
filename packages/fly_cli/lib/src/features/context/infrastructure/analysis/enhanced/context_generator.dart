@@ -73,10 +73,53 @@ class ContextGenerator {
     }
 
     if (config.includeCode) {
-      context['code'] = await _buildAstAnalysisSection(
+      // Merge unified code analyzer results with AST analysis
+      final codeSection = _buildCodeSection(analysisResults);
+      final astSection = await _buildAstAnalysisSection(
         projectDir,
         config,
       );
+      
+      // Merge both sections, with AST analysis taking precedence for overlapping keys
+      // Special handling for patterns: convert Map<String, List<String>> to List<String>
+      final mergedCode = <String, dynamic>{
+        ...codeSection,
+      };
+      
+      // Collect all patterns from both sections
+      final allPatterns = <String>{};
+      
+      // Get patterns from codeSection (always a List if present)
+      final codePatterns = codeSection['patterns'];
+      if (codePatterns is List) {
+        allPatterns.addAll(codePatterns.cast<String>());
+      }
+      
+      // Get patterns from AST section (might be a Map or List)
+      final astPatterns = astSection['patterns'];
+      if (astPatterns is Map) {
+        // Convert AST patterns Map<String, List<String>> to a flat List<String>
+        final patternsMap = astPatterns as Map<String, dynamic>;
+        for (final patternsList in patternsMap.values) {
+          if (patternsList is List) {
+            allPatterns.addAll(patternsList.cast<String>());
+          }
+        }
+      } else if (astPatterns is List) {
+        allPatterns.addAll(astPatterns.cast<String>());
+      }
+      
+      // Merge all AST fields except patterns and error
+      for (final entry in astSection.entries) {
+        if (entry.key != 'patterns' && entry.key != 'error') {
+          mergedCode[entry.key] = entry.value;
+        }
+      }
+      
+      // Always set patterns as a List (empty if no patterns found)
+      mergedCode['patterns'] = allPatterns.toList();
+      
+      context['code'] = mergedCode;
     }
 
     if (config.includeArchitecture) {
@@ -282,10 +325,18 @@ class ContextGenerator {
         analysisResults['unified-structure'] as StructureInfo?;
 
     if (architecturePatterns != null && architecturePatterns.isNotEmpty) {
-      // Use the pattern with the highest confidence
-      final bestPattern = architecturePatterns.reduce(
-        (a, b) => a.confidence > b.confidence ? a : b,
-      );
+      // Prioritize state management and framework patterns over structural patterns
+      final priorityPatterns = architecturePatterns.where((p) =>
+          ['riverpod', 'bloc', 'provider', 'get', 'fly'].contains(p.name));
+      
+      // Use priority pattern if available, otherwise use highest confidence
+      final bestPattern = priorityPatterns.isNotEmpty
+          ? priorityPatterns.reduce(
+              (a, b) => a.confidence > b.confidence ? a : b,
+            )
+          : architecturePatterns.reduce(
+              (a, b) => a.confidence > b.confidence ? a : b,
+            );
 
       return {
         'pattern': bestPattern.name,

@@ -20,19 +20,29 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
       ..writeln(r'    $completions = @()')
       ..writeln('    ')
 
-      // Generate commands list
+      // Generate commands list - include top-level commands and subcommands
       ..writeln('    # Commands');
-    final commandNames = registry.getCommandNames().join("','");
+    final commandNamesList = <String>[]
+    // Add all top-level commands and groups
+    ..addAll(registry.getCommandNames());
+    // Add subcommands from command groups
+    final allCommands = registry.getAllCommands();
+    for (final entry in allCommands.entries) {
+      for (final subcommand in entry.value.subcommands) {
+        commandNamesList.add(subcommand.name);
+      }
+    }
+    final commandNames = commandNamesList.join("','");
     buffer
       ..writeln("    \$commands = @('$commandNames')")
       ..writeln('    ')
 
       // Generate global options
       ..writeln('    # Global options');
-    final globalOptions =
+    final globalOptionsString =
         registry.getGlobalOptions().map((o) => "'--${o.name}'").join(',');
     buffer
-      ..writeln('    \$globalOptions = @($globalOptions)')
+      ..writeln('    \$globalOptions = @($globalOptionsString)')
       ..writeln('    ')
       ..writeln(r"    if ($wordToComplete -match '^[^-]') {")
       ..writeln('        # Complete commands')

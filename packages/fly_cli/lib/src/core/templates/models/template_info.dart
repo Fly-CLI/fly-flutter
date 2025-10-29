@@ -1,11 +1,22 @@
 import 'package:json_annotation/json_annotation.dart';
+
+import 'package:fly_cli/src/core/templates/versioning/models/template_compatibility.dart';
+import 'package:fly_cli/src/core/templates/versioning/utils/version_parser.dart';
+
 import 'template_variable.dart';
 
 part 'template_info.g.dart';
 
 /// Information about a template
+/// 
+/// Contains template metadata including name, version, description, and optional
+/// compatibility requirements. When compatibility data is present, full versioning
+/// checks (CLI versions, SDK versions, deprecation, EOL) are performed.
+/// 
+/// Templates without compatibility data are considered compatible (no constraints).
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class TemplateInfo {
+  /// Create a TemplateInfo instance
   const TemplateInfo({
     required this.name,
     required this.version,
@@ -16,14 +27,23 @@ class TemplateInfo {
     required this.variables,
     required this.features,
     required this.packages,
+    this.compatibility,
   });
   
+  /// Create TemplateInfo from YAML map
+  /// 
+  /// Parses template.yaml content and extracts all template metadata including
+  /// optional compatibility requirements. Compatibility parsing is handled internally
+  /// and includes compatibility data when present in the YAML.
   factory TemplateInfo.fromYaml(Map<dynamic, dynamic> yaml, String templatePath) {
     // Helper to treat empty strings as null
-    String? nonEmptyString(value) {
+    String? nonEmptyString(dynamic value) {
       final str = value as String?;
       return (str != null && str.trim().isNotEmpty) ? str : null;
     }
+    
+    // Parse compatibility data if present
+    final compatibility = VersionParser.parseCompatibility(yaml);
     
     return TemplateInfo(
       name: yaml['name'] as String? ?? '',
@@ -32,9 +52,13 @@ class TemplateInfo {
       path: templatePath,
       minFlutterSdk: nonEmptyString(yaml['min_flutter_sdk']) ?? '3.10.0',
       minDartSdk: nonEmptyString(yaml['min_dart_sdk']) ?? '3.0.0',
-      variables: _parseVariables((yaml['variables'] as Map<dynamic, dynamic>? ?? {}).cast<String, dynamic>()),
+      variables: _parseVariables(
+        (yaml['variables'] as Map<dynamic, dynamic>? ?? {})
+            .cast<String, dynamic>(),
+      ),
       features: (yaml['features'] as List<dynamic>? ?? []).cast<String>(),
       packages: (yaml['packages'] as List<dynamic>? ?? []).cast<String>(),
+      compatibility: compatibility,
     );
   }
 
@@ -71,7 +95,17 @@ class TemplateInfo {
   /// List of packages used by this template
   final List<String> packages;
   
-  static List<TemplateVariable> _parseVariables(Map<String, dynamic> variables) => variables.entries.map((entry) {
+  /// Compatibility requirements (null if not specified)
+  /// 
+  /// When present, enables full compatibility checking including CLI version
+  /// constraints, SDK requirements, deprecation status, and EOL dates.
+  /// When null, template is considered compatible (no constraints to enforce).
+  final TemplateCompatibility? compatibility;
+  
+  static List<TemplateVariable> _parseVariables(
+    Map<String, dynamic> variables,
+  ) =>
+      variables.entries.map((entry) {
       final key = entry.key;
       final value = entry.value as Map<dynamic, dynamic>;
 
@@ -89,7 +123,8 @@ class TemplateInfo {
   Map<String, dynamic> toJson() => _$TemplateInfoToJson(this);
 
   @override
-  String toString() => 'TemplateInfo(name: $name, description: $description, version: $version)';
+  String toString() =>
+      'TemplateInfo(name: $name, description: $description, version: $version)';
 
   @override
   bool operator ==(Object other) {
@@ -97,9 +132,15 @@ class TemplateInfo {
     return other is TemplateInfo &&
         other.name == name &&
         other.description == description &&
-        other.version == version;
+        other.version == version &&
+        other.compatibility == compatibility;
   }
 
   @override
-  int get hashCode => name.hashCode ^ description.hashCode ^ version.hashCode;
+  int get hashCode => Object.hash(
+        name.hashCode,
+        description.hashCode,
+        version.hashCode,
+        compatibility,
+      );
 }

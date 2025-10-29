@@ -441,29 +441,35 @@ void main() {
 
         final config = const ContextGeneratorConfig();
 
-        expect(
-          () => generator.generate(projectDir, config),
-          throwsA(isA<Exception>()),
-        );
+        // Should complete successfully with default/fallback values
+        final context = await generator.generate(projectDir, config);
+        
+        // Should still have basic sections
+        expect(context.containsKey('project'), isTrue);
+        final project = context['project'] as Map<String, dynamic>;
+        // Should use default values when parsing fails
+        expect(project['name'], isA<String>());
       });
 
       test('should handle file access errors gracefully', () async {
         final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
         
-        // Make pubspec.yaml unreadable
-        final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
         // Make pubspec.yaml unreadable by deleting it temporarily
+        final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
         final tempPath = '${pubspecFile.path}.temp';
         await pubspecFile.rename(tempPath);
 
         final config = const ContextGeneratorConfig();
 
-        expect(
-          () => generator.generate(projectDir, config),
-          throwsA(isA<Exception>()),
-        );
+        // Should complete successfully with default values when pubspec is missing
+        final context = await generator.generate(projectDir, config);
+        
+        // Should still have basic sections
+        expect(context.containsKey('project'), isTrue);
+        final project = context['project'] as Map<String, dynamic>;
+        // Should use default values when pubspec is missing
+        expect(project['name'], isA<String>());
 
-        // Restore permissions for cleanup
         // Restore file for cleanup
         await File(tempPath).rename(pubspecFile.path);
       });

@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/core/templates/models/brick_info.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
-
-import 'models/brick_info.dart';
 
 /// Validation result for brick validation
 class BrickValidationResult {
@@ -55,15 +55,11 @@ class BrickRegistry {
   /// Cache for validation results
   final Map<String, BrickValidationResult> _validationCache = {};
 
-  /// Default brick search paths
-  static const List<String> _defaultBrickPaths = [
-    'templates',
-    '../templates',
-    '../../templates',
-    'packages/fly_cli/templates',
-  ];
-
   /// Discover all available bricks
+  /// 
+  /// Searches in the known template directory structure:
+  /// - {templatesDirectory}/projects/
+  /// - {templatesDirectory}/components/
   Future<List<BrickInfo>> discoverBricks({bool forceRefresh = false}) async {
     if (!forceRefresh && _brickCache.isNotEmpty) {
       return _brickCache.values.toList();
@@ -72,16 +68,23 @@ class BrickRegistry {
     logger.info('Discovering Mason bricks...');
     final bricks = <BrickInfo>[];
 
-    // Search in default paths
-    for (final searchPath in _defaultBrickPaths) {
-      final bricksInPath = await _discoverBricksInPath(searchPath);
-      bricks.addAll(bricksInPath);
-    }
+    // Get templates directory from centralized location
+    final templatesDirectory = TemplateManager.findTemplatesDirectory();
+    
+    // Search in projects subdirectory
+    final projectsPath = path.join(templatesDirectory, 'projects');
+    final projectsBricks = await _discoverBricksInPath(projectsPath);
+    bricks.addAll(projectsBricks);
 
-    // Search in custom paths
+    // Search in components subdirectory
+    final componentsPath = path.join(templatesDirectory, 'components');
+    final componentsBricks = await _discoverBricksInPath(componentsPath);
+    bricks.addAll(componentsBricks);
+
+    // Search in custom paths if provided
     for (final customPath in _customBrickPaths) {
-      final bricksInPath = await _discoverBricksInPath(customPath);
-      bricks.addAll(bricksInPath);
+      final customBricks = await _discoverBricksInPath(customPath);
+      bricks.addAll(customBricks);
     }
 
     // Cache discovered bricks
@@ -188,30 +191,26 @@ class BrickRegistry {
     final pathSegments = path.split(brickPath);
     final brickName = pathSegments.last;
 
-    // Check brick name first to determine type
-    switch (brickName) {
-      case 'screen':
-        return BrickType.screen;
-      case 'service':
-        return BrickType.service;
-      case 'minimal':
-      case 'riverpod':
-        return BrickType.project;
-      default:
-        // Check if it's in the main templates directory (project templates)
-        if (pathSegments.contains('templates') &&
-            !pathSegments.contains('fly_cli')) {
-          return BrickType.project;
-        }
-
-        // Check if it's in fly_cli templates (component templates)
-        if (pathSegments.contains('fly_cli') &&
-            pathSegments.contains('templates')) {
-          return BrickType.component;
-        }
-
-        return BrickType.custom;
+    // Check if it's in the projects subdirectory
+    if (pathSegments.contains('projects')) {
+      return BrickType.project;
     }
+
+    // Check if it's in the components subdirectory
+    if (pathSegments.contains('components')) {
+      // Determine specific component type by name
+      switch (brickName) {
+        case 'screen':
+          return BrickType.screen;
+        case 'service':
+          return BrickType.service;
+        default:
+          return BrickType.component;
+      }
+    }
+
+    // Default to custom if path doesn't match expected structure
+    return BrickType.custom;
   }
 
   /// Get brick by name

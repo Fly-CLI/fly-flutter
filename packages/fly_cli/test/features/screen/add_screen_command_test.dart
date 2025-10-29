@@ -45,7 +45,7 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Add a screen to your project'));
+        expect(command.description, equals('Add a new screen component to the current project'));
       });
 
       test('should have required arguments', () {

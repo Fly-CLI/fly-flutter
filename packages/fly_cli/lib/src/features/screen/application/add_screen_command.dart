@@ -271,7 +271,7 @@ class AddScreenCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'screen',
+        command: 'add screen',
         message: 'Screen added successfully',
         data: {
           'screen_name': screenName,

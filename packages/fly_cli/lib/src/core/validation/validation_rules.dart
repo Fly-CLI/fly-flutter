@@ -21,6 +21,27 @@ class NameValidationRule {
   static const int minLength = 2;
   static const int maxLength = 50;
   static final RegExp _pattern = RegExp(r'^[a-z][a-z0-9_]*$');
+  
+  // Reserved words that cannot be used as names
+  static const Set<String> _reservedWords = {
+    'null',
+    'true',
+    'false',
+    'void',
+    'dynamic',
+    'var',
+    'final',
+    'const',
+    'class',
+    'enum',
+    'extends',
+    'implements',
+    'with',
+    'mixin',
+    'abstract',
+    'interface',
+    'typedef',
+  };
 
   /// Validate project name format
   static ValidationResult validateProjectName(
@@ -66,6 +87,12 @@ class NameValidationRule {
     if (name.length > maxLength) {
       return ValidationResult.failure([
         '$fieldName must be no more than $maxLength characters long',
+      ]);
+    }
+
+    if (_reservedWords.contains(name)) {
+      return ValidationResult.failure([
+        '$fieldName cannot be a reserved word: "$name"',
       ]);
     }
 

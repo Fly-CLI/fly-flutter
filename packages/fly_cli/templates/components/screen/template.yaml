@@ -1,0 +1,49 @@
+name: screen
+version: 1.0.0
+description: Generate a Flutter screen with optional viewmodel and tests
+min_flutter_sdk: "3.10.0"
+min_dart_sdk: "3.0.0"
+
+variables:
+  screen_name:
+    type: string
+    required: true
+    description: "Name of the screen (snake_case)"
+  feature:
+    type: string
+    required: true
+    default: "home"
+    description: "Feature module name"
+  screen_type:
+    type: string
+    required: true
+    default: "list"
+    choices: ["list", "detail", "form", "auth", "settings"]
+    description: "Type of screen to generate"
+  with_viewmodel:
+    type: boolean
+    default: true
+    description: "Include Riverpod viewmodel/provider"
+  with_tests:
+    type: boolean
+    default: true
+    description: "Include widget tests"
+  with_validation:
+    type: boolean
+    default: false
+    description: "Include form validation (for form screens)"
+  with_navigation:
+    type: boolean
+    default: true
+    description: "Include navigation logic"
+
+features:
+  - screen_generation
+  - state_management
+  - navigation
+
+packages:
+  - flutter
+  - riverpod
+  - go_router
+

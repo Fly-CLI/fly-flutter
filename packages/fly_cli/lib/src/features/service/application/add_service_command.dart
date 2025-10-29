@@ -271,7 +271,7 @@ class AddServiceCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'service',
+        command: 'add service',
         message: 'Service added successfully',
         data: {
           'service_name': serviceName,

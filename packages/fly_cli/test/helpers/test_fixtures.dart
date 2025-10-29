@@ -317,7 +317,9 @@ packages:
   /// Validate organization format
   /// @deprecated Use a dedicated OrganizationValidationRule instead
   static bool isValidOrganization(String org) {
-    if (org.isEmpty || org.length > 100) return false;
+    if (org.isEmpty || org.length > 25) return false;
+    // Must have at least one dot (e.g., "com.example", not just "com")
+    if (!org.contains('.')) return false;
     final regex = RegExp(r'^[a-z][a-z0-9.]*$');
     return regex.hasMatch(org);
   }

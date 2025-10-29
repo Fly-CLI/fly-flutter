@@ -106,6 +106,10 @@ class CreateCommand extends FlyCommand {
         abbr: 'i',
         help: 'Run in interactive mode',
         negatable: false,
+      )
+      ..addOption(
+        'from-manifest',
+        help: 'Create project from manifest file',
       );
     return parser;
   }

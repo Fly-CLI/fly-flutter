@@ -1,23 +1,29 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
+import 'package:fly_cli/src/core/cache/cache_models.dart';
+import 'package:fly_cli/src/core/cache/template_cache.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
-import 'package:fly_cli/src/core/cache/cache_models.dart';
-import 'package:fly_cli/src/core/cache/template_cache.dart';
 import 'brick_registry.dart';
 import 'generation_preview.dart';
 import 'models/brick_info.dart';
 import 'models/template_info.dart';
 import 'models/template_variable.dart';
+import 'versioning/models/compatibility_result.dart';
+import 'versioning/services/compatibility_checker.dart';
+import 'versioning/services/version_registry.dart';
+import 'versioning/utils/version_parser.dart';
 
 /// Enhanced template management system for Fly CLI
 /// 
 /// Handles template discovery, validation, and generation using Mason bricks.
 /// Integrates with brick registry, caching, and comprehensive error handling.
 class TemplateManager {
+
   TemplateManager({
     required this.templatesDirectory,
     required this.logger,
@@ -29,12 +35,142 @@ class TemplateManager {
         _brickRegistry = BrickRegistry(logger: logger),
         _previewService = GenerationPreviewService(logger: logger);
 
+  /// Find templates directory using a single definitive path
+  /// 
+  /// Calculates the templates directory relative to the package or executable location.
+  /// For development: checks for templates in packages/fly_cli/templates
+  /// For production: templates are located relative to the executable
+  /// 
+  /// Returns the absolute path to the templates directory.
+  static String findTemplatesDirectory() {
+    // Try development path: packages/fly_cli/templates
+    // This works when running from the monorepo
+    final currentDir = Directory.current.path;
+    final devTemplatesPath = path.join(currentDir, 'packages', 'fly_cli', 'templates');
+    final devTemplatesDir = Directory(devTemplatesPath);
+    if (devTemplatesDir.existsSync()) {
+      return path.normalize(devTemplatesPath);
+    }
+
+    // Try relative to script location (development)
+    final scriptPath = Platform.script.toFilePath();
+    final scriptDir = path.dirname(scriptPath);
+    final scriptRelativePath = path.normalize(
+      path.join(scriptDir, '..', '..', 'templates'),
+    );
+    final scriptRelativeDir = Directory(scriptRelativePath);
+    if (scriptRelativeDir.existsSync()) {
+      return scriptRelativePath;
+    }
+
+    // Production path: relative to executable
+    final executablePath = Platform.resolvedExecutable;
+    final executableDir = path.dirname(executablePath);
+    
+    // Templates are located at: {executable_dir}/../templates
+    return path.normalize(
+      path.join(executableDir, '..', 'templates'),
+    );
+  }
+
   final String templatesDirectory;
   final Logger logger;
   final TemplateCacheManager _cacheManager;
   final BrickCacheManager _brickCacheManager;
   final BrickRegistry _brickRegistry;
   final GenerationPreviewService _previewService;
+
+  // Versioning services (lazy initialized)
+  VersionRegistry? _versionRegistry;
+  CompatibilityChecker? _compatibilityChecker;
+
+  /// Get version registry (lazy initialized)
+  VersionRegistry get _versionRegistryInstance {
+    _versionRegistry ??= VersionRegistry(
+      templatesDirectory: templatesDirectory,
+      logger: logger,
+      loadTemplateInfo: _loadTemplateInfo,
+    );
+    return _versionRegistry!;
+  }
+
+  /// Get compatibility checker (lazy initialized)
+  Future<CompatibilityChecker> get _compatibilityCheckerInstance async {
+    if (_compatibilityChecker != null) return _compatibilityChecker!;
+
+    // Get current versions with validation
+    Version cliVersion;
+    try {
+      final cliVersionStr = VersionUtils.getCurrentVersion();
+      cliVersion = Version.parse(cliVersionStr);
+    } catch (e) {
+      logger.warn('Failed to parse CLI version, using default: $e');
+      cliVersion = Version.parse('1.0.0'); // Safe default
+    }
+
+    final flutterVersion = await _getFlutterVersion();
+    final dartVersion = await _getDartVersion();
+
+    _compatibilityChecker = CompatibilityChecker(
+      currentCliVersion: cliVersion,
+      currentFlutterVersion: flutterVersion,
+      currentDartVersion: dartVersion,
+    );
+
+    return _compatibilityChecker!;
+  }
+
+  /// Get Flutter SDK version
+  /// 
+  /// Returns a valid Version object. Falls back to safe default if detection fails.
+  Future<Version> _getFlutterVersion() async {
+    try {
+      final result = await Process.run(
+          'flutter', ['--version'], runInShell: true);
+      if (result.exitCode == 0) {
+        final output = result.stdout as String;
+        final match = RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(output);
+        if (match != null) {
+          final versionStr = match.group(1)!;
+          try {
+            return Version.parse(versionStr);
+          } catch (e) {
+            logger.warn('Invalid Flutter version format: $versionStr');
+          }
+        }
+      }
+    } catch (e) {
+      logger.warn('Failed to detect Flutter version: $e');
+    }
+    // Safe default
+    return Version.parse('3.10.0');
+  }
+
+  /// Get Dart SDK version
+  /// 
+  /// Returns a valid Version object. Falls back to safe default if detection fails.
+  Future<Version> _getDartVersion() async {
+    try {
+      final result = await Process.run('dart', ['--version'], runInShell: true);
+      if (result.exitCode == 0) {
+        final output = result.stdout as String;
+        final match = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(
+            output);
+        if (match != null) {
+          final versionStr = match.group(1)!;
+          try {
+            return Version.parse(versionStr);
+          } catch (e) {
+            logger.warn('Invalid Dart version format: $versionStr');
+          }
+        }
+      }
+    } catch (e) {
+      logger.warn('Failed to detect Dart version: $e');
+    }
+    // Safe default
+    return Version.parse('3.0.0');
+  }
 
   /// Get all available bricks from registry
   Future<List<BrickInfo>> getAvailableBricks({BrickType? filterByType}) async {
@@ -190,17 +326,45 @@ class TemplateManager {
       brickType: brickType,
       outputDirectory: outputDirectory,
       variables: variables,
+      projectName: projectName,
     );
 
-  /// Generate project using enhanced brick system
+  /// Generate project using enhanced brick system with compatibility checking
   Future<TemplateGenerationResult> generateProject({
     required String templateName,
     required String projectName,
     required String outputDirectory,
     required TemplateVariables variables,
     bool dryRun = false,
+    String? version,
   }) async {
     try {
+      // Get template (with optional version)
+      final template = await getTemplate(templateName, version: version);
+      if (template == null) {
+        return TemplateGenerationResult.failure(
+          'Template "$templateName"${version != null
+              ? "@$version"
+              : ""} not found',
+        );
+      }
+
+      // Check compatibility before generation
+      final checker = await _compatibilityCheckerInstance;
+      final compatibilityResult = checker.checkTemplateCompatibility(template);
+
+      if (compatibilityResult.isIncompatible) {
+        final errorMessage = compatibilityResult.errors.join('\n');
+        return TemplateGenerationResult.failure(
+          'Template compatibility check failed:\n$errorMessage',
+        );
+      }
+
+      // Show warnings if any
+      for (final warning in compatibilityResult.warnings) {
+        logger.warn('⚠️  $warning');
+      }
+
       // Convert TemplateVariables to Map
       final variablesMap = variables.toMasonVars();
 
@@ -334,7 +498,9 @@ class TemplateManager {
     }
   }
 
-  /// Convert BrickInfo to TemplateInfo for backward compatibility
+  /// Convert BrickInfo to TemplateInfo
+  /// 
+  /// Creates TemplateInfo from BrickInfo for result types.
   TemplateInfo _brickToTemplateInfo(BrickInfo brick) {
     // Convert BrickVariable to TemplateVariable
     final templateVariables = brick.variables.values.map((brickVar) => TemplateVariable(
@@ -359,7 +525,11 @@ class TemplateManager {
     );
   }
 
-  /// Get all available templates (legacy method for backward compatibility)
+  /// Get all available templates
+  /// 
+  /// Discovers and loads all templates from the templates directory.
+  /// Searches in projects/ and components/ subdirectories.
+  /// Each template includes compatibility data if specified in template.yaml.
   Future<List<TemplateInfo>> getAvailableTemplates() async {
     final templates = <TemplateInfo>[];
     
@@ -370,11 +540,44 @@ class TemplateManager {
         return templates;
       }
       
-      await for (final entity in dir.list()) {
-        if (entity is Directory) {
-          final templateInfo = await _loadTemplateInfo(entity.path);
-          if (templateInfo != null) {
-            templates.add(templateInfo);
+      // Search in projects/ and components/ subdirectories
+      final projectsDir = Directory(path.join(templatesDirectory, 'projects'));
+      if (await projectsDir.exists()) {
+        await for (final entity in projectsDir.list()) {
+          if (entity is Directory) {
+            final templateInfo = await _loadTemplateInfo(entity.path);
+            if (templateInfo != null) {
+              templates.add(templateInfo);
+            }
+          }
+        }
+      }
+      
+      final componentsDir = Directory(path.join(templatesDirectory, 'components'));
+      if (await componentsDir.exists()) {
+        await for (final entity in componentsDir.list()) {
+          if (entity is Directory) {
+            final templateInfo = await _loadTemplateInfo(entity.path);
+            if (templateInfo != null) {
+              templates.add(templateInfo);
+            }
+          }
+        }
+      }
+      
+      // Fallback: check flat structure (for test compatibility and backward compatibility)
+      // Only check if no subdirectories were found or if subdirectories don't exist
+      if (templates.isEmpty || (!await projectsDir.exists() && !await componentsDir.exists())) {
+        await for (final entity in dir.list()) {
+          if (entity is Directory) {
+            final entityName = path.basename(entity.path);
+            // Skip known subdirectories to avoid duplicates
+            if (entityName != 'projects' && entityName != 'components') {
+              final templateInfo = await _loadTemplateInfo(entity.path);
+              if (templateInfo != null) {
+                templates.add(templateInfo);
+              }
+            }
           }
         }
       }
@@ -385,9 +588,27 @@ class TemplateManager {
     return templates;
   }
 
-  /// Get template by name with caching support
-  Future<TemplateInfo?> getTemplate(String name) async {
+  /// Get template by name and optional version
+  /// 
+  /// If version is provided, attempts to load that specific version.
+  /// Otherwise, loads the default/latest version.
+  Future<TemplateInfo?> getTemplate(String name, {String? version}) async {
     try {
+      // If version specified, use version registry
+      if (version != null) {
+        final versionedTemplate = await _versionRegistryInstance
+            .getTemplateVersion(name, version);
+        if (versionedTemplate != null) {
+          return versionedTemplate;
+        }
+        // Don't fall back silently - this could be confusing
+        logger.warn(
+          'Template version "$name@$version" not found. '
+          'Available versions: ${await _versionRegistryInstance.getVersions(name)}. '
+          'Falling back to default template.',
+        );
+      }
+
       // Initialize cache if not already done
       await _cacheManager.initialize();
 
@@ -403,9 +624,26 @@ class TemplateManager {
         logger.warn('Cached template $name corrupted, reloading from source');
       }
 
-      // Load from source
-      final templatePath = path.join(templatesDirectory, name);
-      final template = await _loadTemplateInfo(templatePath);
+      // Load from source - search in subdirectories, then flat structure
+      TemplateInfo? template;
+      
+      // Try projects subdirectory first
+      final projectsPath = path.join(templatesDirectory, 'projects', name);
+      if (await Directory(projectsPath).exists()) {
+        template = await _loadTemplateInfo(projectsPath);
+      } else {
+        // Try components subdirectory
+        final componentsPath = path.join(templatesDirectory, 'components', name);
+        if (await Directory(componentsPath).exists()) {
+          template = await _loadTemplateInfo(componentsPath);
+        } else {
+          // Fallback: check flat structure (for test compatibility)
+          final directPath = path.join(templatesDirectory, name);
+          if (await Directory(directPath).exists()) {
+            template = await _loadTemplateInfo(directPath);
+          }
+        }
+      }
 
       // Cache for future use
       if (template != null) {
@@ -425,23 +663,17 @@ class TemplateManager {
     }
   }
 
-  /// Convert cached template data back to TemplateInfo
+  /// Load TemplateInfo from cache
+  /// 
+  /// Deserializes TemplateInfo from cached JSON data.
+  /// Compatibility data is automatically loaded if present.
   TemplateInfo _templateFromCache(CachedTemplate cachedTemplate) {
     final data = cachedTemplate.templateData;
-    return TemplateInfo(
-      name: data['name'] as String,
-      version: data['version'] as String,
-      description: data['description'] as String,
-      path: data['path'] as String,
-      minFlutterSdk: data['minFlutterSdk'] as String,
-      minDartSdk: data['minDartSdk'] as String,
-      variables: (data['variables'] as List?)?.map((v) => TemplateVariable.fromJson(v as Map<String, dynamic>)).toList() ?? [],
-      features: List<String>.from(data['features'] as List),
-      packages: List<String>.from(data['packages'] as List),
-    );
+    // TemplateInfo.fromJson automatically handles compatibility field if present
+    return TemplateInfo.fromJson(data);
   }
-  
-  /// Validate template
+
+  /// Validate template with compatibility checking
   Future<TemplateValidationResult> validateTemplate(String templateName) async {
     try {
       final template = await getTemplate(templateName);
@@ -454,12 +686,20 @@ class TemplateManager {
       // Validate brick structure
       final issues = <String>[];
       
-      // Note: Brick validation will be enhanced once Mason API access to brick files is available
-      
       // Check template metadata by reading the original YAML file
-      final templatePath = path.join(templatesDirectory, templateName);
-      final templateYamlPath = path.join(templatePath, 'template.yaml');
-      final templateYamlFile = File(templateYamlPath);
+      // template.path points to __brick__ subdirectory, but template.yaml is in parent
+      final brickPath = template.path;
+      final templatePath = path.dirname(brickPath);
+      
+      // Try template.yaml in the template directory (parent of __brick__)
+      var templateYamlPath = path.join(templatePath, 'template.yaml');
+      var templateYamlFile = File(templateYamlPath);
+      
+      // If not found, try in brick path (for backward compatibility)
+      if (!await templateYamlFile.exists()) {
+        templateYamlPath = path.join(brickPath, 'template.yaml');
+        templateYamlFile = File(templateYamlPath);
+      }
       
       if (await templateYamlFile.exists()) {
         try {
@@ -476,6 +716,25 @@ class TemplateManager {
           final version = yaml['version'] as String?;
           if (version == null || version.trim().isEmpty) {
             issues.add('Missing template version');
+          } else {
+            // Validate version format
+            if (VersionParser.parseTemplateVersion(version) == null) {
+              issues.add(
+                  'Invalid version format: "$version". Expected SemVer format (MAJOR.MINOR.PATCH)');
+            }
+          }
+
+          // Check compatibility using template's compatibility data
+          final checker = await _compatibilityCheckerInstance;
+          final compatibilityResult = checker.checkTemplateCompatibility(template);
+
+          if (compatibilityResult.isIncompatible) {
+            issues.addAll(compatibilityResult.errors);
+          }
+
+          // Add warnings as issues (non-blocking)
+          for (final warning in compatibilityResult.warnings) {
+            logger.warn('Template compatibility warning: $warning');
           }
         } catch (e) {
           issues.add('Invalid template.yaml format: $e');
@@ -493,8 +752,14 @@ class TemplateManager {
       return TemplateValidationResult.failure('Validation failed: $e');
     }
   }
-  
-  /// Load template information from directory
+
+  /// Load template information from directory with compatibility parsing
+  /// 
+  /// Parses template.yaml and creates TemplateInfo with optional compatibility data.
+  /// The compatibility field is populated when compatibility section exists in YAML.
+  /// Compatibility parsing is handled by TemplateInfo.fromYaml internally.
+  /// 
+  /// Returns null if template.yaml is missing or invalid.
   Future<TemplateInfo?> _loadTemplateInfo(String templatePath) async {
     try {
       // Check for template.yaml in the template directory
@@ -511,6 +776,8 @@ class TemplateManager {
       
       // Use the __brick__ subdirectory as the actual template path
       final brickPath = path.join(templatePath, '__brick__');
+      
+      // TemplateInfo.fromYaml now handles compatibility parsing internally
       return TemplateInfo.fromYaml(yaml, brickPath);
     } catch (e) {
       logger.warn('Error loading template info from $templatePath: $e');
@@ -614,7 +881,34 @@ class TemplateManager {
     
     return result;
   }
-  
+
+  /// Get all available versions for a template
+  Future<List<String>> getTemplateVersions(String templateName) async {
+    return await _versionRegistryInstance.getVersions(templateName);
+  }
+
+  /// Get latest version of a template
+  Future<String?> getLatestTemplateVersion(String templateName) async {
+    return await _versionRegistryInstance.getLatestVersion(templateName);
+  }
+
+  /// Check template compatibility using full compatibility data
+  /// 
+  /// Uses TemplateInfo.compatibility for full checks (CLI, SDK, deprecation, EOL).
+  /// If compatibility data is not available, returns compatible (no constraints).
+  Future<CompatibilityResult> checkTemplateCompatibility(
+      String templateName) async {
+    final template = await getTemplate(templateName);
+    if (template == null) {
+      return CompatibilityResult.incompatible(
+        errors: ['Template "$templateName" not found'],
+      );
+    }
+
+    final checker = await _compatibilityCheckerInstance;
+    return checker.checkTemplateCompatibility(template);
+  }
+
   /// Clear template cache
   Future<void> clearTemplateCache() async {
     await _cacheManager.clearCache();

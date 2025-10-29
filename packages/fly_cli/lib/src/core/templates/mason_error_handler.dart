@@ -14,6 +14,8 @@ enum MasonErrorType {
   variableValidationFailed,
   cacheError,
   permissionError,
+  versionIncompatible,
+  versionNotFound,
   unknown,
 }
 
@@ -71,6 +73,12 @@ class MasonErrorHandler {
       case MasonErrorType.permissionError:
         return 'Insufficient permissions to write files. Check directory permissions or run with appropriate privileges.';
 
+      case MasonErrorType.versionIncompatible:
+        return 'Template version is incompatible with your current CLI or SDK versions. Check compatibility requirements and upgrade if needed.';
+
+      case MasonErrorType.versionNotFound:
+        return 'Requested template version not found. Run "fly template list --show-versions" to see available versions.';
+
       case MasonErrorType.unknown:
         return 'An unexpected error occurred. Check your Flutter installation and try again. If the problem persists, contact support.';
     }
@@ -92,6 +100,12 @@ class MasonErrorHandler {
 
       case MasonErrorType.variableValidationFailed:
         return true; // Can prompt for missing variables
+
+      case MasonErrorType.versionIncompatible:
+        return true; // Can upgrade CLI/SDK or use different version
+
+      case MasonErrorType.versionNotFound:
+        return true; // Can try different version
 
       case MasonErrorType.brickGenerationFailed:
       case MasonErrorType.templateSyntaxError:
@@ -173,6 +187,12 @@ class MasonErrorHandler {
       case MasonErrorType.permissionError:
         return 'Permission denied: ${error.toString()}';
 
+      case MasonErrorType.versionIncompatible:
+        return 'Template version incompatible: ${error.toString()}';
+
+      case MasonErrorType.versionNotFound:
+        return 'Template version not found: ${error.toString()}';
+
       case MasonErrorType.unknown:
         return 'Unexpected error during generation: ${error.toString()}';
     }
@@ -229,6 +249,23 @@ class MasonErrorHandler {
           'Run in interactive mode: fly create --interactive',
           'Check required variables: fly template info $brickName',
           'Provide all required variables explicitly',
+        ]);
+        break;
+
+      case MasonErrorType.versionIncompatible:
+        strategies.addAll([
+          'Check template compatibility: fly template check $brickName',
+          'Upgrade CLI: dart pub global activate fly_cli',
+          'Upgrade Flutter SDK: flutter upgrade',
+          'Try a different template version: fly template list --show-versions',
+        ]);
+        break;
+
+      case MasonErrorType.versionNotFound:
+        strategies.addAll([
+          'List available versions: fly template list --show-versions',
+          'Use latest version: fly create $brickName',
+          'Check template name spelling',
         ]);
         break;
 

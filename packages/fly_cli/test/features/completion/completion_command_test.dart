@@ -1,3 +1,4 @@
+import 'package:args/args.dart';
 import 'package:fly_cli/src/features/completion/application/completion_command.dart';
 import 'package:test/test.dart';
 
@@ -8,7 +9,17 @@ void main() {
     late CompletionCommand command;
 
     setUp(() {
-      final mockContext = CommandTestHelper.createMockCommandContext();
+      // Create a temporary command to get its parser
+      final tempContext = CommandTestHelper.createMockCommandContext();
+      final tempCommand = CompletionCommand(tempContext);
+      
+      // Parse empty args with the command's parser to get proper argResults
+      final parsedArgs = tempCommand.argParser.parse([]);
+      
+      // Create the mock context with properly parsed args
+      final mockContext = CommandTestHelper.createMockCommandContext(
+        argResults: parsedArgs,
+      );
       command = CompletionCommand(mockContext);
     });
 

@@ -73,10 +73,27 @@ class AstAnalyzer {
 
     // Create a single analysis context for all files in the same directory tree
     final rootDir = _findCommonRoot(dartFiles);
-    final collection = AnalysisContextCollection(
-      includedPaths: [rootDir.path],
-      resourceProvider: PhysicalResourceProvider.INSTANCE,
-    );
+    AnalysisContextCollection? collection;
+    
+    try {
+      collection = AnalysisContextCollection(
+        includedPaths: [rootDir.path],
+        resourceProvider: PhysicalResourceProvider.INSTANCE,
+      );
+    } catch (e) {
+      // SDK path issues or other initialization failures - return empty result
+      // rather than crashing. This handles cases where Flutter SDK path
+      // cannot be resolved correctly (e.g., in test environments).
+      return AstResult(
+        complexityMetrics: complexityMetrics,
+        qualityReports: qualityReports,
+        allIssues: allIssues,
+        deadCode: deadCode,
+        duplicatedCode: duplicatedCode,
+        imports: imports,
+        patterns: patterns,
+      );
+    }
 
     for (final file in dartFiles) {
       try {

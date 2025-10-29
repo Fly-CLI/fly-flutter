@@ -10,12 +10,12 @@ import 'package:fly_cli/src/core/command_metadata/command_metadata.dart' show Co
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/dart_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/flutter_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/network_check.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/platform_tools_check.dart';
 import 'package:fly_cli/src/features/doctor/infrastructure/checks/template_check.dart';
-import 'package:path/path.dart' as path;
 
 /// DoctorCommand using new architecture
 class DoctorCommand extends FlyCommand {
@@ -154,8 +154,9 @@ class DoctorCommand extends FlyCommand {
     ];
 
     // Add template check if templates directory exists
-    final templatesDirectory = _findTemplatesDirectory();
-    if (templatesDirectory != null) {
+    final templatesDirectory = TemplateManager.findTemplatesDirectory();
+    final templatesDir = Directory(templatesDirectory);
+    if (templatesDir.existsSync()) {
       checks.add(TemplateCheck(
         templatesDirectory: templatesDirectory,
         logger: logger,
@@ -163,30 +164,6 @@ class DoctorCommand extends FlyCommand {
     }
 
     return checks;
-  }
-
-  /// Find the templates directory
-  String? _findTemplatesDirectory() {
-    // Try to find templates directory relative to the executable
-    final executablePath = Platform.resolvedExecutable;
-    final executableDir = path.dirname(executablePath);
-    
-    // Look for templates in common locations
-    final possiblePaths = [
-      path.join(executableDir, 'templates'),
-      path.join(executableDir, '..', 'templates'),
-      path.join(executableDir, '..', '..', 'templates'),
-      path.join(Directory.current.path, 'templates'),
-    ];
-
-    for (final possiblePath in possiblePaths) {
-      final dir = Directory(possiblePath);
-      if (dir.existsSync()) {
-        return possiblePath;
-      }
-    }
-
-    return null;
   }
 
   // Lifecycle hooks implementation

@@ -33,9 +33,41 @@ void main() {
         expect(templates, isEmpty);
       });
 
-      test('returns templates when directory exists with valid templates', () async {
-        // Create a mock template directory
+      test('returns templates when directory exists with valid templates (flat structure)', () async {
+        // Create a mock template directory (legacy flat structure)
         final templateDir = Directory('${tempDir.path}/minimal');
+        templateDir.createSync();
+        
+        // Create __brick__ subdirectory
+        final brickDir = Directory('${templateDir.path}/__brick__');
+        brickDir.createSync();
+        
+        // Create template.yaml
+        final templateYaml = File('${templateDir.path}/template.yaml');
+        templateYaml.writeAsStringSync('''
+name: minimal
+version: 1.0.0
+description: Minimal template
+min_flutter_sdk: "3.10.0"
+min_dart_sdk: "3.0.0"
+variables: {}
+features: []
+packages: []
+''');
+
+        final templates = await templateManager.getAvailableTemplates();
+        expect(templates, hasLength(1));
+        expect(templates.first.name, 'minimal');
+        expect(templates.first.version, '1.0.0');
+        expect(templates.first.description, 'Minimal template');
+      });
+
+      test('returns templates when subdirectory structure exists with valid templates', () async {
+        // Create subdirectory structure (new structure)
+        final projectsDir = Directory('${tempDir.path}/projects');
+        projectsDir.createSync();
+        
+        final templateDir = Directory('${projectsDir.path}/minimal');
         templateDir.createSync();
         
         // Create __brick__ subdirectory
@@ -78,9 +110,40 @@ packages: []
         expect(template, isNull);
       });
 
-      test('returns template info when template exists', () async {
-        // Create a mock template directory
+      test('returns template info when template exists (flat structure)', () async {
+        // Create a mock template directory (legacy flat structure)
         final templateDir = Directory('${tempDir.path}/minimal');
+        templateDir.createSync();
+        
+        // Create __brick__ subdirectory
+        final brickDir = Directory('${templateDir.path}/__brick__');
+        brickDir.createSync();
+        
+        // Create template.yaml
+        final templateYaml = File('${templateDir.path}/template.yaml');
+        templateYaml.writeAsStringSync('''
+name: minimal
+version: 1.0.0
+description: Minimal template
+min_flutter_sdk: "3.10.0"
+min_dart_sdk: "3.0.0"
+variables: {}
+features: []
+packages: []
+''');
+
+        final template = await templateManager.getTemplate('minimal');
+        expect(template, isNotNull);
+        expect(template!.name, 'minimal');
+        expect(template.version, '1.0.0');
+      });
+
+      test('returns template info when template exists in projects subdirectory', () async {
+        // Create subdirectory structure (new structure)
+        final projectsDir = Directory('${tempDir.path}/projects');
+        projectsDir.createSync();
+        
+        final templateDir = Directory('${projectsDir.path}/minimal');
         templateDir.createSync();
         
         // Create __brick__ subdirectory

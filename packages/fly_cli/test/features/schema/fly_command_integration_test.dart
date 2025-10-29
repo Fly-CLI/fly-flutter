@@ -96,7 +96,7 @@ void main() {
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new project'));
-        expect(metadata.options, hasLength(2)); // plan and output from base class
+        expect(metadata.options, hasLength(4)); // output, debug, verbose, plan from base class
         expect(metadata.subcommands, isEmpty);
       });
 
@@ -127,7 +127,7 @@ void main() {
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
-        expect(metadata.options, hasLength(3)); // template + plan + output
+        expect(metadata.options, hasLength(5)); // template + output + debug + verbose + plan
         expect(metadata.options.first.name, equals('template'));
       });
 
@@ -154,7 +154,7 @@ void main() {
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
-        expect(metadata.options, hasLength(3)); // verbose + plan + output (output from base class)
+        expect(metadata.options, hasLength(4)); // output + debug + verbose + plan from base class
         expect(metadata.options.any((o) => o.name == 'verbose'), isTrue);
         expect(metadata.options.any((o) => o.name == 'output'), isTrue);
       });
@@ -177,7 +177,7 @@ void main() {
         final createCommand = registry.getCommand('create');
         expect(createCommand, isNotNull);
         expect(createCommand!.name, equals('create'));
-        expect(createCommand.description, equals('Create a new project'));
+        expect(createCommand.description, equals('Create a new Flutter project'));
       });
 
       test('registers FlyCommand with manual metadata', () {

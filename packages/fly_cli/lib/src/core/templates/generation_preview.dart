@@ -4,7 +4,8 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
-import 'models/brick_info.dart';
+import 'package:fly_cli/src/core/templates/models/brick_info.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
 
 /// Preview of what will be generated during dry-run
 class GenerationPreview {
@@ -298,37 +299,23 @@ class GenerationPreviewService {
 
   /// Get brick path based on name and type
   String? _getBrickPath(String brickName, BrickType brickType) {
+    final templatesDirectory = TemplateManager.findTemplatesDirectory();
+    
     switch (brickType) {
       case BrickType.project:
-        // Try different possible paths for project bricks
-        final possiblePaths = [
-          'templates/$brickName',
-          '../templates/$brickName',
-          '../../templates/$brickName',
-        ];
-        
-        for (final possiblePath in possiblePaths) {
-          final dir = Directory(possiblePath);
-          if (dir.existsSync()) {
-            return possiblePath;
-          }
+        final brickPath = path.join(templatesDirectory, 'projects', brickName);
+        final dir = Directory(brickPath);
+        if (dir.existsSync()) {
+          return brickPath;
         }
         return null;
       case BrickType.screen:
       case BrickType.service:
       case BrickType.component:
-        // Try different possible paths for component bricks
-        final possiblePaths = [
-          'packages/fly_cli/templates/$brickName',
-          'templates/$brickName',
-          '../templates/$brickName',
-        ];
-        
-        for (final possiblePath in possiblePaths) {
-          final dir = Directory(possiblePath);
-          if (dir.existsSync()) {
-            return possiblePath;
-          }
+        final brickPath = path.join(templatesDirectory, 'components', brickName);
+        final dir = Directory(brickPath);
+        if (dir.existsSync()) {
+          return brickPath;
         }
         return null;
       case BrickType.custom:

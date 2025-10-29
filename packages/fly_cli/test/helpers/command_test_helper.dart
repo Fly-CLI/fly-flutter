@@ -52,16 +52,177 @@ class CommandTestHelper {
     String? workingDirectory,
     Map<String, String>? environment,
   }) async {
-    // Create a temporary command runner for testing
-    final commandName = args.isNotEmpty ? args.first : 'unknown';
+    // Ensure output format is JSON to parse results
+    final finalArgs = List<String>.from(args);
+    if (!finalArgs.contains('--output=json') && 
+        !finalArgs.contains('--output') && 
+        !finalArgs.any((arg) => arg.startsWith('--output=')) &&
+        !finalArgs.contains('-f')) {
+      finalArgs.add('--output=json');
+    }
+
+    // Find the path to fly.dart
+    // Try to find the workspace root by looking for a directory that contains packages/fly_cli/bin/fly.dart
+    String? workspaceRoot;
+    var current = Directory.current;
+    while (current.path != current.parent.path) {
+      // Check if this directory contains packages/fly_cli/bin/fly.dart
+      final flyDartPath = path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
+      if (File(flyDartPath).existsSync()) {
+        workspaceRoot = current.path;
+        break;
+      }
+      current = current.parent;
+    }
     
-    // Mock the command execution for testing
-    // In real tests, this would instantiate the actual command classes
-    return CommandResult.success(
-      command: commandName,
-      message: 'Test command executed',
-      data: {'args': args, 'workingDirectory': workingDirectory},
+    // If not found, try looking for melos.yaml or root pubspec.yaml (monorepo indicators)
+    if (workspaceRoot == null) {
+      current = Directory.current;
+      while (current.path != current.parent.path) {
+        if (File(path.join(current.path, 'melos.yaml')).existsSync()) {
+          final flyDartPath = path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
+          if (File(flyDartPath).existsSync()) {
+            workspaceRoot = current.path;
+            break;
+          }
+        }
+        current = current.parent;
+      }
+    }
+    
+    // Fallback: try from current directory or parent
+    if (workspaceRoot == null) {
+      // Try relative to current directory
+      final possiblePaths = [
+        path.join(Directory.current.path, 'packages', 'fly_cli', 'bin', 'fly.dart'),
+        path.normalize(path.join(Directory.current.path, '..', '..', 'packages', 'fly_cli', 'bin', 'fly.dart')),
+        path.normalize(path.join(Directory.current.path, '..', 'packages', 'fly_cli', 'bin', 'fly.dart')),
+      ];
+      
+      for (final flyPath in possiblePaths) {
+        final flyFile = File(flyPath);
+        if (flyFile.existsSync()) {
+          // Extract workspace root from the fly.dart path
+          // Go up 3 levels: bin -> fly_cli -> packages -> workspace root
+          workspaceRoot = path.dirname(path.dirname(path.dirname(flyPath)));
+          break;
+        }
+      }
+    }
+    
+    // Final fallback to current directory
+    workspaceRoot ??= Directory.current.path;
+    
+    final flyDartPath = path.join(workspaceRoot, 'packages', 'fly_cli', 'bin', 'fly.dart');
+    final flyDartFile = File(flyDartPath);
+    
+    if (!flyDartFile.existsSync()) {
+      throw StateError('Could not find fly.dart at $flyDartPath');
+    }
+    
+    // Ensure we use an absolute path for fly.dart
+    final absoluteFlyDartPath = flyDartFile.absolute.path;
+    
+    // Run the command via Process
+    final processResult = await Process.run(
+      'dart',
+      ['run', absoluteFlyDartPath, ...finalArgs],
+      workingDirectory: workingDirectory ?? workspaceRoot,
+      environment: environment,
     );
+    
+    final exitCode = processResult.exitCode;
+    
+    // Parse JSON output
+    final stdoutStr = processResult.stdout.toString().trim();
+    if (stdoutStr.isNotEmpty) {
+      try {
+        final jsonOutput = json.decode(stdoutStr) as Map<String, dynamic>;
+        
+        // Convert JSON back to CommandResult
+        return CommandResult(
+          success: jsonOutput['success'] as bool? ?? (exitCode == 0),
+          command: jsonOutput['command'] as String? ?? _extractCommandName(args),
+          message: jsonOutput['message'] as String? ?? 'Command executed',
+          data: jsonOutput['data'] as Map<String, dynamic>?,
+          suggestion: jsonOutput['suggestion'] as String?,
+          metadata: jsonOutput['metadata'] as Map<String, dynamic>?,
+        );
+      } catch (e) {
+        // If JSON parsing fails, check for error JSON in stderr
+        final stderrStr = processResult.stderr.toString().trim();
+        if (stderrStr.isNotEmpty) {
+          try {
+            final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
+            return CommandResult(
+              success: false,
+              command: errorJson['command'] as String? ?? _extractCommandName(args),
+              message: errorJson['message'] as String? ?? 
+                  (errorJson['error'] as Map<String, dynamic>?)?['message'] as String? ?? 
+                  'Command failed',
+              suggestion: errorJson['suggestion'] as String?,
+              metadata: errorJson['metadata'] as Map<String, dynamic>?,
+            );
+          } catch (_) {
+            // Not JSON, use plain text error
+          }
+        }
+        
+        // If JSON parsing fails, create result from exit code and output
+        return CommandResult(
+          success: exitCode == 0,
+          command: _extractCommandName(args),
+          message: stdoutStr.isNotEmpty 
+              ? stdoutStr
+              : (exitCode == 0 ? 'Command executed successfully' : 'Command failed'),
+          suggestion: exitCode != 0 && stderrStr.isNotEmpty
+              ? stderrStr
+              : null,
+        );
+      }
+    } else {
+      // No stdout, check stderr for error JSON
+      final stderrStr = processResult.stderr.toString().trim();
+      if (stderrStr.isNotEmpty && exitCode != 0) {
+        try {
+          final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
+          return CommandResult(
+            success: false,
+            command: errorJson['command'] as String? ?? _extractCommandName(args),
+            message: errorJson['message'] as String? ?? 
+                (errorJson['error'] as Map<String, dynamic>?)?['message'] as String? ?? 
+                'Command failed',
+            suggestion: errorJson['suggestion'] as String?,
+            metadata: errorJson['metadata'] as Map<String, dynamic>?,
+          );
+        } catch (_) {
+          // Not JSON, use plain text
+        }
+      }
+      
+      // No stdout, create result from exit code
+      return CommandResult(
+        success: exitCode == 0,
+        command: _extractCommandName(args),
+        message: exitCode == 0 ? 'Command executed successfully' : 'Command failed',
+        suggestion: exitCode != 0 && stderrStr.isNotEmpty
+            ? stderrStr
+            : null,
+      );
+    }
+  }
+
+  /// Extract command name from args, handling subcommands like "add screen"
+  static String _extractCommandName(List<String> args) {
+    if (args.isEmpty) return 'unknown';
+    
+    // Handle subcommands like "add screen", "add service"
+    if (args.first == 'add' && args.length > 1) {
+      return 'add ${args[1]}';
+    }
+    
+    // Handle other grouped commands similarly if needed
+    return args.first;
   }
 
   /// Run the actual CLI process (for integration tests)

@@ -14,7 +14,7 @@ void main() {
     });
 
     test('should classify FileSystemException as file system error', () {
-      final error = FileSystemException('Permission denied');
+      final error = FileSystemException('File not found');
       final errorType = MasonErrorHandler.classifyError(error);
 
       expect(errorType, equals(MasonErrorType.fileSystemError));
@@ -24,7 +24,7 @@ void main() {
       final error = FileSystemException('Permission denied');
       final errorType = MasonErrorHandler.classifyError(error);
 
-      expect(errorType, equals(MasonErrorType.fileSystemError));
+      expect(errorType, equals(MasonErrorType.permissionError));
     });
 
     test('should classify unknown error as unknown', () {

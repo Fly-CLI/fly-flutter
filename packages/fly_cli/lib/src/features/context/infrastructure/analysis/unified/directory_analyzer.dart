@@ -114,56 +114,127 @@ class UnifiedDirectoryAnalyzer {
     final fileTypes = <String, int>{};
     int totalLinesOfCode = 0;
 
-    // Single traversal of the entire project
-    await for (final entity in projectDir.list(recursive: true)) {
-      if (entity is File) {
-        final relativePath = path.relative(entity.path, from: projectDir.path);
-        final fileName = path.basename(entity.path);
-        final extension = path.extension(entity.path);
-        
-        // Count file types
-        fileTypes[extension] = (fileTypes[extension] ?? 0) + 1;
+    // Check if directory exists before attempting to list
+    if (!await projectDir.exists()) {
+      return DirectoryAnalysisResult(
+        files: files,
+        directories: directories,
+        dartFiles: dartFiles,
+        testFiles: testFiles,
+        generatedFiles: generatedFiles,
+        fileTypes: fileTypes,
+        totalFiles: 0,
+        totalLinesOfCode: 0,
+      );
+    }
 
-        // Determine file type and importance
-        final fileType = _determineFileType(relativePath, fileName);
-        final importance = _determineImportance(fileType, fileName);
-        
-        // Check if it's a generated file
-        final isGenerated = _isGeneratedFile(relativePath, fileName);
-        if (isGenerated) {
-          generatedFiles.add(relativePath);
+    // Single traversal of the entire project
+    try {
+      // Verify directory still exists before listing (handles race conditions)
+      if (!await projectDir.exists()) {
+        return DirectoryAnalysisResult(
+          files: files,
+          directories: directories,
+          dartFiles: dartFiles,
+          testFiles: testFiles,
+          generatedFiles: generatedFiles,
+          fileTypes: fileTypes,
+          totalFiles: files.length,
+          totalLinesOfCode: totalLinesOfCode,
+        );
+      }
+
+      await for (final entity in projectDir.list(recursive: true)) {
+        // Re-check directory existence during iteration to handle concurrent deletion
+        if (!await projectDir.exists()) {
+          break;
         }
 
-        // Count lines of code for Dart files
-        int linesOfCode = 0;
-        if (entity.path.endsWith('.dart')) {
-          dartFiles.add(relativePath);
-          linesOfCode = await FileUtils.countLines(entity);
-          totalLinesOfCode += linesOfCode;
-          
-          if (fileType == 'test') {
-            testFiles.add(relativePath);
+        if (entity is File) {
+          try {
+            final relativePath = path.relative(entity.path, from: projectDir.path);
+            final fileName = path.basename(entity.path);
+            final extension = path.extension(entity.path);
+            
+            // Count file types
+            fileTypes[extension] = (fileTypes[extension] ?? 0) + 1;
+
+            // Determine file type and importance
+            final fileType = _determineFileType(relativePath, fileName);
+            final importance = _determineImportance(fileType, fileName);
+            
+            // Check if it's a generated file
+            final isGenerated = _isGeneratedFile(relativePath, fileName);
+            if (isGenerated) {
+              generatedFiles.add(relativePath);
+            }
+
+            // Count lines of code for Dart files
+            int linesOfCode = 0;
+            if (entity.path.endsWith('.dart')) {
+              dartFiles.add(relativePath);
+              linesOfCode = await FileUtils.countLines(entity);
+              totalLinesOfCode += linesOfCode;
+              
+              if (fileType == 'test') {
+                testFiles.add(relativePath);
+              }
+            }
+
+            // Get file metadata
+            final stat = await entity.stat();
+            
+            files[relativePath] = FileInfo(
+              path: relativePath,
+              name: fileName,
+              type: fileType,
+              importance: importance,
+              linesOfCode: linesOfCode,
+              size: stat.size,
+              modified: stat.modified,
+              description: _generateDescription(fileType, fileName),
+            );
+          } catch (e) {
+            // Skip individual file processing errors (e.g., file deleted during iteration)
+            continue;
+          }
+        } else if (entity is Directory) {
+          try {
+            final relativePath = path.relative(entity.path, from: projectDir.path);
+            final dirInfo = await _analyzeDirectory(entity);
+            directories[relativePath] = dirInfo;
+          } catch (e) {
+            // Skip individual directory processing errors
+            continue;
           }
         }
-
-        // Get file metadata
-        final stat = await entity.stat();
-        
-        files[relativePath] = FileInfo(
-          path: relativePath,
-          name: fileName,
-          type: fileType,
-          importance: importance,
-          linesOfCode: linesOfCode,
-          size: stat.size,
-          modified: stat.modified,
-          description: _generateDescription(fileType, fileName),
-        );
-      } else if (entity is Directory) {
-        final relativePath = path.relative(entity.path, from: projectDir.path);
-        final dirInfo = await _analyzeDirectory(entity);
-        directories[relativePath] = dirInfo;
       }
+    } on FileSystemException {
+      // FileSystemException (including PathNotFoundException) is expected when
+      // directory is deleted during analysis or doesn't exist
+      // Return what we have so far
+      return DirectoryAnalysisResult(
+        files: files,
+        directories: directories,
+        dartFiles: dartFiles,
+        testFiles: testFiles,
+        generatedFiles: generatedFiles,
+        fileTypes: fileTypes,
+        totalFiles: files.length,
+        totalLinesOfCode: totalLinesOfCode,
+      );
+    } catch (e) {
+      // If directory listing fails (e.g., permission denied), return what we have
+      return DirectoryAnalysisResult(
+        files: files,
+        directories: directories,
+        dartFiles: dartFiles,
+        testFiles: testFiles,
+        generatedFiles: generatedFiles,
+        fileTypes: fileTypes,
+        totalFiles: files.length,
+        totalLinesOfCode: totalLinesOfCode,
+      );
     }
 
     return DirectoryAnalysisResult(
@@ -184,7 +255,17 @@ class UnifiedDirectoryAnalyzer {
     int dartFiles = 0;
     final subdirectories = <String>[];
 
-    await for (final entity in dir.list(recursive: false)) {
+    // Check if directory exists before attempting to list
+    if (!await dir.exists()) {
+      return DirectoryInfo(
+        files: files,
+        dartFiles: dartFiles,
+        subdirectories: subdirectories,
+      );
+    }
+
+    try {
+      await for (final entity in dir.list(recursive: false)) {
       if (entity is File) {
         files++;
         if (entity.path.endsWith('.dart')) {
@@ -193,6 +274,14 @@ class UnifiedDirectoryAnalyzer {
       } else if (entity is Directory) {
         subdirectories.add(path.basename(entity.path));
       }
+    }
+    } catch (e) {
+      // If directory listing fails, return what we have so far
+      return DirectoryInfo(
+        files: files,
+        dartFiles: dartFiles,
+        subdirectories: subdirectories,
+      );
     }
 
     return DirectoryInfo(

@@ -64,10 +64,20 @@ class CompletionCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     try {
-      final shell = argResults!['shell'] as String? ?? 'bash';
-      final outputFile = argResults!['file'] as String?;
-      final install = argResults!['install'] as bool? ?? false;
-      final uninstall = argResults!['uninstall'] as bool? ?? false;
+      // Use context.argResults as fallback if Command.argResults is null
+      // This allows testing commands without CommandRunner
+      final args = argResults ?? context.argResults;
+      if (args == null) {
+        return CommandResult.error(
+          message: 'Command arguments not available',
+          suggestion: 'This command must be run through the command runner',
+        );
+      }
+      
+      final shell = args['shell'] as String? ?? 'bash';
+      final outputFile = args['file'] as String?;
+      final install = args['install'] as bool? ?? false;
+      final uninstall = args['uninstall'] as bool? ?? false;
 
       logger.info('🔧 Generating $shell completion script...');
 

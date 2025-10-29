@@ -178,7 +178,7 @@ class ArchitectureDetector {
         final content = await FileUtils.readFile(flyManifest);
         if (content != null) {
           patterns.add(ArchitecturePattern(
-            name: 'fly-framework',
+            name: 'fly',
             confidence: 0.95,
             indicators: ['fly_project.yaml', 'Fly framework'],
             metadata: {

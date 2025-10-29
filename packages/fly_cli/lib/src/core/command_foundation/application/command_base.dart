@@ -68,6 +68,7 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       )..addFlag(
         'plan',
         help: 'Run in plan mode (dry-run)',
+        negatable: false,
       );
     return parser;
   }
@@ -127,8 +128,15 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
 
     final results = <ValidationResult>[];
 
+    // Use context.argResults as fallback if Command.argResults is null
+    // This allows testing commands without CommandRunner
+    final effectiveArgResults = argResults ?? context.argResults;
+    if (effectiveArgResults == null) {
+      return ValidationResult.failure(['Command arguments not available']);
+    }
+
     for (final validator in applicableValidators) {
-      final result = await validator.validate(context, argResults!);
+      final result = await validator.validate(context, effectiveArgResults);
       results.add(result);
 
       // Stop on first validation failure

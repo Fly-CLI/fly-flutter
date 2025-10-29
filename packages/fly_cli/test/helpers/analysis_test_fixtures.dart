@@ -80,6 +80,11 @@ class AnalysisTestFixtures {
     // Create README.md for documented convention
     await File(path.join(projectDir.path, 'README.md')).writeAsString('# Complex Test Project\n\nA complex Flutter project for testing.');
 
+    // Create platform directories
+    await Directory(path.join(projectDir.path, 'ios')).create(recursive: true);
+    await Directory(path.join(projectDir.path, 'android')).create(recursive: true);
+    await Directory(path.join(projectDir.path, 'web')).create(recursive: true);
+
     return projectDir;
   }
 
@@ -196,7 +201,7 @@ dev_dependencies:
   static const String complexPubspecContent = '''
 name: complex_test
 description: A complex test project
-version: 1.0.0+1
+version: 2.0.0+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

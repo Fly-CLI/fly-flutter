@@ -1,0 +1,48 @@
+name: service
+version: 1.0.0
+description: Generate a Flutter service with different types and optional tests/mocks
+min_flutter_sdk: "3.10.0"
+min_dart_sdk: "3.0.0"
+
+variables:
+  service_name:
+    type: string
+    required: true
+    description: "Name of the service (snake_case)"
+  feature:
+    type: string
+    required: true
+    default: "core"
+    description: "Feature module name"
+  service_type:
+    type: string
+    required: true
+    default: "api"
+    choices: ["api", "local", "cache", "analytics", "storage"]
+    description: "Type of service to generate"
+  with_tests:
+    type: boolean
+    default: true
+    description: "Include unit tests"
+  with_mocks:
+    type: boolean
+    default: false
+    description: "Include mock implementations"
+  with_interceptors:
+    type: boolean
+    default: false
+    description: "Include HTTP interceptors (for API services)"
+  base_url:
+    type: string
+    default: "https://api.example.com"
+    description: "Base URL for API services"
+
+features:
+  - service_generation
+  - networking
+  - error_handling
+
+packages:
+  - flutter
+  - http
+

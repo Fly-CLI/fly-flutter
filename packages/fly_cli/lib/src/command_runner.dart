@@ -32,7 +32,7 @@ class FlyCommandRunner extends CommandRunner<int> {
     _services = ServiceContainer()
       ..registerSingleton<Logger>(Logger())
       ..registerSingleton<TemplateManager>(TemplateManager(
-        templatesDirectory: _findTemplatesDirectory(),
+        templatesDirectory: TemplateManager.findTemplatesDirectory(),
         logger: Logger(),
       ))
       ..registerSingleton<SystemChecker>(SystemChecker(logger: Logger()))
@@ -151,7 +151,7 @@ class FlyCommandRunner extends CommandRunner<int> {
   /// Get configuration
   Map<String, dynamic> _getConfig() => {
     'cli_version': VersionUtils.getCurrentVersion(),
-    'templates_directory': _findTemplatesDirectory(),
+    'templates_directory': TemplateManager.findTemplatesDirectory(),
     'plugins_enabled': true,
   };
 
@@ -209,25 +209,6 @@ class FlyCommandRunner extends CommandRunner<int> {
       }
     }
     return errorResult.exitCode;
-  }
-
-  /// Find templates directory
-  String _findTemplatesDirectory() {
-    final possiblePaths = [
-      'templates',
-      '../templates',
-      '../../templates',
-      '${Directory.current.path}/templates',
-    ];
-
-    for (final templatePath in possiblePaths) {
-      final dir = Directory(templatePath);
-      if (dir.existsSync()) {
-        return templatePath;
-      }
-    }
-
-    return 'templates';
   }
 
   @override

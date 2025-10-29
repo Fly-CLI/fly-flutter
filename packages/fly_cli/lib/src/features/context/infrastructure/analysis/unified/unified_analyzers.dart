@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:yaml/yaml.dart';
 import 'package:fly_cli/src/features/context/domain/models/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/analyzer_interface.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/utils.dart';
@@ -25,8 +26,12 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
     try {
       final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
       if (!await pubspecFile.exists()) {
-        throw AnalyzerException(
-          'Not a Flutter project: pubspec.yaml not found',
+        // Don't throw - return error info instead to allow graceful handling
+        // This matches the error handling pattern used elsewhere
+        return const ProjectInfo(
+          name: 'unknown',
+          type: 'flutter',
+          version: '0.0.0',
         );
       }
 
@@ -44,7 +49,11 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
 
       // Determine project type
       final isFlyProject = manifestInfo != null || _isFlyProject(pubspecInfo);
+      // Use 'fly' type for Fly projects, 'flutter' for regular Flutter projects
       final projectType = isFlyProject ? 'fly' : 'flutter';
+
+      // Extract platforms
+      final platforms = manifestInfo?.platforms ?? await _extractPlatforms(projectDir);
 
       return ProjectInfo(
         name: pubspecInfo.name,
@@ -53,7 +62,7 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
         template: manifestInfo?.template,
         organization: manifestInfo?.organization,
         description: pubspecInfo.description,
-        platforms: manifestInfo?.platforms ?? _extractPlatforms(pubspecInfo),
+        platforms: platforms,
         flutterVersion: pubspecInfo.environment?['flutter'],
         dartVersion: pubspecInfo.environment?['sdk'],
         isFlyProject: isFlyProject,
@@ -105,13 +114,32 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
       final content = await FileUtils.readFile(manifestFile);
       if (content == null) return null;
 
-      // Simplified manifest parsing
+      // Parse YAML content
+      final yaml = loadYaml(content) as Map<dynamic, dynamic>?;
+      if (yaml == null) return null;
+
+      // Extract organization - required field, defaults to 'com.example'
+      final organization = yaml['organization'] as String? ?? 'com.example';
+      
+      // Extract template - required field
+      final template = yaml['template'] as String? ?? 'riverpod';
+      
+      // Extract name - required field
+      final name = yaml['name'] as String? ?? 'fly_project';
+      
+      // Extract description - optional
+      final description = yaml['description'] as String?;
+      
+      // Extract platforms - defaults to ios, android
+      final platformsList = yaml['platforms'] as List?;
+      final platforms = platformsList?.cast<String>() ?? ['ios', 'android'];
+
       return ManifestInfo(
-        name: 'fly_project',
-        template: 'riverpod',
-        organization: 'unknown',
-        description: 'Fly project',
-        platforms: const ['ios', 'android'],
+        name: name,
+        template: template,
+        organization: organization,
+        description: description,
+        platforms: platforms,
         screens: const [],
         services: const [],
         packages: const [],
@@ -127,9 +155,25 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
     return false;
   }
 
-  /// Extract platforms from pubspec
-  List<String> _extractPlatforms(PubspecInfo pubspecInfo) {
-    return const ['ios', 'android'];
+  /// Extract platforms from project directory structure
+  Future<List<String>> _extractPlatforms(Directory projectDir) async {
+    final platforms = <String>[];
+    
+    // Check for platform-specific directories
+    final platformDirs = ['ios', 'android', 'web', 'macos', 'windows', 'linux'];
+    for (final platform in platformDirs) {
+      final platformDir = Directory(path.join(projectDir.path, platform));
+      if (await platformDir.exists()) {
+        platforms.add(platform);
+      }
+    }
+    
+    // Default to ios and android if no platforms found
+    if (platforms.isEmpty) {
+      return const ['ios', 'android'];
+    }
+    
+    return platforms;
   }
 
   /// Get project creation date
@@ -162,13 +206,22 @@ class UnifiedStructureAnalyzer extends ProjectAnalyzer<StructureInfo> {
       final directoryAnalyzer = const UnifiedDirectoryAnalyzer();
       final result = await directoryAnalyzer.analyze(projectDir);
 
+      // Extract feature names from screen files
+      // Strip _screen.dart or _page.dart suffix to get the feature name
+      final features = result.getFilesByType('screen').map((f) {
+        final basename = path.basename(f);
+        if (basename.endsWith('_screen.dart')) {
+          return basename.replaceAll('_screen.dart', '');
+        } else if (basename.endsWith('_page.dart')) {
+          return basename.replaceAll('_page.dart', '');
+        }
+        return basename.replaceAll('.dart', '');
+      }).toList();
+      
       return StructureInfo(
         rootDirectory: projectDir.path,
         directories: result.directories,
-        features: result
-            .getFilesByType('screen')
-            .map((f) => path.basename(f))
-            .toList(),
+        features: features,
         totalFiles: result.totalFiles,
         linesOfCode: result.totalLinesOfCode,
         fileTypes: result.fileTypes,
@@ -245,7 +298,10 @@ class UnifiedCodeAnalyzer extends CodeAnalyzer<CodeInfo> {
       final result = await directoryAnalyzer.analyze(projectDir);
 
       // Convert directory result to CodeInfo
+      // Only include Dart files in keyFiles (exclude non-Dart files like pubspec.yaml)
+      final dartFileSet = result.dartFiles.toSet();
       final keyFiles = result.files.values
+          .where((file) => dartFileSet.contains(file.path))
           .map(
             (file) => SourceFile(
               path: file.path,
@@ -384,16 +440,30 @@ class UnifiedCodeAnalyzer extends CodeAnalyzer<CodeInfo> {
       if (!await libDir.exists()) return patterns.toList();
 
       await for (final entity in libDir.list(recursive: true)) {
+        // Check if directory still exists during iteration
+        if (!await projectDir.exists()) {
+          break;
+        }
+
         if (entity is File && entity.path.endsWith('.dart')) {
-          final content = await FileUtils.readFile(entity);
-          if (content != null) {
-            final detectedPatterns = _detectPatternsInContent(content);
-            patterns.addAll(detectedPatterns);
+          try {
+            final content = await FileUtils.readFile(entity);
+            if (content != null) {
+              final detectedPatterns = _detectPatternsInContent(content);
+              patterns.addAll(detectedPatterns);
+            }
+          } catch (e) {
+            // Skip individual file errors (e.g., file deleted during iteration)
+            continue;
           }
         }
       }
+    } on FileSystemException {
+      // FileSystemException (including PathNotFoundException) is expected when
+      // directory is deleted during analysis or doesn't exist
+      // Return what we have so far
     } catch (e) {
-      // Skip if analysis fails
+      // Skip if analysis fails for other reasons
     }
 
     return patterns.toList();
@@ -420,6 +490,20 @@ class UnifiedCodeAnalyzer extends CodeAnalyzer<CodeInfo> {
     }
     if (content.contains('ViewModel') && content.contains('Screen')) {
       patterns.add('mvvm');
+    }
+
+    // UI patterns
+    if (content.contains('Scaffold') || content.contains('AppBar')) {
+      patterns.add('material_design');
+    }
+    if (content.contains('CupertinoApp') ||
+        content.contains('CupertinoPageScaffold')) {
+      patterns.add('cupertino_design');
+    }
+
+    // Navigation patterns
+    if (content.contains('GoRouter') || content.contains('go_router')) {
+      patterns.add('go_router');
     }
 
     return patterns.toList();
@@ -602,6 +686,52 @@ class UnifiedDependencyAnalyzer extends DependencyAnalyzer<DependencyInfo> {
       );
     }
 
+    // Check for conflicting state management packages
+    final stateManagementPackages = [
+      'flutter_riverpod',
+      'flutter_bloc',
+      'provider',
+      'get',
+    ];
+
+    final foundStatePackages = stateManagementPackages
+        .where((pkg) => dependencies.containsKey(pkg))
+        .toList();
+
+    if (foundStatePackages.length > 1) {
+      warnings.add(
+        DependencyWarning(
+          package: foundStatePackages.join(', '),
+          message:
+              'Multiple state management packages detected: ${foundStatePackages.join(', ')}. Consider using only one.',
+          severity: 'high',
+        ),
+      );
+    }
+
+    // Check for conflicting HTTP client packages
+    final httpClientPackages = [
+      'dio',
+      'http',
+      'chopper',
+      'retrofit',
+    ];
+
+    final foundHttpPackages = httpClientPackages
+        .where((pkg) => dependencies.containsKey(pkg))
+        .toList();
+
+    if (foundHttpPackages.length > 1) {
+      warnings.add(
+        DependencyWarning(
+          package: foundHttpPackages.join(', '),
+          message:
+              'Multiple HTTP client packages detected: ${foundHttpPackages.join(', ')}. Consider using only one.',
+          severity: 'medium',
+        ),
+      );
+    }
+
     return warnings;
   }
 
@@ -624,6 +754,24 @@ class UnifiedDependencyAnalyzer extends DependencyAnalyzer<DependencyInfo> {
     if (foundStatePackages.length > 1) {
       conflicts.add(
         'Multiple state management packages detected: ${foundStatePackages.join(', ')}',
+      );
+    }
+
+    // Check for conflicting HTTP client packages
+    final httpClientPackages = [
+      'dio',
+      'http',
+      'chopper',
+      'retrofit',
+    ];
+
+    final foundHttpPackages = httpClientPackages
+        .where((pkg) => dependencies.containsKey(pkg))
+        .toList();
+
+    if (foundHttpPackages.length > 1) {
+      conflicts.add(
+        'Multiple HTTP client packages detected: ${foundHttpPackages.join(', ')}',
       );
     }
 
