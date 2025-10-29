@@ -3,19 +3,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
+import '../helpers/cli_test_helper.dart';
 
 void main() {
   group('Generated Project Validation', () {
     late Directory tempDir;
-    late ProcessManager processManager;
-
-    setUpAll(() {
-      processManager = const LocalProcessManager();
-    });
+    late CliTestHelper cli;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_validation_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/validation_$testRunId');
+      tempDir.createSync(recursive: true);
+      cli = CliTestHelper(tempDir);
     });
 
     tearDown(() {
@@ -28,15 +27,7 @@ void main() {
       test('minimal project structure is correct', () async {
         const projectName = 'minimal_validation_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -73,34 +64,27 @@ void main() {
         const projectName = 'minimal_compile_test';
         
         // Create project
-        final createResult = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final createResult = await cli.createProject(projectName);
 
         expect(createResult.exitCode, equals(0));
         
         final projectPath = path.join(tempDir.path, projectName);
         
         // Test compilation
-        final analyzeResult = await processManager.run([
+        final analyzeResult = await Process.run(
           'flutter',
-          'analyze',
-        ], workingDirectory: projectPath);
+          ['analyze'],
+          workingDirectory: projectPath,
+        );
 
         expect(analyzeResult.exitCode, equals(0));
         
         // Test pub get
-        final pubGetResult = await processManager.run([
+        final pubGetResult = await Process.run(
           'flutter',
-          'pub',
-          'get',
-        ], workingDirectory: projectPath);
+          ['pub', 'get'],
+          workingDirectory: projectPath,
+        );
 
         expect(pubGetResult.exitCode, equals(0));
       });
@@ -110,15 +94,7 @@ void main() {
       test('riverpod project structure is correct', () async {
         const projectName = 'riverpod_validation_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=riverpod',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, template: 'riverpod');
 
         expect(result.exitCode, equals(0));
         
@@ -154,34 +130,27 @@ void main() {
         const projectName = 'riverpod_compile_test';
         
         // Create project
-        final createResult = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=riverpod',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final createResult = await cli.createProject(projectName, template: 'riverpod');
 
         expect(createResult.exitCode, equals(0));
         
         final projectPath = path.join(tempDir.path, projectName);
         
         // Test pub get
-        final pubGetResult = await processManager.run([
+        final pubGetResult = await Process.run(
           'flutter',
-          'pub',
-          'get',
-        ], workingDirectory: projectPath);
+          ['pub', 'get'],
+          workingDirectory: projectPath,
+        );
 
         expect(pubGetResult.exitCode, equals(0));
         
         // Test analysis
-        final analyzeResult = await processManager.run([
+        final analyzeResult = await Process.run(
           'flutter',
-          'analyze',
-        ], workingDirectory: projectPath);
+          ['analyze'],
+          workingDirectory: projectPath,
+        );
 
         expect(analyzeResult.exitCode, equals(0));
       });
@@ -191,15 +160,7 @@ void main() {
       test('project name is correctly substituted', () async {
         const projectName = 'test_project_name_substitution';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -223,16 +184,7 @@ void main() {
         const projectName = 'org_test';
         const organization = 'com.test.organization';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--organization=$organization',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, organization: organization);
 
         expect(result.exitCode, equals(0));
         
@@ -246,16 +198,7 @@ void main() {
       test('platforms are correctly configured', () async {
         const projectName = 'platform_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--platforms=ios,android,web',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, platforms: ['ios', 'android', 'web']);
 
         expect(result.exitCode, equals(0));
         
@@ -271,15 +214,7 @@ void main() {
       test('generated code follows Dart conventions', () async {
         const projectName = 'code_quality_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -295,15 +230,7 @@ void main() {
       test('generated tests are valid', () async {
         const projectName = 'test_validation';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -351,19 +278,13 @@ flutter:
       });
 
       test('add screen generates valid code', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'screen',
+        final result = await cli.addScreen(
           'test_screen',
-          '--feature=home',
-          '--type=generic',
-          '--with-viewmodel=true',
-          '--with-tests=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'home',
+          type: 'generic',
+          withViewModel: true,
+          withTests: true,
+        );
 
         expect(result.exitCode, equals(0));
         
@@ -393,20 +314,14 @@ flutter:
       });
 
       test('add service generates valid code', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'service',
+        final result = await cli.addService(
           'test_service',
-          '--feature=core',
-          '--type=api',
-          '--base-url=https://api.example.com',
-          '--with-tests=true',
-          '--with-mocks=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'core',
+          type: 'api',
+          baseUrl: 'https://api.example.com',
+          withTests: true,
+          withMocks: true,
+        );
 
         expect(result.exitCode, equals(0));
         
@@ -445,15 +360,7 @@ flutter:
         ];
 
         for (final invalidName in invalidNames) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            invalidName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+          final result = await cli.createProject(invalidName);
 
           expect(result.exitCode, equals(1));
           
@@ -469,28 +376,12 @@ flutter:
         const projectName = 'duplicate_test';
         
         // Create first project
-        final firstResult = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final firstResult = await cli.createProject(projectName);
 
         expect(firstResult.exitCode, equals(0));
         
         // Try to create second project with same name
-        final secondResult = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final secondResult = await cli.createProject(projectName);
 
         expect(secondResult.exitCode, equals(1));
         
@@ -506,15 +397,7 @@ flutter:
       test('project creation works on current platform', () async {
         const projectName = 'cross_platform_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         

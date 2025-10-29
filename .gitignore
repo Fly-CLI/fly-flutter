@@ -134,3 +134,6 @@ android/app/key-store-info.txt
 # App Store Connect API Key
 *.p8
 AuthKey_*.p8
+
+# Generated test projects
+/test_generated/

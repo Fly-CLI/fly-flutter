@@ -131,7 +131,9 @@ class DryRunMiddleware implements CommandMiddleware {
 
   @override
   Future<CommandResult?> handle(CommandContext context, Future<CommandResult?> Function() next) async {
-    if (context.planMode) {
+    // Check if plan mode is enabled in the current command's argResults
+    final planMode = context.planMode;
+    if (planMode) {
       // Instead of executing the actual command, return a plan.
       return CommandResult.success(
         command: context.argResults.command?.name ?? 'unknown',

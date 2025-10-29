@@ -94,7 +94,13 @@ class CommandContextImpl implements CommandContext {
   bool get aiOutput => argResults['output'] == 'ai';
 
   @override
-  bool get planMode => argResults['plan'] == true;
+  bool get planMode {
+    try {
+      return argResults['plan'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
 
 
   @override

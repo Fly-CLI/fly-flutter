@@ -8,7 +8,9 @@ void main() {
     late Directory tempDir;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_platform_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/platform_$testRunId');
+      tempDir.createSync(recursive: true);
     });
 
     tearDown(() {
@@ -184,7 +186,7 @@ void main() {
             'packages/fly_cli/bin/fly.dart',
             '--version',
           ],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -200,7 +202,7 @@ void main() {
             'create',
             'test_project',
           ],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));

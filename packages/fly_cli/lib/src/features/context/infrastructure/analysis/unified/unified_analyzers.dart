@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:yaml/yaml.dart';
 import 'package:fly_cli/src/features/context/domain/models/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/analyzer_interface.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/utils.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/enhanced/architecture_detector.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/unified/directory_analyzer.dart';
 import 'package:path/path.dart' as path;
+import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:yaml/yaml.dart';
 
 /// Unified project analyzer that combines all analysis functionality
 class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
@@ -35,12 +36,14 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
         );
       }
 
-      // Analyze pubspec.yaml with retry logic
+      // Analyze pubspec.yaml with retry logic and preserve content for Fly detection
+      String pubspecContent = '';
       final pubspecInfo = await RetryUtils.retry(() async {
         final content = await FileUtils.readFile(pubspecFile);
         if (content == null) {
           throw Exception('Failed to read pubspec.yaml');
         }
+        pubspecContent = content;
         return _parsePubspec(content);
       });
 
@@ -48,7 +51,7 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
       final manifestInfo = await _analyzeManifest(projectDir);
 
       // Determine project type
-      final isFlyProject = manifestInfo != null || _isFlyProject(pubspecInfo);
+      final isFlyProject = manifestInfo != null || _pubspecContainsFlyPackages(pubspecContent);
       // Use 'fly' type for Fly projects, 'flutter' for regular Flutter projects
       final projectType = isFlyProject ? 'fly' : 'flutter';
 
@@ -84,23 +87,85 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
 
   /// Parse pubspec.yaml content
   PubspecInfo _parsePubspec(String content) {
-    // Simplified pubspec parsing - in real implementation would use pubspec_parse
-    final lines = content.split('\n');
-    String name = 'unknown';
-    String version = '0.0.0';
-    String? description;
-
-    for (final line in lines) {
-      if (line.trim().startsWith('name:')) {
-        name = line.split(':')[1].trim();
-      } else if (line.trim().startsWith('version:')) {
-        version = line.split(':')[1].trim();
-      } else if (line.trim().startsWith('description:')) {
-        description = line.split(':')[1].trim();
+    try {
+      // Parse as YAML first to get environment constraints
+      final yaml = loadYaml(content) as Map<dynamic, dynamic>;
+      
+      // Extract environment constraints from YAML
+      Map<String, String>? environment;
+      final envSection = yaml['environment'] as Map<dynamic, dynamic>?;
+      if (envSection != null && envSection.isNotEmpty) {
+        environment = {};
+        for (final entry in envSection.entries) {
+          final key = entry.key.toString();
+          final value = entry.value.toString();
+          environment[key] = value;
+        }
       }
-    }
+      
+      // Now parse with pubspec_parse for proper structure
+      final pubspec = Pubspec.parse(content);
+      
+      return PubspecInfo(
+        name: pubspec.name,
+        version: pubspec.version.toString(),
+        description: pubspec.description,
+        homepage: pubspec.homepage?.toString(),
+        repository: pubspec.repository?.toString(),
+        environment: environment,
+      );
+    } catch (e) {
+      // Fallback to manual parsing if pubspec_parse fails
+      final lines = content.split('\n');
+      String name = 'unknown';
+      String version = '0.0.0';
+      String? description;
+      Map<String, String>? environment;
 
-    return PubspecInfo(name: name, version: version, description: description);
+      bool inEnvironment = false;
+      String? currentKey;
+
+      for (final line in lines) {
+        final trimmed = line.trim();
+        final indent = line.length - trimmed.length;
+
+        // Handle main fields
+        if (indent == 0) {
+          inEnvironment = false;
+          currentKey = null;
+
+          if (trimmed.startsWith('name:')) {
+            name = trimmed.split(':')[1].trim();
+          } else if (trimmed.startsWith('version:')) {
+            version = trimmed.split(':')[1].trim();
+          } else if (trimmed.startsWith('description:')) {
+            description = trimmed.split(':')[1].trim();
+          } else if (trimmed.startsWith('environment:')) {
+            inEnvironment = true;
+            environment ??= {};
+          }
+        } else if (inEnvironment && indent > 0) {
+          // Inside environment block
+          if (trimmed.contains(':')) {
+            final parts = trimmed.split(':');
+            if (parts.length >= 2) {
+              currentKey = parts[0].trim();
+              final value = parts.sublist(1).join(':').trim();
+              if (value.isNotEmpty && !value.startsWith('#')) {
+                environment![currentKey] = value;
+              }
+            }
+          }
+        }
+      }
+
+      return PubspecInfo(
+        name: name,
+        version: version,
+        description: description,
+        environment: environment,
+      );
+    }
   }
 
   /// Analyze Fly manifest if present
@@ -149,10 +214,11 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
     }
   }
 
-  /// Check if project uses Fly packages
-  bool _isFlyProject(PubspecInfo pubspecInfo) {
-    // Simplified check - would need actual dependency parsing
-    return false;
+  /// Check if project uses Fly packages via pubspec content
+  bool _pubspecContainsFlyPackages(String pubspecContent) {
+    // Look for common Fly packages in dependencies section
+    final flyDepPattern = RegExp(r'(^|\n)\s*fly_(core|state|networking)\s*:', multiLine: true);
+    return flyDepPattern.hasMatch(pubspecContent);
   }
 
   /// Extract platforms from project directory structure

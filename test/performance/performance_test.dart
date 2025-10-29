@@ -3,19 +3,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
+import '../helpers/cli_test_helper.dart';
 
 void main() {
   group('Performance Testing', () {
     late Directory tempDir;
-    late ProcessManager processManager;
-
-    setUpAll(() {
-      processManager = const LocalProcessManager();
-    });
+    late CliTestHelper cli;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_performance_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/performance_$testRunId');
+      tempDir.createSync(recursive: true);
+      cli = CliTestHelper(tempDir);
     });
 
     tearDown(() {
@@ -28,15 +27,7 @@ void main() {
       test('minimal project creation completes within 30 seconds', () async {
         const projectName = 'perf_test_minimal';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -56,15 +47,7 @@ void main() {
       test('riverpod project creation completes within 30 seconds', () async {
         const projectName = 'perf_test_riverpod';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=riverpod',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, template: 'riverpod');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -85,15 +68,7 @@ void main() {
         const projectNames = ['perf1', 'perf2', 'perf3', 'perf4', 'perf5'];
         
         for (final projectName in projectNames) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            projectName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
           expect(result.exitCode, equals(0));
         }
@@ -108,16 +83,7 @@ void main() {
       test('project creation with plan mode is fast', () async {
         const projectName = 'perf_test_plan';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--plan',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--plan']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -137,13 +103,7 @@ void main() {
 
     group('Command Performance', () {
       test('doctor command completes quickly', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'doctor',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('doctor');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -154,13 +114,7 @@ void main() {
       });
 
       test('version command completes quickly', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'version',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('version');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -171,14 +125,7 @@ void main() {
       });
 
       test('schema export completes quickly', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'schema',
-          'export',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('schema', args: ['export']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -224,18 +171,12 @@ flutter:
       });
 
       test('add screen command completes quickly', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'screen',
+        final result = await cli.addScreen(
           'test_screen',
-          '--feature=home',
-          '--with-viewmodel=true',
-          '--with-tests=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'home',
+          withViewModel: true,
+          withTests: true,
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -246,19 +187,13 @@ flutter:
       });
 
       test('add service command completes quickly', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'service',
+        final result = await cli.addService(
           'test_service',
-          '--feature=core',
-          '--type=api',
-          '--with-tests=true',
-          '--with-mocks=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'core',
+          type: 'api',
+          withTests: true,
+          withMocks: true,
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -275,15 +210,7 @@ flutter:
         final projectNames = List.generate(10, (index) => 'memory_test_$index');
         
         for (final projectName in projectNames) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            projectName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
           expect(result.exitCode, equals(0));
         }
@@ -298,15 +225,7 @@ flutter:
       test('large project creation handles memory efficiently', () async {
         const projectName = 'large_project_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=riverpod',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, template: 'riverpod');
 
         expect(result.exitCode, equals(0));
 
@@ -426,15 +345,7 @@ flutter:
         final futures = <Future<ProcessResult>>[];
         
         for (final projectName in projectNames) {
-          futures.add(processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            projectName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path));
+          futures.add(cli.createProject(projectName));
         }
         
         final results = await Future.wait(futures);
@@ -449,17 +360,11 @@ flutter:
       });
 
       test('rapid command execution', () async {
-        final commands = [
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', '--version'],
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'doctor', '--output=json'],
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'schema', 'export', '--output=json'],
-        ];
-        
         final futures = <Future<ProcessResult>>[];
         
-        for (final command in commands) {
-          futures.add(processManager.run(command, workingDirectory: tempDir.path));
-        }
+        futures.add(cli.runCommand('--version', jsonOutput: false));
+        futures.add(cli.runCommand('doctor'));
+        futures.add(cli.runCommand('schema', args: ['export']));
         
         final results = await Future.wait(futures);
         

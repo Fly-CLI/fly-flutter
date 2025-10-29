@@ -4,12 +4,25 @@ import 'package:test/test.dart';
 
 void main() {
   group('Unified Output Format Tests', () {
+    late Directory tempDir;
+
+    setUpAll(() {
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/unified_output_$testRunId');
+      tempDir.createSync(recursive: true);
+    });
+
+    tearDownAll(() {
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
     group('Human Output Mode', () {
       test('version command outputs human-readable format', () async {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', '--version', '--output=human'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -22,7 +35,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'doctor', '--output=human'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, anyOf(equals(0), equals(1)));
@@ -38,7 +51,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'context', '--output=human'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -50,7 +63,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'schema', '--output=human'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -62,7 +75,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'completion', '--output=human'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -76,7 +89,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', '--version', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -99,7 +112,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'doctor', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, anyOf(equals(0), equals(1)));
@@ -130,7 +143,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'context', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -153,7 +166,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'schema', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -177,7 +190,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'completion', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -204,7 +217,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', '--version', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -229,7 +242,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'doctor', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, anyOf(equals(0), equals(1)));
@@ -256,7 +269,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'context', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -279,7 +292,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'schema', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -302,7 +315,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'completion', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -327,7 +340,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'invalid-command', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(1));
@@ -345,7 +358,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'invalid-command', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(1));
@@ -370,7 +383,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'version', '--output=json'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -393,7 +406,7 @@ void main() {
         final result = await Process.run(
           'dart',
           ['run', 'bin/fly.dart', 'version', '--output=ai'],
-          workingDirectory: Directory.current.path,
+          workingDirectory: tempDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -429,7 +442,7 @@ void main() {
           final result = await Process.run(
             'dart',
             ['run', 'bin/fly.dart', command, '--output=json'],
-            workingDirectory: Directory.current.path,
+            workingDirectory: tempDir.path,
           );
 
           expect(result.exitCode, anyOf(equals(0), equals(1)));
@@ -460,7 +473,7 @@ void main() {
           final result = await Process.run(
             'dart',
             ['run', 'bin/fly.dart', command, '--output=ai'],
-            workingDirectory: Directory.current.path,
+            workingDirectory: tempDir.path,
           );
 
           expect(result.exitCode, anyOf(equals(0), equals(1)));

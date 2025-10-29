@@ -3,19 +3,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
+import '../helpers/cli_test_helper.dart';
 
 void main() {
   group('Security Review', () {
     late Directory tempDir;
-    late ProcessManager processManager;
-
-    setUpAll(() {
-      processManager = const LocalProcessManager();
-    });
+    late CliTestHelper cli;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_security_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/security_$testRunId');
+      tempDir.createSync(recursive: true);
+      cli = CliTestHelper(tempDir);
     });
 
     tearDown(() {
@@ -37,15 +36,7 @@ void main() {
         ];
 
         for (final maliciousName in maliciousNames) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            maliciousName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(maliciousName);
 
           expect(result.exitCode, equals(1));
           
@@ -65,15 +56,7 @@ void main() {
         ];
 
         for (final traversalPath in traversalPaths) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            traversalPath,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+          final result = await cli.createProject(traversalPath);
 
           expect(result.exitCode, equals(1));
           
@@ -94,15 +77,7 @@ void main() {
         ];
 
         for (final specialChar in specialChars) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            specialChar,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+          final result = await cli.createProject(specialChar);
 
           expect(result.exitCode, equals(1));
           
@@ -114,15 +89,7 @@ void main() {
       test('very long input is handled safely', () async {
         final longName = 'a' * 10000;
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          longName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(longName);
 
         expect(result.exitCode, equals(1));
         
@@ -135,15 +102,7 @@ void main() {
       test('file operations are restricted to working directory', () async {
         const projectName = 'file_security_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -161,15 +120,7 @@ void main() {
       test('directory traversal in file operations is prevented', () async {
         const projectName = 'traversal_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -185,15 +136,7 @@ void main() {
       test('file permissions are set correctly', () async {
         const projectName = 'permissions_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -212,16 +155,7 @@ void main() {
       test('command arguments are properly escaped', () async {
         const projectName = 'command_injection_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--organization=com.test; rm -rf /',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, organization: 'com.test; rm -rf /');
 
         expect(result.exitCode, equals(0));
         
@@ -235,15 +169,7 @@ void main() {
       test('template names are validated', () async {
         const projectName = 'template_validation_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=../../../etc/passwd',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, template: '../../../etc/passwd');
 
         expect(result.exitCode, equals(1));
         
@@ -255,16 +181,7 @@ void main() {
       test('platform arguments are validated', () async {
         const projectName = 'platform_validation_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--platforms=malicious_platform',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, platforms: ['malicious_platform']);
 
         expect(result.exitCode, equals(1));
         
@@ -277,15 +194,7 @@ void main() {
       test('JSON output is properly escaped', () async {
         const projectName = 'json_security_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -297,15 +206,7 @@ void main() {
       });
 
       test('error messages in JSON are safe', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          'invalid<project>name',
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject('invalid<project>name');
 
         expect(result.exitCode, equals(1));
         expect(result.stdout, isNotEmpty);
@@ -322,15 +223,7 @@ void main() {
       test('large project names are handled safely', () async {
         final largeName = 'a' * 1000;
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          largeName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(largeName);
 
         expect(result.exitCode, equals(1));
         
@@ -343,15 +236,7 @@ void main() {
         final futures = <Future<ProcessResult>>[];
         
         for (final projectName in projectNames) {
-          futures.add(processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            projectName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path));
+          futures.add(cli.createProject(projectName));
         }
         
         final results = await Future.wait(futures);
@@ -367,15 +252,7 @@ void main() {
       test('template content is safe', () async {
         const projectName = 'template_security_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -398,15 +275,7 @@ void main() {
       test('template variables are properly escaped', () async {
         const projectName = 'template_escape_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -425,16 +294,7 @@ void main() {
       test('no network requests are made during project creation', () async {
         const projectName = 'network_security_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--offline',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--offline']);
 
         expect(result.exitCode, equals(0));
         
@@ -443,13 +303,7 @@ void main() {
       });
 
       test('doctor command does not leak sensitive information', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'doctor',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('doctor');
 
         expect(result.exitCode, equals(0));
         
@@ -469,15 +323,7 @@ void main() {
       test('no external processes are spawned unnecessarily', () async {
         const projectName = 'process_security_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -491,16 +337,7 @@ void main() {
       test('plan mode does not execute dangerous operations', () async {
         const projectName = 'plan_security_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--plan',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--plan']);
 
         expect(result.exitCode, equals(0));
         

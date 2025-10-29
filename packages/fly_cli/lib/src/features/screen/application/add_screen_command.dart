@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:args/args.dart';
+import 'package:args/args.dart' hide OptionType;
 
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
@@ -9,6 +9,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 
 /// AddScreenCommand using new architecture
 class AddScreenCommand extends FlyCommand {
@@ -22,6 +23,9 @@ class AddScreenCommand extends FlyCommand {
 
   @override
   String get description => 'Add a new screen component to the current project';
+
+  // @override
+  // CommandDefinition? get metadata => null;
 
   @override
   ArgParser get argParser {
@@ -61,6 +65,11 @@ class AddScreenCommand extends FlyCommand {
         'with-navigation',
         help: 'Include navigation logic',
         defaultsTo: true,
+      )
+      ..addOption(
+        'output-dir',
+        help: 'Output directory for generated files (defaults to current directory)',
+        defaultsTo: null,
       );
     return parser;
   }
@@ -83,16 +92,17 @@ class AddScreenCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     final interactive = argResults!['interactive'] as bool? ?? false;
+    final outputDir = argResults!['output-dir'] as String? ?? context.workingDirectory;
     
     if (interactive) {
-      return _runInteractiveMode();
+      return _runInteractiveMode(outputDir);
     }
     
-    return _runNonInteractiveMode();
+    return _runNonInteractiveMode(outputDir);
   }
 
   /// Run in interactive mode
-  Future<CommandResult> _runInteractiveMode() async {
+  Future<CommandResult> _runInteractiveMode(String outputDir) async {
     try {
       final prompter = context.interactivePrompt;
       
@@ -176,6 +186,7 @@ class AddScreenCommand extends FlyCommand {
         withTests: withTests,
         withValidation: withValidation,
         withNavigation: withNavigation,
+        outputDir: outputDir,
       );
     } catch (e) {
       return CommandResult.error(
@@ -186,7 +197,7 @@ class AddScreenCommand extends FlyCommand {
   }
 
   /// Run in non-interactive mode
-  Future<CommandResult> _runNonInteractiveMode() async {
+  Future<CommandResult> _runNonInteractiveMode(String outputDir) async {
     final screenName = argResults!.rest.first;
     final feature = argResults!['feature'] as String? ?? 'home';
     final screenType = argResults!['type'] as String? ?? 'list';
@@ -203,6 +214,7 @@ class AddScreenCommand extends FlyCommand {
       withTests: withTests,
       withValidation: withValidation,
       withNavigation: withNavigation,
+      outputDir: outputDir,
     );
   }
 
@@ -215,6 +227,7 @@ class AddScreenCommand extends FlyCommand {
     required bool withTests,
     required bool withValidation,
     required bool withNavigation,
+    required String outputDir,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -248,7 +261,7 @@ class AddScreenCommand extends FlyCommand {
         componentName: screenName,
         componentType: BrickType.screen,
         config: screenConfig,
-        targetPath: context.workingDirectory,
+        targetPath: outputDir,
       );
 
       stopwatch.stop();

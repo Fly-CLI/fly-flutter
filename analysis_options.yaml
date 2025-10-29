@@ -1,6 +1,9 @@
 include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
+  language:
+    enable-experiment:
+      - null-aware-elements
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
@@ -8,4 +11,5 @@ analyzer:
     - "**/build/**"
     - "**/.dart_tool/**"
     - "**/coverage/**"
-    - "templates/**"
+    - "**/templates/**"
+    - "**/__brick__/**"

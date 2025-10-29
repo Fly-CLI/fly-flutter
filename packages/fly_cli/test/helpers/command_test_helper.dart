@@ -52,6 +52,12 @@ class CommandTestHelper {
     String? workingDirectory,
     Map<String, String>? environment,
   }) async {
+    // Set test mode to skip expensive initialization
+    final testEnvironment = {
+      'FLY_TEST_MODE': 'true',
+      ...?environment,
+    };
+    
     // Ensure output format is JSON to parse results
     final finalArgs = List<String>.from(args);
     if (!finalArgs.contains('--output=json') && 
@@ -128,7 +134,7 @@ class CommandTestHelper {
       'dart',
       ['run', absoluteFlyDartPath, ...finalArgs],
       workingDirectory: workingDirectory ?? workspaceRoot,
-      environment: environment,
+      environment: testEnvironment,
     );
     
     final exitCode = processResult.exitCode;
@@ -137,7 +143,8 @@ class CommandTestHelper {
     final stdoutStr = processResult.stdout.toString().trim();
     if (stdoutStr.isNotEmpty) {
       try {
-        final jsonOutput = json.decode(stdoutStr) as Map<String, dynamic>;
+        // Try to parse the entire stdout as JSON first
+        var jsonOutput = json.decode(stdoutStr) as Map<String, dynamic>;
         
         // Convert JSON back to CommandResult
         return CommandResult(
@@ -149,6 +156,34 @@ class CommandTestHelper {
           metadata: jsonOutput['metadata'] as Map<String, dynamic>?,
         );
       } catch (e) {
+        // If parsing the entire stdout fails, try to find JSON within the output
+        try {
+          final lines = stdoutStr.split('\n');
+          String? jsonLine;
+          
+          for (final line in lines) {
+            if (line.trim().startsWith('{')) {
+              jsonLine = line.trim();
+              break;
+            }
+          }
+          
+          if (jsonLine != null) {
+            final jsonOutput = json.decode(jsonLine) as Map<String, dynamic>;
+            
+            // Convert JSON back to CommandResult
+            return CommandResult(
+              success: jsonOutput['success'] as bool? ?? (exitCode == 0),
+              command: jsonOutput['command'] as String? ?? _extractCommandName(args),
+              message: jsonOutput['message'] as String? ?? 'Command executed',
+              data: jsonOutput['data'] as Map<String, dynamic>?,
+              suggestion: jsonOutput['suggestion'] as String?,
+              metadata: jsonOutput['metadata'] as Map<String, dynamic>?,
+            );
+          }
+        } catch (jsonExtractionError) {
+          // JSON extraction also failed, continue to error handling
+        }
         // If JSON parsing fails, check for error JSON in stderr
         final stderrStr = processResult.stderr.toString().trim();
         if (stderrStr.isNotEmpty) {

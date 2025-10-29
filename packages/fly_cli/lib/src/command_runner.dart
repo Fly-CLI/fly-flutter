@@ -134,6 +134,12 @@ class FlyCommandRunner extends CommandRunner<int> {
 
   /// Create a command context with services
   CommandContext _createContext(ArgResults args) {
+    // Respect environment variables for working directory (12-Factor App pattern)
+    // FLY_OUTPUT_DIR for explicit test control, PWD for Unix standard
+    final workingDir = Platform.environment['FLY_OUTPUT_DIR'] 
+        ?? Platform.environment['PWD']
+        ?? Directory.current.path;
+    
     return CommandContextImpl(
       argResults: args,
       logger: _services.get<Logger>(),
@@ -142,7 +148,7 @@ class FlyCommandRunner extends CommandRunner<int> {
       interactivePrompt: _services.get<InteractivePrompt>(),
       config: _getConfig(),
       environment: Environment.current(),
-      workingDirectory: Directory.current.path,
+      workingDirectory: workingDir,
       verbose: args['verbose'] as bool? ?? false,
       quiet: args['quiet'] as bool? ?? false,
     );

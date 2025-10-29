@@ -91,6 +91,7 @@ class BrickRegistry {
     _brickCache.clear();
     for (final brick in bricks) {
       _brickCache[brick.name] = brick;
+      logger.detail('Cached brick: ${brick.name} (${brick.type.name})');
     }
 
     logger.info('Discovered ${bricks.length} bricks');
@@ -191,25 +192,42 @@ class BrickRegistry {
     final pathSegments = path.split(brickPath);
     final brickName = pathSegments.last;
 
-    // Check if it's in the projects subdirectory
-    if (pathSegments.contains('projects')) {
-      return BrickType.project;
-    }
+    logger.detail('Determining brick type for path: $brickPath');
+    logger.detail('Path segments: $pathSegments');
+    logger.detail('Brick name: $brickName');
 
-    // Check if it's in the components subdirectory
+    // Check if it's in the components subdirectory first (more specific)
     if (pathSegments.contains('components')) {
-      // Determine specific component type by name
-      switch (brickName) {
+      // Determine specific component type by directory name
+      final componentDir = pathSegments[pathSegments.indexOf('components') + 1];
+      logger.detail('Component directory: $componentDir');
+      switch (componentDir) {
         case 'screen':
+          logger.detail('Detected as screen brick');
           return BrickType.screen;
         case 'service':
+          logger.detail('Detected as service brick');
           return BrickType.service;
         default:
+          logger.detail('Detected as generic component brick');
           return BrickType.component;
       }
     }
 
+    // Check if it's in the projects subdirectory (after components check)
+    if (pathSegments.contains('projects')) {
+      // Make sure it's actually in the templates/projects directory structure
+      final templatesIndex = pathSegments.indexOf('templates');
+      if (templatesIndex != -1 && 
+          templatesIndex + 1 < pathSegments.length && 
+          pathSegments[templatesIndex + 1] == 'projects') {
+        logger.detail('Detected as project brick');
+        return BrickType.project;
+      }
+    }
+
     // Default to custom if path doesn't match expected structure
+    logger.detail('Detected as custom brick');
     return BrickType.custom;
   }
 
@@ -217,7 +235,15 @@ class BrickRegistry {
   Future<BrickInfo?> getBrick(String name) async {
     // Ensure bricks are discovered
     await discoverBricks();
-    return _brickCache[name];
+    final brick = _brickCache[name];
+    logger.detail('Looking for brick: $name');
+    if (brick != null) {
+      logger.detail('Found brick: ${brick.name} (${brick.type.name})');
+    } else {
+      logger.detail('Brick not found: $name');
+      logger.detail('Available bricks: ${_brickCache.keys.toList()}');
+    }
+    return brick;
   }
 
   /// Get bricks by type

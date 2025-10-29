@@ -3,19 +3,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
+import '../helpers/cli_test_helper.dart';
 
 void main() {
   group('E2E Integration Tests', () {
     late Directory tempDir;
-    late ProcessManager processManager;
-
-    setUpAll(() {
-      processManager = const LocalProcessManager();
-    });
+    late CliTestHelper cli;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_e2e_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/e2e_$testRunId');
+      tempDir.createSync(recursive: true);
+      cli = CliTestHelper(tempDir);
     });
 
     tearDown(() {
@@ -30,17 +29,11 @@ void main() {
         final projectPath = path.join(tempDir.path, projectName);
 
         // Test project creation
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
+        final result = await cli.createProject(
           projectName,
-          '--template=minimal',
-          '--organization=com.test',
-          '--platforms=ios,android',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+          organization: 'com.test',
+          platforms: ['ios', 'android'],
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -83,17 +76,12 @@ void main() {
         final projectPath = path.join(tempDir.path, projectName);
 
         // Test project creation
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
+        final result = await cli.createProject(
           projectName,
-          '--template=riverpod',
-          '--organization=com.test',
-          '--platforms=ios,android,web',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+          template: 'riverpod',
+          organization: 'com.test',
+          platforms: ['ios', 'android', 'web'],
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -135,16 +123,7 @@ void main() {
         const projectName = 'test_plan_project';
 
         // Test plan mode
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--plan',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--plan']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -165,15 +144,7 @@ void main() {
         const projectName = 'Invalid Project Name!';
 
         // Test invalid project name
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(1));
         expect(result.stdout, isNotEmpty);
@@ -190,7 +161,7 @@ void main() {
     group('Add Commands E2E', () {
       late Directory testProject;
 
-      setUp(() {
+      setUpAll(() {
         testProject = Directory(path.join(tempDir.path, 'test_project'));
         testProject.createSync();
         
@@ -221,19 +192,13 @@ flutter:
       });
 
       test('add screen command works', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'screen',
+        final result = await cli.addScreen(
           'test_screen',
-          '--feature=home',
-          '--type=generic',
-          '--with-viewmodel=true',
-          '--with-tests=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'home',
+          type: 'generic',
+          withViewModel: true,
+          withTests: true,
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -252,20 +217,14 @@ flutter:
       });
 
       test('add service command works', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'service',
+        final result = await cli.addService(
           'test_service',
-          '--feature=core',
-          '--type=api',
-          '--base-url=https://api.example.com',
-          '--with-tests=true',
-          '--with-mocks=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'core',
+          type: 'api',
+          baseUrl: 'https://api.example.com',
+          withTests: true,
+          withMocks: true,
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -286,13 +245,7 @@ flutter:
 
     group('Utility Commands E2E', () {
       test('doctor command works', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'doctor',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('doctor');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -306,13 +259,7 @@ flutter:
       });
 
       test('version command works', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'version',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('version');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -325,14 +272,7 @@ flutter:
       });
 
       test('schema export command works', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'schema',
-          'export',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('schema', args: ['export']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -374,18 +314,7 @@ flutter:
   uses-material-design: true
 ''');
 
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'context',
-          'export',
-          '--output=.ai/project_context.md',
-          '--include-dependencies=true',
-          '--include-structure=true',
-          '--include-conventions=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+        final result = await cli.runCommand('context', args: ['export', '--output=.ai/project_context.md', '--include-dependencies=true', '--include-structure=true', '--include-conventions=true']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -404,26 +333,14 @@ flutter:
 
     group('Error Handling E2E', () {
       test('invalid command fails gracefully', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'invalid_command',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('invalid_command');
 
         expect(result.exitCode, equals(1));
         expect(result.stderr, isNotEmpty);
       });
 
       test('missing required arguments fail gracefully', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('create');
 
         expect(result.exitCode, equals(1));
         expect(result.stdout, isNotEmpty);
@@ -437,15 +354,7 @@ flutter:
       });
 
       test('invalid template fails gracefully', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          'test_project',
-          '--template=invalid_template',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject('test_project', template: 'invalid_template');
 
         expect(result.exitCode, equals(1));
         expect(result.stdout, isNotEmpty);
@@ -464,15 +373,7 @@ flutter:
         const projectName = 'performance_test_project';
         final stopwatch = Stopwatch()..start();
 
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         stopwatch.stop();
 
@@ -490,15 +391,7 @@ flutter:
         final stopwatch = Stopwatch()..start();
 
         for (final projectName in projectNames) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            'packages/fly_cli/bin/fly.dart',
-            'create',
-            projectName,
-            '--template=minimal',
-            '--output=json',
-          ], workingDirectory: tempDir.path);
+          final result = await cli.createProject(projectName);
 
           expect(result.exitCode, equals(0));
         }
@@ -511,12 +404,7 @@ flutter:
     group('Cross-Platform E2E', () {
       test('commands work on current platform', () async {
         // Test basic command functionality
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          '--version',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.runCommand('--version');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -526,15 +414,7 @@ flutter:
         const projectName = 'platform_test_project';
         final projectPath = path.join(tempDir.path, projectName);
 
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
 

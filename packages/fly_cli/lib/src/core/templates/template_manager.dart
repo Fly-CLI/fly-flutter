@@ -55,12 +55,20 @@ class TemplateManager {
     // Try relative to script location (development)
     final scriptPath = Platform.script.toFilePath();
     final scriptDir = path.dirname(scriptPath);
-    final scriptRelativePath = path.normalize(
-      path.join(scriptDir, '..', '..', 'templates'),
-    );
-    final scriptRelativeDir = Directory(scriptRelativePath);
-    if (scriptRelativeDir.existsSync()) {
-      return scriptRelativePath;
+    
+    // Try multiple relative paths for development
+    final scriptRelativePaths = [
+      path.join(scriptDir, '..', '..', 'templates'), // From packages/fly_cli/bin/
+      path.join(scriptDir, '..', '..', '..', 'packages', 'fly_cli', 'templates'), // From test files
+      path.join(scriptDir, '..', '..', '..', '..', 'packages', 'fly_cli', 'templates'), // From deeper test files
+    ];
+    
+    for (final scriptRelativePath in scriptRelativePaths) {
+      final normalizedPath = path.normalize(scriptRelativePath);
+      final scriptRelativeDir = Directory(normalizedPath);
+      if (scriptRelativeDir.existsSync()) {
+        return normalizedPath;
+      }
     }
 
     // Production path: relative to executable

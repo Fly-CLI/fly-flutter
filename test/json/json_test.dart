@@ -3,19 +3,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
+import '../helpers/cli_test_helper.dart';
 
 void main() {
   group('JSON Output Validation', () {
     late Directory tempDir;
-    late ProcessManager processManager;
-
-    setUpAll(() {
-      processManager = const LocalProcessManager();
-    });
+    late CliTestHelper cli;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_json_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/json_$testRunId');
+      tempDir.createSync(recursive: true);
+      cli = CliTestHelper(tempDir);
     });
 
     tearDown(() {
@@ -28,15 +27,7 @@ void main() {
       test('successful project creation returns valid JSON', () async {
         const projectName = 'json_create_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -56,22 +47,14 @@ void main() {
         expect(output['next_steps'], isA<List>());
         
         // Clean up the created project
-        final projectDir = Directory(projectName);
+        final projectDir = Directory(path.join(tempDir.path, projectName));
         if (projectDir.existsSync()) {
           projectDir.deleteSync(recursive: true);
         }
       });
 
       test('failed project creation returns valid error JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          'Invalid Project Name!',
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject('Invalid Project Name!');
 
         expect(result.exitCode, equals(1));
         expect(result.stdout, isNotEmpty);
@@ -89,16 +72,7 @@ void main() {
       test('plan mode returns valid JSON', () async {
         const projectName = 'json_plan_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--plan',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--plan']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -119,10 +93,10 @@ void main() {
     group('Add Commands JSON Output', () {
       late Directory testProject;
 
-      setUp(() {
+      setUpAll(() {
         testProject = Directory(path.join(tempDir.path, 'add_commands_json_test'));
         testProject.createSync();
-        
+
         // Create a minimal Flutter project structure
         File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''
 name: add_commands_json_test
@@ -144,25 +118,19 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 ''');
-        
+
         Directory(path.join(testProject.path, 'lib')).createSync();
         Directory(path.join(testProject.path, 'test')).createSync();
       });
 
       test('add screen command returns valid JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'screen',
+        final result = await cli.addScreen(
           'test_screen',
-          '--feature=home',
-          '--type=generic',
-          '--with-viewmodel=true',
-          '--with-tests=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'home',
+          type: 'generic',
+          withViewModel: true,
+          withTests: true,
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -182,20 +150,14 @@ flutter:
       });
 
       test('add service command returns valid JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'add',
-          'service',
+        final result = await cli.addService(
           'test_service',
-          '--feature=core',
-          '--type=api',
-          '--base-url=https://api.example.com',
-          '--with-tests=true',
-          '--with-mocks=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+          feature: 'core',
+          type: 'api',
+          baseUrl: 'https://api.example.com',
+          withTests: true,
+          withMocks: true,
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -218,13 +180,7 @@ flutter:
 
     group('Utility Commands JSON Output', () {
       test('doctor command returns valid JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'doctor',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.runCommand('doctor');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -241,13 +197,7 @@ flutter:
       });
 
       test('version command returns valid JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'version',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.runCommand('version');
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -264,14 +214,7 @@ flutter:
       });
 
       test('schema export command returns valid JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'schema',
-          'export',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.runCommand('schema', args: ['export']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -314,18 +257,7 @@ flutter:
   uses-material-design: true
 ''');
 
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'context',
-          'export',
-          '--output=.ai/project_context.md',
-          '--include-dependencies=true',
-          '--include-structure=true',
-          '--include-conventions=true',
-          '--output=json',
-        ], workingDirectory: testProject.path);
+        final result = await cli.runCommand('context', args: ['export', '--output=.ai/project_context.md', '--include-dependencies=true', '--include-structure=true', '--include-conventions=true']);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
@@ -345,13 +277,13 @@ flutter:
     group('JSON Schema Validation', () {
       test('all JSON outputs follow consistent schema', () async {
         final commands = [
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', '--version', '--output=json'],
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'doctor', '--output=json'],
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'schema', 'export', '--output=json'],
+          ['--version'],
+          ['doctor'],
+          ['schema', 'export'],
         ];
         
         for (final command in commands) {
-          final result = await processManager.run(command, workingDirectory: tempDir.path);
+          final result = await cli.runCliCommand(command);
           expect(result.exitCode, equals(0));
           expect(result.stdout, isNotEmpty);
           
@@ -367,12 +299,12 @@ flutter:
 
       test('error JSON outputs follow consistent schema', () async {
         final commands = [
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'create', 'Invalid Name!', '--output=json'],
-          ['dart', 'run', 'packages/fly_cli/bin/fly.dart', 'create', 'test', '--template=invalid', '--output=json'],
+          ['create', 'Invalid Name!'],
+          ['create', 'test', '--template=invalid'],
         ];
         
         for (final command in commands) {
-          final result = await processManager.run(command, workingDirectory: tempDir.path);
+          final result = await cli.runCliCommand(command);
           expect(result.exitCode, equals(1));
           expect(result.stdout, isNotEmpty);
           
@@ -390,13 +322,7 @@ flutter:
 
     group('JSON Content Validation', () {
       test('JSON contains no sensitive information', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'doctor',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.runCommand('doctor');
 
         expect(result.exitCode, equals(0));
         
@@ -408,15 +334,7 @@ flutter:
       });
 
       test('JSON contains proper error messages', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          'Invalid Project Name!',
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject('Invalid Project Name!');
 
         expect(result.exitCode, equals(1));
         
@@ -429,15 +347,7 @@ flutter:
       test('JSON contains proper success messages', () async {
         const projectName = 'json_success_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -454,15 +364,7 @@ flutter:
         
         final stopwatch = Stopwatch()..start();
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject(projectName);
 
         stopwatch.stop();
         
@@ -477,15 +379,7 @@ flutter:
       test('JSON output size is reasonable', () async {
         const projectName = 'json_size_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          projectName,
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         
@@ -500,15 +394,7 @@ flutter:
 
     group('JSON Edge Cases', () {
       test('empty project name returns valid error JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          '',
-          '--template=minimal',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject('');
 
         expect(result.exitCode, equals(1));
         
@@ -518,13 +404,7 @@ flutter:
       });
 
       test('missing arguments return valid error JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.runCommand('create');
 
         expect(result.exitCode, equals(1));
         
@@ -534,15 +414,7 @@ flutter:
       });
 
       test('invalid template returns valid error JSON', () async {
-        final result = await processManager.run([
-          'dart',
-          'run',
-          'packages/fly_cli/bin/fly.dart',
-          'create',
-          'test_project',
-          '--template=invalid_template',
-          '--output=json',
-        ], workingDirectory: Directory.current.path);
+        final result = await cli.createProject('test_project', template: 'invalid_template');
 
         expect(result.exitCode, equals(1));
         

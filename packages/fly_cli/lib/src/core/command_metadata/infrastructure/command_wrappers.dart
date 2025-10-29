@@ -29,6 +29,11 @@ class GroupCommand extends Command<int> {
     // This is handled by subcommands
     return 0;
   }
+
+  /// Add a subcommand to this group
+  void addSubcommand(Command<int> subcommand) {
+    super.addSubcommand(subcommand);
+  }
 }
 
 /// Command class for creating command aliases

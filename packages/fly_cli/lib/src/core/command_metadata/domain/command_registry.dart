@@ -67,11 +67,18 @@ class CommandMetadataRegistry {
     _globalOptionsParser = globalOptionsParser;
 
     // Return top-level commands for registration
+    // Commands with subcommands should only be registered as groups, not as top-level commands
     final topLevelCommands = <FlyCommandType, Command<int>>{};
     for (final entry in commandInstances.entries) {
       final commandType = entry.key;
-      if (commandType.isTopLevel) {
-        topLevelCommands[commandType] = entry.value;
+      if (commandType.isTopLevel && commandType.group == null) {
+        // Check if this command has subcommands by looking for commands that have this as parent
+        final hasSubcommands = commandInstances.keys.any((otherType) => 
+          otherType.parentCommand == commandType);
+        
+        if (!hasSubcommands) {
+          topLevelCommands[commandType] = entry.value;
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 
@@ -261,11 +262,12 @@ class TemplateValidationRule extends AsyncValidationRule<String> {
 
     try {
       final templates = await context.templateManager.getAvailableTemplates();
-      final validationResult = templates.contains(templateName)
+      final templateNames = templates.map((t) => t.name).toList();
+      final validationResult = templateNames.contains(templateName)
           ? ValidationResult.success()
           : ValidationResult.failure([
-              'Template "$templateName" not found',
-              'Available templates: ${templates.join(', ')}',
+              'Invalid template',
+              'Available templates: ${templates.map((t) => t.toString()).join(', ')}',
             ]);
 
       cacheResult(cacheKey, validationResult);
@@ -335,7 +337,7 @@ class FlutterProjectValidationRule implements ValidationRule<String> {
     String projectPath, {
     String? fieldName,
   }) async {
-    final pubspecFile = File('pubspec.yaml');
+    final pubspecFile = File(path.join(projectPath, 'pubspec.yaml'));
     if (!pubspecFile.existsSync()) {
       return ValidationResult.failure([
         'Not in a Flutter project directory',
@@ -348,4 +350,32 @@ class FlutterProjectValidationRule implements ValidationRule<String> {
 
   @override
   int get priority => 300;
+}
+
+/// Validation rule for platform validation
+class PlatformValidationRule implements ValidationRule<List<String>> {
+  @override
+  bool get isAsync => false;
+
+  @override
+  Future<ValidationResult> validate(
+    List<String> platforms, {
+    String? fieldName,
+  }) async {
+    const validPlatforms = ['ios', 'android', 'web', 'macos', 'windows', 'linux'];
+    
+    for (final platform in platforms) {
+      if (!validPlatforms.contains(platform)) {
+        return ValidationResult.failure([
+          'Invalid platform',
+          'Valid platforms: ${validPlatforms.join(', ')}',
+        ]);
+      }
+    }
+    
+    return ValidationResult.success();
+  }
+
+  @override
+  int get priority => 350;
 }

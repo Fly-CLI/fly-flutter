@@ -1,8 +1,13 @@
 include: ../../analysis_options.yaml
 
 analyzer:
+  language:
+    enable-experiment:
+      - null-aware-elements
   exclude:
     - "templates/**"
+    - "**/templates/**"
+    - "**/__brick__/**"
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "**/*.mocks.dart"

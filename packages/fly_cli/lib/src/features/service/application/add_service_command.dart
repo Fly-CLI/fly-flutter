@@ -59,6 +59,11 @@ class AddServiceCommand extends FlyCommand {
         'base-url',
         help: 'Base URL for API services',
         defaultsTo: 'https://api.example.com',
+      )
+      ..addOption(
+        'output-dir',
+        help: 'Output directory for generated files (defaults to current directory)',
+        defaultsTo: null,
       );
     return parser;
   }
@@ -81,16 +86,17 @@ class AddServiceCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     final interactive = argResults!['interactive'] as bool? ?? false;
+    final outputDir = argResults!['output-dir'] as String? ?? context.workingDirectory;
     
     if (interactive) {
-      return _runInteractiveMode();
+      return _runInteractiveMode(outputDir);
     }
     
-    return _runNonInteractiveMode();
+    return _runNonInteractiveMode(outputDir);
   }
 
   /// Run in interactive mode
-  Future<CommandResult> _runInteractiveMode() async {
+  Future<CommandResult> _runInteractiveMode(String outputDir) async {
     try {
       final prompter = context.interactivePrompt;
       
@@ -176,6 +182,7 @@ class AddServiceCommand extends FlyCommand {
         withMocks: withMocks,
         withInterceptors: withInterceptors,
         baseUrl: baseUrl,
+        outputDir: outputDir,
       );
     } catch (e) {
       return CommandResult.error(
@@ -186,7 +193,7 @@ class AddServiceCommand extends FlyCommand {
   }
 
   /// Run in non-interactive mode
-  Future<CommandResult> _runNonInteractiveMode() async {
+  Future<CommandResult> _runNonInteractiveMode(String outputDir) async {
     final serviceName = argResults!.rest.first;
     final feature = argResults!['feature'] as String? ?? 'core';
     final serviceType = argResults!['type'] as String? ?? 'api';
@@ -203,6 +210,7 @@ class AddServiceCommand extends FlyCommand {
       withMocks: withMocks,
       withInterceptors: withInterceptors,
       baseUrl: baseUrl,
+      outputDir: outputDir,
     );
   }
 
@@ -215,6 +223,7 @@ class AddServiceCommand extends FlyCommand {
     required bool withMocks,
     required bool withInterceptors,
     required String baseUrl,
+    required String outputDir,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -248,7 +257,7 @@ class AddServiceCommand extends FlyCommand {
         componentName: serviceName,
         componentType: BrickType.service,
         config: serviceConfig,
-        targetPath: context.workingDirectory,
+        targetPath: outputDir,
       );
 
       stopwatch.stop();

@@ -94,7 +94,8 @@ class RequiredArgumentValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    final argValue = args[argumentName];
+    // For positional arguments, check args.rest
+    final argValue = args.rest.isNotEmpty ? args.rest.first : null;
     if (argValue == null || (argValue is String && argValue.isEmpty)) {
       return ValidationResult.failure([
         '$errorMessage: "$argumentName"',
@@ -301,5 +302,26 @@ class FeatureNameValidator implements CommandValidator {
       return ValidationResult.failure(['Feature name is required']);
     }
     return NameValidationRule.validateFeatureName(featureName);
+  }
+}
+
+/// Validates platform values using centralized validation rules
+class PlatformValidator implements CommandValidator {
+  @override
+  int get priority => 5;
+
+  @override
+  bool shouldRun(CommandContext context, String commandName) => true;
+
+  @override
+  bool get isAsync => false;
+
+  @override
+  Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
+    final platforms = args['platforms'] as List<String>?;
+    if (platforms == null) return ValidationResult.success();
+
+    final rule = PlatformValidationRule();
+    return rule.validate(platforms);
   }
 }

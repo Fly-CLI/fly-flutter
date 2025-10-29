@@ -38,7 +38,13 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   bool get debugMode => argResults?['debug'] == true;
 
   /// Whether to run in plan mode (dry-run)
-  bool get planMode => argResults?['plan'] == true;
+  bool get planMode {
+    try {
+      return argResults?['plan'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Whether to run in verbose mode
   bool get verboseMode => argResults?['verbose'] == true || debugMode;

@@ -1,4 +1,5 @@
 import 'package:args/args.dart' hide OptionType;
+import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
@@ -110,6 +111,11 @@ class CreateCommand extends FlyCommand {
       ..addOption(
         'from-manifest',
         help: 'Create project from manifest file',
+      )
+      ..addOption(
+        'output-dir',
+        help: 'Output directory for generated files (defaults to current directory)',
+        defaultsTo: null,
       );
     return parser;
   }
@@ -119,6 +125,7 @@ class CreateCommand extends FlyCommand {
     RequiredArgumentValidator('project_name'),
     ProjectNameValidator(),
     TemplateExistsValidator(),
+    PlatformValidator(),
     DirectoryWritableValidator(),
     EnvironmentValidator(),
   ];
@@ -138,15 +145,19 @@ class CreateCommand extends FlyCommand {
     final organization = argResults!['organization'] as String;
     final platforms = argResults!['platforms'] as List<String>;
     final interactive = argResults!['interactive'] as bool;
+    final outputDir = argResults!['output-dir'] as String? ?? context.workingDirectory;
+
+    // Construct the full project path
+    final projectPath = path.join(outputDir, projectName);
 
     if (interactive) {
       return _runInteractiveMode(
-        projectName, template, organization, platforms,
+        projectName, template, organization, platforms, projectPath,
       );
     }
 
     return _createProject(
-      projectName, template, organization, platforms,
+      projectName, template, organization, platforms, projectPath,
     );
   }
 
@@ -156,6 +167,7 @@ class CreateCommand extends FlyCommand {
     String template,
     String organization,
     List<String> platforms,
+    String projectPath,
   ) async {
     logger..info('🚀 Welcome to Fly CLI Interactive Mode')
     ..info("Let's create your Flutter project step by step.\n");
@@ -221,7 +233,7 @@ class CreateCommand extends FlyCommand {
       logger.info('\nGenerating project...\n');
 
       return _createProject(
-        finalProjectName, finalTemplate, finalOrganization, finalPlatforms,
+        finalProjectName, finalTemplate, finalOrganization, finalPlatforms, projectPath,
       );
     } catch (e) {
       return CommandResult.error(
@@ -243,6 +255,7 @@ class CreateCommand extends FlyCommand {
     String template,
     String organization,
     List<String> platforms,
+    String projectPath,
   ) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -266,7 +279,7 @@ class CreateCommand extends FlyCommand {
       final generationResult = await templateManager.generateProject(
         templateName: template,
         projectName: projectName,
-        outputDirectory: context.workingDirectory,
+        outputDirectory: projectPath,
         variables: templateVariables,
       );
 

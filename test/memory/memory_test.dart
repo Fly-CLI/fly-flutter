@@ -2,22 +2,24 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 import 'package:test/test.dart';
+import '../helpers/cli_test_helper.dart';
 
 void main() {
   group('Memory Leak Detection', () {
     late Directory tempDir;
-    late ProcessManager processManager;
     late String projectRoot;
+    late CliTestHelper cli;
 
     setUpAll(() {
-      processManager = const LocalProcessManager();
       projectRoot = Directory.current.path;
     });
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('fly_memory_test_');
+      final testRunId = DateTime.now().millisecondsSinceEpoch;
+      tempDir = Directory('${Directory.current.path}/test_generated/memory_$testRunId')
+        ..createSync(recursive: true);
+      cli = CliTestHelper(tempDir);
     });
 
     tearDown(() {
@@ -31,14 +33,7 @@ void main() {
         final projectNames = List.generate(20, (index) => 'memory_test_$index');
         
         for (final projectName in projectNames) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'),
-            'create',
-            projectName,
-            '--template=minimal',
-          ], workingDirectory: tempDir.path);
+          final result = await cli.createProject(projectName);
 
           expect(result.exitCode, 0);
           
@@ -57,14 +52,7 @@ void main() {
       test('large project creation does not leak memory', () async {
         const projectName = 'large_memory_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'),
-          'create',
-          projectName,
-          '--template=riverpod',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName, template: 'riverpod');
 
         expect(result.exitCode, 0);
         
@@ -74,18 +62,14 @@ void main() {
       });
 
       test('concurrent project creation does not leak memory', () async {
-        final projectNames = List.generate(5, (index) => 'concurrent_memory_test_$index');
+        final projectNames = List.generate(
+          5, 
+          (index) => 'concurrent_memory_test_$index',
+        );
         final futures = <Future<ProcessResult>>[];
         
         for (final projectName in projectNames) {
-          futures.add(processManager.run([
-            'dart',
-            'run',
-            path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'),
-            'create',
-            projectName,
-            '--template=minimal',
-          ], workingDirectory: tempDir.path));
+          futures.add(cli.createProject(projectName));
         }
         
         final results = await Future.wait(futures);
@@ -94,7 +78,10 @@ void main() {
         for (var i = 0; i < results.length; i++) {
           expect(results[i].exitCode, 0);
           
-          final projectPath = path.join(tempDir.path, 'concurrent_memory_test_$i');
+          final projectPath = path.join(
+            tempDir.path, 
+            'concurrent_memory_test_$i',
+          );
           expect(Directory(projectPath).existsSync(), true);
         }
       });
@@ -105,8 +92,8 @@ void main() {
         // Create many files
         final files = <File>[];
         for (var i = 0; i < 1000; i++) {
-          final file = File(path.join(tempDir.path, 'memory_file_$i.txt'));
-          file.writeAsStringSync('Test content $i');
+          final file = File(path.join(tempDir.path, 'memory_file_$i.txt'))
+            ..writeAsStringSync('Test content $i');
           files.add(file);
         }
         
@@ -132,8 +119,8 @@ void main() {
         // Create many directories
         final directories = <Directory>[];
         for (var i = 0; i < 500; i++) {
-          final dir = Directory(path.join(tempDir.path, 'memory_dir_$i'));
-          dir.createSync();
+          final dir = Directory(path.join(tempDir.path, 'memory_dir_$i'))
+            ..createSync();
           directories.add(dir);
         }
         
@@ -160,12 +147,7 @@ void main() {
       test('repeated command execution does not leak memory', () async {
         // Execute the same command multiple times
         for (var i = 0; i < 100; i++) {
-          final result = await processManager.run([
-            'dart',
-            'run',
-            path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'),
-            '--version',
-          ], workingDirectory: tempDir.path);
+          final result = await cli.runCommand('--version');
 
           expect(result.exitCode, 0);
           expect(result.stdout, isNotEmpty);
@@ -174,15 +156,15 @@ void main() {
 
       test('different command execution does not leak memory', () async {
         final commands = [
-          ['dart', 'run', path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'), '--version'],
-          ['dart', 'run', path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'), 'doctor'],
-          ['dart', 'run', path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'), 'schema', 'export'],
+          ['--version'],
+          ['doctor'],
+          ['schema', 'export'],
         ];
         
         // Execute each command multiple times
         for (var i = 0; i < 50; i++) {
           for (final command in commands) {
-            final result = await processManager.run(command, workingDirectory: tempDir.path);
+            final result = await cli.runCliCommand(command);
             expect(result.exitCode, 0);
           }
         }
@@ -196,8 +178,8 @@ void main() {
         
         // Create files
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(tempDir.path, 'stream_file_$i.txt'));
-          file.writeAsStringSync('Stream test content $i');
+          final file = File(path.join(tempDir.path, 'stream_file_$i.txt'))
+            ..writeAsStringSync('Stream test content $i');
           files.add(file);
         }
         
@@ -241,14 +223,7 @@ void main() {
         // Create a project to test JSON operations
         const projectName = 'json_memory_test';
         
-        final result = await processManager.run([
-          'dart',
-          'run',
-          path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'),
-          'create',
-          projectName,
-          '--template=minimal',
-        ], workingDirectory: tempDir.path);
+        final result = await cli.createProject(projectName);
 
         expect(result.exitCode, 0);
         
@@ -308,8 +283,8 @@ void main() {
         
         // Create temporary files
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(tempDir.path, 'temp_file_$i.txt'));
-          file.writeAsStringSync('Temporary content $i');
+          final file = File(path.join(tempDir.path, 'temp_file_$i.txt'))
+            ..writeAsStringSync('Temporary content $i');
           tempFiles.add(file);
         }
         
@@ -336,8 +311,8 @@ void main() {
         
         // Create temporary directories
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(tempDir.path, 'temp_dir_$i'));
-          dir.createSync();
+          final dir = Directory(path.join(tempDir.path, 'temp_dir_$i'))
+            ..createSync();
           tempDirs.add(dir);
         }
         
@@ -368,26 +343,19 @@ void main() {
           for (var i = 0; i < 5; i++) {
             final projectName = 'long_run_test_${cycle}_$i';
             
-            final result = await processManager.run([
-              'dart',
-              'run',
-              path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'),
-              'create',
-              projectName,
-              '--template=minimal',
-            ], workingDirectory: tempDir.path);
+            final result = await cli.createProject(projectName);
 
             expect(result.exitCode, 0);
           }
           
           // Execute commands
           final commands = [
-            ['dart', 'run', path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'), '--version'],
-            ['dart', 'run', path.join(projectRoot, 'packages/fly_cli/bin/fly.dart'), 'doctor'],
+            ['--version'],
+            ['doctor'],
           ];
           
           for (final command in commands) {
-            final result = await processManager.run(command, workingDirectory: tempDir.path);
+            final result = await cli.runCliCommand(command);
             expect(result.exitCode, 0);
           }
         }
