@@ -1,20 +1,62 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_metadata/infrastructure/command_context_factory.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:test/test.dart';
 
+import '../../helpers/command_test_helper.dart';
+
 /// Helper to create a test context for registry initialization
-CommandContext _createTestContext() => CommandContextFactory.createForMetadataExtraction();
+CommandContext _createTestContext() => CommandTestHelper.createMockCommandContext();
 
 /// Helper to create a test global options parser
 ArgParser _createTestGlobalOptionsParser() {
-  final parser = ArgParser();
-  parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
-  parser.addFlag('quiet', abbr: 'q', help: 'Suppress output');
-  parser.addOption('output', help: 'Output format', allowed: ['human', 'json']);
+  final parser = ArgParser()
+  ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
+  ..addFlag('quiet', abbr: 'q', help: 'Suppress output')
+  ..addOption('output', help: 'Output format', allowed: ['human', 'json']);
   return parser;
+}
+
+/// Helper to create command instances from enum for testing
+({
+  Map<FlyCommandType, Command<int>> commandInstances,
+  Map<String, Command<int>> commandGroups,
+}) _createCommandInstances(CommandContext context) {
+  final commandInstances = <FlyCommandType, Command<int>>{};
+  
+  // Create instances for all command types
+  for (final commandType in FlyCommandType.values) {
+    commandInstances[commandType] = commandType.createInstance(context);
+  }
+  
+  // Build command groups dynamically
+  final commandGroups = <String, Command<int>>{};
+  final groupMap = <String, List<FlyCommandType>>{};
+  for (final entry in commandInstances.entries) {
+    final commandType = entry.key;
+    final group = commandType.group;
+    if (group != null) {
+      groupMap.putIfAbsent(group.name, () => []).add(commandType);
+    }
+  }
+  
+  // Create group commands
+  for (final entry in groupMap.entries) {
+    final groupName = entry.key;
+    final subcommandTypes = entry.value;
+    final groupDescription = subcommandTypes.isNotEmpty
+        ? subcommandTypes.first.group?.description
+        : null;
+    final groupCmd = GroupCommand(groupName, description: groupDescription);
+    for (final subcommandType in subcommandTypes) {
+      groupCmd.addSubcommand(commandInstances[subcommandType]!);
+    }
+    commandGroups[groupName] = groupCmd;
+  }
+  
+  return (commandInstances: commandInstances, commandGroups: commandGroups);
 }
 
 void main() {
@@ -44,12 +86,14 @@ void main() {
         expect(registry.isInitialized, isFalse);
       });
 
-      test('initializes with enum-based approach', () {
+      test('initializes with instances-based approach', () {
         final context = _createTestContext();
         final globalParser = _createTestGlobalOptionsParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -62,9 +106,11 @@ void main() {
       test('does not reinitialize if already initialized', () {
         final context = _createTestContext();
         final globalParser = _createTestGlobalOptionsParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -72,8 +118,9 @@ void main() {
         final initialCommands = registry.getAllCommands().keys.toList();
 
         // Try to initialize again
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -87,9 +134,11 @@ void main() {
       setUp(() {
         final context = _createTestContext();
         final globalParser = _createTestGlobalOptionsParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
       });
@@ -149,9 +198,11 @@ void main() {
       setUp(() {
         final context = _createTestContext();
         final globalParser = _createTestGlobalOptionsParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
       });
@@ -176,9 +227,11 @@ void main() {
       setUp(() {
         final context = _createTestContext();
         final globalParser = _createTestGlobalOptionsParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
       });
@@ -209,9 +262,11 @@ void main() {
       test('clears all metadata and resets initialization state', () {
         final context = _createTestContext();
         final globalParser = _createTestGlobalOptionsParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -222,8 +277,9 @@ void main() {
 
         expect(registry.isInitialized, isFalse);
         // After clearing, need to initialize again
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
         expect(registry.hasCommand('create'), isTrue);
@@ -235,9 +291,11 @@ void main() {
       test('handles initialization with minimal global options', () {
         final context = _createTestContext();
         final minimalParser = ArgParser();
+        final instances = _createCommandInstances(context);
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: minimalParser,
         );
 

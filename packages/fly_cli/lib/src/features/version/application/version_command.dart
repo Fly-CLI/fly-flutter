@@ -1,8 +1,9 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 
 /// VersionCommand using new architecture
 class VersionCommand extends FlyCommand {
@@ -35,12 +36,7 @@ class VersionCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-    final versionInfo = {
-      'version': '0.1.0',
-      'build_number': null,
-      'git_commit': '3eaaea7',
-      'build_date': DateTime.now().toIso8601String(),
-    };
+    final versionInfo = VersionUtils.getVersionInfo().toJson();
 
     return CommandResult.success(
       command: 'version',

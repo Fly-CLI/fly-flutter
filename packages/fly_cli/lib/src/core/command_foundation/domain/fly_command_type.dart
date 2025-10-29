@@ -18,6 +18,20 @@ enum CommandCategory {
   integration, // schema, completion
 }
 
+/// Represents a command group with name and description
+class CommandGroup {
+  const CommandGroup({
+    required this.name,
+    required this.description,
+  });
+
+  /// The name of the command group
+  final String name;
+
+  /// The description of the command group
+  final String description;
+}
+
 /// Enum representing all available Fly CLI commands
 enum FlyCommandType {
   create,
@@ -126,17 +140,24 @@ extension FlyCommandTypeExtension on FlyCommandType {
     }
   }
 
-  /// The group name for subcommands (e.g., 'add' for screen, service)
-  String? get groupName {
+  /// The command group information (null if not part of a group)
+  CommandGroup? get group {
     switch (this) {
       case FlyCommandType.screen:
       case FlyCommandType.service:
-        return 'add';
+        return const CommandGroup(
+          name: 'add',
+          description: 'Add new components to the current project',
+        );
+      case FlyCommandType.schema:
+      case FlyCommandType.context:
+        return const CommandGroup(
+          name: 'ai',
+          description: 'AI integration commands for coding assistants',
+        );
       case FlyCommandType.create:
       case FlyCommandType.doctor:
-      case FlyCommandType.schema:
       case FlyCommandType.version:
-      case FlyCommandType.context:
       case FlyCommandType.completion:
         return null;
     }

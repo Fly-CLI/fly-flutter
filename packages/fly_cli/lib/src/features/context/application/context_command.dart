@@ -7,6 +7,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 
 import 'package:fly_cli/src/features/context/domain/models/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/enhanced/context_generator.dart';
@@ -125,7 +126,7 @@ class ContextCommand extends FlyCommand {
         },
         'export_metadata': {
           'exported_at': DateTime.now().toIso8601String(),
-          'cli_version': '0.1.0',
+          'cli_version': VersionUtils.getCurrentVersion(),
           'working_directory': context.workingDirectory,
           'output_file': outputFile,
         },

@@ -1,12 +1,56 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_type.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
 import 'package:test/test.dart';
+
+import '../../helpers/command_test_helper.dart';
+
+/// Helper to create command instances from enum for testing
+({
+  Map<FlyCommandType, Command<int>> commandInstances,
+  Map<String, Command<int>> commandGroups,
+}) _createCommandInstances() {
+  final context = CommandTestHelper.createMockCommandContext();
+  final commandInstances = <FlyCommandType, Command<int>>{};
+  
+  // Create instances for all command types
+  for (final commandType in FlyCommandType.values) {
+    commandInstances[commandType] = commandType.createInstance(context);
+  }
+  
+  // Build command groups dynamically
+  final commandGroups = <String, Command<int>>{};
+  final groupMap = <String, List<FlyCommandType>>{};
+  for (final entry in commandInstances.entries) {
+    final commandType = entry.key;
+    final group = commandType.group;
+    if (group != null) {
+      groupMap.putIfAbsent(group.name, () => []).add(commandType);
+    }
+  }
+  
+  // Create group commands
+  for (final entry in groupMap.entries) {
+    final groupName = entry.key;
+    final subcommandTypes = entry.value;
+    final groupDescription = subcommandTypes.isNotEmpty
+        ? subcommandTypes.first.group?.description
+        : null;
+    final groupCmd = GroupCommand(groupName, description: groupDescription);
+    for (final subcommandType in subcommandTypes) {
+      groupCmd.addSubcommand(commandInstances[subcommandType]!);
+    }
+    commandGroups[groupName] = groupCmd;
+  }
+  
+  return (commandInstances: commandInstances, commandGroups: commandGroups);
+}
 
 void main() {
   group('CompletionGenerator', () {
@@ -16,8 +60,7 @@ void main() {
       registry = CommandMetadataRegistry.instance
         ..clear();
 
-      // Setup test registry with enum-based initialization
-      final context = CommandContextFactory.createForMetadataExtraction();
+      // Setup test registry with instances-based initialization
       final globalParser = ArgParser()
         ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
         ..addOption(
@@ -27,8 +70,10 @@ void main() {
           allowed: ['human', 'json'],
         );
 
-      registry.initializeFromEnum(
-        context: context,
+      final instances = _createCommandInstances();
+      registry.initializeFromInstances(
+        commandInstances: instances.commandInstances,
+        commandGroups: instances.commandGroups,
         globalOptionsParser: globalParser,
       );
     });
@@ -396,13 +441,32 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   @override
   bool get isInitialized => _initialized;
 
-  void set isInitialized(bool value) {
+  set isInitialized(bool value) {
     _initialized = value;
   }
 
   @override
-  void initializeFromEnum({
+  CommandRegistrationData createAndInitialize({
     required CommandContext context,
+    required ArgParser globalOptionsParser,
+  }) {
+    if (_initialized) {
+      return CommandRegistrationData(
+        topLevelCommands: {},
+        commandGroups: {},
+      );
+    }
+    _initialized = true;
+    return CommandRegistrationData(
+      topLevelCommands: {},
+      commandGroups: {},
+    );
+  }
+
+  @override
+  void initializeFromInstances({
+    required Map<FlyCommandType, Command<int>> commandInstances,
+    required Map<String, Command<int>> commandGroups,
     required ArgParser globalOptionsParser,
   }) {
     if (_initialized) {

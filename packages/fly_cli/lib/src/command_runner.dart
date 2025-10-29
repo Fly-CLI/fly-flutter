@@ -8,11 +8,12 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/fly_command_type.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/dependency_injection/domain/service_container.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/performance/performance_optimizer.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/features/schema/domain/command_registry.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Enhanced Fly CLI Command Runner with simplified dependency injection
@@ -78,36 +79,35 @@ class FlyCommandRunner extends CommandRunner<int> {
   void _registerCommands() {
     // Create a temporary context for command registration
     final tempArgs = ArgParser()
-    ..addFlag('verbose', negatable: false)
-    ..addFlag('quiet', negatable: false);
+      ..addFlag('verbose', negatable: false)
+      ..addFlag('quiet', negatable: false);
     final context = _createContext(tempArgs.parse([]));
 
-    // Register all commands using enum-based iteration
-    for (final commandType in FlyCommandType.values) {
-      if (commandType.isTopLevel) {
-        // Create command instance once
-        final commandInstance = commandType.createInstance(context);
-        
-        // Register top-level commands
-        addCommand(commandInstance);
-        
-        // Register aliases for top-level commands
-        for (final alias in commandType.aliases) {
-          addCommand(_AliasCommand(alias, commandInstance));
-        }
+    // Delegate command creation to registry
+    final registrationData =
+        CommandMetadataRegistry.instance.createAndInitialize(
+      context: context,
+      globalOptionsParser: argParser,
+    );
+
+    // Register top-level commands
+    for (final entry in registrationData.topLevelCommands.entries) {
+      final commandType = entry.key;
+      final commandInstance = entry.value;
+
+      // Register top-level command
+      addCommand(commandInstance);
+
+      // Register aliases for top-level commands
+      for (final alias in commandType.aliases) {
+        addCommand(AliasCommand(alias, commandInstance));
       }
     }
 
-    // Manually create the 'add' command group for screen and service commands
-    final addCmd = _GroupCommand('add')
-    ..addSubcommand(FlyCommandType.screen.createInstance(context))
-    ..addSubcommand(FlyCommandType.service.createInstance(context));
-    addCommand(addCmd);
-
-    // Set metadata provider for lazy initialization (metadata extracted only when needed)
-    CommandMetadataRegistry.instance.setProvider(
-      _CommandRunnerMetadataProvider(this),
-    );
+    // Register all command groups
+    for (final group in registrationData.commandGroups.values) {
+      addCommand(group);
+    }
   }
 
   @override
@@ -150,35 +150,31 @@ class FlyCommandRunner extends CommandRunner<int> {
 
   /// Get configuration
   Map<String, dynamic> _getConfig() => {
-    'cli_version': '0.1.0',
+    'cli_version': VersionUtils.getCurrentVersion(),
     'templates_directory': _findTemplatesDirectory(),
     'plugins_enabled': true,
   };
 
   /// Handle version flag using CommandResult for consistency
   int _handleVersionFlag(String outputFormat) {
-    final versionInfo = {
-      'version': '0.1.0',
-      'build_number': null,
-      'git_commit': '3eaaea7',
-      'build_date': DateTime.now().toIso8601String(),
-    };
+    final logger = _services.get<Logger>();
+    final versionInfo = VersionUtils.getVersionInfo().toJson();
 
     final result = CommandResult.success(
       command: 'version',
       message: 'Version information retrieved',
       data: versionInfo,
       metadata: {
-        'cli_version': '0.1.0',
+        'cli_version': VersionUtils.getCurrentVersion(),
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
 
     // Use CommandResult's built-in output handling
     if (outputFormat == 'json') {
-      print(json.encode(result.toJson()));
+      logger.info(json.encode(result.toJson()));
     } else if (outputFormat == 'ai') {
-      print(json.encode(result.toAiJson()));
+      logger.info(json.encode(result.toAiJson()));
     } else {
       result.displayHuman();
     }
@@ -187,6 +183,7 @@ class FlyCommandRunner extends CommandRunner<int> {
 
   /// Handle errors with proper error handling
   int _handleError(Object e, StackTrace stackTrace, Iterable<String> args) {
+    final logger = _services.get<Logger>();
     final outputFormat = args.contains('--output=json') ? 'json' : 
                         args.contains('--output=ai') ? 'ai' : 'human';
     
@@ -194,7 +191,7 @@ class FlyCommandRunner extends CommandRunner<int> {
       message: e.toString(),
       suggestion: 'Check your command syntax and try again',
       metadata: {
-        'cli_version': '0.1.0',
+        'cli_version': VersionUtils.getCurrentVersion(),
         'timestamp': DateTime.now().toIso8601String(),
         'verbose': args.contains('--verbose'),
       },
@@ -202,13 +199,13 @@ class FlyCommandRunner extends CommandRunner<int> {
 
     // Use CommandResult's built-in output handling
     if (outputFormat == 'json') {
-      print(json.encode(errorResult.toJson()));
+      logger.info(json.encode(errorResult.toJson()));
     } else if (outputFormat == 'ai') {
-      print(json.encode(errorResult.toAiJson()));
+      logger.info(json.encode(errorResult.toAiJson()));
     } else {
       errorResult.displayHuman();
       if (args.contains('--verbose')) {
-        print('Stack trace: $stackTrace');
+        logger.err('Stack trace: $stackTrace');
       }
     }
     return errorResult.exitCode;
@@ -220,7 +217,7 @@ class FlyCommandRunner extends CommandRunner<int> {
       'templates',
       '../templates',
       '../../templates',
-      Directory.current.path + '/templates',
+      '${Directory.current.path}/templates',
     ];
 
     for (final templatePath in possiblePaths) {
@@ -247,56 +244,4 @@ ${commands.keys.map((name) => '  $name').join('\n')}
 
 Run "fly help <command>" for more information about a command.
 ''';
-}
-
-/// Internal command class for grouping subcommands
-class _GroupCommand extends Command<int> {
-  _GroupCommand(this.groupName) : super();
-
-  final String groupName;
-
-  @override
-  String get name => groupName;
-
-  @override
-  String get description => 'Add components to your project';
-
-  @override
-  Future<int> run() async {
-    // This is handled by subcommands
-    return 0;
-  }
-}
-
-/// Internal command class for aliases
-class _AliasCommand extends Command<int> {
-  _AliasCommand(String aliasName, this._targetCommand) : _aliasName = aliasName, super();
-  
-  final Command<int> _targetCommand;
-  final String _aliasName;
-
-  @override
-  String get name => _aliasName;
-
-  @override
-  String get description => _targetCommand.description;
-
-  @override
-  Future<int> run() async {
-    final result = await _targetCommand.run();
-    return result is int ? result : 1;
-  }
-}
-
-/// CommandMetadataProvider implementation for CommandRunner
-class _CommandRunnerMetadataProvider implements CommandMetadataProvider {
-  _CommandRunnerMetadataProvider(this._runner);
-
-  final CommandRunner<int> _runner;
-
-  @override
-  ArgParser getGlobalOptionsParser() => _runner.argParser;
-
-  @override
-  Map<String, Command<int>> getCommands() => _runner.commands;
 }

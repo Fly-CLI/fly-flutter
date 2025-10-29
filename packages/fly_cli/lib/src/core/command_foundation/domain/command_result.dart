@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/core/errors/error_codes.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Result of a command execution with AI-friendly structure
@@ -69,7 +70,7 @@ class CommandResult {
       if (errorCode != null) 'error_code': errorCode!.code,
       if (errorContext != null) 'error_context': errorContext,
       'metadata': {
-        'cli_version': '0.1.0',
+        'cli_version': VersionUtils.getCurrentVersion(),
         'timestamp': DateTime.now().toIso8601String(),
         ...?metadata,
       },
@@ -91,7 +92,7 @@ class CommandResult {
       if (errorContext != null) 'error_context': errorContext,
       'context': {
         'tool': 'fly_cli',
-        'version': '0.1.0',
+        'version': VersionUtils.getCurrentVersion(),
         'timestamp': DateTime.now().toIso8601String(),
         'format': 'ai_optimized',
         ...?metadata,

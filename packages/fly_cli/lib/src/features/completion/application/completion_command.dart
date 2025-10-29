@@ -7,6 +7,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 
 import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
@@ -100,7 +101,7 @@ class CompletionCommand extends FlyCommand {
         },
         'export_metadata': {
           'generated_at': DateTime.now().toIso8601String(),
-          'cli_version': '0.1.0',
+          'cli_version': VersionUtils.getCurrentVersion(),
           'shell_version': _getShellVersion(shell),
         },
       };

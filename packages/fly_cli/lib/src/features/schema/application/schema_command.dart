@@ -8,6 +8,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter_factory.dart';
@@ -131,7 +132,7 @@ class SchemaCommand extends FlyCommand {
         },
         'export_metadata': {
           'exported_at': DateTime.now().toIso8601String(),
-          'cli_version': '0.1.0',
+          'cli_version': VersionUtils.getCurrentVersion(),
           'content_type': exporter.contentType,
           'file_extension': format.fileExtension,
           'output_file': outputFile,

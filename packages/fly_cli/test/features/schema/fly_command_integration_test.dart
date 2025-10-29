@@ -4,10 +4,51 @@ import 'package:test/test.dart';
 
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_type.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
-import 'package:fly_cli/src/core/command_metadata/infrastructure/command_context_factory.dart';
 
 import '../../helpers/command_test_helper.dart';
+
+/// Helper to create command instances from enum for testing
+({
+  Map<FlyCommandType, Command<int>> commandInstances,
+  Map<String, Command<int>> commandGroups,
+}) _createCommandInstances() {
+  final context = CommandTestHelper.createMockCommandContext();
+  final commandInstances = <FlyCommandType, Command<int>>{};
+  
+  // Create instances for all command types
+  for (final commandType in FlyCommandType.values) {
+    commandInstances[commandType] = commandType.createInstance(context);
+  }
+  
+  // Build command groups dynamically
+  final commandGroups = <String, Command<int>>{};
+  final groupMap = <String, List<FlyCommandType>>{};
+  for (final entry in commandInstances.entries) {
+    final commandType = entry.key;
+    final group = commandType.group;
+    if (group != null) {
+      groupMap.putIfAbsent(group.name, () => []).add(commandType);
+    }
+  }
+  
+  // Create group commands
+  for (final entry in groupMap.entries) {
+    final groupName = entry.key;
+    final subcommandTypes = entry.value;
+    final groupDescription = subcommandTypes.isNotEmpty
+        ? subcommandTypes.first.group?.description
+        : null;
+    final groupCmd = GroupCommand(groupName, description: groupDescription);
+    for (final subcommandType in subcommandTypes) {
+      groupCmd.addSubcommand(commandInstances[subcommandType]!);
+    }
+    commandGroups[groupName] = groupCmd;
+  }
+  
+  return (commandInstances: commandInstances, commandGroups: commandGroups);
+}
 
 void main() {
   group('FlyCommand Metadata Integration', () {
@@ -121,11 +162,12 @@ void main() {
 
     group('registry integration', () {
       test('registers FlyCommand in registry', () {
-        final context = CommandContextFactory.createForMetadataExtraction();
         final globalParser = ArgParser();
+        final instances = _createCommandInstances();
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -139,11 +181,12 @@ void main() {
       });
 
       test('registers FlyCommand with manual metadata', () {
-        final context = CommandContextFactory.createForMetadataExtraction();
         final globalParser = ArgParser();
+        final instances = _createCommandInstances();
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -156,11 +199,12 @@ void main() {
       });
 
       test('handles commands from enum correctly', () {
-        final context = CommandContextFactory.createForMetadataExtraction();
         final globalParser = ArgParser();
+        final instances = _createCommandInstances();
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -192,11 +236,12 @@ void main() {
       });
 
       test('registers subcommands in registry', () {
-        final context = CommandContextFactory.createForMetadataExtraction();
         final globalParser = ArgParser();
+        final instances = _createCommandInstances();
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
@@ -221,11 +266,12 @@ void main() {
       });
 
       test('commands can opt into metadata gradually', () {
-        final context = CommandContextFactory.createForMetadataExtraction();
         final globalParser = ArgParser();
+        final instances = _createCommandInstances();
 
-        registry.initializeFromEnum(
-          context: context,
+        registry.initializeFromInstances(
+          commandInstances: instances.commandInstances,
+          commandGroups: instances.commandGroups,
           globalOptionsParser: globalParser,
         );
 
