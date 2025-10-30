@@ -21,8 +21,15 @@ class DartSdkCheck extends SystemCheck {
   @override
   Future<CheckResult> run() async {
     try {
-      // Check if dart command is available
-      final dartResult = await Process.run('dart', ['--version'], runInShell: true);
+      // Check if dart command is available with timeout
+      final dartResult = await Process.run(
+        'dart', 
+        ['--version'], 
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => ProcessResult(0, 1, '', 'Dart --version timed out after 10 seconds'),
+      );
       
       if (dartResult.exitCode != 0) {
         return CheckResult.error(
@@ -76,8 +83,15 @@ class DartSdkCheck extends SystemCheck {
         );
       }
 
-      // Check Dart analyzer
-      final analyzeResult = await Process.run('dart', ['analyze', '--version'], runInShell: true);
+      // Check Dart analyzer with timeout
+      final analyzeResult = await Process.run(
+        'dart', 
+        ['analyze', '--version'], 
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => ProcessResult(0, 1, '', 'Dart analyze timed out after 10 seconds'),
+      );
       
       if (analyzeResult.exitCode != 0) {
         return CheckResult.warning(

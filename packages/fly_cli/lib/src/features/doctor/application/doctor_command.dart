@@ -146,24 +146,12 @@ class DoctorCommand extends FlyCommand {
 
   /// Get the list of system checks to run
   Future<List<SystemCheck>> _getSystemChecks() async {
-    final checks = <SystemCheck>[
-      FlutterSdkCheck(logger: logger),
+    return <SystemCheck>[
       DartSdkCheck(logger: logger),
+      FlutterSdkCheck(logger: logger),
       PlatformToolsCheck(logger: logger),
-      NetworkCheck(logger: logger),
+      // Keep TemplateCheck and NetworkCheck optional if added back later
     ];
-
-    // Add template check if templates directory exists
-    final templatesDirectory = TemplateManager.findTemplatesDirectory();
-    final templatesDir = Directory(templatesDirectory);
-    if (templatesDir.existsSync()) {
-      checks.add(TemplateCheck(
-        templatesDirectory: templatesDirectory,
-        logger: logger,
-      ));
-    }
-
-    return checks;
   }
 
   // Lifecycle hooks implementation

@@ -129,13 +129,29 @@ class CommandTestHelper {
     // Ensure we use an absolute path for fly.dart
     final absoluteFlyDartPath = flyDartFile.absolute.path;
     
-    // Run the command via Process
-    final processResult = await Process.run(
-      'dart',
-      ['run', absoluteFlyDartPath, ...finalArgs],
-      workingDirectory: workingDirectory ?? workspaceRoot,
-      environment: testEnvironment,
-    );
+    // Performance optimization: Try to use pre-compiled executable first
+    final executablePath = path.join(workspaceRoot, 'build', 'fly');
+    final executableFile = File(executablePath);
+    
+    ProcessResult processResult;
+    if (executableFile.existsSync()) {
+      // Use pre-compiled executable for better performance
+      // Use provided working directory or fall back to workspace root
+      processResult = await Process.run(
+        executablePath,
+        finalArgs,
+        workingDirectory: workingDirectory ?? workspaceRoot,
+        environment: testEnvironment,
+      );
+    } else {
+      // Fallback to dart run (slower but works)
+      processResult = await Process.run(
+        'dart',
+        ['run', absoluteFlyDartPath, ...finalArgs],
+        workingDirectory: workingDirectory ?? workspaceRoot,
+        environment: testEnvironment,
+      );
+    }
     
     final exitCode = processResult.exitCode;
     
@@ -184,11 +200,11 @@ class CommandTestHelper {
         } catch (jsonExtractionError) {
           // JSON extraction also failed, continue to error handling
         }
-        // If JSON parsing fails, check for error JSON in stderr
-        final stderrStr = processResult.stderr.toString().trim();
-        if (stderrStr.isNotEmpty) {
-          try {
-            final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
+    // If JSON parsing fails, check for error JSON in stderr
+    final stderrStr = processResult.stderr.toString().trim();
+    if (stderrStr.isNotEmpty) {
+      try {
+        final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
             return CommandResult(
               success: false,
               command: errorJson['command'] as String? ?? _extractCommandName(args),

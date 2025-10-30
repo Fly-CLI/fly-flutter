@@ -140,6 +140,7 @@ class CreateCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
+
     final projectName = argResults!.rest.first;
     final template = argResults!['template'] as String;
     final organization = argResults!['organization'] as String;

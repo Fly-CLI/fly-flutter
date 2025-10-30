@@ -22,8 +22,15 @@ class FlutterSdkCheck extends SystemCheck {
   @override
   Future<CheckResult> run() async {
     try {
-      // Check if flutter command is available
-      final flutterResult = await Process.run('flutter', ['--version'], runInShell: true);
+      // Check if flutter command is available with timeout
+      final flutterResult = await Process.run(
+        'flutter', 
+        ['--version'], 
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => ProcessResult(0, 1, '', 'Flutter --version timed out after 10 seconds'),
+      );
       
       if (flutterResult.exitCode != 0) {
         return CheckResult.error(
@@ -77,31 +84,25 @@ class FlutterSdkCheck extends SystemCheck {
         );
       }
 
-      // Check Flutter doctor
-      final doctorResult = await Process.run('flutter', ['doctor'], runInShell: true);
-      final doctorOutput = doctorResult.stdout as String;
-      
-      // Look for critical issues
-      final criticalIssues = <String>[];
-      if (doctorOutput.contains('No devices available')) {
-        criticalIssues.add('No devices available');
-      }
-      if (doctorOutput.contains('Android toolchain')) {
-        criticalIssues.add('Android toolchain issues');
-      }
-      if (doctorOutput.contains('Xcode')) {
-        criticalIssues.add('Xcode issues');
-      }
+      // Run a bounded flutter doctor to capture basic diagnostics without hanging
+      final doctorResult = await Process.run(
+        'flutter',
+        ['doctor', '-v'],
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => ProcessResult(0, 1, '', 'Flutter doctor timed out after 15 seconds'),
+      );
 
-      if (criticalIssues.isNotEmpty) {
+      if (doctorResult.exitCode != 0) {
         return CheckResult.warning(
-          message: 'Flutter SDK installed but has configuration issues',
-          suggestion: 'Run "flutter doctor" to see detailed issues and suggested fixes',
-          fixCommand: 'flutter doctor',
+          message: 'Flutter doctor reported issues or timed out',
+          suggestion: 'Run "flutter doctor -v" manually to see details',
           data: {
             'version': flutterVersion,
-            'issues': criticalIssues,
-            'doctorOutput': doctorOutput,
+            'path': _getFlutterPath(),
+            'doctorStdout': doctorResult.stdout,
+            'doctorStderr': doctorResult.stderr,
           },
         );
       }
@@ -111,6 +112,7 @@ class FlutterSdkCheck extends SystemCheck {
         data: {
           'version': flutterVersion,
           'path': _getFlutterPath(),
+          'doctor': 'ok',
         },
       );
 

@@ -167,8 +167,15 @@ class PlatformToolsCheck extends SystemCheck {
   /// Check Xcode installation (macOS only)
   Future<CheckResult> _checkXcode() async {
     try {
-      // Check if xcodebuild is available
-      final xcodeResult = await Process.run('xcodebuild', ['-version'], runInShell: true);
+      // Check if xcodebuild is available with timeout
+      final xcodeResult = await Process.run(
+        'xcodebuild', 
+        ['-version'], 
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => ProcessResult(0, 1, '', 'xcodebuild timed out after 10 seconds'),
+      );
       
       if (xcodeResult.exitCode != 0) {
         return CheckResult.error(
@@ -195,8 +202,15 @@ class PlatformToolsCheck extends SystemCheck {
 
       final xcodeVersion = versionMatch.group(1)!;
       
-      // Check for iOS Simulator
-      final simulatorResult = await Process.run('xcrun', ['simctl', 'list'], runInShell: true);
+      // Check for iOS Simulator with timeout
+      final simulatorResult = await Process.run(
+        'xcrun', 
+        ['simctl', 'list'], 
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => ProcessResult(0, 1, '', 'xcrun simctl list timed out after 10 seconds'),
+      );
       if (simulatorResult.exitCode != 0) {
         return CheckResult.warning(
           message: 'iOS Simulator not available',
@@ -255,8 +269,15 @@ class PlatformToolsCheck extends SystemCheck {
         );
       }
 
-      // Check for MSBuild
-      final msbuildResult = await Process.run('msbuild', ['-version'], runInShell: true);
+      // Check for MSBuild with timeout
+      final msbuildResult = await Process.run(
+        'msbuild', 
+        ['-version'], 
+        runInShell: true,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => ProcessResult(0, 1, '', 'msbuild timed out after 10 seconds'),
+      );
       if (msbuildResult.exitCode != 0) {
         return CheckResult.warning(
           message: 'MSBuild not found in PATH',
