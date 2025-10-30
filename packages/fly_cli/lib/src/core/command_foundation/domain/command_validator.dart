@@ -1,60 +1,7 @@
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
-
-import 'command_context.dart';
-
-/// Validation result for command arguments and environment
-class ValidationResult {
-  const ValidationResult({
-    required this.isValid,
-    this.errors = const [],
-    this.warnings = const [],
-  });
-  
-  /// Whether validation passed
-  final bool isValid;
-  
-  /// List of validation errors
-  final List<String> errors;
-  
-  /// List of validation warnings
-  final List<String> warnings;
-  
-  /// Create a successful validation result
-  factory ValidationResult.success() => const ValidationResult(isValid: true);
-  
-  /// Create a failed validation result with errors
-  factory ValidationResult.failure(List<String> errors) => ValidationResult(
-    isValid: false,
-    errors: errors,
-  );
-  
-  /// Create a validation result with warnings
-  factory ValidationResult.withWarnings(List<String> warnings) => ValidationResult(
-    isValid: true,
-    warnings: warnings,
-  );
-  
-  /// Combine multiple validation results
-  factory ValidationResult.combine(List<ValidationResult> results) {
-    final allErrors = <String>[];
-    final allWarnings = <String>[];
-    
-    for (final result in results) {
-      allErrors.addAll(result.errors);
-      allWarnings.addAll(result.warnings);
-    }
-    
-    return ValidationResult(
-      isValid: allErrors.isEmpty,
-      errors: allErrors,
-      warnings: allWarnings,
-    );
-  }
-  
-  @override
-  String toString() => 'ValidationResult(isValid: $isValid, errors: $errors, warnings: $warnings)';
-}
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/validation/validation_rules.dart' as cli_validation;
+import 'package:fly_core/src/validation/validation.dart';
 
 /// Base interface for command validators
 abstract class CommandValidator {
@@ -118,7 +65,7 @@ class FlutterProjectValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    final rule = FlutterProjectValidationRule();
+    final rule = cli_validation.FlutterProjectValidationRule();
     return rule.validate(context.workingDirectory);
   }
 }
@@ -140,7 +87,7 @@ class ProjectNameValidator implements CommandValidator {
     if (projectName == null) {
       return ValidationResult.failure(['Project name is required']);
     }
-    return NameValidationRule.validateProjectName(projectName);
+    return cli_validation.NameValidationRule.validateProjectName(projectName);
   }
 }
 
@@ -162,7 +109,7 @@ class DirectoryWritableValidator implements CommandValidator {
   @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
     final directoryPath = targetDirectory ?? context.workingDirectory;
-    final rule = DirectoryValidationRule(targetDirectory);
+    final rule = cli_validation.DirectoryValidationRule(targetDirectory);
     return rule.validate(directoryPath);
   }
 }
@@ -187,7 +134,7 @@ class TemplateExistsValidator implements CommandValidator {
     final template = templateName ?? args['template'] as String?;
     if (template == null) return ValidationResult.success();
 
-    final rule = TemplateValidationRule(context);
+    final rule = cli_validation.TemplateValidationRule(context);
     return rule.validate(template);
   }
 }
@@ -205,7 +152,7 @@ class EnvironmentValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(CommandContext context, ArgResults args) async {
-    final rule = EnvironmentValidationRule();
+    final rule = cli_validation.EnvironmentValidationRule();
     return rule.validate(null);
   }
 }
@@ -228,7 +175,7 @@ class NetworkValidator implements CommandValidator {
   @override
   Future<ValidationResult> validate(CommandContext context,
       ArgResults args) async {
-    final rule = NetworkValidationRule(requiredHosts: requiredHosts);
+    final rule = cli_validation.NetworkValidationRule(requiredHosts: requiredHosts);
     final results = <ValidationResult>[];
 
     for (final host in requiredHosts) {
@@ -257,7 +204,7 @@ class ScreenNameValidator implements CommandValidator {
     if (screenName == null) {
       return ValidationResult.failure(['Screen name is required']);
     }
-    return NameValidationRule.validateScreenName(screenName);
+    return cli_validation.NameValidationRule.validateScreenName(screenName);
   }
 }
 
@@ -279,7 +226,7 @@ class ServiceNameValidator implements CommandValidator {
     if (serviceName == null) {
       return ValidationResult.failure(['Service name is required']);
     }
-    return NameValidationRule.validateServiceName(serviceName);
+    return cli_validation.NameValidationRule.validateServiceName(serviceName);
   }
 }
 
@@ -301,7 +248,7 @@ class FeatureNameValidator implements CommandValidator {
     if (featureName == null) {
       return ValidationResult.failure(['Feature name is required']);
     }
-    return NameValidationRule.validateFeatureName(featureName);
+    return cli_validation.NameValidationRule.validateFeatureName(featureName);
   }
 }
 
@@ -321,7 +268,7 @@ class PlatformValidator implements CommandValidator {
     final platforms = args['platforms'] as List<String>?;
     if (platforms == null) return ValidationResult.success();
 
-    final rule = PlatformValidationRule();
+    final rule = cli_validation.PlatformValidationRule();
     return rule.validate(platforms);
   }
 }

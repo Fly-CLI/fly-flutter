@@ -45,10 +45,16 @@ class LoggingInterceptor extends Interceptor {
       return;
     }
     
+    // Record start time for latency measurement
+    options.extra['startTime'] = DateTime.now();
+
     final buffer = StringBuffer();
     buffer
       ..writeln('🚀 ${options.method} ${options.uri}')
-      ..writeln('📦 Body: ${options.data}');
+      ..writeln('📋 Headers: ${_redactHeaders(options.headers)}');
+    if (logRequestBody) {
+      buffer.writeln('📦 Body: ${options.data}');
+    }
     
     if (kDebugMode) {
       debugPrint(buffer.toString());
@@ -65,12 +71,19 @@ class LoggingInterceptor extends Interceptor {
     }
     
     final buffer = StringBuffer();
+    final latency = _computeLatency(response.requestOptions);
     buffer
       ..writeln(
         '✅ ${response.statusCode} ${response.requestOptions.method} '
         '${response.requestOptions.uri}',
       )
-      ..writeln('📦 Response: ${response.data}');
+      ..writeln('⏱️ Latency: ${latency.inMilliseconds}ms');
+    if (logResponseHeaders) {
+      buffer.writeln('📋 Headers: ${_redactHeaders(response.headers.map.map((k, v) => MapEntry(k, v.join(", "))))}');
+    }
+    if (logResponseBody) {
+      buffer.writeln('📦 Response: ${response.data}');
+    }
     
     if (kDebugMode) {
       debugPrint(buffer.toString());
@@ -87,12 +100,15 @@ class LoggingInterceptor extends Interceptor {
     }
     
     final buffer = StringBuffer();
+    final latency = _computeLatency(err.requestOptions);
     buffer
       ..writeln(
         '❌ ${err.type} ${err.requestOptions.method} '
         '${err.requestOptions.uri}',
       )
-      ..writeln('📋 Message: ${err.message}');
+      ..writeln('⏱️ Latency: ${latency.inMilliseconds}ms')
+      ..writeln('📋 Message: ${err.message}')
+      ..writeln('📋 Request Headers: ${_redactHeaders(err.requestOptions.headers)}');
     
     if (err.response != null) {
       buffer
@@ -107,5 +123,26 @@ class LoggingInterceptor extends Interceptor {
     }
     
     handler.next(err);
+  }
+
+  Map<String, Object?> _redactHeaders(Map<String, Object?> headers) {
+    const sensitive = {'authorization', 'cookie', 'set-cookie'};
+    final redacted = <String, Object?>{};
+    headers.forEach((key, value) {
+      if (sensitive.contains(key.toLowerCase())) {
+        redacted[key] = 'REDACTED';
+      } else {
+        redacted[key] = value;
+      }
+    });
+    return redacted;
+  }
+
+  Duration _computeLatency(RequestOptions options) {
+    final start = options.extra['startTime'];
+    if (start is DateTime) {
+      return DateTime.now().difference(start);
+    }
+    return Duration.zero;
   }
 }

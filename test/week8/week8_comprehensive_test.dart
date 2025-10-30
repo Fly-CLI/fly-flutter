@@ -5,23 +5,21 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../helpers/cli_test_helper.dart';
+import '../helpers/test_temp_dir.dart';
 
 void main() {
+  final temp = TestTempDir();
+
+  setUpAll(temp.initSuite);
+  setUp(temp.beforeEach);
+  tearDown(temp.afterEach);
+  tearDownAll(temp.cleanupSuite);
+
   group('Week 8: Testing & Quality Assurance - Comprehensive Test Suite', () {
-    late Directory tempDir;
     late CliTestHelper cli;
 
     setUp(() {
-      final testRunId = DateTime.now().millisecondsSinceEpoch;
-      tempDir = Directory('${Directory.current.path}/test_generated/week8_$testRunId');
-      tempDir.createSync(recursive: true);
-      cli = CliTestHelper(tempDir);
-    });
-
-    tearDown(() {
-      if (tempDir.existsSync()) {
-        tempDir.deleteSync(recursive: true);
-      }
+      cli = CliTestHelper(temp.currentTestDir);
     });
 
     group('E2E Integration Tests', () {
@@ -37,7 +35,7 @@ void main() {
 
         expect(createResult.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
         
         // Test add screen command
@@ -88,7 +86,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
         
         // Test platform-specific file operations
@@ -148,7 +146,7 @@ void main() {
 
         // Verify all projects were created
         for (final projectName in projectNames) {
-          final projectPath = path.join(tempDir.path, projectName);
+          final projectPath = path.join(temp.currentTestDir.path, projectName);
           expect(Directory(projectPath).existsSync(), isTrue);
         }
       });
@@ -162,7 +160,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         
         // Validate structure
         expect(Directory(projectPath).existsSync(), isTrue);
@@ -189,7 +187,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         
         // Validate structure
         expect(Directory(projectPath).existsSync(), isTrue);
@@ -320,7 +318,7 @@ void main() {
 
           expect(result.exitCode, equals(0));
           
-          final projectPath = path.join(tempDir.path, projectName);
+          final projectPath = path.join(temp.currentTestDir.path, projectName);
           expect(Directory(projectPath).existsSync(), isTrue);
           expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
         }
@@ -328,7 +326,7 @@ void main() {
 
       test('all add commands work correctly', () async {
         // Create a test project first
-        final testProject = Directory(path.join(tempDir.path, 'add_commands_qa_test'));
+        final testProject = Directory(path.join(temp.currentTestDir.path, 'add_commands_qa_test'));
         testProject.createSync();
         
         File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''

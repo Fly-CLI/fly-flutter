@@ -1,8 +1,10 @@
 import 'dart:io';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/environment/env_var.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart' as path;
 
 /// Check for platform-specific development tools
 class PlatformToolsCheck extends SystemCheck {
@@ -88,9 +90,10 @@ class PlatformToolsCheck extends SystemCheck {
   /// Check Android SDK installation
   Future<CheckResult> _checkAndroidSdk() async {
     try {
-      // Check for ANDROID_HOME environment variable
-      final androidHome = Platform.environment['ANDROID_HOME'] ?? 
-                         Platform.environment['ANDROID_SDK_ROOT'];
+      // Check for ANDROID_HOME/ANDROID_SDK_ROOT via EnvironmentManager
+      const env = EnvironmentManager();
+      final androidHome = env.getString(EnvVar.androidHome) ??
+                         env.getString(EnvVar.androidSdkRoot);
       
       if (androidHome == null) {
         return CheckResult.error(

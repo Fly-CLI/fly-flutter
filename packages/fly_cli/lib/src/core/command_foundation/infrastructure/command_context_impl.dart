@@ -7,6 +7,8 @@ import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/environment/env_var.dart';
 
 /// Environment information for command execution
 class Environment {
@@ -35,7 +37,9 @@ class Environment {
       isLinux: Platform.isLinux,
       isUnix: Platform.isLinux || Platform.isMacOS,
       pathSeparator: Platform.pathSeparator,
-      homeDirectory: Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '',
+      homeDirectory: const EnvironmentManager().getString(EnvVar.home) 
+          ?? const EnvironmentManager().getString(EnvVar.userProfile) 
+          ?? '',
       tempDirectory: Directory.systemTemp.path,
     );
   }
@@ -58,7 +62,7 @@ class CommandContextImpl implements CommandContext {
   });
 
   @override
-  final ArgResults argResults;
+  ArgResults argResults;
 
   @override
   final Logger logger;
@@ -91,6 +95,7 @@ class CommandContextImpl implements CommandContext {
   final bool quiet;
 
   final Map<String, dynamic> _data = {};
+  String? _commandName;
 
   @override
   bool get jsonOutput => argResults['output'] == 'json';
@@ -119,6 +124,12 @@ class CommandContextImpl implements CommandContext {
   @override
   dynamic getData(String key) {
     return _data[key];
+  }
+  
+  String? get commandName => _commandName;
+  
+  set commandName(String? value) {
+    _commandName = value;
   }
 
   String _getErrorSuggestion(Object error) {

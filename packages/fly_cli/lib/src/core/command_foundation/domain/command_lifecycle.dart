@@ -1,7 +1,7 @@
 import 'package:args/args.dart';
-import 'command_context.dart';
-import 'command_result.dart';
-import 'command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_core/src/validation/validation.dart';
 
 /// Lifecycle hooks for command execution phases
 abstract class CommandLifecycle {

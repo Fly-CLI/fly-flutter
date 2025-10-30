@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/utils/platform_utils.dart';
+import 'package:fly_core/src/file_operations/file_operations.dart';
+import 'package:fly_core/src/retry/retry.dart';
 
 /// Cache metadata structure
 class CacheInfo {
@@ -56,7 +58,25 @@ class Template {
 
 /// Manages template caching for offline mode
 class TemplateCacheManager {
+  TemplateCacheManager({
+    FileReader? fileReader,
+    FileWriter? fileWriter,
+    ChecksumCalculator? checksumCalculator,
+    DirectoryManager? directoryManager,
+    FileCache? fileCache,
+  })  : _fileReader = fileReader ?? const FileReader(),
+        _fileWriter = fileWriter ?? const FileWriter(),
+        _checksumCalculator = checksumCalculator ?? const ChecksumCalculator(),
+        _directoryManager = directoryManager ?? const DirectoryManager(),
+        _fileCache = fileCache ?? FileCache();
+
   static const cacheDuration = Duration(days: 7);
+  
+  final FileReader _fileReader;
+  final FileWriter _fileWriter;
+  final ChecksumCalculator _checksumCalculator;
+  final DirectoryManager _directoryManager;
+  final FileCache _fileCache;
   
   /// Get template, checking cache first, then downloading
   Future<Template> getTemplate(
@@ -116,7 +136,7 @@ class TemplateCacheManager {
   /// Save template to cache
   Future<void> _saveToCache(String cachePath, Template template) async {
     final cacheFile = File(cachePath);
-    await cacheFile.parent.create(recursive: true);
+    await _directoryManager.ensureExists(cacheFile.parent.path);
     
     final checksum = await _calculateChecksum(template);
     
@@ -127,27 +147,55 @@ class TemplateCacheManager {
       'checksum': checksum,
     };
     
-    await cacheFile.writeAsString(json.encode(cacheData));
+    final success = await _fileWriter.writeFileAtomic(
+      cacheFile,
+      json.encode(cacheData),
+    );
+    
+    if (!success) {
+      throw Exception('Failed to write template cache to $cachePath');
+    }
   }
   
   /// Load template from cache
   Future<Template> _loadFromCache(String cachePath) async {
     final cacheFile = File(cachePath);
-    final content = await cacheFile.readAsString();
-    final data = json.decode(content) as Map<String, dynamic>;
     
+    // Check memory cache first
+    final cachedContent = _fileCache.get(cachePath);
+    if (cachedContent != null) {
+      final data = json.decode(cachedContent) as Map<String, dynamic>;
+      return Template.fromJson(data['template'] as Map<String, dynamic>);
+    }
+    
+    // Read from disk
+    final content = await _fileReader.readFile(cacheFile);
+    if (content == null) {
+      throw Exception('Failed to read template cache from $cachePath');
+    }
+    
+    // Cache in memory for future reads
+    _fileCache.set(cachePath, content, ttl: cacheDuration);
+    
+    final data = json.decode(content) as Map<String, dynamic>;
     return Template.fromJson(data['template'] as Map<String, dynamic>);
   }
   
   /// Check if cache file exists
-  Future<bool> _cacheExists(String cachePath) async => File(cachePath).exists();
+  Future<bool> _cacheExists(String cachePath) async {
+    final cacheFile = File(cachePath);
+    return await _fileReader.isReadable(cacheFile);
+  }
   
   /// Get cache metadata
   Future<CacheInfo> _getCacheInfo(String cachePath) async {
     final cacheFile = File(cachePath);
-    final content = await cacheFile.readAsString();
-    final data = json.decode(content) as Map<String, dynamic>;
+    final content = await _fileReader.readFile(cacheFile);
+    if (content == null) {
+      throw Exception('Failed to read cache metadata from $cachePath');
+    }
     
+    final data = json.decode(content) as Map<String, dynamic>;
     return CacheInfo.fromJson(data);
   }
   
@@ -155,16 +203,15 @@ class TemplateCacheManager {
   Future<String> _getCachePath(String templateName) async {
     final cacheDir = await PlatformUtils.getCacheDirectory();
     final templateCacheDir = path.join(cacheDir, 'templates');
-    await Directory(templateCacheDir).create(recursive: true);
+    await _directoryManager.ensureExists(templateCacheDir);
     
     return path.join(templateCacheDir, '$templateName.json');
   }
   
   /// Calculate checksum for template
   Future<String> _calculateChecksum(Template template) async {
-    // Simple checksum based on template name and version
-    // In production, use a proper hashing algorithm
-    return '${template.name}-${template.version}';
+    // Use unified checksum calculator
+    return _checksumCalculator.calculateForMap(template.toJson());
   }
   
   /// Download template (placeholder implementation)

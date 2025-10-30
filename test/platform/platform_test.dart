@@ -2,22 +2,17 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+import '../helpers/test_temp_dir.dart';
 
 void main() {
+  final temp = TestTempDir();
+
+  setUpAll(temp.initSuite);
+  setUp(temp.beforeEach);
+  tearDown(temp.afterEach);
+  tearDownAll(temp.cleanupSuite);
+
   group('Platform-Specific Testing', () {
-    late Directory tempDir;
-
-    setUp(() {
-      final testRunId = DateTime.now().millisecondsSinceEpoch;
-      tempDir = Directory('${Directory.current.path}/test_generated/platform_$testRunId');
-      tempDir.createSync(recursive: true);
-    });
-
-    tearDown(() {
-      if (tempDir.existsSync()) {
-        tempDir.deleteSync(recursive: true);
-      }
-    });
 
     group('Windows Platform Tests', () {
       test('Windows path handling works correctly', () {
@@ -30,7 +25,7 @@ void main() {
 
       test('Windows file operations work correctly', () {
         if (Platform.isWindows) {
-          final testFile = File(path.join(tempDir.path, 'test_file.txt'));
+          final testFile = File(path.join(temp.currentTestDir.path, 'test_file.txt'));
           testFile.writeAsStringSync('Windows test content');
           
           expect(testFile.existsSync(), isTrue);
@@ -40,7 +35,7 @@ void main() {
 
       test('Windows directory operations work correctly', () {
         if (Platform.isWindows) {
-          final testDir = Directory(path.join(tempDir.path, 'test_dir'));
+          final testDir = Directory(path.join(temp.currentTestDir.path, 'test_dir'));
           testDir.createSync();
           
           expect(testDir.existsSync(), isTrue);
@@ -64,7 +59,7 @@ void main() {
 
       test('macOS file operations work correctly', () {
         if (Platform.isMacOS) {
-          final testFile = File(path.join(tempDir.path, 'test_file.txt'));
+          final testFile = File(path.join(temp.currentTestDir.path, 'test_file.txt'));
           testFile.writeAsStringSync('macOS test content');
           
           expect(testFile.existsSync(), isTrue);
@@ -74,7 +69,7 @@ void main() {
 
       test('macOS directory operations work correctly', () {
         if (Platform.isMacOS) {
-          final testDir = Directory(path.join(tempDir.path, 'test_dir'));
+          final testDir = Directory(path.join(temp.currentTestDir.path, 'test_dir'));
           testDir.createSync();
           
           expect(testDir.existsSync(), isTrue);
@@ -98,7 +93,7 @@ void main() {
 
       test('Linux file operations work correctly', () {
         if (Platform.isLinux) {
-          final testFile = File(path.join(tempDir.path, 'test_file.txt'));
+          final testFile = File(path.join(temp.currentTestDir.path, 'test_file.txt'));
           testFile.writeAsStringSync('Linux test content');
           
           expect(testFile.existsSync(), isTrue);
@@ -108,7 +103,7 @@ void main() {
 
       test('Linux directory operations work correctly', () {
         if (Platform.isLinux) {
-          final testDir = Directory(path.join(tempDir.path, 'test_dir'));
+          final testDir = Directory(path.join(temp.currentTestDir.path, 'test_dir'));
           testDir.createSync();
           
           expect(testDir.existsSync(), isTrue);
@@ -179,14 +174,14 @@ void main() {
 
     group('Platform-Specific CLI Tests', () {
       test('CLI works on current platform', () async {
-        final result = await Process.run(
+          final result = await Process.run(
           'dart',
           [
             'run',
             'packages/fly_cli/bin/fly.dart',
             '--version',
           ],
-          workingDirectory: tempDir.path,
+            workingDirectory: temp.currentTestDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -194,7 +189,7 @@ void main() {
       });
 
       test('create command basic functionality', () async {
-        final result = await Process.run(
+          final result = await Process.run(
           'dart',
           [
             'run',
@@ -202,7 +197,7 @@ void main() {
             'create',
             'test_project',
           ],
-          workingDirectory: tempDir.path,
+            workingDirectory: temp.currentTestDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -255,7 +250,7 @@ void main() {
         
         // Create multiple files
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(tempDir.path, 'test_file_$i.txt'));
+          final file = File(path.join(temp.currentTestDir.path, 'test_file_$i.txt'));
           file.writeAsStringSync('Test content $i');
         }
         
@@ -268,7 +263,7 @@ void main() {
         
         // Create multiple directories
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(tempDir.path, 'test_dir_$i'));
+          final dir = Directory(path.join(temp.currentTestDir.path, 'test_dir_$i'));
           dir.createSync();
         }
         
@@ -294,7 +289,7 @@ void main() {
       });
 
       test('file permissions handled correctly', () {
-        final testFile = File(path.join(tempDir.path, 'permission_test.txt'));
+        final testFile = File(path.join(temp.currentTestDir.path, 'permission_test.txt'));
         testFile.writeAsStringSync('test content');
         
         expect(testFile.existsSync(), isTrue);

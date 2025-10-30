@@ -2,19 +2,12 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_core/src/validation/validation.dart' as fly_core;
 
-/// Base interface for composable validation rules
-abstract class ValidationRule<T> {
-  /// Validate a value and return a ValidationResult
-  Future<ValidationResult> validate(T value, {String? fieldName});
-
-  /// Whether this rule supports async operations
-  bool get isAsync => false;
-
-  /// Priority for rule execution (lower numbers execute first)
-  int get priority => 0;
-}
+/// Re-export ValidationRule and ValidationResult from fly_core for backward compatibility
+typedef ValidationRule<T> = fly_core.ValidationRule<T>;
+typedef SyncValidationRule<T> = fly_core.SyncValidationRule<T>;
+typedef ValidationResult = fly_core.ValidationResult;
 
 /// Core validation rules for names and identifiers
 class NameValidationRule {
@@ -128,40 +121,17 @@ class NameValidationRule {
   }
 }
 
-/// Async validation rule for expensive operations
-abstract class AsyncValidationRule<T> implements ValidationRule<T> {
-  @override
-  bool get isAsync => true;
-
-  /// Cache for validation results
-  final Map<String, ValidationResult> _cache = {};
-
-  /// Cache duration in milliseconds
-  Duration get cacheDuration => const Duration(minutes: 5);
-
-  /// Get cached result if available and not expired
-  ValidationResult? getCachedResult(String key) {
-    // For now, we'll implement simple caching without expiration
-    // In a production system, you'd want to track timestamps
-    return _cache[key];
-  }
-
-  /// Cache a validation result
-  void cacheResult(String key, ValidationResult result) {
-    _cache[key] = result;
-  }
-
-  /// Clear cache
-  void clearCache() {
-    _cache.clear();
-  }
-}
+/// Re-export AsyncValidationRule from fly_core
+typedef AsyncValidationRule<T> = fly_core.AsyncValidationRule<T>;
 
 /// Validation rule for network connectivity
-class NetworkValidationRule extends AsyncValidationRule<String> {
+class NetworkValidationRule extends fly_core.AsyncValidationRule<String> {
   NetworkValidationRule({this.requiredHosts = const ['pub.dev']});
 
   final List<String> requiredHosts;
+
+  @override
+  bool get enableCache => true;
 
   @override
   Future<ValidationResult> validate(String host, {String? fieldName}) async {
@@ -197,10 +167,19 @@ class NetworkValidationRule extends AsyncValidationRule<String> {
 
   @override
   int get priority => 700;
+
+  @override
+  bool shouldRun(String value) => value.isNotEmpty;
 }
 
 /// Validation rule for environment prerequisites
-class EnvironmentValidationRule extends AsyncValidationRule<void> {
+class EnvironmentValidationRule extends fly_core.AsyncValidationRule<void> {
+  @override
+  bool get enableCache => true;
+
+  @override
+  bool shouldRun(void value) => true;
+
   @override
   Future<ValidationResult> validate(void value, {String? fieldName}) async {
     const cacheKey = 'environment_check';
@@ -244,10 +223,16 @@ class EnvironmentValidationRule extends AsyncValidationRule<void> {
 }
 
 /// Validation rule for template existence
-class TemplateValidationRule extends AsyncValidationRule<String> {
+class TemplateValidationRule extends fly_core.AsyncValidationRule<String> {
   TemplateValidationRule(this.context);
 
   final CommandContext context;
+
+  @override
+  bool get enableCache => true;
+
+  @override
+  bool shouldRun(String value) => value.isNotEmpty;
 
   @override
   Future<ValidationResult> validate(
@@ -325,12 +310,18 @@ class DirectoryValidationRule implements ValidationRule<String> {
 
   @override
   int get priority => 400;
+
+  @override
+  bool shouldRun(String value) => value.isNotEmpty;
 }
 
 /// Validation rule for Flutter project structure
 class FlutterProjectValidationRule implements ValidationRule<String> {
   @override
   bool get isAsync => false;
+
+  @override
+  bool shouldRun(String value) => value.isNotEmpty;
 
   @override
   Future<ValidationResult> validate(
@@ -356,6 +347,9 @@ class FlutterProjectValidationRule implements ValidationRule<String> {
 class PlatformValidationRule implements ValidationRule<List<String>> {
   @override
   bool get isAsync => false;
+
+  @override
+  bool shouldRun(List<String> value) => value.isNotEmpty;
 
   @override
   Future<ValidationResult> validate(

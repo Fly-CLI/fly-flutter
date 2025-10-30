@@ -226,7 +226,7 @@ flutter:
         expect(output['command'] as String, equals('schema export'));
         expect(output['message'] as String, isA<String>());
         expect(output['data'], isA<Map<String, dynamic>>());
-        expect((output['data'] as Map<String, dynamic>)['cli_name'], equals('fly'));
+        expect((output['data'] as Map<String, dynamic>)['cli_name'], equals('flutter'));
         expect((output['data'] as Map<String, dynamic>)['commands'], isA<List<dynamic>>());
         expect(((output['data'] as Map<String, dynamic>)['commands'] as List<dynamic>).length, greaterThan(0));
       });

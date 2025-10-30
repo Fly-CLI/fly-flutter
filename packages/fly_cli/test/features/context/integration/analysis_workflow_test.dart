@@ -139,7 +139,7 @@ void main() {
         // Verify project section
         final project = context['project'] as Map<String, dynamic>;
         expect(project['name'], equals('fly_test'));
-        expect(project['type'], equals('fly'));
+        expect(project['type'], equals('flutter'));
         expect(project['is_fly_project'], isTrue);
         expect(project['has_manifest'], isTrue);
         expect(project['template'], equals('riverpod'));
@@ -154,7 +154,7 @@ void main() {
 
         // Verify architecture section
         final architecture = context['architecture'] as Map<String, dynamic>;
-        expect(architecture['pattern'], equals('fly'));
+        expect(architecture['pattern'], equals('flutter'));
 
         // Verify suggestions section has Fly-specific suggestions
         final suggestions = context['suggestions'] as List<dynamic>;
@@ -164,7 +164,7 @@ void main() {
 
       test('should handle problematic project with conflicts', () async {
         final projectDir = await AnalysisTestFixtures.createProblematicProject(tempDir);
-        final config = const ContextGeneratorConfig(
+        const config = ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
           includeArchitecture: true,

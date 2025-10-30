@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
+import 'package:fly_networking/src/interceptors/circuit_breaker_interceptor.dart';
 import 'package:fly_networking/src/interceptors/error_interceptor.dart';
 import 'package:fly_networking/src/interceptors/logging_interceptor.dart';
 import 'package:fly_networking/src/interceptors/retry_interceptor.dart';
 import 'package:fly_networking/src/models/api_error.dart';
 import 'package:fly_networking/src/models/api_response.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'api_client.g.dart';
 
@@ -29,9 +29,33 @@ class ApiClient extends _$ApiClient {
   void _setupInterceptors() {
     _dio.interceptors.addAll([
       LoggingInterceptor(),
-      RetryInterceptor(),
+      RetryInterceptor(dio: _dio),
       ErrorInterceptor(),
     ]);
+  }
+
+  /// Enable optional circuit breaker interceptor
+  void enableCircuitBreaker({
+    int failureThreshold = 5,
+    int windowSize = 10,
+    Duration openDuration = const Duration(seconds: 30),
+    Set<int> evaluateOnStatus = const {500, 502, 503, 504},
+  }) {
+    // Avoid duplicate addition
+    final alreadyAdded = _dio.interceptors.any(
+      (i) => i is CircuitBreakerInterceptor,
+    );
+    if (alreadyAdded) return;
+    _dio.interceptors.insert(
+      1, // after logging, before retry
+      CircuitBreakerInterceptor(
+        failureThreshold: failureThreshold,
+        windowSize: windowSize,
+        openDuration: openDuration,
+        evaluateOnStatus: evaluateOnStatus,
+        enabled: true,
+      ),
+    );
   }
   
   /// Configure the base URL for all requests

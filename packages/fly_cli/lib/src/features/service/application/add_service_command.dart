@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
@@ -9,6 +11,7 @@ import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:path/path.dart' as path;
 
 /// AddServiceCommand using new architecture
 class AddServiceCommand extends FlyCommand {
@@ -224,19 +227,15 @@ class AddServiceCommand extends FlyCommand {
     final withInterceptors = argResults!['with-interceptors'] as bool? ?? false;
     final baseUrl = argResults!['base-url'] as String? ?? 'https://api.example.com';
 
-    // Use PathResolver to resolve component path
-    final componentPathResult = await context.pathResolver.resolveComponentPath(
+    // Resolve the target output directory, prioritizing --output-dir and FLY_OUTPUT_DIR.
+    final outputDirResult = await context.pathResolver.resolveOutputDirectory(
       context,
-      serviceName,
-      'service',
-      feature,
       outputDir,
     );
-
-    if (!componentPathResult.success) {
+    if (!outputDirResult.success) {
       return CommandResult.error(
-        message: 'Failed to resolve component path: ${componentPathResult.errors.join(', ')}',
-        suggestion: 'Check your project structure and output directory',
+        message: 'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
+        suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
           'add service',
@@ -244,8 +243,7 @@ class AddServiceCommand extends FlyCommand {
         ),
       );
     }
-
-    final componentPath = componentPathResult.path!;
+    final targetProjectDir = outputDirResult.path!.absolute;
 
     return _generateServiceWithMason(
       serviceName: serviceName,
@@ -255,7 +253,7 @@ class AddServiceCommand extends FlyCommand {
       withMocks: withMocks,
       withInterceptors: withInterceptors,
       baseUrl: baseUrl,
-      outputDir: componentPath.absolute,
+      outputDir: targetProjectDir,
     );
   }
 

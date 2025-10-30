@@ -2,18 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
-
-import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
-import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 
 import 'mock_logger.dart';
 
@@ -58,11 +56,17 @@ class CommandTestHelper {
     Map<String, String>? environment,
   }) async {
     // Set test mode to skip expensive initialization
-    final testEnvironment = {
-      'FLY_TEST_MODE': 'true',
-      ...?environment,
-    };
-    
+    // Derive output directory from args or workingDirectory and set FLY_OUTPUT_DIR
+    String? parsedOutputDir;
+    for (final a in args) {
+      if (a.startsWith('--output-dir=')) {
+        parsedOutputDir = a.substring('--output-dir='.length);
+        break;
+      }
+    }
+
+    final effectiveOutputDir = parsedOutputDir ?? workingDirectory;
+
     // Ensure output format is JSON to parse results
     final finalArgs = List<String>.from(args);
     if (!finalArgs.contains('--output=json') && 
@@ -71,6 +75,15 @@ class CommandTestHelper {
         !finalArgs.contains('-f')) {
       finalArgs.add('--output=json');
     }
+
+    final testEnvironment = <String, String>{
+      'FLY_TEST_MODE': 'true',
+      if (finalArgs.contains('--output=json') ||
+          finalArgs.any((a) => a.startsWith('--output=json')))
+        'FLY_JSON_OUTPUT': 'true',
+      if (effectiveOutputDir != null) 'FLY_OUTPUT_DIR': effectiveOutputDir,
+      ...?environment,
+    };
 
     // Find the path to fly.dart
     // Try to find the workspace root by looking for a directory that contains packages/fly_cli/bin/fly.dart
@@ -177,32 +190,40 @@ class CommandTestHelper {
           metadata: jsonOutput['metadata'] as Map<String, dynamic>?,
         );
       } catch (e) {
-        // If parsing the entire stdout fails, try to find JSON within the output
+        // If parsing the entire stdout fails, try to find CommandResult JSON within the output
         try {
           final lines = stdoutStr.split('\n');
-          String? jsonLine;
-          
-          for (final line in lines) {
-            if (line.trim().startsWith('{')) {
-              jsonLine = line.trim();
-              break;
+          Map<String, dynamic>? bestJson;
+
+          for (final rawLine in lines) {
+            final line = rawLine.trim();
+            if (!line.startsWith('{')) continue;
+            try {
+              final candidate = json.decode(line) as Map<String, dynamic>;
+              // Heuristic: prefer JSON objects that look like CommandResult
+              final hasSuccess = candidate.containsKey('success');
+              final hasMessage = candidate.containsKey('message') || candidate.containsKey('summary');
+              if (hasSuccess && hasMessage) {
+                // Keep the last valid JSON object encountered
+                bestJson = candidate;
+              }
+            } catch (_) {
+              // Not a JSON object we can use; continue scanning
             }
           }
-          
-          if (jsonLine != null) {
-            final jsonOutput = json.decode(jsonLine) as Map<String, dynamic>;
-            
-            // Convert JSON back to CommandResult
+
+          if (bestJson != null) {
+            final jsonOutput = bestJson;
             return CommandResult(
               success: jsonOutput['success'] as bool? ?? (exitCode == 0),
               command: jsonOutput['command'] as String? ?? _extractCommandName(args),
-              message: jsonOutput['message'] as String? ?? 'Command executed',
-              data: jsonOutput['data'] as Map<String, dynamic>?,
-              suggestion: jsonOutput['suggestion'] as String?,
-              metadata: jsonOutput['metadata'] as Map<String, dynamic>?,
+              message: (jsonOutput['message'] as String?) ?? (jsonOutput['summary'] as String?) ?? 'Command executed',
+              data: (jsonOutput['data'] as Map<String, dynamic>?) ?? (jsonOutput['details'] as Map<String, dynamic>?),
+              suggestion: jsonOutput['suggestion'] as String? ?? jsonOutput['recommendation'] as String?,
+              metadata: (jsonOutput['metadata'] as Map<String, dynamic>?) ?? (jsonOutput['context'] as Map<String, dynamic>?),
             );
           }
-        } catch (jsonExtractionError) {
+        } catch (_) {
           // JSON extraction also failed, continue to error handling
         }
         // If JSON parsing fails, check for error JSON in stderr
@@ -224,16 +245,12 @@ class CommandTestHelper {
           }
         }
         
-        // If JSON parsing fails, create result from exit code and output
+        // If JSON parsing fails, create result from exit code and avoid noisy logs in message
         return CommandResult(
           success: exitCode == 0,
           command: _extractCommandName(args),
-          message: stdoutStr.isNotEmpty 
-              ? stdoutStr
-              : (exitCode == 0 ? 'Command executed successfully' : 'Command failed'),
-          suggestion: exitCode != 0 && stderrStr.isNotEmpty
-              ? stderrStr
-              : null,
+          message: exitCode == 0 ? 'Command executed successfully' : 'Command failed',
+          suggestion: exitCode != 0 && stderrStr.isNotEmpty ? stderrStr : null,
         );
       }
     } else {
@@ -298,9 +315,16 @@ class CommandTestHelper {
   }
 
   /// Create a temporary directory for testing
-  static Directory createTempDir({String? prefix}) => Directory.systemTemp.createTempSync(
-      prefix ?? 'fly_test_',
-    );
+  static Directory createTempDir({String? prefix}) {
+    final root = Directory(path.join(Directory.current.path, 'test_generated'));
+    if (!root.existsSync()) {
+      root.createSync(recursive: true);
+    }
+    final id = DateTime.now().millisecondsSinceEpoch;
+    final dir = Directory(path.join(root.path, (prefix ?? 'fly_test_') + id.toString()));
+    dir.createSync(recursive: true);
+    return dir;
+  }
 
   /// Clean up a temporary directory
   static void cleanupTempDir(Directory dir) {

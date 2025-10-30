@@ -28,7 +28,7 @@ class CliTestHelper {
     };
     
         // Run command
-        return await Process.run(
+        return Process.run(
           'dart',
           ['run', flyDartPath, ...arguments],
           workingDirectory: testOutputDir.path,

@@ -4,23 +4,21 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import '../helpers/cli_test_helper.dart';
+import '../helpers/test_temp_dir.dart';
 
 void main() {
+  final temp = TestTempDir();
+
+  setUpAll(temp.initSuite);
+  setUp(temp.beforeEach);
+  tearDown(temp.afterEach);
+  tearDownAll(temp.cleanupSuite);
+
   group('Security Review', () {
-    late Directory tempDir;
     late CliTestHelper cli;
 
     setUp(() {
-      final testRunId = DateTime.now().millisecondsSinceEpoch;
-      tempDir = Directory('${Directory.current.path}/test_generated/security_$testRunId');
-      tempDir.createSync(recursive: true);
-      cli = CliTestHelper(tempDir);
-    });
-
-    tearDown(() {
-      if (tempDir.existsSync()) {
-        tempDir.deleteSync(recursive: true);
-      }
+      cli = CliTestHelper(temp.currentTestDir);
     });
 
     group('Input Validation Security', () {
@@ -106,7 +104,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
         
         // Verify files are created only in the project directory
@@ -114,7 +112,7 @@ void main() {
         expect(File(path.join(projectPath, 'lib', 'main.dart')).existsSync(), isTrue);
         
         // Verify no files are created outside the project directory
-        expect(File(path.join(tempDir.path, '..', 'malicious_file.txt')).existsSync(), isFalse);
+        expect(File(path.join(temp.currentTestDir.path, '..', 'malicious_file.txt')).existsSync(), isFalse);
       });
 
       test('directory traversal in file operations is prevented', () async {
@@ -124,13 +122,13 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         
         // Verify project files are created in correct location
         expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
         
         // Verify no files are created in parent directories
-        expect(File(path.join(tempDir.path, '..', 'pubspec.yaml')).existsSync(), isFalse);
+        expect(File(path.join(temp.currentTestDir.path, '..', 'pubspec.yaml')).existsSync(), isFalse);
       });
 
       test('file permissions are set correctly', () async {
@@ -140,7 +138,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         
         // Verify files are readable
         final pubspecFile = File(path.join(projectPath, 'pubspec.yaml'));
@@ -159,7 +157,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
         
         // Verify project was created successfully despite malicious organization
@@ -256,7 +254,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         
         // Check generated files for suspicious content
         final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
@@ -279,7 +277,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         
         // Check that project name is properly escaped in generated files
         final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
@@ -298,7 +296,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
       });
 
@@ -327,7 +325,7 @@ void main() {
 
         expect(result.exitCode, equals(0));
         
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
         
         // Verify project was created without spawning external processes
@@ -342,7 +340,7 @@ void main() {
         expect(result.exitCode, equals(0));
         
         // Verify no files were created in plan mode
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isFalse);
       });
     });

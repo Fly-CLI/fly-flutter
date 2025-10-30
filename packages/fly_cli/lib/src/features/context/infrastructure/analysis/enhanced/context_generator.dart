@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/context/domain/models/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/analyzer_interface.dart';
@@ -7,7 +8,7 @@ import 'package:fly_cli/src/features/context/infrastructure/analysis/base/utils.
 import 'package:fly_cli/src/features/context/infrastructure/analysis/enhanced/dependency_health_analyzer.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/unified/ast_analyzer.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/unified/unified_analyzers.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_core/src/retry/retry.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
@@ -34,15 +35,16 @@ class ContextGenerator {
     logger.info('📊 Running ${analyzers.length} analyzers in parallel...');
 
     // Run all analyzers in parallel with retry logic
-    final results = await RetryUtils.retryAll(
+    const retryExecutor = RetryExecutor(
+      policy: RetryPolicy.quick,
+    );
+    final results = await retryExecutor.retryAll(
       analyzers
           .map(
             (analyzer) =>
                 () => analyzer.analyze(projectDir, config),
           )
           .toList(),
-      maxRetries: 3,
-      initialDelay: const Duration(milliseconds: 100),
     );
 
     // Extract results with proper typing

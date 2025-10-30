@@ -1,8 +1,11 @@
 import 'dart:io';
-import 'package:path/path.dart' as path;
-import 'package:mason_logger/mason_logger.dart';
+
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/path_management/models/resolved_path.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/environment/env_var.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart' as path;
 
 /// Single source of truth for all path resolution in Fly CLI
 /// 
@@ -30,12 +33,12 @@ class PathResolver {
       String workingDir;
       
       // Check environment variables first
-      final flyOutputDir = Platform.environment['FLY_OUTPUT_DIR'];
+      final flyOutputDir = const EnvironmentManager().getString(EnvVar.flyOutputDir);
       if (flyOutputDir != null && flyOutputDir.isNotEmpty) {
         workingDir = path.normalize(flyOutputDir);
         logger.detail('Using FLY_OUTPUT_DIR: $workingDir');
       } else {
-        final pwd = Platform.environment['PWD'];
+        final pwd = const EnvironmentManager().getString(EnvVar.pwd);
         if (pwd != null && pwd.isNotEmpty) {
           workingDir = path.normalize(pwd);
           logger.detail('Using PWD: $workingDir');

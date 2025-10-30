@@ -4,23 +4,21 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import '../helpers/cli_test_helper.dart';
+import '../helpers/test_temp_dir.dart';
 
 void main() {
+  final temp = TestTempDir();
+
+  setUpAll(temp.initSuite);
+  setUp(temp.beforeEach);
+  tearDown(temp.afterEach);
+  tearDownAll(temp.cleanupSuite);
+
   group('Performance Testing', () {
-    late Directory tempDir;
     late CliTestHelper cli;
 
     setUp(() {
-      final testRunId = DateTime.now().millisecondsSinceEpoch;
-      tempDir = Directory('${Directory.current.path}/test_generated/performance_$testRunId');
-      tempDir.createSync(recursive: true);
-      cli = CliTestHelper(tempDir);
-    });
-
-    tearDown(() {
-      if (tempDir.existsSync()) {
-        tempDir.deleteSync(recursive: true);
-      }
+      cli = CliTestHelper(temp.currentTestDir);
     });
 
     group('Project Creation Performance', () {
@@ -40,7 +38,7 @@ void main() {
         expect(durationMs, lessThan(30000)); // 30 seconds max
 
         // Verify project was created
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
       });
 
@@ -60,7 +58,7 @@ void main() {
         expect(durationMs, lessThan(30000)); // 30 seconds max
 
         // Verify project was created
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
       });
 
@@ -75,7 +73,7 @@ void main() {
         
         // Verify all projects were created
         for (final projectName in projectNames) {
-          final projectPath = path.join(tempDir.path, projectName);
+          final projectPath = path.join(temp.currentTestDir.path, projectName);
           expect(Directory(projectPath).existsSync(), isTrue);
         }
       });
@@ -96,7 +94,7 @@ void main() {
         expect(durationMs, lessThan(5000)); // Plan mode should be very fast
 
         // Verify project was NOT created in plan mode
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isFalse);
       });
     });
@@ -141,7 +139,7 @@ void main() {
       late Directory testProject;
 
       setUp(() {
-        testProject = Directory(path.join(tempDir.path, 'test_project'));
+        testProject = Directory(path.join(temp.currentTestDir.path, 'test_project'));
         testProject.createSync();
         
         // Create a minimal Flutter project structure
@@ -217,7 +215,7 @@ flutter:
 
         // Verify all projects were created
         for (final projectName in projectNames) {
-          final projectPath = path.join(tempDir.path, projectName);
+          final projectPath = path.join(temp.currentTestDir.path, projectName);
           expect(Directory(projectPath).existsSync(), isTrue);
         }
       });
@@ -230,7 +228,7 @@ flutter:
         expect(result.exitCode, equals(0));
 
         // Verify project was created
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = path.join(temp.currentTestDir.path, projectName);
         expect(Directory(projectPath).existsSync(), isTrue);
       });
     });
@@ -239,13 +237,13 @@ flutter:
       test('file operations are efficient', () async {
         // Create multiple files
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(tempDir.path, 'test_file_$i.txt'));
+          final file = File(path.join(temp.currentTestDir.path, 'test_file_$i.txt'));
           file.writeAsStringSync('Test content $i');
         }
         
         // Verify files were created
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(tempDir.path, 'test_file_$i.txt'));
+          final file = File(path.join(temp.currentTestDir.path, 'test_file_$i.txt'));
           expect(file.existsSync(), isTrue);
         }
       });
@@ -253,13 +251,13 @@ flutter:
       test('directory operations are efficient', () async {
         // Create multiple directories
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(tempDir.path, 'test_dir_$i'));
+          final dir = Directory(path.join(temp.currentTestDir.path, 'test_dir_$i'));
           dir.createSync();
         }
         
         // Verify directories were created
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(tempDir.path, 'test_dir_$i'));
+          final dir = Directory(path.join(temp.currentTestDir.path, 'test_dir_$i'));
           expect(dir.existsSync(), isTrue);
         }
       });
@@ -267,7 +265,7 @@ flutter:
 
     group('Performance Optimization Tests', () {
       test('template loading optimization works', () async {
-        final templatesDir = path.join(tempDir.path, 'templates');
+        final templatesDir = path.join(temp.currentTestDir.path, 'templates');
         Directory(templatesDir).createSync();
         
         // Template optimization removed
@@ -278,7 +276,7 @@ flutter:
 
       test('file operations optimization works', () async {
         final filePaths = List.generate(50, (index) => 
-          path.join(tempDir.path, 'optimized_file_$index.txt'));
+          path.join(temp.currentTestDir.path, 'optimized_file_$index.txt'));
         
         // File optimization removed
         
@@ -294,11 +292,11 @@ flutter:
       });
 
       test('comprehensive optimization works', () async {
-        final templatesDir = path.join(tempDir.path, 'templates');
+        final templatesDir = path.join(temp.currentTestDir.path, 'templates');
         Directory(templatesDir).createSync();
         
         final filePaths = List.generate(20, (index) => 
-          path.join(tempDir.path, 'comprehensive_file_$index.txt'));
+          path.join(temp.currentTestDir.path, 'comprehensive_file_$index.txt'));
         
         // Comprehensive optimization removed
         
@@ -354,7 +352,7 @@ flutter:
         for (var i = 0; i < results.length; i++) {
           expect(results[i].exitCode, equals(0));
           
-          final projectPath = path.join(tempDir.path, 'stress_test_$i');
+          final projectPath = path.join(temp.currentTestDir.path, 'stress_test_$i');
           expect(Directory(projectPath).existsSync(), isTrue);
         }
       });

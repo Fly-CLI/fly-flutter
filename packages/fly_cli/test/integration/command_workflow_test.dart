@@ -274,6 +274,7 @@ void main() {
           'screen',
           'login',
           '--feature=auth',
+          '--output-dir=${projectDir.path}',
         ]);
         
         // Try to add same screen again
@@ -282,6 +283,7 @@ void main() {
           'screen',
           'login',
           '--feature=auth',
+          '--output-dir=${projectDir.path}',
         ]);
         
         // Should handle gracefully (either succeed or provide helpful error)
@@ -360,6 +362,7 @@ void main() {
           '--feature=auth',
           '--with-viewmodel',
           '--plan',
+          '--output-dir=${projectDir.path}',
         ]);
         
         expect(planResult.success, isTrue);
@@ -372,6 +375,7 @@ void main() {
           'login',
           '--feature=auth',
           '--with-viewmodel',
+          '--output-dir=${projectDir.path}',
         ]);
         
         expect(addResult.success, isTrue);
@@ -405,6 +409,7 @@ void main() {
           'screen',
           'home',
           '--feature=main',
+          '--output-dir=${projectDir.path}',
         ]);
         
         await CommandTestHelper.runCommand([
@@ -413,6 +418,7 @@ void main() {
           'api',
           '--feature=core',
           '--type=api',
+          '--output-dir=${projectDir.path}',
         ]);
         
         // Step 4: Check system health again

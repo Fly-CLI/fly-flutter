@@ -4,29 +4,27 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import '../helpers/cli_test_helper.dart';
+import '../helpers/test_temp_dir.dart';
 
 void main() {
+  final temp = TestTempDir();
+
+  setUpAll(temp.initSuite);
+  setUp(temp.beforeEach);
+  tearDown(temp.afterEach);
+  tearDownAll(temp.cleanupSuite);
+
   group('E2E Integration Tests', () {
-    late Directory tempDir;
     late CliTestHelper cli;
 
     setUp(() {
-      final testRunId = DateTime.now().millisecondsSinceEpoch;
-      tempDir = Directory('${Directory.current.path}/test_generated/e2e_$testRunId');
-      tempDir.createSync(recursive: true);
-      cli = CliTestHelper(tempDir);
-    });
-
-    tearDown(() {
-      if (tempDir.existsSync()) {
-        tempDir.deleteSync(recursive: true);
-      }
+      cli = CliTestHelper(temp.currentTestDir);
     });
 
     group('Project Creation E2E', () {
       test('create minimal project with all features', () async {
         const projectName = 'test_minimal_project';
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = temp.inCurrent(projectName);
 
         // Test project creation
         final result = await cli.createProject(
@@ -73,7 +71,7 @@ void main() {
 
       test('create riverpod project with all features', () async {
         const projectName = 'test_riverpod_project';
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = temp.inCurrent(projectName);
 
         // Test project creation
         final result = await cli.createProject(
@@ -136,7 +134,7 @@ void main() {
         expect(projectNameOutput, equals(projectName));
 
         // Verify project was NOT created in plan mode
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = temp.inCurrent(projectName);
         expect(Directory(projectPath).existsSync(), isFalse);
       });
 
@@ -160,11 +158,16 @@ void main() {
 
     group('Add Commands E2E', () {
       late Directory testProject;
+      late CliTestHelper addCli;
 
-      setUpAll(() {
-        testProject = Directory(path.join(tempDir.path, 'test_project'));
-        testProject.createSync();
-        
+      setUpAll(() async {
+        // Use suite-scoped directory to persist across tests in this group
+        testProject = Directory(temp.path('add_commands/test_project'));
+        if (await testProject.exists()) {
+          await testProject.delete(recursive: true);
+        }
+        await testProject.create(recursive: true);
+
         // Create a minimal Flutter project structure
         File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''
 name: test_project
@@ -189,10 +192,12 @@ flutter:
         
         Directory(path.join(testProject.path, 'lib')).createSync();
         Directory(path.join(testProject.path, 'test')).createSync();
+
+        addCli = CliTestHelper(testProject);
       });
 
       test('add screen command works', () async {
-        final result = await cli.addScreen(
+        final result = await addCli.addScreen(
           'test_screen',
           feature: 'home',
           type: 'generic',
@@ -217,7 +222,7 @@ flutter:
       });
 
       test('add service command works', () async {
-        final result = await cli.addService(
+        final result = await addCli.addService(
           'test_service',
           feature: 'core',
           type: 'api',
@@ -282,7 +287,7 @@ flutter:
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final cliName = data['cli_name'] as String;
-        expect(cliName, equals('fly'));
+        expect(cliName, equals('flutter'));
         final commands = data['commands'] as List<dynamic>;
         expect(commands, isA<List<dynamic>>());
         expect(commands.length, greaterThan(0));
@@ -290,7 +295,7 @@ flutter:
 
       test('context export command works', () async {
         // Create a test Flutter project
-        final testProject = Directory(path.join(tempDir.path, 'context_test'));
+        final testProject = Directory(temp.inCurrent('context_test'));
         testProject.createSync();
         
         File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''
@@ -412,7 +417,7 @@ flutter:
 
       test('file operations work correctly', () async {
         const projectName = 'platform_test_project';
-        final projectPath = path.join(tempDir.path, projectName);
+        final projectPath = temp.inCurrent(projectName);
 
         final result = await cli.createProject(projectName);
 

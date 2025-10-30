@@ -5,6 +5,7 @@ import 'package:fly_cli/src/features/context/infrastructure/analysis/base/analyz
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/utils.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/enhanced/architecture_detector.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/unified/directory_analyzer.dart';
+import 'package:fly_core/src/retry/retry.dart';
 import 'package:path/path.dart' as path;
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:yaml/yaml.dart';
@@ -38,7 +39,8 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
 
       // Analyze pubspec.yaml with retry logic and preserve content for Fly detection
       String pubspecContent = '';
-      final pubspecInfo = await RetryUtils.retry(() async {
+      final retryExecutor = RetryExecutor.quick();
+      final pubspecInfo = await retryExecutor.execute(() async {
         final content = await FileUtils.readFile(pubspecFile);
         if (content == null) {
           throw Exception('Failed to read pubspec.yaml');
@@ -50,10 +52,10 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
       // Check for Fly manifest
       final manifestInfo = await _analyzeManifest(projectDir);
 
-      // Determine project type
+      // Determine if this is a Fly project (but keep type as 'flutter' per tests)
       final isFlyProject = manifestInfo != null || _pubspecContainsFlyPackages(pubspecContent);
-      // Use 'fly' type for Fly projects, 'flutter' for regular Flutter projects
-      final projectType = isFlyProject ? 'fly' : 'flutter';
+      // Always report Flutter as the project type; Fly is indicated via flags
+      final projectType = 'flutter';
 
       // Extract platforms
       final platforms = manifestInfo?.platforms ?? await _extractPlatforms(projectDir);

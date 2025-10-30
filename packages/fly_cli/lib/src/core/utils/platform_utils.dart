@@ -1,4 +1,7 @@
 import 'dart:io';
+
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/environment/env_var.dart';
 import 'package:path/path.dart' as path;
 
 /// Cross-platform utility functions for Fly CLI
@@ -22,9 +25,9 @@ class PlatformUtils {
   /// Get user home directory
   static Future<String> getUserHome() async {
     if (isWindows) {
-      return Platform.environment['USERPROFILE'] ?? '';
+      return const EnvironmentManager().getString(EnvVar.userProfile) ?? '';
     } else {
-      return Platform.environment['HOME'] ?? '';
+      return const EnvironmentManager().getString(EnvVar.home) ?? '';
     }
   }
 
@@ -49,7 +52,8 @@ class PlatformUtils {
 
   /// Get default cache directory synchronously (for constructor)
   static String getDefaultCacheDirectory() {
-    final home = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '';
+    const env = EnvironmentManager();
+    final home = env.getString(EnvVar.home) ?? env.getString(EnvVar.userProfile) ?? '';
     if (isWindows) {
       return path.join(home, 'AppData', 'Local', 'fly_cli', 'cache');
     } else if (isMacOS) {
@@ -76,15 +80,19 @@ class PlatformUtils {
   /// Get shell for current platform
   static String getShell() {
     if (isWindows) {
-      return Platform.environment['COMSPEC'] ?? 'powershell.exe';
+      final env = const EnvironmentManager();
+      return env.getString(EnvVar.comspec) 
+          ?? env.getString(EnvVar.comSpec) 
+          ?? 'powershell.exe';
     } else {
-      return Platform.environment['SHELL'] ?? '/bin/bash';
+      return const EnvironmentManager().getString(EnvVar.shell) ?? '/bin/bash';
     }
   }
 
   /// Detect the current shell type
   static String detectShell() {
-    final shell = Platform.environment['SHELL'] ?? Platform.environment['ComSpec'];
+    final env = const EnvironmentManager();
+    final shell = env.getString(EnvVar.shell) ?? env.getString(EnvVar.comSpec);
     if (shell == null) {
       return 'unknown';
     }

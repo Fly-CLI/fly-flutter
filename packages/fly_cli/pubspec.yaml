@@ -34,6 +34,8 @@ dependencies:
   freezed_annotation: ^3.0.0
   analyzer: ^7.0.0
   json_annotation: ^4.9.0
+  fly_core:
+    path: ../fly_core
 
 dev_dependencies:
   test: ^1.24.6

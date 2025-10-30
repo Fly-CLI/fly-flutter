@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/file_operations/file_operations.dart';
 
 import 'package:fly_cli/src/core/templates/brick_registry.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
@@ -83,18 +86,31 @@ class BrickCacheManager {
   BrickCacheManager({
     required this.logger,
     String? cacheDirectory,
-  }) : _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory();
+    FileReader? fileReader,
+    FileWriter? fileWriter,
+    ChecksumCalculator? checksumCalculator,
+    DirectoryManager? directoryManager,
+  })  : _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory(),
+        _fileReader = fileReader ?? const FileReader(),
+        _fileWriter = fileWriter ?? const FileWriter(),
+        _checksumCalculator = checksumCalculator ?? const ChecksumCalculator(),
+        _directoryManager = directoryManager ?? const DirectoryManager();
 
   final Logger logger;
   final String _cacheDirectory;
+  final FileReader _fileReader;
+  final FileWriter _fileWriter;
+  final ChecksumCalculator _checksumCalculator;
+  final DirectoryManager _directoryManager;
 
   /// Cache duration for brick metadata
   static const Duration cacheDuration = Duration(days: 7);
 
   /// Get default cache directory
   static String _getDefaultCacheDirectory() {
-    final homeDir = Platform.environment['HOME'] ??
-        Platform.environment['USERPROFILE'] ??
+    const env = EnvironmentManager();
+    final homeDir = env.getString(EnvVar.home) ??
+        env.getString(EnvVar.userProfile) ??
         '';
     return path.join(homeDir, '.fly', 'cache', 'bricks');
   }
@@ -103,7 +119,7 @@ class BrickCacheManager {
   Future<void> cacheBrickRegistry(List<BrickInfo> bricks) async {
     try {
       final cacheFile = File(path.join(_cacheDirectory, 'registry.json'));
-      await cacheFile.parent.create(recursive: true);
+      await _directoryManager.ensureExists(cacheFile.parent.path);
 
       final cacheData = {
         'bricks': bricks.map((brick) => brick.toJson()).toList(),
@@ -113,8 +129,16 @@ class BrickCacheManager {
         'brick_count': bricks.length,
       };
 
-      await cacheFile.writeAsString(json.encode(cacheData));
-      logger.detail('Cached brick registry with ${bricks.length} bricks');
+      final success = await _fileWriter.writeFileAtomic(
+        cacheFile,
+        json.encode(cacheData),
+      );
+      
+      if (success) {
+        logger.detail('Cached brick registry with ${bricks.length} bricks');
+      } else {
+        logger.warn('Failed to write brick registry cache');
+      }
     } catch (e) {
       logger.warn('Failed to cache brick registry: $e');
     }
@@ -124,11 +148,15 @@ class BrickCacheManager {
   Future<List<BrickInfo>?> loadBrickRegistry() async {
     try {
       final cacheFile = File(path.join(_cacheDirectory, 'registry.json'));
-      if (!await cacheFile.exists()) {
+      if (!await _fileReader.isReadable(cacheFile)) {
         return null;
       }
 
-      final content = await cacheFile.readAsString();
+      final content = await _fileReader.readFile(cacheFile);
+      if (content == null) {
+        return null;
+      }
+      
       final data = json.decode(content) as Map<String, dynamic>;
 
       // Check cache validity
@@ -159,10 +187,18 @@ class BrickCacheManager {
     try {
       final cacheFile = File(path.join(_cacheDirectory, 'plans',
           '${plan.brickName}_${plan.brickType.name}.json'));
-      await cacheFile.parent.create(recursive: true);
+      await _directoryManager.ensureExists(cacheFile.parent.path);
 
-      await cacheFile.writeAsString(json.encode(plan.toJson()));
-      logger.detail('Cached generation plan for ${plan.brickName}');
+      final success = await _fileWriter.writeFileAtomic(
+        cacheFile,
+        json.encode(plan.toJson()),
+      );
+      
+      if (success) {
+        logger.detail('Cached generation plan for ${plan.brickName}');
+      } else {
+        logger.warn('Failed to write generation plan cache');
+      }
     } catch (e) {
       logger.warn('Failed to cache generation plan: $e');
     }
@@ -174,11 +210,15 @@ class BrickCacheManager {
     try {
       final cacheFile = File(path.join(
           _cacheDirectory, 'plans', '${brickName}_${brickType.name}.json'));
-      if (!await cacheFile.exists()) {
+      if (!await _fileReader.isReadable(cacheFile)) {
         return null;
       }
 
-      final content = await cacheFile.readAsString();
+      final content = await _fileReader.readFile(cacheFile);
+      if (content == null) {
+        return null;
+      }
+      
       final data = json.decode(content) as Map<String, dynamic>;
 
       return GenerationPlan.fromJson(data);
@@ -194,7 +234,7 @@ class BrickCacheManager {
     try {
       final cacheFile =
           File(path.join(_cacheDirectory, 'validations', '$brickName.json'));
-      await cacheFile.parent.create(recursive: true);
+      await _directoryManager.ensureExists(cacheFile.parent.path);
 
       final cacheData = {
         'is_valid': result.isValid,
@@ -203,8 +243,16 @@ class BrickCacheManager {
         'cached_at': DateTime.now().toIso8601String(),
       };
 
-      await cacheFile.writeAsString(json.encode(cacheData));
-      logger.detail('Cached validation result for $brickName');
+      final success = await _fileWriter.writeFileAtomic(
+        cacheFile,
+        json.encode(cacheData),
+      );
+      
+      if (success) {
+        logger.detail('Cached validation result for $brickName');
+      } else {
+        logger.warn('Failed to write validation result cache');
+      }
     } catch (e) {
       logger.warn('Failed to cache validation result: $e');
     }
@@ -215,11 +263,15 @@ class BrickCacheManager {
     try {
       final cacheFile =
           File(path.join(_cacheDirectory, 'validations', '$brickName.json'));
-      if (!await cacheFile.exists()) {
+      if (!await _fileReader.isReadable(cacheFile)) {
         return null;
       }
 
-      final content = await cacheFile.readAsString();
+      final content = await _fileReader.readFile(cacheFile);
+      if (content == null) {
+        return null;
+      }
+      
       final data = json.decode(content) as Map<String, dynamic>;
 
       // Check cache validity (validation results expire after 1 day)
@@ -245,11 +297,15 @@ class BrickCacheManager {
   Future<bool> isCacheValid() async {
     try {
       final cacheFile = File(path.join(_cacheDirectory, 'registry.json'));
-      if (!await cacheFile.exists()) {
+      if (!await _fileReader.isReadable(cacheFile)) {
         return false;
       }
 
-      final content = await cacheFile.readAsString();
+      final content = await _fileReader.readFile(cacheFile);
+      if (content == null) {
+        return false;
+      }
+      
       final data = json.decode(content) as Map<String, dynamic>;
 
       final cachedAt = DateTime.parse(data['cached_at'] as String);
@@ -264,9 +320,8 @@ class BrickCacheManager {
   /// Clear all cached data
   Future<void> clearCache() async {
     try {
-      final cacheDir = Directory(_cacheDirectory);
-      if (await cacheDir.exists()) {
-        await cacheDir.delete(recursive: true);
+      if (await _directoryManager.exists(_cacheDirectory)) {
+        await _directoryManager.delete(_cacheDirectory, recursive: true);
         logger.info('Cleared brick cache');
       }
     } catch (e) {
@@ -277,9 +332,9 @@ class BrickCacheManager {
   /// Clear specific cache type
   Future<void> clearCacheType(String type) async {
     try {
-      final typeDir = Directory(path.join(_cacheDirectory, type));
-      if (await typeDir.exists()) {
-        await typeDir.delete(recursive: true);
+      final typeDir = path.join(_cacheDirectory, type);
+      if (await _directoryManager.exists(typeDir)) {
+        await _directoryManager.delete(typeDir, recursive: true);
         logger.info('Cleared $type cache');
       }
     } catch (e) {
@@ -290,8 +345,7 @@ class BrickCacheManager {
   /// Get cache statistics
   Future<Map<String, dynamic>> getCacheStats() async {
     try {
-      final cacheDir = Directory(_cacheDirectory);
-      if (!await cacheDir.exists()) {
+      if (!await _directoryManager.exists(_cacheDirectory)) {
         return {
           'exists': false,
           'total_size_bytes': 0,
@@ -300,20 +354,23 @@ class BrickCacheManager {
         };
       }
 
-      var totalSize = 0;
-      var fileCount = 0;
+      final totalSize = await _directoryManager.getSize(_cacheDirectory);
+      final fileCount = await _directoryManager.getFileCount(
+        _cacheDirectory,
+        recursive: true,
+      );
+
+      // Get directory breakdown
       final directories = <String, int>{};
+      final files = await _directoryManager.listFiles(
+        _cacheDirectory,
+        recursive: true,
+      );
 
-      await for (final entity in cacheDir.list(recursive: true)) {
-        if (entity is File) {
-          totalSize += await entity.length();
-          fileCount++;
-
-          final relativePath =
-              path.relative(entity.path, from: _cacheDirectory);
-          final dir = path.dirname(relativePath);
-          directories[dir] = (directories[dir] ?? 0) + 1;
-        }
+      for (final file in files) {
+        final relativePath = path.relative(file.path, from: _cacheDirectory);
+        final dir = path.dirname(relativePath);
+        directories[dir] = (directories[dir] ?? 0) + 1;
       }
 
       return {
@@ -334,9 +391,11 @@ class BrickCacheManager {
 
   /// Calculate checksum for brick list
   Future<String> _calculateChecksum(List<BrickInfo> bricks) async {
-    final names = bricks.map((b) => b.name).toList()..sort();
-    final versions = bricks.map((b) => b.version).toList()..sort();
-    return '${names.join(',')}-${versions.join(',')}';
+    // Convert to list of strings for checksum calculation
+    final data = bricks.map((b) => b.toJson()).toList();
+    return _checksumCalculator.calculateForList(
+      data.map((json) => json.toString()).toList(),
+    );
   }
 
   /// Get cache directory path

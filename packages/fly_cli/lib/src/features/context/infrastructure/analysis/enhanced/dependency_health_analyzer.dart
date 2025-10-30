@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/features/context/domain/models/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analysis/base/utils.dart';
+import 'package:fly_core/src/retry/retry.dart';
 
 /// Enhanced dependency health analyzer with parallel API calls and caching
 class DependencyHealthAnalyzer {
@@ -51,7 +52,8 @@ class DependencyHealthAnalyzer {
     final futures = dependencies.map((dependency) => 
         () => _analyzeDependency(dependency)).toList();
     
-    final results = await RetryUtils.retryAll<DependencyHealth>(futures);
+    final retryExecutor = RetryExecutor.quick();
+    final results = await retryExecutor.retryAll<DependencyHealth>(futures);
     
     return results.whereType<DependencyHealth>().toList();
   }

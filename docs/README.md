@@ -104,3 +104,10 @@ The documentation is automatically deployed to GitHub Pages on every push to the
 - **Last updated** timestamps
 - **Version switching** (when multiple versions exist)
 - **Feedback collection** forms
+
+## Networking and Logging Quick Reference
+
+- Retry policy: idempotent methods by default; POST retried only with `Idempotency-Key`.
+- Retryable statuses: 408, 429, 500, 502, 503, 504; honors `Retry-After`.
+- Circuit breaker: optional; enable via `ApiClient.enableCircuitBreaker()`.
+- Logging: structured, latency included; sensitive headers redacted.

@@ -1,6 +1,7 @@
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 
 /// Middleware that cannot be skipped and always runs
 /// 
@@ -75,12 +76,17 @@ class DryRunMandatoryMiddleware extends MandatoryMiddleware {
     
     // Also check if --plan flag is in the raw arguments as a fallback
     final hasPlanFlag = context.argResults.arguments.contains('--plan') || 
-                       context.argResults.options.contains('plan');
+                       (context.argResults.options.contains('plan') && context.argResults['plan'] == true);
     
     if (planMode || hasPlanFlag) {
+      // Get command name from argResults or fallback
+      final cmdName = context.argResults.command?.name ?? 
+                     (context is CommandContextImpl ? (context as CommandContextImpl).commandName : null) ?? 
+                     'unknown';
+      
       // Short-circuit ALL subsequent operations when plan mode is active
       return CommandResult.success(
-        command: context.argResults.command?.name ?? 'unknown',
+        command: cmdName,
         message: 'Execution plan generated (dry-run) - showing estimated files and duration',
         data: {
           'estimated_files': _estimateFiles(context),
@@ -92,7 +98,7 @@ class DryRunMandatoryMiddleware extends MandatoryMiddleware {
         },
         nextSteps: [
           NextStep(
-            command: 'fly ${context.argResults.command?.name ?? 'command'} [args]',
+            command: 'fly $cmdName [args]',
             description: 'Run the command without --plan to execute',
           ),
         ],

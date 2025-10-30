@@ -66,7 +66,7 @@ void main() {
       test('should create Fly project', () {
         const projectInfo = ProjectInfo(
           name: 'fly_project',
-          type: 'fly',
+          type: 'flutter',
           version: '1.0.0+1',
           template: 'riverpod',
           organization: 'test_org',
@@ -75,7 +75,7 @@ void main() {
         );
 
         expect(projectInfo.name, equals('fly_project'));
-        expect(projectInfo.type, equals('fly'));
+        expect(projectInfo.type, equals('flutter'));
         expect(projectInfo.template, equals('riverpod'));
         expect(projectInfo.organization, equals('test_org'));
         expect(projectInfo.isFlyProject, isTrue);

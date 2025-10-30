@@ -8,9 +8,11 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.da
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/mandatory_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_core/src/validation/validation.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Enhanced base command class following SOLID principles
@@ -93,6 +95,18 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   @override
   Future<int> run() async {
     try {
+      // Ensure the context reflects the current command's parsed arguments
+      // so that middleware and validators see the correct flags (e.g., --plan, --output)
+      try {
+        if (context is CommandContextImpl && argResults != null) {
+          final contextImpl = context as CommandContextImpl;
+          contextImpl.argResults = argResults!;
+          contextImpl.commandName = name;
+        }
+      } catch (_) {
+        // Best-effort; continue even if context can't be updated
+      }
+
       // 1. Validate middleware pipeline
       middlewarePipeline.validate();
 
@@ -154,8 +168,9 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     // Use context.argResults as fallback if Command.argResults is null
     // This allows testing commands without CommandRunner
     final effectiveArgResults = argResults ?? context.argResults;
+    
     if (effectiveArgResults == null) {
-      return ValidationResult.failure(['Command arguments not available']);
+      return ValidationResult.failure(['No command arguments available']);
     }
 
     for (final validator in applicableValidators) {

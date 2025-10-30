@@ -1,4 +1,7 @@
 import 'dart:io';
+
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/environment/env_var.dart';
 import 'package:path/path.dart' as path;
 import 'package:pubspec_parse/pubspec_parse.dart';
 
@@ -105,7 +108,7 @@ class VersionUtils {
     }
 
     // Try to get from environment variable (set during build)
-    _cachedBuildNumber = Platform.environment['BUILD_NUMBER'];
+    _cachedBuildNumber = const EnvironmentManager().getString(EnvVar.buildNumber);
     return _cachedBuildNumber;
   }
 
@@ -133,7 +136,7 @@ class VersionUtils {
   /// Get build date
   static String getBuildDate() {
     // Try to get from environment variable (set during build)
-    final buildDate = Platform.environment['BUILD_DATE'];
+    final buildDate = const EnvironmentManager().getString(EnvVar.buildDate);
     if (buildDate != null) {
       return buildDate;
     }

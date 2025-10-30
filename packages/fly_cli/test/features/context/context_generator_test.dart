@@ -58,7 +58,7 @@ void main() {
 
         final project = context['project'] as Map<String, dynamic>;
         expect(project['name'], equals('fly_test'));
-        expect(project['type'], equals('fly'));
+        expect(project['type'], equals('flutter'));
         expect(project['is_fly_project'], isTrue);
         expect(project['has_manifest'], isTrue);
       });

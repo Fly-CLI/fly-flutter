@@ -111,6 +111,7 @@ This analysis provides a complete evaluation of the Fly CLI architecture's readi
 
 ### Existing Architecture Docs
 - [Command System Architecture](../architecture/command-system.md)
+- [Networking Guarantees](../configuration.md)
 - [Features README](../features/README.md)
 - [Core Components](../core/)
 

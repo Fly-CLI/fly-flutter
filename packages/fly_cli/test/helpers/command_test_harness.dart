@@ -1,6 +1,7 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/dependency_injection/domain/service_container.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
@@ -20,7 +21,11 @@ class CommandTestHarness {
     container..registerSingleton<Logger>(MockLogger())
     ..registerSingleton<TemplateManager>(MockTemplateManager())
     ..registerSingleton<SystemChecker>(MockSystemChecker())
-    ..registerSingleton<InteractivePrompt>(MockInteractivePrompt());
+    ..registerSingleton<InteractivePrompt>(MockInteractivePrompt())
+    ..registerSingleton<PathResolver>(PathResolver(
+      logger: container.get<Logger>(),
+      isDevelopment: true,
+    ));
   }
   
   /// Create a mock command context
@@ -30,6 +35,7 @@ class CommandTestHarness {
       templateManager: container.get<TemplateManager>(),
       systemChecker: container.get<SystemChecker>(),
       interactivePrompt: container.get<InteractivePrompt>(),
+      pathResolver: container.get<PathResolver>(),
       config: <String, dynamic>{},
       environment: Environment.current(),
       workingDirectory: '/test/project',
