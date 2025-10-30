@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/command_context.dart';
+import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:fly_core/src/validation/validation.dart' as fly_core;
 
 /// Re-export ValidationRule and ValidationResult from fly_core for backward compatibility
@@ -247,7 +248,7 @@ class TemplateValidationRule extends fly_core.AsyncValidationRule<String> {
 
     try {
       final templates = await context.templateManager.getAvailableTemplates();
-      final templateNames = templates.map((t) => t.name).toList();
+      final templateNames = templates.map((TemplateInfo t) => t.name).toList();
       final validationResult = templateNames.contains(templateName)
           ? ValidationResult.success()
           : ValidationResult.failure([

@@ -1,12 +1,12 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
-import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
-import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
-import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
-import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
+import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
+import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';
+import 'package:fly_cli/src/features/completion/generators/powershell_generator.dart';
+import 'package:fly_cli/src/features/completion/generators/zsh_generator.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';

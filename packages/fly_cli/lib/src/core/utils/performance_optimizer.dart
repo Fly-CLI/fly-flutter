@@ -1,275 +1,413 @@
-import 'dart:io';
-
+import 'dart:async';
+import 'dart:collection';
+import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart' as path;
 
-/// Performance optimization utilities for Fly CLI
-class PerformanceOptimizer {
-  PerformanceOptimizer({
-    required this.logger,
-  });
-  
-  final Logger logger;
-  
-  /// Optimize template loading with caching
-  Future<void> optimizeTemplateLoading(String templatesDirectory) async {
-    logger.info('🚀 Optimizing template loading...');
+import 'package:fly_cli/src/core/command_foundation/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
+
+import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+
+/// Performance metrics collector
+class PerformanceMetrics {
+  PerformanceMetrics();
+
+  final Map<String, List<int>> _executionTimes = {};
+  final Map<String, int> _executionCounts = {};
+  final Map<String, List<String>> _errors = {};
+
+  /// Record command execution time
+  void recordExecutionTime(String commandName, int milliseconds) {
+    _executionTimes.putIfAbsent(commandName, () => []).add(milliseconds);
+    _executionCounts[commandName] = (_executionCounts[commandName] ?? 0) + 1;
+  }
+
+  /// Record command error
+  void recordError(String commandName, String error) {
+    _errors.putIfAbsent(commandName, () => []).add(error);
+  }
+
+  /// Get average execution time for a command
+  double getAverageExecutionTime(String commandName) {
+    final times = _executionTimes[commandName];
+    if (times == null || times.isEmpty) return 0.0;
     
-    try {
-      final templatesDir = Directory(templatesDirectory);
-      if (!await templatesDir.exists()) {
-        logger.warn('Templates directory does not exist: $templatesDirectory');
-        return;
-      }
-      
-      // Pre-load template metadata
-      final templates = <String, Map<String, dynamic>>{};
-      
-      await for (final entity in templatesDir.list()) {
-        if (entity is Directory) {
-          final templateName = path.basename(entity.path);
-          final templateYamlPath = path.join(entity.path, 'template.yaml');
-          final templateYamlFile = File(templateYamlPath);
-          
-          if (await templateYamlFile.exists()) {
-            try {
-              final content = await templateYamlFile.readAsString();
-              final yaml = _parseYaml(content);
-              templates[templateName] = yaml;
-            } catch (e) {
-              logger.warn('Failed to parse template $templateName: $e');
-            }
-          }
-        }
-      }
-      
-      logger.info('✅ Pre-loaded ${templates.length} templates');
-    } catch (e) {
-      logger.warn('Failed to optimize template loading: $e');
+    return times.reduce((a, b) => a + b) / times.length;
+  }
+
+  /// Get execution count for a command
+  int getExecutionCount(String commandName) {
+    return _executionCounts[commandName] ?? 0;
+  }
+
+  /// Get error count for a command
+  int getErrorCount(String commandName) {
+    return _errors[commandName]?.length ?? 0;
+  }
+
+  /// Get all metrics
+  Map<String, dynamic> getAllMetrics() {
+    final metrics = <String, dynamic>{};
+    
+    for (final command in _executionTimes.keys) {
+      metrics[command] = {
+        'execution_count': getExecutionCount(command),
+        'average_time_ms': getAverageExecutionTime(command),
+        'error_count': getErrorCount(command),
+        'success_rate': _calculateSuccessRate(command),
+      };
     }
+    
+    return metrics;
   }
-  
-  /// Optimize file operations with batching
-  Future<void> optimizeFileOperations(List<String> filePaths) async {
-    logger.info('📁 Optimizing file operations...');
-    
-    try {
-      // Group files by directory for batch operations
-      final filesByDir = <String, List<String>>{};
-      
-      for (final filePath in filePaths) {
-        final dir = path.dirname(filePath);
-        filesByDir.putIfAbsent(dir, () => []).add(filePath);
-      }
-      
-      // Process each directory in parallel
-      final futures = filesByDir.entries.map((entry) async {
-        final dir = entry.key;
-        final files = entry.value;
-        
-        // Create directory if it doesn't exist
-        final dirObj = Directory(dir);
-        if (!await dirObj.exists()) {
-          await dirObj.create(recursive: true);
-        }
-        
-        // Process files in this directory
-        for (final file in files) {
-          // Simulate file processing
-          await Future<void>.delayed(const Duration(milliseconds: 1));
-        }
-      });
-      
-      await Future.wait(futures);
-      
-      logger.info('✅ Optimized ${filePaths.length} file operations');
-    } catch (e) {
-      logger.warn('Failed to optimize file operations: $e');
-    }
+
+  double _calculateSuccessRate(String commandName) {
+    final total = getExecutionCount(commandName);
+    final errors = getErrorCount(commandName);
+    if (total == 0) return 1.0;
+    return (total - errors) / total;
   }
-  
-  /// Optimize memory usage with lazy loading
-  Future<void> optimizeMemoryUsage() async {
-    logger.info('🧠 Optimizing memory usage...');
-    
-    try {
-      // Force garbage collection
-      await _forceGarbageCollection();
-      
-      // Log memory usage
-      final memoryUsage = _getMemoryUsage();
-      logger.info('Memory usage: ${memoryUsage.toStringAsFixed(2)} MB');
-      
-      logger.info('✅ Memory optimization completed');
-    } catch (e) {
-      logger.warn('Failed to optimize memory usage: $e');
-    }
-  }
-  
-  /// Optimize network operations with connection pooling
-  Future<void> optimizeNetworkOperations() async {
-    logger.info('🌐 Optimizing network operations...');
-    
-    try {
-      // Simulate network optimization
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      
-      logger.info('✅ Network optimization completed');
-    } catch (e) {
-      logger.warn('Failed to optimize network operations: $e');
-    }
-  }
-  
-  /// Run comprehensive performance optimization
-  Future<void> runComprehensiveOptimization({
-    String? templatesDirectory,
-    List<String>? filePaths,
-  }) async {
-    logger.info('⚡ Running comprehensive performance optimization...');
-    
-    final stopwatch = Stopwatch()..start();
-    
-    try {
-      // Run optimizations in parallel where possible
-      final futures = <Future<void>>[];
-      
-      if (templatesDirectory != null) {
-        futures.add(optimizeTemplateLoading(templatesDirectory));
-      }
-      
-      if (filePaths != null && filePaths.isNotEmpty) {
-        futures.add(optimizeFileOperations(filePaths));
-      }
-      
-      futures.addAll([
-        optimizeMemoryUsage(),
-        optimizeNetworkOperations(),
-      ]);
-      
-      await Future.wait(futures);
-      
-      stopwatch.stop();
-      
-      logger.info('✅ Comprehensive optimization completed in ${stopwatch.elapsedMilliseconds}ms');
-    } catch (e) {
-      logger.warn('Failed to run comprehensive optimization: $e');
-    }
-  }
-  
-  /// Benchmark template rendering performance
-  Future<Duration> benchmarkTemplateRendering({
-    required String templateName,
-    required String projectName,
-    required Map<String, dynamic> variables,
-  }) async {
-    logger.info('⏱️ Benchmarking template rendering for $templateName...');
-    
-    final stopwatch = Stopwatch()..start();
-    
-    try {
-      // Simulate template rendering
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      
-      stopwatch.stop();
-      
-      logger.info('✅ Template rendering benchmark: ${stopwatch.elapsedMilliseconds}ms');
-      return stopwatch.elapsed;
-    } catch (e) {
-      logger.warn('Failed to benchmark template rendering: $e');
-      return Duration.zero;
-    }
-  }
-  
-  /// Benchmark project creation performance
-  Future<Duration> benchmarkProjectCreation({
-    required String projectName,
-    required String template,
-  }) async {
-    logger.info('⏱️ Benchmarking project creation for $projectName...');
-    
-    final stopwatch = Stopwatch()..start();
-    
-    try {
-      // Simulate project creation
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      
-      stopwatch.stop();
-      
-      logger.info('✅ Project creation benchmark: ${stopwatch.elapsedMilliseconds}ms');
-      return stopwatch.elapsed;
-    } catch (e) {
-      logger.warn('Failed to benchmark project creation: $e');
-      return Duration.zero;
-    }
-  }
-  
-  /// Get performance metrics
-  Map<String, dynamic> getPerformanceMetrics() => {
-      'memory_usage_mb': _getMemoryUsage(),
-      'template_cache_size': 0, // TODO: Implement template cache
-      'file_operations_batched': true,
-      'network_connections_pooled': true,
-      'optimization_enabled': true,
-    };
-  
-  Future<void> _forceGarbageCollection() async {
-    // Force garbage collection by creating and releasing memory
-    final largeList = List.generate(100000, (index) => 'item_$index');
-    largeList.clear();
-    
-    // Give the garbage collector time to run
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-  }
-  
-  double _getMemoryUsage() {
-    // This is a simplified memory usage calculation
-    // In a real implementation, you would use platform-specific APIs
-    return 0; // TODO: Implement actual memory usage calculation
-  }
-  
-  Map<String, dynamic> _parseYaml(String content) {
-    // Simplified YAML parsing for performance optimization
-    // In a real implementation, you would use a proper YAML parser
-    return {'name': 'template', 'version': '1.0.0'};
+
+  /// Clear all metrics
+  void clear() {
+    _executionTimes.clear();
+    _executionCounts.clear();
+    _errors.clear();
   }
 }
 
-/// Performance monitoring utilities
-class PerformanceMonitor {
-  PerformanceMonitor({
-    required this.logger,
+/// Lazy loading service container
+class LazyServiceContainer extends ServiceContainer {
+  LazyServiceContainer();
+
+  final Map<Type, dynamic> _lazyInstances = {};
+  final Map<Type, Future<dynamic>> _loadingPromises = {};
+
+  /// Preload a service type
+  Future<void> preload<T>() async {
+    if (!_lazyInstances.containsKey(T)) {
+      try {
+        final instance = super.get<T>();
+        _lazyInstances[T] = instance;
+      } catch (e) {
+        // Service not registered or failed to create
+        return;
+      }
+    }
+  }
+
+  /// Preload multiple services in parallel
+  Future<void> preloadServices<T1, T2>() async {
+    await Future.wait([
+      preload<T1>(),
+      preload<T2>(),
+    ]);
+  }
+}
+
+/// Command result cache
+class CommandResultCache {
+  CommandResultCache({this.maxSize = 100, this.ttlSeconds = 300});
+
+  final int maxSize;
+  final int ttlSeconds;
+  final Map<String, _CacheEntry> _cache = {};
+
+  /// Get cached result
+  CommandResult? get(String key) {
+    final entry = _cache[key];
+    if (entry == null) return null;
+
+    // Check TTL
+    if (DateTime.now().difference(entry.timestamp).inSeconds > ttlSeconds) {
+      _cache.remove(key);
+      return null;
+    }
+
+    return entry.result;
+  }
+
+  /// Cache result
+  void put(String key, CommandResult result) {
+    // Remove oldest entries if cache is full
+    if (_cache.length >= maxSize) {
+      final oldestKey = _cache.keys.first;
+      _cache.remove(oldestKey);
+    }
+
+    _cache[key] = _CacheEntry(
+      result: result,
+      timestamp: DateTime.now(),
+    );
+  }
+
+  /// Generate cache key from command context
+  String generateKey(CommandContext context, Map<String, dynamic> args) {
+    final commandName = context.config['command_name'] as String? ?? 'unknown';
+    final keyData = {
+      'command': commandName,
+      'args': args,
+      'working_directory': context.workingDirectory,
+    };
+    
+    return '${commandName}_${keyData.hashCode}';
+  }
+
+  /// Clear cache
+  void clear() {
+    _cache.clear();
+  }
+
+  /// Get cache statistics
+  Map<String, dynamic> getStats() {
+    return {
+      'size': _cache.length,
+      'max_size': maxSize,
+      'ttl_seconds': ttlSeconds,
+      'keys': _cache.keys.toList(),
+    };
+  }
+}
+
+class _CacheEntry {
+  _CacheEntry({required this.result, required this.timestamp});
+  
+  final CommandResult result;
+  final DateTime timestamp;
+}
+
+/// Performance optimizer for command execution
+class CommandPerformanceOptimizer {
+  CommandPerformanceOptimizer({
+    this.enableCaching = true,
+    this.enableLazyLoading = true,
+    this.enableMetrics = true,
   });
-  
-  final Logger logger;
-  final Map<String, Stopwatch> _timers = {};
-  
-  /// Start timing an operation
-  void startTimer(String operation) {
-    _timers[operation] = Stopwatch()..start();
-  }
-  
-  /// Stop timing an operation and log the result
-  void stopTimer(String operation) {
-    final timer = _timers[operation];
-    if (timer != null) {
-      timer.stop();
-      logger.info('⏱️ $operation completed in ${timer.elapsedMilliseconds}ms');
-      _timers.remove(operation);
+
+  final bool enableCaching;
+  final bool enableLazyLoading;
+  final bool enableMetrics;
+
+  late final PerformanceMetrics _metrics = PerformanceMetrics();
+  late final CommandResultCache _cache = CommandResultCache();
+  late final LazyServiceContainer _container = LazyServiceContainer();
+
+  /// Optimize command execution
+  Future<CommandResult> optimizeExecution<T extends FlyCommand>(
+    T command,
+    Future<CommandResult> Function() execution,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    final commandName = command.name;
+
+    try {
+      // Check cache first
+      if (enableCaching) {
+        final cacheKey = _cache.generateKey(command.context, {
+          'args': command.argResults?.arguments ?? {},
+        });
+        
+        final cachedResult = _cache.get(cacheKey);
+        if (cachedResult != null) {
+          _recordMetrics(commandName, stopwatch.elapsedMilliseconds);
+          return cachedResult;
+        }
+      }
+
+      // Execute command
+      final result = await execution();
+      
+      // Cache successful results
+      if (enableCaching && result.success) {
+        final cacheKey = _cache.generateKey(command.context, {
+          'args': command.argResults?.arguments ?? {},
+        });
+        _cache.put(cacheKey, result);
+      }
+
+      _recordMetrics(commandName, stopwatch.elapsedMilliseconds);
+      return result;
+    } catch (e) {
+      _metrics.recordError(commandName, e.toString());
+      _recordMetrics(commandName, stopwatch.elapsedMilliseconds);
+      rethrow;
     }
   }
-  
-  /// Get timing for an operation
-  Duration? getTiming(String operation) {
-    final timer = _timers[operation];
-    return timer?.elapsed;
-  }
-  
-  /// Get all active timers
-  Map<String, Duration> getAllTimings() {
-    final timings = <String, Duration>{};
-    for (final entry in _timers.entries) {
-      timings[entry.key] = entry.value.elapsed;
+
+  void _recordMetrics(String commandName, int milliseconds) {
+    if (enableMetrics) {
+      _metrics.recordExecutionTime(commandName, milliseconds);
     }
-    return timings;
   }
+
+  /// Get performance metrics
+  Map<String, dynamic> getMetrics() {
+    return _metrics.getAllMetrics();
+  }
+
+  /// Get cache statistics
+  Map<String, dynamic> getCacheStats() {
+    return _cache.getStats();
+  }
+
+  /// Clear all optimization data
+  void clear() {
+    _metrics.clear();
+    _cache.clear();
+  }
+
+  /// Preload critical services
+  Future<void> preloadCriticalServices() async {
+    if (enableLazyLoading) {
+      await _container.preloadServices<Logger, TemplateManager>();
+      await _container.preload<SystemChecker>();
+    }
+  }
+}
+
+/// Benchmark utility for measuring performance improvements
+class CommandBenchmark {
+  CommandBenchmark();
+
+  final Map<String, List<BenchmarkResult>> _results = {};
+
+  /// Run benchmark for a command
+  Future<BenchmarkResult> benchmark<T extends FlyCommand>(
+    T command,
+    Future<CommandResult> Function() execution, {
+    int iterations = 10,
+  }) async {
+    final times = <int>[];
+    final errors = <String>[];
+
+    for (int i = 0; i < iterations; i++) {
+      final stopwatch = Stopwatch()..start();
+      
+      try {
+        await execution();
+        stopwatch.stop();
+        times.add(stopwatch.elapsedMilliseconds);
+      } catch (e) {
+        stopwatch.stop();
+        errors.add(e.toString());
+      }
+    }
+
+    final result = BenchmarkResult(
+      commandName: command.name,
+      iterations: iterations,
+      averageTime: times.isEmpty ? 0 : times.reduce((a, b) => a + b) / times.length,
+      minTime: times.isEmpty ? 0 : times.reduce((a, b) => a < b ? a : b),
+      maxTime: times.isEmpty ? 0 : times.reduce((a, b) => a > b ? a : b),
+      errorCount: errors.length,
+      successRate: times.length / iterations,
+    );
+
+    _results.putIfAbsent(command.name, () => []).add(result);
+    return result;
+  }
+
+  /// Compare benchmark results
+  Map<String, dynamic> compareResults(String commandName) {
+    final commandResults = _results[commandName];
+    if (commandResults == null || commandResults.length < 2) {
+      return {'error': 'Need at least 2 benchmark runs to compare'};
+    }
+
+    final latest = commandResults.last;
+    final previous = commandResults[commandResults.length - 2];
+
+    return {
+      'command': commandName,
+      'latest': latest.toJson(),
+      'previous': previous.toJson(),
+      'improvement': {
+        'average_time_ms': latest.averageTime - previous.averageTime,
+        'average_time_percent': ((latest.averageTime - previous.averageTime) / previous.averageTime) * 100,
+        'success_rate': latest.successRate - previous.successRate,
+      },
+    };
+  }
+
+  /// Get all benchmark results
+  Map<String, dynamic> getAllResults() {
+    final results = <String, dynamic>{};
+    
+    for (final entry in _results.entries) {
+      results[entry.key] = entry.value.map((r) => r.toJson()).toList();
+    }
+    
+    return results;
+  }
+}
+
+class BenchmarkResult {
+  BenchmarkResult({
+    required this.commandName,
+    required this.iterations,
+    required this.averageTime,
+    required this.minTime,
+    required this.maxTime,
+    required this.errorCount,
+    required this.successRate,
+  });
+
+  final String commandName;
+  final int iterations;
+  final double averageTime;
+  final int minTime;
+  final int maxTime;
+  final int errorCount;
+  final double successRate;
+
+  Map<String, dynamic> toJson() => {
+    'command_name': commandName,
+    'iterations': iterations,
+    'average_time_ms': averageTime,
+    'min_time_ms': minTime,
+    'max_time_ms': maxTime,
+    'error_count': errorCount,
+    'success_rate': successRate,
+  };
+}
+
+/// Performance monitoring middleware
+class PerformanceMonitoringMiddleware extends CommandMiddleware {
+  PerformanceMonitoringMiddleware(this._optimizer);
+
+  final CommandPerformanceOptimizer _optimizer;
+
+  @override
+  Future<CommandResult?> handle(CommandContext context, NextMiddleware next) async {
+    final stopwatch = Stopwatch()..start();
+    
+    try {
+      final result = await next();
+      stopwatch.stop();
+      
+      // Record performance metrics
+      _optimizer._recordMetrics(
+        context.config['command_name'] as String? ?? 'unknown',
+        stopwatch.elapsedMilliseconds,
+      );
+      
+      return result;
+    } catch (e) {
+      stopwatch.stop();
+      
+      // Record error metrics
+      _optimizer._metrics.recordError(
+        context.config['command_name'] as String? ?? 'unknown',
+        e.toString(),
+      );
+      
+      rethrow;
+    }
+  }
+
+  @override
+  int get priority => 1000; // Low priority to run last
 }

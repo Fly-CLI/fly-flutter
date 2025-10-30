@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-<% if (with_viewmodel) { %>import 'package:flutter_riverpod/flutter_riverpod.dart';
+{{#with_viewmodel}}import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/{{screen_name}}_provider.dart';
-<% } %>
+{{/with_viewmodel}}
 
 class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
   const {{screen_name.pascalCase()}}Screen({super.key});
@@ -11,16 +11,16 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('{{screen_name.titleCase()}}'),
-<% if (with_navigation) { %>        leading: IconButton(
+{{#with_navigation}}        leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-<% } %>      ),
-      body: <% if (with_viewmodel) { %>Consumer(<% } %>_buildBody(<% if (with_viewmodel) { %>ref<% } %>)<% if (with_viewmodel) { %>)<% } %>,
+{{/with_navigation}}      ),
+      body: {{#with_viewmodel}}Consumer({{/with_viewmodel}}_buildBody({{#with_viewmodel}}ref{{/with_viewmodel}}){{#with_viewmodel}}){{/with_viewmodel}},
     );
   }
 
-<% if (with_viewmodel) { %>  Widget _buildBody(WidgetRef ref) {
+{{#with_viewmodel}}  Widget _buildBody(WidgetRef ref) {
     final state = ref.watch({{screen_name}}Provider);
     
     if (state.isLoading) {
@@ -49,26 +49,42 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
   }
   
   Widget _buildContent({{screen_name.pascalCase()}}State state) {
-<% } else { %>  Widget _buildBody() {
-<% } %>    switch ('{{screen_type}}') {
+    switch ('{{screen_type}}') {
       case 'list':
-        return _buildListScreen(<% if (with_viewmodel) { %>state<% } %>);
+        return _buildListScreen(state);
       case 'detail':
-        return _buildDetailScreen(<% if (with_viewmodel) { %>state<% } %>);
+        return _buildDetailScreen(state);
       case 'form':
-        return _buildFormScreen(<% if (with_viewmodel) { %>state<% } %>);
+        return _buildFormScreen(state);
       case 'auth':
-        return _buildAuthScreen(<% if (with_viewmodel) { %>state<% } %>);
+        return _buildAuthScreen(state);
       case 'settings':
-        return _buildSettingsScreen(<% if (with_viewmodel) { %>state<% } %>);
+        return _buildSettingsScreen(state);
       default:
-        return _buildDefaultScreen(<% if (with_viewmodel) { %>state<% } %>);
+        return _buildDefaultScreen(state);
     }
   }
+{{/with_viewmodel}}{{^with_viewmodel}}  Widget _buildBody() {
+    switch ('{{screen_type}}') {
+      case 'list':
+        return _buildListScreen();
+      case 'detail':
+        return _buildDetailScreen();
+      case 'form':
+        return _buildFormScreen();
+      case 'auth':
+        return _buildAuthScreen();
+      case 'settings':
+        return _buildSettingsScreen();
+      default:
+        return _buildDefaultScreen();
+    }
+  }
+{{/with_viewmodel}}
 
-<% if (screen_type == 'list') { %>  Widget _buildListScreen(<% if (with_viewmodel) { %>{{screen_name.pascalCase()}}State state<% } %>) {
+{{#screen_type_list}}  Widget _buildListScreen({{#with_viewmodel}}{{screen_name.pascalCase()}}State state{{/with_viewmodel}}) {
     return ListView.builder(
-      itemCount: <% if (with_viewmodel) { %>state.items.length<% } else { %>10<% } %>,
+      itemCount: {{#with_viewmodel}}state.items.length{{/with_viewmodel}}{{^with_viewmodel}}10{{/with_viewmodel}},
       itemBuilder: (context, index) {
         return Card(
           margin: const EdgeInsets.all(8.0),
@@ -85,9 +101,9 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
       },
     );
   }
-<% } %>
+{{/screen_type_list}}
 
-<% if (screen_type == 'detail') { %>  Widget _buildDetailScreen(<% if (with_viewmodel) { %>{{screen_name.pascalCase()}}State state<% } %>) {
+{{#screen_type_detail}}  Widget _buildDetailScreen({{#with_viewmodel}}{{screen_name.pascalCase()}}State state{{/with_viewmodel}}) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -110,9 +126,9 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
       ),
     );
   }
-<% } %>
+{{/screen_type_detail}}
 
-<% if (screen_type == 'form') { %>  Widget _buildFormScreen(<% if (with_viewmodel) { %>{{screen_name.pascalCase()}}State state<% } %>) {
+{{#screen_type_form}}  Widget _buildFormScreen({{#with_viewmodel}}{{screen_name.pascalCase()}}State state{{/with_viewmodel}}) {
     final formKey = GlobalKey<FormState>();
     
     return Form(
@@ -126,20 +142,20 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
                 labelText: 'Name',
                 border: OutlineInputBorder(),
               ),
-<% if (with_validation) { %>              validator: (value) {
+{{#with_validation}}              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a name';
                 }
                 return null;
               },
-<% } %>            ),
+{{/with_validation}}            ),
             const SizedBox(height: 16),
             TextFormField(
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
               ),
-<% if (with_validation) { %>              validator: (value) {
+{{#with_validation}}              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter an email';
                 }
@@ -148,7 +164,7 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
                 }
                 return null;
               },
-<% } %>            ),
+{{/with_validation}}            ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
@@ -163,9 +179,9 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
       ),
     );
   }
-<% } %>
+{{/screen_type_form}}
 
-<% if (screen_type == 'auth') { %>  Widget _buildAuthScreen(<% if (with_viewmodel) { %>{{screen_name.pascalCase()}}State state<% } %>) {
+{{#screen_type_auth}}  Widget _buildAuthScreen({{#with_viewmodel}}{{screen_name.pascalCase()}}State state{{/with_viewmodel}}) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -203,9 +219,9 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
       ),
     );
   }
-<% } %>
+{{/screen_type_auth}}
 
-<% if (screen_type == 'settings') { %>  Widget _buildSettingsScreen(<% if (with_viewmodel) { %>{{screen_name.pascalCase()}}State state<% } %>) {
+{{#screen_type_settings}}  Widget _buildSettingsScreen({{#with_viewmodel}}{{screen_name.pascalCase()}}State state{{/with_viewmodel}}) {
     return ListView(
       children: [
         const ListTile(
@@ -239,9 +255,9 @@ class {{screen_name.pascalCase()}}Screen extends StatelessWidget {
       ],
     );
   }
-<% } %>
+{{/screen_type_settings}}
 
-  Widget _buildDefaultScreen(<% if (with_viewmodel) { %>{{screen_name.pascalCase()}}State state<% } %>) {
+  Widget _buildDefaultScreen({{#with_viewmodel}}{{screen_name.pascalCase()}}State state{{/with_viewmodel}}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

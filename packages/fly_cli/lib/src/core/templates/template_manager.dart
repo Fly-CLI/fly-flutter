@@ -10,13 +10,13 @@ import 'package:yaml/yaml.dart';
 
 import 'brick_registry.dart';
 import 'generation_preview.dart';
-import 'models/brick_info.dart';
-import 'models/template_info.dart';
-import 'models/template_variable.dart';
-import 'versioning/models/compatibility_result.dart';
-import 'versioning/services/compatibility_checker.dart';
-import 'versioning/services/version_registry.dart';
-import 'versioning/utils/version_parser.dart';
+import 'brick_info.dart';
+import 'template_info.dart';
+import 'template_variable.dart';
+import 'compatibility_result.dart';
+import 'compatibility_checker.dart';
+import 'version_registry.dart';
+import 'version_parser.dart';
 
 /// Enhanced template management system for Fly CLI
 /// 

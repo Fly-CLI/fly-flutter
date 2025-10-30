@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:fly_cli/src/core/templates/models/brick_metadata.dart';
+import 'package:fly_cli/src/core/templates/brick_metadata.dart';
 
 /// Responsible ONLY for finding and loading brick metadata
 /// 

@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:fly_cli/src/core/cache/cache_models.dart';
 import 'package:fly_cli/src/core/cache/template_cache.dart';
-import 'package:fly_cli/src/core/templates/models/template_info.dart';
+import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
