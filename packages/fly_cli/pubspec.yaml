@@ -32,22 +32,26 @@ dependencies:
   term_glyph: ^1.2.1
   usage: ^4.1.0
   freezed_annotation: ^3.0.0
-  analyzer: ^7.0.0
+  analyzer: ^7.6.0
   json_annotation: ^4.9.0
   fly_core:
     path: ../fly_core
+  fly_mcp_server:
+    path: ../fly_mcp_server
+  fly_mcp_core:
+    path: ../fly_mcp_core
 
 dev_dependencies:
   test: ^1.24.6
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
-  very_good_analysis: ^5.1.0
+  flutter_lints: ^6.0.0
+  very_good_analysis: ^10.0.0
   mocktail: ^1.0.0
-  build_runner: ^2.4.7
+  build_runner: ^2.7.1
   freezed: ^3.0.0
-  json_annotation: ^4.8.1
-  json_serializable: ^6.7.1
+  json_annotation: ^4.9.0
+  json_serializable: ^6.11.1
 
 executables:
   fly:

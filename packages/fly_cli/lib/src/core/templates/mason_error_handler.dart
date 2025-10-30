@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/command_result.dart';
 import 'package:mason/mason.dart';
 import 'package:yaml/yaml.dart';
 

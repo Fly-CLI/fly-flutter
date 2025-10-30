@@ -1,0 +1,74 @@
+---
+name: scaffold_api_client
+description: Generate API client code with error handling, serialization, and networking patterns using Fly conventions
+input:
+  schema:
+    baseUrl:
+      type: string
+      required: true
+      description: The API base URL (required)
+    endpoints:
+      type: array
+      required: false
+      description: Array of API endpoints to generate
+    authentication:
+      type: string
+      required: false
+      default: bearer
+      description: Authentication type (bearer, basic, none)
+---
+Create a Flutter API client for {{baseUrl}} following Fly conventions.
+
+The API client should include:
+
+1. Base client structure:
+   - ApiClient class with base URL configuration
+   - HTTP client initialization (using http package or dio)
+   - Base headers and interceptors
+
+2. Authentication:
+{{#if isBearerAuth}}
+   - Bearer token authentication
+   - Token storage and refresh mechanism
+   - Automatic token injection in requests
+{{else}}
+{{#if isBasicAuth}}
+   - Basic authentication
+   - Credentials management
+{{else}}
+   - No authentication required
+{{/if}}
+{{/if}}
+
+{{#if endpoints}}
+3. API endpoints to implement:
+{{#each endpoints}}
+   - {{this}} with proper request/response handling
+{{/each}}
+{{else}}
+3. Sample endpoints (GET, POST, PUT, DELETE)
+{{/if}}
+
+4. Error handling:
+   - Custom API exception classes
+   - HTTP status code handling
+   - Network error handling
+   - Timeout configuration
+
+5. Serialization:
+   - JSON serialization/deserialization
+   - Model classes with fromJson/toJson
+   - Null safety handling
+
+6. Features:
+   - Retry logic for failed requests
+   - Request/response logging (optional)
+   - Caching support (optional)
+   - Type-safe endpoint definitions
+
+7. Follow Fly conventions:
+   - Use fly_networking package if available
+   - Proper error handling and exceptions
+   - Include unit tests
+   - Document public API methods
+

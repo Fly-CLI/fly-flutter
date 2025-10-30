@@ -1,0 +1,65 @@
+---
+name: scaffold_feature
+description: Generate a complete Flutter feature module with screens, services, and routing using Fly conventions
+input:
+  schema:
+    featureName:
+      type: string
+      required: true
+      description: The name of the feature to scaffold
+    screens:
+      type: array
+      required: false
+      description: Array of screen names to include in the feature
+    services:
+      type: array
+      required: false
+      description: Array of service names to include in the feature
+    stateManagement:
+      type: string
+      required: false
+      default: riverpod
+      description: State management approach (default: riverpod)
+---
+Create a complete Flutter feature module named "{{featureName}}" using {{stateManagement}} for state management.
+
+The feature should include:
+
+1. Feature structure:
+   - lib/features/{{featureNameLowerCase}}/
+     - domain/ (models, repositories, use cases)
+     - data/ (data sources, repository implementations)
+     - presentation/ (screens, widgets, view models)
+
+{{#if screens}}
+2. Screens to create:
+{{#each screens}}
+   - {{this}}Screen with ViewModel, Widget, and Route
+{{/each}}
+{{else}}
+2. At least one screen with ViewModel, Widget, and Route
+{{/if}}
+
+{{#if services}}
+3. Services to create:
+{{#each services}}
+   - {{this}}Service with proper dependency injection
+{{/each}}
+{{else}}
+3. Services as needed for the feature
+{{/if}}
+
+4. Routing configuration:
+   - Add routes to the app router
+   - Configure route parameters and navigation
+
+5. State management:
+   - Use {{stateManagement}} providers for state
+   - Implement proper state initialization and disposal
+
+6. Follow Fly conventions:
+   - Use clear separation of concerns
+   - Include proper error handling
+   - Add basic tests for key components
+   - Use consistent naming conventions
+

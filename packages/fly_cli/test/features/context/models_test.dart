@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import 'package:fly_cli/src/features/context/domain/models/models.dart';
+import 'package:fly_cli/src/features/context/models.dart';
 
 void main() {
   group('Analysis Models', () {

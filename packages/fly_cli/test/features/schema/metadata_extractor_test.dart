@@ -1,7 +1,7 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/command_result.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:test/test.dart';
 

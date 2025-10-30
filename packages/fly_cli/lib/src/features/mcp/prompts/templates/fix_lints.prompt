@@ -1,0 +1,57 @@
+---
+name: fix_lints
+description: Generate actionable fix suggestions for Dart/Flutter lint issues with code examples
+input:
+  schema:
+    lintFile:
+      type: string
+      required: false
+      description: Specific file path to fix (optional, if not provided, fixes all files)
+    severity:
+      type: string
+      required: false
+      default: warning
+      description: Minimum severity to fix (error, warning, info)
+---
+Analyze and fix Dart/Flutter lint issues{{#if lintFile}} in the file: {{lintFile}}{{else}} across all Dart files in the project{{/if}} (minimum severity: {{severity}}).
+
+For each lint issue found, provide:
+
+1. Issue identification:
+   - Lint rule name and description
+   - Location (file, line, column)
+   - Severity level
+
+2. Fix suggestions:
+   - Specific code changes needed
+   - Before/after code examples
+   - Explanation of why the fix is needed
+
+3. Common fixes to apply:
+   - Prefer const constructors where possible
+   - Use final for variables that are not reassigned
+   - Remove unused imports and variables
+   - Fix null safety issues
+   - Apply proper formatting
+   - Use meaningful variable names
+   - Fix missing documentation
+   - Resolve deprecated API usage
+
+4. Best practices:
+   - Follow Dart style guide
+   - Maintain code readability
+   - Ensure type safety
+   - Keep functions focused and small
+
+5. Output format:
+   - List each issue separately
+   - Show code snippets for context
+   - Provide step-by-step fix instructions
+   - Explain the reasoning behind each fix
+
+{{#if lintFile}}
+Focus on fixing issues in: {{lintFile}}
+{{else}}
+Fix issues across all Dart files, starting with highest severity.
+{{/if}}
+

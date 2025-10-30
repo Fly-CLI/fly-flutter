@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
-import 'package:fly_cli/src/features/version/application/version_command.dart';
+import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/features/version/version_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';

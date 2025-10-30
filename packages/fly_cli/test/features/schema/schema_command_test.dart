@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
-import 'package:fly_cli/src/features/schema/application/schema_command.dart';
+import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/features/schema/schema_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';

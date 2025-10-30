@@ -1,0 +1,17 @@
+---
+name: scaffold_page
+description: Generate a new Flutter page (widget + route) with Fly conventions
+input:
+  schema:
+    name:
+      type: string
+      required: true
+      description: The name of the page to scaffold
+    stateManagement:
+      type: string
+      required: false
+      default: riverpod
+      description: State management approach (default: riverpod)
+---
+Create a Flutter page named "{{name}}" using {{stateManagement}}. Include a widget, route, and basic tests.
+

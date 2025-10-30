@@ -8,7 +8,7 @@ import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/file_operations/file_operations.dart';
 
 import 'package:fly_cli/src/core/templates/brick_registry.dart';
-import 'package:fly_cli/src/core/templates/models/brick_info.dart';
+import 'package:fly_cli/src/core/templates/brick_info.dart';
 
 /// Cache metadata for brick information
 class BrickCacheInfo {

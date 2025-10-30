@@ -1,9 +1,9 @@
 import 'package:args/args.dart';
 
-import 'domain/logger.dart' as flylog;
-import 'domain/logging_context.dart' as flylog_ctx;
-import 'infrastructure/logger_factory.dart' as flylog_factory;
-import 'infrastructure/logging_config.dart' as flylog_cfg;
+import 'logger.dart' as flylog;
+import 'logging_context.dart' as flylog_ctx;
+import 'logger_factory.dart' as flylog_factory;
+import 'logging_config.dart' as flylog_cfg;
 import '../utils/version_utils.dart';
 
 class LoggingBootstrap {

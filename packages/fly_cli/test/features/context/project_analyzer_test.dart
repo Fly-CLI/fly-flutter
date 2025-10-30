@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/domain/models/models.dart';
-import 'package:fly_cli/src/features/context/infrastructure/analysis/unified/unified_analyzers.dart';
+import 'package:fly_cli/src/features/context/models.dart';
+import 'package:fly_cli/src/features/context/analyzers/unified_analyzers.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 

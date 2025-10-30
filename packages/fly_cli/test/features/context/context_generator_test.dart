@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-import 'package:fly_cli/src/features/context/infrastructure/analysis/enhanced/context_generator.dart';
-import 'package:fly_cli/src/features/context/domain/models/models.dart';
+import 'package:fly_cli/src/features/context/context_generator.dart';
+import 'package:fly_cli/src/features/context/models.dart';
 import '../../helpers/analysis_test_fixtures.dart';
 import '../../helpers/mock_logger.dart';
 

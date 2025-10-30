@@ -4,7 +4,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
-import 'package:fly_cli/src/core/templates/models/brick_info.dart';
+import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 
 /// Preview of what will be generated during dry-run
