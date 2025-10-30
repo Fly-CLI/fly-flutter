@@ -11,6 +11,7 @@ import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_p
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/dependency_injection/domain/service_container.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/performance/performance_optimizer.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
@@ -29,16 +30,31 @@ class FlyCommandRunner extends CommandRunner<int> {
 
   /// Initialize service container and dependencies
   void _initializeServices() {
+    final logger = Logger();
+    final isDevelopment = _isDevelopmentMode();
+    
     _services = ServiceContainer()
-      ..registerSingleton<Logger>(Logger())
-      ..registerSingleton<TemplateManager>(TemplateManager(
-        templatesDirectory: TemplateManager.findTemplatesDirectory(),
-        logger: Logger(),
+      ..registerSingleton<Logger>(logger)
+      ..registerSingleton<PathResolver>(PathResolver(
+        logger: logger,
+        isDevelopment: isDevelopment,
       ))
-      ..registerSingleton<SystemChecker>(SystemChecker(logger: Logger()))
-      ..registerSingleton<InteractivePrompt>(InteractivePrompt(Logger()));
+      ..registerSingleton<TemplateManager>(TemplateManager(
+        templatesDirectory: '', // Will be resolved by PathResolver
+        logger: logger,
+      ))
+      ..registerSingleton<SystemChecker>(SystemChecker(logger: logger))
+      ..registerSingleton<InteractivePrompt>(InteractivePrompt(logger));
 
     _optimizer = CommandPerformanceOptimizer();
+  }
+
+  /// Determine if running in development mode
+  bool _isDevelopmentMode() {
+    // Check if we're running from source (development) vs installed package
+    final scriptPath = Platform.script.toFilePath();
+    return scriptPath.contains('packages/fly_cli') || 
+           scriptPath.contains('bin/fly.dart');
   }
 
   /// Register global options
@@ -146,6 +162,7 @@ class FlyCommandRunner extends CommandRunner<int> {
       templateManager: _services.get<TemplateManager>(),
       systemChecker: _services.get<SystemChecker>(),
       interactivePrompt: _services.get<InteractivePrompt>(),
+      pathResolver: _services.get<PathResolver>(),
       config: _getConfig(),
       environment: Environment.current(),
       workingDirectory: workingDir,

@@ -6,6 +6,8 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/errors/error_codes.dart';
+import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
@@ -92,7 +94,7 @@ class AddScreenCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     final interactive = argResults!['interactive'] as bool? ?? false;
-    final outputDir = argResults!['output-dir'] as String? ?? context.workingDirectory;
+    final outputDir = argResults!['output-dir'] as String?;
     
     if (interactive) {
       return _runInteractiveMode(outputDir);
@@ -102,7 +104,7 @@ class AddScreenCommand extends FlyCommand {
   }
 
   /// Run in interactive mode
-  Future<CommandResult> _runInteractiveMode(String outputDir) async {
+  Future<CommandResult> _runInteractiveMode(String? outputDir) async {
     try {
       final prompter = context.interactivePrompt;
       
@@ -177,6 +179,26 @@ class AddScreenCommand extends FlyCommand {
         );
       }
       
+      // Resolve output directory via PathResolver
+      final resolvedOutputDir = await context.pathResolver.resolveOutputDirectory(
+        context,
+        outputDir,
+      );
+
+      if (!resolvedOutputDir.success) {
+        return CommandResult.error(
+          message: 'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
+          suggestion: 'Specify a valid --output-dir or run from a project root',
+          errorCode: ErrorCode.fileSystemError,
+          context: ErrorContext.forCommand(
+            'add screen',
+            arguments: argResults?.arguments,
+          ),
+        );
+      }
+
+      final targetDir = resolvedOutputDir.path!.absolute;
+
       // Generate screen using Mason brick
       return await _generateScreenWithMason(
         screenName: screenName,
@@ -186,7 +208,7 @@ class AddScreenCommand extends FlyCommand {
         withTests: withTests,
         withValidation: withValidation,
         withNavigation: withNavigation,
-        outputDir: outputDir,
+        outputDir: targetDir,
       );
     } catch (e) {
       return CommandResult.error(
@@ -197,7 +219,7 @@ class AddScreenCommand extends FlyCommand {
   }
 
   /// Run in non-interactive mode
-  Future<CommandResult> _runNonInteractiveMode(String outputDir) async {
+  Future<CommandResult> _runNonInteractiveMode(String? outputDir) async {
     final screenName = argResults!.rest.first;
     final feature = argResults!['feature'] as String? ?? 'home';
     final screenType = argResults!['type'] as String? ?? 'list';
@@ -205,6 +227,29 @@ class AddScreenCommand extends FlyCommand {
     final withTests = argResults!['with-tests'] as bool? ?? false;
     final withValidation = argResults!['with-validation'] as bool? ?? false;
     final withNavigation = argResults!['with-navigation'] as bool? ?? true;
+
+    // Use PathResolver to resolve component path
+    final componentPathResult = await context.pathResolver.resolveComponentPath(
+      context,
+      screenName,
+      'screen',
+      feature,
+      outputDir,
+    );
+
+    if (!componentPathResult.success) {
+      return CommandResult.error(
+        message: 'Failed to resolve component path: ${componentPathResult.errors.join(', ')}',
+        suggestion: 'Check your project structure and output directory',
+        errorCode: ErrorCode.fileSystemError,
+        context: ErrorContext.forCommand(
+          'add screen',
+          arguments: argResults?.arguments,
+        ),
+      );
+    }
+
+    final componentPath = componentPathResult.path!;
 
     return _generateScreenWithMason(
       screenName: screenName,
@@ -214,7 +259,7 @@ class AddScreenCommand extends FlyCommand {
       withTests: withTests,
       withValidation: withValidation,
       withNavigation: withNavigation,
-      outputDir: outputDir,
+      outputDir: componentPath.absolute,
     );
   }
 

@@ -7,6 +7,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_lifecycle.dar
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/mandatory_middleware.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
@@ -19,8 +20,15 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   /// Command execution context with injected dependencies
   final CommandContext context;
 
-  /// List of middleware to execute before command logic
+  /// List of optional middleware to execute before command logic
+  /// 
+  /// Mandatory middleware (DryRun, Logging, Metrics) are automatically included
   List<CommandMiddleware> get middleware => [];
+
+  /// Get the complete middleware pipeline including mandatory middleware
+  MandatoryMiddlewarePipeline get middlewarePipeline => MandatoryMiddlewarePipeline(
+    optional: middleware,
+  );
 
   /// List of validators to run before execution
   List<CommandValidator> get validators => [];
@@ -85,30 +93,39 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   @override
   Future<int> run() async {
     try {
-      // 1. Run validators
+      // 1. Validate middleware pipeline
+      middlewarePipeline.validate();
+
+      // 2. Execute mandatory middleware pipeline (includes dry-run check)
+      final mandatoryResult = await _runMandatoryMiddlewarePipeline();
+      if (mandatoryResult != null) {
+        return _handleResult(mandatoryResult);
+      }
+
+      // 3. Run validators
       final validationResult = await _runValidators();
       if (!validationResult.isValid) {
         return _handleValidationFailure(validationResult);
       }
 
-      // 2. Execute middleware pipeline
-      final middlewareResult = await _runMiddlewarePipeline();
-      if (middlewareResult != null) {
-        return _handleResult(middlewareResult);
+      // 4. Execute optional middleware pipeline
+      final optionalResult = await _runOptionalMiddlewarePipeline();
+      if (optionalResult != null) {
+        return _handleResult(optionalResult);
       }
 
-      // 3. Call lifecycle hook
+      // 5. Call lifecycle hook
       await onBeforeExecute(context);
 
-      // 4. Execute command logic
+      // 6. Execute command logic
       final result = await execute();
 
-      // 5. Call lifecycle hook
+      // 7. Call lifecycle hook
       await onAfterExecute(context, result);
 
       return _handleResult(result);
     } catch (e, stackTrace) {
-      // 6. Handle errors with lifecycle hook
+      // 8. Handle errors with lifecycle hook
       await onError(context, e, stackTrace);
 
       // Simple error result with context
@@ -154,8 +171,27 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     return ValidationResult.combine(results);
   }
 
-  /// Run middleware pipeline
-  Future<CommandResult?> _runMiddlewarePipeline() async {
+  /// Run mandatory middleware pipeline
+  Future<CommandResult?> _runMandatoryMiddlewarePipeline() async {
+    final mandatoryMiddleware = middlewarePipeline.mandatory
+      ..sort((a, b) => a.priority.compareTo(b.priority));
+
+    int currentIndex = 0;
+
+    Future<CommandResult?> next() async {
+      if (currentIndex >= mandatoryMiddleware.length) {
+        return null;
+      }
+
+      final middleware = mandatoryMiddleware[currentIndex++];
+      return middleware.handle(context, next);
+    }
+
+    return next();
+  }
+
+  /// Run optional middleware pipeline
+  Future<CommandResult?> _runOptionalMiddlewarePipeline() async {
     final applicableMiddleware =
         middleware.where((m) => m.shouldRun(context, name)).toList()
           ..sort((a, b) => a.priority.compareTo(b.priority));

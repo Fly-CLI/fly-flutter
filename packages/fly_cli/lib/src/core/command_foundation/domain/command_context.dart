@@ -5,6 +5,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 
 /// Command execution context providing access to dependencies and configuration
 abstract class CommandContext {
@@ -22,6 +23,9 @@ abstract class CommandContext {
   
   /// Interactive prompt for user input
   InteractivePrompt get interactivePrompt;
+  
+  /// Path resolver for all path operations
+  PathResolver get pathResolver;
   
   /// Configuration map for command-specific settings
   Map<String, dynamic> get config;

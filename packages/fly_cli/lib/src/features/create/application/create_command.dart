@@ -140,25 +140,42 @@ class CreateCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-
     final projectName = argResults!.rest.first;
     final template = argResults!['template'] as String;
     final organization = argResults!['organization'] as String;
     final platforms = argResults!['platforms'] as List<String>;
     final interactive = argResults!['interactive'] as bool;
-    final outputDir = argResults!['output-dir'] as String? ?? context.workingDirectory;
+    final outputDir = argResults!['output-dir'] as String?;
 
-    // Construct the full project path
-    final projectPath = path.join(outputDir, projectName);
+    // Use PathResolver to resolve project path
+    final projectPathResult = await context.pathResolver.resolveProjectPath(
+      context,
+      projectName,
+      outputDir,
+    );
+
+    if (!projectPathResult.success) {
+      return CommandResult.error(
+        message: 'Failed to resolve project path: ${projectPathResult.errors.join(', ')}',
+        suggestion: 'Check your output directory and permissions',
+        errorCode: ErrorCode.fileSystemError,
+        context: ErrorContext.forCommand(
+          'create',
+          arguments: argResults?.arguments,
+        ),
+      );
+    }
+
+    final projectPath = projectPathResult.path!;
 
     if (interactive) {
       return _runInteractiveMode(
-        projectName, template, organization, platforms, projectPath,
+        projectName, template, organization, platforms, projectPath.absolute,
       );
     }
 
     return _createProject(
-      projectName, template, organization, platforms, projectPath,
+      projectName, template, organization, platforms, projectPath.absolute,
     );
   }
 

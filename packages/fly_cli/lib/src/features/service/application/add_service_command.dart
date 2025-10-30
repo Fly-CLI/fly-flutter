@@ -4,6 +4,8 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/errors/error_codes.dart';
+import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/templates/models/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
@@ -86,7 +88,7 @@ class AddServiceCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     final interactive = argResults!['interactive'] as bool? ?? false;
-    final outputDir = argResults!['output-dir'] as String? ?? context.workingDirectory;
+    final outputDir = argResults!['output-dir'] as String?;
     
     if (interactive) {
       return _runInteractiveMode(outputDir);
@@ -96,7 +98,7 @@ class AddServiceCommand extends FlyCommand {
   }
 
   /// Run in interactive mode
-  Future<CommandResult> _runInteractiveMode(String outputDir) async {
+  Future<CommandResult> _runInteractiveMode(String? outputDir) async {
     try {
       final prompter = context.interactivePrompt;
       
@@ -173,6 +175,26 @@ class AddServiceCommand extends FlyCommand {
         );
       }
       
+      // Resolve output directory via PathResolver
+      final resolvedOutputDir = await context.pathResolver.resolveOutputDirectory(
+        context,
+        outputDir,
+      );
+
+      if (!resolvedOutputDir.success) {
+        return CommandResult.error(
+          message: 'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
+          suggestion: 'Specify a valid --output-dir or run from a project root',
+          errorCode: ErrorCode.fileSystemError,
+          context: ErrorContext.forCommand(
+            'add service',
+            arguments: argResults?.arguments,
+          ),
+        );
+      }
+
+      final targetDir = resolvedOutputDir.path!.absolute;
+
       // Generate service using Mason brick
       return await _generateServiceWithMason(
         serviceName: serviceName,
@@ -182,7 +204,7 @@ class AddServiceCommand extends FlyCommand {
         withMocks: withMocks,
         withInterceptors: withInterceptors,
         baseUrl: baseUrl,
-        outputDir: outputDir,
+        outputDir: targetDir,
       );
     } catch (e) {
       return CommandResult.error(
@@ -193,7 +215,7 @@ class AddServiceCommand extends FlyCommand {
   }
 
   /// Run in non-interactive mode
-  Future<CommandResult> _runNonInteractiveMode(String outputDir) async {
+  Future<CommandResult> _runNonInteractiveMode(String? outputDir) async {
     final serviceName = argResults!.rest.first;
     final feature = argResults!['feature'] as String? ?? 'core';
     final serviceType = argResults!['type'] as String? ?? 'api';
@@ -201,6 +223,29 @@ class AddServiceCommand extends FlyCommand {
     final withMocks = argResults!['with-mocks'] as bool? ?? false;
     final withInterceptors = argResults!['with-interceptors'] as bool? ?? false;
     final baseUrl = argResults!['base-url'] as String? ?? 'https://api.example.com';
+
+    // Use PathResolver to resolve component path
+    final componentPathResult = await context.pathResolver.resolveComponentPath(
+      context,
+      serviceName,
+      'service',
+      feature,
+      outputDir,
+    );
+
+    if (!componentPathResult.success) {
+      return CommandResult.error(
+        message: 'Failed to resolve component path: ${componentPathResult.errors.join(', ')}',
+        suggestion: 'Check your project structure and output directory',
+        errorCode: ErrorCode.fileSystemError,
+        context: ErrorContext.forCommand(
+          'add service',
+          arguments: argResults?.arguments,
+        ),
+      );
+    }
+
+    final componentPath = componentPathResult.path!;
 
     return _generateServiceWithMason(
       serviceName: serviceName,
@@ -210,7 +255,7 @@ class AddServiceCommand extends FlyCommand {
       withMocks: withMocks,
       withInterceptors: withInterceptors,
       baseUrl: baseUrl,
-      outputDir: outputDir,
+      outputDir: componentPath.absolute,
     );
   }
 

@@ -13,6 +13,7 @@ import 'package:test/test.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 
 import 'mock_logger.dart';
 
@@ -39,6 +40,10 @@ class CommandTestHelper {
       ),
       systemChecker: SystemChecker(logger: mockLogger),
       interactivePrompt: InteractivePrompt(mockLogger),
+      pathResolver: PathResolver(
+        logger: mockLogger,
+        isDevelopment: true,
+      ),
       config: mockConfig,
       environment: Environment.current(),
       workingDirectory: workingDir,
@@ -146,11 +151,11 @@ class CommandTestHelper {
     } else {
       // Fallback to dart run (slower but works)
       processResult = await Process.run(
-        'dart',
-        ['run', absoluteFlyDartPath, ...finalArgs],
-        workingDirectory: workingDirectory ?? workspaceRoot,
-        environment: testEnvironment,
-      );
+      'dart',
+      ['run', absoluteFlyDartPath, ...finalArgs],
+      workingDirectory: workingDirectory ?? workspaceRoot,
+      environment: testEnvironment,
+    );
     }
     
     final exitCode = processResult.exitCode;
@@ -200,11 +205,11 @@ class CommandTestHelper {
         } catch (jsonExtractionError) {
           // JSON extraction also failed, continue to error handling
         }
-    // If JSON parsing fails, check for error JSON in stderr
-    final stderrStr = processResult.stderr.toString().trim();
-    if (stderrStr.isNotEmpty) {
-      try {
-        final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
+        // If JSON parsing fails, check for error JSON in stderr
+        final stderrStr = processResult.stderr.toString().trim();
+        if (stderrStr.isNotEmpty) {
+          try {
+            final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
             return CommandResult(
               success: false,
               command: errorJson['command'] as String? ?? _extractCommandName(args),
