@@ -24,7 +24,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  very_good_analysis: ^5.1.0
+  very_good_analysis: ^10.0.0
   mocktail: ^1.0.0
   melos: ^7.3.0
 
