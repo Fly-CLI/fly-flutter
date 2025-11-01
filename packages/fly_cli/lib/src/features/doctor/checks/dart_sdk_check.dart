@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:mason_logger/mason_logger.dart';
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// Check for Dart SDK installation and configuration
 class DartSdkCheck extends SystemCheck {
   DartSdkCheck({this.logger});
-  
+
   final Logger? logger;
 
   @override
@@ -16,25 +16,28 @@ class DartSdkCheck extends SystemCheck {
   String get category => 'Development Environment';
 
   @override
-  String get description => 'Check Dart SDK installation and version compatibility';
+  String get description =>
+      'Check Dart SDK installation and version compatibility';
 
   @override
   Future<CheckResult> run() async {
     try {
       // Check if dart command is available with timeout
       final dartResult = await Process.run(
-        'dart', 
-        ['--version'], 
+        'dart',
+        ['--version'],
         runInShell: true,
       ).timeout(
         const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(0, 1, '', 'Dart --version timed out after 10 seconds'),
+        onTimeout: () => ProcessResult(
+            0, 1, '', 'Dart --version timed out after 10 seconds'),
       );
-      
+
       if (dartResult.exitCode != 0) {
         return CheckResult.error(
           message: 'Dart SDK not found in PATH',
-          suggestion: 'Dart SDK is usually included with Flutter SDK. Ensure Flutter is properly installed.',
+          suggestion:
+              'Dart SDK is usually included with Flutter SDK. Ensure Flutter is properly installed.',
           fixCommand: 'Install Flutter SDK which includes Dart SDK',
           data: {
             'exitCode': dartResult.exitCode,
@@ -45,8 +48,9 @@ class DartSdkCheck extends SystemCheck {
 
       // Parse Dart version
       final versionOutput = dartResult.stdout as String;
-      final versionMatch = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(versionOutput);
-      
+      final versionMatch = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)')
+          .firstMatch(versionOutput);
+
       if (versionMatch == null) {
         return CheckResult.warning(
           message: 'Could not parse Dart version',
@@ -57,11 +61,11 @@ class DartSdkCheck extends SystemCheck {
 
       final dartVersion = versionMatch.group(1)!;
       final versionParts = dartVersion.split('.').map(int.parse).toList();
-      
+
       // Check minimum version (3.0.0)
       final minVersion = [3, 0, 0];
       var isCompatible = true;
-      
+
       for (var i = 0; i < minVersion.length; i++) {
         if (versionParts[i] < minVersion[i]) {
           isCompatible = false;
@@ -85,14 +89,15 @@ class DartSdkCheck extends SystemCheck {
 
       // Check Dart analyzer with timeout
       final analyzeResult = await Process.run(
-        'dart', 
-        ['analyze', '--version'], 
+        'dart',
+        ['analyze', '--version'],
         runInShell: true,
       ).timeout(
         const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(0, 1, '', 'Dart analyze timed out after 10 seconds'),
+        onTimeout: () =>
+            ProcessResult(0, 1, '', 'Dart analyze timed out after 10 seconds'),
       );
-      
+
       if (analyzeResult.exitCode != 0) {
         return CheckResult.warning(
           message: 'Dart analyzer not working properly',
@@ -111,7 +116,6 @@ class DartSdkCheck extends SystemCheck {
           'path': _getDartPath(),
         },
       );
-
     } catch (e) {
       return CheckResult.error(
         message: 'Failed to check Dart SDK: $e',

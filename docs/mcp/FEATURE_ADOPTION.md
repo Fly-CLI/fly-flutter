@@ -179,12 +179,14 @@ outlines the planned adoption tracking framework, metrics, and insights approach
 **Data Collection Policy**:
 
 ✅ **Collected**:
+
 - Tool usage counts
 - Resource access patterns
 - Error rates
 - Performance metrics
 
 ❌ **Not Collected**:
+
 - Personal information
 - File contents
 - Code snippets
@@ -215,17 +217,20 @@ outlines the planned adoption tracking framework, metrics, and insights approach
 ### Phase 1: Foundation (Week 1-2)
 
 **Goals**:
+
 - Design telemetry architecture
 - Implement opt-in mechanism
 - Basic data collection
 
 **Tasks**:
+
 - [ ] Define telemetry schema
 - [ ] Implement opt-in consent
 - [ ] Collect baseline metrics
 - [ ] Privacy compliance review
 
 **Deliverables**:
+
 - Telemetry implementation
 - Privacy policy
 - Consent mechanism
@@ -235,17 +240,20 @@ outlines the planned adoption tracking framework, metrics, and insights approach
 ### Phase 2: Analysis (Week 3-4)
 
 **Goals**:
+
 - Deploy tracking
 - Establish baseline
 - Initial insights
 
 **Tasks**:
+
 - [ ] Deploy telemetry
 - [ ] Collect 2-4 weeks of data
 - [ ] Generate initial report
 - [ ] Identify patterns
 
 **Deliverables**:
+
 - Baseline metrics
 - Initial insights
 - Dashboard
@@ -255,17 +263,20 @@ outlines the planned adoption tracking framework, metrics, and insights approach
 ### Phase 3: Insights (Ongoing)
 
 **Goals**:
+
 - Continuous tracking
 - Trend analysis
 - Optimization insights
 
 **Tasks**:
+
 - [ ] Monthly reports
 - [ ] Trend analysis
 - [ ] Optimization recommendations
 - [ ] Feature prioritization
 
 **Deliverables**:
+
 - Monthly reports
 - Trend dashboards
 - Action plans
@@ -281,6 +292,7 @@ outlines the planned adoption tracking framework, metrics, and insights approach
 **Action**: Prioritize improvements for popular features
 
 **Example**:
+
 ```
 If flutter.run is used 10x more than flutter.build:
 → Optimize flutter.run performance
@@ -297,6 +309,7 @@ If flutter.run is used 10x more than flutter.build:
 **Action**: Measure feature success
 
 **Example**:
+
 ```
 Tracking fly.scaffold.page usage:
 Week 1: 100 uses
@@ -314,6 +327,7 @@ Week 3: 200 uses (+33%)
 **Action**: Improve documentation for problematic areas
 
 **Example**:
+
 ```
 If fly.template.apply has 20% error rate due to invalid parameters:
 → Add parameter examples
@@ -330,6 +344,7 @@ If fly.template.apply has 20% error rate due to invalid parameters:
 **Action**: Optimize high-usage, high-latency paths
 
 **Example**:
+
 ```
 If workspace:// reads account for 80% of requests with 100ms avg latency:
 → Implement caching for workspace resources
@@ -343,21 +358,21 @@ If workspace:// reads account for 80% of requests with 100ms avg latency:
 
 ### Adoption Targets
 
-| Metric | Target | Timeframe | Status |
-|--------|--------|-----------|--------|
-| Active Users | 100+ | Month 1 | ❌ Not Tracked |
-| Tool Utilization | 80%+ tools used | Month 3 | ❌ Not Tracked |
-| Feature Retention | 70%+ 30-day retention | Month 3 | ❌ Not Tracked |
-| Error Rate | <5% | Ongoing | ❌ Not Tracked |
-| User Satisfaction | 4.0+/5.0 | Ongoing | ❌ Not Tracked |
+| Metric            | Target                | Timeframe | Status        |
+|-------------------|-----------------------|-----------|---------------|
+| Active Users      | 100+                  | Month 1   | ❌ Not Tracked |
+| Tool Utilization  | 80%+ tools used       | Month 3   | ❌ Not Tracked |
+| Feature Retention | 70%+ 30-day retention | Month 3   | ❌ Not Tracked |
+| Error Rate        | <5%                   | Ongoing   | ❌ Not Tracked |
+| User Satisfaction | 4.0+/5.0              | Ongoing   | ❌ Not Tracked |
 
 ### Engagement Metrics
 
-| Metric | Target | Timeframe | Status |
-|--------|--------|-----------|--------|
-| Sessions per User | 5+/month | Month 2 | ❌ Not Tracked |
-| Tools per Session | 3+ | Month 2 | ❌ Not Tracked |
-| Returning Users | 60%+ | Month 3 | ❌ Not Tracked |
+| Metric            | Target   | Timeframe | Status        |
+|-------------------|----------|-----------|---------------|
+| Sessions per User | 5+/month | Month 2   | ❌ Not Tracked |
+| Tools per Session | 3+       | Month 2   | ❌ Not Tracked |
+| Returning Users   | 60%+     | Month 3   | ❌ Not Tracked |
 
 ---
 
@@ -366,57 +381,59 @@ If workspace:// reads account for 80% of requests with 100ms avg latency:
 ### Immediate Actions (Next 2 Weeks)
 
 1. **Design Telemetry Architecture**
-   - Privacy-first approach
-   - Opt-in consent mechanism
-   - Data collection schema
-   - **Effort**: 3-5 days
+    - Privacy-first approach
+    - Opt-in consent mechanism
+    - Data collection schema
+    - **Effort**: 3-5 days
 
 2. **Implement Basic Tracking**
-   - Tool usage tracking
-   - Error rate tracking
-   - Performance metrics
-   - **Effort**: 3-5 days
+    - Tool usage tracking
+    - Error rate tracking
+    - Performance metrics
+    - **Effort**: 3-5 days
 
 3. **Privacy Compliance**
-   - Privacy policy
-   - Consent implementation
-   - GDPR/CCPA review
-   - **Effort**: 2-3 days
+    - Privacy policy
+    - Consent implementation
+    - GDPR/CCPA review
+    - **Effort**: 2-3 days
 
 ### Short-Term (Next Month)
 
 4. **Deploy and Collect**
-   - Deploy tracking
-   - Collect baseline
-   - Initial insights
-   - **Effort**: Ongoing
+    - Deploy tracking
+    - Collect baseline
+    - Initial insights
+    - **Effort**: Ongoing
 
 5. **Analysis and Reporting**
-   - Monthly reports
-   - Trend analysis
-   - Dashboard
-   - **Effort**: 1 week
+    - Monthly reports
+    - Trend analysis
+    - Dashboard
+    - **Effort**: 1 week
 
 ### Medium-Term (Next Quarter)
 
 6. **Advanced Analytics**
-   - Predictive analytics
-   - User segmentation
-   - Cohort analysis
-   - **Effort**: 2-3 weeks
+    - Predictive analytics
+    - User segmentation
+    - Cohort analysis
+    - **Effort**: 2-3 weeks
 
 ---
 
 ## Conclusion
 
-Feature adoption tracking is **not yet implemented** for the Fly CLI MCP server. Implementing privacy-conscious adoption tracking is essential for:
+Feature adoption tracking is **not yet implemented** for the Fly CLI MCP server. Implementing
+privacy-conscious adoption tracking is essential for:
 
 1. Product prioritization based on real usage
 2. Data-driven feature development
 3. Performance optimization insights
 4. Documentation and support improvements
 
-**Recommended Action**: Prioritize telemetry design and implementation as part of Phase 2 expansion, with privacy-first approach.
+**Recommended Action**: Prioritize telemetry design and implementation as part of Phase 2 expansion,
+with privacy-first approach.
 
 ---
 

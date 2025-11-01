@@ -1,5 +1,5 @@
 /// Exception classification for retry operations
-/// 
+///
 /// Defines how exceptions should be handled in retry scenarios.
 /// This interface allows custom exception types to be marked as retryable.
 abstract class RetryableException {
@@ -69,7 +69,8 @@ class RetryableExceptionChecker {
     if (exception.toString().contains('Connection')) {
       return 'Network connection issue';
     }
-    if (exception.toString().contains('503') || exception.toString().contains('502')) {
+    if (exception.toString().contains('503') ||
+        exception.toString().contains('502')) {
       return 'Server temporarily unavailable';
     }
     if (exception.toString().contains('429')) {
@@ -79,4 +80,3 @@ class RetryableExceptionChecker {
     return 'Temporary failure detected';
   }
 }
-

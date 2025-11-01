@@ -1,11 +1,11 @@
 /// Result of compatibility checking
 sealed class CompatibilityResult {
   const CompatibilityResult();
-  
+
   const factory CompatibilityResult.compatible({
     List<String> warnings,
   }) = Compatible;
-  
+
   const factory CompatibilityResult.incompatible({
     required List<String> errors,
     List<String> warnings,
@@ -76,5 +76,3 @@ class Incompatible extends CompatibilityResult {
   String toString() =>
       'Incompatible(errors: ${errors.length}, warnings: ${warnings.length})';
 }
-
-

@@ -17,8 +17,8 @@ variables:
   platforms:
     type: list
     required: true
-    default: ["ios", "android"]
-    choices: ["ios", "android", "web", "macos", "windows", "linux"]
+    default: [ "ios", "android" ]
+    choices: [ "ios", "android", "web", "macos", "windows", "linux" ]
     description: "Target platforms"
   description:
     type: string

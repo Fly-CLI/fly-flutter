@@ -8,7 +8,8 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
   const HomeScreen({super.key});
 
   @override
-  ProviderListenable<HomeViewModel> get viewModelProvider => homeViewModelNotifierProvider;
+  ProviderListenable<HomeViewModel> get viewModelProvider =>
+      homeViewModelNotifierProvider;
 
   @override
   Widget buildContent(BuildContext context, HomeViewModel viewModel) {
@@ -20,7 +21,7 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
       body: Consumer(
         builder: (context, ref, child) {
           final counter = ref.watch(counterProvider);
-          
+
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -44,17 +45,22 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
-                      onPressed: () => ref.read(counterNotifierProvider.notifier).increment(),
+                      onPressed: () => ref
+                          .read(counterNotifierProvider.notifier)
+                          .increment(),
                       child: const Text('Increment'),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () => ref.read(counterNotifierProvider.notifier).decrement(),
+                      onPressed: () => ref
+                          .read(counterNotifierProvider.notifier)
+                          .decrement(),
                       child: const Text('Decrement'),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () => ref.read(counterNotifierProvider.notifier).reset(),
+                      onPressed: () =>
+                          ref.read(counterNotifierProvider.notifier).reset(),
                       child: const Text('Reset'),
                     ),
                   ],

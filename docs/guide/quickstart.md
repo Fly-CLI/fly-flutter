@@ -1,6 +1,7 @@
 # Quickstart
 
-Get up and running with Fly CLI in under 5 minutes. This guide will walk you through creating your first Flutter project with AI-native features.
+Get up and running with Fly CLI in under 5 minutes. This guide will walk you through creating your
+first Flutter project with AI-native features.
 
 ## Prerequisites
 
@@ -77,6 +78,7 @@ fly context export --include-dependencies=true --include-structure=true --includ
 ```
 
 This creates `.ai/project_context.md` with:
+
 - Project structure overview
 - Available commands and patterns
 - Architecture conventions
@@ -148,17 +150,20 @@ my_app/
 ### 1. Explore Templates
 
 Learn more about the available templates:
+
 - **[Minimal Template](/guide/templates#minimal)** - Simple structure
 - **[Riverpod Template](/guide/templates#riverpod)** - Production-ready
 
 ### 2. Master Commands
 
 Discover all available commands:
+
 - **[Commands Reference](/guide/commands)** - Complete command documentation
 
 ### 3. AI Integration
 
 Set up AI coding assistant integration:
+
 - **[AI Integration Guide](/ai-integration/overview)** - Complete AI setup
 - **[JSON Schemas](/ai-integration/json-schemas)** - Machine-readable output
 - **[AI Agents](/ai-integration/agents)** - Integration scripts
@@ -166,6 +171,7 @@ Set up AI coding assistant integration:
 ### 4. Migration
 
 Migrate from other CLI tools:
+
 - **[From Very Good CLI](/migration/very-good-cli)**
 - **[From Stacked CLI](/migration/stacked-cli)**
 - **[From Vanilla Flutter](/migration/vanilla-flutter)**
@@ -175,6 +181,7 @@ Migrate from other CLI tools:
 ### Common Issues
 
 **Project creation fails:**
+
 ```bash
 # Check Flutter installation
 flutter doctor
@@ -184,6 +191,7 @@ fly doctor
 ```
 
 **Dependencies not found:**
+
 ```bash
 # Clean and get dependencies
 flutter clean
@@ -191,6 +199,7 @@ flutter pub get
 ```
 
 **AI context not generated:**
+
 ```bash
 # Check if .ai directory exists
 ls -la .ai/

@@ -1,10 +1,12 @@
 # Simplified Error Handling System
 
-This document describes the simplified error handling system implemented in Fly CLI, focusing on structured error codes and consistent error context.
+This document describes the simplified error handling system implemented in Fly CLI, focusing on
+structured error codes and consistent error context.
 
 ## Overview
 
 The simplified error handling system provides:
+
 - **Structured Error Codes**: Semantic error codes for programmatic handling
 - **Consistent Error Context**: Automatic collection of relevant context information
 - **Simple Integration**: Easy to use in commands without complex abstractions
@@ -39,6 +41,7 @@ enum ErrorCode {
 ```
 
 Each error code includes:
+
 - **Code**: Unique identifier (e.g., "E1001")
 - **Category**: Semantic grouping (user, system, integration, internal)
 - **Severity**: Impact level (error, critical)
@@ -277,6 +280,7 @@ try {
 ## Error Code Reference
 
 ### User Errors (E1xxx)
+
 - `E1001` - Invalid project name
 - `E1002` - Invalid template name
 - `E1003` - Missing required argument
@@ -289,6 +293,7 @@ try {
 - `E1010` - Invalid screen name
 
 ### System Errors (E2xxx)
+
 - `E2001` - Permission denied
 - `E2002` - Network connection error
 - `E2003` - Insufficient disk space
@@ -299,6 +304,7 @@ try {
 - `E2008` - Environment configuration error
 
 ### Integration Errors (E3xxx)
+
 - `E3001` - Flutter SDK not found
 - `E3002` - Dart SDK not found
 - `E3003` - Template not found
@@ -309,6 +315,7 @@ try {
 - `E3008` - Platform tools error
 
 ### Internal Errors (E4xxx)
+
 - `E4001` - Internal error
 - `E4002` - Invalid state
 - `E4003` - Configuration error
@@ -321,26 +328,31 @@ try {
 ## Best Practices
 
 ### 1. Use Appropriate Error Codes
+
 - Choose the most specific error code that matches the situation
 - Use `ErrorCode.unknownError` only as a last resort
 - Prefer user errors (E1xxx) for input validation issues
 
 ### 2. Provide Helpful Context
+
 - Use the appropriate `ErrorContext` helper method
 - Include relevant information like file paths, template names, etc.
 - Add custom fields using the `extra` parameter
 
 ### 3. Write Clear Messages
+
 - Use clear, actionable error messages
 - Avoid technical jargon when possible
 - Include the specific value that caused the error
 
 ### 4. Provide Useful Suggestions
+
 - Give specific steps to resolve the issue
 - Suggest alternative approaches when appropriate
 - Reference other commands that might help
 
 ### 5. Handle Errors Gracefully
+
 - Catch exceptions and convert them to structured errors
 - Don't let raw exceptions bubble up to the user
 - Always provide context about what was being attempted
@@ -425,6 +437,7 @@ If you were using basic `CommandResult.error()`:
 ## Benefits
 
 ### ✅ Achieved Goals
+
 - **Structured Error Codes**: All errors have semantic codes for programmatic handling
 - **Consistent Error Context**: Automatic collection of relevant context information
 - **Simple Integration**: Easy to use without complex abstractions
@@ -432,6 +445,7 @@ If you were using basic `CommandResult.error()`:
 - **Maintainable**: Much less code to maintain
 
 ### ✅ What We Kept
+
 - Error codes with semantic categories
 - Consistent error context collection
 - Debug mode support
@@ -439,6 +453,7 @@ If you were using basic `CommandResult.error()`:
 - Human-readable error display
 
 ### ✅ What We Simplified
+
 - Removed Freezed dependencies
 - Removed automatic recovery middleware
 - Removed complex error type hierarchy
@@ -464,6 +479,7 @@ fly create my_app --debug
 ```
 
 This will show:
+
 - Full error context
 - Stack traces
 - Detailed JSON output

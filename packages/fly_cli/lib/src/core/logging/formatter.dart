@@ -11,5 +11,3 @@ abstract class LogFormatter {
   // Returns a structured JSON-serializable map for the event.
   Map<String, Object?> formatToJson(LogEvent event);
 }
-
-

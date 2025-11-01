@@ -13,7 +13,7 @@ void main() {
   group('ExponentialBackoffStrategy', () {
     test('calculates exponential delays correctly', () {
       const strategy = ExponentialBackoffStrategy();
-      
+
       expect(strategy.calculateDelay(0, policy), const Duration(seconds: 1));
       expect(strategy.calculateDelay(1, policy).inSeconds, closeTo(2, 0.5));
       expect(strategy.calculateDelay(2, policy).inSeconds, closeTo(4, 0.5));
@@ -28,8 +28,9 @@ void main() {
         maxDelay: Duration(seconds: 5),
         maxAttempts: 5,
       );
-      
-      expect(strategy.calculateDelay(2, shortMaxDelay).inSeconds, lessThanOrEqualTo(5));
+
+      expect(strategy.calculateDelay(2, shortMaxDelay).inSeconds,
+          lessThanOrEqualTo(5));
     });
 
     test('has correct name', () {
@@ -41,11 +42,11 @@ void main() {
   group('FixedDelayStrategy', () {
     test('returns same delay for all attempts', () {
       const strategy = FixedDelayStrategy();
-      
+
       final delay1 = strategy.calculateDelay(0, policy);
       final delay2 = strategy.calculateDelay(1, policy);
       final delay3 = strategy.calculateDelay(2, policy);
-      
+
       expect(delay1, equals(delay2));
       expect(delay2, equals(delay3));
     });
@@ -64,7 +65,7 @@ void main() {
   group('LinearBackoffStrategy', () {
     test('calculates linear delays correctly', () {
       const strategy = LinearBackoffStrategy();
-      
+
       expect(strategy.calculateDelay(0, policy).inSeconds, 1);
       expect(strategy.calculateDelay(1, policy).inSeconds, 2);
       expect(strategy.calculateDelay(2, policy).inSeconds, 3);
@@ -78,8 +79,9 @@ void main() {
         maxDelay: Duration(seconds: 2),
         maxAttempts: 5,
       );
-      
-      expect(strategy.calculateDelay(3, shortMaxDelay).inSeconds, lessThanOrEqualTo(2));
+
+      expect(strategy.calculateDelay(3, shortMaxDelay).inSeconds,
+          lessThanOrEqualTo(2));
     });
 
     test('has correct name', () {
@@ -91,7 +93,7 @@ void main() {
   group('AdaptiveStrategy', () {
     test('uses exponential backoff as base', () {
       const strategy = AdaptiveStrategy(useJitter: false);
-      
+
       final delay = strategy.calculateDelay(2, policy);
       expect(delay.inSeconds, greaterThan(1));
       expect(delay.inSeconds, lessThan(30));
@@ -105,14 +107,16 @@ void main() {
 
   group('RetryStrategies', () {
     test('byName returns correct strategies', () {
-      expect(RetryStrategies.byName('exponential'), isA<ExponentialBackoffStrategy>());
+      expect(RetryStrategies.byName('exponential'),
+          isA<ExponentialBackoffStrategy>());
       expect(RetryStrategies.byName('fixed'), isA<FixedDelayStrategy>());
       expect(RetryStrategies.byName('linear'), isA<LinearBackoffStrategy>());
       expect(RetryStrategies.byName('adaptive'), isA<AdaptiveStrategy>());
     });
 
     test('byName is case insensitive', () {
-      expect(RetryStrategies.byName('EXPONENTIAL'), isA<ExponentialBackoffStrategy>());
+      expect(RetryStrategies.byName('EXPONENTIAL'),
+          isA<ExponentialBackoffStrategy>());
       expect(RetryStrategies.byName('Fixed'), isA<FixedDelayStrategy>());
     });
 
@@ -121,4 +125,3 @@ void main() {
     });
   });
 }
-

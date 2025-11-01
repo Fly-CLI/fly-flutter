@@ -79,12 +79,14 @@ Based on the implementation in `fly_mcp_core/lib/src/mcp/error_codes.dart`:
 **Pattern**: Client provides invalid or missing parameters
 
 **Potential Causes**:
+
 - Schema validation failures
 - Missing required fields
 - Type mismatches
 - Out-of-range values
 
 **Examples**:
+
 ```json
 // Missing required field
 {"name": "fly.template.apply", "arguments": {"templateId": "riverpod"}}
@@ -100,6 +102,7 @@ Based on the implementation in `fly_mcp_core/lib/src/mcp/error_codes.dart`:
 ```
 
 **Improvements**:
+
 - Enhanced validation messages
 - Suggestions for correct parameters
 - Examples in error responses
@@ -111,12 +114,14 @@ Based on the implementation in `fly_mcp_core/lib/src/mcp/error_codes.dart`:
 **Pattern**: Operations exceed timeout limits
 
 **Potential Causes**:
+
 - Long-running Flutter operations
 - Large project builds
 - Network delays
 - System resource contention
 
 **Examples**:
+
 ```
 Tool: flutter.build
 Timeout: 30 minutes
@@ -125,6 +130,7 @@ Result: -32801 McpTimeout
 ```
 
 **Improvements**:
+
 - Configurable timeouts
 - Progress notifications
 - Timeout warnings
@@ -137,11 +143,13 @@ Result: -32801 McpTimeout
 **Pattern**: Concurrency limits or other permission issues
 
 **Potential Causes**:
+
 - Too many concurrent operations
 - Resource limits reached
 - Permission issues
 
 **Examples**:
+
 ```
 Operation: flutter.run
 Concurrent runs: 2 (limit)
@@ -150,6 +158,7 @@ Result: -32803 McpPermissionDenied
 ```
 
 **Improvements**:
+
 - Clear error messages with current usage
 - Suggested wait times
 - Alternative options
@@ -161,11 +170,13 @@ Result: -32803 McpPermissionDenied
 **Pattern**: Requested resource or tool doesn't exist
 
 **Potential Causes**:
+
 - Invalid tool name
 - Missing template
 - Invalid resource URI
 
 **Examples**:
+
 ```
 Tool: fly.template.apply
 Template: nonexistent
@@ -173,6 +184,7 @@ Result: -32804 McpNotFound
 ```
 
 **Improvements**:
+
 - Suggest similar names
 - List available options
 - Typo detection and suggestions
@@ -184,11 +196,13 @@ Result: -32804 McpNotFound
 ### Current State
 
 **Good Practices**:
+
 - Correlation IDs for tracking
 - Structured error responses
 - Error codes following MCP spec
 
 **Needs Improvement**:
+
 - Generic error messages
 - Limited actionable suggestions
 - No context-aware hints
@@ -197,6 +211,7 @@ Result: -32804 McpNotFound
 ### Target Error Message Quality
 
 **Required Elements**:
+
 1. Clear description of the error
 2. Specific field(s) causing the error
 3. Expected vs actual values
@@ -208,6 +223,7 @@ Result: -32804 McpNotFound
 **Example**:
 
 **Current**:
+
 ```json
 {
   "error": {
@@ -218,6 +234,7 @@ Result: -32804 McpNotFound
 ```
 
 **Target**:
+
 ```json
 {
   "error": {
@@ -249,35 +266,35 @@ Result: -32804 McpNotFound
 ### Immediate Enhancements
 
 1. **Enhanced Validation Messages**
-   - Field-specific errors
-   - Expected type/value information
-   - **Effort**: 3-5 days
+    - Field-specific errors
+    - Expected type/value information
+    - **Effort**: 3-5 days
 
 2. **Error Suggestions**
-   - Context-aware hints
-   - Similar name suggestions
-   - Example parameters
-   - **Effort**: 3-5 days
+    - Context-aware hints
+    - Similar name suggestions
+    - Example parameters
+    - **Effort**: 3-5 days
 
 3. **Error Documentation**
-   - Comprehensive error code reference
-   - Troubleshooting guide
-   - Common issues and solutions
-   - **Effort**: 2-3 days
+    - Comprehensive error code reference
+    - Troubleshooting guide
+    - Common issues and solutions
+    - **Effort**: 2-3 days
 
 ### Medium-Term Improvements
 
 4. **Error Analytics**
-   - Track error frequencies
-   - Identify patterns
-   - Proactive improvements
-   - **Effort**: 1 week
+    - Track error frequencies
+    - Identify patterns
+    - Proactive improvements
+    - **Effort**: 1 week
 
 5. **Error Recovery**
-   - Automatic retry for transient errors
-   - Graceful degradation
-   - Fallback mechanisms
-   - **Effort**: 1-2 weeks
+    - Automatic retry for transient errors
+    - Graceful degradation
+    - Fallback mechanisms
+    - **Effort**: 1-2 weeks
 
 ---
 
@@ -288,6 +305,7 @@ Result: -32804 McpNotFound
 **Current**: ✅ Implemented
 
 **Enhancement**:
+
 - Pre-compile schemas
 - Generate type-safe validators
 - Compile-time validation
@@ -299,6 +317,7 @@ Result: -32804 McpNotFound
 **Strategy**: Provide hints during request construction
 
 **Implementation**:
+
 - Tool metadata with examples
 - Parameter hints
 - Auto-completion support
@@ -310,6 +329,7 @@ Result: -32804 McpNotFound
 **Strategy**: Comprehensive error path testing
 
 **Implementation**:
+
 - Unit tests for validators
 - Integration tests for error scenarios
 - Error injection testing
@@ -321,18 +341,21 @@ Result: -32804 McpNotFound
 ### Planned Infrastructure
 
 **Components**:
+
 1. Error logger with structured data
 2. Error metrics collection
 3. Error dashboard
 4. Alerting system
 
 **Metrics**:
+
 - Error rate by tool
 - Error rate by code
 - Error trends over time
 - Recovery time
 
 **Dashboards**:
+
 - Real-time error monitoring
 - Error distribution charts
 - Trending analysis
@@ -345,46 +368,46 @@ Result: -32804 McpNotFound
 ### Priority 1: Immediate (Next 2 Weeks)
 
 1. Implement error tracking
-   - Structured error logging
-   - Metrics collection
-   - Basic dashboard
-   - **Effort**: 1 week
+    - Structured error logging
+    - Metrics collection
+    - Basic dashboard
+    - **Effort**: 1 week
 
 2. Enhance error messages
-   - Detailed error responses
-   - Actionable suggestions
-   - Examples
-   - **Effort**: 3-5 days
+    - Detailed error responses
+    - Actionable suggestions
+    - Examples
+    - **Effort**: 3-5 days
 
 3. Error documentation
-   - Error code reference
-   - Troubleshooting guide
-   - **Effort**: 2-3 days
+    - Error code reference
+    - Troubleshooting guide
+    - **Effort**: 2-3 days
 
 ### Priority 2: Short-Term (Next Month)
 
 4. Error analytics
-   - Pattern detection
-   - Trending analysis
-   - Proactive improvements
-   - **Effort**: 1 week
+    - Pattern detection
+    - Trending analysis
+    - Proactive improvements
+    - **Effort**: 1 week
 
 5. Error testing
-   - Comprehensive test coverage
-   - Error injection testing
-   - **Effort**: 1 week
+    - Comprehensive test coverage
+    - Error injection testing
+    - **Effort**: 1 week
 
 ### Priority 3: Medium-Term (Next Quarter)
 
 6. Error recovery
-   - Automatic retry
-   - Graceful degradation
-   - **Effort**: 1-2 weeks
+    - Automatic retry
+    - Graceful degradation
+    - **Effort**: 1-2 weeks
 
 7. Advanced analytics
-   - Predictive error detection
-   - Root cause analysis
-   - **Effort**: 2-3 weeks
+    - Predictive error detection
+    - Root cause analysis
+    - **Effort**: 2-3 weeks
 
 ---
 

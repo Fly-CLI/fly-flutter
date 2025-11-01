@@ -19,5 +19,3 @@ class JsonFormatter implements LogFormatter {
     return jsonEncode(formatToJson(event));
   }
 }
-
-

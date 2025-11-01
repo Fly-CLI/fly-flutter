@@ -34,6 +34,6 @@ class ServiceContainer {
   }
 
   /// Check if a service is registered
-  bool isRegistered<T>() => 
-    _singletons.containsKey(T) || _factories.containsKey(T);
+  bool isRegistered<T>() =>
+      _singletons.containsKey(T) || _factories.containsKey(T);
 }

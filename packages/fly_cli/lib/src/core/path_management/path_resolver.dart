@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/path_management/resolved_path.dart';
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
 /// Single source of truth for all path resolution in Fly CLI
-/// 
+///
 /// This service centralizes all path computation, resolution, and validation.
 /// All commands and services must use this resolver instead of manually
 /// constructing paths or using scattered path utilities.
@@ -22,18 +22,20 @@ class PathResolver {
   final bool isDevelopment;
 
   /// Resolve working directory from context with fallbacks
-  /// 
+  ///
   /// Priority order:
   /// 1. FLY_OUTPUT_DIR environment variable
-  /// 2. PWD environment variable  
+  /// 2. PWD environment variable
   /// 3. context.workingDirectory
   /// 4. Directory.current.path
-  Future<PathResolutionResult> resolveWorkingDirectory(CommandContext context) async {
+  Future<PathResolutionResult> resolveWorkingDirectory(
+      CommandContext context) async {
     try {
       String workingDir;
-      
+
       // Check environment variables first
-      final flyOutputDir = const EnvironmentManager().getString(EnvVar.flyOutputDir);
+      final flyOutputDir =
+          const EnvironmentManager().getString(EnvVar.flyOutputDir);
       if (flyOutputDir != null && flyOutputDir.isNotEmpty) {
         workingDir = path.normalize(flyOutputDir);
         logger.detail('Using FLY_OUTPUT_DIR: $workingDir');
@@ -70,12 +72,13 @@ class PathResolver {
 
       return PathResolutionResult.success(resolvedPath);
     } catch (e) {
-      return PathResolutionResult.failure(['Failed to resolve working directory: $e']);
+      return PathResolutionResult.failure(
+          ['Failed to resolve working directory: $e']);
     }
   }
 
   /// Resolve output directory with validation
-  /// 
+  ///
   /// Uses the provided outputDir or falls back to working directory
   Future<PathResolutionResult> resolveOutputDirectory(
     CommandContext context,
@@ -112,17 +115,18 @@ class PathResolver {
 
       return PathResolutionResult.success(resolvedPath);
     } catch (e) {
-      return PathResolutionResult.failure(['Failed to resolve output directory: $e']);
+      return PathResolutionResult.failure(
+          ['Failed to resolve output directory: $e']);
     }
   }
 
   /// Resolve template directory (replaces TemplateManager.findTemplatesDirectory)
-  /// 
+  ///
   /// Uses environment-based resolution with single strategy per mode
   Future<PathResolutionResult> resolveTemplatesDirectory() async {
     try {
       String templatesDir;
-      
+
       if (isDevelopment) {
         templatesDir = _resolveDevTemplatesPath();
       } else {
@@ -136,10 +140,12 @@ class PathResolver {
 
       final validationErrors = <String>[];
       if (!exists) {
-        validationErrors.add('Templates directory does not exist: $templatesDir');
+        validationErrors
+            .add('Templates directory does not exist: $templatesDir');
       }
       if (!writable) {
-        validationErrors.add('Templates directory is not writable: $templatesDir');
+        validationErrors
+            .add('Templates directory is not writable: $templatesDir');
       }
 
       final resolvedPath = TemplatePath(
@@ -151,7 +157,8 @@ class PathResolver {
 
       return PathResolutionResult.success(resolvedPath);
     } catch (e) {
-      return PathResolutionResult.failure(['Failed to resolve templates directory: $e']);
+      return PathResolutionResult.failure(
+          ['Failed to resolve templates directory: $e']);
     }
   }
 
@@ -195,7 +202,8 @@ class PathResolver {
 
       return PathResolutionResult.success(resolvedPath);
     } catch (e) {
-      return PathResolutionResult.failure(['Failed to resolve project path: $e']);
+      return PathResolutionResult.failure(
+          ['Failed to resolve project path: $e']);
     }
   }
 
@@ -209,13 +217,14 @@ class PathResolver {
   ) async {
     try {
       // First resolve the project directory
-      final projectDirResult = await _resolveProjectDirectory(context, outputDir);
+      final projectDirResult =
+          await _resolveProjectDirectory(context, outputDir);
       if (!projectDirResult.success) {
         return projectDirResult;
       }
 
       final projectDir = projectDirResult.path as WorkingDirectoryPath;
-      
+
       // Build component path based on type and feature
       final componentPath = _buildComponentPath(
         projectDir.absolute,
@@ -231,7 +240,8 @@ class PathResolver {
 
       final validationErrors = <String>[];
       if (!writable) {
-        validationErrors.add('Component directory is not writable: $componentPath');
+        validationErrors
+            .add('Component directory is not writable: $componentPath');
       }
 
       final resolvedPath = ComponentPath(
@@ -246,7 +256,8 @@ class PathResolver {
 
       return PathResolutionResult.success(resolvedPath);
     } catch (e) {
-      return PathResolutionResult.failure(['Failed to resolve component path: $e']);
+      return PathResolutionResult.failure(
+          ['Failed to resolve component path: $e']);
     }
   }
 
@@ -267,7 +278,7 @@ class PathResolver {
     }
 
     final workingDir = workingDirResult.path as WorkingDirectoryPath;
-    
+
     // Check if current directory is a Flutter project
     final pubspecFile = File(path.join(workingDir.absolute, 'pubspec.yaml'));
     if (await pubspecFile.exists()) {
@@ -276,25 +287,26 @@ class PathResolver {
 
     // Look for Flutter project in parent directories
     String currentDir = workingDir.absolute;
-    for (int i = 0; i < 5; i++) { // Limit search depth
+    for (int i = 0; i < 5; i++) {
+      // Limit search depth
       final parentDir = path.dirname(currentDir);
       if (parentDir == currentDir) break; // Reached root
-      
+
       final pubspecFile = File(path.join(parentDir, 'pubspec.yaml'));
       if (await pubspecFile.exists()) {
         final dir = Directory(parentDir);
         final exists = await dir.exists();
         final writable = await _isWritable(parentDir);
-        
+
         final resolvedPath = WorkingDirectoryPath(
           absolute: parentDir,
           exists: exists,
           writable: writable,
         );
-        
+
         return PathResolutionResult.success(resolvedPath);
       }
-      
+
       currentDir = parentDir;
     }
 
@@ -354,7 +366,8 @@ class PathResolver {
   /// Resolve development templates path
   String _resolveDevTemplatesPath() {
     final currentDir = Directory.current.path;
-    final devTemplatesPath = path.join(currentDir, 'packages', 'fly_cli', 'templates');
+    final devTemplatesPath =
+        path.join(currentDir, 'packages', 'fly_cli', 'templates');
     return path.normalize(devTemplatesPath);
   }
 
@@ -368,7 +381,8 @@ class PathResolver {
   /// Check if a directory is writable
   Future<bool> _isWritable(String dirPath) async {
     try {
-      final tempFile = File(path.join(dirPath, '.fly_temp_${DateTime.now().millisecondsSinceEpoch}'));
+      final tempFile = File(path.join(
+          dirPath, '.fly_temp_${DateTime.now().millisecondsSinceEpoch}'));
       await tempFile.create();
       await tempFile.delete();
       return true;

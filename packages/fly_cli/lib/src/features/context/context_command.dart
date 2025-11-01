@@ -2,22 +2,22 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
-
-import 'package:fly_cli/src/features/context/models.dart';
 import 'package:fly_cli/src/features/context/context_generator.dart';
+import 'package:fly_cli/src/features/context/models.dart';
 
 /// ContextCommand using new architecture
 class ContextCommand extends FlyCommand {
   ContextCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory ContextCommand.create(CommandContext context) => ContextCommand(context);
+  factory ContextCommand.create(CommandContext context) =>
+      ContextCommand(context);
 
   @override
   String get name => 'context';
@@ -28,7 +28,6 @@ class ContextCommand extends FlyCommand {
   @override
   ArgParser get argParser {
     final parser = super.argParser
-
       ..addOption(
         'file',
         abbr: 'o',
@@ -43,11 +42,13 @@ class ContextCommand extends FlyCommand {
         'include-dependencies',
         help: 'Include dependency analysis in context export',
         negatable: false,
-      )..addFlag(
+      )
+      ..addFlag(
         'include-architecture',
         help: 'Include architecture analysis in context export',
         defaultsTo: true,
-      )..addFlag(
+      )
+      ..addFlag(
         'include-suggestions',
         help: 'Include AI suggestions in context export',
         defaultsTo: true,
@@ -56,7 +57,8 @@ class ContextCommand extends FlyCommand {
         'max-files',
         help: 'Maximum number of files to analyze',
         defaultsTo: '50',
-      )..addOption(
+      )
+      ..addOption(
         'max-file-size',
         help: 'Maximum file size to include (in bytes)',
         defaultsTo: '10000',
@@ -65,33 +67,33 @@ class ContextCommand extends FlyCommand {
   }
 
   @override
-  List<CommandValidator> get validators =>
-      [
+  List<CommandValidator> get validators => [
         FlutterProjectValidator(),
         DirectoryWritableValidator(),
       ];
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
     try {
       final outputFile = argResults!['file'] as String?;
       final includeCode = argResults!['include-code'] as bool? ?? false;
-      final includeDependencies = argResults!['include-dependencies'] as bool? ??
-          false;
-      final includeArchitecture = argResults!['include-architecture'] as bool? ??
-          true;
-      final includeSuggestions = argResults!['include-suggestions'] as bool? ??
-          true;
-      final maxFiles = int.tryParse(
-          argResults!['max-files'] as String? ?? '50') ?? 50;
-      final maxFileSize = int.tryParse(
-          argResults!['max-file-size'] as String? ?? '10000') ?? 10000;
+      final includeDependencies =
+          argResults!['include-dependencies'] as bool? ?? false;
+      final includeArchitecture =
+          argResults!['include-architecture'] as bool? ?? true;
+      final includeSuggestions =
+          argResults!['include-suggestions'] as bool? ?? true;
+      final maxFiles =
+          int.tryParse(argResults!['max-files'] as String? ?? '50') ?? 50;
+      final maxFileSize =
+          int.tryParse(argResults!['max-file-size'] as String? ?? '10000') ??
+              10000;
 
       logger.info('🔍 Analyzing project context...');
 
@@ -135,11 +137,11 @@ class ContextCommand extends FlyCommand {
       // Write to file if specified
       if (outputFile != null) {
         final file = File(outputFile);
-        await file.writeAsString(
-            jsonOutput ? json.encode(enrichedData) :
-            aiOutput ? json.encode(enrichedData) :
-            _formatHumanOutput(enrichedData)
-        );
+        await file.writeAsString(jsonOutput
+            ? json.encode(enrichedData)
+            : aiOutput
+                ? json.encode(enrichedData)
+                : _formatHumanOutput(enrichedData));
 
         return CommandResult.success(
           command: 'context',
@@ -180,40 +182,48 @@ class ContextCommand extends FlyCommand {
   /// Format context data for human-readable output
   String _formatHumanOutput(Map<String, dynamic> data) {
     final buffer = StringBuffer()
-      ..writeln('📋 Project Context Export')..writeln(
-          '========================')..writeln();
+      ..writeln('📋 Project Context Export')
+      ..writeln('========================')
+      ..writeln();
 
     if (data.containsKey('project')) {
       final project = data['project'] as Map<String, dynamic>;
-      buffer..writeln('📁 Project: ${project['name'] ?? 'Unknown'}')..writeln(
-          '📦 Package: ${project['package_name'] ?? 'Unknown'}')..writeln(
-          '🏗️  Type: ${project['project_type'] ?? 'Unknown'}')..writeln();
+      buffer
+        ..writeln('📁 Project: ${project['name'] ?? 'Unknown'}')
+        ..writeln('📦 Package: ${project['package_name'] ?? 'Unknown'}')
+        ..writeln('🏗️  Type: ${project['project_type'] ?? 'Unknown'}')
+        ..writeln();
     }
 
     if (data.containsKey('structure')) {
       final structure = data['structure'] as Map<String, dynamic>;
-      buffer..writeln('📂 Structure:')..writeln(
-          '  - Directories: ${structure['directory_count'] ?? 0}')..writeln(
-          '  - Files: ${structure['file_count'] ?? 0}')..writeln();
+      buffer
+        ..writeln('📂 Structure:')
+        ..writeln('  - Directories: ${structure['directory_count'] ?? 0}')
+        ..writeln('  - Files: ${structure['file_count'] ?? 0}')
+        ..writeln();
     }
 
     if (data.containsKey('commands')) {
       final commands = data['commands'] as Map<String, dynamic>;
       final available = commands['available'] as List<dynamic>? ?? [];
-      buffer..writeln('⚡ Available Commands: ${available.length}')..writeln();
+      buffer
+        ..writeln('⚡ Available Commands: ${available.length}')
+        ..writeln();
     }
 
-    buffer..writeln('📊 Export Summary:')..writeln(
-        '  - Sections: ${data.keys.length}')..writeln(
-        '  - Exported: ${data['export_metadata']?['exported_at'] ??
-            'Unknown'}')..writeln();
+    buffer
+      ..writeln('📊 Export Summary:')
+      ..writeln('  - Sections: ${data.keys.length}')
+      ..writeln(
+          '  - Exported: ${data['export_metadata']?['exported_at'] ?? 'Unknown'}')
+      ..writeln();
 
     return buffer.toString();
   }
 
   /// Get list of included sections for metadata
-  List<String> _getIncludedSections(Map<String, dynamic> data) =>
-      data.keys.where((key) =>
-      !['export_config', 'export_metadata'].contains(key)
-      ).toList();
+  List<String> _getIncludedSections(Map<String, dynamic> data) => data.keys
+      .where((key) => !['export_config', 'export_metadata'].contains(key))
+      .toList();
 }

@@ -210,7 +210,8 @@ void main() {
     });
 
     test('should remove null values', () {
-      const asyncValue = AsyncValue.data(<String, int?>{'a': 1, 'b': null, 'c': 3});
+      const asyncValue =
+          AsyncValue.data(<String, int?>{'a': 1, 'b': null, 'c': 3});
       final cleaned = asyncValue.removeNullValues();
       expect(cleaned.hasFlyData, true);
       expect(cleaned.dataOrNull, {'a': 1, 'c': 3});

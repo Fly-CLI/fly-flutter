@@ -1,11 +1,9 @@
 import 'package:args/args.dart' hide OptionType;
-import 'package:path/path.dart' as path;
-
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
@@ -18,7 +16,7 @@ class CreateCommand extends FlyCommand {
   CreateCommand(super.context);
 
   /// Factory constructor for enum-based command creation
-  factory CreateCommand.create(CommandContext context) => 
+  factory CreateCommand.create(CommandContext context) =>
       CreateCommand(context);
 
   @override
@@ -29,60 +27,67 @@ class CreateCommand extends FlyCommand {
 
   @override
   CommandDefinition? get metadata => CommandDefinition(
-    name: name,
-    description: description,
-    arguments: [
-      const ArgumentDefinition(
-        name: 'project_name',
-        description: 'Name of the Flutter project to create',
-      ),
-    ],
-    options: [
-      const OptionDefinition(
-        name: 'template',
-        description: 'Project template to use',
-        type: OptionType.value,
-        short: 't',
-        allowedValues: ['minimal', 'riverpod'],
-        defaultValue: 'riverpod',
-      ),
-      const OptionDefinition(
-        name: 'organization',
-        description: 'Organization identifier (e.g., com.example)',
-        type: OptionType.value,
-        short: 'o',
-        defaultValue: 'com.example',
-      ),
-      const OptionDefinition(
-        name: 'platforms',
-        description: 'Target platforms for the project',
-        type: OptionType.value,
-        allowedValues: ['ios', 'android', 'web', 'macos', 'windows', 'linux'],
-        defaultValue: 'ios,android',
-      ),
-      const OptionDefinition(
-        name: 'interactive',
-        description: 'Run in interactive mode to configure project settings',
-        short: 'i',
-      ),
-    ],
-    examples: [
-      const CommandExample(
-        command: 'fly create my_app --template=minimal',
-        description: 'Create a minimal Flutter project',
-      ),
-      const CommandExample(
-        command: 'fly create my_app --template=riverpod '
-            '--platforms=ios,android,web',
-        description: 'Create a Riverpod project with multiple platforms',
-      ),
-    ],
-  );
+        name: name,
+        description: description,
+        arguments: [
+          const ArgumentDefinition(
+            name: 'project_name',
+            description: 'Name of the Flutter project to create',
+          ),
+        ],
+        options: [
+          const OptionDefinition(
+            name: 'template',
+            description: 'Project template to use',
+            type: OptionType.value,
+            short: 't',
+            allowedValues: ['minimal', 'riverpod'],
+            defaultValue: 'riverpod',
+          ),
+          const OptionDefinition(
+            name: 'organization',
+            description: 'Organization identifier (e.g., com.example)',
+            type: OptionType.value,
+            short: 'o',
+            defaultValue: 'com.example',
+          ),
+          const OptionDefinition(
+            name: 'platforms',
+            description: 'Target platforms for the project',
+            type: OptionType.value,
+            allowedValues: [
+              'ios',
+              'android',
+              'web',
+              'macos',
+              'windows',
+              'linux'
+            ],
+            defaultValue: 'ios,android',
+          ),
+          const OptionDefinition(
+            name: 'interactive',
+            description:
+                'Run in interactive mode to configure project settings',
+            short: 'i',
+          ),
+        ],
+        examples: [
+          const CommandExample(
+            command: 'fly create my_app --template=minimal',
+            description: 'Create a minimal Flutter project',
+          ),
+          const CommandExample(
+            command: 'fly create my_app --template=riverpod '
+                '--platforms=ios,android,web',
+            description: 'Create a Riverpod project with multiple platforms',
+          ),
+        ],
+      );
 
   @override
   ArgParser get argParser {
     final parser = super.argParser
-
       ..addOption(
         'template',
         abbr: 't',
@@ -114,7 +119,8 @@ class CreateCommand extends FlyCommand {
       )
       ..addOption(
         'output-dir',
-        help: 'Output directory for generated files (defaults to current directory)',
+        help:
+            'Output directory for generated files (defaults to current directory)',
         defaultsTo: null,
       );
     return parser;
@@ -122,21 +128,21 @@ class CreateCommand extends FlyCommand {
 
   @override
   List<CommandValidator> get validators => [
-    RequiredArgumentValidator('project_name'),
-    ProjectNameValidator(),
-    TemplateExistsValidator(),
-    PlatformValidator(),
-    DirectoryWritableValidator(),
-    EnvironmentValidator(),
-  ];
+        RequiredArgumentValidator('project_name'),
+        ProjectNameValidator(),
+        TemplateExistsValidator(),
+        PlatformValidator(),
+        DirectoryWritableValidator(),
+        EnvironmentValidator(),
+      ];
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-    DryRunMiddleware(),
-    CachingMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+        DryRunMiddleware(),
+        CachingMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
@@ -156,7 +162,8 @@ class CreateCommand extends FlyCommand {
 
     if (!projectPathResult.success) {
       return CommandResult.error(
-        message: 'Failed to resolve project path: ${projectPathResult.errors.join(', ')}',
+        message:
+            'Failed to resolve project path: ${projectPathResult.errors.join(', ')}',
         suggestion: 'Check your output directory and permissions',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
@@ -170,12 +177,20 @@ class CreateCommand extends FlyCommand {
 
     if (interactive) {
       return _runInteractiveMode(
-        projectName, template, organization, platforms, projectPath.absolute,
+        projectName,
+        template,
+        organization,
+        platforms,
+        projectPath.absolute,
       );
     }
 
     return _createProject(
-      projectName, template, organization, platforms, projectPath.absolute,
+      projectName,
+      template,
+      organization,
+      platforms,
+      projectPath.absolute,
     );
   }
 
@@ -187,8 +202,9 @@ class CreateCommand extends FlyCommand {
     List<String> platforms,
     String projectPath,
   ) async {
-    logger..info('🚀 Welcome to Fly CLI Interactive Mode')
-    ..info("Let's create your Flutter project step by step.\n");
+    logger
+      ..info('🚀 Welcome to Fly CLI Interactive Mode')
+      ..info("Let's create your Flutter project step by step.\n");
 
     try {
       // Use injected interactive prompt
@@ -224,11 +240,12 @@ class CreateCommand extends FlyCommand {
       );
 
       // 5. Display summary
-      logger..info('\n📋 Project Configuration:')
-      ..info('  Name: $finalProjectName')
-      ..info('  Template: $finalTemplate')
-      ..info('  Organization: $finalOrganization')
-      ..info('  Platforms: ${finalPlatforms.join(', ')}');
+      logger
+        ..info('\n📋 Project Configuration:')
+        ..info('  Name: $finalProjectName')
+        ..info('  Template: $finalTemplate')
+        ..info('  Organization: $finalOrganization')
+        ..info('  Platforms: ${finalPlatforms.join(', ')}');
 
       // 6. Confirmation
       final confirmed = await prompter.promptConfirm(
@@ -251,7 +268,11 @@ class CreateCommand extends FlyCommand {
       logger.info('\nGenerating project...\n');
 
       return _createProject(
-        finalProjectName, finalTemplate, finalOrganization, finalPlatforms, projectPath,
+        finalProjectName,
+        finalTemplate,
+        finalOrganization,
+        finalPlatforms,
+        projectPath,
       );
     } catch (e) {
       return CommandResult.error(
@@ -278,10 +299,11 @@ class CreateCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger..info('Creating Flutter project...')
-      ..info('Template: $template')
-      ..info('Organization: $organization')
-      ..info('Platforms: ${platforms.join(', ')}');
+      logger
+        ..info('Creating Flutter project...')
+        ..info('Template: $template')
+        ..info('Organization: $organization')
+        ..info('Platforms: ${platforms.join(', ')}');
 
       // Use injected template manager
       final templateManager = context.templateManager;
@@ -375,7 +397,7 @@ class CreateCommand extends FlyCommand {
 
   @override
   Future<void> onAfterExecute(
-    CommandContext context, 
+    CommandContext context,
     CommandResult result,
   ) async {
     if (result.success) {
@@ -385,8 +407,8 @@ class CreateCommand extends FlyCommand {
 
   @override
   Future<void> onError(
-    CommandContext context, 
-    Object error, 
+    CommandContext context,
+    Object error,
     StackTrace stackTrace,
   ) async {
     logger.err('💥 Project creation failed: $error');

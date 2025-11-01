@@ -18,7 +18,7 @@ variables:
     type: string
     required: true
     default: "list"
-    choices: ["list", "detail", "form", "auth", "settings"]
+    choices: [ "list", "detail", "form", "auth", "settings" ]
     description: "Type of screen to generate"
   with_viewmodel:
     type: boolean

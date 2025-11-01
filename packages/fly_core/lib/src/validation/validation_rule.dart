@@ -1,7 +1,7 @@
 import 'validation_result.dart';
 
 /// Base interface for composable validation rules
-/// 
+///
 /// All validation rules implement this interface to provide
 /// consistent validation behavior across packages.
 abstract class ValidationRule<T> {
@@ -19,7 +19,7 @@ abstract class ValidationRule<T> {
 }
 
 /// Synchronous validation rule base class
-/// 
+///
 /// For simple validation rules that don't need async operations.
 abstract class SyncValidationRule<T> implements ValidationRule<T> {
   @override
@@ -35,7 +35,7 @@ abstract class SyncValidationRule<T> implements ValidationRule<T> {
 }
 
 /// Asynchronous validation rule base class
-/// 
+///
 /// For validation rules that need async operations.
 abstract class AsyncValidationRule<T> implements ValidationRule<T> {
   @override
@@ -73,4 +73,3 @@ abstract class AsyncValidationRule<T> implements ValidationRule<T> {
     return '$fieldName:$value';
   }
 }
-

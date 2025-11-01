@@ -2,10 +2,10 @@
 enum ExportFormat {
   /// JSON Schema Draft 7 format
   jsonSchema,
-  
+
   /// OpenAPI 3.0 inspired format
   openApi,
-  
+
   /// Custom CLI specification format
   cliSpec,
 }

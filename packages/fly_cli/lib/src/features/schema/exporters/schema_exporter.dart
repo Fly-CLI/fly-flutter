@@ -38,14 +38,15 @@ class ExportConfig {
     bool? includeValidation,
     bool? includeGlobalOptions,
     bool? prettyPrint,
-  }) => ExportConfig(
-      format: format ?? this.format,
-      commandFilter: commandFilter ?? this.commandFilter,
-      includeExamples: includeExamples ?? this.includeExamples,
-      includeValidation: includeValidation ?? this.includeValidation,
-      includeGlobalOptions: includeGlobalOptions ?? this.includeGlobalOptions,
-      prettyPrint: prettyPrint ?? this.prettyPrint,
-    );
+  }) =>
+      ExportConfig(
+        format: format ?? this.format,
+        commandFilter: commandFilter ?? this.commandFilter,
+        includeExamples: includeExamples ?? this.includeExamples,
+        includeValidation: includeValidation ?? this.includeValidation,
+        includeGlobalOptions: includeGlobalOptions ?? this.includeGlobalOptions,
+        prettyPrint: prettyPrint ?? this.prettyPrint,
+      );
 }
 
 /// Abstract base class for schema exporters
@@ -71,7 +72,7 @@ class SchemaExportUtils {
     ExportConfig config,
   ) {
     final allCommands = registry.getAllCommands();
-    
+
     if (config.commandFilter != null) {
       final filteredCommand = allCommands[config.commandFilter!];
       if (filteredCommand != null) {
@@ -79,7 +80,7 @@ class SchemaExportUtils {
       }
       return {};
     }
-    
+
     return allCommands;
   }
 
@@ -95,11 +96,12 @@ class SchemaExportUtils {
   }
 
   /// Format JSON with proper indentation
-  static String formatJson(Map<String, dynamic> json, {bool prettyPrint = true}) {
+  static String formatJson(Map<String, dynamic> json,
+      {bool prettyPrint = true}) {
     if (!prettyPrint) {
       return json.toString();
     }
-    
+
     // Simple JSON formatting - in a real implementation, you'd use dart:convert
     final buffer = StringBuffer();
     _formatJsonValue(json, buffer, 0);

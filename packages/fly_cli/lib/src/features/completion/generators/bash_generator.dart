@@ -1,6 +1,7 @@
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/completion_generator.dart';
-// 
+
+//
 /// Bash shell completion generator
 class BashCompletionGenerator extends CompletionGenerator {
   const BashCompletionGenerator();
@@ -48,7 +49,8 @@ class BashCompletionGenerator extends CompletionGenerator {
       ..writeln(r'    case "${prev}" in')
       ..writeln('        --output)')
       ..writeln(
-          r'            COMPREPLY=( $(compgen -W "human json" -- "${cur}") )',)
+        r'            COMPREPLY=( $(compgen -W "human json" -- "${cur}") )',
+      )
       ..writeln('            return 0')
       ..writeln('            ;;')
       ..writeln('    esac')
@@ -62,7 +64,10 @@ class BashCompletionGenerator extends CompletionGenerator {
   }
 
   void generateCommandCase(
-      StringBuffer buffer, String commandName, CommandDefinition command,) {
+    StringBuffer buffer,
+    String commandName,
+    CommandDefinition command,
+  ) {
     // Generate command-specific options
     final options = command.options.map((o) => '--${o.name}').join(' ');
     final subcommands = command.subcommands.map((s) => s.name).join(' ');
@@ -77,10 +82,16 @@ class BashCompletionGenerator extends CompletionGenerator {
 
     if (subcommands.isNotEmpty) {
       buffer.writeln(
-          r'                COMPREPLY=( $(compgen -W "' + subcommands + r'" -- "${cur}") )',);
+        r'                COMPREPLY=( $(compgen -W "' +
+            subcommands +
+            r'" -- "${cur}") )',
+      );
     } else if (options.isNotEmpty) {
       buffer.writeln(
-          r'                COMPREPLY=( $(compgen -W "' + options + r' $global_opts" -- "${cur}") )',);
+        r'                COMPREPLY=( $(compgen -W "' +
+            options +
+            r' $global_opts" -- "${cur}") )',
+      );
     }
 
     if (subcommands.isNotEmpty || options.isNotEmpty) {
@@ -106,7 +117,8 @@ class BashCompletionGenerator extends CompletionGenerator {
 
   @override
   String generateSubcommandsCompletion(
-          List<SubcommandDefinition> subcommands,) =>
+    List<SubcommandDefinition> subcommands,
+  ) =>
       subcommands.map((s) => s.name).join(' ');
 
   @override

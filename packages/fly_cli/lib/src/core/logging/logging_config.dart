@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/core/logging/log_level.dart';
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
 
 enum LogFormat { human, json }
 
@@ -61,11 +61,13 @@ class LoggingConfig {
     final levelStr = manager.getString(
           EnvVar.flyLogLevel,
           defaultValue: isProd ? 'info' : 'debug',
-        ) ?? (isProd ? 'info' : 'debug');
+        ) ??
+        (isProd ? 'info' : 'debug');
     final formatStr = manager.getString(
           EnvVar.flyLogFormat,
           defaultValue: isProd ? 'json' : 'human',
-        ) ?? (isProd ? 'json' : 'human');
+        ) ??
+        (isProd ? 'json' : 'human');
     final noColor = manager.getBool(EnvVar.flyNoColor, defaultValue: false);
     final httpEndpoint = manager.getString(EnvVar.flyLogHttpEndpoint);
     final httpToken = manager.getString(EnvVar.flyLogHttpToken);
@@ -75,9 +77,8 @@ class LoggingConfig {
 
     return LoggingConfig(
       level: LogLevel.fromString(levelStr, fallback: LogLevel.info),
-      format: formatStr.toLowerCase() == 'json'
-          ? LogFormat.json
-          : LogFormat.human,
+      format:
+          formatStr.toLowerCase() == 'json' ? LogFormat.json : LogFormat.human,
       logFile: manager.getString(EnvVar.flyLogFile),
       color: !noColor && !isProd,
       trace: manager.getBool(EnvVar.flyLogTrace, defaultValue: false),

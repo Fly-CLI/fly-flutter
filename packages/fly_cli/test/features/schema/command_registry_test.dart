@@ -1,39 +1,40 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/definitions/fly_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
 
 /// Helper to create a test context for registry initialization
-CommandContext _createTestContext() => CommandTestHelper.createMockCommandContext();
+CommandContext _createTestContext() =>
+    CommandTestHelper.createMockCommandContext();
 
 /// Helper to create a test global options parser
 ArgParser _createTestGlobalOptionsParser() {
   final parser = ArgParser()
-  ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
-  ..addFlag('quiet', abbr: 'q', help: 'Suppress output')
-  ..addOption('output', help: 'Output format', allowed: ['human', 'json']);
+    ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
+    ..addFlag('quiet', abbr: 'q', help: 'Suppress output')
+    ..addOption('output', help: 'Output format', allowed: ['human', 'json']);
   return parser;
 }
 
 /// Helper to create command instances from enum for testing
 ({
-  Map<FlyCommandType, Command<int>> commandInstances,
+  Map<FlyCommand, Command<int>> commandInstances,
   Map<String, Command<int>> commandGroups,
 }) _createCommandInstances(CommandContext context) {
-  final commandInstances = <FlyCommandType, Command<int>>{};
-  
+  final commandInstances = <FlyCommand, Command<int>>{};
+
   // Create instances for all command types
-  for (final commandType in FlyCommandType.values) {
+  for (final commandType in FlyCommand.values) {
     commandInstances[commandType] = commandType.createInstance(context);
   }
-  
+
   // Build command groups dynamically
   final commandGroups = <String, Command<int>>{};
-  final groupMap = <String, List<FlyCommandType>>{};
+  final groupMap = <String, List<FlyCommand>>{};
   for (final entry in commandInstances.entries) {
     final commandType = entry.key;
     final group = commandType.group;
@@ -41,7 +42,7 @@ ArgParser _createTestGlobalOptionsParser() {
       groupMap.putIfAbsent(group.name, () => []).add(commandType);
     }
   }
-  
+
   // Create group commands
   for (final entry in groupMap.entries) {
     final groupName = entry.key;
@@ -55,7 +56,7 @@ ArgParser _createTestGlobalOptionsParser() {
     }
     commandGroups[groupName] = groupCmd;
   }
-  
+
   return (commandInstances: commandInstances, commandGroups: commandGroups);
 }
 
@@ -100,7 +101,8 @@ void main() {
         expect(registry.isInitialized, isTrue);
         expect(registry.hasCommand('create'), isTrue);
         expect(registry.hasCommand('doctor'), isTrue);
-        expect(registry.getGlobalOptions().length, greaterThanOrEqualTo(3)); // verbose, quiet, output
+        expect(registry.getGlobalOptions().length,
+            greaterThanOrEqualTo(3)); // verbose, quiet, output
       });
 
       test('does not reinitialize if already initialized', () {
@@ -126,7 +128,8 @@ void main() {
 
         // Should still have same commands
         expect(registry.isInitialized, isTrue);
-        expect(registry.getAllCommands().keys.toList(), equals(initialCommands));
+        expect(
+            registry.getAllCommands().keys.toList(), equals(initialCommands));
       });
     });
 
@@ -180,10 +183,12 @@ void main() {
       test('getSubcommands returns subcommands for add command', () {
         final subcommands = registry.getSubcommands('add');
         expect(subcommands, hasLength(2));
-        expect(subcommands.map((s) => s.name), containsAll(['screen', 'service']));
+        expect(
+            subcommands.map((s) => s.name), containsAll(['screen', 'service']));
       });
 
-      test('getSubcommands returns empty list for command without subcommands', () {
+      test('getSubcommands returns empty list for command without subcommands',
+          () {
         final subcommands = registry.getSubcommands('create');
         expect(subcommands, isEmpty);
       });
@@ -211,12 +216,14 @@ void main() {
         final globalOptions = registry.getGlobalOptions();
         expect(globalOptions.length, greaterThanOrEqualTo(3));
 
-        final verboseOption = globalOptions.firstWhere((o) => o.name == 'verbose');
+        final verboseOption =
+            globalOptions.firstWhere((o) => o.name == 'verbose');
         expect(verboseOption.type, equals(OptionType.flag));
         expect(verboseOption.short, equals('v'));
         expect(verboseOption.isGlobal, isTrue);
 
-        final outputOption = globalOptions.firstWhere((o) => o.name == 'output');
+        final outputOption =
+            globalOptions.firstWhere((o) => o.name == 'output');
         expect(outputOption.type, equals(OptionType.value));
         expect(outputOption.allowedValues, equals(['human', 'json']));
         expect(outputOption.isGlobal, isTrue);
@@ -252,7 +259,8 @@ void main() {
         final globalOptions = json['global_options'] as List<dynamic>;
         expect(globalOptions.length, greaterThanOrEqualTo(3));
 
-        final verboseOption = globalOptions.firstWhere((o) => o['name'] == 'verbose') as Map<String, dynamic>;
+        final verboseOption = globalOptions
+            .firstWhere((o) => o['name'] == 'verbose') as Map<String, dynamic>;
         expect(verboseOption['name'], equals('verbose'));
         expect(verboseOption['short'], equals('v'));
       });

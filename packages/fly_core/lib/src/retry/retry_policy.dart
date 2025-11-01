@@ -1,5 +1,5 @@
 /// Configuration for retry behavior
-/// 
+///
 /// Provides default settings and configuration for retry operations
 /// across all packages in the Fly CLI ecosystem.
 class RetryPolicy {
@@ -47,7 +47,7 @@ class RetryPolicy {
     for (int i = 0; i < attemptNumber; i++) {
       multiplier *= backoffMultiplier;
     }
-    
+
     final calculatedDelay = Duration(
       milliseconds: (initialDelay.inMilliseconds * multiplier).round(),
     );
@@ -57,7 +57,8 @@ class RetryPolicy {
     if (jitterEnabled) {
       // Add ±20% jitter
       final jitterRange = (cappedDelay.inMilliseconds * 0.2).round();
-      final jitter = (jitterRange * 2 * (0.5 - 0.5)).round(); // TODO: Implement random
+      final jitter =
+          (jitterRange * 2 * (0.5 - 0.5)).round(); // TODO: Implement random
       return Duration(milliseconds: cappedDelay.inMilliseconds + jitter);
     }
 
@@ -129,4 +130,3 @@ class RetryPolicy {
     jitterEnabled: true,
   );
 }
-

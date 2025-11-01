@@ -2,7 +2,7 @@
 name: production_app
 template: riverpod
 organization: com.company
-platforms: [ios, android, web]
+platforms: [ ios, android, web ]
 description: "Production-ready Flutter app"
 
 screens:
@@ -10,23 +10,23 @@ screens:
     type: auth
   - name: login
     type: auth
-    features: [validation, biometric_auth]
+    features: [ validation, biometric_auth ]
   - name: home
     type: list
-    features: [pull_to_refresh, infinite_scroll]
+    features: [ pull_to_refresh, infinite_scroll ]
   - name: profile
     type: detail
-    features: [edit_mode]
+    features: [ edit_mode ]
 
 services:
   - name: auth_service
     api_base: https://api.company.com
     type: api
-    features: [token_refresh, offline_support]
+    features: [ token_refresh, offline_support ]
   - name: user_service
     api_base: https://api.company.com
     type: api
-    features: [caching]
+    features: [ caching ]
 
 packages:
   - firebase_core

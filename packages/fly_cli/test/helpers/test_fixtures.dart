@@ -206,7 +206,8 @@ class TestFixtures {
     'success': false,
     'command': 'create',
     'message': 'Invalid project name: MyApp',
-    'suggestion': 'Project name must contain only lowercase letters, numbers, and underscores',
+    'suggestion':
+        'Project name must contain only lowercase letters, numbers, and underscores',
     'data': {
       'error_type': 'validation_error',
       'field': 'project_name',
@@ -217,8 +218,17 @@ class TestFixtures {
   /// Sample command arguments for testing
   static const Map<String, List<String>> sampleCommandArgs = {
     'create_minimal': ['create', 'test_app', '--template=minimal'],
-    'create_riverpod': ['create', 'test_app', '--template=riverpod', '--organization=com.test'],
-    'create_with_platforms': ['create', 'test_app', '--platforms=ios,android,web'],
+    'create_riverpod': [
+      'create',
+      'test_app',
+      '--template=riverpod',
+      '--organization=com.test'
+    ],
+    'create_with_platforms': [
+      'create',
+      'test_app',
+      '--platforms=ios,android,web'
+    ],
     'create_interactive': ['create', 'test_app', '--interactive'],
     'create_from_manifest': ['create', '--from-manifest=manifest.yaml'],
     'doctor': ['doctor'],
@@ -288,19 +298,19 @@ packages:
 
   /// Get a random valid project name
   static String getRandomProjectName() => validProjectNames[
-        DateTime.now().millisecondsSinceEpoch % validProjectNames.length];
+      DateTime.now().millisecondsSinceEpoch % validProjectNames.length];
 
   /// Get a random valid organization
   static String getRandomOrganization() => validOrganizations[
-        DateTime.now().millisecondsSinceEpoch % validOrganizations.length];
+      DateTime.now().millisecondsSinceEpoch % validOrganizations.length];
 
   /// Get a random valid screen name
   static String getRandomScreenName() => validScreenNames[
-        DateTime.now().millisecondsSinceEpoch % validScreenNames.length];
+      DateTime.now().millisecondsSinceEpoch % validScreenNames.length];
 
   /// Get a random valid service name
   static String getRandomServiceName() => validServiceNames[
-        DateTime.now().millisecondsSinceEpoch % validServiceNames.length];
+      DateTime.now().millisecondsSinceEpoch % validServiceNames.length];
 
   /// Create a test project name with timestamp
   static String createTestProjectName({String? prefix}) {

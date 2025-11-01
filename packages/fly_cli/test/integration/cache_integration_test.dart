@@ -47,7 +47,8 @@ void main() {
           () async {
         // Create a test template
         final templateDir = Directory(
-            path.join(templateManager.templatesDirectory, 'test_template'),);
+          path.join(templateManager.templatesDirectory, 'test_template'),
+        );
         await templateDir.create(recursive: true);
 
         // Create template.yaml
@@ -89,7 +90,8 @@ packages: [test_package]
       test('should reload template when cache expires', () async {
         // Create a test template
         final templateDir = Directory(
-            path.join(templateManager.templatesDirectory, 'expiring_template'),);
+          path.join(templateManager.templatesDirectory, 'expiring_template'),
+        );
         await templateDir.create(recursive: true);
 
         File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync('''
@@ -135,7 +137,8 @@ packages: [test_package]
       test('should use cached template when source is unavailable', () async {
         // Create a test template
         final templateDir = Directory(
-            path.join(templateManager.templatesDirectory, 'offline_template'),);
+          path.join(templateManager.templatesDirectory, 'offline_template'),
+        );
         await templateDir.create(recursive: true);
 
         File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync('''
@@ -165,7 +168,8 @@ packages: [test_package]
       test('should handle cache corruption gracefully', () async {
         // Create a test template
         final templateDir = Directory(
-            path.join(templateManager.templatesDirectory, 'corrupt_template'),);
+          path.join(templateManager.templatesDirectory, 'corrupt_template'),
+        );
         await templateDir.create(recursive: true);
 
         File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync('''
@@ -183,7 +187,8 @@ packages: [test_package]
 
         // Corrupt the cache
         final cacheDir = Directory(
-            path.join(cacheManager.cacheDirectory, 'corrupt_template'),);
+          path.join(cacheManager.cacheDirectory, 'corrupt_template'),
+        );
         if (cacheDir.existsSync()) {
           File(path.join(cacheDir.path, 'cache_entry.json'))
               .writeAsStringSync('invalid json');
@@ -199,8 +204,12 @@ packages: [test_package]
     group('Cache Management Integration', () {
       test('should clear cache and reload templates', () async {
         // Create a test template
-        final templateDir = Directory(path.join(
-            templateManager.templatesDirectory, 'clearable_template',),);
+        final templateDir = Directory(
+          path.join(
+            templateManager.templatesDirectory,
+            'clearable_template',
+          ),
+        );
         await templateDir.create(recursive: true);
 
         File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync('''
@@ -227,7 +236,7 @@ packages: [test_package]
         // Verify cache is cleared
         final clearedResult =
             await cacheManager.getTemplate('clearable_template');
-            expect(clearedResult, isA<CacheMiss>());
+        expect(clearedResult, isA<CacheMiss>());
 
         // Template should still be loadable from source
         final reloaded =
@@ -242,7 +251,8 @@ packages: [test_package]
 
         for (final templateName in templates) {
           final templateDir = Directory(
-              path.join(templateManager.templatesDirectory, templateName),);
+            path.join(templateManager.templatesDirectory, templateName),
+          );
           await templateDir.create(recursive: true);
 
           File(path.join(templateDir.path, 'template.yaml'))
@@ -272,8 +282,8 @@ packages: [test_package]
 
         // Delete one template from source
         await Directory(
-                path.join(templateManager.templatesDirectory, 'template2'),)
-            .delete(recursive: true);
+          path.join(templateManager.templatesDirectory, 'template2'),
+        ).delete(recursive: true);
 
         // template2 should still be available from cache
         final cachedTemplate = await templateManager.getTemplate('template2');

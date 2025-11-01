@@ -1,10 +1,10 @@
 import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:fly_cli/src/core/templates/compatibility_result.dart';
+import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 /// Service for checking template compatibility with current environment
-/// 
+///
 /// Performs compatibility checks using TemplateCompatibility data when available.
 /// Templates without compatibility data are considered compatible (no constraints).
 class CompatibilityChecker {
@@ -33,7 +33,7 @@ class CompatibilityChecker {
   /// with the current environment (CLI version, Flutter SDK, Dart SDK).
   CompatibilityResult checkTemplateCompatibility(TemplateInfo template) {
     final compatibility = template.compatibility;
-    
+
     // If compatibility data exists, use it for full checks
     if (compatibility != null) {
       return compatibility.checkCompatibility(

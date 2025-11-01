@@ -47,7 +47,9 @@ features:
 
 ### 🚀 **Built for the AI Era**
 
-Fly CLI is the first Flutter CLI tool designed specifically for AI coding assistants. Every command outputs structured JSON, making it easy for AI tools to understand and integrate with your development workflow.
+Fly CLI is the first Flutter CLI tool designed specifically for AI coding assistants. Every command
+outputs structured JSON, making it easy for AI tools to understand and integrate with your
+development workflow.
 
 ### 🎯 **Production-Ready Templates**
 

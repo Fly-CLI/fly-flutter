@@ -1,10 +1,9 @@
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/version/version_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
 import '../../helpers/mock_logger.dart';
-
 
 void main() {
   group('VersionCommand', () {
@@ -34,7 +33,7 @@ void main() {
 
       test('should have required arguments', () {
         final parser = command.argParser;
-        
+
         expect(parser.options.containsKey('check-updates'), isTrue);
         expect(parser.options.containsKey('plan'), isTrue);
         expect(parser.options.containsKey('output'), isTrue);
@@ -42,7 +41,7 @@ void main() {
 
       test('should have correct default values', () {
         final parser = command.argParser;
-        
+
         expect(parser.options['check-updates']!.defaultsTo, equals(false));
         expect(parser.options['check-updates']!.negatable, equals(false));
       });
@@ -52,21 +51,21 @@ void main() {
       test('should handle basic version check', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result['check-updates'], equals(false));
       });
 
       test('should handle update check flag', () {
         final parser = command.argParser;
         final result = parser.parse(['--check-updates']);
-        
+
         expect(result['check-updates'], equals(true));
       });
 
       test('should handle empty arguments', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result['check-updates'], equals(false));
       });
     });
@@ -74,7 +73,7 @@ void main() {
     group('Error Handling', () {
       test('should handle invalid arguments gracefully', () {
         final parser = command.argParser;
-        
+
         // Should not throw for valid arguments
         expect(() => parser.parse([]), returnsNormally);
         expect(() => parser.parse(['--check-updates']), returnsNormally);
@@ -83,7 +82,7 @@ void main() {
       test('should handle empty arguments', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result['check-updates'], equals(false));
       });
     });
@@ -127,14 +126,14 @@ void main() {
       test('should handle large argument lists efficiently', () {
         final parser = command.argParser;
         final largeArgs = List.generate(100, (i) => 'arg$i');
-        
+
         expect(() => parser.parse(largeArgs), returnsNormally);
       });
 
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
         final args = ['--check-updates'];
-        
+
         for (var i = 0; i < 100; i++) {
           expect(() => parser.parse(args), returnsNormally);
         }
@@ -151,7 +150,7 @@ void main() {
       test('should have consistent naming conventions', () {
         // Command name should be lowercase
         expect(command.name, equals(command.name.toLowerCase()));
-        
+
         // Description should be meaningful
         expect(command.description.contains('version'), isTrue);
       });

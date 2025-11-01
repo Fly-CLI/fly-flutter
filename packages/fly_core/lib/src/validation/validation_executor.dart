@@ -2,14 +2,14 @@ import 'validation_result.dart';
 import 'validation_rule.dart';
 
 /// Executor for running validation rules in sequence
-/// 
+///
 /// Provides utilities for executing validation rules in order
 /// and combining their results.
 class ValidationExecutor {
   const ValidationExecutor();
 
   /// Execute multiple rules in sequence
-  /// 
+  ///
   /// Rules are executed in priority order (lowest first).
   /// Returns a combined result of all rule executions.
   Future<ValidationResult> executeAll<T>(
@@ -44,7 +44,7 @@ class ValidationExecutor {
   }
 
   /// Execute rules in parallel
-  /// 
+  ///
   /// All rules execute concurrently and results are combined.
   /// Note: Parallel execution may not respect priority ordering.
   Future<ValidationResult> executeAllParallel<T>(
@@ -53,7 +53,8 @@ class ValidationExecutor {
     String? fieldName,
   }) async {
     // Filter rules that should run
-    final applicableRules = rules.where((rule) => rule.shouldRun(value)).toList();
+    final applicableRules =
+        rules.where((rule) => rule.shouldRun(value)).toList();
 
     // Execute all rules in parallel
     final results = await Future.wait(
@@ -67,7 +68,7 @@ class ValidationExecutor {
   }
 
   /// Execute a single rule
-  /// 
+  ///
   /// Convenience method for executing a single rule.
   Future<ValidationResult> execute<T>(
     ValidationRule<T> rule,
@@ -82,7 +83,7 @@ class ValidationExecutor {
   }
 
   /// Validate and throw on failure
-  /// 
+  ///
   /// Executes validation and throws an exception if validation fails.
   Future<void> validateAndThrow<T>(
     List<ValidationRule<T>> rules,
@@ -109,6 +110,7 @@ class ValidationExecutor {
 /// Exception thrown when validation fails
 class ValidationException implements Exception {
   const ValidationException(this.message);
+
   final String message;
 
   @override
@@ -118,9 +120,9 @@ class ValidationException implements Exception {
 /// Warning for validation issues
 class ValidationWarning implements Exception {
   const ValidationWarning(this.message);
+
   final String message;
 
   @override
   String toString() => message;
 }
-

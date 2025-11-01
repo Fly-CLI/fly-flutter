@@ -14,6 +14,7 @@ systems.
 The command foundation provides the core abstractions and base classes for all commands.
 
 #### Domain Layer
+
 - **`CommandContext`** - Encapsulates execution context with dependencies and configuration
 - **`CommandLifecycle`** - Defines lifecycle hooks for command execution phases
 - **`CommandMiddleware`** - Interface for cross-cutting concerns
@@ -21,9 +22,11 @@ The command foundation provides the core abstractions and base classes for all c
 - **`CommandResult`** - Standardized result structure with AI-friendly formats
 
 #### Application Layer
+
 - **`FlyCommand`** - Enhanced base command class with integrated features
 
 #### Infrastructure Layer
+
 - **`CommandContextImpl`** - Concrete implementation of CommandContext
 - **`Environment`** - Environment information abstraction
 
@@ -32,10 +35,12 @@ The command foundation provides the core abstractions and base classes for all c
 Factory-based dependency injection system for managing service lifecycles and dependencies.
 
 #### Domain Layer
+
 - **`ServiceContainer`** - Service registration and resolution container
 - **`ServiceLifetime`** - Service lifetime management (transient, scoped, singleton)
 
 #### Application Layer
+
 - **`CommandFactory`** - Factory for creating commands with injected dependencies
 
 ### 3. Validation System (`features/validation/`)
@@ -43,6 +48,7 @@ Factory-based dependency injection system for managing service lifecycles and de
 Composable validation pipeline with common validators for argument and environment validation.
 
 #### Validators
+
 - **`RequiredArgumentValidator`** - Validates required arguments
 - **`ProjectNameValidator`** - Validates project name format
 - **`FlutterProjectValidator`** - Validates Flutter project structure
@@ -56,6 +62,7 @@ Composable validation pipeline with common validators for argument and environme
 Pipeline-based middleware for cross-cutting concerns.
 
 #### Built-in Middleware
+
 - **`LoggingMiddleware`** - Command execution logging
 - **`MetricsMiddleware`** - Performance metrics collection
 - **`DryRunMiddleware`** - Plan mode execution
@@ -67,11 +74,13 @@ Pipeline-based middleware for cross-cutting concerns.
 Extensible plugin architecture for third-party command registration.
 
 #### Domain Layer
+
 - **`FlyPlugin`** - Base plugin interface
 - **`PluginContext`** - Plugin initialization context
 - **`PluginConfig`** - Plugin configuration model
 
 #### Application Layer
+
 - **`PluginRegistry`** - Plugin discovery, loading, and lifecycle management
 
 ## Command Lifecycle
@@ -210,11 +219,15 @@ final result = ValidationResult.combine([
 
 ## Command Context Data Sharing
 
-The `CommandContext` provides a data sharing mechanism through `setData()` and `getData()` methods that allows middleware and lifecycle hooks to share execution metadata and state throughout the command lifecycle.
+The `CommandContext` provides a data sharing mechanism through `setData()` and `getData()` methods
+that allows middleware and lifecycle hooks to share execution metadata and state throughout the
+command lifecycle.
 
 ### How It Works
 
-Data set using `setData()` persists for the duration of the command execution and can be accessed by any middleware or lifecycle hook that runs after the data is set. This enables cross-cutting concerns to share information without tight coupling.
+Data set using `setData()` persists for the duration of the command execution and can be accessed by
+any middleware or lifecycle hook that runs after the data is set. This enables cross-cutting
+concerns to share information without tight coupling.
 
 ### Real-World Example
 
@@ -247,20 +260,20 @@ class LoggingMiddleware extends CommandMiddleware {
 ### Best Practices
 
 1. **Key Naming Conventions**
-   - Use descriptive keys with prefixes to avoid collisions
-   - Examples: `metrics.execution_time`, `validation.errors`, `cache.hit_count`
+    - Use descriptive keys with prefixes to avoid collisions
+    - Examples: `metrics.execution_time`, `validation.errors`, `cache.hit_count`
 
 2. **Data Types**
-   - Store only serializable data types (String, int, bool, Map, List)
-   - Avoid storing complex objects or closures
+    - Store only serializable data types (String, int, bool, Map, List)
+    - Avoid storing complex objects or closures
 
 3. **Thread Safety**
-   - Data may be modified by multiple middleware running concurrently
-   - Use defensive programming when accessing shared data
+    - Data may be modified by multiple middleware running concurrently
+    - Use defensive programming when accessing shared data
 
 4. **Cleanup**
-   - Clean up sensitive data after use
-   - Consider data lifecycle and when it's no longer needed
+    - Clean up sensitive data after use
+    - Consider data lifecycle and when it's no longer needed
 
 ### Common Use Cases
 
@@ -396,30 +409,35 @@ expect(harness.container.mockTemplateManager.generatedProjects, contains('test-p
 ## Best Practices
 
 ### 1. Command Design
+
 - Keep commands focused on a single responsibility
 - Use dependency injection for all external dependencies
 - Implement proper error handling with meaningful messages
 - Provide helpful suggestions in error results
 
 ### 2. Validation
+
 - Use composition over inheritance for validators
 - Order validators by priority (required args first, then business logic)
 - Provide clear, actionable error messages
 - Validate early and fail fast
 
 ### 3. Middleware
+
 - Keep middleware stateless when possible
 - Use appropriate priority ordering
 - Handle errors gracefully
 - Log meaningful information
 
 ### 4. Testing
+
 - Test commands in isolation using mocks
 - Test validation logic separately
 - Test middleware pipeline behavior
 - Use test harness for consistent setup
 
 ### 5. Performance
+
 - Use singleton services for expensive resources
 - Implement caching for idempotent operations
 - Use lazy loading for optional features
@@ -482,21 +500,21 @@ expect(harness.container.mockTemplateManager.generatedProjects, contains('test-p
 ### Common Issues
 
 1. **Service Not Found**
-   - Ensure service is registered in ServiceContainer
-   - Check service lifetime (singleton vs transient)
+    - Ensure service is registered in ServiceContainer
+    - Check service lifetime (singleton vs transient)
 
 2. **Validation Failures**
-   - Verify validator priority ordering
-   - Check validator shouldRun() conditions
+    - Verify validator priority ordering
+    - Check validator shouldRun() conditions
 
 3. **Middleware Issues**
-   - Ensure middleware priority is correct
-   - Check middleware shouldRun() conditions
+    - Ensure middleware priority is correct
+    - Check middleware shouldRun() conditions
 
 4. **Plugin Loading**
-   - Verify plugin directory structure
-   - Check plugin configuration format
-   - Ensure plugin dependencies are met
+    - Verify plugin directory structure
+    - Check plugin configuration format
+    - Ensure plugin dependencies are met
 
 ### Debug Mode
 
@@ -507,6 +525,7 @@ fly --verbose my-command
 ```
 
 This will provide detailed information about:
+
 - Service resolution
 - Validation results
 - Middleware execution

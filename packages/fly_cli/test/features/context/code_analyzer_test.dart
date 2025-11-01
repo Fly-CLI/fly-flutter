@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
 
 import 'package:fly_cli/src/features/context/analyzers/unified_analyzers.dart';
 import 'package:fly_cli/src/features/context/models.dart';
+import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 import '../../helpers/analysis_test_fixtures.dart';
 
@@ -25,7 +25,8 @@ void main() {
 
     group('Code Analysis', () {
       test('should analyze code in complex project', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final codeInfo = await analyzer.analyze(projectDir, config);
 
@@ -38,7 +39,8 @@ void main() {
       });
 
       test('should extract file contents when enabled', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final configWithCode = const ContextGeneratorConfig(includeCode: true);
 
         final codeInfo = await analyzer.analyze(projectDir, configWithCode);
@@ -50,8 +52,10 @@ void main() {
       });
 
       test('should not extract file contents when disabled', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
-        final configWithoutCode = const ContextGeneratorConfig(includeCode: false);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final configWithoutCode =
+            const ContextGeneratorConfig(includeCode: false);
 
         final codeInfo = await analyzer.analyze(projectDir, configWithoutCode);
 
@@ -59,7 +63,8 @@ void main() {
       });
 
       test('should respect max file size limit', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final configWithLimit = const ContextGeneratorConfig(
           includeCode: true,
           maxFileSize: 1000,
@@ -75,7 +80,8 @@ void main() {
       });
 
       test('should respect max files limit', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final configWithLimit = const ContextGeneratorConfig(
           includeCode: true,
           maxFiles: 5,
@@ -87,7 +93,8 @@ void main() {
       });
 
       test('should analyze imports correctly', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final codeInfo = await analyzer.analyze(projectDir, config);
 
@@ -98,7 +105,8 @@ void main() {
       });
 
       test('should detect code patterns', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final codeInfo = await analyzer.analyze(projectDir, config);
 
@@ -111,7 +119,8 @@ void main() {
       });
 
       test('should handle empty project', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
 
         final codeInfo = await analyzer.analyze(projectDir, config);
 
@@ -129,7 +138,7 @@ void main() {
       test('should handle missing lib directory', () async {
         final projectDir = Directory(path.join(tempDir.path, 'no_lib'));
         projectDir.createSync();
-        
+
         final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
         pubspecFile.writeAsStringSync('''
 name: no_lib_test
@@ -156,7 +165,8 @@ dependencies:
 
     group('Performance', () {
       test('should complete analysis within reasonable time', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final stopwatch = Stopwatch()..start();
         final codeInfo = await analyzer.analyze(projectDir, config);
@@ -167,7 +177,8 @@ dependencies:
       });
 
       test('should handle large files efficiently', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final stopwatch = Stopwatch()..start();
         final codeInfo = await analyzer.analyze(projectDir, config);
@@ -178,8 +189,10 @@ dependencies:
       });
 
       test('should be faster without code extraction', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
-        final configWithoutCode = const ContextGeneratorConfig(includeCode: false);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final configWithoutCode =
+            const ContextGeneratorConfig(includeCode: false);
 
         final stopwatch = Stopwatch()..start();
         final codeInfo = await analyzer.analyze(projectDir, configWithoutCode);
@@ -192,7 +205,8 @@ dependencies:
 
     group('Integration', () {
       test('should work with different configurations', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         // Test with different config options
         final configWithLimits = const ContextGeneratorConfig(
@@ -208,7 +222,8 @@ dependencies:
       });
 
       test('should handle repeated analysis', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
 
         // Run analysis multiple times
         for (int i = 0; i < 3; i++) {
@@ -235,10 +250,10 @@ dependencies:
       test('should handle malformed Dart files', () async {
         final projectDir = Directory(path.join(tempDir.path, 'malformed'));
         projectDir.createSync();
-        
+
         final libDir = Directory(path.join(projectDir.path, 'lib'));
         libDir.createSync();
-        
+
         final mainFile = File(path.join(libDir.path, 'main.dart'));
         mainFile.writeAsStringSync('invalid dart code: [unclosed');
 

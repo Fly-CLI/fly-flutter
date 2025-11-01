@@ -1,6 +1,5 @@
-import 'package:test/test.dart';
-
 import 'package:fly_cli/src/features/context/models.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Analysis Models', () {
@@ -170,7 +169,8 @@ void main() {
         expect(structureInfo.linesOfCode, equals(1000));
         expect(structureInfo.fileTypes.length, equals(2));
         expect(structureInfo.architecturePattern, equals('riverpod'));
-        expect(structureInfo.conventions, equals(['feature-first', 'test-driven']));
+        expect(structureInfo.conventions,
+            equals(['feature-first', 'test-driven']));
       });
 
       test('should serialize to JSON correctly', () {
@@ -555,7 +555,8 @@ void main() {
         expect(architectureInfo.stateManagement, equals('riverpod'));
         expect(architectureInfo.routing, equals('go_router'));
         expect(architectureInfo.dependencyInjection, equals('riverpod'));
-        expect(architectureInfo.frameworks, equals(['flutter_riverpod', 'go_router']));
+        expect(architectureInfo.frameworks,
+            equals(['flutter_riverpod', 'go_router']));
       });
 
       test('should have empty frameworks by default', () {
@@ -822,7 +823,8 @@ void main() {
         expect(pubspecInfo.version, equals('1.0.0+1'));
         expect(pubspecInfo.description, equals('A test project'));
         expect(pubspecInfo.homepage, equals('https://example.com'));
-        expect(pubspecInfo.repository, equals('https://github.com/test/project'));
+        expect(
+            pubspecInfo.repository, equals('https://github.com/test/project'));
         expect(pubspecInfo.environment, equals(environment));
         expect(pubspecInfo.dependencies, equals(dependencies));
         expect(pubspecInfo.devDependencies, equals(devDependencies));

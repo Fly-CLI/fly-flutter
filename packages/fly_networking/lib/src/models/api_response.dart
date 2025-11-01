@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'api_response.freezed.dart';
 
 /// Standardized API response wrapper
-/// 
+///
 /// Provides a consistent way to handle API responses with success/error states
 /// and additional metadata like status codes and headers.
 @freezed
@@ -16,7 +16,7 @@ sealed class ApiResponse<T> with _$ApiResponse<T> {
     Map<String, dynamic>? headers,
     String? message,
   }) = ApiSuccess<T>;
-  
+
   /// Failed API response
   const factory ApiResponse.failure(
     ApiError error, {
@@ -29,34 +29,34 @@ sealed class ApiResponse<T> with _$ApiResponse<T> {
 extension ApiResponseHelpers<T> on ApiResponse<T> {
   /// Whether the response is successful
   bool get isSuccess => this is ApiSuccess<T>;
-  
+
   /// Whether the response is a failure
   bool get isFailure => this is ApiFailure<T>;
-  
+
   /// Get the data if successful, null otherwise
   T? get data => switch (this) {
-    ApiSuccess<T>(data: final data) => data,
-    ApiFailure<T>() => null,
-  };
-  
+        ApiSuccess<T>(data: final data) => data,
+        ApiFailure<T>() => null,
+      };
+
   /// Get the error if failed, null otherwise
   ApiError? get error => switch (this) {
-    ApiSuccess<T>() => null,
-    ApiFailure<T>(error: final error) => error,
-  };
-  
+        ApiSuccess<T>() => null,
+        ApiFailure<T>(error: final error) => error,
+      };
+
   /// Get the status code
   int? get statusCode => switch (this) {
-    ApiSuccess<T>(statusCode: final statusCode) => statusCode,
-    ApiFailure<T>(statusCode: final statusCode) => statusCode,
-  };
-  
+        ApiSuccess<T>(statusCode: final statusCode) => statusCode,
+        ApiFailure<T>(statusCode: final statusCode) => statusCode,
+      };
+
   /// Get the headers
   Map<String, dynamic>? get headers => switch (this) {
-    ApiSuccess<T>(headers: final headers) => headers,
-    ApiFailure<T>(headers: final headers) => headers,
-  };
-  
+        ApiSuccess<T>(headers: final headers) => headers,
+        ApiFailure<T>(headers: final headers) => headers,
+      };
+
   /// Map the response to a new type
   ApiResponse<R> mapData<R>(R Function(T data) mapper) => switch (this) {
         ApiSuccess<T>(

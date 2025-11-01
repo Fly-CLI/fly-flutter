@@ -19,7 +19,9 @@ dart --version
 flutter --version
 ```
 
-If you don't have Dart or Flutter installed, follow the [official installation guides](https://dart.dev/get-dart) and [Flutter installation guide](https://docs.flutter.dev/get-started/install).
+If you don't have Dart or Flutter installed, follow
+the [official installation guides](https://dart.dev/get-dart)
+and [Flutter installation guide](https://docs.flutter.dev/get-started/install).
 
 ## Installation Methods
 
@@ -162,6 +164,7 @@ fly doctor
 ```
 
 This will check:
+
 - Dart SDK installation
 - Flutter SDK installation
 - PATH configuration

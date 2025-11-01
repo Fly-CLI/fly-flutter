@@ -14,7 +14,8 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
       ..writeln('# Fly CLI PowerShell completion script')
       ..writeln()
       ..writeln(
-          'Register-ArgumentCompleter -Native -CommandName fly -ScriptBlock {',)
+        'Register-ArgumentCompleter -Native -CommandName fly -ScriptBlock {',
+      )
       ..writeln(r'    param($commandName, $wordToComplete, $cursorPosition)')
       ..writeln('    ')
       ..writeln(r'    $completions = @()')
@@ -23,8 +24,8 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
       // Generate commands list - include top-level commands and subcommands
       ..writeln('    # Commands');
     final commandNamesList = <String>[]
-    // Add all top-level commands and groups
-    ..addAll(registry.getCommandNames());
+      // Add all top-level commands and groups
+      ..addAll(registry.getCommandNames());
     // Add subcommands from command groups
     final allCommands = registry.getAllCommands();
     for (final entry in allCommands.entries) {
@@ -47,11 +48,13 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
       ..writeln(r"    if ($wordToComplete -match '^[^-]') {")
       ..writeln('        # Complete commands')
       ..writeln(
-          r'        $completions = $commands | Where-Object { $_ -like "$wordToComplete*" }',)
+        r'        $completions = $commands | Where-Object { $_ -like "$wordToComplete*" }',
+      )
       ..writeln('    } else {')
       ..writeln('        # Complete options')
       ..writeln(
-          r'        $completions = $globalOptions | Where-Object { $_ -like "$wordToComplete*" }',)
+        r'        $completions = $globalOptions | Where-Object { $_ -like "$wordToComplete*" }',
+      )
       ..writeln('    }')
       ..writeln('    ')
       ..writeln(r'    return $completions')
@@ -76,7 +79,8 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
 
   @override
   String generateSubcommandsCompletion(
-          List<SubcommandDefinition> subcommands,) =>
+    List<SubcommandDefinition> subcommands,
+  ) =>
       subcommands.map((s) => s.name).join(' ');
 
   @override

@@ -17,11 +17,11 @@ class TemplateVariable {
   /// Create TemplateVariable from JSON
   factory TemplateVariable.fromJson(Map<String, dynamic> json) =>
       _$TemplateVariableFromJson(json);
-  
+
   final String name;
   final String type;
   final bool required;
-  
+
   @JsonKey(name: 'default')
   final String? defaultValue;
   final List<String>? choices;

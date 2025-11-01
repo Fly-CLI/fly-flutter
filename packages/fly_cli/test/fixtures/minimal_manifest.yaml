@@ -2,4 +2,4 @@
 name: simple_app
 template: minimal
 organization: com.simple
-platforms: [ios, android]
+platforms: [ ios, android ]

@@ -3,13 +3,13 @@ import 'dart:io';
 
 /// Retry policy for network operations with exponential backoff
 class RetryPolicy {
-
   const RetryPolicy({
     this.maxAttempts = 3,
     this.initialDelay = const Duration(seconds: 1),
     this.backoffMultiplier = 2.0,
     this.maxDelay = const Duration(seconds: 30),
   });
+
   final int maxAttempts;
   final Duration initialDelay;
   final double backoffMultiplier;
@@ -45,9 +45,10 @@ class RetryPolicy {
   }
 
   /// Check if error is retryable
-  bool _isRetryable(Object error) => error is SocketException ||
-        error is TimeoutException ||
-        error is HttpException;
+  bool _isRetryable(Object error) =>
+      error is SocketException ||
+      error is TimeoutException ||
+      error is HttpException;
 }
 
 /// Connectivity checker for network status detection
@@ -69,7 +70,8 @@ class ConnectivityChecker {
     try {
       final client = HttpClient();
       final request = await client.getUrl(Uri.parse('https://pub.dev'));
-      final response = await request.close().timeout(const Duration(seconds: 5));
+      final response =
+          await request.close().timeout(const Duration(seconds: 5));
       client.close();
       return response.statusCode == 200;
     } catch (e) {

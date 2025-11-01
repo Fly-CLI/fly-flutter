@@ -1,7 +1,7 @@
 import 'validation_result.dart';
 
 /// Cache for async validation results with TTL support
-/// 
+///
 /// Provides efficient caching of expensive validation operations
 /// to reduce redundant checks.
 class AsyncValidationCache {
@@ -100,4 +100,3 @@ class _CachedValidation {
   final DateTime timestamp;
   final Duration ttl;
 }
-

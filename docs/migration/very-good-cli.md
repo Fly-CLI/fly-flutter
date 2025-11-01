@@ -1,6 +1,7 @@
 # Migration from Very Good CLI
 
-This guide will help you migrate from Very Good CLI to Fly CLI, taking advantage of AI-native features and improved developer experience.
+This guide will help you migrate from Very Good CLI to Fly CLI, taking advantage of AI-native
+features and improved developer experience.
 
 ## Why Migrate?
 
@@ -53,6 +54,7 @@ fly create my_new_app --template=minimal
 ### 4. Migrate Your Code
 
 #### Very Good CLI Structure
+
 ```
 lib/
 ├── app/
@@ -73,6 +75,7 @@ lib/
 ```
 
 #### Fly CLI Riverpod Structure
+
 ```
 lib/
 ├── main.dart
@@ -94,6 +97,7 @@ lib/
 ### 1. App Bootstrap
 
 #### Very Good CLI (app/app.dart)
+
 ```dart
 class App extends StatelessWidget {
   const App({super.key});
@@ -112,6 +116,7 @@ class App extends StatelessWidget {
 ```
 
 #### Fly CLI (lib/main.dart)
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -144,6 +149,7 @@ class MyApp extends ConsumerWidget {
 ### 2. State Management
 
 #### Very Good CLI (CounterCubit)
+
 ```dart
 class CounterCubit extends Cubit<int> {
   CounterCubit() : super(0);
@@ -154,6 +160,7 @@ class CounterCubit extends Cubit<int> {
 ```
 
 #### Fly CLI (CounterProvider)
+
 ```dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -172,6 +179,7 @@ class CounterNotifier extends _$CounterNotifier {
 ### 3. UI Components
 
 #### Very Good CLI (CounterPage)
+
 ```dart
 class CounterPage extends StatelessWidget {
   const CounterPage({super.key});
@@ -197,6 +205,7 @@ class CounterPage extends StatelessWidget {
 ```
 
 #### Fly CLI (CounterScreen)
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,6 +235,7 @@ class CounterScreen extends ConsumerWidget {
 ### 4. Network Layer
 
 #### Very Good CLI (ApiClient)
+
 ```dart
 class ApiClient {
   ApiClient({required this.dio}) : _dio = dio;
@@ -239,6 +249,7 @@ class ApiClient {
 ```
 
 #### Fly CLI (ApiClient)
+
 ```dart
 import 'package:fly_networking/fly_networking.dart';
 
@@ -256,24 +267,28 @@ class ApiClient {
 ## Migration Checklist
 
 ### Phase 1: Project Setup
+
 - [ ] Install Fly CLI
 - [ ] Create new project with appropriate template
 - [ ] Set up basic project structure
 - [ ] Configure dependencies
 
 ### Phase 2: Core Migration
+
 - [ ] Migrate main app setup
 - [ ] Set up routing (GoRouter)
 - [ ] Configure theming
 - [ ] Set up state management (Riverpod)
 
 ### Phase 3: Feature Migration
+
 - [ ] Migrate each feature module
 - [ ] Convert Cubits to Riverpod providers
 - [ ] Update UI components
 - [ ] Migrate network layer
 
 ### Phase 4: Testing & Polish
+
 - [ ] Update tests
 - [ ] Test all functionality
 - [ ] Update documentation
@@ -397,6 +412,7 @@ class UserRepository extends _$UserRepository {
 ### Common Issues
 
 **Dependency conflicts:**
+
 ```bash
 # Clean and reinstall
 flutter clean
@@ -404,12 +420,14 @@ flutter pub get
 ```
 
 **State management errors:**
+
 ```bash
 # Regenerate Riverpod code
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 **Routing issues:**
+
 ```bash
 # Check GoRouter configuration
 fly context export --include-structure=true

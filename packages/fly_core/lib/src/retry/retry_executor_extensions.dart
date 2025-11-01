@@ -7,7 +7,7 @@ import 'package:fly_core/src/retry/retry_strategy.dart';
 /// Extensions for RetryExecutor to support parallel operations
 extension RetryExecutorExtensions on RetryExecutor {
   /// Execute multiple operations in parallel with retry
-  /// 
+  ///
   /// Each operation uses its own retry logic. Returns a list of results
   /// where failed operations result in null entries.
   Future<List<T?>> retryAll<T>(
@@ -38,7 +38,7 @@ extension RetryExecutorExtensions on RetryExecutor {
   }
 
   /// Execute multiple operations in parallel with retry, throwing on failures
-  /// 
+  ///
   /// All operations must succeed or the first failure is thrown.
   Future<List<T>> retryAllOrThrow<T>(
     List<Future<T> Function()> operations, {
@@ -63,7 +63,7 @@ extension RetryExecutorExtensions on RetryExecutor {
   }
 
   /// Execute multiple operations in parallel without retry
-  /// 
+  ///
   /// A simpler version that doesn't apply retry logic to each operation.
   Future<List<T?>> executeAll<T>(
     List<Future<T> Function()> operations,
@@ -75,4 +75,3 @@ extension RetryExecutorExtensions on RetryExecutor {
     return results;
   }
 }
-

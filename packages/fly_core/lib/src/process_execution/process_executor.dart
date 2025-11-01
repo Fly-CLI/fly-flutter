@@ -7,7 +7,7 @@ import 'package:fly_core/src/process_execution/process_result.dart';
 import 'package:fly_core/src/retry/retry.dart';
 
 /// Executor for process operations
-/// 
+///
 /// Provides a unified interface for executing external processes
 /// with timeout, retry, and error handling support.
 class ProcessExecutor {
@@ -19,8 +19,8 @@ class ProcessExecutor {
     this.onProcessComplete,
     CommandBuilder? commandBuilder,
     OutputParser? outputParser,
-  }) : _commandBuilder = commandBuilder ?? const CommandBuilder(),
-       _outputParser = outputParser ?? const OutputParser();
+  })  : _commandBuilder = commandBuilder ?? const CommandBuilder(),
+        _outputParser = outputParser ?? const OutputParser();
 
   /// Default timeout for process execution
   final Duration defaultTimeout;
@@ -48,7 +48,7 @@ class ProcessExecutor {
     bool includeParentEnvironment = true,
   }) async {
     final stopwatch = Stopwatch()..start();
-    
+
     if (onProcessStart != null) {
       onProcessStart!(command, args);
     }
@@ -294,4 +294,3 @@ class ProcessExecutionException implements Exception {
     return 'ProcessExecutionException: ${result.stderr}';
   }
 }
-

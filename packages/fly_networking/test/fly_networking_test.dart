@@ -97,7 +97,8 @@ void main() {
     });
 
     test('should create unknown error', () {
-      final error = ApiErrorFactory.fromUnknownException(Exception('Unknown error'));
+      final error =
+          ApiErrorFactory.fromUnknownException(Exception('Unknown error'));
       expect(error.isUnknown, true);
       expect(error.message, 'Exception: Unknown error');
     });
@@ -124,7 +125,8 @@ void main() {
       const httpError = ApiError.http(statusCode: 500, message: 'Server error');
       expect(httpError.isRetryable, true);
 
-      const clientError = ApiError.http(statusCode: 400, message: 'Bad request');
+      const clientError =
+          ApiError.http(statusCode: 400, message: 'Bad request');
       expect(clientError.isRetryable, false);
 
       const cancelledError = ApiError.cancelled(message: 'Cancelled');
@@ -133,16 +135,19 @@ void main() {
 
     test('should get user-friendly message', () {
       const networkError = ApiError.network(message: 'Network error');
-      expect(networkError.userMessage, 'Please check your internet connection and try again.');
+      expect(networkError.userMessage,
+          'Please check your internet connection and try again.');
 
       const timeoutError = ApiError.timeout(message: 'Timeout');
-      expect(timeoutError.userMessage, 'The request timed out. Please try again.');
+      expect(
+          timeoutError.userMessage, 'The request timed out. Please try again.');
 
       const httpError = ApiError.http(statusCode: 404, message: 'Not found');
       expect(httpError.userMessage, 'The requested resource was not found.');
 
       const validationError = ApiError.validation(message: 'Validation error');
-      expect(validationError.userMessage, 'Please check your input and try again.');
+      expect(validationError.userMessage,
+          'Please check your input and try again.');
     });
   });
 
@@ -160,31 +165,36 @@ void main() {
     });
 
     test('should create error from network exception', () {
-      final apiError = ApiErrorFactory.fromNetworkException(Exception('Network error'));
+      final apiError =
+          ApiErrorFactory.fromNetworkException(Exception('Network error'));
       expect(apiError.isNetwork, true);
       expect(apiError.message, 'Network error occurred');
     });
 
     test('should create error from timeout exception', () {
-      final apiError = ApiErrorFactory.fromTimeoutException(Exception('Timeout'));
+      final apiError =
+          ApiErrorFactory.fromTimeoutException(Exception('Timeout'));
       expect(apiError.isTimeout, true);
       expect(apiError.message, 'Request timed out');
     });
 
     test('should create error from parse exception', () {
-      final apiError = ApiErrorFactory.fromParseException(Exception('Parse error'));
+      final apiError =
+          ApiErrorFactory.fromParseException(Exception('Parse error'));
       expect(apiError.isParse, true);
       expect(apiError.message, 'Failed to parse response');
     });
 
     test('should create error from validation exception', () {
-      final apiError = ApiErrorFactory.fromValidationException('Validation error');
+      final apiError =
+          ApiErrorFactory.fromValidationException('Validation error');
       expect(apiError.isValidation, true);
       expect(apiError.message, 'Validation error');
     });
 
     test('should create error from unknown exception', () {
-      final apiError = ApiErrorFactory.fromUnknownException(Exception('Unknown error'));
+      final apiError =
+          ApiErrorFactory.fromUnknownException(Exception('Unknown error'));
       expect(apiError.isUnknown, true);
       expect(apiError.message, 'Exception: Unknown error');
     });

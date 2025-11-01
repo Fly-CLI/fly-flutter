@@ -1,6 +1,7 @@
 # Melos Comprehensive Guide
 
-A complete guide to using Melos for monorepo management, versioning, and workflow automation in the Fly CLI project.
+A complete guide to using Melos for monorepo management, versioning, and workflow automation in the
+Fly CLI project.
 
 ## Table of Contents
 
@@ -18,7 +19,8 @@ A complete guide to using Melos for monorepo management, versioning, and workflo
 
 Melos is a powerful tool for managing Dart/Flutter monorepos. In the Fly CLI project, it's used to:
 
-- **Coordinate packages**: Manage multiple packages (`fly_cli`, `fly_core`, `fly_networking`, `fly_state`)
+- **Coordinate packages**: Manage multiple packages (`fly_cli`, `fly_core`, `fly_networking`,
+  `fly_state`)
 - **Automate workflows**: Run commands across all packages simultaneously
 - **Version management**: Coordinate version bumps and changelog generation
 - **Publishing**: Streamline package publishing workflows
@@ -50,15 +52,18 @@ melos:
 ### Key Configuration Options
 
 #### Bootstrap Configuration
+
 - **`runPubGetInParallel`**: Run `pub get` on all packages simultaneously for faster setup
 - **`environment`**: Define SDK constraints for all packages in the workspace
 
 #### Version Configuration
+
 - **`linkToCommits`**: Link version bumps to specific commits
 - **`workspaceChangelog`**: Generate changelog for the entire workspace
 - **`commitMessageFormat`**: Customize commit message format for version bumps
 
 #### Ignore Patterns
+
 ```yaml
 ignore:
   - "**/*.g.dart"          # Generated files
@@ -86,6 +91,7 @@ packages/
 ### Workspace Commands
 
 #### Bootstrap Workspace
+
 ```bash
 # Set up the entire workspace
 melos bootstrap
@@ -95,6 +101,7 @@ melos bootstrap --no-pub-get-in-parallel
 ```
 
 #### Clean Workspace
+
 ```bash
 # Clean all packages
 melos clean
@@ -104,6 +111,7 @@ melos clean --scope="fly_cli"
 ```
 
 #### Get Dependencies
+
 ```bash
 # Get dependencies for all packages
 melos exec -- flutter pub get
@@ -117,7 +125,9 @@ melos exec -- flutter pub get --packageFilters="diff:HEAD~1"
 ### Core Melos Commands
 
 #### `melos bootstrap`
+
 Sets up the workspace by:
+
 - Installing dependencies for all packages
 - Creating symlinks between packages
 - Running post-install scripts
@@ -134,6 +144,7 @@ melos bootstrap --verbose
 ```
 
 #### `melos exec`
+
 Execute commands across packages:
 
 ```bash
@@ -148,6 +159,7 @@ melos exec -- flutter test --scope="fly_cli"
 ```
 
 #### `melos list`
+
 List packages in the workspace:
 
 ```bash
@@ -162,6 +174,7 @@ melos list --scope="fly_*"
 ```
 
 #### `melos run`
+
 Execute predefined scripts:
 
 ```bash
@@ -201,6 +214,7 @@ Melos supports powerful package filtering:
 ### Analysis and Formatting Scripts
 
 #### `analyze`
+
 ```yaml
 analyze:
   run: melos exec -- flutter analyze
@@ -208,6 +222,7 @@ analyze:
 ```
 
 #### `format`
+
 ```yaml
 format:
   run: melos exec -- dart format --set-exit-if-changed .
@@ -215,6 +230,7 @@ format:
 ```
 
 #### `format:check`
+
 ```yaml
 format:check:
   run: melos exec -- dart format --set-exit-if-changed .
@@ -224,6 +240,7 @@ format:check:
 ### Testing Scripts
 
 #### `test`
+
 ```yaml
 test:
   run: melos exec -- flutter test --coverage
@@ -233,6 +250,7 @@ test:
 ```
 
 #### `test:changed`
+
 ```yaml
 test:changed:
   run: melos exec -- flutter test
@@ -244,6 +262,7 @@ test:changed:
 ### Code Generation Scripts
 
 #### `build_runner`
+
 ```yaml
 build_runner:
   run: melos exec -- dart run build_runner build --delete-conflicting-outputs
@@ -253,6 +272,7 @@ build_runner:
 ### Publishing Scripts
 
 #### `publish:dry-run`
+
 ```yaml
 publish:dry-run:
   run: melos publish --dry-run --yes
@@ -262,6 +282,7 @@ publish:dry-run:
 ### Development Scripts
 
 #### `clean`
+
 ```yaml
 clean:
   run: melos exec -- flutter clean
@@ -269,6 +290,7 @@ clean:
 ```
 
 #### `get`
+
 ```yaml
 get:
   run: melos exec -- flutter pub get
@@ -276,6 +298,7 @@ get:
 ```
 
 #### `outdated`
+
 ```yaml
 outdated:
   run: melos exec -- flutter pub outdated
@@ -285,6 +308,7 @@ outdated:
 ### CLI-Specific Scripts
 
 #### `install`
+
 ```yaml
 install:
   run: dart pub global activate --source path packages/fly_cli
@@ -292,6 +316,7 @@ install:
 ```
 
 #### `schema:export`
+
 ```yaml
 schema:export:
   run: dart run packages/fly_cli/bin/fly.dart schema export --output=json
@@ -301,6 +326,7 @@ schema:export:
 ### Security and Compliance Scripts
 
 #### `license:check`
+
 ```yaml
 license:check:
   run: dart run tools/license_checker.dart
@@ -308,6 +334,7 @@ license:check:
 ```
 
 #### `security:scan`
+
 ```yaml
 security:scan:
   run: melos exec -- dart run packages/fly_cli/lib/src/security/template_validator.dart
@@ -328,6 +355,7 @@ version:
 ### Versioning Workflows
 
 #### 1. Independent Versioning
+
 Each package maintains its own version:
 
 ```bash
@@ -339,6 +367,7 @@ melos version --scope="fly_cli,fly_core"
 ```
 
 #### 2. Workspace Versioning
+
 Version all packages together:
 
 ```bash
@@ -350,6 +379,7 @@ melos version --prerelease=beta
 ```
 
 #### 3. Pre-release Versioning
+
 ```bash
 # Create beta release
 melos version --prerelease=beta
@@ -364,18 +394,21 @@ melos version --prerelease=rc
 ### Version Strategies
 
 #### Patch Versioning
+
 ```bash
 # Bump patch version (1.0.0 -> 1.0.1)
 melos version --patch
 ```
 
 #### Minor Versioning
+
 ```bash
 # Bump minor version (1.0.0 -> 1.1.0)
 melos version --minor
 ```
 
 #### Major Versioning
+
 ```bash
 # Bump major version (1.0.0 -> 2.0.0)
 melos version --major
@@ -396,6 +429,7 @@ melos version --changelog --changelog-format=markdown
 ### Version Constraints
 
 #### Dependency Versioning
+
 ```yaml
 # In package pubspec.yaml
 dependencies:
@@ -405,6 +439,7 @@ dependencies:
 ```
 
 #### Workspace Versioning
+
 ```yaml
 # In root pubspec.yaml
 melos:
@@ -435,6 +470,7 @@ melos:
 ### Publishing Commands
 
 #### Dry Run Publishing
+
 ```bash
 # Test publishing without actually publishing
 melos publish --dry-run
@@ -444,6 +480,7 @@ melos publish --dry-run --scope="fly_cli"
 ```
 
 #### Actual Publishing
+
 ```bash
 # Publish all packages
 melos publish
@@ -456,6 +493,7 @@ melos publish --force
 ```
 
 #### Publishing with Versioning
+
 ```bash
 # Version and publish in one command
 melos version --patch && melos publish
@@ -464,6 +502,7 @@ melos version --patch && melos publish
 ### Publishing Strategies
 
 #### 1. Independent Publishing
+
 Each package is published independently:
 
 ```bash
@@ -472,6 +511,7 @@ melos publish --skip-if-no-changes
 ```
 
 #### 2. Coordinated Publishing
+
 All packages are published together:
 
 ```bash
@@ -480,6 +520,7 @@ melos publish --all
 ```
 
 #### 3. Selective Publishing
+
 Publish specific packages:
 
 ```bash
@@ -504,16 +545,19 @@ melos publish --prerelease=alpha
 ### Workspace Organization
 
 #### 1. Package Naming
+
 - Use consistent naming: `fly_*` for all packages
 - Keep package names descriptive and concise
 - Follow Dart package naming conventions
 
 #### 2. Dependency Management
+
 - Use path dependencies for local packages
 - Specify version constraints appropriately
 - Keep dependencies up to date
 
 #### 3. Script Organization
+
 - Group related scripts together
 - Use descriptive script names
 - Include helpful descriptions
@@ -521,6 +565,7 @@ melos publish --prerelease=alpha
 ### Development Workflow
 
 #### 1. Daily Development
+
 ```bash
 # Start development session
 melos bootstrap
@@ -536,6 +581,7 @@ melos run format
 ```
 
 #### 2. Before Committing
+
 ```bash
 # Check formatting
 melos run format:check
@@ -551,6 +597,7 @@ melos run outdated
 ```
 
 #### 3. Before Publishing
+
 ```bash
 # Run full test suite
 melos run test
@@ -568,16 +615,19 @@ melos run publish:dry-run
 ### Versioning Best Practices
 
 #### 1. Semantic Versioning
+
 - Follow [SemVer](https://semver.org/) principles
 - Use appropriate version bumps
 - Document breaking changes
 
 #### 2. Changelog Management
+
 - Keep changelogs up to date
 - Use consistent format
 - Include migration guides for breaking changes
 
 #### 3. Pre-release Strategy
+
 - Use pre-releases for testing
 - Clear naming convention (alpha, beta, rc)
 - Document pre-release limitations
@@ -585,6 +635,7 @@ melos run publish:dry-run
 ### CI/CD Integration
 
 #### GitHub Actions Example
+
 ```yaml
 name: Melos Workflow
 
@@ -620,6 +671,7 @@ jobs:
 ```
 
 #### GitLab CI Example
+
 ```yaml
 stages:
   - test
@@ -656,6 +708,7 @@ publish:
 #### Bootstrap Issues
 
 **Problem**: Bootstrap fails with dependency conflicts
+
 ```bash
 # Solution: Clean and retry
 melos clean
@@ -663,6 +716,7 @@ melos bootstrap
 ```
 
 **Problem**: Symlink creation fails
+
 ```bash
 # Solution: Check permissions and retry
 sudo melos bootstrap
@@ -671,6 +725,7 @@ sudo melos bootstrap
 #### Version Issues
 
 **Problem**: Version command fails
+
 ```bash
 # Solution: Check git status
 git status
@@ -680,6 +735,7 @@ melos version
 ```
 
 **Problem**: Changelog generation fails
+
 ```bash
 # Solution: Check git history
 git log --oneline
@@ -689,12 +745,14 @@ melos version --changelog
 #### Publishing Issues
 
 **Problem**: Publishing fails with authentication
+
 ```bash
 # Solution: Configure pub credentials
 dart pub token add https://pub.dev
 ```
 
 **Problem**: Package already exists
+
 ```bash
 # Solution: Use force flag or bump version
 melos publish --force
@@ -706,6 +764,7 @@ melos publish
 ### Debugging Commands
 
 #### Verbose Output
+
 ```bash
 # Enable verbose output for any command
 melos bootstrap --verbose
@@ -714,6 +773,7 @@ melos publish --verbose
 ```
 
 #### Dry Run
+
 ```bash
 # Test commands without side effects
 melos publish --dry-run
@@ -721,6 +781,7 @@ melos version --dry-run
 ```
 
 #### Package Filtering
+
 ```bash
 # Test on specific packages
 melos exec -- flutter test --scope="fly_cli"
@@ -730,18 +791,21 @@ melos version --scope="fly_cli"
 ### Performance Optimization
 
 #### Parallel Execution
+
 ```bash
 # Use parallel execution for faster builds
 melos exec -- flutter test --concurrency=4
 ```
 
 #### Caching
+
 ```bash
 # Use build cache
 melos exec -- flutter build --cache
 ```
 
 #### Selective Testing
+
 ```bash
 # Test only changed packages
 melos run test:changed
@@ -750,6 +814,7 @@ melos run test:changed
 ### Getting Help
 
 #### Melos Help
+
 ```bash
 # Get help for any command
 melos --help
@@ -759,12 +824,14 @@ melos publish --help
 ```
 
 #### Package Help
+
 ```bash
 # Get help for specific package
 melos exec -- flutter --help --scope="fly_cli"
 ```
 
 #### Community Resources
+
 - [Melos Documentation](https://melos.invertase.dev/)
 - [Melos GitHub](https://github.com/invertase/melos)
 - [Fly CLI GitHub](https://github.com/fly-cli/fly)
@@ -774,6 +841,7 @@ melos exec -- flutter --help --scope="fly_cli"
 ### Custom Scripts
 
 #### Complex Workflows
+
 ```yaml
 # Custom script for full CI pipeline
 ci:full:
@@ -787,6 +855,7 @@ ci:full:
 ```
 
 #### Conditional Scripts
+
 ```yaml
 # Script that runs only on specific packages
 test:integration:
@@ -799,6 +868,7 @@ test:integration:
 ### Environment Variables
 
 #### Custom Environment
+
 ```bash
 # Set custom environment variables
 export MELOS_ROOT_PATH=/path/to/workspace
@@ -807,6 +877,7 @@ melos bootstrap
 ```
 
 #### Script Environment
+
 ```yaml
 # Script with custom environment
 build:release:
@@ -819,6 +890,7 @@ build:release:
 ### Integration with Other Tools
 
 #### Mason Integration
+
 ```yaml
 # Mason brick generation
 generate:bricks:
@@ -827,6 +899,7 @@ generate:bricks:
 ```
 
 #### Very Good CLI Integration
+
 ```yaml
 # Very Good CLI commands
 very_good:create:
@@ -834,4 +907,6 @@ very_good:create:
   description: Create packages with Very Good CLI
 ```
 
-This comprehensive guide covers all aspects of using Melos in the Fly CLI project, from basic configuration to advanced workflows and troubleshooting. Use this as a reference for managing the monorepo effectively and efficiently.
+This comprehensive guide covers all aspects of using Melos in the Fly CLI project, from basic
+configuration to advanced workflows and troubleshooting. Use this as a reference for managing the
+monorepo effectively and efficiently.

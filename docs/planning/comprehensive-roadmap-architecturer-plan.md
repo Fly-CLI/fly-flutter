@@ -25,16 +25,22 @@
 
 ### 1.1 Project Vision
 
-**Fly CLI** is positioned as the **first AI-native Flutter CLI tool** designed to revolutionize Flutter development through intelligent automation, multi-architecture support, and seamless integration with modern AI coding assistants. Our vision is to make Flutter development "at the speed of thought" by providing machine-readable interfaces that enable AI agents to generate, scaffold, and manage Flutter projects with unprecedented efficiency.
+**Fly CLI** is positioned as the **first AI-native Flutter CLI tool** designed to revolutionize
+Flutter development through intelligent automation, multi-architecture support, and seamless
+integration with modern AI coding assistants. Our vision is to make Flutter development "at the
+speed of thought" by providing machine-readable interfaces that enable AI agents to generate,
+scaffold, and manage Flutter projects with unprecedented efficiency.
 
 ### 1.2 Strategic Positioning
 
 **Primary Differentiator:** AI-Native Architecture
+
 - **Unique Market Position:** First Flutter CLI designed from the ground up for AI integration
 - **Competitive Moat:** Machine-readable output, declarative manifests, schema introspection
 - **Future-Proof:** Built for the next generation of AI-assisted development
 
 **Secondary Differentiators:**
+
 - **Architecture Flexibility:** Support for MVVM, Clean Architecture, BLoC, and custom patterns
 - **Comprehensive Foundation:** Production-ready package ecosystem (12+ packages)
 - **Superior Developer Experience:** Interactive wizards, helpful errors, beautiful output
@@ -43,45 +49,51 @@
 ### 1.3 Market Opportunity
 
 **Target Market Size:**
+
 - **Primary:** 500,000+ Flutter developers globally
 - **Secondary:** 50,000+ Flutter teams and enterprises
 - **Emerging:** AI coding assistant users (growing 300%+ annually)
 
 **Competitive Landscape:**
+
 - **Very Good CLI:** Fast but single-architecture, limited customization
 - **Stacked CLI:** Excellent MVVM but framework-locked
 - **ft_cli:** Clean Architecture only, no flexibility
 - **Mason:** Powerful but requires brick knowledge, poor UX
 
-**Market Gap:** No existing tool provides AI-native interfaces, multi-architecture support, and comprehensive foundation packages in a single solution.
+**Market Gap:** No existing tool provides AI-native interfaces, multi-architecture support, and
+comprehensive foundation packages in a single solution.
 
 ### 1.4 Timeline Overview
 
-| Phase | Duration | Focus | Key Deliverables |
-|-------|----------|-------|------------------|
-| **Phase 0** | 1 week | Critical Foundation | Security framework, compliance, testing infrastructure |
-| **Phase 1** | 10-11 weeks | MVP Launch | Core CLI, 2 templates, 3 foundation packages, AI integration |
-| **Phase 2** | 3 months | Enhancement | Additional templates, VSCode extension, migration tools |
-| **Phase 3** | 3 months | Enterprise | Plugin system, advanced features, enterprise packages |
-| **Phase 4** | 3 months | Maturity | Performance optimization, ecosystem growth, market leadership |
+| Phase       | Duration    | Focus               | Key Deliverables                                              |
+|-------------|-------------|---------------------|---------------------------------------------------------------|
+| **Phase 0** | 1 week      | Critical Foundation | Security framework, compliance, testing infrastructure        |
+| **Phase 1** | 10-11 weeks | MVP Launch          | Core CLI, 2 templates, 3 foundation packages, AI integration  |
+| **Phase 2** | 3 months    | Enhancement         | Additional templates, VSCode extension, migration tools       |
+| **Phase 3** | 3 months    | Enterprise          | Plugin system, advanced features, enterprise packages         |
+| **Phase 4** | 3 months    | Maturity            | Performance optimization, ecosystem growth, market leadership |
 
 **Total Timeline:** 12 months to market leadership
 
 ### 1.5 Resource Requirements
 
 **Team Composition:**
+
 - **1-2 Senior Flutter Developers** (full-time, 12 months)
 - **1 Technical Writer** (part-time, 4 months)
 - **1 DevOps Engineer** (part-time, 2 months)
 - **Community Contributors** (volunteer, ongoing)
 
 **Budget Analysis:**
+
 - **Year 1 Infrastructure:** ~$1,800 (GitHub Actions, CDN, analytics)
 - **Development:** Primary cost (salaries/time)
 - **Marketing:** Website, videos, conference talks
 - **Community:** Hackathon prizes, swag
 
 **ROI Projection:**
+
 - **Break-even:** 10,000+ active users, 50+ sponsors, 5+ enterprise clients
 - **Self-sustaining:** By Year 2 through GitHub Sponsors and enterprise licensing
 
@@ -101,13 +113,13 @@
 ✅ Can dedicate 1-2 developers full-time  
 ✅ Willing to actively engage community  
 ✅ Passionate about Flutter ecosystem improvement  
-✅ Understand AI-native positioning as primary differentiator  
+✅ Understand AI-native positioning as primary differentiator
 
 **Reconsider If:**
 ⚠️ Limited time/resources (consider contributing to existing tools instead)  
 ⚠️ Unwilling to maintain long-term  
 ⚠️ Unclear unique value proposition  
-⚠️ Cannot commit to AI-first development approach  
+⚠️ Cannot commit to AI-first development approach
 
 ---
 
@@ -116,18 +128,21 @@
 ### 2.1 Market Landscape
 
 **Flutter Ecosystem Growth:**
+
 - **Developer Base:** 500,000+ active Flutter developers (2024)
 - **Growth Rate:** 25%+ annually
 - **Enterprise Adoption:** 50,000+ companies using Flutter
 - **Market Maturity:** Post-hype, focused on productivity tools
 
 **AI Coding Assistant Market:**
+
 - **Cursor:** 1M+ users, growing 50%+ monthly
 - **GitHub Copilot:** 1.5M+ paid subscribers
 - **ChatGPT Code Interpreter:** 100M+ users
 - **Market Trend:** AI-assisted development becoming standard practice
 
 **CLI Tool Market:**
+
 - **Very Good CLI:** ~10,000 downloads/month
 - **Stacked CLI:** ~5,000 downloads/month
 - **ft_cli:** ~2,000 downloads/month
@@ -135,15 +150,16 @@
 
 ### 2.2 Competitive Positioning
 
-| Tool | Strengths | Limitations | Fly CLI Advantage |
-|------|-----------|-------------|-------------------|
-| **Very Good CLI** | Fast setup, best practices | Single architecture, limited customization | Multi-architecture, deeper customization |
-| **Stacked CLI** | Excellent MVVM, good DX | Stacked framework locked-in | Framework agnostic, broader patterns |
-| **ft_cli** | Clean Architecture focus | Single pattern only | Multiple patterns supported |
-| **Mason** | Powerful, flexible | Steep learning curve, manual setup | Built-in templates, better UX |
-| **Feature Folder CLI** | Good structure | Limited scope | Comprehensive features beyond structure |
+| Tool                   | Strengths                  | Limitations                                | Fly CLI Advantage                        |
+|------------------------|----------------------------|--------------------------------------------|------------------------------------------|
+| **Very Good CLI**      | Fast setup, best practices | Single architecture, limited customization | Multi-architecture, deeper customization |
+| **Stacked CLI**        | Excellent MVVM, good DX    | Stacked framework locked-in                | Framework agnostic, broader patterns     |
+| **ft_cli**             | Clean Architecture focus   | Single pattern only                        | Multiple patterns supported              |
+| **Mason**              | Powerful, flexible         | Steep learning curve, manual setup         | Built-in templates, better UX            |
+| **Feature Folder CLI** | Good structure             | Limited scope                              | Comprehensive features beyond structure  |
 
 **Fly CLI Unique Value Propositions:**
+
 1. **AI-Native Architecture:** Only CLI supporting AI coding assistants natively
 2. **Architecture Flexibility:** Seamless support for multiple architectural patterns
 3. **Comprehensive Foundation:** Most extensive package ecosystem for Flutter
@@ -154,11 +170,14 @@
 ### 2.3 Target Market Segments
 
 **Primary Market (Year 1):**
-- **Individual Developers** (60%): Seeking productivity boost, frustrated with existing tool limitations
+
+- **Individual Developers** (60%): Seeking productivity boost, frustrated with existing tool
+  limitations
 - **Small Teams** (30%): 2-10 developers wanting consistency and best practices
 - **AI Coding Assistant Users** (10%): Early adopters of Cursor, Copilot, ChatGPT
 
 **Secondary Market (Year 2+):**
+
 - **Enterprise Teams** (40%): Requiring standardization, compliance, team templates
 - **Development Agencies** (30%): Building multiple client projects with different architectures
 - **Open Source Projects** (20%): Establishing conventions and contribution guidelines
@@ -167,18 +186,21 @@
 ### 2.4 Business Model & Sustainability
 
 **Revenue Streams:**
+
 1. **GitHub Sponsors** (Primary): Community funding for core development
 2. **Enterprise Licensing** (Secondary): Premium features, support contracts
 3. **Training/Consulting** (Tertiary): Workshops, architecture consulting
 4. **Premium Templates** (Future): Advanced templates, enterprise patterns
 
 **Sustainability Strategy:**
+
 - **Open Source Core:** MIT license, community-driven development
 - **Enterprise Tier:** Advanced features, support, compliance
 - **Community Funding:** GitHub Sponsors, donations, corporate sponsorships
 - **Partnership Revenue:** Integration partnerships, co-marketing
 
 **Financial Projections:**
+
 - **Year 1:** $0 revenue, focus on adoption and community building
 - **Year 2:** $50,000+ from sponsorships and enterprise licenses
 - **Year 3:** $200,000+ sustainable revenue, self-funding
@@ -186,12 +208,14 @@
 ### 2.5 Community & Ecosystem Development
 
 **Community Strategy:**
+
 - **Open Source First:** MIT license, welcoming contribution guidelines
 - **Inclusive Governance:** Benevolent dictator initially, steering committee later
 - **Recognition Program:** Contributors page, sponsor acknowledgments
 - **Communication Channels:** Discord/Slack, GitHub Discussions, monthly calls
 
 **Ecosystem Programs:**
+
 - **Template Marketplace:** Share custom templates, discover community patterns
 - **Plugin Registry:** Official plugin directory, third-party extensions
 - **Showcase Program:** Featured projects using Fly CLI
@@ -199,6 +223,7 @@
 - **Hackathons:** Quarterly events with prizes, community building
 
 **Partnership Strategy:**
+
 - **AI Tool Integration:** Official partnerships with Cursor, GitHub Copilot
 - **IDE Vendors:** VSCode, IntelliJ, Android Studio integrations
 - **Cloud Providers:** Firebase, Supabase, AWS official plugins
@@ -212,17 +237,18 @@
 
 **Core Framework Decisions:**
 
-| Component | Choice | Rationale |
-|-----------|--------|-----------|
-| **Language** | Dart 3.0+ | Native Flutter ecosystem, null safety, modern features |
-| **CLI Framework** | Custom on `args` | Full control, better UX than existing frameworks |
-| **Template Engine** | Mason | Proven, flexible, battle-tested code generation |
-| **Logging** | `mason_logger` | Beautiful, consistent CLI output |
-| **HTTP Client** | `http` + `dio` | Simple for CLI, powerful for foundation packages |
-| **Monorepo** | Melos | Industry standard, excellent tooling |
-| **CI/CD** | GitHub Actions | Free for open source, excellent Flutter support |
+| Component           | Choice           | Rationale                                              |
+|---------------------|------------------|--------------------------------------------------------|
+| **Language**        | Dart 3.0+        | Native Flutter ecosystem, null safety, modern features |
+| **CLI Framework**   | Custom on `args` | Full control, better UX than existing frameworks       |
+| **Template Engine** | Mason            | Proven, flexible, battle-tested code generation        |
+| **Logging**         | `mason_logger`   | Beautiful, consistent CLI output                       |
+| **HTTP Client**     | `http` + `dio`   | Simple for CLI, powerful for foundation packages       |
+| **Monorepo**        | Melos            | Industry standard, excellent tooling                   |
+| **CI/CD**           | GitHub Actions   | Free for open source, excellent Flutter support        |
 
 **Foundation Package Dependencies:**
+
 - **State Management:** Riverpod 2.0+ (modern, flexible, code generation)
 - **Navigation:** GoRouter (declarative, type-safe)
 - **HTTP Client:** Dio (interceptors, retry logic, error handling)
@@ -233,6 +259,7 @@
 ### 3.2 Foundation Package Architecture
 
 **Package Structure:**
+
 ```
 fly/
 ├── packages/
@@ -261,6 +288,7 @@ fly/
 5. **Testing Friendly:** Comprehensive testing utilities and mocks
 
 **Example Architecture:**
+
 ```dart
 // fly_core/lib/src/screens/base_screen.dart
 abstract class BaseScreen<VM extends BaseViewModel> extends StatefulWidget {
@@ -303,6 +331,7 @@ class BaseScreenState<VM extends BaseViewModel> extends State<BaseScreen<VM>> {
 ### 3.3 Template System Design
 
 **Template Architecture:**
+
 ```
 templates/
 ├── minimal/
@@ -322,6 +351,7 @@ templates/
 ```
 
 **Template Metadata Format:**
+
 ```yaml
 name: riverpod
 version: 1.0.0
@@ -353,6 +383,7 @@ packages:
 ### 3.4 CLI Command Structure
 
 **Core Commands (MVP):**
+
 ```bash
 fly create <project_name> [options]      # Create new project
 fly add screen <name> [options]          # Add component (screen, service, etc.)
@@ -364,6 +395,7 @@ fly context export [options]              # Generate AI context files
 ```
 
 **AI-Native Command Structure:**
+
 ```dart
 abstract class FlyCommand extends Command<int> {
   FlyCommand() {
@@ -396,6 +428,7 @@ abstract class FlyCommand extends Command<int> {
 **Core AI Features:**
 
 1. **Machine-Readable Output:**
+
 ```json
 {
   "success": true,
@@ -424,6 +457,7 @@ abstract class FlyCommand extends Command<int> {
 ```
 
 2. **Declarative Manifest Format:**
+
 ```yaml
 # fly_project.yaml
 name: my_app
@@ -448,6 +482,7 @@ packages:
 ```
 
 3. **Schema Export & Introspection:**
+
 ```bash
 # Export CLI schema for AI training/context
 fly schema export --output=json > fly_schema.json
@@ -457,12 +492,14 @@ fly template describe riverpod --output=json
 ```
 
 4. **AI Context Generation:**
+
 ```bash
 # Auto-generate context files for AI coding assistants
 fly context export --output=.ai/project_context.md
 ```
 
 **Generated Context File Example:**
+
 ```markdown
 # Project: my_app
 # Template: Riverpod
@@ -485,9 +522,11 @@ fly add screen <name>
 ```
 
 ## To add a new service:
+
 ```bash
 fly add service <name>
 ```
+
 ```
 
 ### 3.6 Cross-Platform Compatibility Strategy
@@ -538,6 +577,7 @@ class TemplateValidator {
 ```
 
 **Security Measures:**
+
 1. **Template Sandboxing:** Custom templates run in isolated environment
 2. **Checksum Verification:** Official templates verified against known hashes
 3. **Dependency Scanning:** All dependencies scanned for vulnerabilities
@@ -553,30 +593,35 @@ class TemplateValidator {
 **Week 0: Security & Compliance Foundation**
 
 **Day 1-2: Security Framework**
+
 - Implement template validation system
 - Create security policy documentation
 - Set up dependency vulnerability scanning
 - Design template sandboxing architecture
 
 **Day 3: License Audit**
+
 - Audit all planned dependencies for MIT compatibility
 - Create NOTICE file with attributions
 - Document license compatibility matrix
 - Set up automated license checking in CI
 
 **Day 4-5: Platform Testing Infrastructure**
+
 - Set up CI matrix for Windows, macOS, Linux
 - Create platform-specific test utilities
 - Implement cross-platform file operations
 - Test shell completion scripts on all platforms
 
 **Day 6-7: Offline Mode Architecture**
+
 - Design local template caching system
 - Implement offline fallback mechanisms
 - Create network resilience patterns
 - Document offline usage scenarios
 
 **Deliverables:**
+
 - ✅ Security framework and template validation
 - ✅ License audit and compliance documentation
 - ✅ Platform testing infrastructure
@@ -585,6 +630,7 @@ class TemplateValidator {
 ### 4.2 Phase 1: MVP Launch (10-11 weeks)
 
 **Week 1: Foundation Setup + AI Schema Design**
+
 - Set up monorepo structure with Melos
 - Configure CI/CD pipeline (GitHub Actions)
 - Create basic CLI entry point and command parser
@@ -595,6 +641,7 @@ class TemplateValidator {
 - Write project README and CONTRIBUTING.md
 
 **Week 2: Core Architecture + AI Infrastructure**
+
 - Implement fly_core package structure
 - Build BaseViewModel with Riverpod StateNotifier
 - Create ViewState sealed class hierarchy
@@ -604,6 +651,7 @@ class TemplateValidator {
 - Write unit tests (target: 95% coverage)
 
 **Week 3: Networking & State Packages**
+
 - Implement fly_networking with Dio + Riverpod
 - Create ApiClient, interceptors, error handling
 - Build fly_state package with provider utilities
@@ -612,6 +660,7 @@ class TemplateValidator {
 - Documentation for all public APIs
 
 **Week 4: CLI Commands (Part 1) + AI Output**
+
 - Implement `fly create` command
 - Build interactive wizard with prompts
 - Add project validation logic
@@ -622,6 +671,7 @@ class TemplateValidator {
 - Unit tests for all commands
 
 **Week 5: Template Engine & Generation**
+
 - Integrate Mason for code generation
 - Create template management system
 - Build Mason bricks for minimal template
@@ -631,6 +681,7 @@ class TemplateValidator {
 - Test template rendering and variable substitution
 
 **Week 6: CLI Commands (Part 2) + AI Manifests**
+
 - Implement `fly add screen` command
 - Implement `fly add service` command
 - Add code formatting after generation
@@ -641,6 +692,7 @@ class TemplateValidator {
 - Integration tests for full workflows
 
 **Week 7: Example Projects & AI Aliases**
+
 - Create minimal_example app
 - Create riverpod_example app (realistic app with API calls)
 - Add shell completion scripts (bash, zsh)
@@ -650,6 +702,7 @@ class TemplateValidator {
 - Code review and refactoring
 
 **Week 8: Testing & Quality Assurance**
+
 - E2E integration tests (full project generation)
 - Platform-specific testing (Windows, macOS, Linux)
 - Performance testing (project creation speed)
@@ -659,6 +712,7 @@ class TemplateValidator {
 - **AI Integration:** JSON output validation tests
 
 **Week 9: Documentation & AI Examples**
+
 - Build documentation website (VitePress/Docusaurus)
 - Write all guides (installation, quickstart, templates)
 - Create migration guides (3 competing tools)
@@ -669,6 +723,7 @@ class TemplateValidator {
 - Create video tutorial (5-10 minutes)
 
 **Week 10: Launch Preparation & Execution**
+
 - Prepare launch announcements
 - Final testing and bug fixes
 - Publish to pub.dev
@@ -677,6 +732,7 @@ class TemplateValidator {
 - Monitor initial feedback and usage
 
 **Week 11: Post-Launch Stabilization**
+
 - Address critical bugs from launch feedback
 - Performance optimizations based on real usage
 - Documentation improvements
@@ -686,18 +742,21 @@ class TemplateValidator {
 ### 4.3 Phase 2: Enhancement (Months 4-6)
 
 **Month 4: Additional Templates**
+
 - MVVM template with GetX/Provider
 - Clean Architecture template
 - BLoC template
 - Template comparison documentation
 
 **Month 5: IDE Integration**
+
 - VSCode extension development
 - Right-click code generation
 - Code snippets and live templates
 - IntelliJ plugin (basic version)
 
 **Month 6: Migration Tools**
+
 - Automated migration from Very Good CLI
 - Migration from Stacked CLI
 - Migration from vanilla Flutter projects
@@ -706,18 +765,21 @@ class TemplateValidator {
 ### 4.4 Phase 3: Enterprise & Extensibility (Months 7-9)
 
 **Month 7: Plugin System**
+
 - Plugin architecture implementation
 - Official Firebase plugin
 - Official Supabase plugin
 - Plugin registry and marketplace
 
 **Month 8: Advanced Features**
+
 - Team template sharing
 - Enterprise packages (analytics, auth, etc.)
 - CI/CD integration templates
 - Advanced migration tools
 
 **Month 9: Enterprise Features**
+
 - Custom template management
 - Team configuration
 - Enterprise support contracts
@@ -726,18 +788,21 @@ class TemplateValidator {
 ### 4.5 Phase 4: Maturity (Months 10-12)
 
 **Month 10: Performance & Scale**
+
 - Performance optimizations
 - Advanced caching strategies
 - Large project support
 - Memory optimization
 
 **Month 11: Ecosystem Growth**
+
 - Community contribution system
 - Advanced plugin development
 - Conference talks and workshops
 - Industry partnerships
 
 **Month 12: Market Leadership**
+
 - Advanced AI features
 - Natural language command parsing
 - Visual diff tools
@@ -749,15 +814,20 @@ class TemplateValidator {
 
 ### 5.1 Version Management & SDK Compatibility
 
-**Gap Identified:** No strategy for handling Flutter/Dart SDK version compatibility across generated projects.
+**Gap Identified:** No strategy for handling Flutter/Dart SDK version compatibility across generated
+projects.
 
 **Critical Considerations:**
-- **SDK Compatibility Matrix:** Need explicit tracking of Flutter SDK versions supported by each CLI version
-- **Generated Project Versions:** Projects generated with older CLI versions may break with newer Flutter SDKs
+
+- **SDK Compatibility Matrix:** Need explicit tracking of Flutter SDK versions supported by each CLI
+  version
+- **Generated Project Versions:** Projects generated with older CLI versions may break with newer
+  Flutter SDKs
 - **Migration Path:** When Flutter 4.0 or Dart 4.0 releases, how do existing projects migrate?
 - **Version Pinning:** Should templates pin specific SDK versions or use ranges?
 
 **Mitigation Strategy:**
+
 ```yaml
 # fly_config.yaml metadata
 cli_version: 1.2.0
@@ -776,15 +846,18 @@ generated_with:
 
 ### 5.2 Null Safety & Language Feature Evolution
 
-**Gap Identified:** No discussion of sound null safety requirements and future language features (macros, patterns).
+**Gap Identified:** No discussion of sound null safety requirements and future language features (
+macros, patterns).
 
 **Critical Considerations:**
+
 - All foundation packages must be null-safe
 - Generated code must be null-safe by default
 - Future Dart macros (data classes, etc.) may conflict with current codegen approaches
 - Pattern matching in Dart 3+ changes how errors/state should be handled
 
 **Mitigation Strategy:**
+
 ```dart
 // Future-proof with sealed classes for state
 sealed class ViewState {}
@@ -810,15 +883,18 @@ switch (viewModel.state) {
 
 ### 5.3 Testing Infrastructure for Generated Code
 
-**Gap Identified:** No strategy for testing projects created by the CLI or validating generated code quality.
+**Gap Identified:** No strategy for testing projects created by the CLI or validating generated code
+quality.
 
 **Critical Considerations:**
+
 - **Golden Testing:** How to verify generated projects match expectations?
 - **Regression Testing:** When templates change, how to ensure backward compatibility?
 - **Generated Code Quality:** Linting, formatting, analysis of output
 - **Integration Testing:** Full E2E tests of creating, building, and running projects
 
 **Mitigation Strategy:**
+
 ```dart
 // test/integration/project_generation_test.dart
 test('MVVM template generates buildable project', () async {
@@ -853,6 +929,7 @@ test('MVVM template generates buildable project', () async {
 **Gap Identified:** No security analysis for CLI tool, template injection, or supply chain attacks.
 
 **Critical Considerations:**
+
 - **Template Injection:** Custom templates could contain malicious code
 - **Dependency Confusion:** Package names could be hijacked on pub.dev
 - **API Keys in Templates:** Generated code might include hardcoded secrets
@@ -860,6 +937,7 @@ test('MVVM template generates buildable project', () async {
 - **Plugin Security:** Third-party plugins could be malicious
 
 **Mitigation Strategy:**
+
 ```dart
 // Template validation before execution
 class TemplateValidator {
@@ -898,6 +976,7 @@ void warnCustomTemplate(String templatePath) {
 ```
 
 **Action Items:**
+
 - Implement template sandboxing for custom templates
 - Add checksum verification for official templates
 - Create security.md with responsible disclosure policy
@@ -908,12 +987,14 @@ void warnCustomTemplate(String templatePath) {
 **Gap Identified:** No consideration for offline development or poor network conditions.
 
 **Critical Considerations:**
+
 - Developers may work offline or with limited connectivity
 - Template downloads could fail mid-process
 - Package installation (pub get) might timeout
 - No offline fallback for documentation
 
 **Mitigation Strategy:**
+
 ```dart
 // Implement local template caching
 class TemplateCacheManager {
@@ -947,6 +1028,7 @@ fly create my_app --template=mvvm --offline
 ```
 
 **Action Items:**
+
 - Bundle most common templates with CLI installation
 - Implement exponential backoff for network operations
 - Add resume capability for interrupted downloads
@@ -957,6 +1039,7 @@ fly create my_app --template=mvvm --offline
 **Gap Identified:** Limited discussion of IDE integrations beyond "VSCode extension" in Phase 4.
 
 **Critical Considerations:**
+
 - **Code Completion:** IDEs should suggest Fly CLI commands
 - **File Templates:** Right-click "New Fly Screen" in IDE
 - **Live Templates:** Code snippets for BaseScreen, BaseViewModel
@@ -964,6 +1047,7 @@ fly create my_app --template=mvvm --offline
 - **Debugging Support:** Source maps and breakpoint compatibility
 
 **Mitigation Strategy:**
+
 ```json
 // .vscode/extensions/fly-cli/package.json
 {
@@ -1017,15 +1101,18 @@ fly create my_app --template=mvvm --offline
 ```
 
 **Action Items:**
+
 - Prioritize VSCode extension to Phase 2 (not Phase 4)
 - Add Android Studio/IntelliJ plugin specification
 - Create Language Server Protocol (LSP) integration for universal IDE support
 
 ### 5.7 Internationalization & Accessibility
 
-**Gap Identified:** CLI itself needs i18n support; no accessibility requirements for generated UI components.
+**Gap Identified:** CLI itself needs i18n support; no accessibility requirements for generated UI
+components.
 
 **Critical Considerations:**
+
 - **CLI Localization:** Error messages, prompts in user's language
 - **Template Localization:** Generated apps should support i18n out-of-box
 - **Accessibility:** fly_ui components must be screen-reader friendly
@@ -1033,6 +1120,7 @@ fly create my_app --template=mvvm --offline
 - **Semantic Labels:** All interactive widgets need proper semantics
 
 **Mitigation Strategy:**
+
 ```dart
 // CLI localization
 class FlyLocalizations {
@@ -1067,15 +1155,18 @@ fly create my_app --features=i18n,accessibility
 ```
 
 **Action Items:**
+
 - Add i18n as core feature (not optional package)
 - Establish accessibility guidelines for all fly_ui components
 - Create accessibility testing guide for generated projects
 
 ### 5.8 Performance Monitoring & Analytics
 
-**Gap Identified:** No plan for understanding CLI usage patterns, performance bottlenecks, or user behavior.
+**Gap Identified:** No plan for understanding CLI usage patterns, performance bottlenecks, or user
+behavior.
 
 **Critical Considerations:**
+
 - **Usage Analytics:** Which templates are most popular?
 - **Performance Metrics:** Where does the CLI spend time?
 - **Error Tracking:** What errors do users encounter most?
@@ -1083,6 +1174,7 @@ fly create my_app --features=i18n,accessibility
 - **Privacy:** Must be opt-in and respect user privacy
 
 **Mitigation Strategy:**
+
 ```dart
 // Privacy-respecting telemetry
 class TelemetryService {
@@ -1142,15 +1234,18 @@ fly telemetry status
 ```
 
 **Action Items:**
+
 - Implement opt-in telemetry with clear privacy policy
 - Add dashboard showing aggregated usage statistics
 - Use data to prioritize feature development
 
 ### 5.9 Backward Compatibility & Deprecation Strategy
 
-**Gap Identified:** No clear policy for breaking changes, deprecations, or long-term support versions.
+**Gap Identified:** No clear policy for breaking changes, deprecations, or long-term support
+versions.
 
 **Critical Considerations:**
+
 - **CLI Versioning:** How do breaking changes affect existing users?
 - **Template Versioning:** Old projects using old template versions
 - **Package Dependencies:** Foundation package version compatibility
@@ -1158,6 +1253,7 @@ fly telemetry status
 - **LTS Releases:** Should there be long-term support versions?
 
 **Mitigation Strategy:**
+
 ```yaml
 # Versioning Policy
 
@@ -1192,6 +1288,7 @@ fly create --template=mvvm
 ```
 
 **Action Items:**
+
 - Document versioning policy in CONTRIBUTING.md
 - Create deprecation warning system
 - Build automated migration tools
@@ -1199,9 +1296,11 @@ fly create --template=mvvm
 
 ### 5.10 Foundation Package Testing Strategy
 
-**Gap Identified:** Testing coverage goals mentioned but no concrete testing architecture for complex scenarios.
+**Gap Identified:** Testing coverage goals mentioned but no concrete testing architecture for
+complex scenarios.
 
 **Critical Considerations:**
+
 - **Widget Testing:** How to test BaseScreen with different ViewModels?
 - **Integration Testing:** Testing navigation flows, API calls, state management together
 - **Performance Testing:** Memory leaks, rebuild performance
@@ -1209,6 +1308,7 @@ fly create --template=mvvm
 - **Mock Services:** Providing test utilities for users
 
 **Mitigation Strategy:**
+
 ```dart
 // fly_core_test package - Testing utilities for users
 class MockViewModel extends BaseViewModel {
@@ -1275,6 +1375,7 @@ testWidgets('BaseScreen handles ViewModel state changes', (tester) async {
 ```
 
 **Action Items:**
+
 - Create fly_test_utils package with testing helpers
 - Add golden tests for all UI components
 - Implement memory leak detection in CI
@@ -1282,9 +1383,11 @@ testWidgets('BaseScreen handles ViewModel state changes', (tester) async {
 
 ### 5.11 Error Handling & Debugging Experience
 
-**Gap Identified:** Error messages mentioned but no comprehensive error handling strategy or debugging tools.
+**Gap Identified:** Error messages mentioned but no comprehensive error handling strategy or
+debugging tools.
 
 **Critical Considerations:**
+
 - **Error Categories:** User errors vs. system errors vs. bugs
 - **Actionable Errors:** Every error should suggest a solution
 - **Debug Mode:** Verbose logging for troubleshooting
@@ -1292,6 +1395,7 @@ testWidgets('BaseScreen handles ViewModel state changes', (tester) async {
 - **Stack Traces:** Should they be shown or hidden by default?
 
 **Mitigation Strategy:**
+
 ```dart
 // Structured error handling
 abstract class FlyError implements Exception {
@@ -1361,6 +1465,7 @@ fly bug-report  # Generates diagnostic info and opens GitHub issue
 ```
 
 **Action Items:**
+
 - Create comprehensive error catalog
 - Add debug mode with verbose logging
 - Implement `fly doctor` for system diagnostics
@@ -1371,6 +1476,7 @@ fly bug-report  # Generates diagnostic info and opens GitHub issue
 **Gap Identified:** CI/CD mentioned for the CLI itself, but not for projects created by the CLI.
 
 **Critical Considerations:**
+
 - **Generated CI Files:** Should templates include .github/workflows?
 - **Container Support:** Docker files for generated projects?
 - **Deployment Configs:** Firebase, AWS, Google Cloud templates
@@ -1378,6 +1484,7 @@ fly bug-report  # Generates diagnostic info and opens GitHub issue
 - **Secrets Management:** How to handle API keys in CI?
 
 **Mitigation Strategy:**
+
 ```yaml
 # Generate project with CI/CD
 fly create my_app --ci=github-actions --deployment=firebase
@@ -1424,6 +1531,7 @@ fly config set-env staging --firebase-config=firebase.staging.json
 ```
 
 **Action Items:**
+
 - Add CI/CD template generation in Phase 1 (MVP)
 - Create Docker templates for common deployment scenarios
 - Provide environment configuration management
@@ -1434,6 +1542,7 @@ fly config set-env staging --firebase-config=firebase.staging.json
 **Gap Identified:** Melos mentioned but no discussion of monorepo challenges or best practices.
 
 **Critical Considerations:**
+
 - **Dependency Hell:** Circular dependencies between packages
 - **Version Synchronization:** Coordinating releases across 12+ packages
 - **Build Times:** Monorepo can slow down CI/CD significantly
@@ -1441,6 +1550,7 @@ fly config set-env staging --firebase-config=firebase.staging.json
 - **Breaking Changes:** One breaking change affects multiple packages
 
 **Mitigation Strategy:**
+
 ```yaml
 # melos.yaml - Advanced configuration
 name: fly
@@ -1495,6 +1605,7 @@ fly deps circular-check
 ```
 
 **Action Items:**
+
 - Document monorepo best practices
 - Add dependency graph visualization tool
 - Implement automated version bumping strategy
@@ -1503,9 +1614,11 @@ fly deps circular-check
 
 ### 5.14 Community Contribution Workflow
 
-**Gap Identified:** Community mentioned but no clear contribution workflow, review process, or governance.
+**Gap Identified:** Community mentioned but no clear contribution workflow, review process, or
+governance.
 
 **Critical Considerations:**
+
 - **Contribution Barriers:** How easy is it for first-time contributors?
 - **Review Process:** Who reviews PRs? How long does it take?
 - **Code Quality:** Automated checks before human review?
@@ -1513,6 +1626,7 @@ fly deps circular-check
 - **Decision Making:** How are feature requests prioritized?
 
 **Mitigation Strategy:**
+
 ```markdown
 # CONTRIBUTING.md
 
@@ -1581,6 +1695,7 @@ melos run format
 - **Core Team**: 3-5 trusted contributors with merge rights
 - **RFC Process**: Major changes require RFC and community feedback
 - **Monthly Calls**: Open community calls for feature discussions
+
 ```
 
 **Action Items:**
@@ -1634,6 +1749,7 @@ By contributing, you agree that:
 ```
 
 **Action Items:**
+
 - Conduct license audit of all dependencies
 - Add license checker to CI/CD
 - Create trademark guidelines
@@ -1645,6 +1761,7 @@ By contributing, you agree that:
 **Gap Identified:** Discussion of accessibility in generated apps but not for the CLI tool itself.
 
 **Critical Considerations:**
+
 - **Screen Reader Compatibility:** Is CLI output screen-reader friendly?
 - **Color Blindness:** Do colors convey only supplementary information?
 - **Keyboard Navigation:** Interactive prompts keyboard accessible?
@@ -1652,6 +1769,7 @@ By contributing, you agree that:
 - **Alternative Formats:** Can output be JSON for parsing by assistive tools?
 
 **Mitigation Strategy:**
+
 ```dart
 // Accessible CLI output
 class AccessibleLogger {
@@ -1691,6 +1809,7 @@ fly config set accessibility.screen-reader-mode true
 ```
 
 **Action Items:**
+
 - Test CLI with screen readers (NVDA, JAWS, VoiceOver)
 - Ensure all information conveyed by color has text alternative
 - Add non-interactive mode for all commands
@@ -1701,6 +1820,7 @@ fly config set accessibility.screen-reader-mode true
 **Gap Identified:** Cross-platform mentioned but no discussion of platform-specific challenges.
 
 **Critical Considerations:**
+
 - **File Paths:** Windows backslashes vs. Unix forward slashes
 - **Permissions:** Unix file permissions vs. Windows ACLs
 - **Line Endings:** CRLF vs. LF in generated files
@@ -1709,6 +1829,7 @@ fly config set accessibility.screen-reader-mode true
 - **Installation:** Homebrew (macOS) vs. Chocolatey (Windows) vs. apt/snap (Linux)
 
 **Mitigation Strategy:**
+
 ```dart
 // Platform abstraction layer
 class PlatformUtils {
@@ -1761,6 +1882,7 @@ end
 ```
 
 **Action Items:**
+
 - Test on Windows 10/11, macOS (Intel + Apple Silicon), Ubuntu
 - Create installation guides for each platform
 - Set up CI matrix for all platforms
@@ -1771,6 +1893,7 @@ end
 **Gap Identified:** "fly update" command mentioned but no details on how CLI updates itself.
 
 **Critical Considerations:**
+
 - **Auto-Update Check:** Should CLI check for updates automatically?
 - **Breaking Changes:** How to handle incompatible updates?
 - **Rollback:** Can users rollback to previous version?
@@ -1778,6 +1901,7 @@ end
 - **Beta Channel:** Should there be stable vs. beta releases?
 
 **Mitigation Strategy:**
+
 ```dart
 // Update checker
 class UpdateChecker {
@@ -1835,6 +1959,7 @@ Creating project "my_app"...
 ```
 
 **Action Items:**
+
 - Implement background update checker
 - Add release channels (stable, beta, dev)
 - Create rollback mechanism
@@ -1843,9 +1968,11 @@ Creating project "my_app"...
 
 ### 5.19 Infrastructure Costs at Scale
 
-**Gap Identified:** Budget mentions "~$50/month" but no analysis of scaling costs or infrastructure needs.
+**Gap Identified:** Budget mentions "~$50/month" but no analysis of scaling costs or infrastructure
+needs.
 
 **Critical Considerations:**
+
 - **CDN Costs:** Template distribution at 1,000+ downloads/day
 - **Analytics Infrastructure:** Storing and processing telemetry data
 - **Documentation Hosting:** Bandwidth for docs site
@@ -1853,6 +1980,7 @@ Creating project "my_app"...
 - **Domain & SSL:** fly-cli.dev domain and certificates
 
 **Mitigation Strategy:**
+
 ```markdown
 ## Infrastructure Cost Projection
 
@@ -1887,6 +2015,7 @@ Creating project "my_app"...
 ```
 
 **Action Items:**
+
 - Set up infrastructure monitoring
 - Implement cost tracking dashboard
 - Create sustainability plan for scaling
@@ -1894,9 +2023,11 @@ Creating project "my_app"...
 
 ### 5.20 Migration from Competing Tools
 
-**Gap Identified:** No strategy for migrating existing projects from Very Good CLI, Stacked, or other tools.
+**Gap Identified:** No strategy for migrating existing projects from Very Good CLI, Stacked, or
+other tools.
 
 **Critical Considerations:**
+
 - **Project Detection:** Automatically detect existing project type
 - **Migration Path:** Step-by-step migration guides
 - **Partial Migration:** Can users migrate incrementally?
@@ -1904,6 +2035,7 @@ Creating project "my_app"...
 - **Rollback:** Ability to undo migration
 
 **Mitigation Strategy:**
+
 ```bash
 # Auto-detect and migrate
 fly migrate --from=very-good
@@ -1943,6 +2075,7 @@ Migration plan:
 ```
 
 **Action Items:**
+
 - Create migration guides for each major competing tool
 - Implement automated migration commands
 - Add rollback mechanism
@@ -1955,46 +2088,46 @@ Migration plan:
 
 ### 6.1 Technical Risks
 
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| **Breaking Flutter changes** | High | Medium | Pin dependencies, maintain compatibility matrix, test against multiple Flutter versions |
-| **Mason API changes** | Medium | Low | Abstract Mason behind own interface, maintain compatibility layer |
-| **Performance issues** | Medium | Low | Benchmark early, optimize incrementally, lazy loading, caching |
-| **Cross-platform compatibility** | High | Medium | Test on Windows, macOS, Linux in CI, platform abstraction layer |
-| **Riverpod code generation issues** | Medium | Medium | Extensive testing with riverpod_generator, fallback to manual providers |
-| **JSON schema evolution** | Low | High | Version schemas, maintain backward compatibility, migration tools |
-| **AI integration complexity** | Medium | Medium | Start simple, iterate based on feedback, core features work without AI |
+| Risk                                | Impact | Probability | Mitigation Strategy                                                                     |
+|-------------------------------------|--------|-------------|-----------------------------------------------------------------------------------------|
+| **Breaking Flutter changes**        | High   | Medium      | Pin dependencies, maintain compatibility matrix, test against multiple Flutter versions |
+| **Mason API changes**               | Medium | Low         | Abstract Mason behind own interface, maintain compatibility layer                       |
+| **Performance issues**              | Medium | Low         | Benchmark early, optimize incrementally, lazy loading, caching                          |
+| **Cross-platform compatibility**    | High   | Medium      | Test on Windows, macOS, Linux in CI, platform abstraction layer                         |
+| **Riverpod code generation issues** | Medium | Medium      | Extensive testing with riverpod_generator, fallback to manual providers                 |
+| **JSON schema evolution**           | Low    | High        | Version schemas, maintain backward compatibility, migration tools                       |
+| **AI integration complexity**       | Medium | Medium      | Start simple, iterate based on feedback, core features work without AI                  |
 
 ### 6.2 Market Risks
 
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| **Low adoption** | High | Medium | Focus on superior UX, marketing, community engagement, AI-first positioning |
-| **Competing tool improvements** | Medium | High | Continuous innovation, unique features, AI-native advantage |
-| **Package maintenance burden** | High | Medium | Monorepo, automated testing, community contributions, clear ownership |
-| **Enterprise hesitation** | Medium | Low | Case studies, enterprise support tier, compliance features |
-| **AI integration not valued** | Medium | Medium | Demonstrate clear productivity gains, target AI coding assistant users |
-| **Community fragmentation** | Medium | Medium | Clear governance, contributor recognition, regular communication |
+| Risk                            | Impact | Probability | Mitigation Strategy                                                         |
+|---------------------------------|--------|-------------|-----------------------------------------------------------------------------|
+| **Low adoption**                | High   | Medium      | Focus on superior UX, marketing, community engagement, AI-first positioning |
+| **Competing tool improvements** | Medium | High        | Continuous innovation, unique features, AI-native advantage                 |
+| **Package maintenance burden**  | High   | Medium      | Monorepo, automated testing, community contributions, clear ownership       |
+| **Enterprise hesitation**       | Medium | Low         | Case studies, enterprise support tier, compliance features                  |
+| **AI integration not valued**   | Medium | Medium      | Demonstrate clear productivity gains, target AI coding assistant users      |
+| **Community fragmentation**     | Medium | Medium      | Clear governance, contributor recognition, regular communication            |
 
 ### 6.3 Business Risks
 
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| **Sustainability** | High | Medium | GitHub Sponsors, enterprise licensing, donations, clear funding strategy |
-| **Team capacity** | Medium | Medium | Open source contributions, clear roadmap, community involvement |
-| **Documentation lag** | Medium | High | Docs-as-code, auto-generation, community contributions |
-| **Legal challenges** | High | Low | Trademark search, legal review, backup names, clear licensing |
-| **Key contributor departure** | High | Low | Documentation, knowledge sharing, bus factor >3, community building |
+| Risk                          | Impact | Probability | Mitigation Strategy                                                      |
+|-------------------------------|--------|-------------|--------------------------------------------------------------------------|
+| **Sustainability**            | High   | Medium      | GitHub Sponsors, enterprise licensing, donations, clear funding strategy |
+| **Team capacity**             | Medium | Medium      | Open source contributions, clear roadmap, community involvement          |
+| **Documentation lag**         | Medium | High        | Docs-as-code, auto-generation, community contributions                   |
+| **Legal challenges**          | High   | Low         | Trademark search, legal review, backup names, clear licensing            |
+| **Key contributor departure** | High   | Low         | Documentation, knowledge sharing, bus factor >3, community building      |
 
 ### 6.4 Security Risks
 
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| **Template injection attack** | Critical | Medium | Sandboxing, validation, security warnings, checksum verification |
-| **Dependency confusion** | High | Low | Package name verification, dependency scanning, official sources only |
-| **Supply chain attack** | High | Low | Dependency scanning, checksum verification, security audits |
-| **API key exposure** | Medium | Medium | Template validation, security warnings, best practices documentation |
-| **Malicious plugins** | Medium | Low | Plugin validation, sandboxing, community review process |
+| Risk                          | Impact   | Probability | Mitigation Strategy                                                   |
+|-------------------------------|----------|-------------|-----------------------------------------------------------------------|
+| **Template injection attack** | Critical | Medium      | Sandboxing, validation, security warnings, checksum verification      |
+| **Dependency confusion**      | High     | Low         | Package name verification, dependency scanning, official sources only |
+| **Supply chain attack**       | High     | Low         | Dependency scanning, checksum verification, security audits           |
+| **API key exposure**          | Medium   | Medium      | Template validation, security warnings, best practices documentation  |
+| **Malicious plugins**         | Medium   | Low         | Plugin validation, sandboxing, community review process               |
 
 ### 6.5 Go/No-Go Decision Criteria
 
@@ -2005,21 +2138,21 @@ Migration plan:
 ✅ Legal and licensing framework established  
 ✅ Security framework designed and approved  
 ✅ Community engagement strategy defined  
-✅ Funding strategy sustainable for 12+ months  
+✅ Funding strategy sustainable for 12+ months
 
 **Delay Implementation If:**
 ⚠️ Critical technical risks cannot be mitigated  
 ⚠️ Market validation insufficient  
 ⚠️ Team capacity uncertain  
 ⚠️ Legal issues unresolved  
-⚠️ Security concerns unaddressed  
+⚠️ Security concerns unaddressed
 
 **Cancel/Pivot If:**
 🛑 Fundamental architecture issues discovered  
 🛑 Competing tool launches identical solution  
 🛑 Resource constraints prevent quality delivery  
 🛑 Market research shows insufficient demand  
-🛑 Legal or security issues cannot be resolved  
+🛑 Legal or security issues cannot be resolved
 
 ---
 
@@ -2028,11 +2161,13 @@ Migration plan:
 ### 7.1 Testing Strategy Overview
 
 **Testing Pyramid:**
+
 - **Unit Tests (70%):** Individual components, functions, classes
 - **Integration Tests (20%):** Component interactions, API calls
 - **E2E Tests (10%):** Full workflows, project generation
 
 **Testing Targets:**
+
 - **CLI Tool:** 90%+ code coverage
 - **Foundation Packages:** 95%+ code coverage
 - **Generated Projects:** 100% pass `flutter analyze`
@@ -2041,6 +2176,7 @@ Migration plan:
 ### 7.2 CLI Testing Framework
 
 **Unit Testing:**
+
 ```dart
 // test/commands/create_command_test.dart
 test('create command validates project name', () {
@@ -2067,6 +2203,7 @@ test('create command generates correct project structure', () async {
 ```
 
 **Integration Testing:**
+
 ```dart
 // test/integration/project_generation_test.dart
 test('riverpod template generates buildable project', () async {
@@ -2096,6 +2233,7 @@ test('riverpod template generates buildable project', () async {
 ```
 
 **Platform Testing:**
+
 ```yaml
 # .github/workflows/test.yml
 name: Test
@@ -2134,6 +2272,7 @@ jobs:
 ### 7.3 Foundation Package Testing
 
 **Package-Specific Testing:**
+
 ```dart
 // packages/fly_core/test/screens/base_screen_test.dart
 testWidgets('BaseScreen handles ViewModel state changes', (tester) async {
@@ -2179,6 +2318,7 @@ test('ApiClient handles network errors gracefully', () async {
 ```
 
 **Cross-Package Integration Testing:**
+
 ```dart
 // test/integration/package_integration_test.dart
 test('fly_core and fly_networking work together', () async {
@@ -2209,6 +2349,7 @@ test('fly_core and fly_networking work together', () async {
 ### 7.4 AI Integration Testing
 
 **JSON Output Validation:**
+
 ```dart
 // test/ai/json_output_test.dart
 test('create command JSON output is valid', () async {
@@ -2245,6 +2386,7 @@ platforms: [ios, android]
 ```
 
 **Schema Export Testing:**
+
 ```dart
 // test/ai/schema_export_test.dart
 test('schema export generates valid JSON schema', () async {
@@ -2268,6 +2410,7 @@ test('schema export generates valid JSON schema', () async {
 ### 7.5 Golden File Testing
 
 **Template Output Validation:**
+
 ```dart
 // test/golden/template_output_test.dart
 test('minimal template generates expected files', () async {
@@ -2346,6 +2489,7 @@ Future<List<File>> _getAllFiles(Directory dir) async {
 ```
 
 **Generated Project Validation:**
+
 ```dart
 // test/validation/project_validation_test.dart
 test('generated projects pass flutter analyze', () async {
@@ -2406,6 +2550,7 @@ test('generated projects build successfully', () async {
 ### 7.6 Code Quality Standards
 
 **Linting Configuration:**
+
 ```yaml
 # analysis_options.yaml
 include: package:very_good_analysis/analysis_options.yaml
@@ -2448,12 +2593,14 @@ linter:
 ```
 
 **Code Coverage Requirements:**
+
 - **CLI Commands:** 90%+ coverage
 - **Foundation Packages:** 95%+ coverage
 - **Template Generation:** 100% coverage for critical paths
 - **AI Integration:** 85%+ coverage
 
 **Performance Benchmarks:**
+
 ```dart
 // test/performance/benchmark_test.dart
 test('project creation performance', () async {
@@ -2489,18 +2636,21 @@ test('template rendering performance', () async {
 ### 8.1 Quantitative Metrics
 
 **Adoption Metrics:**
+
 - **Downloads:** Target 10,000+ downloads in first 6 months
 - **Active Users:** 1,000+ monthly active users by Month 6
 - **GitHub Stars:** 500+ stars within first year
 - **Community Growth:** 100+ contributors, 50+ issues resolved
 
 **Usage Metrics:**
+
 - **Template Usage:** Track which templates are most popular
 - **Command Frequency:** Monitor most-used CLI commands
 - **Platform Distribution:** Windows vs macOS vs Linux usage
 - **AI Integration Usage:** Track JSON output and manifest usage
 
 **Technical Metrics:**
+
 - **Build Success Rate:** 99%+ of generated projects build successfully
 - **Test Coverage:** Maintain 90%+ coverage across all packages
 - **Performance:** Project creation <30 seconds, template rendering <5 seconds
@@ -2509,18 +2659,21 @@ test('template rendering performance', () async {
 ### 8.2 Qualitative Metrics
 
 **Developer Experience:**
+
 - **User Satisfaction:** Survey scores 4.5+ out of 5
 - **Recommendation Rate:** Net Promoter Score >50
 - **Support Tickets:** <10 tickets per week
 - **Documentation Quality:** User feedback on docs completeness
 
 **Community Health:**
+
 - **Contribution Velocity:** 5+ PRs merged per week
 - **Issue Resolution Time:** <48 hours for critical issues
 - **Community Engagement:** Active Discord/Slack participation
 - **Conference Talks:** 3+ talks at Flutter conferences
 
 **Market Position:**
+
 - **Competitive Analysis:** Feature comparison with competing tools
 - **Industry Recognition:** Awards, mentions in Flutter ecosystem
 - **Enterprise Adoption:** 10+ enterprise clients by Year 2
@@ -2529,12 +2682,14 @@ test('template rendering performance', () async {
 ### 8.3 Phase-Specific Success Criteria
 
 **Phase 0 (Week 1) Success Criteria:**
+
 - ✅ Security framework implemented and tested
 - ✅ License audit completed with no conflicts
 - ✅ Platform testing infrastructure operational
 - ✅ Offline mode architecture designed
 
 **Phase 1 (Weeks 2-11) Success Criteria:**
+
 - ✅ MVP CLI with core commands functional
 - ✅ 2 templates (minimal, riverpod) generating working projects
 - ✅ 3 foundation packages (fly_core, fly_networking, fly_state) stable
@@ -2543,6 +2698,7 @@ test('template rendering performance', () async {
 - ✅ 100+ beta testers providing feedback
 
 **Phase 2 (Months 4-6) Success Criteria:**
+
 - ✅ 4+ templates available (MVVM, Clean Architecture, BLoC)
 - ✅ VSCode extension with basic functionality
 - ✅ Migration tools for 2+ competing tools
@@ -2550,12 +2706,14 @@ test('template rendering performance', () async {
 - ✅ Community contributors actively participating
 
 **Phase 3 (Months 7-9) Success Criteria:**
+
 - ✅ Plugin system operational with 3+ official plugins
 - ✅ Enterprise features and support contracts
 - ✅ 5,000+ downloads per month
 - ✅ Recognition in Flutter ecosystem
 
 **Phase 4 (Months 10-12) Success Criteria:**
+
 - ✅ Market leadership position established
 - ✅ 10,000+ downloads per month
 - ✅ Self-sustaining through sponsorships/enterprise
@@ -2564,6 +2722,7 @@ test('template rendering performance', () async {
 ### 8.4 Continuous Improvement Framework
 
 **Feedback Collection:**
+
 ```dart
 // Built-in feedback system
 class FeedbackCollector {
@@ -2598,12 +2757,14 @@ class FeedbackCollector {
 ```
 
 **Metrics Dashboard:**
+
 - **Real-time Analytics:** Track downloads, usage patterns
 - **Performance Monitoring:** CLI response times, memory usage
 - **Error Tracking:** Crash reports, error frequency
 - **Community Metrics:** GitHub activity, Discord engagement
 
 **Regular Evaluation Cycles:**
+
 - **Weekly:** Technical metrics review, bug triage
 - **Monthly:** User feedback analysis, feature prioritization
 - **Quarterly:** Strategic review, roadmap updates
@@ -2616,6 +2777,7 @@ class FeedbackCollector {
 ### 9.1 Pre-Launch Preparation
 
 **Beta Testing Program:**
+
 ```markdown
 # Beta Testing Program (Weeks 8-10)
 
@@ -2643,6 +2805,7 @@ class FeedbackCollector {
 ```
 
 **Content Creation:**
+
 - **Documentation:** Complete guides, tutorials, API docs
 - **Video Content:** 5-minute demo video, 30-minute deep dive
 - **Blog Posts:** Technical articles, architecture decisions
@@ -2652,6 +2815,7 @@ class FeedbackCollector {
 ### 9.2 Launch Day Execution
 
 **Launch Timeline:**
+
 ```markdown
 # Launch Day (Week 11)
 
@@ -2678,6 +2842,7 @@ class FeedbackCollector {
 ```
 
 **Launch Announcements:**
+
 ```markdown
 # Launch Announcement Template
 
@@ -2712,18 +2877,21 @@ cd my_app && flutter run
 ```
 
 ## Learn More
+
 - 📖 Documentation: https://fly-cli.dev/docs
 - 🎥 Demo Video: https://fly-cli.dev/demo
 - 💬 Community: https://discord.gg/fly-cli
 - 🐛 Issues: https://github.com/your-org/fly/issues
 
 ## What's Next?
+
 - VSCode extension (coming soon)
 - Additional templates (MVVM, Clean Architecture)
 - Migration tools from competing CLIs
 - Enterprise features and support
 
 Join us in revolutionizing Flutter development! 🎉
+
 ```
 
 ### 9.3 Post-Launch Engagement Strategy
@@ -2758,6 +2926,7 @@ Join us in revolutionizing Flutter development! 🎉
 ```
 
 **Support Strategy:**
+
 ```markdown
 # Support Tiers
 
@@ -2784,6 +2953,7 @@ Join us in revolutionizing Flutter development! 🎉
 ### 9.4 AI Coding Assistant Community Outreach
 
 **Integration Partnerships:**
+
 ```markdown
 # AI Tool Integration Strategy
 
@@ -2815,6 +2985,7 @@ Join us in revolutionizing Flutter development! 🎉
 ### 9.5 Sustainability & Funding Approach
 
 **Revenue Streams:**
+
 ```markdown
 # Sustainability Strategy
 
@@ -2845,6 +3016,7 @@ Join us in revolutionizing Flutter development! 🎉
 ```
 
 **Cost Management:**
+
 - **Infrastructure:** Optimize costs through caching and CDN
 - **Development:** Community contributions reduce team costs
 - **Marketing:** Organic growth through community and content
@@ -2857,6 +3029,7 @@ Join us in revolutionizing Flutter development! 🎉
 ### Appendix A: Detailed JSON Schemas for AI Integration
 
 **Command Result Schema:**
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -2904,6 +3077,7 @@ Join us in revolutionizing Flutter development! 🎉
 ```
 
 **Project Manifest Schema:**
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -2976,6 +3150,7 @@ Join us in revolutionizing Flutter development! 🎉
 ### Appendix B: Template Specifications and Metadata Format
 
 **Template Metadata Schema:**
+
 ```yaml
 # Template metadata format
 name: riverpod                    # Template identifier
@@ -3077,6 +3252,7 @@ validation:
 ### Appendix C: CLI Command Reference
 
 **Core Commands:**
+
 ```bash
 # Project Management
 fly create <project_name> [options]           # Create new Flutter project
@@ -3115,6 +3291,7 @@ fly test [options]                           # Run tests
 ```
 
 **Command Options:**
+
 ```bash
 # Global Options
 --output <format>                            # Output format (human, json)
@@ -3142,6 +3319,7 @@ fly test [options]                           # Run tests
 ### Appendix D: Foundation Package API Overview
 
 **fly_core Package:**
+
 ```dart
 // Core abstractions
 abstract class BaseScreen<VM extends BaseViewModel> extends StatefulWidget
@@ -3160,6 +3338,7 @@ extension ResultExtensions<T> on Result<T>
 ```
 
 **fly_networking Package:**
+
 ```dart
 // HTTP client
 class ApiClient
@@ -3180,6 +3359,7 @@ extension DioExtensions on Dio
 ```
 
 **fly_state Package:**
+
 ```dart
 // State management
 class StateNotifierProvider<T>
@@ -3194,24 +3374,25 @@ extension ViewStateExtensions on ViewState
 
 ### Appendix E: Platform Compatibility Matrix
 
-| Platform | CLI Support | Generated Apps | Testing Priority | Notes |
-|----------|-------------|---------------|------------------|-------|
-| **Windows 10/11** | ✅ Full | ✅ All platforms | High | PowerShell completion |
-| **macOS (Intel)** | ✅ Full | ✅ All platforms | High | Homebrew installation |
-| **macOS (Apple Silicon)** | ✅ Full | ✅ All platforms | High | Native ARM support |
-| **Ubuntu 20.04+** | ✅ Full | ✅ All platforms | High | Snap package support |
-| **Debian 10+** | ✅ Full | ✅ All platforms | Medium | APT package support |
-| **CentOS 8+** | ✅ Full | ✅ All platforms | Medium | RPM package support |
-| **iOS 12+** | N/A | ✅ Native | Medium | Generated app support |
-| **Android API 21+** | N/A | ✅ Native | Medium | Generated app support |
-| **Web** | N/A | ✅ Web | Medium | Generated app support |
-| **macOS Desktop** | N/A | ✅ Native | Low | Generated app support |
-| **Windows Desktop** | N/A | ✅ Native | Low | Generated app support |
-| **Linux Desktop** | N/A | ✅ Native | Low | Generated app support |
+| Platform                  | CLI Support | Generated Apps  | Testing Priority | Notes                 |
+|---------------------------|-------------|-----------------|------------------|-----------------------|
+| **Windows 10/11**         | ✅ Full      | ✅ All platforms | High             | PowerShell completion |
+| **macOS (Intel)**         | ✅ Full      | ✅ All platforms | High             | Homebrew installation |
+| **macOS (Apple Silicon)** | ✅ Full      | ✅ All platforms | High             | Native ARM support    |
+| **Ubuntu 20.04+**         | ✅ Full      | ✅ All platforms | High             | Snap package support  |
+| **Debian 10+**            | ✅ Full      | ✅ All platforms | Medium           | APT package support   |
+| **CentOS 8+**             | ✅ Full      | ✅ All platforms | Medium           | RPM package support   |
+| **iOS 12+**               | N/A         | ✅ Native        | Medium           | Generated app support |
+| **Android API 21+**       | N/A         | ✅ Native        | Medium           | Generated app support |
+| **Web**                   | N/A         | ✅ Web           | Medium           | Generated app support |
+| **macOS Desktop**         | N/A         | ✅ Native        | Low              | Generated app support |
+| **Windows Desktop**       | N/A         | ✅ Native        | Low              | Generated app support |
+| **Linux Desktop**         | N/A         | ✅ Native        | Low              | Generated app support |
 
 ### Appendix F: License and Legal Framework
 
 **MIT License:**
+
 ```markdown
 MIT License
 
@@ -3237,6 +3418,7 @@ SOFTWARE.
 ```
 
 **Contributor License Agreement:**
+
 ```markdown
 By contributing to Fly CLI, you agree that your contributions will be licensed
 under the MIT License. You represent that you have the right to grant this
@@ -3253,6 +3435,7 @@ You also agree that:
 ### Appendix G: Resource Allocation and Budget Details
 
 **Development Resources:**
+
 ```markdown
 # Resource Allocation (12 months)
 
@@ -3278,6 +3461,7 @@ You also agree that:
 ```
 
 **Revenue Projections:**
+
 ```markdown
 # Revenue Projections (3 years)
 
@@ -3303,6 +3487,7 @@ You also agree that:
 ### Appendix H: References to Existing Detailed Documents
 
 **Technical Documentation:**
+
 - `docs/technical/architecture-and-analysis.md` - Detailed technical architecture
 - `docs/planning/mvp-phase-1-plan.md` - MVP implementation timeline
 - `docs/technical/foundation-packages.md` - Foundation package specifications
@@ -3310,18 +3495,21 @@ You also agree that:
 - `docs/technical/ai-integration.md` - AI integration architecture
 
 **Planning Documents:**
+
 - `docs/planning/plan.md` - This comprehensive plan structure
 - `docs/planning/risk-analysis.md` - Detailed risk assessment
 - `docs/planning/market-analysis.md` - Competitive analysis
 - `docs/planning/community-strategy.md` - Community building plan
 
 **Implementation Guides:**
+
 - `docs/implementation/setup-guide.md` - Development environment setup
 - `docs/implementation/testing-guide.md` - Testing strategy and implementation
 - `docs/implementation/deployment-guide.md` - Deployment and release process
 - `docs/implementation/contribution-guide.md` - Contributor guidelines
 
 **User Documentation:**
+
 - `docs/user/installation.md` - Installation instructions
 - `docs/user/quickstart.md` - Quick start guide
 - `docs/user/templates.md` - Template documentation

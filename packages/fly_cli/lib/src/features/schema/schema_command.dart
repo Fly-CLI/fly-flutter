@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
@@ -18,7 +18,8 @@ class SchemaCommand extends FlyCommand {
   SchemaCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory SchemaCommand.create(CommandContext context) => SchemaCommand(context);
+  factory SchemaCommand.create(CommandContext context) =>
+      SchemaCommand(context);
 
   @override
   String get name => 'schema';
@@ -29,7 +30,6 @@ class SchemaCommand extends FlyCommand {
   @override
   ArgParser get argParser {
     final parser = super.argParser
-
       ..addOption(
         'format',
         help: 'Export format',
@@ -71,14 +71,14 @@ class SchemaCommand extends FlyCommand {
 
   @override
   List<CommandValidator> get validators => [
-    EnvironmentValidator(),
-  ];
+        EnvironmentValidator(),
+      ];
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
@@ -87,15 +87,17 @@ class SchemaCommand extends FlyCommand {
       final commandFilter = argResults!['command'] as String?;
       final outputFile = argResults!['file'] as String?;
       final includeExamples = argResults!['include-examples'] as bool? ?? true;
-      final includeValidation = argResults!['include-validation'] as bool? ?? true;
-      final includeGlobalOptions = argResults!['include-global-options'] as bool? ?? true;
+      final includeValidation =
+          argResults!['include-validation'] as bool? ?? true;
+      final includeGlobalOptions =
+          argResults!['include-global-options'] as bool? ?? true;
       final prettyPrint = argResults!['pretty-print'] as bool? ?? true;
 
       logger.info('📋 Exporting command schema...');
 
       // Parse format
       final format = _parseFormat(formatStr);
-      
+
       // Create export configuration
       final config = ExportConfig(
         format: format,
@@ -111,10 +113,10 @@ class SchemaCommand extends FlyCommand {
 
       // Get exporter
       final exporter = SchemaExporterFactory.getExporter(format);
-      
+
       // Export schema
       final schemaContent = exporter.export(registry, config);
-      
+
       // Parse schema for metadata extraction
       final schemaData = json.decode(schemaContent) as Map<String, dynamic>;
 
@@ -143,7 +145,7 @@ class SchemaCommand extends FlyCommand {
       if (outputFile != null) {
         final file = File(outputFile);
         await file.writeAsString(schemaContent);
-        
+
         return CommandResult.success(
           command: 'schema',
           message: 'Schema exported to $outputFile',

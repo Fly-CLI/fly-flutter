@@ -8,22 +8,21 @@ import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'brick_registry.dart';
-import 'generation_preview.dart';
 import 'brick_info.dart';
+import 'brick_registry.dart';
+import 'compatibility_checker.dart';
+import 'compatibility_result.dart';
+import 'generation_preview.dart';
 import 'template_info.dart';
 import 'template_variable.dart';
-import 'compatibility_result.dart';
-import 'compatibility_checker.dart';
-import 'version_registry.dart';
 import 'version_parser.dart';
+import 'version_registry.dart';
 
 /// Enhanced template management system for Fly CLI
-/// 
+///
 /// Handles template discovery, validation, and generation using Mason bricks.
 /// Integrates with brick registry, caching, and comprehensive error handling.
 class TemplateManager {
-
   TemplateManager({
     required this.templatesDirectory,
     required this.logger,
@@ -36,17 +35,18 @@ class TemplateManager {
         _previewService = GenerationPreviewService(logger: logger);
 
   /// Find templates directory using a single definitive path
-  /// 
+  ///
   /// Calculates the templates directory relative to the package or executable location.
   /// For development: checks for templates in packages/fly_cli/templates
   /// For production: templates are located relative to the executable
-  /// 
+  ///
   /// Returns the absolute path to the templates directory.
   static String findTemplatesDirectory() {
     // Try development path: packages/fly_cli/templates
     // This works when running from the monorepo
     final currentDir = Directory.current.path;
-    final devTemplatesPath = path.join(currentDir, 'packages', 'fly_cli', 'templates');
+    final devTemplatesPath =
+        path.join(currentDir, 'packages', 'fly_cli', 'templates');
     final devTemplatesDir = Directory(devTemplatesPath);
     if (devTemplatesDir.existsSync()) {
       return path.normalize(devTemplatesPath);
@@ -55,14 +55,19 @@ class TemplateManager {
     // Try relative to script location (development)
     final scriptPath = Platform.script.toFilePath();
     final scriptDir = path.dirname(scriptPath);
-    
+
     // Try multiple relative paths for development
     final scriptRelativePaths = [
-      path.join(scriptDir, '..', '..', 'templates'), // From packages/fly_cli/bin/
-      path.join(scriptDir, '..', '..', '..', 'packages', 'fly_cli', 'templates'), // From test files
-      path.join(scriptDir, '..', '..', '..', '..', 'packages', 'fly_cli', 'templates'), // From deeper test files
+      path.join(scriptDir, '..', '..', 'templates'),
+      // From packages/fly_cli/bin/
+      path.join(
+          scriptDir, '..', '..', '..', 'packages', 'fly_cli', 'templates'),
+      // From test files
+      path.join(scriptDir, '..', '..', '..', '..', 'packages', 'fly_cli',
+          'templates'),
+      // From deeper test files
     ];
-    
+
     for (final scriptRelativePath in scriptRelativePaths) {
       final normalizedPath = path.normalize(scriptRelativePath);
       final scriptRelativeDir = Directory(normalizedPath);
@@ -74,7 +79,7 @@ class TemplateManager {
     // Production path: relative to executable
     final executablePath = Platform.resolvedExecutable;
     final executableDir = path.dirname(executablePath);
-    
+
     // Templates are located at: {executable_dir}/../templates
     return path.normalize(
       path.join(executableDir, '..', 'templates'),
@@ -129,12 +134,12 @@ class TemplateManager {
   }
 
   /// Get Flutter SDK version
-  /// 
+  ///
   /// Returns a valid Version object. Falls back to safe default if detection fails.
   Future<Version> _getFlutterVersion() async {
     try {
-      final result = await Process.run(
-          'flutter', ['--version'], runInShell: true);
+      final result =
+          await Process.run('flutter', ['--version'], runInShell: true);
       if (result.exitCode == 0) {
         final output = result.stdout as String;
         final match = RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(output);
@@ -155,15 +160,15 @@ class TemplateManager {
   }
 
   /// Get Dart SDK version
-  /// 
+  ///
   /// Returns a valid Version object. Falls back to safe default if detection fails.
   Future<Version> _getDartVersion() async {
     try {
       final result = await Process.run('dart', ['--version'], runInShell: true);
       if (result.exitCode == 0) {
         final output = result.stdout as String;
-        final match = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(
-            output);
+        final match =
+            RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(output);
         if (match != null) {
           final versionStr = match.group(1)!;
           try {
@@ -207,13 +212,16 @@ class TemplateManager {
   }
 
   /// Get project bricks
-  Future<List<BrickInfo>> getProjectBricks() async => await _brickRegistry.getProjectBricks();
+  Future<List<BrickInfo>> getProjectBricks() async =>
+      await _brickRegistry.getProjectBricks();
 
   /// Get screen bricks
-  Future<List<BrickInfo>> getScreenBricks() async => await _brickRegistry.getScreenBricks();
+  Future<List<BrickInfo>> getScreenBricks() async =>
+      await _brickRegistry.getScreenBricks();
 
   /// Get service bricks
-  Future<List<BrickInfo>> getServiceBricks() async => await _brickRegistry.getServiceBricks();
+  Future<List<BrickInfo>> getServiceBricks() async =>
+      await _brickRegistry.getServiceBricks();
 
   /// Validate brick
   Future<BrickValidationResult> validateBrick(String brickName) async {
@@ -329,13 +337,14 @@ class TemplateManager {
     required String outputDirectory,
     required Map<String, dynamic> variables,
     String? projectName,
-  }) async => _previewService.generatePreview(
-      brickName: brickName,
-      brickType: brickType,
-      outputDirectory: outputDirectory,
-      variables: variables,
-      projectName: projectName,
-    );
+  }) async =>
+      _previewService.generatePreview(
+        brickName: brickName,
+        brickType: brickType,
+        outputDirectory: outputDirectory,
+        variables: variables,
+        projectName: projectName,
+      );
 
   /// Generate project using enhanced brick system with compatibility checking
   Future<TemplateGenerationResult> generateProject({
@@ -351,9 +360,7 @@ class TemplateManager {
       final template = await getTemplate(templateName, version: version);
       if (template == null) {
         return TemplateGenerationResult.failure(
-          'Template "$templateName"${version != null
-              ? "@$version"
-              : ""} not found',
+          'Template "$templateName"${version != null ? "@$version" : ""} not found',
         );
       }
 
@@ -507,18 +514,20 @@ class TemplateManager {
   }
 
   /// Convert BrickInfo to TemplateInfo
-  /// 
+  ///
   /// Creates TemplateInfo from BrickInfo for result types.
   TemplateInfo _brickToTemplateInfo(BrickInfo brick) {
     // Convert BrickVariable to TemplateVariable
-    final templateVariables = brick.variables.values.map((brickVar) => TemplateVariable(
-        name: brickVar.name,
-        type: brickVar.type,
-        required: brickVar.required,
-        defaultValue: brickVar.defaultValue,
-        choices: brickVar.choices,
-        description: brickVar.description,
-      )).toList();
+    final templateVariables = brick.variables.values
+        .map((brickVar) => TemplateVariable(
+              name: brickVar.name,
+              type: brickVar.type,
+              required: brickVar.required,
+              defaultValue: brickVar.defaultValue,
+              choices: brickVar.choices,
+              description: brickVar.description,
+            ))
+        .toList();
 
     return TemplateInfo(
       name: brick.name,
@@ -534,20 +543,20 @@ class TemplateManager {
   }
 
   /// Get all available templates
-  /// 
+  ///
   /// Discovers and loads all templates from the templates directory.
   /// Searches in projects/ and components/ subdirectories.
   /// Each template includes compatibility data if specified in template.yaml.
   Future<List<TemplateInfo>> getAvailableTemplates() async {
     final templates = <TemplateInfo>[];
-    
+
     try {
       final dir = Directory(templatesDirectory);
       if (!await dir.exists()) {
         logger.warn('Templates directory does not exist: $templatesDirectory');
         return templates;
       }
-      
+
       // Search in projects/ and components/ subdirectories
       final projectsDir = Directory(path.join(templatesDirectory, 'projects'));
       if (await projectsDir.exists()) {
@@ -560,8 +569,9 @@ class TemplateManager {
           }
         }
       }
-      
-      final componentsDir = Directory(path.join(templatesDirectory, 'components'));
+
+      final componentsDir =
+          Directory(path.join(templatesDirectory, 'components'));
       if (await componentsDir.exists()) {
         await for (final entity in componentsDir.list()) {
           if (entity is Directory) {
@@ -572,10 +582,11 @@ class TemplateManager {
           }
         }
       }
-      
+
       // Fallback: check flat structure (for test compatibility and backward compatibility)
       // Only check if no subdirectories were found or if subdirectories don't exist
-      if (templates.isEmpty || (!await projectsDir.exists() && !await componentsDir.exists())) {
+      if (templates.isEmpty ||
+          (!await projectsDir.exists() && !await componentsDir.exists())) {
         await for (final entity in dir.list()) {
           if (entity is Directory) {
             final entityName = path.basename(entity.path);
@@ -592,20 +603,20 @@ class TemplateManager {
     } catch (e) {
       logger.err('Error loading templates: $e');
     }
-    
+
     return templates;
   }
 
   /// Get template by name and optional version
-  /// 
+  ///
   /// If version is provided, attempts to load that specific version.
   /// Otherwise, loads the default/latest version.
   Future<TemplateInfo?> getTemplate(String name, {String? version}) async {
     try {
       // If version specified, use version registry
       if (version != null) {
-        final versionedTemplate = await _versionRegistryInstance
-            .getTemplateVersion(name, version);
+        final versionedTemplate =
+            await _versionRegistryInstance.getTemplateVersion(name, version);
         if (versionedTemplate != null) {
           return versionedTemplate;
         }
@@ -634,14 +645,15 @@ class TemplateManager {
 
       // Load from source - search in subdirectories, then flat structure
       TemplateInfo? template;
-      
+
       // Try projects subdirectory first
       final projectsPath = path.join(templatesDirectory, 'projects', name);
       if (await Directory(projectsPath).exists()) {
         template = await _loadTemplateInfo(projectsPath);
       } else {
         // Try components subdirectory
-        final componentsPath = path.join(templatesDirectory, 'components', name);
+        final componentsPath =
+            path.join(templatesDirectory, 'components', name);
         if (await Directory(componentsPath).exists()) {
           template = await _loadTemplateInfo(componentsPath);
         } else {
@@ -672,7 +684,7 @@ class TemplateManager {
   }
 
   /// Load TemplateInfo from cache
-  /// 
+  ///
   /// Deserializes TemplateInfo from cached JSON data.
   /// Compatibility data is automatically loaded if present.
   TemplateInfo _templateFromCache(CachedTemplate cachedTemplate) {
@@ -690,36 +702,36 @@ class TemplateManager {
           'Template "$templateName" not found',
         );
       }
-      
+
       // Validate brick structure
       final issues = <String>[];
-      
+
       // Check template metadata by reading the original YAML file
       // template.path points to __brick__ subdirectory, but template.yaml is in parent
       final brickPath = template.path;
       final templatePath = path.dirname(brickPath);
-      
+
       // Try template.yaml in the template directory (parent of __brick__)
       var templateYamlPath = path.join(templatePath, 'template.yaml');
       var templateYamlFile = File(templateYamlPath);
-      
+
       // If not found, try in brick path (for backward compatibility)
       if (!await templateYamlFile.exists()) {
         templateYamlPath = path.join(brickPath, 'template.yaml');
         templateYamlFile = File(templateYamlPath);
       }
-      
+
       if (await templateYamlFile.exists()) {
         try {
           final yamlContent = await templateYamlFile.readAsString();
           final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
-          
+
           // Check if description is missing or empty in original YAML
           final description = yaml['description'] as String?;
           if (description == null || description.trim().isEmpty) {
             issues.add('Missing template description');
           }
-          
+
           // Check if version is missing or empty in original YAML
           final version = yaml['version'] as String?;
           if (version == null || version.trim().isEmpty) {
@@ -734,7 +746,8 @@ class TemplateManager {
 
           // Check compatibility using template's compatibility data
           final checker = await _compatibilityCheckerInstance;
-          final compatibilityResult = checker.checkTemplateCompatibility(template);
+          final compatibilityResult =
+              checker.checkTemplateCompatibility(template);
 
           if (compatibilityResult.isIncompatible) {
             issues.addAll(compatibilityResult.errors);
@@ -750,7 +763,7 @@ class TemplateManager {
       } else {
         issues.add('template.yaml file not found');
       }
-      
+
       return TemplateValidationResult(
         isValid: issues.isEmpty,
         issues: issues,
@@ -762,29 +775,29 @@ class TemplateManager {
   }
 
   /// Load template information from directory with compatibility parsing
-  /// 
+  ///
   /// Parses template.yaml and creates TemplateInfo with optional compatibility data.
   /// The compatibility field is populated when compatibility section exists in YAML.
   /// Compatibility parsing is handled by TemplateInfo.fromYaml internally.
-  /// 
+  ///
   /// Returns null if template.yaml is missing or invalid.
   Future<TemplateInfo?> _loadTemplateInfo(String templatePath) async {
     try {
       // Check for template.yaml in the template directory
       final templateYamlPath = path.join(templatePath, 'template.yaml');
       final templateYamlFile = File(templateYamlPath);
-      
+
       if (!await templateYamlFile.exists()) {
         logger.warn('Missing template.yaml in $templatePath');
         return null;
       }
-      
+
       final yamlContent = await templateYamlFile.readAsString();
       final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
-      
+
       // Use the __brick__ subdirectory as the actual template path
       final brickPath = path.join(templatePath, '__brick__');
-      
+
       // TemplateInfo.fromYaml now handles compatibility parsing internally
       return TemplateInfo.fromYaml(yaml, brickPath);
     } catch (e) {
@@ -792,7 +805,7 @@ class TemplateManager {
       return null;
     }
   }
-  
+
   /// Run pre-generation hooks
   Future<void> _runPreGenerationHooks(
     TemplateInfo template,
@@ -800,7 +813,7 @@ class TemplateManager {
   ) async {
     final hooksDir = path.join(template.path, 'hooks');
     final preGenFile = File(path.join(hooksDir, 'pre_gen.dart'));
-    
+
     if (await preGenFile.exists()) {
       try {
         // Execute pre-generation hook
@@ -813,7 +826,7 @@ class TemplateManager {
       }
     }
   }
-  
+
   /// Run post-generation hooks
   Future<void> _runPostGenerationHooks(
     TemplateInfo template,
@@ -822,7 +835,7 @@ class TemplateManager {
   ) async {
     final hooksDir = path.join(template.path, 'hooks');
     final postGenFile = File(path.join(hooksDir, 'post_gen.dart'));
-    
+
     if (await postGenFile.exists()) {
       try {
         // Execute post-generation hook
@@ -847,24 +860,24 @@ class TemplateManager {
     Map<String, dynamic> variables,
   ) async {
     final brickDir = Directory(brickPath);
-    
+
     if (!await brickDir.exists()) {
       throw Exception('Brick directory does not exist: $brickPath');
     }
-    
+
     // Create target directory
     await Directory(targetDirectory).create(recursive: true);
-    
+
     // Copy files recursively
     await for (final entity in brickDir.list(recursive: true)) {
       if (entity is File) {
         final relativePath = path.relative(entity.path, from: brickPath);
         final targetPath = path.join(targetDirectory, relativePath);
-        
+
         // Process template variables in file content
         final content = await entity.readAsString();
         final processedContent = _processTemplate(content, variables);
-        
+
         // Create target file
         final targetFile = File(targetPath);
         await targetFile.parent.create(recursive: true);
@@ -876,17 +889,18 @@ class TemplateManager {
   /// Process template variables in content
   String _processTemplate(String content, Map<String, dynamic> variables) {
     var result = content;
-    
+
     for (final entry in variables.entries) {
       final placeholder = '{{${entry.key}}}';
       // Handle list variables
       if (entry.value is List) {
-        result = result.replaceAll(placeholder, (entry.value as List).join(', '));
+        result =
+            result.replaceAll(placeholder, (entry.value as List).join(', '));
       } else {
         result = result.replaceAll(placeholder, entry.value.toString());
       }
     }
-    
+
     return result;
   }
 
@@ -901,7 +915,7 @@ class TemplateManager {
   }
 
   /// Check template compatibility using full compatibility data
-  /// 
+  ///
   /// Uses TemplateInfo.compatibility for full checks (CLI, SDK, deprecation, EOL).
   /// If compatibility data is not available, returns compatible (no constraints).
   Future<CompatibilityResult> checkTemplateCompatibility(
@@ -923,8 +937,6 @@ class TemplateManager {
   }
 }
 
-
-
 /// Template variables container
 class TemplateVariables {
   const TemplateVariables({
@@ -936,50 +948,55 @@ class TemplateVariables {
   });
 
   /// Create TemplateVariables from JSON
-  factory TemplateVariables.fromJson(Map<String, dynamic> json) => TemplateVariables(
-      projectName: json['projectName'] as String? ?? json['project_name'] as String? ?? '',
-      organization: json['organization'] as String? ?? '',
-      platforms: (json['platforms'] as List?)?.cast<String>() ?? const [],
-      description: json['description'] as String? ?? '',
-      features: (json['features'] as List?)?.cast<String>() ?? const [],
-    );
-  
+  factory TemplateVariables.fromJson(Map<String, dynamic> json) =>
+      TemplateVariables(
+        projectName: json['projectName'] as String? ??
+            json['project_name'] as String? ??
+            '',
+        organization: json['organization'] as String? ?? '',
+        platforms: (json['platforms'] as List?)?.cast<String>() ?? const [],
+        description: json['description'] as String? ?? '',
+        features: (json['features'] as List?)?.cast<String>() ?? const [],
+      );
+
   final String projectName;
   final String organization;
   final List<String> platforms;
   final String description;
   final List<String> features;
-  
+
   Map<String, dynamic> toMasonVars() => {
-      'project_name': projectName,
-      'organization': organization,
-      'platforms': platforms,
-      'description': description,
-      'features': features,
-      'project_name_snake': projectName.toLowerCase().replaceAll(' ', '_'),
-      'project_name_camel': _toCamelCase(projectName),
-      'project_name_pascal': _toPascalCase(projectName),
-    };
-  
+        'project_name': projectName,
+        'organization': organization,
+        'platforms': platforms,
+        'description': description,
+        'features': features,
+        'project_name_snake': projectName.toLowerCase().replaceAll(' ', '_'),
+        'project_name_camel': _toCamelCase(projectName),
+        'project_name_pascal': _toPascalCase(projectName),
+      };
+
   String _toCamelCase(String input) {
     // Convert to camelCase: "My App" -> "myApp", "test_mason" -> "testMason"
-    final words = input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
+    final words =
+        input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
     if (words.isEmpty) return input.toLowerCase();
-    
+
     final firstWord = words.first.toLowerCase();
     final otherWords = words.skip(1).map((word) {
       if (word.isEmpty) return word;
       return word[0].toUpperCase() + word.substring(1).toLowerCase();
     });
-    
+
     return '$firstWord${otherWords.join()}';
   }
-  
+
   String _toPascalCase(String input) {
     // Convert to PascalCase: "My App" -> "MyApp", "test_mason" -> "TestMason"
-    final words = input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
+    final words =
+        input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
     if (words.isEmpty) return input;
-    
+
     return words.map((word) {
       if (word.isEmpty) return word;
       return word[0].toUpperCase() + word.substring(1).toLowerCase();
@@ -990,16 +1007,17 @@ class TemplateVariables {
 /// Template generation result
 sealed class TemplateGenerationResult {
   const TemplateGenerationResult();
-  
+
   const factory TemplateGenerationResult.success({
     required TemplateInfo template,
     required String targetDirectory,
     required int filesGenerated,
     required Duration duration,
   }) = TemplateGenerationSuccess;
-  
-  const factory TemplateGenerationResult.failure(String error) = TemplateGenerationFailure;
-  
+
+  const factory TemplateGenerationResult.failure(String error) =
+      TemplateGenerationFailure;
+
   const factory TemplateGenerationResult.dryRun({
     required TemplateInfo template,
     required String targetDirectory,
@@ -1031,13 +1049,15 @@ class TemplateGenerationSuccess extends TemplateGenerationResult {
   });
 
   /// Create TemplateGenerationSuccess from JSON
-  factory TemplateGenerationSuccess.fromJson(Map<String, dynamic> json) => TemplateGenerationSuccess(
-      template: TemplateInfo.fromJson(json['template'] as Map<String, dynamic>),
-      targetDirectory: json['targetDirectory'] as String,
-      filesGenerated: json['filesGenerated'] as int,
-      duration: Duration(milliseconds: json['duration'] as int),
-    );
-  
+  factory TemplateGenerationSuccess.fromJson(Map<String, dynamic> json) =>
+      TemplateGenerationSuccess(
+        template:
+            TemplateInfo.fromJson(json['template'] as Map<String, dynamic>),
+        targetDirectory: json['targetDirectory'] as String,
+        filesGenerated: json['filesGenerated'] as int,
+        duration: Duration(milliseconds: json['duration'] as int),
+      );
+
   final TemplateInfo template;
   final String targetDirectory;
   final int filesGenerated;
@@ -1048,8 +1068,9 @@ class TemplateGenerationFailure extends TemplateGenerationResult {
   const TemplateGenerationFailure(this.error);
 
   /// Create TemplateGenerationFailure from JSON
-  factory TemplateGenerationFailure.fromJson(Map<String, dynamic> json) => TemplateGenerationFailure(json['error'] as String);
-  
+  factory TemplateGenerationFailure.fromJson(Map<String, dynamic> json) =>
+      TemplateGenerationFailure(json['error'] as String);
+
   final String error;
 }
 
@@ -1061,12 +1082,15 @@ class TemplateGenerationDryRun extends TemplateGenerationResult {
   });
 
   /// Create TemplateGenerationDryRun from JSON
-  factory TemplateGenerationDryRun.fromJson(Map<String, dynamic> json) => TemplateGenerationDryRun(
-      template: TemplateInfo.fromJson(json['template'] as Map<String, dynamic>),
-      targetDirectory: json['targetDirectory'] as String,
-      variables: TemplateVariables.fromJson(json['variables'] as Map<String, dynamic>),
-    );
-  
+  factory TemplateGenerationDryRun.fromJson(Map<String, dynamic> json) =>
+      TemplateGenerationDryRun(
+        template:
+            TemplateInfo.fromJson(json['template'] as Map<String, dynamic>),
+        targetDirectory: json['targetDirectory'] as String,
+        variables: TemplateVariables.fromJson(
+            json['variables'] as Map<String, dynamic>),
+      );
+
   final TemplateInfo template;
   final String targetDirectory;
   final TemplateVariables variables;
@@ -1080,11 +1104,12 @@ class TemplateValidationResult {
     this.template,
   });
 
-  factory TemplateValidationResult.failure(String error) => TemplateValidationResult(
-      isValid: false,
-      issues: [error],
-    );
-  
+  factory TemplateValidationResult.failure(String error) =>
+      TemplateValidationResult(
+        isValid: false,
+        issues: [error],
+      );
+
   final bool isValid;
   final List<String> issues;
   final TemplateInfo? template;
@@ -1093,7 +1118,7 @@ class TemplateValidationResult {
 /// Generated file model
 class GeneratedFile {
   const GeneratedFile(this.path, {this.content});
-  
+
   final String path;
   final String? content;
 }

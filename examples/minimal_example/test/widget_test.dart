@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:minimal_example/main.dart';
 
 void main() {
@@ -10,7 +9,8 @@ void main() {
 
     // Verify that our welcome message is displayed.
     expect(find.text('Welcome to Minimal Example!'), findsOneWidget);
-    expect(find.text('This is a minimal Flutter project created with Fly CLI.'), findsOneWidget);
+    expect(find.text('This is a minimal Flutter project created with Fly CLI.'),
+        findsOneWidget);
 
     // Verify that the counter starts at 0.
     expect(find.text('0'), findsOneWidget);
@@ -25,7 +25,7 @@ void main() {
 
   testWidgets('App title is correct', (tester) async {
     await tester.pumpWidget(const MinimalExampleApp());
-    
+
     expect(find.text('Minimal Example'), findsOneWidget);
   });
 

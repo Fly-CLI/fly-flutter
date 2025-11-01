@@ -5,6 +5,7 @@ A dedicated Flutter project for testing Fly CLI capabilities through natural usa
 ## Purpose
 
 This project serves as a test bed for:
+
 - **Developers** to validate their CLI changes
 - **AI Assistants** (Cursor, Claude Desktop, etc.) to test CLI features via MCP protocol
 - **Natural usage scenario testing** of all CLI capabilities
@@ -29,6 +30,7 @@ This project serves as a test bed for:
 This project is designed to test:
 
 ### Project Structure
+
 - Feature-based architecture
 - Core utilities (router, theme)
 - Service layer structure

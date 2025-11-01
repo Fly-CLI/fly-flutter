@@ -27,7 +27,8 @@ class ZshCompletionGenerator extends CompletionGenerator {
       final desc =
           option.description.replaceAll('[', r'\[').replaceAll(']', r'\]');
       buffer.writeln(
-          "        '--${option.name}${option.short != null ? "(-${option.short})" : ""}[$desc]' \\",);
+        "        '--${option.name}${option.short != null ? "(-${option.short})" : ""}[$desc]' \\",
+      );
     }
 
     buffer
@@ -85,7 +86,10 @@ class ZshCompletionGenerator extends CompletionGenerator {
   }
 
   void generateCommandFunction(
-      StringBuffer buffer, String commandName, CommandDefinition command,) {
+    StringBuffer buffer,
+    String commandName,
+    CommandDefinition command,
+  ) {
     buffer
       ..writeln('_fly_$commandName() {')
       ..writeln(r'    _arguments \');

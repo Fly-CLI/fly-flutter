@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_strategy.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_strategy.dart';
+import 'package:fly_cli/src/core/definitions/categories.dart';
 import 'package:fly_cli/src/features/schema/schema_command.dart';
 
 /// Strategy for schema command
@@ -14,9 +14,6 @@ class SchemaCommandStrategy extends FlyCommandStrategy {
 
   @override
   List<String> get aliases => ['spec', 'export', 'api'];
-
-  @override
-  FlyCommandType? get parentCommand => null;
 
   @override
   CommandGroup? get group => const CommandGroup(
@@ -32,4 +29,3 @@ class SchemaCommandStrategy extends FlyCommandStrategy {
     return SchemaCommand.create(context);
   }
 }
-

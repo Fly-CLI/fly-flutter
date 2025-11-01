@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/models.dart';
 import 'package:fly_cli/src/features/context/analyzers/unified_analyzers.dart';
+import 'package:fly_cli/src/features/context/models.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -25,7 +25,8 @@ void main() {
 
     group('Project Analysis', () {
       test('should analyze minimal Flutter project', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
 
         final projectInfo = await analyzer.analyze(projectDir, config);
 
@@ -39,7 +40,8 @@ void main() {
       });
 
       test('should analyze complex Flutter project', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final projectInfo = await analyzer.analyze(projectDir, config);
 
@@ -78,7 +80,7 @@ void main() {
       test('should handle malformed pubspec.yaml', () async {
         final projectDir = Directory(path.join(tempDir.path, 'malformed'));
         projectDir.createSync();
-        
+
         final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
         pubspecFile.writeAsStringSync('invalid yaml content: [unclosed');
 
@@ -92,7 +94,8 @@ void main() {
 
     group('Performance', () {
       test('should complete analysis within reasonable time', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final stopwatch = Stopwatch()..start();
         final projectInfo = await analyzer.analyze(projectDir, config);
@@ -103,7 +106,8 @@ void main() {
       });
 
       test('should handle large projects efficiently', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         final stopwatch = Stopwatch()..start();
         final projectInfo = await analyzer.analyze(projectDir, config);
@@ -116,14 +120,16 @@ void main() {
 
     group('Integration', () {
       test('should work with different configurations', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
         // Test with different config options
         final configWithArchitecture = const ContextGeneratorConfig(
           includeArchitecture: true,
         );
 
-        final projectInfo = await analyzer.analyze(projectDir, configWithArchitecture);
+        final projectInfo =
+            await analyzer.analyze(projectDir, configWithArchitecture);
 
         expect(projectInfo.name, equals('complex_test'));
         expect(projectInfo.type, equals('flutter'));
@@ -131,7 +137,8 @@ void main() {
       });
 
       test('should handle repeated analysis', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
 
         // Run analysis multiple times
         for (int i = 0; i < 3; i++) {
@@ -155,7 +162,7 @@ void main() {
       test('should handle permission denied', () async {
         final projectDir = Directory(path.join(tempDir.path, 'restricted'));
         projectDir.createSync();
-        
+
         // Test with restricted directory
         final projectInfo = await analyzer.analyze(projectDir, config);
         expect(projectInfo.name, equals('unknown'));

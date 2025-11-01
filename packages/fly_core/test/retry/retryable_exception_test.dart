@@ -19,45 +19,67 @@ void main() {
     });
 
     test('identifies connection errors as retryable', () {
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('Connection refused'),
-      ), true);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('Connection reset'),
-      ), true);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('Connection timed out'),
-      ), true);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('Network is unreachable'),
-      ), true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('Connection refused'),
+          ),
+          true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('Connection reset'),
+          ),
+          true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('Connection timed out'),
+          ),
+          true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('Network is unreachable'),
+          ),
+          true);
     });
 
     test('identifies HTTP 5xx errors as retryable', () {
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('504 Gateway Timeout'),
-      ), true);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('503 Service Unavailable'),
-      ), true);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('502 Bad Gateway'),
-      ), true);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('429 Too Many Requests'),
-      ), true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('504 Gateway Timeout'),
+          ),
+          true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('503 Service Unavailable'),
+          ),
+          true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('502 Bad Gateway'),
+          ),
+          true);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('429 Too Many Requests'),
+          ),
+          true);
     });
 
     test('identifies non-retryable exceptions', () {
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('Invalid input'),
-      ), false);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('File not found'),
-      ), false);
-      expect(RetryableExceptionChecker.isRetryable(
-        Exception('Permission denied'),
-      ), false);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('Invalid input'),
+          ),
+          false);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('File not found'),
+          ),
+          false);
+      expect(
+          RetryableExceptionChecker.isRetryable(
+            Exception('Permission denied'),
+          ),
+          false);
     });
 
     test('provides retry reasons for common errors', () {
@@ -67,21 +89,21 @@ void main() {
         ),
         'Operation timed out',
       );
-      
+
       expect(
         RetryableExceptionChecker.getRetryReason(
           Exception('Connection error'),
         ),
         'Network connection issue',
       );
-      
+
       expect(
         RetryableExceptionChecker.getRetryReason(
           Exception('503 error'),
         ),
         'Server temporarily unavailable',
       );
-      
+
       expect(
         RetryableExceptionChecker.getRetryReason(
           Exception('429 rate limit'),
@@ -105,4 +127,3 @@ void main() {
     });
   });
 }
-

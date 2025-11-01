@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
+
 import '../helpers/test_temp_dir.dart';
 
 void main() {
@@ -34,11 +36,14 @@ void main() {
         );
 
         expect(result.exitCode, anyOf(equals(0), equals(1)));
-        expect(result.stdout, anyOf(
-          contains('✅'),
-          contains('❌'),
-          contains('🔧'),
-        ));
+        expect(
+          result.stdout,
+          anyOf(
+            contains('✅'),
+            contains('❌'),
+            contains('🔧'),
+          ),
+        );
         expect(result.stdout, isNot(contains('{')));
       });
 
@@ -88,7 +93,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('success', true));
@@ -96,7 +101,7 @@ void main() {
         expect(jsonOutput.keys, contains('message'));
         expect(jsonOutput.keys, contains('data'));
         expect(jsonOutput.keys, contains('metadata'));
-        
+
         // ignore: argument_type_not_assignable
         final metadata = jsonOutput['metadata'] as Map<String, dynamic>;
         expect(metadata.keys, contains('cli_version'));
@@ -111,7 +116,7 @@ void main() {
         );
 
         expect(result.exitCode, anyOf(equals(0), equals(1)));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput.keys, contains('success'));
@@ -119,7 +124,7 @@ void main() {
         expect(jsonOutput.keys, contains('message'));
         expect(jsonOutput.keys, contains('data'));
         expect(jsonOutput.keys, contains('metadata'));
-        
+
         if (jsonOutput['success'] == true) {
           // ignore: argument_type_not_assignable
           final data = jsonOutput['data'] as Map<String, dynamic>;
@@ -142,7 +147,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('success', true));
@@ -150,7 +155,7 @@ void main() {
         expect(jsonOutput.keys, contains('message'));
         expect(jsonOutput.keys, contains('data'));
         expect(jsonOutput.keys, contains('metadata'));
-        
+
         // ignore: argument_type_not_assignable
         final data = jsonOutput['data'] as Map<String, dynamic>;
         expect(data.keys, contains('export_config'));
@@ -165,7 +170,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('success', true));
@@ -173,7 +178,7 @@ void main() {
         expect(jsonOutput.keys, contains('message'));
         expect(jsonOutput.keys, contains('data'));
         expect(jsonOutput.keys, contains('metadata'));
-        
+
         final data = jsonOutput['data'] as Map<String, dynamic>?;
         expect(data, isNotNull);
         expect(data!.keys, contains('schema'));
@@ -189,7 +194,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('success', true));
@@ -197,7 +202,7 @@ void main() {
         expect(jsonOutput.keys, contains('message'));
         expect(jsonOutput.keys, contains('data'));
         expect(jsonOutput.keys, contains('metadata'));
-        
+
         final data = jsonOutput['data'] as Map<String, dynamic>?;
         expect(data, isNotNull);
         expect(data!.keys, contains('script'));
@@ -216,7 +221,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('status', 'success'));
@@ -224,7 +229,7 @@ void main() {
         expect(jsonOutput.keys, contains('summary'));
         expect(jsonOutput.keys, contains('details'));
         expect(jsonOutput.keys, contains('context'));
-        
+
         // ignore: argument_type_not_assignable
         final context = jsonOutput['context'] as Map<String, dynamic>;
         expect(context, containsPair('tool', 'fly_cli'));
@@ -241,7 +246,7 @@ void main() {
         );
 
         expect(result.exitCode, anyOf(equals(0), equals(1)));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput.keys, contains('status'));
@@ -249,12 +254,12 @@ void main() {
         expect(jsonOutput.keys, contains('summary'));
         expect(jsonOutput.keys, contains('details'));
         expect(jsonOutput.keys, contains('context'));
-        
+
         // ignore: argument_type_not_assignable
         final context = jsonOutput['context'] as Map<String, dynamic>;
         expect(context, containsPair('tool', 'fly_cli'));
         expect(context, containsPair('format', 'ai_optimized'));
-        
+
         if (jsonOutput['status'] == 'error') {
           expect(jsonOutput.keys, contains('recommendation'));
         }
@@ -268,7 +273,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('status', 'success'));
@@ -276,7 +281,7 @@ void main() {
         expect(jsonOutput.keys, contains('summary'));
         expect(jsonOutput.keys, contains('details'));
         expect(jsonOutput.keys, contains('context'));
-        
+
         // ignore: argument_type_not_assignable
         final context = jsonOutput['context'] as Map<String, dynamic>;
         expect(context, containsPair('tool', 'fly_cli'));
@@ -291,7 +296,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('status', 'success'));
@@ -299,7 +304,7 @@ void main() {
         expect(jsonOutput.keys, contains('summary'));
         expect(jsonOutput.keys, contains('details'));
         expect(jsonOutput.keys, contains('context'));
-        
+
         // ignore: argument_type_not_assignable
         final context = jsonOutput['context'] as Map<String, dynamic>;
         expect(context, containsPair('tool', 'fly_cli'));
@@ -314,7 +319,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('status', 'success'));
@@ -322,7 +327,7 @@ void main() {
         expect(jsonOutput.keys, contains('summary'));
         expect(jsonOutput.keys, contains('details'));
         expect(jsonOutput.keys, contains('context'));
-        
+
         // ignore: argument_type_not_assignable
         final context = jsonOutput['context'] as Map<String, dynamic>;
         expect(context, containsPair('tool', 'fly_cli'));
@@ -339,7 +344,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(1));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('success', false));
@@ -357,7 +362,7 @@ void main() {
         );
 
         expect(result.exitCode, equals(1));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput, containsPair('status', 'error'));
@@ -365,7 +370,7 @@ void main() {
         expect(jsonOutput.keys, contains('summary'));
         expect(jsonOutput.keys, contains('recommendation'));
         expect(jsonOutput.keys, contains('context'));
-        
+
         // ignore: argument_type_not_assignable
         final context = jsonOutput['context'] as Map<String, dynamic>;
         expect(context, containsPair('tool', 'fly_cli'));
@@ -382,11 +387,11 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput.keys, contains('next_steps'));
-        
+
         final nextSteps = jsonOutput['next_steps'] as List<dynamic>?;
         if (nextSteps != null) {
           for (final step in nextSteps) {
@@ -405,11 +410,11 @@ void main() {
         );
 
         expect(result.exitCode, equals(0));
-        
+
         // ignore: argument_type_not_assignable
         final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
         expect(jsonOutput.keys, contains('actions'));
-        
+
         final actions = jsonOutput['actions'] as List<dynamic>?;
         if (actions != null) {
           for (final action in actions) {
@@ -430,9 +435,9 @@ void main() {
           'doctor',
           'context',
           'schema',
-          'completion'
+          'completion',
         ];
-        
+
         for (final command in commands) {
           final result = await Process.run(
             'dart',
@@ -441,11 +446,11 @@ void main() {
           );
 
           expect(result.exitCode, anyOf(equals(0), equals(1)));
-          
+
           // ignore: argument_type_not_assignable
-        final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
+          final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
           expect(jsonOutput.keys, contains('metadata'));
-          
+
           // ignore: argument_type_not_assignable
           final metadata = jsonOutput['metadata'] as Map<String, dynamic>;
           expect(metadata.keys, contains('cli_version'));
@@ -461,9 +466,9 @@ void main() {
           'doctor',
           'context',
           'schema',
-          'completion'
+          'completion',
         ];
-        
+
         for (final command in commands) {
           final result = await Process.run(
             'dart',
@@ -472,15 +477,15 @@ void main() {
           );
 
           expect(result.exitCode, anyOf(equals(0), equals(1)));
-          
+
           // ignore: argument_type_not_assignable
-        final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
+          final jsonOutput = json.decode(result.stdout) as Map<String, dynamic>;
           expect(jsonOutput.keys, contains('context'));
-          
-        // ignore: argument_type_not_assignable
-        final context = jsonOutput['context'] as Map<String, dynamic>;
-        expect(context, containsPair('tool', 'fly_cli'));
-        expect(context, containsPair('format', 'ai_optimized'));
+
+          // ignore: argument_type_not_assignable
+          final context = jsonOutput['context'] as Map<String, dynamic>;
+          expect(context, containsPair('tool', 'fly_cli'));
+          expect(context, containsPair('format', 'ai_optimized'));
           expect(context.keys, contains('version'));
           expect(context.keys, contains('timestamp'));
         }

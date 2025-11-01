@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:riverpod_example/features/profile/providers/profile_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -11,7 +10,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final themeMode = ref.watch(themeModeProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -31,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            
+
             // User Info Card
             Card(
               child: Padding(
@@ -71,9 +70,9 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Settings Card
             Card(
               child: Padding(
@@ -91,21 +90,23 @@ class ProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 16),
                     SwitchListTile(
                       title: const Text('Dark Mode'),
-                      subtitle: const Text('Toggle between light and dark theme'),
+                      subtitle:
+                          const Text('Toggle between light and dark theme'),
                       value: themeMode == ThemeMode.dark,
                       onChanged: (value) {
                         ref.read(themeModeProvider.notifier).setThemeMode(
-                            value ? ThemeMode.dark : ThemeMode.light,
-                        );
+                              value ? ThemeMode.dark : ThemeMode.light,
+                            );
                       },
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => ref.read(userProvider.notifier).updateUser(
-                        'John Doe Updated',
-                        'john.updated@example.com',
-                        28,
-                      ),
+                      onPressed: () =>
+                          ref.read(userProvider.notifier).updateUser(
+                                'John Doe Updated',
+                                'john.updated@example.com',
+                                28,
+                              ),
                       child: const Text('Update User Info'),
                     ),
                   ],

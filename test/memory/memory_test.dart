@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
 import '../helpers/cli_test_helper.dart';
 
 void main() {
@@ -17,8 +18,9 @@ void main() {
 
     setUp(() {
       final testRunId = DateTime.now().millisecondsSinceEpoch;
-      tempDir = Directory('${Directory.current.path}/test_generated/memory_$testRunId')
-        ..createSync(recursive: true);
+      tempDir = Directory(
+        '${Directory.current.path}/test_generated/memory_$testRunId',
+      )..createSync(recursive: true);
       cli = CliTestHelper(tempDir);
     });
 
@@ -31,12 +33,12 @@ void main() {
     group('Project Creation Memory Tests', () {
       test('multiple project creation does not leak memory', () async {
         final projectNames = List.generate(20, (index) => 'memory_test_$index');
-        
+
         for (final projectName in projectNames) {
           final result = await cli.createProject(projectName);
 
           expect(result.exitCode, 0);
-          
+
           // Verify project was created
           final projectPath = path.join(tempDir.path, projectName);
           expect(Directory(projectPath).existsSync(), true);
@@ -51,11 +53,14 @@ void main() {
 
       test('large project creation does not leak memory', () async {
         const projectName = 'large_memory_test';
-        
-        final result = await cli.createProject(projectName, template: 'riverpod');
+
+        final result = await cli.createProject(
+          projectName,
+          template: 'riverpod',
+        );
 
         expect(result.exitCode, 0);
-        
+
         // Verify project was created
         final projectPath = path.join(tempDir.path, projectName);
         expect(Directory(projectPath).existsSync(), true);
@@ -63,23 +68,23 @@ void main() {
 
       test('concurrent project creation does not leak memory', () async {
         final projectNames = List.generate(
-          5, 
+          5,
           (index) => 'concurrent_memory_test_$index',
         );
         final futures = <Future<ProcessResult>>[];
-        
+
         for (final projectName in projectNames) {
           futures.add(cli.createProject(projectName));
         }
-        
+
         final results = await Future.wait(futures);
-        
+
         // Verify all projects were created successfully
         for (var i = 0; i < results.length; i++) {
           expect(results[i].exitCode, 0);
-          
+
           final projectPath = path.join(
-            tempDir.path, 
+            tempDir.path,
             'concurrent_memory_test_$i',
           );
           expect(Directory(projectPath).existsSync(), true);
@@ -96,19 +101,19 @@ void main() {
             ..writeAsStringSync('Test content $i');
           files.add(file);
         }
-        
+
         // Verify files were created
         for (final file in files) {
           expect(file.existsSync(), true);
         }
-        
+
         // Delete all files
         for (final file in files) {
           if (file.existsSync()) {
             file.deleteSync();
           }
         }
-        
+
         // Verify files were deleted
         for (final file in files) {
           expect(file.existsSync(), false);
@@ -123,19 +128,19 @@ void main() {
             ..createSync();
           directories.add(dir);
         }
-        
+
         // Verify directories were created
         for (final dir in directories) {
           expect(dir.existsSync(), true);
         }
-        
+
         // Delete all directories
         for (final dir in directories) {
           if (dir.existsSync()) {
             dir.deleteSync(recursive: true);
           }
         }
-        
+
         // Verify directories were deleted
         for (final dir in directories) {
           expect(dir.existsSync(), false);
@@ -160,7 +165,7 @@ void main() {
           ['doctor'],
           ['schema', 'export'],
         ];
-        
+
         // Execute each command multiple times
         for (var i = 0; i < 50; i++) {
           for (final command in commands) {
@@ -175,14 +180,14 @@ void main() {
       test('stream operations do not leak memory', () async {
         final directory = Directory(tempDir.path);
         final files = <File>[];
-        
+
         // Create files
         for (var i = 0; i < 100; i++) {
           final file = File(path.join(tempDir.path, 'stream_file_$i.txt'))
             ..writeAsStringSync('Stream test content $i');
           files.add(file);
         }
-        
+
         // Use stream to read files
         await for (final entity in directory.list()) {
           if (entity is File) {
@@ -190,7 +195,7 @@ void main() {
             expect(content, isNotEmpty);
           }
         }
-        
+
         // Clean up
         for (final file in files) {
           if (file.existsSync()) {
@@ -201,15 +206,15 @@ void main() {
 
       test('async operations do not leak memory', () async {
         final futures = <Future<String>>[];
-        
+
         // Create many async operations
         for (var i = 0; i < 1000; i++) {
           futures.add(Future.delayed(Duration.zero, () => 'Async result $i'));
         }
-        
+
         // Wait for all operations to complete
         final results = await Future.wait(futures);
-        
+
         // Verify results
         expect(results.length, 1000);
         for (var i = 0; i < results.length; i++) {
@@ -222,11 +227,11 @@ void main() {
       test('JSON parsing does not leak memory', () async {
         // Create a project to test JSON operations
         const projectName = 'json_memory_test';
-        
+
         final result = await cli.createProject(projectName);
 
         expect(result.exitCode, 0);
-        
+
         // Verify project was created
         final projectPath = path.join(tempDir.path, projectName);
         expect(Directory(projectPath).existsSync(), true);
@@ -243,7 +248,7 @@ void main() {
             },
           },
         };
-        
+
         // Encode JSON multiple times
         for (var i = 0; i < 1000; i++) {
           final encoded = json.encode(testData);
@@ -255,20 +260,20 @@ void main() {
     group('Path Operations Memory Tests', () {
       test('path operations do not leak memory', () async {
         final paths = <String>[];
-        
+
         // Generate many paths
         for (var i = 0; i < 10000; i++) {
           final testPath = 'test/path/to/file_$i.txt';
           paths.add(testPath);
         }
-        
+
         // Perform path operations
         for (final testPath in paths) {
           final normalized = path.normalize(testPath);
           final basename = path.basename(testPath);
           final dirname = path.dirname(testPath);
           final joined = path.join('test', 'path', 'to', 'file.txt');
-          
+
           expect(normalized, isNotEmpty);
           expect(basename, isNotEmpty);
           expect(dirname, isNotEmpty);
@@ -280,26 +285,26 @@ void main() {
     group('Resource Cleanup Tests', () {
       test('temporary files are cleaned up', () async {
         final tempFiles = <File>[];
-        
+
         // Create temporary files
         for (var i = 0; i < 100; i++) {
           final file = File(path.join(tempDir.path, 'temp_file_$i.txt'))
             ..writeAsStringSync('Temporary content $i');
           tempFiles.add(file);
         }
-        
+
         // Verify files exist
         for (final file in tempFiles) {
           expect(file.existsSync(), true);
         }
-        
+
         // Clean up files
         for (final file in tempFiles) {
           if (file.existsSync()) {
             file.deleteSync();
           }
         }
-        
+
         // Verify files are deleted
         for (final file in tempFiles) {
           expect(file.existsSync(), false);
@@ -308,26 +313,26 @@ void main() {
 
       test('temporary directories are cleaned up', () async {
         final tempDirs = <Directory>[];
-        
+
         // Create temporary directories
         for (var i = 0; i < 50; i++) {
           final dir = Directory(path.join(tempDir.path, 'temp_dir_$i'))
             ..createSync();
           tempDirs.add(dir);
         }
-        
+
         // Verify directories exist
         for (final dir in tempDirs) {
           expect(dir.existsSync(), true);
         }
-        
+
         // Clean up directories
         for (final dir in tempDirs) {
           if (dir.existsSync()) {
             dir.deleteSync(recursive: true);
           }
         }
-        
+
         // Verify directories are deleted
         for (final dir in tempDirs) {
           expect(dir.existsSync(), false);
@@ -342,18 +347,18 @@ void main() {
           // Create projects
           for (var i = 0; i < 5; i++) {
             final projectName = 'long_run_test_${cycle}_$i';
-            
+
             final result = await cli.createProject(projectName);
 
             expect(result.exitCode, 0);
           }
-          
+
           // Execute commands
           final commands = [
             ['--version'],
             ['doctor'],
           ];
-          
+
           for (final command in commands) {
             final result = await cli.runCliCommand(command);
             expect(result.exitCode, 0);

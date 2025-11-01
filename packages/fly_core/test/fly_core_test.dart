@@ -29,15 +29,15 @@ void main() {
       expect(state.error, error);
     });
 
-          test('should create success state', () {
-        const data = 'test data';
-        const state = ViewState<String>.success(data);
-        expect(state.isIdle, false);
-        expect(state.isLoading, false);
-        expect(state.isError, false);
-        expect(state.isSuccess, true);
-        expect(state.data, data);
-      });
+    test('should create success state', () {
+      const data = 'test data';
+      const state = ViewState<String>.success(data);
+      expect(state.isIdle, false);
+      expect(state.isLoading, false);
+      expect(state.isError, false);
+      expect(state.isSuccess, true);
+      expect(state.data, data);
+    });
 
     test('should handle when method', () {
       const state = ViewState<String>.success('test');
@@ -226,7 +226,7 @@ void main() {
     test('should check if date is today', () {
       final today = DateTime.now();
       expect(today.isToday, true);
-      
+
       final yesterday = today.subtract(const Duration(days: 1));
       expect(yesterday.isToday, false);
     });

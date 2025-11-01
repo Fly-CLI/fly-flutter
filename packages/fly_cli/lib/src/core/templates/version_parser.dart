@@ -38,7 +38,7 @@ class VersionParser {
   }
 
   /// Parse TemplateCompatibility from YAML map
-  /// 
+  ///
   /// Parses compatibility section from template.yaml.
   /// Returns null if compatibility section is missing or invalid.
   static TemplateCompatibility? parseCompatibility(Map<dynamic, dynamic> yaml) {
@@ -62,13 +62,12 @@ class VersionParser {
     if (version == null || version.trim().isEmpty) {
       return null;
     }
-    
+
     // Validate format
     if (parseVersion(version) == null) {
       return null;
     }
-    
+
     return version.trim();
   }
 }
-

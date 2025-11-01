@@ -1,12 +1,13 @@
 import 'dart:io';
+
 import 'package:yaml/yaml.dart';
 
 void main(List<String> args) async {
   print('Checking license compatibility...');
-  
+
   final packages = await _getAllDependencies();
   final violations = <String, String>{};
-  
+
   for (final package in packages) {
     try {
       final license = await _getLicense(package);
@@ -17,7 +18,7 @@ void main(List<String> args) async {
       print('Warning: Could not check license for $package: $e');
     }
   }
-  
+
   if (violations.isNotEmpty) {
     print('❌ License violations found:');
     violations.forEach((pkg, license) {
@@ -25,7 +26,7 @@ void main(List<String> args) async {
     });
     exit(1);
   }
-  
+
   print('✅ All licenses compatible with MIT');
 }
 
@@ -34,10 +35,10 @@ Future<List<String>> _getAllDependencies() async {
   if (!await pubspec.exists()) {
     return [];
   }
-  
+
   final content = await pubspec.readAsString();
   final yaml = loadYaml(content);
-  
+
   final deps = <String>[];
   if (yaml['dependencies'] != null) {
     deps.addAll((yaml['dependencies'] as Map).keys.cast<String>());
@@ -45,7 +46,7 @@ Future<List<String>> _getAllDependencies() async {
   if (yaml['dev_dependencies'] != null) {
     deps.addAll((yaml['dev_dependencies'] as Map).keys.cast<String>());
   }
-  
+
   return deps;
 }
 

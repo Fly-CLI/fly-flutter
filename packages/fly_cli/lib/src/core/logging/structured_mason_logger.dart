@@ -19,7 +19,7 @@ import 'package:mason_logger/mason_logger.dart' as mason;
 ///   inherited untouched to retain mason UX semantics.
 class StructuredMasonLogger extends mason.Logger {
   StructuredMasonLogger(this._inner, this._structured)
-    : super(theme: _inner.theme, level: _inner.level);
+      : super(theme: _inner.theme, level: _inner.level);
 
   final mason.Logger _inner;
   final flylog.Logger _structured;

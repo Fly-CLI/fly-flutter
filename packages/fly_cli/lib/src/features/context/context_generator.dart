@@ -41,8 +41,7 @@ class ContextGenerator {
     final results = await retryExecutor.retryAll(
       analyzers
           .map(
-            (analyzer) =>
-                () => analyzer.analyze(projectDir, config),
+            (analyzer) => () => analyzer.analyze(projectDir, config),
           )
           .toList(),
     );
@@ -81,22 +80,22 @@ class ContextGenerator {
         projectDir,
         config,
       );
-      
+
       // Merge both sections, with AST analysis taking precedence for overlapping keys
       // Special handling for patterns: convert Map<String, List<String>> to List<String>
       final mergedCode = <String, dynamic>{
         ...codeSection,
       };
-      
+
       // Collect all patterns from both sections
       final allPatterns = <String>{};
-      
+
       // Get patterns from codeSection (always a List if present)
       final codePatterns = codeSection['patterns'];
       if (codePatterns is List) {
         allPatterns.addAll(codePatterns.cast<String>());
       }
-      
+
       // Get patterns from AST section (might be a Map or List)
       final astPatterns = astSection['patterns'];
       if (astPatterns is Map) {
@@ -110,17 +109,17 @@ class ContextGenerator {
       } else if (astPatterns is List) {
         allPatterns.addAll(astPatterns.cast<String>());
       }
-      
+
       // Merge all AST fields except patterns and error
       for (final entry in astSection.entries) {
         if (entry.key != 'patterns' && entry.key != 'error') {
           mergedCode[entry.key] = entry.value;
         }
       }
-      
+
       // Always set patterns as a List (empty if no patterns found)
       mergedCode['patterns'] = allPatterns.toList();
-      
+
       context['code'] = mergedCode;
     }
 
@@ -144,11 +143,12 @@ class ContextGenerator {
 
   /// Register all analyzers in the registry
   void _registerAnalyzers(AnalyzerRegistry registry) {
-    registry..register(UnifiedProjectAnalyzer())
-    ..register(UnifiedStructureAnalyzer())
-    ..register(UnifiedCodeAnalyzer())
-    ..register(UnifiedDependencyAnalyzer())
-    ..register(UnifiedArchitectureAnalyzer());
+    registry
+      ..register(UnifiedProjectAnalyzer())
+      ..register(UnifiedStructureAnalyzer())
+      ..register(UnifiedCodeAnalyzer())
+      ..register(UnifiedDependencyAnalyzer())
+      ..register(UnifiedArchitectureAnalyzer());
   }
 
   /// Build project metadata section
@@ -330,7 +330,7 @@ class ContextGenerator {
       // Prioritize state management and framework patterns over structural patterns
       final priorityPatterns = architecturePatterns.where((p) =>
           ['riverpod', 'bloc', 'provider', 'get', 'fly'].contains(p.name));
-      
+
       // Use priority pattern if available, otherwise use highest confidence
       final bestPattern = priorityPatterns.isNotEmpty
           ? priorityPatterns.reduce(
@@ -437,9 +437,8 @@ class ContextGenerator {
     if (codeInfo != null) {
       // Check for missing tests
       final testFiles = codeInfo.keyFiles.where((f) => f.type == 'test').length;
-      final screenFiles = codeInfo.keyFiles
-          .where((f) => f.type == 'screen')
-          .length;
+      final screenFiles =
+          codeInfo.keyFiles.where((f) => f.type == 'screen').length;
 
       if (screenFiles > 0 && testFiles == 0) {
         suggestions.add(
@@ -448,9 +447,8 @@ class ContextGenerator {
       }
 
       // Check for missing services
-      final serviceFiles = codeInfo.keyFiles
-          .where((f) => f.type == 'service')
-          .length;
+      final serviceFiles =
+          codeInfo.keyFiles.where((f) => f.type == 'service').length;
       if (screenFiles > 0 && serviceFiles == 0) {
         suggestions.add('Consider adding API services for data management');
       }
@@ -531,8 +529,7 @@ class ContextGenerator {
   Map<String, dynamic> _buildPerformanceSection() {
     return {
       'file_cache_stats': FileUtils.getCacheStats(),
-      'dependency_cache_stats':
-          DependencyHealthAnalyzer.getCacheStats(),
+      'dependency_cache_stats': DependencyHealthAnalyzer.getCacheStats(),
       'analysis_time': DateTime.now().toIso8601String(),
     };
   }

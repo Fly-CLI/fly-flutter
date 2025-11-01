@@ -7,6 +7,7 @@
 ## Day 1-2: Security Framework Implementation
 
 ### Completed
+
 - [x] SECURITY.md with responsible disclosure policy
 - [x] Dependabot configuration for daily dependency checks
 - [x] Security scanning workflow (Trivy + TruffleHog)
@@ -17,11 +18,13 @@
 - [x] All security tests passing
 
 ### Deferred to Phase 1
+
 - [ ] Template sandbox design and implementation
 
 ## Day 3: License Compliance & Audit
 
 ### Completed
+
 - [x] License compatibility matrix documentation (LICENSE_COMPATIBILITY.md)
 - [x] Automated license checker script (tools/license_checker.dart)
 - [x] NOTICE file with dependency attributions
@@ -29,6 +32,7 @@
 - [x] Initial pubspec.yaml for fly_cli with core dependencies
 
 ### Remaining
+
 - [ ] License audit of all planned dependencies (Mason, args, dio, riverpod, etc.)
 - [ ] Complete NOTICE file with all future dependencies
 - [ ] Contribution guidelines for dependency additions
@@ -36,12 +40,14 @@
 ## Day 4-5: Platform Testing Infrastructure
 
 ### Completed
+
 - [x] Multi-platform CI matrix (Windows, macOS, Linux)
 - [x] PlatformUtils class implementation
 - [x] Platform-specific test suite created
 - [x] CI workflow with test and analyze jobs
 
 ### Remaining
+
 - [ ] Additional test coverage for edge cases
 - [ ] File operations compatibility testing
 - [ ] Shell completion scripts (bash, zsh, PowerShell)
@@ -49,6 +55,7 @@
 ## Day 6-7: Offline Mode Architecture
 
 ### Completed
+
 - [x] TemplateCacheManager implementation
 - [x] Network resilience with retry logic
 - [x] Connectivity checker
@@ -59,6 +66,7 @@
 - [x] Platform integration tests
 
 ### Deferred to Phase 1
+
 - [ ] Bundled templates (minimal + riverpod) packaging
 - [ ] Cache management commands implementation
 

@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:yaml/yaml.dart';
 
 part 'brick_info.g.dart';
 

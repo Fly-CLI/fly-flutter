@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:mason_logger/mason_logger.dart';
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// Check network connectivity and accessibility of required services
 class NetworkCheck extends SystemCheck {
   NetworkCheck({this.logger});
-  
+
   final Logger? logger;
 
   @override
@@ -16,7 +16,8 @@ class NetworkCheck extends SystemCheck {
   String get category => 'Network';
 
   @override
-  String get description => 'Check internet connectivity and accessibility of required services';
+  String get description =>
+      'Check internet connectivity and accessibility of required services';
 
   @override
   Future<CheckResult> run() async {
@@ -84,9 +85,10 @@ class NetworkCheck extends SystemCheck {
   Future<CheckResult> _checkBasicConnectivity() async {
     try {
       // Try to connect to a reliable service
-      final socket = await Socket.connect('google.com', 80, timeout: const Duration(seconds: 10));
+      final socket = await Socket.connect('google.com', 80,
+          timeout: const Duration(seconds: 10));
       await socket.close();
-      
+
       return CheckResult.success(
         message: 'Basic internet connectivity is working',
         data: {'testHost': 'google.com', 'port': 80},
@@ -105,10 +107,11 @@ class NetworkCheck extends SystemCheck {
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 10);
-      
-      final request = await client.getUrl(Uri.parse('https://pub.dev/api/packages/flutter'));
+
+      final request = await client
+          .getUrl(Uri.parse('https://pub.dev/api/packages/flutter'));
       final response = await request.close();
-      
+
       if (response.statusCode == 200) {
         return CheckResult.success(
           message: 'pub.dev is accessible',
@@ -141,10 +144,10 @@ class NetworkCheck extends SystemCheck {
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 10);
-      
+
       final request = await client.getUrl(Uri.parse('https://api.github.com'));
       final response = await request.close();
-      
+
       if (response.statusCode == 200) {
         return CheckResult.success(
           message: 'GitHub is accessible',

@@ -2,7 +2,10 @@
 
 ## Overview
 
-Create a unified, comprehensive architecture and analysis plan that serves as the definitive guide for Fly CLI implementation. This plan will synthesize the existing technical architecture document and MVP Phase 1 plan, address all 20 identified critical gaps, and position the project for success with AI-native features as the primary market differentiator.
+Create a unified, comprehensive architecture and analysis plan that serves as the definitive guide
+for Fly CLI implementation. This plan will synthesize the existing technical architecture document
+and MVP Phase 1 plan, address all 20 identified critical gaps, and position the project for success
+with AI-native features as the primary market differentiator.
 
 ## Document Structure
 

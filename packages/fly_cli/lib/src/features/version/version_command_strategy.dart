@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_strategy.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_strategy.dart';
+import 'package:fly_cli/src/core/definitions/categories.dart';
 import 'package:fly_cli/src/features/version/version_command.dart';
 
 /// Strategy for version command
@@ -16,9 +16,6 @@ class VersionCommandStrategy extends FlyCommandStrategy {
   List<String> get aliases => ['--version', '-v', 'info'];
 
   @override
-  FlyCommandType? get parentCommand => null;
-
-  @override
   CommandGroup? get group => null;
 
   @override
@@ -29,4 +26,3 @@ class VersionCommandStrategy extends FlyCommandStrategy {
     return VersionCommand.create(context);
   }
 }
-

@@ -8,10 +8,10 @@ part 'command_definition.g.dart';
 /// Complete command specification with all metadata
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class CommandDefinition {
-
   /// Create CommandDefinition from JSON
   factory CommandDefinition.fromJson(Map<String, dynamic> json) =>
       _$CommandDefinitionFromJson(json);
+
   const CommandDefinition({
     required this.name,
     required this.description,
@@ -59,16 +59,17 @@ class CommandDefinition {
     List<CommandExample>? examples,
     List<OptionDefinition>? globalOptions,
     bool? isHidden,
-  }) => CommandDefinition(
-      name: name ?? this.name,
-      description: description ?? this.description,
-      arguments: arguments ?? this.arguments,
-      options: options ?? this.options,
-      subcommands: subcommands ?? this.subcommands,
-      examples: examples ?? this.examples,
-      globalOptions: globalOptions ?? this.globalOptions,
-      isHidden: isHidden ?? this.isHidden,
-    );
+  }) =>
+      CommandDefinition(
+        name: name ?? this.name,
+        description: description ?? this.description,
+        arguments: arguments ?? this.arguments,
+        options: options ?? this.options,
+        subcommands: subcommands ?? this.subcommands,
+        examples: examples ?? this.examples,
+        globalOptions: globalOptions ?? this.globalOptions,
+        isHidden: isHidden ?? this.isHidden,
+      );
 
   /// Convert to JSON for schema export
   Map<String, dynamic> toJson() => _$CommandDefinitionToJson(this);
@@ -97,16 +98,17 @@ class CommandDefinition {
   }
 
   @override
-  String toString() => 'CommandDefinition(name: $name, description: $description)';
+  String toString() =>
+      'CommandDefinition(name: $name, description: $description)';
 }
 
 /// Positional argument metadata
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ArgumentDefinition {
-
   /// Create ArgumentDefinition from JSON
   factory ArgumentDefinition.fromJson(Map<String, dynamic> json) =>
       _$ArgumentDefinitionFromJson(json);
+
   const ArgumentDefinition({
     required this.name,
     required this.description,
@@ -149,10 +151,10 @@ class ArgumentDefinition {
 /// Option/flag metadata
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class OptionDefinition {
-
   /// Create OptionDefinition from JSON
   factory OptionDefinition.fromJson(Map<String, dynamic> json) =>
       _$OptionDefinitionFromJson(json);
+
   const OptionDefinition({
     required this.name,
     required this.description,
@@ -202,12 +204,14 @@ class OptionDefinition {
   bool isValid() {
     if (name.isEmpty) return false;
     if (description.isEmpty) return false;
-    
+
     // Validate type constraints
-    if (type == OptionType.flag && defaultValue != null && defaultValue is bool == false) {
+    if (type == OptionType.flag &&
+        defaultValue != null &&
+        defaultValue is bool == false) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -231,10 +235,10 @@ enum OptionType {
 /// Subcommand metadata
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class SubcommandDefinition {
-
   /// Create SubcommandDefinition from JSON
   factory SubcommandDefinition.fromJson(Map<String, dynamic> json) =>
       _$SubcommandDefinitionFromJson(json);
+
   const SubcommandDefinition({
     required this.name,
     required this.description,
@@ -268,10 +272,10 @@ class SubcommandDefinition {
 /// Command usage example
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class CommandExample {
-
   /// Create CommandExample from JSON
   factory CommandExample.fromJson(Map<String, dynamic> json) =>
       _$CommandExampleFromJson(json);
+
   const CommandExample({
     required this.command,
     required this.description,
@@ -289,4 +293,3 @@ class CommandExample {
   @override
   String toString() => 'CommandExample(command: $command)';
 }
-

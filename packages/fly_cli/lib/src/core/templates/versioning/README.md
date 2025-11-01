@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Template Versioning System provides robust, powerful version management for Fly CLI templates. It enables semantic versioning, compatibility checking, version discovery, and supports future migration capabilities.
+The Template Versioning System provides robust, powerful version management for Fly CLI templates.
+It enables semantic versioning, compatibility checking, version discovery, and supports future
+migration capabilities.
 
 ## Architecture
 
@@ -45,30 +47,36 @@ The Template Versioning System provides robust, powerful version management for 
 ### Models Layer
 
 #### `template_version.dart`
+
 Semantic version wrapper using `pub_semver`.
 
 **Responsibilities:**
+
 - Parse SemVer strings (MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD])
 - Compare versions (>, <, >=, <=, ==)
 - Support version constraints (^2.1.0, ~2.1.0, >=2.0.0 <3.0.0)
 - Validate version formats
 
 **Key Methods:**
+
 - `TemplateVersion.parse(String)` - Parse version string
 - `compareTo(TemplateVersion)` - Compare versions
 - `satisfies(VersionConstraint)` - Check constraint satisfaction
 - `isCompatibleWith(TemplateVersion)` - Check compatibility
 
 #### `template_compatibility.dart`
+
 Compatibility requirements and metadata model.
 
 **Responsibilities:**
+
 - Store CLI version constraints (min/max)
 - Store SDK requirements (Flutter/Dart)
 - Track deprecation status and dates
 - Perform compatibility checks
 
 **Key Fields:**
+
 - `cliMinVersion: Version?` - Minimum CLI version required
 - `cliMaxVersion: VersionConstraint?` - Maximum CLI version allowed
 - `flutterMinSdk: Version?` - Minimum Flutter SDK version
@@ -78,31 +86,38 @@ Compatibility requirements and metadata model.
 - `eolDate: DateTime?` - End of life date
 
 **Key Methods:**
+
 - `checkCompatibility()` - Validate against current environment
 - `fromYaml()` - Parse from template.yaml
 - `fromJson()` - Deserialize from JSON (for caching)
 
 #### `compatibility_result.dart`
+
 Sealed class representing compatibility check results.
 
 **Types:**
+
 - `Compatible` - Template is compatible (may have warnings)
 - `Incompatible` - Template is incompatible (has errors)
 
 **Key Properties:**
+
 - `errors: List<String>` - Incompatibility errors
 - `warnings: List<String>` - Non-blocking warnings
 - `isCompatible: bool` - Convenience check
 
 #### `template_info.dart` (Enhanced)
+
 TemplateInfo model with integrated compatibility support.
 
 **Responsibilities:**
+
 - Store template metadata (name, version, description, path)
 - Include optional compatibility data directly
 - Support JSON serialization with compatibility
 
 **Key Features:**
+
 - Optional `compatibility` field for full versioning checks
 - Compatibility parsing integrated into `fromYaml` factory
 - Backward compatible - templates without compatibility work as before
@@ -110,50 +125,61 @@ TemplateInfo model with integrated compatibility support.
 ### Services Layer
 
 #### `version_registry.dart`
+
 Version discovery and management service.
 
 **Responsibilities:**
+
 - Discover available template versions
 - Query specific template versions
 - Maintain version cache
 - Support multi-version templates
 
 **Key Methods:**
+
 - `getVersions(String templateName)` - List all versions
 - `getTemplateVersion(String name, String version)` - Get specific version
 - `getLatestVersion(String templateName)` - Get latest version
 - `versionExists(String name, String version)` - Check version existence
 
 **Storage Strategies:**
+
 1. **Single Version** (default): `templates/{name}/template.yaml`
 2. **Multi-Version**: `templates/{name}/versions/{version}/template.yaml`
 3. **Versions Registry**: `templates/{name}/versions.yaml`
 
 #### `compatibility_checker.dart`
+
 Compatibility validation service.
 
 **Responsibilities:**
+
 - Validate template compatibility with current environment
 - Check CLI version constraints
 - Check SDK version requirements
 - Provide actionable error messages
 
 **Key Methods:**
-- `checkTemplateCompatibility(TemplateInfo)` - Full compatibility check using TemplateInfo.compatibility
+
+- `checkTemplateCompatibility(TemplateInfo)` - Full compatibility check using
+  TemplateInfo.compatibility
 - `checkBrickCompatibility(BrickInfo)` - Brick compatibility check
 
 ### Utils Layer
 
 #### `version_parser.dart`
+
 YAML parsing utilities for version-related data.
 
 **Responsibilities:**
+
 - Parse version strings from YAML
 - Parse version constraints from YAML
 - Parse compatibility data from YAML
 - Extract and validate version strings
 
 **Key Methods:**
+
 - `parseVersion(String?)` - Parse Version object
 - `parseVersionConstraint(String?)` - Parse VersionConstraint
 - `parseTemplateVersion(String?)` - Parse TemplateVersion
@@ -490,6 +516,7 @@ templates/
 ```
 
 **Usage:**
+
 - Simple templates with one version
 - Backward compatible with existing templates
 - Version stored in `template.yaml`
@@ -511,6 +538,7 @@ templates/
 ```
 
 **Usage:**
+
 - Multiple versions maintained
 - Easy to manage version history
 - Supports version-specific migrations
@@ -526,6 +554,7 @@ templates/
 ```
 
 **versions.yaml:**
+
 ```yaml
 versions:
   - "2.1.3"
@@ -534,6 +563,7 @@ versions:
 ```
 
 **Usage:**
+
 - Clean structure
 - Centralized version management
 - Easy to query available versions
@@ -543,27 +573,27 @@ versions:
 ### Check Priority
 
 1. **CLI Version Check**
-   - Check minimum CLI version requirement
-   - Check maximum CLI version constraint
-   - Block if incompatible
+    - Check minimum CLI version requirement
+    - Check maximum CLI version constraint
+    - Block if incompatible
 
 2. **Flutter SDK Check**
-   - Compare current Flutter version with minimum required
-   - Provide upgrade instructions if incompatible
+    - Compare current Flutter version with minimum required
+    - Provide upgrade instructions if incompatible
 
 3. **Dart SDK Check**
-   - Compare current Dart version with minimum required
-   - Provide upgrade instructions if incompatible
+    - Compare current Dart version with minimum required
+    - Provide upgrade instructions if incompatible
 
 4. **Deprecation Warning**
-   - Warn if template is deprecated
-   - Show deprecation date if available
-   - Non-blocking (warning only)
+    - Warn if template is deprecated
+    - Show deprecation date if available
+    - Non-blocking (warning only)
 
 5. **EOL Check**
-   - Error if template reached end of life
-   - Warning if approaching EOL date
-   - Provide days remaining
+    - Error if template reached end of life
+    - Warning if approaching EOL date
+    - Provide days remaining
 
 ### Compatibility Matrix
 
@@ -585,28 +615,34 @@ versions:
 ### Error Types
 
 #### `versionIncompatible`
+
 **Trigger:** Template compatibility check fails
 
 **Example:**
+
 ```
 Template version incompatible: CLI version 0.9.0 is less than required minimum 1.0.0
 ```
 
 **Recovery Strategies:**
+
 - Check template compatibility: `fly template check riverpod`
 - Upgrade CLI: `dart pub global activate fly_cli`
 - Upgrade Flutter SDK: `flutter upgrade`
 - Try different template version: `fly template list --show-versions`
 
 #### `versionNotFound`
+
 **Trigger:** Requested template version doesn't exist
 
 **Example:**
+
 ```
 Template version not found: riverpod@2.5.0 not found
 ```
 
 **Recovery Strategies:**
+
 - List available versions: `fly template list --show-versions`
 - Use latest version: `fly create riverpod`
 - Check template name spelling
@@ -631,6 +667,7 @@ Template version not found: riverpod@2.5.0 not found
 ```
 
 **Cache Invalidation:**
+
 - Manual: `versionRegistry.clearCache()`
 - Automatic: On template directory changes
 - Expiration: Not implemented (can be added)
@@ -657,11 +694,13 @@ class CachedTemplate {
 **Decision:** Use `VersionConstraint` for max version instead of `VersionRange`
 
 **Rationale:**
+
 - `VersionConstraint` directly supports common constraint formats (^, ~, >=, <)
 - `VersionRange` constructor doesn't accept `VersionConstraint` directly
 - Simpler API: `constraint.allows(version)` vs complex range logic
 
 **Example:**
+
 ```dart
 // Max version constraint in template.yaml
 cli_max_version: "<3.0.0"
@@ -676,11 +715,13 @@ final compatible = constraint.allows(currentVersion);
 **Decision:** Always use full compatibility checking when compatibility data exists
 
 **Rationale:**
+
 - Clean, direct approach for greenfield project
 - No fallback complexity
 - Templates without compatibility data are considered compatible (no constraints)
 
 **Implementation:**
+
 - `compatibility` field nullable in `TemplateInfo`
 - `checkTemplateCompatibility` uses `TemplateCompatibility.checkCompatibility` when available
 - Returns compatible result if no compatibility data (no constraints = compatible)
@@ -690,11 +731,13 @@ final compatible = constraint.allows(currentVersion);
 **Decision:** Version services initialized lazily
 
 **Rationale:**
+
 - Reduces startup overhead
 - Only initialized when versioning features used
 - Better performance for simple operations
 
 **Implementation:**
+
 ```dart
 VersionRegistry? _versionRegistry;
 CompatibilityChecker? _compatibilityChecker;
@@ -710,11 +753,13 @@ VersionRegistry get _versionRegistryInstance {
 **Decision:** Use sealed classes for result types
 
 **Rationale:**
+
 - Type-safe exhaustiveness checking
 - Clear intent (compatible vs incompatible)
 - Matches existing codebase patterns
 
 **Implementation:**
+
 ```dart
 sealed class CompatibilityResult {
   const factory CompatibilityResult.compatible({List<String> warnings}) = Compatible;
@@ -730,12 +775,14 @@ sealed class CompatibilityResult {
 ### Migration System
 
 **Planned Features:**
+
 - Migration script execution
 - Dry-run mode for migration preview
 - Migration history tracking
 - Rollback capability
 
 **Migration Script Structure:**
+
 ```dart
 // migrations/2.0.0_to_2.1.0.dart
 Future<void> migrate(String projectPath) async {
@@ -747,6 +794,7 @@ Future<void> migrate(String projectPath) async {
 ### Template Lock Files
 
 **Planned Features:**
+
 - `.fly/template.lock` in generated projects
 - Pin exact template versions
 - Reproducible builds
@@ -755,6 +803,7 @@ Future<void> migrate(String projectPath) async {
 ### Remote Template Repository
 
 **Planned Features:**
+
 - Fetch templates from remote source
 - Version discovery from remote
 - Template cache with remote sync
@@ -763,6 +812,7 @@ Future<void> migrate(String projectPath) async {
 ### Version Analytics
 
 **Planned Features:**
+
 - Track template version usage
 - Report deprecated template usage
 - Suggest version upgrades
@@ -773,11 +823,13 @@ Future<void> migrate(String projectPath) async {
 ### Unit Tests
 
 **Models:**
+
 - Version parsing and comparison
 - Compatibility checking logic
 - YAML parsing edge cases
 
 **Services:**
+
 - Version registry discovery
 - Compatibility checker validation
 - Error handling
@@ -785,11 +837,13 @@ Future<void> migrate(String projectPath) async {
 ### Integration Tests
 
 **TemplateManager:**
+
 - Version-aware template loading
 - Compatibility checking integration
 - Version discovery flow
 
 **End-to-End:**
+
 - Template generation with versioning
 - Compatibility error handling
 - Version pinning in CLI commands
@@ -819,11 +873,13 @@ Future<void> migrate(String projectPath) async {
 ### Updating Existing Templates
 
 **Step 1:** Add version to `template.yaml` (if not present)
+
 ```yaml
 version: 1.0.0
 ```
 
 **Step 2:** Add compatibility section (optional)
+
 ```yaml
 compatibility:
   cli_min_version: "1.0.0"
@@ -832,6 +888,7 @@ compatibility:
 ```
 
 **Step 3:** Add deprecation info (if applicable)
+
 ```yaml
 deprecated: false
 deprecation_date: null
@@ -841,11 +898,13 @@ eol_date: null
 ### Creating Multi-Version Templates
 
 **Step 1:** Create versioned directory structure
+
 ```
 templates/riverpod/versions/2.1.3/
 ```
 
 **Step 2:** Create `versions.yaml` registry
+
 ```yaml
 versions:
   - "2.1.3"
@@ -860,25 +919,31 @@ versions:
 ### Common Issues
 
 #### Issue: Version format not recognized
+
 **Symptom:** `Invalid version format` error
 
 **Solution:**
+
 - Ensure version follows SemVer: `MAJOR.MINOR.PATCH`
 - Examples: `1.0.0`, `2.1.3`, `3.0.0-beta.1`
 
 #### Issue: Compatibility check fails
+
 **Symptom:** `Template compatibility check failed` error
 
 **Solution:**
+
 1. Check CLI version: `fly --version`
 2. Check Flutter version: `flutter --version`
 3. Check Dart version: `dart --version`
 4. Upgrade if below minimum requirements
 
 #### Issue: Version not found
+
 **Symptom:** `Template version not found` error
 
 **Solution:**
+
 1. List available versions: `fly template list --show-versions`
 2. Use latest version: `fly create riverpod`
 3. Check template name spelling

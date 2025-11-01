@@ -1,10 +1,12 @@
 # AI-Assisted Development Workflow
 
-This guide explains the standard workflow for developing Fly CLI using AI assistants like Cursor for testing during development.
+This guide explains the standard workflow for developing Fly CLI using AI assistants like Cursor for
+testing during development.
 
 ## Overview
 
-When developing Fly CLI, you can use AI assistants (like Cursor) to test your changes via the MCP (Model Context Protocol) server. This workflow allows you to:
+When developing Fly CLI, you can use AI assistants (like Cursor) to test your changes via the MCP (
+Model Context Protocol) server. This workflow allows you to:
 
 - Make code changes to Fly CLI
 - Quickly reload the CLI with your changes
@@ -30,7 +32,8 @@ Install Fly CLI from local source:
 ./scripts/setup/install.sh
 ```
 
-This activates the CLI using `dart pub global activate --source path`, so it will always use your local code changes.
+This activates the CLI using `dart pub global activate --source path`, so it will always use your
+local code changes.
 
 ### 2. Set Up Cursor MCP Integration
 
@@ -82,22 +85,24 @@ Or use the full development cycle script:
 
 **Critical**: After reloading the CLI, restart Cursor so it picks up the new CLI version.
 
-The MCP server runs `fly mcp serve --stdio`, which uses the `fly` command. Since we're using `dart pub global activate --source path`, the newly installed `fly` command will have your latest changes.
+The MCP server runs `fly mcp serve --stdio`, which uses the `fly` command. Since we're using
+`dart pub global activate --source path`, the newly installed `fly` command will have your latest
+changes.
 
 ### Step 4: Test with AI Assistant
 
 Once Cursor is restarted, you can test your changes:
 
 1. **In Cursor chat**, ask it to test CLI features:
-   - "Test the `fly add screen` command on the test project"
-   - "Add a new screen called ProductDetail to the catalog feature"
-   - "Validate the test project structure"
+    - "Test the `fly add screen` command on the test project"
+    - "Add a new screen called ProductDetail to the catalog feature"
+    - "Validate the test project structure"
 
 2. **Cursor will use MCP tools** like:
-   - `fly.add.screen` - Add a screen
-   - `fly.add.service` - Add a service
-   - `fly.template.list` - List templates
-   - `flutter.build` - Build the project
+    - `fly.add.screen` - Add a screen
+    - `fly.add.service` - Add a service
+    - `fly.template.list` - List templates
+    - `flutter.build` - Build the project
 
 3. **Results are validated** in `examples/test_project/`
 
@@ -110,6 +115,7 @@ Check that your CLI changes work correctly:
 ```
 
 Or manually check:
+
 - Files were created in correct locations
 - Code follows Fly conventions
 - Project compiles (`flutter analyze` in test project)
@@ -128,31 +134,37 @@ If the test project gets into a bad state:
 ### Common Commands
 
 **Reload CLI after changes:**
+
 ```bash
 ./scripts/development/reload-cli.sh
 ```
 
 **Full development cycle:**
+
 ```bash
 ./scripts/development/dev-cycle.sh
 ```
 
 **Check test project status:**
+
 ```bash
 ./scripts/mcp/test-project.sh status
 ```
 
 **Validate test project:**
+
 ```bash
 ./scripts/mcp/test-project.sh validate
 ```
 
 **Reset test project:**
+
 ```bash
 ./scripts/mcp/test-project.sh reset
 ```
 
 **List available MCP tools:**
+
 ```bash
 ./scripts/mcp/list.sh --type=tools
 ```
@@ -197,6 +209,7 @@ The project includes automation scripts for common workflows:
 **Problem**: Cursor still uses old CLI version after changes.
 
 **Solution**:
+
 1. Ensure you ran `./scripts/development/reload-cli.sh`
 2. **Restart Cursor completely** (quit and reopen)
 3. Check CLI version: `fly --version` in terminal
@@ -207,6 +220,7 @@ The project includes automation scripts for common workflows:
 **Problem**: MCP tools fail or timeout.
 
 **Solution**:
+
 1. Check Fly CLI is installed: `fly --version`
 2. Verify MCP configuration: `./scripts/mcp/verify.sh`
 3. Check Flutter SDK: `flutter doctor`
@@ -217,6 +231,7 @@ The project includes automation scripts for common workflows:
 **Problem**: Test project is in bad state or won't compile.
 
 **Solution**:
+
 1. Reset test project: `./scripts/mcp/test-project.sh reset`
 2. Validate project: `./scripts/mcp/test-project.sh validate`
 3. Check Flutter SDK compatibility
@@ -227,6 +242,7 @@ The project includes automation scripts for common workflows:
 **Problem**: `./scripts/setup/install.sh` fails.
 
 **Solution**:
+
 1. Ensure you're in project root
 2. Check `packages/fly_cli` exists
 3. Verify Dart SDK is installed: `dart --version`

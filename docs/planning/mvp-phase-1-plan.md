@@ -4,13 +4,15 @@
 
 **Timeline**: 9-10 weeks (2.5 months)  
 **Target Launch**: End of Week 10  
-**Core Value Proposition**: AI-native Flutter CLI with Riverpod-first architecture, production-ready foundation packages, and machine-readable interfaces
+**Core Value Proposition**: AI-native Flutter CLI with Riverpod-first architecture, production-ready
+foundation packages, and machine-readable interfaces
 
 ---
 
 ## 1. Architecture & Technical Foundation
 
 ### 1.1 Technology Stack
+
 - **CLI Framework**: Dart 3.0+ with `args` package for command parsing
 - **Template Engine**: Mason for code generation
 - **Logging**: `mason_logger` for beautiful CLI output
@@ -20,6 +22,7 @@
 - **AI Integration**: JSON output, declarative manifests, schema export
 
 ### 1.2 Repository Structure
+
 ```
 fly/
 ├── packages/
@@ -40,6 +43,7 @@ fly/
 ```
 
 ### 1.3 Core Commands (MVP)
+
 - `fly create <project_name>` - Create new project with interactive wizard
 - `fly add screen <name>` - Generate new screen with ViewModel
 - `fly add service <name>` - Generate new service class
@@ -49,6 +53,7 @@ fly/
 - `fly context export` - Generate AI context files for project
 
 ### 1.4 AI-Friendly Features
+
 - `--output=json` flag on all commands for machine-readable responses
 - `--plan` flag for dry-run execution plans
 - `--from-manifest=<file>` for declarative project creation
@@ -62,6 +67,7 @@ fly/
 ### 2.1 fly_core Package
 
 **Key Components**:
+
 - `BaseScreen<VM>` - Stateful widget with ViewModel lifecycle
 - `BaseViewModel` - Base class with loading/error states, Riverpod integration
 - `ViewState` - Sealed class for state representation (idle/loading/error/success)
@@ -69,6 +75,7 @@ fly/
 - Common utilities (extensions, helpers)
 
 **Example Implementation**:
+
 ```dart
 // BaseViewModel with Riverpod integration
 abstract class BaseViewModel extends StateNotifier<ViewState> {
@@ -102,6 +109,7 @@ sealed class ViewState {
 ### 2.2 fly_networking Package
 
 **Key Components**:
+
 - `ApiClient` - Dio-based HTTP client with Riverpod provider
 - `ApiInterceptor` - Logging, retry, error handling interceptors
 - `ApiResponse<T>` - Standardized response wrapper
@@ -112,6 +120,7 @@ sealed class ViewState {
 ### 2.3 fly_state Package
 
 **Key Components**:
+
 - Riverpod provider utilities and extensions
 - State management patterns (AsyncValue helpers)
 - Common state providers (theme, locale, connectivity)
@@ -126,6 +135,7 @@ sealed class ViewState {
 **Purpose**: Bare-bones Flutter structure for developers who want full control
 
 **Structure**:
+
 ```
 my_app/
 ├── lib/
@@ -145,6 +155,7 @@ my_app/
 **Purpose**: Production-ready Riverpod architecture with best practices
 
 **Structure**:
+
 ```
 my_app/
 ├── lib/
@@ -172,6 +183,7 @@ my_app/
 **Dependencies**: fly_core, fly_networking, fly_state, riverpod, riverpod_annotation, go_router
 
 ### 3.3 Template Metadata (template.yaml)
+
 ```yaml
 name: riverpod
 version: 1.0.0
@@ -207,6 +219,7 @@ packages:
 ### 4.1 Interactive Project Wizard
 
 **User Flow**:
+
 ```bash
 $ fly create
 
@@ -292,6 +305,7 @@ class CreateCommand extends FlyCommand {
 ### 4.3 Declarative Manifest Support
 
 **Manifest Format (fly_project.yaml)**:
+
 ```yaml
 name: my_app
 template: riverpod
@@ -315,6 +329,7 @@ packages:
 ```
 
 **Usage**:
+
 ```bash
 # Create from manifest file
 fly create --from-manifest=fly_project.yaml
@@ -403,12 +418,14 @@ class ProjectExistsError extends FlyError {
 ## 5. Testing Strategy
 
 ### 5.1 CLI Testing
+
 - **Unit Tests**: 90%+ coverage for all command logic
 - **Integration Tests**: E2E project generation and validation
 - **Platform Tests**: Windows, macOS, Linux in CI matrix
 - **AI Integration Tests**: JSON output validation, manifest parsing
 
 **Example Integration Test**:
+
 ```dart
 test('riverpod template generates buildable project', () async {
   final tempDir = Directory.systemTemp.createTempSync('fly_test_');
@@ -446,6 +463,7 @@ test('JSON output format is valid', () async {
 ```
 
 ### 5.2 Foundation Package Testing
+
 - **Unit Tests**: 95%+ coverage
 - **Widget Tests**: All BaseScreen states (loading, error, success)
 - **Integration Tests**: Cross-package compatibility
@@ -456,6 +474,7 @@ test('JSON output format is valid', () async {
 ## 6. Documentation Deliverables
 
 ### 6.1 Website Structure (GitHub Pages / VitePress)
+
 ```
 docs/
 ├── index.md                    # Landing page
@@ -484,6 +503,7 @@ docs/
 ```
 
 ### 6.2 AI Integration Guide Content
+
 - **Getting Started**: How to use Fly CLI with AI coding assistants
 - **Manifest Format**: Complete specification for fly_project.yaml
 - **JSON Schemas**: All command response formats
@@ -495,6 +515,7 @@ docs/
 ## 7. Quality Assurance Checklist
 
 ### 7.1 Pre-Launch Validation
+
 - [ ] All CI/CD tests passing (Windows, macOS, Linux)
 - [ ] Both templates generate projects that compile without errors
 - [ ] `flutter analyze` passes with 0 warnings on generated projects
@@ -508,6 +529,7 @@ docs/
 - [ ] AI context files generated correctly
 
 ### 7.2 Code Quality Standards
+
 - [ ] 90%+ test coverage on fly_cli
 - [ ] 95%+ test coverage on foundation packages
 - [ ] All code passes `very_good_analysis` linting
@@ -521,6 +543,7 @@ docs/
 ## 8. Success Metrics (Week 10 Evaluation)
 
 ### 8.1 Quantitative Metrics
+
 - **Target**: 100+ pub.dev downloads (fly_cli)
 - **Target**: 50+ pub.dev downloads (foundation packages)
 - **Target**: 10+ GitHub stars
@@ -529,6 +552,7 @@ docs/
 - **Target**: 5+ AI agent integrations demonstrated
 
 ### 8.2 Qualitative Metrics
+
 - **Target**: 2+ production projects using Fly CLI
 - **Target**: 10+ community feedback responses (surveys/interviews)
 - **Target**: 5+ GitHub issues/feature requests (quality engagement)
@@ -537,6 +561,7 @@ docs/
 - **Target**: 1+ AI coding assistant integration (Cursor/Copilot)
 
 ### 8.3 Technical Metrics
+
 - **Target**: 90%+ test coverage (CLI)
 - **Target**: 95%+ test coverage (foundation packages)
 - **Target**: All platforms pass CI (Windows, macOS, Linux)
@@ -548,61 +573,68 @@ docs/
 ## 9. Risk Mitigation Strategies
 
 ### 9.1 Technical Risks
-| Risk | Mitigation |
-|------|------------|
-| Mason API breaking changes | Abstract Mason behind own interface, pin versions |
-| Flutter SDK incompatibility | Test against Flutter 3.10, 3.13, 3.16, 3.19 |
-| Riverpod code generation issues | Extensive testing with riverpod_generator |
-| Cross-platform bugs | Daily CI runs on all platforms |
-| JSON schema evolution | Version schemas, maintain backward compatibility |
-| AI integration complexity | Start simple, iterate based on feedback |
+
+| Risk                            | Mitigation                                        |
+|---------------------------------|---------------------------------------------------|
+| Mason API breaking changes      | Abstract Mason behind own interface, pin versions |
+| Flutter SDK incompatibility     | Test against Flutter 3.10, 3.13, 3.16, 3.19       |
+| Riverpod code generation issues | Extensive testing with riverpod_generator         |
+| Cross-platform bugs             | Daily CI runs on all platforms                    |
+| JSON schema evolution           | Version schemas, maintain backward compatibility  |
+| AI integration complexity       | Start simple, iterate based on feedback           |
 
 ### 9.2 Schedule Risks
-| Risk | Mitigation |
-|------|------------|
-| Scope creep | Strict feature freeze after Week 7 |
-| Testing bottleneck | Automated testing from Week 1 |
-| Documentation delay | Write docs alongside code |
-| Unexpected complexity | 1-week buffer in timeline |
+
+| Risk                      | Mitigation                                     |
+|---------------------------|------------------------------------------------|
+| Scope creep               | Strict feature freeze after Week 7             |
+| Testing bottleneck        | Automated testing from Week 1                  |
+| Documentation delay       | Write docs alongside code                      |
+| Unexpected complexity     | 1-week buffer in timeline                      |
 | AI features taking longer | Core AI features integrated into existing work |
 
 ### 9.3 Market Risks
-| Risk | Mitigation |
-|------|------------|
-| Low adoption | Target Flutter communities early, gather feedback |
-| Competing tool launches | Focus on unique value (AI-native + Riverpod-first) |
-| Negative feedback | Rapid iteration based on user input |
-| AI integration not valued | Demonstrate clear productivity gains |
+
+| Risk                      | Mitigation                                         |
+|---------------------------|----------------------------------------------------|
+| Low adoption              | Target Flutter communities early, gather feedback  |
+| Competing tool launches   | Focus on unique value (AI-native + Riverpod-first) |
+| Negative feedback         | Rapid iteration based on user input                |
+| AI integration not valued | Demonstrate clear productivity gains               |
 
 ---
 
 ## 10. Go/No-Go Decision Criteria
 
 ### 10.1 Proceed to Public Launch If:
+
 ✅ All technical metrics met (90%+ coverage, 0 P0 bugs)  
 ✅ Both templates generate working projects  
 ✅ Documentation complete and reviewed  
 ✅ At least 3 beta testers report positive experience  
 ✅ Pub.dev publication dry-run successful  
-✅ AI integration features working and documented  
+✅ AI integration features working and documented
 
 ### 10.2 Delay Launch If:
+
 ⚠️ Critical bugs discovered in testing  
 ⚠️ Generated projects fail `flutter analyze`  
 ⚠️ Platform-specific failures in CI  
 ⚠️ Incomplete documentation (< 80% coverage)  
-⚠️ JSON output schemas not validated  
+⚠️ JSON output schemas not validated
 
 ### 10.3 Cancel/Pivot If:
+
 🛑 Beta feedback indicates fundamental architecture issues  
 🛑 Competing tool launches identical solution  
-🛑 Resource constraints prevent quality delivery  
+🛑 Resource constraints prevent quality delivery
 
 ---
 
 ## 11. Post-MVP Roadmap (Phase 2 Preview)
 
 **Months 4-6 Focus Areas**:
+
 1. **Additional Templates**: MVVM (GetX/Provider), Clean Architecture
 2. **VSCode Extension**: Right-click code generation, snippets
 3. **Migration Tools**: Automated migration from Very Good CLI, Stacked
@@ -611,6 +643,7 @@ docs/
 6. **Advanced AI Features**: Natural language command parsing, visual diff tools
 
 **Success Trigger for Phase 2**:
+
 - 500+ downloads
 - 50+ GitHub stars
 - Active community engagement (Discord/discussions)
@@ -622,19 +655,21 @@ docs/
 ## 12. Resource Requirements
 
 ### 12.1 Team Composition
+
 - **1-2 Senior Flutter Developers** (full-time, 9-10 weeks)
-  - CLI architecture and implementation
-  - Foundation packages development
-  - AI integration features
-  - Testing and quality assurance
-  
+    - CLI architecture and implementation
+    - Foundation packages development
+    - AI integration features
+    - Testing and quality assurance
+
 - **1 Technical Writer** (part-time, 3-4 weeks)
-  - Documentation website
-  - AI integration guide
-  - Migration guides
-  - API documentation review
+    - Documentation website
+    - AI integration guide
+    - Migration guides
+    - API documentation review
 
 ### 12.2 Infrastructure Costs
+
 - **Domain**: $12/year (fly-cli.dev)
 - **GitHub**: Free (open source)
 - **GitHub Pages**: Free (documentation hosting)
@@ -642,6 +677,7 @@ docs/
 - **Total Year 1**: ~$12
 
 ### 12.3 Time Allocation (per developer)
+
 - **Weeks 1-2**: Architecture setup, monorepo structure, AI schema design (40 hours)
 - **Weeks 3-4**: Foundation packages (fly_core, fly_networking, fly_state) (80 hours)
 - **Weeks 5-6**: CLI commands, template engine, AI integration (80 hours)
@@ -656,6 +692,7 @@ docs/
 ## 13. Launch Strategy
 
 ### 13.1 Pre-Launch (Week 9)
+
 - [ ] Create landing page with clear value proposition
 - [ ] Prepare announcement blog post highlighting AI integration
 - [ ] Set up Twitter/X account (@fly_cli_dev)
@@ -664,18 +701,20 @@ docs/
 - [ ] Create AI integration demo videos
 
 ### 13.2 Launch Day (Week 10, Day 1)
+
 - [ ] Publish all packages to pub.dev
 - [ ] Deploy documentation website
 - [ ] Post announcement on:
-  - r/FlutterDev (Reddit) - emphasize AI-native features
-  - Flutter Discord #tools channel
-  - Twitter/X with hashtags #Flutter #FlutterDev #AI
-  - LinkedIn Flutter groups
+    - r/FlutterDev (Reddit) - emphasize AI-native features
+    - Flutter Discord #tools channel
+    - Twitter/X with hashtags #Flutter #FlutterDev #AI
+    - LinkedIn Flutter groups
 - [ ] Send email to beta testers
 - [ ] Create GitHub release with changelog
 - [ ] Submit to AI coding assistant communities
 
 ### 13.3 Post-Launch (Weeks 10-13)
+
 - [ ] Monitor GitHub issues daily
 - [ ] Respond to community questions within 24 hours
 - [ ] Collect feedback via surveys
@@ -689,6 +728,7 @@ docs/
 ## 14. Detailed Week-by-Week Breakdown
 
 ### **Week 1: Foundation Setup + AI Schema Design**
+
 - Set up monorepo structure with Melos
 - Configure CI/CD pipeline (GitHub Actions)
 - Create basic CLI entry point and command parser
@@ -699,6 +739,7 @@ docs/
 - Write project README and CONTRIBUTING.md
 
 ### **Week 2: Core Architecture + AI Infrastructure**
+
 - Implement fly_core package structure
 - Build BaseViewModel with Riverpod StateNotifier
 - Create ViewState sealed class hierarchy
@@ -708,6 +749,7 @@ docs/
 - Write unit tests (target: 95% coverage)
 
 ### **Week 3: Networking & State Packages**
+
 - Implement fly_networking with Dio + Riverpod
 - Create ApiClient, interceptors, error handling
 - Build fly_state package with provider utilities
@@ -716,6 +758,7 @@ docs/
 - Documentation for all public APIs
 
 ### **Week 4: CLI Commands (Part 1) + AI Output**
+
 - Implement `fly create` command
 - Build interactive wizard with prompts
 - Add project validation logic
@@ -726,6 +769,7 @@ docs/
 - Unit tests for all commands
 
 ### **Week 5: Template Engine & Generation**
+
 - Integrate Mason for code generation
 - Create template management system
 - Build Mason bricks for minimal template
@@ -735,6 +779,7 @@ docs/
 - Test template rendering and variable substitution
 
 ### **Week 6: CLI Commands (Part 2) + AI Manifests**
+
 - Implement `fly add screen` command
 - Implement `fly add service` command
 - Add code formatting after generation
@@ -745,6 +790,7 @@ docs/
 - Integration tests for full workflows
 
 ### **Week 7: Example Projects & AI Aliases**
+
 - Create minimal_example app
 - Create riverpod_example app (realistic app with API calls)
 - Add shell completion scripts (bash, zsh)
@@ -754,6 +800,7 @@ docs/
 - Code review and refactoring
 
 ### **Week 8: Testing & Quality Assurance**
+
 - E2E integration tests (full project generation)
 - Platform-specific testing (Windows, macOS, Linux)
 - Performance testing (project creation speed)
@@ -763,6 +810,7 @@ docs/
 - **AI Integration**: JSON output validation tests
 
 ### **Week 9: Documentation & AI Examples**
+
 - Build documentation website (VitePress/Docusaurus)
 - Write all guides (installation, quickstart, templates)
 - Create migration guides (3 competing tools)
@@ -773,6 +821,7 @@ docs/
 - Create video tutorial (5-10 minutes)
 
 ### **Week 10: Launch Preparation & Execution**
+
 - Prepare launch announcements
 - Final testing and bug fixes
 - Publish to pub.dev
@@ -785,6 +834,7 @@ docs/
 ## 15. Appendix: Key Files & Their Purposes
 
 ### CLI Package Files
+
 - `bin/fly.dart` - Entry point, delegates to CommandRunner
 - `lib/src/command_runner.dart` - Main command orchestration
 - `lib/src/commands/create_command.dart` - Project creation logic
@@ -801,6 +851,7 @@ docs/
 - `lib/src/ai/context_generator.dart` - AI context file generation
 
 ### Foundation Package Files
+
 - `packages/fly_core/lib/src/screens/base_screen.dart`
 - `packages/fly_core/lib/src/viewmodels/base_viewmodel.dart`
 - `packages/fly_core/lib/src/models/view_state.dart`
@@ -810,6 +861,7 @@ docs/
 - `packages/fly_state/lib/src/providers/`
 
 ### Configuration Files
+
 - `melos.yaml` - Monorepo configuration
 - `.github/workflows/ci.yml` - CI/CD pipeline
 - `templates/minimal/template.yaml` - Minimal template config
@@ -823,26 +875,31 @@ docs/
 ### 16.1 Core AI Features (MVP)
 
 **Machine-Readable Output**:
+
 - Every command supports `--output=json` flag for structured responses
 - Errors include machine-readable suggestions with fix commands
 - All responses follow consistent JSON schema
 
 **Declarative Manifests**:
+
 - Support `--from-manifest=fly_project.yaml` for project creation
 - AI can generate complete project specifications
 - Manifest includes screens, services, packages, and configuration
 
 **CLI Introspection**:
+
 - `fly schema export --output=json` - Export command schemas for AI context
 - `fly template describe <name> --output=json` - Get template specifications
 - Self-documenting CLI that AI can learn from
 
 **Dry-Run Mode**:
+
 - `--plan` flag shows execution plan without running
 - AI can validate commands before execution
 - Includes file creation preview and estimated duration
 
 **AI Context Generation**:
+
 - Auto-generate `.ai/project_context.md` after project creation
 - Provides architecture overview, conventions, and available commands
 - Helps AI coding assistants understand project structure
@@ -850,6 +907,7 @@ docs/
 ### 16.2 Implementation Details
 
 **Base Command Structure**:
+
 ```dart
 abstract class FlyCommand extends Command<int> {
   FlyCommand() {
@@ -878,6 +936,7 @@ abstract class FlyCommand extends Command<int> {
 ```
 
 **Manifest Format (fly_project.yaml)**:
+
 ```yaml
 name: my_app
 template: riverpod
@@ -901,6 +960,7 @@ packages:
 ```
 
 **JSON Response Format**:
+
 ```json
 {
   "success": true,
@@ -938,21 +998,25 @@ packages:
 ### 16.4 Updated Week-by-Week Integration
 
 **Week 1 Additions**:
+
 - Define JSON output schema for all command responses
 - Design fly_project.yaml manifest format
 - Create AI context file templates
 
 **Week 4 Additions**:
+
 - Implement `--output=json` flag infrastructure
 - Build `fly schema export` command
 - Add `--plan` (dry-run) mode to create command
 
 **Week 6 Additions**:
+
 - Add `--from-manifest` support for project creation
 - Implement `fly context export` command
 - Add semantic command aliases (generate, scaffold, new)
 
 **Week 9 Additions**:
+
 - Create "AI Integration Guide" in documentation
 - Document JSON schemas and manifest formats
 - Provide example AI agent integration scripts
@@ -960,6 +1024,7 @@ packages:
 ### 16.5 Timeline Impact
 
 **New Timeline**: 9-10 weeks (additional 1 week)
+
 - Core AI features integrated into existing work (+3 days)
 - Schema export and manifest support (+2 days)
 - AI context generation and documentation (+2 days)
@@ -967,6 +1032,7 @@ packages:
 ### 16.6 Competitive Advantage
 
 **First AI-Native Flutter CLI**:
+
 - ✅ Native integration with Cursor, GitHub Copilot, ChatGPT
 - ✅ Declarative project generation from natural language
 - ✅ Machine-readable everything (output, errors, schemas)
@@ -1000,5 +1066,6 @@ This plan delivers a **focused, production-ready, AI-native MVP** in **9-10 week
 - [ ] Implement fly add screen/service commands with code generation and AI manifests
 - [ ] Create minimal_example and riverpod_example applications
 - [ ] Write integration tests, E2E tests, platform-specific testing, and AI integration tests
-- [ ] Build documentation website, write guides, create migration docs, AI integration guide, and tutorial video
+- [ ] Build documentation website, write guides, create migration docs, AI integration guide, and
+  tutorial video
 - [ ] Publish packages to pub.dev, deploy docs, prepare announcements, and execute launch

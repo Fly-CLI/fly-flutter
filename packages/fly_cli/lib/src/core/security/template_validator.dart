@@ -8,13 +8,13 @@ enum SecuritySeverity {
 
 /// Security issue structure
 class SecurityIssue {
-
   SecurityIssue({
     required this.type,
     required this.message,
     required this.severity,
     required this.suggestion,
   });
+
   final String type;
   final String message;
   final SecuritySeverity severity;
@@ -23,24 +23,27 @@ class SecurityIssue {
 
 /// Security issues found in templates
 class SecurityIssues {
-
   SecurityIssues(this.issues);
+
   final List<SecurityIssue> issues;
 
   bool get hasIssues => issues.isNotEmpty;
-  bool get hasCritical => issues.any((i) => i.severity == SecuritySeverity.critical);
+
+  bool get hasCritical =>
+      issues.any((i) => i.severity == SecuritySeverity.critical);
+
   bool get hasHigh => issues.any((i) => i.severity == SecuritySeverity.high);
 }
 
 /// Template structure for validation
 class TemplateContent {
-
   TemplateContent({
     required this.name,
     required this.files,
     required this.imports,
     required this.dependencies,
   });
+
   final String name;
   final Map<String, String> files; // file path -> content
   final List<String> imports;
@@ -68,8 +71,8 @@ class TemplateValidator {
   List<SecurityIssue> _checkForHardcodedSecrets(TemplateContent template) {
     final issues = <SecurityIssue>[];
     final patterns = [
-      (pattern: r'apiKey\s*[:=]\s*["''][^"'']+["'']', type: 'API Key'),
-      (pattern: r'password\s*[:=]\s*["''][^"'']+["'']', type: 'Password'),
+      (pattern: r'apiKey\s*[:=]\s*["' '][^"' ']+["' ']', type: 'API Key'),
+      (pattern: r'password\s*[:=]\s*["' '][^"' ']+["' ']', type: 'Password'),
       (pattern: 'sk-[a-zA-Z0-9]{32,}', type: 'OpenAI API Key'),
       (pattern: 'ghp_[a-zA-Z0-9]{36}', type: 'GitHub Token'),
       (pattern: r'AIza[0-9A-Za-z\\-_]{35}', type: 'Google API Key'),
@@ -83,12 +86,15 @@ class TemplateValidator {
       for (final pattern in patterns) {
         final regex = RegExp(pattern.pattern, caseSensitive: false);
         if (regex.hasMatch(content)) {
-          issues.add(SecurityIssue(
-            type: 'hardcoded_secret',
-            message: 'Found ${pattern.type} in $filePath',
-            severity: SecuritySeverity.critical,
-            suggestion: 'Remove hardcoded credentials. Use environment variables or configuration files.',
-          ),);
+          issues.add(
+            SecurityIssue(
+              type: 'hardcoded_secret',
+              message: 'Found ${pattern.type} in $filePath',
+              severity: SecuritySeverity.critical,
+              suggestion:
+                  'Remove hardcoded credentials. Use environment variables or configuration files.',
+            ),
+          );
         }
       }
     }
@@ -108,12 +114,15 @@ class TemplateValidator {
     for (final import in template.imports) {
       for (final dangerous in dangerousImports) {
         if (import.contains(dangerous.import)) {
-          issues.add(SecurityIssue(
-            type: 'suspicious_import',
-            message: 'Suspicious import: $import (${dangerous.reason})',
-            severity: SecuritySeverity.high,
-            suggestion: 'Review if this import is necessary. Use with caution in templates.',
-          ),);
+          issues.add(
+            SecurityIssue(
+              type: 'suspicious_import',
+              message: 'Suspicious import: $import (${dangerous.reason})',
+              severity: SecuritySeverity.high,
+              suggestion:
+                  'Review if this import is necessary. Use with caution in templates.',
+            ),
+          );
         }
       }
     }
@@ -126,7 +135,10 @@ class TemplateValidator {
     final issues = <SecurityIssue>[];
     final fileSystemPatterns = [
       (pattern: r'''File\(['"]([^'"\n]+)['"]\)''', operation: 'File access'),
-      (pattern: r'''Directory\(['"]([^'"\n]+)['"]\)''', operation: 'Directory access'),
+      (
+        pattern: r'''Directory\(['"]([^'"\n]+)['"]\)''',
+        operation: 'Directory access'
+      ),
       (pattern: r'\.delete\(\)', operation: 'File deletion'),
       (pattern: r'\.writeAsString\(', operation: 'File writing'),
     ];
@@ -138,12 +150,16 @@ class TemplateValidator {
       for (final pattern in fileSystemPatterns) {
         final regex = RegExp(pattern.pattern, caseSensitive: false);
         if (regex.hasMatch(content)) {
-          issues.add(SecurityIssue(
-            type: 'file_system_access',
-            message: 'File system operation detected in $filePath: ${pattern.operation}',
-            severity: SecuritySeverity.medium,
-            suggestion: 'Ensure file operations are scoped to safe directories only.',
-          ),);
+          issues.add(
+            SecurityIssue(
+              type: 'file_system_access',
+              message:
+                  'File system operation detected in $filePath: ${pattern.operation}',
+              severity: SecuritySeverity.medium,
+              suggestion:
+                  'Ensure file operations are scoped to safe directories only.',
+            ),
+          );
         }
       }
     }
@@ -167,12 +183,15 @@ class TemplateValidator {
       for (final pattern in networkPatterns) {
         final regex = RegExp(pattern.pattern, caseSensitive: false);
         if (regex.hasMatch(content)) {
-          issues.add(SecurityIssue(
-            type: 'network_call',
-            message: 'Network operation detected: ${pattern.operation}',
-            severity: SecuritySeverity.medium,
-            suggestion: 'Review network calls in template. Ensure they only connect to trusted endpoints.',
-          ),);
+          issues.add(
+            SecurityIssue(
+              type: 'network_call',
+              message: 'Network operation detected: ${pattern.operation}',
+              severity: SecuritySeverity.medium,
+              suggestion:
+                  'Review network calls in template. Ensure they only connect to trusted endpoints.',
+            ),
+          );
         }
       }
     }
@@ -187,22 +206,28 @@ class TemplateValidator {
 
     for (final dependency in template.dependencies) {
       if (gitUrlPattern.hasMatch(dependency)) {
-        issues.add(SecurityIssue(
-          type: 'git_dependency',
-          message: 'Git dependency found: $dependency',
-          severity: SecuritySeverity.low,
-          suggestion: 'Prefer pub.dev packages over direct Git dependencies for better security.',
-        ),);
+        issues.add(
+          SecurityIssue(
+            type: 'git_dependency',
+            message: 'Git dependency found: $dependency',
+            severity: SecuritySeverity.low,
+            suggestion:
+                'Prefer pub.dev packages over direct Git dependencies for better security.',
+          ),
+        );
       }
 
       // Check for hosted packages from untrusted sources
       if (dependency.startsWith('http://')) {
-        issues.add(SecurityIssue(
-          type: 'unsecure_dependency',
-          message: 'Unsecure HTTP dependency: $dependency',
-          severity: SecuritySeverity.high,
-          suggestion: 'Use HTTPS for package sources to prevent man-in-the-middle attacks.',
-        ),);
+        issues.add(
+          SecurityIssue(
+            type: 'unsecure_dependency',
+            message: 'Unsecure HTTP dependency: $dependency',
+            severity: SecuritySeverity.high,
+            suggestion:
+                'Use HTTPS for package sources to prevent man-in-the-middle attacks.',
+          ),
+        );
       }
     }
 
@@ -224,16 +249,19 @@ class TemplateValidator {
       for (final pattern in shellPatterns) {
         final regex = RegExp(pattern.pattern, caseSensitive: false);
         if (regex.hasMatch(content)) {
-          issues.add(SecurityIssue(
-            type: 'shell_command',
-            message: 'Shell command execution detected: ${pattern.operation}',
-            severity: SecuritySeverity.critical,
-            suggestion: 'Shell commands in templates are dangerous. Use with extreme caution.',
-          ),);
+          issues.add(
+            SecurityIssue(
+              type: 'shell_command',
+              message: 'Shell command execution detected: ${pattern.operation}',
+              severity: SecuritySeverity.critical,
+              suggestion:
+                  'Shell commands in templates are dangerous. Use with extreme caution.',
+            ),
+          );
         }
       }
     }
 
     return issues;
   }
-} 
+}

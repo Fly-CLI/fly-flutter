@@ -1,6 +1,7 @@
 # Fly CLI Documentation Website
 
-This directory contains the documentation website for Fly CLI, built with VitePress for fast, modern documentation.
+This directory contains the documentation website for Fly CLI, built with VitePress for fast, modern
+documentation.
 
 ## Structure
 

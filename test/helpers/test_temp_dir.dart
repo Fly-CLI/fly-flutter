@@ -134,7 +134,9 @@ class TestTempDir {
   /// Write JSON to a file under the current test directory.
   Future<void> writeJson(String relative, Object jsonObject) async {
     final file = await ensureFile(relative);
-    await file.writeAsString(const JsonEncoder.withIndent('  ').convert(jsonObject));
+    await file.writeAsString(
+      const JsonEncoder.withIndent('  ').convert(jsonObject),
+    );
   }
 
   /// Read JSON from a file and parse it using [parse].
@@ -163,5 +165,3 @@ class TestTempDir {
     }
   }
 }
-
-

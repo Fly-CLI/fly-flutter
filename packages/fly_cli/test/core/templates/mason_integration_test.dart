@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
-import 'package:fly_cli/src/core/templates/brick_registry.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
+import 'package:fly_cli/src/core/templates/brick_registry.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
@@ -36,8 +36,9 @@ void main() {
       // Should discover at least the minimal and riverpod project bricks
       expect(bricks, isNotEmpty);
 
-      final projectBricks =
-          bricks.where((brick) => brick.type == BrickType.project).toList();
+      final projectBricks = bricks
+          .where((brick) => brick.type == BrickType.project)
+          .toList();
       if (projectBricks.isNotEmpty) {
         final brickNames = projectBricks.map((brick) => brick.name).toList();
         // Check for common bricks if available
@@ -49,7 +50,7 @@ void main() {
 
     test('should get bricks by type', () async {
       final allBricks = await templateManager.getAvailableBricks();
-      
+
       // Integration test requires actual Mason bricks to be set up
       if (allBricks.isEmpty) {
         // Skip if no bricks available
@@ -58,26 +59,32 @@ void main() {
 
       final projectBricks = await templateManager.getProjectBricks();
       if (projectBricks.isNotEmpty) {
-        expect(projectBricks.every((brick) => brick.type == BrickType.project),
-            isTrue);
+        expect(
+          projectBricks.every((brick) => brick.type == BrickType.project),
+          isTrue,
+        );
       }
 
       final screenBricks = await templateManager.getScreenBricks();
       if (screenBricks.isNotEmpty) {
-        expect(screenBricks.every((brick) => brick.type == BrickType.screen),
-            isTrue);
+        expect(
+          screenBricks.every((brick) => brick.type == BrickType.screen),
+          isTrue,
+        );
       }
 
       final serviceBricks = await templateManager.getServiceBricks();
       if (serviceBricks.isNotEmpty) {
-        expect(serviceBricks.every((brick) => brick.type == BrickType.service),
-            isTrue);
+        expect(
+          serviceBricks.every((brick) => brick.type == BrickType.service),
+          isTrue,
+        );
       }
     });
 
     test('should validate bricks', () async {
       final bricks = await templateManager.getAvailableBricks();
-      
+
       // Skip if no bricks available
       if (bricks.isEmpty) {
         return;
@@ -94,14 +101,16 @@ void main() {
 
     test('should generate preview for project', () async {
       final bricks = await templateManager.getAvailableBricks();
-      
+
       // Skip if no bricks available
       if (bricks.isEmpty) {
         return;
       }
 
       // Use first available project brick
-      final projectBricks = bricks.where((b) => b.type == BrickType.project).toList();
+      final projectBricks = bricks
+          .where((b) => b.type == BrickType.project)
+          .toList();
       if (projectBricks.isEmpty) {
         return;
       }
@@ -130,7 +139,7 @@ void main() {
 
     test('should generate preview for screen component', () async {
       final bricks = await templateManager.getAvailableBricks();
-      
+
       // Skip if no bricks available
       if (bricks.isEmpty) {
         return;
@@ -164,7 +173,7 @@ void main() {
 
     test('should generate preview for service component', () async {
       final bricks = await templateManager.getAvailableBricks();
-      
+
       // Skip if no bricks available
       if (bricks.isEmpty) {
         return;
@@ -198,14 +207,16 @@ void main() {
 
     test('should handle dry run generation', () async {
       final bricks = await templateManager.getAvailableBricks();
-      
+
       // Skip if no bricks available
       if (bricks.isEmpty) {
         return;
       }
 
       // Use first available project brick
-      final projectBricks = bricks.where((b) => b.type == BrickType.project).toList();
+      final projectBricks = bricks
+          .where((b) => b.type == BrickType.project)
+          .toList();
       if (projectBricks.isEmpty) {
         return;
       }
@@ -231,7 +242,7 @@ void main() {
 
     test('should handle component generation', () async {
       final bricks = await templateManager.getAvailableBricks();
-      
+
       // Skip if no bricks available
       if (bricks.isEmpty) {
         return;
@@ -264,11 +275,10 @@ void main() {
       expect(result, isA<TemplateGenerationResult>());
     });
 
-    test('should maintain backward compatibility with legacy methods',
-        () async {
+    test('should maintain backward compatibility with legacy methods', () async {
       // Test that the legacy getAvailableTemplates method still works
       final templates = await templateManager.getAvailableTemplates();
-      
+
       // Integration test may have no templates if templates directory doesn't exist
       if (templates.isEmpty) {
         // Allow test to pass if no templates available (integration requirement)
@@ -303,7 +313,9 @@ void main() {
 
       expect(result, isA<TemplateGenerationFailure>());
       expect(
-          (result as TemplateGenerationFailure).error, contains('not found'));
+        (result as TemplateGenerationFailure).error,
+        contains('not found'),
+      );
     });
   });
 }

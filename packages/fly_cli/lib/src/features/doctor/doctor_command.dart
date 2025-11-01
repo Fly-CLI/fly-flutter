@@ -1,28 +1,25 @@
-import 'dart:io';
-
 import 'package:args/args.dart' hide OptionType;
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart' show CommandDefinition, CommandExample, OptionDefinition;
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart'
+    show CommandDefinition, CommandExample, OptionDefinition;
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/features/doctor/checks/dart_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/checks/flutter_sdk_check.dart';
-import 'package:fly_cli/src/features/doctor/checks/network_check.dart';
 import 'package:fly_cli/src/features/doctor/checks/platform_tools_check.dart';
-import 'package:fly_cli/src/features/doctor/checks/template_check.dart';
 
 /// DoctorCommand using new architecture
 class DoctorCommand extends FlyCommand {
   DoctorCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory DoctorCommand.create(CommandContext context) => DoctorCommand(context);
+  factory DoctorCommand.create(CommandContext context) =>
+      DoctorCommand(context);
 
   @override
   String get name => 'doctor';
@@ -32,48 +29,48 @@ class DoctorCommand extends FlyCommand {
 
   @override
   CommandDefinition? get metadata => CommandDefinition(
-    name: name,
-    description: description,
-    options: [
-      const OptionDefinition(
-        name: 'fix',
-        description: 'Attempt to fix common issues automatically',
-      ),
-    ],
-    examples: [
-      const CommandExample(
-        command: 'fly doctor',
-        description: 'Check system setup and show status',
-      ),
-      const CommandExample(
-        command: 'fly doctor --fix',
-        description: 'Check system setup and attempt to fix issues',
-      ),
-    ],
-  );
+        name: name,
+        description: description,
+        options: [
+          const OptionDefinition(
+            name: 'fix',
+            description: 'Attempt to fix common issues automatically',
+          ),
+        ],
+        examples: [
+          const CommandExample(
+            command: 'fly doctor',
+            description: 'Check system setup and show status',
+          ),
+          const CommandExample(
+            command: 'fly doctor --fix',
+            description: 'Check system setup and attempt to fix issues',
+          ),
+        ],
+      );
 
   @override
   ArgParser get argParser {
     final parser = super.argParser
-    ..addFlag(
-      'fix',
-      help: 'Attempt to fix common issues',
-      negatable: false,
-    );
+      ..addFlag(
+        'fix',
+        help: 'Attempt to fix common issues',
+        negatable: false,
+      );
     return parser;
   }
 
   @override
   List<CommandValidator> get validators => [
-    EnvironmentValidator(),
-    NetworkValidator(['pub.dev', 'flutter.dev']),
-  ];
+        EnvironmentValidator(),
+        NetworkValidator(['pub.dev', 'flutter.dev']),
+      ];
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
@@ -81,19 +78,19 @@ class DoctorCommand extends FlyCommand {
 
     try {
       logger.info('Running system diagnostics...');
-      
+
       // Use injected system checker
       final systemChecker = context.systemChecker;
       final checks = await _getSystemChecks();
       final results = await systemChecker.runAllChecks(checks);
-      
+
       final healthyChecks = results.where((result) => result.healthy).length;
       final totalChecks = results.length;
       final overallStatus = systemChecker.getOverallStatus(results);
-      
+
       // Convert results to JSON format
       final checksJson = results.map((result) => result.toJson()).toList();
-      
+
       if (overallStatus == SystemHealthStatus.healthy) {
         return CommandResult.success(
           command: 'doctor',
@@ -108,12 +105,19 @@ class DoctorCommand extends FlyCommand {
         );
       } else {
         final issues = results.where((result) => !result.healthy).toList();
-        final errorCount = issues.where((result) => result.severity == CheckSeverity.error).length;
-        final warningCount = issues.where((result) => result.severity == CheckSeverity.warning).length;
-        
+        final errorCount = issues
+            .where((result) => result.severity == CheckSeverity.error)
+            .length;
+        final warningCount = issues
+            .where((result) => result.severity == CheckSeverity.warning)
+            .length;
+
         return CommandResult.error(
-          message: 'Found ${issues.length} system issues ($errorCount errors, $warningCount warnings)',
-          suggestion: fix ? 'Attempting to fix issues...' : 'Run "fly doctor --fix" to attempt fixes',
+          message:
+              'Found ${issues.length} system issues ($errorCount errors, $warningCount warnings)',
+          suggestion: fix
+              ? 'Attempting to fix issues...'
+              : 'Run "fly doctor --fix" to attempt fixes',
           errorCode: ErrorCode.environmentError,
           context: ErrorContext.forSystemError(
             'system_diagnostics',
@@ -161,7 +165,8 @@ class DoctorCommand extends FlyCommand {
   }
 
   @override
-  Future<void> onAfterExecute(CommandContext context, CommandResult result) async {
+  Future<void> onAfterExecute(
+      CommandContext context, CommandResult result) async {
     if (result.success) {
       logger.info('🎉 All system checks passed!');
     } else {
@@ -170,7 +175,8 @@ class DoctorCommand extends FlyCommand {
   }
 
   @override
-  Future<void> onError(CommandContext context, Object error, StackTrace stackTrace) async {
+  Future<void> onError(
+      CommandContext context, Object error, StackTrace stackTrace) async {
     logger.err('💥 System check failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');

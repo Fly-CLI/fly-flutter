@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:yaml/yaml.dart';
-
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:yaml/yaml.dart';
 
 /// Exception thrown when manifest parsing fails
 class ManifestException implements Exception {
-
   ManifestException(this.message);
+
   final String message;
 
   @override
@@ -17,12 +16,12 @@ class ManifestException implements Exception {
 
 /// Configuration for a screen in the manifest
 class ScreenConfig {
-
   ScreenConfig({
     required this.name,
     this.type,
     this.features = const [],
   });
+
   final String name;
   final String? type;
   final List<String> features;
@@ -49,21 +48,21 @@ class ScreenConfig {
   }
 
   Map<String, dynamic> toJson() => {
-    'name': name,
-    if (type != null) 'type': type,
-    'features': features,
-  };
+        'name': name,
+        if (type != null) 'type': type,
+        'features': features,
+      };
 }
 
 /// Configuration for a service in the manifest
 class ServiceConfig {
-
   ServiceConfig({
     required this.name,
     this.apiBase,
     this.type,
     this.features = const [],
   });
+
   final String name;
   final String? apiBase;
   final String? type;
@@ -93,11 +92,11 @@ class ServiceConfig {
   }
 
   Map<String, dynamic> toJson() => {
-    'name': name,
-    if (apiBase != null) 'api_base': apiBase,
-    if (type != null) 'type': type,
-    'features': features,
-  };
+        'name': name,
+        if (apiBase != null) 'api_base': apiBase,
+        if (type != null) 'type': type,
+        'features': features,
+      };
 }
 
 /// Configuration map for service generation with Mason brick
@@ -153,14 +152,14 @@ class ServiceConfigMap {
 
   /// Convert to JSON map
   Map<String, dynamic> toJson() => {
-    'service_name': serviceName,
-    'feature': feature,
-    'service_type': serviceType,
-    'with_tests': withTests,
-    'with_mocks': withMocks,
-    'with_interceptors': withInterceptors,
-    'base_url': baseUrl,
-  };
+        'service_name': serviceName,
+        'feature': feature,
+        'service_type': serviceType,
+        'with_tests': withTests,
+        'with_mocks': withMocks,
+        'with_interceptors': withInterceptors,
+        'base_url': baseUrl,
+      };
 
   /// Convert to JSON string
   String toJsonString() => jsonEncode(toJson());
@@ -172,15 +171,15 @@ class ServiceConfigMap {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ServiceConfigMap &&
-              runtimeType == other.runtimeType &&
-              serviceName == other.serviceName &&
-              feature == other.feature &&
-              serviceType == other.serviceType &&
-              withTests == other.withTests &&
-              withMocks == other.withMocks &&
-              withInterceptors == other.withInterceptors &&
-              baseUrl == other.baseUrl;
+      other is ServiceConfigMap &&
+          runtimeType == other.runtimeType &&
+          serviceName == other.serviceName &&
+          feature == other.feature &&
+          serviceType == other.serviceType &&
+          withTests == other.withTests &&
+          withMocks == other.withMocks &&
+          withInterceptors == other.withInterceptors &&
+          baseUrl == other.baseUrl;
 
   @override
   int get hashCode =>
@@ -195,7 +194,6 @@ class ServiceConfigMap {
 
 /// Configuration section of the manifest
 class ManifestConfig {
-
   const ManifestConfig({
     this.minSdkVersion,
     this.targetSdkVersion,
@@ -205,6 +203,7 @@ class ManifestConfig {
     this.generateContext = true,
     this.includeExamples = false,
   });
+
   final int? minSdkVersion;
   final int? targetSdkVersion;
   final String? iosDeploymentTarget;
@@ -234,23 +233,23 @@ class ManifestConfig {
   }
 
   Map<String, dynamic> toJson() => {
-    if (minSdkVersion != null) 'min_sdk_version': minSdkVersion,
-    if (targetSdkVersion != null) 'target_sdk_version': targetSdkVersion,
-    if (iosDeploymentTarget != null) 'ios_deployment_target': iosDeploymentTarget,
-    'code_generation': {
-      'generate_tests': generateTests,
-      'generate_docs': generateDocs,
-    },
-    'ai_integration': {
-      'generate_context': generateContext,
-      'include_examples': includeExamples,
-    },
-  };
+        if (minSdkVersion != null) 'min_sdk_version': minSdkVersion,
+        if (targetSdkVersion != null) 'target_sdk_version': targetSdkVersion,
+        if (iosDeploymentTarget != null)
+          'ios_deployment_target': iosDeploymentTarget,
+        'code_generation': {
+          'generate_tests': generateTests,
+          'generate_docs': generateDocs,
+        },
+        'ai_integration': {
+          'generate_context': generateContext,
+          'include_examples': includeExamples,
+        },
+      };
 }
 
 /// Main project manifest class
 class ProjectManifest {
-
   ProjectManifest({
     required this.name,
     required this.template,
@@ -262,6 +261,7 @@ class ProjectManifest {
     this.packages = const [],
     this.config = const ManifestConfig(),
   });
+
   final String name;
   final String template;
   final String organization;
@@ -308,18 +308,28 @@ class ProjectManifest {
     // Parse template
     final template = yaml['template'] as String;
     if (!['minimal', 'riverpod'].contains(template)) {
-      throw ManifestException('Invalid template: $template. Must be "minimal" or "riverpod"');
+      throw ManifestException(
+          'Invalid template: $template. Must be "minimal" or "riverpod"');
     }
 
     // Parse organization
     final organization = yaml['organization'] as String? ?? 'com.example';
 
     // Parse platforms
-    final platforms = (yaml['platforms'] as List?)?.cast<String>() ?? ['ios', 'android'];
-    final validPlatforms = ['ios', 'android', 'web', 'macos', 'windows', 'linux'];
+    final platforms =
+        (yaml['platforms'] as List?)?.cast<String>() ?? ['ios', 'android'];
+    final validPlatforms = [
+      'ios',
+      'android',
+      'web',
+      'macos',
+      'windows',
+      'linux'
+    ];
     for (final platform in platforms) {
       if (!validPlatforms.contains(platform)) {
-        throw ManifestException('Invalid platform: $platform. Must be one of: ${validPlatforms.join(', ')}');
+        throw ManifestException(
+            'Invalid platform: $platform. Must be one of: ${validPlatforms.join(', ')}');
       }
     }
 
@@ -366,12 +376,12 @@ class ProjectManifest {
 
   /// Convert to TemplateVariables for project generation
   TemplateVariables toTemplateVariables() => TemplateVariables(
-    projectName: name,
-    organization: organization,
-    platforms: platforms,
-    description: description ?? 'A new Flutter project',
-    features: _extractFeatures(),
-  );
+        projectName: name,
+        organization: organization,
+        platforms: platforms,
+        description: description ?? 'A new Flutter project',
+        features: _extractFeatures(),
+      );
 
   /// Extract features from screens and services
   List<String> _extractFeatures() {
@@ -390,16 +400,16 @@ class ProjectManifest {
 
   /// Convert to JSON for debugging/testing
   Map<String, dynamic> toJson() => {
-    'name': name,
-    'template': template,
-    'organization': organization,
-    if (description != null) 'description': description,
-    'platforms': platforms,
-    'screens': screens.map((s) => s.toJson()).toList(),
-    'services': services.map((s) => s.toJson()).toList(),
-    'packages': packages,
-    'config': config.toJson(),
-  };
+        'name': name,
+        'template': template,
+        'organization': organization,
+        if (description != null) 'description': description,
+        'platforms': platforms,
+        'screens': screens.map((s) => s.toJson()).toList(),
+        'services': services.map((s) => s.toJson()).toList(),
+        'packages': packages,
+        'config': config.toJson(),
+      };
 
   /// Validate project name format
   static bool _isValidProjectName(String name) {

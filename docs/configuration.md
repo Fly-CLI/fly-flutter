@@ -17,6 +17,7 @@ LOG_FORMAT=human       # human|json
 ```
 
 Notes:
+
 - `FLY_OUTPUT_DIR` is respected by `EnvironmentManager` and the CLI.
 - Sensitive values should never be committed. Use your secret manager in CI.
 

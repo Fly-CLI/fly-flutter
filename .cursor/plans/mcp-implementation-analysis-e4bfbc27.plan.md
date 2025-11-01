@@ -1,9 +1,13 @@
 <!-- e4bfbc27-aacf-4d47-a60f-ffb6a0aab391 dc398992-2201-4ba4-8690-c7be97ca11fb -->
+
 # MCP Implementation Deep Analysis Report
 
 ## Executive Summary
 
-The Fly CLI MCP (Model Context Protocol) implementation is a **production-ready MVP** with a solid foundation covering core protocol features. The implementation includes 7 tools, 2 resource types, and 1 prompt, with comprehensive safety features, cancellation support, and proper error handling. However, several gaps exist in tool coverage, resource types, advanced features, and testing.
+The Fly CLI MCP (Model Context Protocol) implementation is a **production-ready MVP** with a solid
+foundation covering core protocol features. The implementation includes 7 tools, 2 resource types,
+and 1 prompt, with comprehensive safety features, cancellation support, and proper error handling.
+However, several gaps exist in tool coverage, resource types, advanced features, and testing.
 
 **Status**: MVP Complete, Expansion Phase Ready
 
@@ -47,7 +51,7 @@ The MCP implementation follows a clean layered architecture:
 #### ✅ Tools (7/7 Phase 1 Complete)
 
 1. `fly.echo` - Diagnostic/connectivity test
-2. `flutter.doctor` - Flutter environment diagnostics  
+2. `flutter.doctor` - Flutter environment diagnostics
 3. `fly.template.list` - List available templates
 4. `fly.template.apply` - Apply template to workspace
 5. `flutter.create` - Create Flutter project
@@ -67,18 +71,18 @@ The MCP implementation follows a clean layered architecture:
 
 1. **Workspace Resources** (`workspace://`)
 
-   - Read-only file access
-   - Path sandboxing (security)
-   - Pagination support
-   - Byte-range reads
-   - Allowlisted file types (.dart, .yaml, .gradle, .swift, etc.)
+    - Read-only file access
+    - Path sandboxing (security)
+    - Pagination support
+    - Byte-range reads
+    - Allowlisted file types (.dart, .yaml, .gradle, .swift, etc.)
 
 2. **Log Resources** (`logs://run`, `logs://build`)
 
-   - Bounded buffers (100KB per log, 1000 entries)
-   - Pagination support
-   - Real-time streaming from tool execution
-   - Circular buffer behavior
+    - Bounded buffers (100KB per log, 1000 entries)
+    - Pagination support
+    - Real-time streaming from tool execution
+    - Circular buffer behavior
 
 #### ✅ Prompts (1/1 MVP Complete)
 
@@ -199,8 +203,8 @@ The MCP implementation follows a clean layered architecture:
 **Current Test Coverage**:
 
 - `packages/fly_mcp_server/test/`: Only 2 test files
-  - `concurrency_limiter_test.dart`
-  - `timeout_manager_test.dart`
+    - `concurrency_limiter_test.dart`
+    - `timeout_manager_test.dart`
 - `tool/ci/mcp_conformance_test.dart`: Basic protocol conformance tests
 
 **Missing Test Coverage**:
@@ -277,10 +281,10 @@ The MCP implementation follows a clean layered architecture:
 
 - **Issue**: Limited metrics and tracing
 - **Impact**: Difficult to debug production issues
-- **Recommendation**: 
-  - Add structured logging with correlation IDs
-  - Metrics for tool execution times, success rates
-  - Distributed tracing support
+- **Recommendation**:
+    - Add structured logging with correlation IDs
+    - Metrics for tool execution times, success rates
+    - Distributed tracing support
 
 **4. Performance**
 
@@ -300,7 +304,8 @@ The MCP implementation follows a clean layered architecture:
 
 - **Issue**: Some tools use strategy pattern, others direct handlers
 - **Impact**: Inconsistent architecture
-- **Recommendation**: Migrate all tools to strategy pattern (already partially done via `McpToolType`)
+- **Recommendation**: Migrate all tools to strategy pattern (already partially done via
+  `McpToolType`)
 
 **3. Error Code Consistency**
 
@@ -479,63 +484,65 @@ The MCP implementation follows a clean layered architecture:
 
 1. **Add Missing High-Priority Tools**:
 
-   - `fly.add.screen` (2-3 days)
-   - `fly.add.service` (2-3 days)
-   - `flutter.devices.list` (1-2 days)
+    - `fly.add.screen` (2-3 days)
+    - `fly.add.service` (2-3 days)
+    - `flutter.devices.list` (1-2 days)
 
 2. **Improve Test Coverage**:
 
-   - Add unit tests for tool strategies (5-7 test files)
-   - Add integration tests for resource providers (2 test files)
-   - Add error handling tests (2-3 test files)
+    - Add unit tests for tool strategies (5-7 test files)
+    - Add integration tests for resource providers (2 test files)
+    - Add error handling tests (2-3 test files)
 
 3. **Enhance Error Messages**:
 
-   - Add error suggestions to tool handlers
-   - Improve validation error messages
+    - Add error suggestions to tool handlers
+    - Improve validation error messages
 
 ### Short-Term (Next Month)
 
 1. **Expand Resource Types**:
 
-   - Implement `manifest://` resource (2-3 days)
-   - Implement `dependencies://` resource (3-4 days)
+    - Implement `manifest://` resource (2-3 days)
+    - Implement `dependencies://` resource (3-4 days)
 
 2. **Add More Prompts**:
 
-   - `fly.scaffold.feature` (2-3 days)
-   - `fly.scaffold.api_client` (2 days)
+    - `fly.scaffold.feature` (2-3 days)
+    - `fly.scaffold.api_client` (2 days)
 
 3. **Add Flutter Tools**:
 
-   - `flutter.test` (2-3 days)
-   - `flutter.devices.list` (1-2 days)
+    - `flutter.test` (2-3 days)
+    - `flutter.devices.list` (1-2 days)
 
 ### Medium-Term (Next Quarter)
 
 1. **Advanced Features**:
 
-   - Resource subscriptions
-   - Tool composition/workflows
-   - HTTP/WebSocket transport
+    - Resource subscriptions
+    - Tool composition/workflows
+    - HTTP/WebSocket transport
 
 2. **Developer Experience**:
 
-   - Interactive tool tester
-   - Enhanced debugging mode
-   - Generated API documentation
+    - Interactive tool tester
+    - Enhanced debugging mode
+    - Generated API documentation
 
 3. **Security**:
 
-   - Output verification
-   - Audit logging
-   - Enhanced rate limiting
+    - Output verification
+    - Audit logging
+    - Enhanced rate limiting
 
 ---
 
 ## 6. Conclusion
 
-The Fly CLI MCP implementation is **solid and production-ready** for its current scope. The foundation is well-architected with proper separation of concerns, comprehensive safety features, and good protocol compliance.
+The Fly CLI MCP implementation is **solid and production-ready** for its current scope. The
+foundation is well-architected with proper separation of concerns, comprehensive safety features,
+and good protocol compliance.
 
 **Strengths**:
 
@@ -555,14 +562,18 @@ The Fly CLI MCP implementation is **solid and production-ready** for its current
 
 **Overall Assessment**: **MVP Complete, Expansion Phase Ready**
 
-The implementation provides a strong foundation for expansion. With focused effort on the priority recommendations, the MCP server can achieve comprehensive feature parity with the CLI while maintaining the same quality standards.
+The implementation provides a strong foundation for expansion. With focused effort on the priority
+recommendations, the MCP server can achieve comprehensive feature parity with the CLI while
+maintaining the same quality standards.
 
-**Next Steps**: Prioritize tool expansion and test coverage improvements while maintaining the current quality bar.
+**Next Steps**: Prioritize tool expansion and test coverage improvements while maintaining the
+current quality bar.
 
 ### To-dos
 
 - [ ] Deep analysis of current MCP implementation covering architecture, features, and status
 - [ ] Identify missing tools, resources, prompts, and protocol features
 - [ ] Document areas for improvement in architecture, code quality, and features
-- [ ] Define necessary reports for tracking implementation status, security, performance, and adoption
+- [ ] Define necessary reports for tracking implementation status, security, performance, and
+  adoption
 - [ ] Create prioritized recommendations for immediate, short-term, and medium-term improvements

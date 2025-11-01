@@ -16,7 +16,8 @@ void main() {
       adapter.enqueueError(DioException(
         requestOptions: RequestOptions(path: '/post'),
         type: DioExceptionType.badResponse,
-        response: Response(requestOptions: RequestOptions(path: '/post'), statusCode: 500),
+        response: Response(
+            requestOptions: RequestOptions(path: '/post'), statusCode: 500),
       ));
 
       expect(
@@ -35,7 +36,8 @@ void main() {
       adapter.enqueueError(DioException(
         requestOptions: RequestOptions(path: '/post'),
         type: DioExceptionType.badResponse,
-        response: Response(requestOptions: RequestOptions(path: '/post'), statusCode: 500),
+        response: Response(
+            requestOptions: RequestOptions(path: '/post'), statusCode: 500),
       ));
       // Second attempt -> 200
       adapter.enqueueResponse(ResponseBody.fromString('ok', 200));
@@ -48,7 +50,8 @@ void main() {
       expect(res.statusCode, 200);
     });
 
-    test('honors Retry-After header for 429/503 (no assertion on time)', () async {
+    test('honors Retry-After header for 429/503 (no assertion on time)',
+        () async {
       final dio = Dio();
       final adapter = QueuedMockAdapter();
       dio.httpClientAdapter = adapter;
@@ -61,7 +64,9 @@ void main() {
         response: Response(
           requestOptions: RequestOptions(path: '/get'),
           statusCode: 429,
-          headers: Headers.fromMap({'retry-after': ['1']}),
+          headers: Headers.fromMap({
+            'retry-after': ['1']
+          }),
         ),
       ));
       // Second attempt -> 200
@@ -72,5 +77,3 @@ void main() {
     });
   });
 }
-
-

@@ -28,23 +28,28 @@ void main() {
     });
 
     group('getAvailableTemplates', () {
-      test('returns empty list when templates directory does not exist', () async {
-        final templates = await templateManager.getAvailableTemplates();
-        expect(templates, isEmpty);
-      });
+      test(
+        'returns empty list when templates directory does not exist',
+        () async {
+          final templates = await templateManager.getAvailableTemplates();
+          expect(templates, isEmpty);
+        },
+      );
 
-      test('returns templates when directory exists with valid templates (flat structure)', () async {
-        // Create a mock template directory (legacy flat structure)
-        final templateDir = Directory('${tempDir.path}/minimal');
-        templateDir.createSync();
-        
-        // Create __brick__ subdirectory
-        final brickDir = Directory('${templateDir.path}/__brick__');
-        brickDir.createSync();
-        
-        // Create template.yaml
-        final templateYaml = File('${templateDir.path}/template.yaml');
-        templateYaml.writeAsStringSync('''
+      test(
+        'returns templates when directory exists with valid templates (flat structure)',
+        () async {
+          // Create a mock template directory (legacy flat structure)
+          final templateDir = Directory('${tempDir.path}/minimal');
+          templateDir.createSync();
+
+          // Create __brick__ subdirectory
+          final brickDir = Directory('${templateDir.path}/__brick__');
+          brickDir.createSync();
+
+          // Create template.yaml
+          final templateYaml = File('${templateDir.path}/template.yaml');
+          templateYaml.writeAsStringSync('''
 name: minimal
 version: 1.0.0
 description: Minimal template
@@ -55,28 +60,31 @@ features: []
 packages: []
 ''');
 
-        final templates = await templateManager.getAvailableTemplates();
-        expect(templates, hasLength(1));
-        expect(templates.first.name, 'minimal');
-        expect(templates.first.version, '1.0.0');
-        expect(templates.first.description, 'Minimal template');
-      });
+          final templates = await templateManager.getAvailableTemplates();
+          expect(templates, hasLength(1));
+          expect(templates.first.name, 'minimal');
+          expect(templates.first.version, '1.0.0');
+          expect(templates.first.description, 'Minimal template');
+        },
+      );
 
-      test('returns templates when subdirectory structure exists with valid templates', () async {
-        // Create subdirectory structure (new structure)
-        final projectsDir = Directory('${tempDir.path}/projects');
-        projectsDir.createSync();
-        
-        final templateDir = Directory('${projectsDir.path}/minimal');
-        templateDir.createSync();
-        
-        // Create __brick__ subdirectory
-        final brickDir = Directory('${templateDir.path}/__brick__');
-        brickDir.createSync();
-        
-        // Create template.yaml
-        final templateYaml = File('${templateDir.path}/template.yaml');
-        templateYaml.writeAsStringSync('''
+      test(
+        'returns templates when subdirectory structure exists with valid templates',
+        () async {
+          // Create subdirectory structure (new structure)
+          final projectsDir = Directory('${tempDir.path}/projects');
+          projectsDir.createSync();
+
+          final templateDir = Directory('${projectsDir.path}/minimal');
+          templateDir.createSync();
+
+          // Create __brick__ subdirectory
+          final brickDir = Directory('${templateDir.path}/__brick__');
+          brickDir.createSync();
+
+          // Create template.yaml
+          final templateYaml = File('${templateDir.path}/template.yaml');
+          templateYaml.writeAsStringSync('''
 name: minimal
 version: 1.0.0
 description: Minimal template
@@ -87,12 +95,13 @@ features: []
 packages: []
 ''');
 
-        final templates = await templateManager.getAvailableTemplates();
-        expect(templates, hasLength(1));
-        expect(templates.first.name, 'minimal');
-        expect(templates.first.version, '1.0.0');
-        expect(templates.first.description, 'Minimal template');
-      });
+          final templates = await templateManager.getAvailableTemplates();
+          expect(templates, hasLength(1));
+          expect(templates.first.name, 'minimal');
+          expect(templates.first.version, '1.0.0');
+          expect(templates.first.description, 'Minimal template');
+        },
+      );
 
       test('skips directories without template.yaml', () async {
         // Create a directory without template.yaml
@@ -110,18 +119,20 @@ packages: []
         expect(template, isNull);
       });
 
-      test('returns template info when template exists (flat structure)', () async {
-        // Create a mock template directory (legacy flat structure)
-        final templateDir = Directory('${tempDir.path}/minimal');
-        templateDir.createSync();
-        
-        // Create __brick__ subdirectory
-        final brickDir = Directory('${templateDir.path}/__brick__');
-        brickDir.createSync();
-        
-        // Create template.yaml
-        final templateYaml = File('${templateDir.path}/template.yaml');
-        templateYaml.writeAsStringSync('''
+      test(
+        'returns template info when template exists (flat structure)',
+        () async {
+          // Create a mock template directory (legacy flat structure)
+          final templateDir = Directory('${tempDir.path}/minimal');
+          templateDir.createSync();
+
+          // Create __brick__ subdirectory
+          final brickDir = Directory('${templateDir.path}/__brick__');
+          brickDir.createSync();
+
+          // Create template.yaml
+          final templateYaml = File('${templateDir.path}/template.yaml');
+          templateYaml.writeAsStringSync('''
 name: minimal
 version: 1.0.0
 description: Minimal template
@@ -132,27 +143,30 @@ features: []
 packages: []
 ''');
 
-        final template = await templateManager.getTemplate('minimal');
-        expect(template, isNotNull);
-        expect(template!.name, 'minimal');
-        expect(template.version, '1.0.0');
-      });
+          final template = await templateManager.getTemplate('minimal');
+          expect(template, isNotNull);
+          expect(template!.name, 'minimal');
+          expect(template.version, '1.0.0');
+        },
+      );
 
-      test('returns template info when template exists in projects subdirectory', () async {
-        // Create subdirectory structure (new structure)
-        final projectsDir = Directory('${tempDir.path}/projects');
-        projectsDir.createSync();
-        
-        final templateDir = Directory('${projectsDir.path}/minimal');
-        templateDir.createSync();
-        
-        // Create __brick__ subdirectory
-        final brickDir = Directory('${templateDir.path}/__brick__');
-        brickDir.createSync();
-        
-        // Create template.yaml
-        final templateYaml = File('${templateDir.path}/template.yaml');
-        templateYaml.writeAsStringSync('''
+      test(
+        'returns template info when template exists in projects subdirectory',
+        () async {
+          // Create subdirectory structure (new structure)
+          final projectsDir = Directory('${tempDir.path}/projects');
+          projectsDir.createSync();
+
+          final templateDir = Directory('${projectsDir.path}/minimal');
+          templateDir.createSync();
+
+          // Create __brick__ subdirectory
+          final brickDir = Directory('${templateDir.path}/__brick__');
+          brickDir.createSync();
+
+          // Create template.yaml
+          final templateYaml = File('${templateDir.path}/template.yaml');
+          templateYaml.writeAsStringSync('''
 name: minimal
 version: 1.0.0
 description: Minimal template
@@ -163,11 +177,12 @@ features: []
 packages: []
 ''');
 
-        final template = await templateManager.getTemplate('minimal');
-        expect(template, isNotNull);
-        expect(template!.name, 'minimal');
-        expect(template.version, '1.0.0');
-      });
+          final template = await templateManager.getTemplate('minimal');
+          expect(template, isNotNull);
+          expect(template!.name, 'minimal');
+          expect(template.version, '1.0.0');
+        },
+      );
     });
 
     group('validateTemplate', () {
@@ -181,11 +196,11 @@ packages: []
         // Create a mock template directory
         final templateDir = Directory('${tempDir.path}/minimal');
         templateDir.createSync();
-        
+
         // Create __brick__ subdirectory
         final brickDir = Directory('${templateDir.path}/__brick__');
         brickDir.createSync();
-        
+
         // Create template.yaml with missing required fields
         final templateYaml = File('${templateDir.path}/template.yaml');
         templateYaml.writeAsStringSync('''
@@ -227,7 +242,7 @@ packages: []
       );
 
       final masonVars = variables.toMasonVars();
-      
+
       expect(masonVars['project_name'], 'My App');
       expect(masonVars['organization'], 'com.example');
       expect(masonVars['platforms'], ['ios', 'android']);
@@ -246,7 +261,7 @@ packages: []
       );
 
       final masonVars = variables.toMasonVars();
-      
+
       expect(masonVars['project_name'], '');
       expect(masonVars['project_name_snake'], '');
       expect(masonVars['project_name_camel'], '');
@@ -261,7 +276,7 @@ packages: []
       );
 
       final masonVars = variables.toMasonVars();
-      
+
       expect(masonVars['project_name_snake'], 'my_awesome_app');
       expect(masonVars['project_name_camel'], 'myAwesomeApp');
       expect(masonVars['project_name_pascal'], 'MyAwesomeApp');
@@ -293,7 +308,7 @@ packages: []
       };
 
       final templateInfo = TemplateInfo.fromYaml(yaml, '/path/to/template');
-      
+
       expect(templateInfo.name, 'test_template');
       expect(templateInfo.version, '2.0.0');
       expect(templateInfo.description, 'Test template');
@@ -313,7 +328,7 @@ packages: []
       };
 
       final templateInfo = TemplateInfo.fromYaml(yaml, '/path/to/template');
-      
+
       expect(templateInfo.name, 'minimal_template');
       expect(templateInfo.version, '1.0.0'); // default
       expect(templateInfo.description, ''); // default

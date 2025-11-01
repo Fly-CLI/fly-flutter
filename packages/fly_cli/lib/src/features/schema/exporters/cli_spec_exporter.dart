@@ -1,5 +1,6 @@
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
+
 import 'schema_exporter.dart';
 
 /// Custom CLI specification exporter
@@ -29,7 +30,7 @@ class CliSpecExporter extends SchemaExporter {
     for (final entry in commands.entries) {
       final commandName = entry.key;
       final command = entry.value;
-      
+
       spec['commands'][commandName] = _buildCommandSpec(command, config);
     }
 
@@ -48,7 +49,8 @@ class CliSpecExporter extends SchemaExporter {
   }
 
   /// Build CLI spec for a single command
-  Map<String, dynamic> _buildCommandSpec(CommandDefinition command, ExportConfig config) {
+  Map<String, dynamic> _buildCommandSpec(
+      CommandDefinition command, ExportConfig config) {
     final spec = <String, dynamic>{
       'name': command.name,
       'description': command.description,
@@ -67,15 +69,20 @@ class CliSpecExporter extends SchemaExporter {
 
     // Add subcommands
     if (command.subcommands.isNotEmpty) {
-      spec['subcommands'] = command.subcommands.map(_buildSubcommandSpec).toList();
+      spec['subcommands'] =
+          command.subcommands.map(_buildSubcommandSpec).toList();
     }
 
     // Add examples
     if (config.includeExamples && command.examples.isNotEmpty) {
-      spec['examples'] = command.examples.map((e) => {
-        'command': e.command,
-        'description': e.description,
-      },).toList();
+      spec['examples'] = command.examples
+          .map(
+            (e) => {
+              'command': e.command,
+              'description': e.description,
+            },
+          )
+          .toList();
     }
 
     // Add completion hints
@@ -89,7 +96,7 @@ class CliSpecExporter extends SchemaExporter {
     final spec = <String, dynamic>{
       'name': arg.name,
       'description': arg.description,
-        'type': 'string', // Arguments are always strings
+      'type': 'string', // Arguments are always strings
       'required': arg.required,
     };
 
@@ -129,10 +136,11 @@ class CliSpecExporter extends SchemaExporter {
   }
 
   /// Build subcommand specification
-  Map<String, dynamic> _buildSubcommandSpec(SubcommandDefinition subcommand) => {
-      'name': subcommand.name,
-      'description': subcommand.description,
-    };
+  Map<String, dynamic> _buildSubcommandSpec(SubcommandDefinition subcommand) =>
+      {
+        'name': subcommand.name,
+        'description': subcommand.description,
+      };
 
   /// Build completion specification
   Map<String, dynamic> _buildCompletionSpec(CommandDefinition command) {
@@ -142,26 +150,35 @@ class CliSpecExporter extends SchemaExporter {
 
     // Add argument completions
     if (command.arguments.isNotEmpty) {
-      completion['arguments'] = command.arguments.map((a) => {
-        'name': a.name,
-          'type': 'string', // Arguments are always strings
-        if (a.allowedValues != null) 'values': a.allowedValues,
-      },).toList();
+      completion['arguments'] = command.arguments
+          .map(
+            (a) => {
+              'name': a.name,
+              'type': 'string', // Arguments are always strings
+              if (a.allowedValues != null) 'values': a.allowedValues,
+            },
+          )
+          .toList();
     }
 
     // Add option completions
     if (command.options.isNotEmpty) {
-      completion['options'] = command.options.map((o) => {
-        'name': o.name,
-        'type': o.type.name,
-        if (o.short != null) 'short': o.short,
-        if (o.allowedValues != null) 'values': o.allowedValues,
-      },).toList();
+      completion['options'] = command.options
+          .map(
+            (o) => {
+              'name': o.name,
+              'type': o.type.name,
+              if (o.short != null) 'short': o.short,
+              if (o.allowedValues != null) 'values': o.allowedValues,
+            },
+          )
+          .toList();
     }
 
     // Add subcommand completions
     if (command.subcommands.isNotEmpty) {
-      completion['subcommands'] = command.subcommands.map((s) => s.name).toList();
+      completion['subcommands'] =
+          command.subcommands.map((s) => s.name).toList();
     }
 
     return completion;

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 /// Centralized helper for running CLI commands in tests with proper environment setup
@@ -6,7 +7,7 @@ class CliTestHelper {
   final Directory testOutputDir;
 
   CliTestHelper(this.testOutputDir);
-  
+
   /// Run a CLI command with proper environment setup
   Future<ProcessResult> runCliCommand(
     List<String> arguments, {
@@ -20,22 +21,22 @@ class CliTestHelper {
       'bin',
       'fly.dart',
     );
-    
+
     // Prepare environment variables
     final environment = <String, String>{
-      'FLY_OUTPUT_DIR': testOutputDir.path,  // Force CLI to use test directory
+      'FLY_OUTPUT_DIR': testOutputDir.path, // Force CLI to use test directory
       ...?additionalEnvironment,
     };
-    
-        // Run command
-        return Process.run(
-          'dart',
-          ['run', flyDartPath, ...arguments],
-          workingDirectory: testOutputDir.path,
-          environment: environment,
-        );
+
+    // Run command
+    return Process.run(
+      'dart',
+      ['run', flyDartPath, ...arguments],
+      workingDirectory: testOutputDir.path,
+      environment: environment,
+    );
   }
-  
+
   /// Create a project using the CLI
   Future<ProcessResult> createProject(
     String projectName, {
@@ -50,13 +51,14 @@ class CliTestHelper {
       '--template=$template',
       if (organization != null) '--organization=$organization',
       if (platforms != null) '--platforms=${platforms.join(',')}',
-      '--output-dir', testOutputDir.path,
+      '--output-dir',
+      testOutputDir.path,
       if (jsonOutput) '--output=json',
     ];
-    
+
     return await runCliCommand(args);
   }
-  
+
   /// Add a screen using the CLI
   Future<ProcessResult> addScreen(
     String screenName, {
@@ -74,13 +76,14 @@ class CliTestHelper {
       '--type=$type',
       if (withViewModel) '--with-viewmodel',
       if (withTests) '--with-tests',
-      '--output-dir', testOutputDir.path,
+      '--output-dir',
+      testOutputDir.path,
       if (jsonOutput) '--output=json',
     ];
-    
+
     return await runCliCommand(args);
   }
-  
+
   /// Add a service using the CLI
   Future<ProcessResult> addService(
     String serviceName, {
@@ -100,13 +103,14 @@ class CliTestHelper {
       if (withTests) '--with-tests',
       if (withMocks) '--with-mocks',
       if (baseUrl != null) '--base-url=$baseUrl',
-      '--output-dir', testOutputDir.path,
+      '--output-dir',
+      testOutputDir.path,
       if (jsonOutput) '--output=json',
     ];
-    
+
     return await runCliCommand(args);
   }
-  
+
   /// Run any CLI command with environment variable set
   Future<ProcessResult> runCommand(
     String command, {
@@ -116,10 +120,11 @@ class CliTestHelper {
     final arguments = [
       command,
       ...args,
-      '--output-dir', testOutputDir.path,
+      '--output-dir',
+      testOutputDir.path,
       if (jsonOutput) '--output=json',
     ];
-    
+
     return await runCliCommand(arguments);
   }
 }

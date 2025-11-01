@@ -5,7 +5,8 @@ import '../formatter.dart';
 import '../log_event.dart';
 
 class FileAppender implements Appender {
-  FileAppender(this.formatter, {required this.path, this.maxBytes = 5 * 1024 * 1024, this.maxFiles = 3});
+  FileAppender(this.formatter,
+      {required this.path, this.maxBytes = 5 * 1024 * 1024, this.maxFiles = 3});
 
   final LogFormatter formatter;
   final String path;
@@ -71,5 +72,3 @@ class FileAppender implements Appender {
     _sink = null;
   }
 }
-
-

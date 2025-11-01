@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
 
 import 'package:fly_cli/src/features/context/context_generator.dart';
 import 'package:fly_cli/src/features/context/models.dart';
+import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
+
 import '../../helpers/analysis_test_fixtures.dart';
 import '../../helpers/mock_logger.dart';
 
@@ -26,7 +27,8 @@ void main() {
 
     group('Complete Analysis Workflow', () {
       test('should perform complete analysis on minimal project', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -83,7 +85,8 @@ void main() {
       });
 
       test('should perform complete analysis on complex project', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -163,7 +166,8 @@ void main() {
       });
 
       test('should handle problematic project with conflicts', () async {
-        final projectDir = await AnalysisTestFixtures.createProblematicProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createProblematicProject(tempDir);
         const config = ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -177,8 +181,10 @@ void main() {
         final dependencies = context['dependencies'] as Map<String, dynamic>;
         final conflicts = dependencies['conflicts'] as List<dynamic>;
         expect(conflicts.isNotEmpty, isTrue);
-        expect(conflicts.any((c) => c.toString().contains('state management')), isTrue);
-        expect(conflicts.any((c) => c.toString().contains('HTTP client')), isTrue);
+        expect(conflicts.any((c) => c.toString().contains('state management')),
+            isTrue);
+        expect(
+            conflicts.any((c) => c.toString().contains('HTTP client')), isTrue);
 
         // Verify warnings section
         final warnings = dependencies['warnings'] as List<dynamic>;
@@ -200,7 +206,8 @@ void main() {
 
     group('Configuration Variations', () {
       test('should handle minimal configuration', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: false,
           includeDependencies: false,
@@ -225,7 +232,8 @@ void main() {
       });
 
       test('should handle code-only configuration', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: false,
@@ -249,7 +257,8 @@ void main() {
       });
 
       test('should handle dependencies-only configuration', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: false,
           includeDependencies: true,
@@ -272,7 +281,8 @@ void main() {
       });
 
       test('should handle architecture-only configuration', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: false,
           includeDependencies: false,
@@ -295,7 +305,8 @@ void main() {
       });
 
       test('should handle suggestions-only configuration', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: false,
           includeDependencies: false,
@@ -319,13 +330,15 @@ void main() {
 
     group('Performance and Scalability', () {
       test('should handle large project efficiently', () async {
-        final projectDir = await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createLargeProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
           includeArchitecture: true,
           includeSuggestions: true,
-          maxFiles: 20, // Limit files for performance
+          maxFiles: 20,
+          // Limit files for performance
           maxFileSize: 5000, // Limit file size
         );
 
@@ -334,7 +347,8 @@ void main() {
         stopwatch.stop();
 
         // Should complete within reasonable time
-        expect(stopwatch.elapsedMilliseconds, lessThan(30000)); // 30 seconds max
+        expect(
+            stopwatch.elapsedMilliseconds, lessThan(30000)); // 30 seconds max
 
         // Should have processed files within limits
         final code = context['code'] as Map<String, dynamic>;
@@ -349,14 +363,16 @@ void main() {
       });
 
       test('should handle concurrent analysis requests', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
         );
 
         // Run multiple analyses concurrently
-        final futures = List.generate(5, (_) => generator.generate(projectDir, config));
+        final futures =
+            List.generate(5, (_) => generator.generate(projectDir, config));
         final results = await Future.wait(futures);
 
         // All should succeed
@@ -372,13 +388,16 @@ void main() {
         // Results should be consistent
         final firstResult = results.first;
         for (final result in results.skip(1)) {
-          expect(result['project']['name'], equals(firstResult['project']['name']));
-          expect(result['project']['type'], equals(firstResult['project']['type']));
+          expect(result['project']['name'],
+              equals(firstResult['project']['name']));
+          expect(result['project']['type'],
+              equals(firstResult['project']['type']));
         }
       });
 
       test('should handle memory constraints gracefully', () async {
-        final projectDir = await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createLargeProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           maxFiles: 5, // Very small limit
@@ -411,7 +430,8 @@ void main() {
         await projectDir.create(recursive: true);
 
         final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
-        await pubspecFile.writeAsString(AnalysisTestFixtures.minimalPubspecContent);
+        await pubspecFile
+            .writeAsString(AnalysisTestFixtures.minimalPubspecContent);
 
         final config = const ContextGeneratorConfig(
           includeCode: true,
@@ -443,7 +463,7 @@ void main() {
 
         // Should complete successfully with default/fallback values
         final context = await generator.generate(projectDir, config);
-        
+
         // Should still have basic sections
         expect(context.containsKey('project'), isTrue);
         final project = context['project'] as Map<String, dynamic>;
@@ -452,8 +472,9 @@ void main() {
       });
 
       test('should handle file access errors gracefully', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
-        
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+
         // Make pubspec.yaml unreadable by deleting it temporarily
         final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
         final tempPath = '${pubspecFile.path}.temp';
@@ -463,7 +484,7 @@ void main() {
 
         // Should complete successfully with default values when pubspec is missing
         final context = await generator.generate(projectDir, config);
-        
+
         // Should still have basic sections
         expect(context.containsKey('project'), isTrue);
         final project = context['project'] as Map<String, dynamic>;
@@ -474,9 +495,11 @@ void main() {
         await File(tempPath).rename(pubspecFile.path);
       });
 
-      test('should handle partial analysis when some components fail', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
-        
+      test('should handle partial analysis when some components fail',
+          () async {
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+
         // Make some files unreadable but keep pubspec.yaml readable
         final libDir = Directory(path.join(projectDir.path, 'lib'));
         await for (final entity in libDir.list(recursive: true)) {
@@ -513,7 +536,8 @@ void main() {
 
     group('Output Consistency', () {
       test('should produce consistent output for same project', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -536,17 +560,22 @@ void main() {
           // Core data should be identical
           expect(current['project']['name'], equals(first['project']['name']));
           expect(current['project']['type'], equals(first['project']['type']));
-          expect(current['structure']['total_files'], equals(first['structure']['total_files']));
-          expect(current['structure']['lines_of_code'], equals(first['structure']['lines_of_code']));
+          expect(current['structure']['total_files'],
+              equals(first['structure']['total_files']));
+          expect(current['structure']['lines_of_code'],
+              equals(first['structure']['lines_of_code']));
 
           // Dependencies should be identical
-          final firstDeps = first['dependencies']['dependencies'] as Map<String, dynamic>;
-          final currentDeps = current['dependencies']['dependencies'] as Map<String, dynamic>;
+          final firstDeps =
+              first['dependencies']['dependencies'] as Map<String, dynamic>;
+          final currentDeps =
+              current['dependencies']['dependencies'] as Map<String, dynamic>;
           expect(currentDeps, equals(firstDeps));
 
           // Code metrics should be identical
           final firstMetrics = first['code']['metrics'] as Map<String, dynamic>;
-          final currentMetrics = current['code']['metrics'] as Map<String, dynamic>;
+          final currentMetrics =
+              current['code']['metrics'] as Map<String, dynamic>;
           expect(currentMetrics, equals(firstMetrics));
 
           // Patterns should be identical
@@ -557,7 +586,8 @@ void main() {
       });
 
       test('should produce valid JSON output', () async {
-        final projectDir = await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -575,7 +605,8 @@ void main() {
       });
 
       test('should include required metadata', () async {
-        final projectDir = await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
+        final projectDir =
+            await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
         final config = const ContextGeneratorConfig();
 
         final context = await generator.generate(projectDir, config);

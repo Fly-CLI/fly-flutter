@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
+
 import '../helpers/cli_test_helper.dart';
 import '../helpers/test_temp_dir.dart';
 
@@ -37,7 +38,8 @@ void main() {
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final projectNameOutput = data['project_name'] as String;
@@ -47,24 +49,42 @@ void main() {
 
         // Verify project structure
         expect(Directory(projectPath).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'lib', 'main.dart')).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'test', 'widget_test.dart')).existsSync(), isTrue);
+        expect(
+          File(path.join(projectPath, 'pubspec.yaml')).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(path.join(projectPath, 'lib', 'main.dart')).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(path.join(projectPath, 'test', 'widget_test.dart')).existsSync(),
+          isTrue,
+        );
         expect(File(path.join(projectPath, 'README.md')).existsSync(), isTrue);
 
         // Verify pubspec.yaml content
-        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        final pubspecContent = File(
+          path.join(projectPath, 'pubspec.yaml'),
+        ).readAsStringSync();
         expect(pubspecContent.contains('name: $projectName'), isTrue);
-        expect(pubspecContent.contains('description: A new Flutter project'), isTrue);
+        expect(
+          pubspecContent.contains('description: A new Flutter project'),
+          isTrue,
+        );
         expect(pubspecContent.contains('flutter:'), isTrue);
 
         // Verify main.dart content
-        final mainContent = File(path.join(projectPath, 'lib', 'main.dart')).readAsStringSync();
+        final mainContent = File(
+          path.join(projectPath, 'lib', 'main.dart'),
+        ).readAsStringSync();
         expect(mainContent.contains('MinimalExampleApp'), isTrue);
         expect(mainContent.contains('MinimalExampleHomePage'), isTrue);
 
         // Verify test content
-        final testContent = File(path.join(projectPath, 'test', 'widget_test.dart')).readAsStringSync();
+        final testContent = File(
+          path.join(projectPath, 'test', 'widget_test.dart'),
+        ).readAsStringSync();
         expect(testContent.contains('MinimalExampleApp'), isTrue);
         expect(testContent.contains('testWidgets'), isTrue);
       });
@@ -85,7 +105,8 @@ void main() {
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final projectNameOutput = data['project_name'] as String;
@@ -95,24 +116,53 @@ void main() {
 
         // Verify project structure
         expect(Directory(projectPath).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'lib', 'main.dart')).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'test', 'widget_test.dart')).existsSync(), isTrue);
+        expect(
+          File(path.join(projectPath, 'pubspec.yaml')).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(path.join(projectPath, 'lib', 'main.dart')).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(path.join(projectPath, 'test', 'widget_test.dart')).existsSync(),
+          isTrue,
+        );
 
         // Verify feature structure
-        expect(Directory(path.join(projectPath, 'lib', 'features')).existsSync(), isTrue);
-        expect(Directory(path.join(projectPath, 'lib', 'core')).existsSync(), isTrue);
-        expect(Directory(path.join(projectPath, 'lib', 'features', 'home')).existsSync(), isTrue);
-        expect(Directory(path.join(projectPath, 'lib', 'features', 'profile')).existsSync(), isTrue);
+        expect(
+          Directory(path.join(projectPath, 'lib', 'features')).existsSync(),
+          isTrue,
+        );
+        expect(
+          Directory(path.join(projectPath, 'lib', 'core')).existsSync(),
+          isTrue,
+        );
+        expect(
+          Directory(
+            path.join(projectPath, 'lib', 'features', 'home'),
+          ).existsSync(),
+          isTrue,
+        );
+        expect(
+          Directory(
+            path.join(projectPath, 'lib', 'features', 'profile'),
+          ).existsSync(),
+          isTrue,
+        );
 
         // Verify pubspec.yaml content
-        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        final pubspecContent = File(
+          path.join(projectPath, 'pubspec.yaml'),
+        ).readAsStringSync();
         expect(pubspecContent.contains('name: $projectName'), isTrue);
         expect(pubspecContent.contains('flutter_riverpod:'), isTrue);
         expect(pubspecContent.contains('go_router:'), isTrue);
 
         // Verify main.dart content
-        final mainContent = File(path.join(projectPath, 'lib', 'main.dart')).readAsStringSync();
+        final mainContent = File(
+          path.join(projectPath, 'lib', 'main.dart'),
+        ).readAsStringSync();
         expect(mainContent.contains('RiverpodExampleApp'), isTrue);
         expect(mainContent.contains('ProviderScope'), isTrue);
       });
@@ -121,13 +171,17 @@ void main() {
         const projectName = 'test_plan_project';
 
         // Test plan mode
-        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--plan']);
+        final result = await cli.runCommand(
+          'create',
+          args: [projectName, '--template=minimal', '--plan'],
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final projectNameOutput = data['project_name'] as String;
@@ -148,7 +202,8 @@ void main() {
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isFalse);
         final error = output['error'] as Map<String, dynamic>;
         final message = error['message'] as String;
@@ -189,7 +244,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 ''');
-        
+
         Directory(path.join(testProject.path, 'lib')).createSync();
         Directory(path.join(testProject.path, 'test')).createSync();
 
@@ -209,16 +264,52 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final screenName = data['screen_name'] as String;
         expect(screenName, equals('test_screen'));
 
         // Verify files were created
-        expect(File(path.join(testProject.path, 'lib', 'features', 'home', 'presentation', 'test_screen_screen.dart')).existsSync(), isTrue);
-        expect(File(path.join(testProject.path, 'lib', 'features', 'home', 'providers', 'test_screen_provider.dart')).existsSync(), isTrue);
-        expect(File(path.join(testProject.path, 'test', 'features', 'home', 'test_screen_screen_test.dart')).existsSync(), isTrue);
+        expect(
+          File(
+            path.join(
+              testProject.path,
+              'lib',
+              'features',
+              'home',
+              'presentation',
+              'test_screen_screen.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(
+            path.join(
+              testProject.path,
+              'lib',
+              'features',
+              'home',
+              'providers',
+              'test_screen_provider.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(
+            path.join(
+              testProject.path,
+              'test',
+              'features',
+              'home',
+              'test_screen_screen_test.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
       });
 
       test('add service command works', () async {
@@ -235,16 +326,53 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final serviceName = data['service_name'] as String;
         expect(serviceName, equals('test_service'));
 
         // Verify files were created
-        expect(File(path.join(testProject.path, 'lib', 'features', 'core', 'services', 'test_service_service.dart')).existsSync(), isTrue);
-        expect(File(path.join(testProject.path, 'test', 'features', 'core', 'services', 'test_service_service_test.dart')).existsSync(), isTrue);
-        expect(File(path.join(testProject.path, 'test', 'features', 'core', 'mocks', 'test_service_service_mock.dart')).existsSync(), isTrue);
+        expect(
+          File(
+            path.join(
+              testProject.path,
+              'lib',
+              'features',
+              'core',
+              'services',
+              'test_service_service.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(
+            path.join(
+              testProject.path,
+              'test',
+              'features',
+              'core',
+              'services',
+              'test_service_service_test.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
+        expect(
+          File(
+            path.join(
+              testProject.path,
+              'test',
+              'features',
+              'core',
+              'mocks',
+              'test_service_service_mock.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
       });
     });
 
@@ -256,7 +384,8 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final status = data['status'] as String;
@@ -270,7 +399,8 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         expect(data['version'], isNotEmpty);
@@ -283,7 +413,8 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final cliName = data['cli_name'] as String;
@@ -297,7 +428,7 @@ flutter:
         // Create a test Flutter project
         final testProject = Directory(temp.inCurrent('context_test'));
         testProject.createSync();
-        
+
         File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''
 name: context_test
 description: A test project for context export
@@ -319,20 +450,35 @@ flutter:
   uses-material-design: true
 ''');
 
-        final result = await cli.runCommand('context', args: ['export', '--output=.ai/project_context.md', '--include-dependencies=true', '--include-structure=true', '--include-conventions=true']);
+        final result = await cli.runCommand(
+          'context',
+          args: [
+            'export',
+            '--output=.ai/project_context.md',
+            '--include-dependencies=true',
+            '--include-structure=true',
+            '--include-conventions=true',
+          ],
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final outputPath = data['output_path'] as String;
         expect(outputPath, contains('.ai/project_context.md'));
 
         // Verify context file was created
-        expect(File(path.join(testProject.path, '.ai', 'project_context.md')).existsSync(), isTrue);
+        expect(
+          File(
+            path.join(testProject.path, '.ai', 'project_context.md'),
+          ).existsSync(),
+          isTrue,
+        );
       });
     });
 
@@ -351,7 +497,8 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isFalse);
         final error = output['error'] as Map<String, dynamic>;
         final message = error['message'] as String;
@@ -359,13 +506,17 @@ flutter:
       });
 
       test('invalid template fails gracefully', () async {
-        final result = await cli.createProject('test_project', template: 'invalid_template');
+        final result = await cli.createProject(
+          'test_project',
+          template: 'invalid_template',
+        );
 
         expect(result.exitCode, equals(1));
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isFalse);
         final error = output['error'] as Map<String, dynamic>;
         final message = error['message'] as String;
@@ -383,12 +534,19 @@ flutter:
         stopwatch.stop();
 
         expect(result.exitCode, equals(0));
-        expect(stopwatch.elapsedMilliseconds, lessThan(30000)); // Should complete within 30 seconds
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThan(30000),
+        ); // Should complete within 30 seconds
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'] as bool, isTrue);
-        expect((output['data'] as Map<String, dynamic>)['duration_ms'], lessThan(30000));
+        expect(
+          (output['data'] as Map<String, dynamic>)['duration_ms'],
+          lessThan(30000),
+        );
       });
 
       test('multiple project creation works efficiently', () async {
@@ -402,7 +560,10 @@ flutter:
         }
 
         stopwatch.stop();
-        expect(stopwatch.elapsedMilliseconds, lessThan(60000)); // Should complete within 60 seconds for 3 projects
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThan(60000),
+        ); // Should complete within 60 seconds for 3 projects
       });
     });
 
@@ -425,10 +586,15 @@ flutter:
 
         // Verify platform-specific file operations work
         expect(Directory(projectPath).existsSync(), isTrue);
-        expect(File(path.join(projectPath, 'pubspec.yaml')).existsSync(), isTrue);
-        
+        expect(
+          File(path.join(projectPath, 'pubspec.yaml')).existsSync(),
+          isTrue,
+        );
+
         // Test file reading
-        final pubspecContent = File(path.join(projectPath, 'pubspec.yaml')).readAsStringSync();
+        final pubspecContent = File(
+          path.join(projectPath, 'pubspec.yaml'),
+        ).readAsStringSync();
         expect(pubspecContent, isNotEmpty);
         expect(pubspecContent.contains('name: $projectName'), isTrue);
       });

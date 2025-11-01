@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fly_cli/src/core/templates/brick_info.dart';
+import 'package:fly_cli/src/core/templates/brick_registry.dart';
+import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
+import 'package:fly_core/src/file_operations/file_operations.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
-import 'package:fly_core/src/environment/environment_manager.dart';
-import 'package:fly_core/src/environment/env_var.dart';
-import 'package:fly_core/src/file_operations/file_operations.dart';
-
-import 'package:fly_cli/src/core/templates/brick_registry.dart';
-import 'package:fly_cli/src/core/templates/brick_info.dart';
 
 /// Cache metadata for brick information
 class BrickCacheInfo {
@@ -109,9 +108,8 @@ class BrickCacheManager {
   /// Get default cache directory
   static String _getDefaultCacheDirectory() {
     const env = EnvironmentManager();
-    final homeDir = env.getString(EnvVar.home) ??
-        env.getString(EnvVar.userProfile) ??
-        '';
+    final homeDir =
+        env.getString(EnvVar.home) ?? env.getString(EnvVar.userProfile) ?? '';
     return path.join(homeDir, '.fly', 'cache', 'bricks');
   }
 
@@ -133,7 +131,7 @@ class BrickCacheManager {
         cacheFile,
         json.encode(cacheData),
       );
-      
+
       if (success) {
         logger.detail('Cached brick registry with ${bricks.length} bricks');
       } else {
@@ -156,7 +154,7 @@ class BrickCacheManager {
       if (content == null) {
         return null;
       }
-      
+
       final data = json.decode(content) as Map<String, dynamic>;
 
       // Check cache validity
@@ -193,7 +191,7 @@ class BrickCacheManager {
         cacheFile,
         json.encode(plan.toJson()),
       );
-      
+
       if (success) {
         logger.detail('Cached generation plan for ${plan.brickName}');
       } else {
@@ -218,7 +216,7 @@ class BrickCacheManager {
       if (content == null) {
         return null;
       }
-      
+
       final data = json.decode(content) as Map<String, dynamic>;
 
       return GenerationPlan.fromJson(data);
@@ -247,7 +245,7 @@ class BrickCacheManager {
         cacheFile,
         json.encode(cacheData),
       );
-      
+
       if (success) {
         logger.detail('Cached validation result for $brickName');
       } else {
@@ -271,7 +269,7 @@ class BrickCacheManager {
       if (content == null) {
         return null;
       }
-      
+
       final data = json.decode(content) as Map<String, dynamic>;
 
       // Check cache validity (validation results expire after 1 day)
@@ -305,7 +303,7 @@ class BrickCacheManager {
       if (content == null) {
         return false;
       }
-      
+
       final data = json.decode(content) as Map<String, dynamic>;
 
       final cachedAt = DateTime.parse(data['cached_at'] as String);

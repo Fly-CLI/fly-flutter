@@ -32,17 +32,17 @@ class VersionRegistry {
         .replaceAll(RegExp(r'[\\/]'), '')
         .replaceAll('..', '')
         .trim();
-    
+
     if (sanitized.isEmpty) {
       throw ArgumentError('Template name cannot be empty');
     }
-    
+
     if (sanitized != templateName) {
       logger.warn(
         'Template name sanitized from "$templateName" to "$sanitized"',
       );
     }
-    
+
     return sanitized;
   }
 
@@ -50,34 +50,36 @@ class VersionRegistry {
   /// Returns the path to the template directory, or null if not found
   Future<String?> _findTemplatePath(String sanitizedName) async {
     // Check projects subdirectory
-    final projectsPath = path.join(templatesDirectory, 'projects', sanitizedName);
+    final projectsPath =
+        path.join(templatesDirectory, 'projects', sanitizedName);
     if (await Directory(projectsPath).exists()) {
       return projectsPath;
     }
-    
+
     // Check components subdirectory
-    final componentsPath = path.join(templatesDirectory, 'components', sanitizedName);
+    final componentsPath =
+        path.join(templatesDirectory, 'components', sanitizedName);
     if (await Directory(componentsPath).exists()) {
       return componentsPath;
     }
-    
+
     // Fallback: check directly in templatesDirectory (for test compatibility and flexibility)
     final directPath = path.join(templatesDirectory, sanitizedName);
     if (await Directory(directPath).exists()) {
       return directPath;
     }
-    
+
     return null;
   }
 
   /// Get all available versions for a template
-  /// 
+  ///
   /// Supports both single-version (backward compatible) and multi-version templates.
   /// Returns versions sorted semantically (latest first).
   Future<List<String>> getVersions(String templateName) async {
     // Sanitize template name to prevent path traversal
     final sanitizedName = _sanitizeTemplateName(templateName);
-    
+
     // Check cache first
     final cached = _versionsCache[sanitizedName];
     if (cached != null && !cached.isExpired) {
@@ -101,7 +103,7 @@ class VersionRegistry {
         try {
           final yamlContent = await versionsYamlFile.readAsString();
           final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
-          
+
           final versionsList = yaml['versions'] as List<dynamic>?;
           if (versionsList != null) {
             for (final v in versionsList) {
@@ -173,7 +175,7 @@ class VersionRegistry {
       versions: sortedVersions,
       cachedAt: DateTime.now().millisecondsSinceEpoch,
     );
-    
+
     return sortedVersions;
   }
 
@@ -190,13 +192,12 @@ class VersionRegistry {
 
     // Sort: latest first
     parsedVersions.sort((a, b) => b.compareTo(a));
-    
+
     // Map back to strings, preserving invalid versions at the end
     final sorted = parsedVersions.map((v) => v.versionString).toList();
-    final invalidVersions = versions
-        .where((v) => TemplateVersion.tryParse(v) == null)
-        .toList();
-    
+    final invalidVersions =
+        versions.where((v) => TemplateVersion.tryParse(v) == null).toList();
+
     return [...sorted, ...invalidVersions];
   }
 
@@ -207,10 +208,11 @@ class VersionRegistry {
   ) async {
     // Sanitize template name
     final sanitizedName = _sanitizeTemplateName(templateName);
-    
+
     // Validate version format
     if (TemplateVersion.tryParse(version) == null) {
-      logger.warn('Invalid version format: "$version" for template $sanitizedName');
+      logger.warn(
+          'Invalid version format: "$version" for template $sanitizedName');
       return null;
     }
 
@@ -261,7 +263,7 @@ class VersionRegistry {
   }
 
   /// Get the latest version of a template
-  /// 
+  ///
   /// Returns the highest semantic version. Versions are already sorted
   /// semantically in getVersions() (latest first).
   Future<String?> getLatestVersion(String templateName) async {
@@ -273,7 +275,7 @@ class VersionRegistry {
   }
 
   /// Get versions within a specified range
-  /// 
+  ///
   /// Returns all versions that satisfy the given version constraint.
   Future<List<String>> getVersionsInRange(
     String templateName,
@@ -282,7 +284,7 @@ class VersionRegistry {
     try {
       final constraint = VersionConstraint.parse(versionConstraint);
       final versions = await getVersions(templateName);
-      
+
       return versions.where((versionStr) {
         final version = TemplateVersion.tryParse(versionStr);
         if (version == null) return false;
@@ -297,7 +299,8 @@ class VersionRegistry {
   }
 
   /// Get the next version after the specified version
-  Future<String?> getNextVersion(String templateName, String currentVersion) async {
+  Future<String?> getNextVersion(
+      String templateName, String currentVersion) async {
     final versions = await getVersions(templateName);
     if (versions.isEmpty) return null;
 
@@ -316,7 +319,8 @@ class VersionRegistry {
   }
 
   /// Get the previous version before the specified version
-  Future<String?> getPreviousVersion(String templateName, String currentVersion) async {
+  Future<String?> getPreviousVersion(
+      String templateName, String currentVersion) async {
     final versions = await getVersions(templateName);
     if (versions.isEmpty) return null;
 
@@ -367,4 +371,3 @@ class _CachedVersions {
     return (now - cachedAt) > VersionRegistry.cacheExpirationMs;
   }
 }
-

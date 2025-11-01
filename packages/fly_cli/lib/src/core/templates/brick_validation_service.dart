@@ -1,11 +1,12 @@
 import 'dart:io';
+
+import 'package:fly_cli/src/core/templates/brick_metadata.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:version/version.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:fly_cli/src/core/templates/brick_metadata.dart';
 
 /// Responsible ONLY for validating brick structure and compatibility
-/// 
+///
 /// This service is decoupled from discovery and generation.
 /// It focuses solely on validating brick metadata and structure.
 class BrickValidationService {
@@ -47,7 +48,8 @@ class BrickValidationService {
   }
 
   /// Validate brick file structure
-  Future<BrickValidationResult> _validateBrickStructure(BrickMetadata brick) async {
+  Future<BrickValidationResult> _validateBrickStructure(
+      BrickMetadata brick) async {
     final errors = <String>[];
     final warnings = <String>[];
 
@@ -67,7 +69,7 @@ class BrickValidationService {
       // Check for brick.yaml or template.yaml
       final brickYamlFile = File(path.join(brick.path, 'brick.yaml'));
       final templateYamlFile = File(path.join(brick.path, 'template.yaml'));
-      
+
       if (!await brickYamlFile.exists() && !await templateYamlFile.exists()) {
         errors.add('Missing brick.yaml or template.yaml in: ${brick.path}');
       }
@@ -108,7 +110,7 @@ class BrickValidationService {
     List<String> warnings,
   ) async {
     final brickContentDir = Directory(path.join(brick.path, '__brick__'));
-    
+
     // Check for essential project files
     final essentialFiles = [
       'pubspec.yaml',
@@ -140,9 +142,10 @@ class BrickValidationService {
     List<String> warnings,
   ) async {
     final brickContentDir = Directory(path.join(brick.path, '__brick__'));
-    
+
     // Check for screen file
-    final screenFile = File(path.join(brickContentDir.path, '{{screen_name}}_screen.dart'));
+    final screenFile =
+        File(path.join(brickContentDir.path, '{{screen_name}}_screen.dart'));
     if (!await screenFile.exists()) {
       errors.add('Missing screen file: {{screen_name}}_screen.dart');
     }
@@ -168,9 +171,10 @@ class BrickValidationService {
     List<String> warnings,
   ) async {
     final brickContentDir = Directory(path.join(brick.path, '__brick__'));
-    
+
     // Check for service file
-    final serviceFile = File(path.join(brickContentDir.path, '{{service_name}}_service.dart'));
+    final serviceFile =
+        File(path.join(brickContentDir.path, '{{service_name}}_service.dart'));
     if (!await serviceFile.exists()) {
       errors.add('Missing service file: {{service_name}}_service.dart');
     }
@@ -196,9 +200,10 @@ class BrickValidationService {
     List<String> warnings,
   ) async {
     final brickContentDir = Directory(path.join(brick.path, '__brick__'));
-    
+
     // Check for widget file
-    final widgetFile = File(path.join(brickContentDir.path, '{{widget_name}}_widget.dart'));
+    final widgetFile =
+        File(path.join(brickContentDir.path, '{{widget_name}}_widget.dart'));
     if (!await widgetFile.exists()) {
       errors.add('Missing widget file: {{widget_name}}_widget.dart');
     }
@@ -223,7 +228,7 @@ class BrickValidationService {
     List<String> warnings,
   ) async {
     final brickContentDir = Directory(path.join(brick.path, '__brick__'));
-    
+
     // Addon bricks have flexible structure
     // Just check that there's some content
     final files = await brickContentDir.list().toList();
@@ -233,7 +238,8 @@ class BrickValidationService {
   }
 
   /// Validate brick compatibility with current environment
-  Future<BrickValidationResult> _validateBrickCompatibility(BrickMetadata brick) async {
+  Future<BrickValidationResult> _validateBrickCompatibility(
+      BrickMetadata brick) async {
     final errors = <String>[];
     final warnings = <String>[];
 
@@ -244,9 +250,8 @@ class BrickValidationService {
         if (currentFlutterVersion != null) {
           if (currentFlutterVersion < brick.minFlutterSdk!) {
             errors.add(
-              'Brick requires Flutter SDK ${brick.minFlutterSdk} or higher, '
-              'but current version is $currentFlutterVersion'
-            );
+                'Brick requires Flutter SDK ${brick.minFlutterSdk} or higher, '
+                'but current version is $currentFlutterVersion');
           }
         } else {
           warnings.add('Could not determine current Flutter SDK version');
@@ -258,10 +263,8 @@ class BrickValidationService {
         final currentDartVersion = await _getCurrentDartVersion();
         if (currentDartVersion != null) {
           if (currentDartVersion < brick.minDartSdk!) {
-            errors.add(
-              'Brick requires Dart SDK ${brick.minDartSdk} or higher, '
-              'but current version is $currentDartVersion'
-            );
+            errors.add('Brick requires Dart SDK ${brick.minDartSdk} or higher, '
+                'but current version is $currentDartVersion');
           }
         } else {
           warnings.add('Could not determine current Dart SDK version');
@@ -274,14 +277,16 @@ class BrickValidationService {
         warnings: warnings,
       );
     } catch (e) {
-      return BrickValidationResult.failure(['Compatibility validation failed: $e']);
+      return BrickValidationResult.failure(
+          ['Compatibility validation failed: $e']);
     }
   }
 
   /// Get current Flutter SDK version
   Future<Version?> _getCurrentFlutterVersion() async {
     try {
-      final result = await Process.run('flutter', ['--version'], runInShell: true);
+      final result =
+          await Process.run('flutter', ['--version'], runInShell: true);
       if (result.exitCode == 0) {
         final output = result.stdout as String;
         final match = RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(output);
@@ -301,7 +306,8 @@ class BrickValidationService {
       final result = await Process.run('dart', ['--version'], runInShell: true);
       if (result.exitCode == 0) {
         final output = result.stdout as String;
-        final match = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(output);
+        final match =
+            RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(output);
         if (match != null) {
           return Version.parse(match.group(1)!);
         }

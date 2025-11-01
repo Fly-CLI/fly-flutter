@@ -51,9 +51,8 @@ enum EnvVar {
   productMode('dart.vm.product', EnvType.boolean, isSynthetic: true);
 
   const EnvVar(this.key, this.type, {this.isSynthetic = false});
+
   final String key;
   final EnvType type;
   final bool isSynthetic;
 }
-
-

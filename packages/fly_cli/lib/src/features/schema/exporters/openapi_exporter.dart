@@ -1,5 +1,6 @@
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
+
 import 'schema_exporter.dart';
 
 /// OpenAPI 3.0 inspired exporter
@@ -44,7 +45,7 @@ class OpenApiExporter extends SchemaExporter {
     // Add global options as reusable parameters
     if (globalOptions.isNotEmpty) {
       for (final option in globalOptions) {
-        openApi['components']['parameters']['Global${option.name}'] = 
+        openApi['components']['parameters']['Global${option.name}'] =
             _buildParameterSchema(option, true);
       }
     }
@@ -53,7 +54,7 @@ class OpenApiExporter extends SchemaExporter {
     for (final entry in commands.entries) {
       final commandName = entry.key;
       final command = entry.value;
-      
+
       openApi['paths']['/$commandName'] = _buildCommandPath(command, config);
     }
 
@@ -78,49 +79,52 @@ class OpenApiExporter extends SchemaExporter {
   }
 
   /// Build OpenAPI path for a command
-  Map<String, dynamic> _buildCommandPath(CommandDefinition command, ExportConfig config) => {
-      'post': {
-        'summary': command.description,
-        'description': command.description,
-        'operationId': command.name,
-        'parameters': _buildParameters(command, config),
-        'requestBody': _buildRequestBody(command),
-        'responses': {
-          '200': {
-            'description': 'Command executed successfully',
-            'content': {
-              'application/json': {
-                'schema': {
-                  'type': 'object',
-                  'properties': {
-                    'success': {'type': 'boolean'},
-                    'message': {'type': 'string'},
-                    'data': {'type': 'object'},
+  Map<String, dynamic> _buildCommandPath(
+          CommandDefinition command, ExportConfig config) =>
+      {
+        'post': {
+          'summary': command.description,
+          'description': command.description,
+          'operationId': command.name,
+          'parameters': _buildParameters(command, config),
+          'requestBody': _buildRequestBody(command),
+          'responses': {
+            '200': {
+              'description': 'Command executed successfully',
+              'content': {
+                'application/json': {
+                  'schema': {
+                    'type': 'object',
+                    'properties': {
+                      'success': {'type': 'boolean'},
+                      'message': {'type': 'string'},
+                      'data': {'type': 'object'},
+                    },
                   },
                 },
               },
             },
-          },
-          '400': {
-            'description': 'Invalid command arguments',
-            'content': {
-              'application/json': {
-                'schema': {
-                  'type': 'object',
-                  'properties': {
-                    'error': {'type': 'string'},
-                    'details': {'type': 'string'},
+            '400': {
+              'description': 'Invalid command arguments',
+              'content': {
+                'application/json': {
+                  'schema': {
+                    'type': 'object',
+                    'properties': {
+                      'error': {'type': 'string'},
+                      'details': {'type': 'string'},
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    };
+      };
 
   /// Build parameters for a command
-  List<Map<String, dynamic>> _buildParameters(CommandDefinition command, ExportConfig config) {
+  List<Map<String, dynamic>> _buildParameters(
+      CommandDefinition command, ExportConfig config) {
     final parameters = <Map<String, dynamic>>[];
 
     // Add command-specific options
@@ -142,7 +146,8 @@ class OpenApiExporter extends SchemaExporter {
   }
 
   /// Build parameter schema for an option
-  Map<String, dynamic> _buildParameterSchema(OptionDefinition option, bool isGlobal) {
+  Map<String, dynamic> _buildParameterSchema(
+      OptionDefinition option, bool isGlobal) {
     final schema = <String, dynamic>{
       'name': '--${option.name}',
       'in': 'query',
@@ -239,7 +244,7 @@ class OpenApiExporter extends SchemaExporter {
       for (final entry in value.entries) {
         buffer.write('  ' * indent);
         buffer.write('${entry.key}:');
-        
+
         if (entry.value is Map || entry.value is List) {
           buffer.writeln();
           _formatYamlValue(entry.value, buffer, indent + 1);

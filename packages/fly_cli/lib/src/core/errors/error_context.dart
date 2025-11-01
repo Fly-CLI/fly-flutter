@@ -1,7 +1,7 @@
 import 'dart:io';
 
 /// Simple error context helper for consistent error reporting
-/// 
+///
 /// Provides static methods to create common error context patterns
 /// without complex fluent APIs or builders.
 class ErrorContext {
@@ -135,6 +135,87 @@ class ErrorContext {
       'operation': operation,
       'timestamp': DateTime.now().toIso8601String(),
       ...?extra,
+    };
+  }
+
+  /// Create context for MCP tool errors
+  static Map<String, dynamic> forMcpToolError(
+    String tool,
+    String error, {
+    Map<String, dynamic>? params,
+    List<String>? validationErrors,
+    String? hint,
+    List<String>? remediation,
+  }) {
+    return {
+      'tool': tool,
+      'error': error,
+      'params': params,
+      'validation_errors': validationErrors,
+      'hint':
+          hint ?? 'Check tool schema with tools/list for correct parameters',
+      'remediation': remediation ??
+          [
+            'Call tools/list to see available tools',
+            'Read tool schema to understand parameters',
+            'Verify all required parameters are provided',
+            'Check parameter types match schema',
+          ],
+      'timestamp': DateTime.now().toIso8601String(),
+      'platform': Platform.operatingSystem,
+    };
+  }
+
+  /// Create context for MCP resource errors
+  static Map<String, dynamic> forMcpResourceError(
+    String resourceUri,
+    String error, {
+    String? resourceType,
+    String? hint,
+    List<String>? remediation,
+  }) {
+    return {
+      'resource_uri': resourceUri,
+      'resource_type': resourceType,
+      'error': error,
+      'hint': hint ?? 'Verify resource URI is correct',
+      'remediation': remediation ??
+          [
+            'Use resources/list to discover available resources',
+            'Verify resource URI prefix (workspace://, logs://, etc.)',
+            'Check resource exists and is accessible',
+          ],
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+  }
+
+  /// Create context for MCP validation errors
+  static Map<String, dynamic> forMcpValidationError(
+    String field,
+    dynamic value,
+    String reason, {
+    String? tool,
+    String? hint,
+    List<String>? remediation,
+  }) {
+    final hints = <String>[];
+    if (field.toLowerCase().contains('name')) {
+      hints.add('Names must be lowercase (e.g., "Home" → "home")');
+    }
+    if (field.toLowerCase().contains('screen')) {
+      hints.add('Screen names must be lowercase and use snake_case');
+    }
+
+    final defaultHint = hints.isNotEmpty ? hints.first : reason;
+
+    return {
+      'tool': tool,
+      'field': field,
+      'value': value.toString(),
+      'reason': reason,
+      'hint': hint ?? defaultHint,
+      'remediation': remediation ?? hints,
+      'timestamp': DateTime.now().toIso8601String(),
     };
   }
 }

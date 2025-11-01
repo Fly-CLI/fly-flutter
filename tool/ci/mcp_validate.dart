@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 /// MCP Validate Tool
-/// 
+///
 /// Validates MCP tools, prompts, and resources by checking:
 /// - Tools: schemas, handlers, metadata
 /// - Prompts: template files, syntax, variables
 /// - Resources: strategies, URI patterns
-/// 
+///
 /// Usage:
 ///   dart run tool/ci/mcp_validate.dart [--type=tools|prompts|resources] [--format=table|json] [--strict]
 Future<void> main(List<String> args) async {
@@ -90,26 +91,31 @@ Future<void> main(List<String> args) async {
   }
 }
 
-Future<Map<String, Object?>> validateTools(Directory projectRoot, bool verbose) async {
+Future<Map<String, Object?>> validateTools(
+  Directory projectRoot,
+  bool verbose,
+) async {
   final errors = <Map<String, String>>[];
   final warnings = <Map<String, String>>[];
 
-  // Read McpToolType enum
-  final toolTypeFile = File(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_cli',
-    'lib',
-    'src',
-    'features',
-    'mcp',
-    'mcp_tool_type.dart',
-  ));
+  // Read McpTool enum
+  final toolTypeFile = File(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_cli',
+      'lib',
+      'src',
+      'core',
+      'definitions',
+      'mcp_tool.dart',
+    ),
+  );
 
   if (!await toolTypeFile.exists()) {
     errors.add({
       'type': 'file_not_found',
-      'message': 'McpToolType enum file not found',
+      'message': 'McpTool enum file not found',
       'file': toolTypeFile.path,
     });
     return {
@@ -122,13 +128,13 @@ Future<Map<String, Object?>> validateTools(Directory projectRoot, bool verbose) 
   }
 
   final content = await toolTypeFile.readAsString();
-  final enumPattern = RegExp(r'enum\s+McpToolType\s*\{([^}]+)\}');
+  final enumPattern = RegExp(r'enum\s+McpTool\s*\{([^}]+)\}');
   final match = enumPattern.firstMatch(content);
 
   if (match == null) {
     errors.add({
       'type': 'parse_error',
-      'message': 'Could not parse McpToolType enum',
+      'message': 'Could not parse McpTool enum',
       'file': toolTypeFile.path,
     });
     return {
@@ -163,17 +169,19 @@ Future<Map<String, Object?>> validateTools(Directory projectRoot, bool verbose) 
 
     // Check strategy file exists
     final strategyFileName = _enumNameToStrategyFile(toolName);
-    final strategyFile = File(path.join(
-      projectRoot.path,
-      'packages',
-      'fly_cli',
-      'lib',
-      'src',
-      'features',
-      'mcp',
-      'tools',
-      strategyFileName,
-    ));
+    final strategyFile = File(
+      path.join(
+        projectRoot.path,
+        'packages',
+        'fly_cli',
+        'lib',
+        'src',
+        'features',
+        'mcp',
+        'tools',
+        strategyFileName,
+      ),
+    );
 
     if (!await strategyFile.exists()) {
       item['errors'] = (item['errors'] as List<String>)
@@ -212,7 +220,8 @@ Future<Map<String, Object?>> validateTools(Directory projectRoot, bool verbose) 
       }
 
       // Check for schema definitions
-      if (!strategyContent.contains('paramsSchema') && !strategyContent.contains('ObjectSchema')) {
+      if (!strategyContent.contains('paramsSchema') &&
+          !strategyContent.contains('ObjectSchema')) {
         item['warnings'] = (item['warnings'] as List<String>)
           ..add('No paramsSchema found');
         warnings.add({
@@ -236,20 +245,25 @@ Future<Map<String, Object?>> validateTools(Directory projectRoot, bool verbose) 
   };
 }
 
-Future<Map<String, Object?>> validatePrompts(Directory projectRoot, bool verbose) async {
+Future<Map<String, Object?>> validatePrompts(
+  Directory projectRoot,
+  bool verbose,
+) async {
   final errors = <Map<String, String>>[];
   final warnings = <Map<String, String>>[];
 
   // Read PromptType enum
-  final promptTypeFile = File(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_mcp_server',
-    'lib',
-    'src',
-    'domain',
-    'prompt_type.dart',
-  ));
+  final promptTypeFile = File(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_mcp_server',
+      'lib',
+      'src',
+      'domain',
+      'prompt_type.dart',
+    ),
+  );
 
   if (!await promptTypeFile.exists()) {
     errors.add({
@@ -297,17 +311,19 @@ Future<Map<String, Object?>> validatePrompts(Directory projectRoot, bool verbose
   }
 
   final items = <Map<String, Object?>>[];
-  final templatesDir = Directory(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_cli',
-    'lib',
-    'src',
-    'features',
-    'mcp',
-    'prompts',
-    'templates',
-  ));
+  final templatesDir = Directory(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_cli',
+      'lib',
+      'src',
+      'features',
+      'mcp',
+      'prompts',
+      'templates',
+    ),
+  );
 
   for (final promptName in promptNames) {
     final promptId = _enumNameToPromptId(promptName);
@@ -335,7 +351,7 @@ Future<Map<String, Object?>> validatePrompts(Directory projectRoot, bool verbose
       // Validate template can be read
       try {
         final templateContent = await templateFile.readAsString();
-        
+
         // Basic validation: check template is not empty
         final parts = templateContent.split('---');
         String templateText;
@@ -369,17 +385,19 @@ Future<Map<String, Object?>> validatePrompts(Directory projectRoot, bool verbose
 
     // Check strategy file exists
     final strategyFileName = _enumNameToPromptStrategyFile(promptName);
-    final strategyFile = File(path.join(
-      projectRoot.path,
-      'packages',
-      'fly_cli',
-      'lib',
-      'src',
-      'features',
-      'mcp',
-      'prompts',
-      strategyFileName,
-    ));
+    final strategyFile = File(
+      path.join(
+        projectRoot.path,
+        'packages',
+        'fly_cli',
+        'lib',
+        'src',
+        'features',
+        'mcp',
+        'prompts',
+        strategyFileName,
+      ),
+    );
 
     if (!await strategyFile.exists()) {
       item['errors'] = (item['errors'] as List<String>)
@@ -404,20 +422,25 @@ Future<Map<String, Object?>> validatePrompts(Directory projectRoot, bool verbose
   };
 }
 
-Future<Map<String, Object?>> validateResources(Directory projectRoot, bool verbose) async {
+Future<Map<String, Object?>> validateResources(
+  Directory projectRoot,
+  bool verbose,
+) async {
   final errors = <Map<String, String>>[];
   final warnings = <Map<String, String>>[];
 
   // Read ResourceType enum
-  final resourceTypeFile = File(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_mcp_server',
-    'lib',
-    'src',
-    'domain',
-    'resource_type.dart',
-  ));
+  final resourceTypeFile = File(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_mcp_server',
+      'lib',
+      'src',
+      'domain',
+      'resource_type.dart',
+    ),
+  );
 
   if (!await resourceTypeFile.exists()) {
     errors.add({
@@ -476,17 +499,19 @@ Future<Map<String, Object?>> validateResources(Directory projectRoot, bool verbo
 
     // Check strategy file exists
     final strategyFileName = _enumNameToResourceStrategyFile(resourceName);
-    final strategyFile = File(path.join(
-      projectRoot.path,
-      'packages',
-      'fly_cli',
-      'lib',
-      'src',
-      'features',
-      'mcp',
-      'resources',
-      strategyFileName,
-    ));
+    final strategyFile = File(
+      path.join(
+        projectRoot.path,
+        'packages',
+        'fly_cli',
+        'lib',
+        'src',
+        'features',
+        'mcp',
+        'resources',
+        strategyFileName,
+      ),
+    );
 
     if (!await strategyFile.exists()) {
       item['errors'] = (item['errors'] as List<String>)
@@ -525,7 +550,12 @@ Future<Map<String, Object?>> validateResources(Directory projectRoot, bool verbo
       }
 
       // Check URI prefix format
-      final uriPrefixMatch = RegExp(r"String\s+get\s+uriPrefix\s*=>\s*['""]([^'""]+)['""]").firstMatch(strategyContent);
+      final uriPrefixMatch = RegExp(
+        r"String\s+get\s+uriPrefix\s*=>\s*['"
+        "]([^'"
+        "]+)['"
+        "]",
+      ).firstMatch(strategyContent);
       if (uriPrefixMatch != null) {
         final uriPrefix = uriPrefixMatch.group(1)!;
         if (!uriPrefix.endsWith('://') && !uriPrefix.endsWith('/')) {
@@ -684,7 +714,9 @@ void printValidationResults(Map<String, Object?> results, bool verbose) {
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     print('PROMPTS');
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    print('Errors: ${prompts['errorCount']}, Warnings: ${prompts['warningCount']}');
+    print(
+      'Errors: ${prompts['errorCount']}, Warnings: ${prompts['warningCount']}',
+    );
     print('');
 
     final items = prompts['items'] as List;
@@ -715,7 +747,9 @@ void printValidationResults(Map<String, Object?> results, bool verbose) {
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     print('RESOURCES');
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    print('Errors: ${resources['errorCount']}, Warnings: ${resources['warningCount']}');
+    print(
+      'Errors: ${resources['errorCount']}, Warnings: ${resources['warningCount']}',
+    );
     print('');
 
     final items = resources['items'] as List;
@@ -762,5 +796,3 @@ void printUsage() {
   print('  dart run tool/ci/mcp_validate.dart --type=tools --strict');
   print('  dart run tool/ci/mcp_validate.dart --format=json');
 }
-
-

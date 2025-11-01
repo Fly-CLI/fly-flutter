@@ -1,7 +1,7 @@
 import 'dart:io';
 
 /// Manager for directory operations
-/// 
+///
 /// Provides utilities for creating, managing, and operating on directories
 /// with proper error handling.
 class DirectoryManager {
@@ -10,32 +10,32 @@ class DirectoryManager {
   /// Ensure a directory exists, creating it if necessary
   Future<Directory> ensureExists(String path, {bool recursive = true}) async {
     final directory = Directory(path);
-    
+
     if (await directory.exists()) {
       return directory;
     }
-    
+
     if (recursive) {
       return await directory.create(recursive: true);
     }
-    
+
     return await directory.create();
   }
 
   /// Ensure a directory exists synchronously
   Directory ensureExistsSync(String path, {bool recursive = true}) {
     final directory = Directory(path);
-    
+
     if (directory.existsSync()) {
       return directory;
     }
-    
+
     if (recursive) {
       directory.createSync(recursive: true);
     } else {
       directory.createSync();
     }
-    
+
     return directory;
   }
 
@@ -71,7 +71,7 @@ class DirectoryManager {
     }
 
     final files = <File>[];
-    
+
     if (recursive) {
       await for (final entity in directory.list(recursive: true)) {
         if (entity is File) {
@@ -85,19 +85,20 @@ class DirectoryManager {
         }
       }
     }
-    
+
     return files;
   }
 
   /// Get all directories in a directory
-  Future<List<Directory>> listDirectories(String path, {bool recursive = false}) async {
+  Future<List<Directory>> listDirectories(String path,
+      {bool recursive = false}) async {
     final directory = Directory(path);
     if (!await directory.exists()) {
       return [];
     }
 
     final directories = <Directory>[];
-    
+
     if (recursive) {
       await for (final entity in directory.list(recursive: true)) {
         if (entity is Directory) {
@@ -111,7 +112,7 @@ class DirectoryManager {
         }
       }
     }
-    
+
     return directories;
   }
 
@@ -123,13 +124,13 @@ class DirectoryManager {
     }
 
     var totalSize = 0;
-    
+
     await for (final entity in directory.list(recursive: true)) {
       if (entity is File) {
         totalSize += await entity.length();
       }
     }
-    
+
     return totalSize;
   }
 
@@ -141,7 +142,7 @@ class DirectoryManager {
     }
 
     var count = 0;
-    
+
     if (recursive) {
       await for (final entity in directory.list(recursive: true)) {
         if (entity is File) {
@@ -155,8 +156,7 @@ class DirectoryManager {
         }
       }
     }
-    
+
     return count;
   }
 }
-

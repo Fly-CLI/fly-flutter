@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
 /// Check for platform-specific development tools
 class PlatformToolsCheck extends SystemCheck {
   PlatformToolsCheck({this.logger});
-  
+
   final Logger? logger;
 
   @override
@@ -19,7 +19,8 @@ class PlatformToolsCheck extends SystemCheck {
   String get category => 'Development Environment';
 
   @override
-  String get description => 'Check platform-specific development tools (Android SDK, Xcode, etc.)';
+  String get description =>
+      'Check platform-specific development tools (Android SDK, Xcode, etc.)';
 
   @override
   Future<CheckResult> run() async {
@@ -93,12 +94,13 @@ class PlatformToolsCheck extends SystemCheck {
       // Check for ANDROID_HOME/ANDROID_SDK_ROOT via EnvironmentManager
       const env = EnvironmentManager();
       final androidHome = env.getString(EnvVar.androidHome) ??
-                         env.getString(EnvVar.androidSdkRoot);
-      
+          env.getString(EnvVar.androidSdkRoot);
+
       if (androidHome == null) {
         return CheckResult.error(
           message: 'ANDROID_HOME environment variable not set',
-          suggestion: 'Set ANDROID_HOME to your Android SDK installation directory',
+          suggestion:
+              'Set ANDROID_HOME to your Android SDK installation directory',
           fixCommand: 'export ANDROID_HOME=/path/to/android/sdk',
           data: {'missing': 'ANDROID_HOME'},
         );
@@ -131,7 +133,8 @@ class PlatformToolsCheck extends SystemCheck {
       if (missingPaths.isNotEmpty) {
         return CheckResult.warning(
           message: 'Android SDK missing components: ${missingPaths.join(', ')}',
-          suggestion: 'Install missing Android SDK components using Android Studio SDK Manager',
+          suggestion:
+              'Install missing Android SDK components using Android Studio SDK Manager',
           data: {
             'path': androidHome,
             'missing': missingPaths,
@@ -140,7 +143,8 @@ class PlatformToolsCheck extends SystemCheck {
       }
 
       // Check for adb
-      final adbPath = path.join(androidHome, 'platform-tools', Platform.isWindows ? 'adb.exe' : 'adb');
+      final adbPath = path.join(androidHome, 'platform-tools',
+          Platform.isWindows ? 'adb.exe' : 'adb');
       final adbFile = File(adbPath);
       if (!await adbFile.exists()) {
         return CheckResult.warning(
@@ -157,7 +161,6 @@ class PlatformToolsCheck extends SystemCheck {
           'adbPath': adbPath,
         },
       );
-
     } catch (e) {
       return CheckResult.error(
         message: 'Failed to check Android SDK: $e',
@@ -172,14 +175,15 @@ class PlatformToolsCheck extends SystemCheck {
     try {
       // Check if xcodebuild is available with timeout
       final xcodeResult = await Process.run(
-        'xcodebuild', 
-        ['-version'], 
+        'xcodebuild',
+        ['-version'],
         runInShell: true,
       ).timeout(
         const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(0, 1, '', 'xcodebuild timed out after 10 seconds'),
+        onTimeout: () =>
+            ProcessResult(0, 1, '', 'xcodebuild timed out after 10 seconds'),
       );
-      
+
       if (xcodeResult.exitCode != 0) {
         return CheckResult.error(
           message: 'Xcode not found or not properly installed',
@@ -193,8 +197,9 @@ class PlatformToolsCheck extends SystemCheck {
       }
 
       final versionOutput = xcodeResult.stdout as String;
-      final versionMatch = RegExp(r'Xcode (\d+\.\d+)').firstMatch(versionOutput);
-      
+      final versionMatch =
+          RegExp(r'Xcode (\d+\.\d+)').firstMatch(versionOutput);
+
       if (versionMatch == null) {
         return CheckResult.warning(
           message: 'Could not parse Xcode version',
@@ -204,15 +209,16 @@ class PlatformToolsCheck extends SystemCheck {
       }
 
       final xcodeVersion = versionMatch.group(1)!;
-      
+
       // Check for iOS Simulator with timeout
       final simulatorResult = await Process.run(
-        'xcrun', 
-        ['simctl', 'list'], 
+        'xcrun',
+        ['simctl', 'list'],
         runInShell: true,
       ).timeout(
         const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(0, 1, '', 'xcrun simctl list timed out after 10 seconds'),
+        onTimeout: () => ProcessResult(
+            0, 1, '', 'xcrun simctl list timed out after 10 seconds'),
       );
       if (simulatorResult.exitCode != 0) {
         return CheckResult.warning(
@@ -232,7 +238,6 @@ class PlatformToolsCheck extends SystemCheck {
           'simulatorAvailable': true,
         },
       );
-
     } catch (e) {
       return CheckResult.error(
         message: 'Failed to check Xcode: $e',
@@ -253,7 +258,7 @@ class PlatformToolsCheck extends SystemCheck {
 
       var found = false;
       String? vsPath;
-      
+
       for (final commonPath in commonPaths) {
         final vsDir = Directory(commonPath);
         if (await vsDir.exists()) {
@@ -274,17 +279,19 @@ class PlatformToolsCheck extends SystemCheck {
 
       // Check for MSBuild with timeout
       final msbuildResult = await Process.run(
-        'msbuild', 
-        ['-version'], 
+        'msbuild',
+        ['-version'],
         runInShell: true,
       ).timeout(
         const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(0, 1, '', 'msbuild timed out after 10 seconds'),
+        onTimeout: () =>
+            ProcessResult(0, 1, '', 'msbuild timed out after 10 seconds'),
       );
       if (msbuildResult.exitCode != 0) {
         return CheckResult.warning(
           message: 'MSBuild not found in PATH',
-          suggestion: 'Add Visual Studio MSBuild to PATH or install Visual Studio Build Tools',
+          suggestion:
+              'Add Visual Studio MSBuild to PATH or install Visual Studio Build Tools',
           data: {
             'vsPath': vsPath,
             'msbuildError': msbuildResult.stderr,
@@ -299,7 +306,6 @@ class PlatformToolsCheck extends SystemCheck {
           'msbuildAvailable': true,
         },
       );
-
     } catch (e) {
       return CheckResult.error(
         message: 'Failed to check Visual Studio: $e',

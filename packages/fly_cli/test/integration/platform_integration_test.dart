@@ -9,10 +9,10 @@ void main() {
       test('path normalization works across platforms', () {
         const windowsPath = r'lib\src\main.dart';
         const unixPath = 'lib/src/main.dart';
-        
+
         final normalizedWindows = PlatformUtils.normalizePath(windowsPath);
         final normalizedUnix = PlatformUtils.normalizePath(unixPath);
-        
+
         expect(normalizedWindows, normalizedUnix);
         expect(normalizedWindows, 'lib/src/main.dart');
       });
@@ -20,7 +20,7 @@ void main() {
       test('mixed separators are handled correctly', () {
         const mixedPath = r'lib\src/main.dart';
         final normalized = PlatformUtils.normalizePath(mixedPath);
-        
+
         expect(normalized, 'lib/src/main.dart');
       });
     });
@@ -28,10 +28,10 @@ void main() {
     group('Config Directory Creation', () {
       test('config directory paths are valid on all platforms', () async {
         final configDir = await PlatformUtils.getConfigDirectory();
-        
+
         expect(configDir, isNotEmpty);
         expect(configDir, contains('fly_cli'));
-        
+
         // Verify path structure
         if (Platform.isWindows) {
           expect(configDir, contains('AppData'));
@@ -47,7 +47,7 @@ void main() {
       test('ensure config directory creates directories', () async {
         final configDir = await PlatformUtils.ensureConfigDirectory();
         final dir = Directory(configDir);
-        
+
         expect(await dir.exists(), true);
       });
 
@@ -55,7 +55,7 @@ void main() {
         final configDir = await PlatformUtils.getConfigDirectory();
         final cacheDir = await PlatformUtils.getCacheDirectory();
         final templatesDir = await PlatformUtils.getTemplatesDirectory();
-        
+
         expect(cacheDir, contains(configDir));
         expect(templatesDir, contains(configDir));
         expect(cacheDir, contains('cache'));
@@ -74,7 +74,7 @@ void main() {
     group('Line Endings', () {
       test('line ending is correct for platform', () {
         final lineEnding = PlatformUtils.lineEnding;
-        
+
         if (Platform.isWindows) {
           expect(lineEnding, '\r\n');
         } else {

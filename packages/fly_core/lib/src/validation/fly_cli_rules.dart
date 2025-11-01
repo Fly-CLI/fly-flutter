@@ -8,7 +8,7 @@ import 'validation_result.dart';
 import 'validation_rule.dart';
 
 /// Flutter project validation rule
-/// 
+///
 /// Validates that the current directory is a Flutter project.
 class FlutterProjectValidationRule implements ValidationRule<String> {
   const FlutterProjectValidationRule();
@@ -20,7 +20,8 @@ class FlutterProjectValidationRule implements ValidationRule<String> {
   int get priority => 300;
 
   @override
-  Future<ValidationResult> validate(String projectPath, {String? fieldName}) async {
+  Future<ValidationResult> validate(String projectPath,
+      {String? fieldName}) async {
     final pubspecFile = File(path.join(projectPath, 'pubspec.yaml'));
     if (!await pubspecFile.exists()) {
       return ValidationResult.failure([
@@ -37,7 +38,7 @@ class FlutterProjectValidationRule implements ValidationRule<String> {
 }
 
 /// Directory writability validation rule
-/// 
+///
 /// Validates that a directory exists and is writable.
 class DirectoryWritableRule implements ValidationRule<String> {
   const DirectoryWritableRule();
@@ -49,7 +50,8 @@ class DirectoryWritableRule implements ValidationRule<String> {
   int get priority => 400;
 
   @override
-  Future<ValidationResult> validate(String directoryPath, {String? fieldName}) async {
+  Future<ValidationResult> validate(String directoryPath,
+      {String? fieldName}) async {
     final directory = Directory(directoryPath);
 
     if (!await directory.exists()) {
@@ -79,7 +81,7 @@ class DirectoryWritableRule implements ValidationRule<String> {
 }
 
 /// Platform validation rule
-/// 
+///
 /// Validates that platform names are valid Flutter platforms.
 class PlatformValidationRule implements ValidationRule<List<String>> {
   const PlatformValidationRule();
@@ -100,7 +102,8 @@ class PlatformValidationRule implements ValidationRule<List<String>> {
   int get priority => 350;
 
   @override
-  Future<ValidationResult> validate(List<String> platforms, {String? fieldName}) async {
+  Future<ValidationResult> validate(List<String> platforms,
+      {String? fieldName}) async {
     for (final platform in platforms) {
       if (!validPlatforms.contains(platform)) {
         return ValidationResult.failure([
@@ -118,7 +121,7 @@ class PlatformValidationRule implements ValidationRule<List<String>> {
 }
 
 /// Environment prerequisites validation rule
-/// 
+///
 /// Validates that required SDKs and tools are installed and working.
 class EnvironmentValidationRule extends AsyncValidationRule<void> {
   final ProcessExecutor? processExecutor;
@@ -147,7 +150,8 @@ class EnvironmentValidationRule extends AsyncValidationRule<void> {
 
     // Check Flutter SDK
     try {
-      final flutterResult = await processExecutor!.execute('flutter', ['--version']);
+      final flutterResult =
+          await processExecutor!.execute('flutter', ['--version']);
       if (!flutterResult.success) {
         errors.add('Flutter SDK not found or not working');
       }
@@ -215,13 +219,14 @@ class FlutterCliValidationRules {
   }
 
   /// Get environment validation rule
-  static ValidationRule<void> environmentRule({ProcessExecutor? processExecutor}) {
+  static ValidationRule<void> environmentRule(
+      {ProcessExecutor? processExecutor}) {
     return EnvironmentValidationRule(processExecutor: processExecutor);
   }
 
   /// Get network connectivity validation rule
-  static ValidationRule<String> networkRule({ProcessExecutor? processExecutor}) {
+  static ValidationRule<String> networkRule(
+      {ProcessExecutor? processExecutor}) {
     return NetworkConnectivityRule(processExecutor: processExecutor);
   }
 }
-

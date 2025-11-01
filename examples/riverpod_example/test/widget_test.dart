@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:riverpod_example/main.dart';
 
 void main() {
@@ -18,7 +17,10 @@ void main() {
 
     // Verify that our welcome message is displayed.
     expect(find.text('Welcome to Riverpod Example!'), findsOneWidget);
-    expect(find.text('This is a production-ready Flutter project created with Fly CLI.'), findsOneWidget);
+    expect(
+        find.text(
+            'This is a production-ready Flutter project created with Fly CLI.'),
+        findsOneWidget);
   });
 
   testWidgets('Counter increments when button is pressed', (tester) async {
@@ -35,7 +37,7 @@ void main() {
     // Find the increment button and tap it
     final incrementButton = find.text('Increment');
     expect(incrementButton, findsOneWidget);
-    
+
     await tester.tap(incrementButton);
     await tester.pump();
 
@@ -102,7 +104,7 @@ void main() {
     // Find and tap the add sample todo button
     final addTodoButton = find.text('Add Sample Todo');
     expect(addTodoButton, findsOneWidget);
-    
+
     await tester.tap(addTodoButton);
     await tester.pump();
 
@@ -122,7 +124,7 @@ void main() {
     // Find and tap the profile button
     final profileButton = find.byIcon(Icons.person);
     expect(profileButton, findsOneWidget);
-    
+
     await tester.tap(profileButton);
     await tester.pumpAndSettle();
 

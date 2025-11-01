@@ -1,17 +1,20 @@
 import 'dart:io';
 
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:path/path.dart' as path;
 
 /// Cross-platform utility functions for Fly CLI
 class PlatformUtils {
   static bool get isWindows => Platform.isWindows;
+
   static bool get isMacOS => Platform.isMacOS;
+
   static bool get isLinux => Platform.isLinux;
 
   /// Normalize path separators (always use forward slash internally)
-  static String normalizePath(String filePath) => filePath.replaceAll(r'\', '/');
+  static String normalizePath(String filePath) =>
+      filePath.replaceAll(r'\', '/');
 
   /// Make file executable (Unix only)
   static Future<void> makeExecutable(String filePath) async {
@@ -53,11 +56,13 @@ class PlatformUtils {
   /// Get default cache directory synchronously (for constructor)
   static String getDefaultCacheDirectory() {
     const env = EnvironmentManager();
-    final home = env.getString(EnvVar.home) ?? env.getString(EnvVar.userProfile) ?? '';
+    final home =
+        env.getString(EnvVar.home) ?? env.getString(EnvVar.userProfile) ?? '';
     if (isWindows) {
       return path.join(home, 'AppData', 'Local', 'fly_cli', 'cache');
     } else if (isMacOS) {
-      return path.join(home, 'Library', 'Application Support', 'fly_cli', 'cache');
+      return path.join(
+          home, 'Library', 'Application Support', 'fly_cli', 'cache');
     } else {
       // Linux and other Unix-like systems
       return path.join(home, '.config', 'fly_cli', 'cache');
@@ -81,9 +86,9 @@ class PlatformUtils {
   static String getShell() {
     if (isWindows) {
       final env = const EnvironmentManager();
-      return env.getString(EnvVar.comspec) 
-          ?? env.getString(EnvVar.comSpec) 
-          ?? 'powershell.exe';
+      return env.getString(EnvVar.comspec) ??
+          env.getString(EnvVar.comSpec) ??
+          'powershell.exe';
     } else {
       return const EnvironmentManager().getString(EnvVar.shell) ?? '/bin/bash';
     }
@@ -96,17 +101,19 @@ class PlatformUtils {
     if (shell == null) {
       return 'unknown';
     }
-    
+
     if (shell.contains('bash')) return 'bash';
     if (shell.contains('zsh')) return 'zsh';
     if (shell.contains('fish')) return 'fish';
-    if (shell.contains('powershell') || shell.contains('pwsh')) return 'powershell';
+    if (shell.contains('powershell') || shell.contains('pwsh'))
+      return 'powershell';
     if (shell.contains('cmd')) return 'cmd';
-    
+
     return 'unknown';
   }
 
   /// Check if running in CI environment
-  static bool get isCI => Platform.environment.containsKey('CI') ||
-        Platform.environment.containsKey('CONTINUOUS_INTEGRATION');
+  static bool get isCI =>
+      Platform.environment.containsKey('CI') ||
+      Platform.environment.containsKey('CONTINUOUS_INTEGRATION');
 }

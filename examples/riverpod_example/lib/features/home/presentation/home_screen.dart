@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:riverpod_example/features/home/providers/home_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -11,7 +10,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final counter = ref.watch(counterProvider);
     final todos = ref.watch(todosProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Riverpod Example'),
@@ -38,7 +37,7 @@ class HomeScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 32),
-            
+
             // Counter Section
             Card(
               child: Padding(
@@ -87,9 +86,9 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Todos Section
             Card(
               child: Padding(
@@ -130,9 +129,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => ref
-                          .read(todosProvider.notifier)
-                          .addTodo(
+                      onPressed: () => ref.read(todosProvider.notifier).addTodo(
                             'Sample Todo ${DateTime.now().millisecondsSinceEpoch}',
                             'This is a sample todo created at ${DateTime.now()}',
                           ),

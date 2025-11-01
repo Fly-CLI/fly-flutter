@@ -29,7 +29,8 @@ class RedactionPolicy {
       } else if (v is Map<String, Object?>) {
         out[k] = scrub(v);
       } else if (v is List) {
-        out[k] = v.map((e) => e is Map<String, Object?> ? scrub(e) : e).toList();
+        out[k] =
+            v.map((e) => e is Map<String, Object?> ? scrub(e) : e).toList();
       } else {
         out[k] = v;
       }
@@ -54,5 +55,3 @@ class RedactionPolicy {
     return '${s.substring(0, 2)}****${s.substring(s.length - 2)}';
   }
 }
-
-

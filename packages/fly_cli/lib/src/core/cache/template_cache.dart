@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:fly_cli/src/core/utils/platform_utils.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:fly_cli/src/core/utils/platform_utils.dart';
 import 'cache_models.dart';
 
 /// Manages template caching with expiration, validation, and size management
@@ -17,8 +17,12 @@ class TemplateCacheManager {
     Duration? cacheDuration,
     int? maxSizeBytes,
   })  : _logger = logger ?? Logger(),
-        _cacheDirectory = cacheDirectory ?? PlatformUtils.getDefaultCacheDirectory(),
-        _expirationDays = expirationDays ?? (cacheDuration != null ? (cacheDuration.inDays > 0 ? cacheDuration.inDays : 1) : 7),
+        _cacheDirectory =
+            cacheDirectory ?? PlatformUtils.getDefaultCacheDirectory(),
+        _expirationDays = expirationDays ??
+            (cacheDuration != null
+                ? (cacheDuration.inDays > 0 ? cacheDuration.inDays : 1)
+                : 7),
         _cacheDuration = cacheDuration ?? const Duration(days: 7),
         _maxSizeBytes = maxSizeBytes ?? 100 * 1024 * 1024; // 100MB
 
@@ -67,13 +71,14 @@ class TemplateCacheManager {
   }
 
   /// Cache a template with metadata
-  Future<void> cacheTemplate(String name, Map<String, dynamic> templateData) async {
+  Future<void> cacheTemplate(
+      String name, Map<String, dynamic> templateData) async {
     await _ensureInitialized();
 
     try {
       // Use template data directly
       final data = templateData;
-      
+
       // Generate checksum for validation
       final jsonString = json.encode(data);
       final checksum = sha256.convert(utf8.encode(jsonString)).toString();
@@ -144,7 +149,8 @@ class TemplateCacheManager {
 
       // Validate checksum
       if (!await _validateChecksum(entry.template)) {
-        _logger.warn('Template $name checksum validation failed, removing from cache');
+        _logger.warn(
+            'Template $name checksum validation failed, removing from cache');
         await invalidate(name);
         return const CacheCorrupted(error: 'Checksum validation failed');
       }
@@ -258,10 +264,12 @@ class TemplateCacheManager {
       }
 
       if (expiredKeys.isNotEmpty) {
-        _logger.info('Cleaned up ${expiredKeys.length} expired templates during initialization');
+        _logger.info(
+            'Cleaned up ${expiredKeys.length} expired templates during initialization');
       }
     } catch (e) {
-      _logger.warn('Failed to cleanup expired entries during initialization: $e');
+      _logger
+          .warn('Failed to cleanup expired entries during initialization: $e');
       // Don't rethrow during initialization
     }
   }
@@ -407,10 +415,9 @@ class TemplateCacheManager {
     }
   }
 
-
   Future<void> _loadMetadata() async {
     final metadataFile = File(path.join(_cacheDirectory, _metadataFileName));
-    
+
     if (await metadataFile.exists()) {
       try {
         final content = await metadataFile.readAsString();
@@ -433,7 +440,7 @@ class TemplateCacheManager {
 
   Future<void> _loadEntries() async {
     _entries.clear();
-    
+
     final cacheDir = Directory(_cacheDirectory);
     if (!await cacheDir.exists()) {
       _logger.info('Cache directory does not exist, skipping entry loading');
@@ -442,8 +449,8 @@ class TemplateCacheManager {
 
     try {
       await for (final entity in cacheDir.list()) {
-        if (entity is File && 
-            entity.path.endsWith('.json') && 
+        if (entity is File &&
+            entity.path.endsWith('.json') &&
             !entity.path.endsWith(_metadataFileName)) {
           try {
             final content = await entity.readAsString();
@@ -478,7 +485,8 @@ class TemplateCacheManager {
   Future<bool> _validateChecksum(CachedTemplate template) async {
     try {
       final jsonString = json.encode(template.templateData);
-      final currentChecksum = sha256.convert(utf8.encode(jsonString)).toString();
+      final currentChecksum =
+          sha256.convert(utf8.encode(jsonString)).toString();
       return currentChecksum == template.checksum;
     } catch (e) {
       _logger.warn('Checksum validation failed for ${template.name}: $e');
@@ -495,13 +503,12 @@ class TemplateCacheManager {
     }
   }
 
-  CacheMetadata _createDefaultMetadata() =>
-      CacheMetadata(
-      cacheVersion: _cacheVersion,
-      totalEntries: 0,
-      totalSizeBytes: 0,
-      lastCleanup: DateTime.now(),
-      defaultExpirationDays: _expirationDays,
-      maxSizeBytes: _maxSizeBytes,
-    );
+  CacheMetadata _createDefaultMetadata() => CacheMetadata(
+        cacheVersion: _cacheVersion,
+        totalEntries: 0,
+        totalSizeBytes: 0,
+        lastCleanup: DateTime.now(),
+        defaultExpirationDays: _expirationDays,
+        maxSizeBytes: _maxSizeBytes,
+      );
 }

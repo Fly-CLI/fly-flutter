@@ -1,6 +1,7 @@
 # Fly CLI Development Scripts
 
-This directory contains comprehensive shell scripts for automating CLI commands and development workflows in the Fly CLI project.
+This directory contains comprehensive shell scripts for automating CLI commands and development
+workflows in the Fly CLI project.
 
 ## Quick Start
 
@@ -36,12 +37,14 @@ Scripts are organized into logical groups:
 Bootstrap the monorepo with melos. Installs all package dependencies.
 
 **Usage:**
+
 ```bash
 ./scripts/setup/bootstrap.sh
 ./scripts/setup/bootstrap.sh --verbose
 ```
 
 **What it does:**
+
 - Checks if melos is installed
 - Runs `melos bootstrap` to install all package dependencies
 - Verifies the bootstrap was successful
@@ -51,12 +54,15 @@ Bootstrap the monorepo with melos. Installs all package dependencies.
 Install Fly CLI locally for development.
 
 **Usage:**
+
 ```bash
 ./scripts/setup/install.sh
 ```
 
 **What it does:**
-- Activates the CLI from local source using `dart pub global activate --source path packages/fly_cli`
+
+- Activates the CLI from local source using
+  `dart pub global activate --source path packages/fly_cli`
 - Makes the `fly` command available globally
 
 ### `setup/verify.sh`
@@ -64,11 +70,13 @@ Install Fly CLI locally for development.
 Verify the installation is working correctly.
 
 **Usage:**
+
 ```bash
 ./scripts/setup/verify.sh
 ```
 
 **What it does:**
+
 - Runs `fly doctor` to check system configuration
 - Verifies all dependencies are properly installed
 
@@ -79,12 +87,14 @@ Verify the installation is working correctly.
 Run static analysis on all packages.
 
 **Usage:**
+
 ```bash
 ./scripts/development/analyze.sh
 ./scripts/development/analyze.sh --verbose
 ```
 
 **What it does:**
+
 - Runs `melos run analyze` to execute `flutter analyze` on all packages
 - Reports any analysis issues
 
@@ -93,11 +103,13 @@ Run static analysis on all packages.
 Format all Dart files in the project.
 
 **Usage:**
+
 ```bash
 ./scripts/development/format.sh
 ```
 
 **What it does:**
+
 - Runs `melos run format` to format all Dart files
 - Uses `dart format --set-exit-if-changed .`
 
@@ -106,11 +118,13 @@ Format all Dart files in the project.
 Check if all Dart files are properly formatted without changing them.
 
 **Usage:**
+
 ```bash
 ./scripts/development/format-check.sh
 ```
 
 **What it does:**
+
 - Runs `melos run format:check` to verify formatting
 - Exits with error code if formatting issues are found
 
@@ -119,12 +133,14 @@ Check if all Dart files are properly formatted without changing them.
 Run all tests with coverage.
 
 **Usage:**
+
 ```bash
 ./scripts/development/test.sh
 ./scripts/development/test.sh --verbose
 ```
 
 **What it does:**
+
 - Runs `melos run test` to execute all tests with coverage
 - Only runs tests in packages that have a `test/` directory
 
@@ -133,11 +149,13 @@ Run all tests with coverage.
 Run tests only for packages that have changed.
 
 **Usage:**
+
 ```bash
 ./scripts/development/test-changed.sh
 ```
 
 **What it does:**
+
 - Runs `melos run test:changed` to test only packages changed since last commit
 - Useful for quick feedback during development
 
@@ -146,11 +164,13 @@ Run tests only for packages that have changed.
 Run unit tests only.
 
 **Usage:**
+
 ```bash
 ./scripts/development/test-unit.sh [package_name]
 ```
 
 **Examples:**
+
 ```bash
 # Run all unit tests
 ./scripts/development/test-unit.sh
@@ -164,11 +184,13 @@ Run unit tests only.
 Run integration tests.
 
 **Usage:**
+
 ```bash
 ./scripts/development/test-integration.sh
 ```
 
 **What it does:**
+
 - Runs integration tests from `test/integration/` directories
 
 ### `development/test-e2e.sh`
@@ -176,11 +198,13 @@ Run integration tests.
 Run end-to-end tests.
 
 **Usage:**
+
 ```bash
 ./scripts/development/test-e2e.sh
 ```
 
 **What it does:**
+
 - Runs E2E tests from `test/e2e/` directories
 
 ### `development/test-mcp.sh`
@@ -188,11 +212,13 @@ Run end-to-end tests.
 Run MCP conformance tests.
 
 **Usage:**
+
 ```bash
 ./scripts/development/test-mcp.sh
 ```
 
 **What it does:**
+
 - Runs `dart run tool/ci/mcp_conformance_test.dart`
 - Tests MCP protocol compliance
 
@@ -201,22 +227,26 @@ Run MCP conformance tests.
 Reload Fly CLI after code changes. Reinstalls CLI locally and reminds about Cursor restart.
 
 **Usage:**
+
 ```bash
 ./scripts/development/reload-cli.sh
 ./scripts/development/reload-cli.sh --verbose
 ```
 
 **What it does:**
+
 - Reinstalls CLI locally using `dart pub global activate --source path`
 - Verifies CLI is available
 - Reminds you to restart Cursor to pick up changes
 
 **When to use:**
+
 - After making changes to Fly CLI code
 - Before testing changes with AI assistants (Cursor)
 - Part of the development iteration cycle
 
 **Examples:**
+
 ```bash
 # Reload CLI after making changes
 ./scripts/development/reload-cli.sh
@@ -225,13 +255,15 @@ Reload Fly CLI after code changes. Reinstalls CLI locally and reminds about Curs
 ./scripts/development/reload-cli.sh --verbose
 ```
 
-**Important**: After running this script, **restart Cursor** so the MCP server picks up the new CLI version.
+**Important**: After running this script, **restart Cursor** so the MCP server picks up the new CLI
+version.
 
 ### `development/dev-cycle.sh`
 
 Complete development iteration cycle. Reloads CLI, validates test project, and provides next steps.
 
 **Usage:**
+
 ```bash
 ./scripts/development/dev-cycle.sh
 ./scripts/development/dev-cycle.sh --verbose
@@ -240,22 +272,26 @@ Complete development iteration cycle. Reloads CLI, validates test project, and p
 ```
 
 **What it does:**
+
 - Reloads CLI with latest changes (unless `--skip-reload`)
 - Validates test project structure (unless `--skip-validate`)
 - Provides clear next steps and reminders
 
 **Options:**
+
 - `-v, --verbose` - Enable verbose output
 - `--skip-validate` - Skip test project validation
 - `--skip-reload` - Skip CLI reload
 - `-h, --help` - Show help message
 
 **When to use:**
+
 - Complete development cycle after making CLI changes
 - Before testing with AI assistants
 - As part of iterative development workflow
 
 **Examples:**
+
 ```bash
 # Full cycle (reload + validate)
 ./scripts/development/dev-cycle.sh
@@ -270,7 +306,8 @@ Complete development iteration cycle. Reloads CLI, validates test project, and p
 ./scripts/development/dev-cycle.sh --verbose
 ```
 
-**Important**: After running this script, **restart Cursor** so the MCP server picks up the new CLI version.
+**Important**: After running this script, **restart Cursor** so the MCP server picks up the new CLI
+version.
 
 See `docs/testing/ai-assisted-development.md` for the complete AI-assisted development workflow.
 
@@ -279,11 +316,13 @@ See `docs/testing/ai-assisted-development.md` for the complete AI-assisted devel
 Run code generation with build_runner.
 
 **Usage:**
+
 ```bash
 ./scripts/development/build-runner.sh
 ```
 
 **What it does:**
+
 - Runs `melos run build_runner` to generate code for all packages
 - Uses `build_runner build --delete-conflicting-outputs`
 
@@ -292,11 +331,13 @@ Run code generation with build_runner.
 Clean all packages (remove build artifacts).
 
 **Usage:**
+
 ```bash
 ./scripts/development/clean.sh
 ```
 
 **What it does:**
+
 - Runs `melos run clean` to execute `flutter clean` on all packages
 
 ### `development/get.sh`
@@ -304,11 +345,13 @@ Clean all packages (remove build artifacts).
 Get dependencies for all packages.
 
 **Usage:**
+
 ```bash
 ./scripts/development/get.sh
 ```
 
 **What it does:**
+
 - Runs `melos run get` to execute `flutter pub get` on all packages
 
 ### `development/outdated.sh`
@@ -316,11 +359,13 @@ Get dependencies for all packages.
 Check for outdated dependencies.
 
 **Usage:**
+
 ```bash
 ./scripts/development/outdated.sh
 ```
 
 **What it does:**
+
 - Runs `melos run outdated` to check for outdated packages
 
 ## CLI Command Wrappers
@@ -332,11 +377,13 @@ These scripts wrap Fly CLI commands for convenience.
 Create a new Flutter project.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/create.sh PROJECT_NAME [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Basic project creation
 ./scripts/cli/create.sh my_app
@@ -355,11 +402,13 @@ Create a new Flutter project.
 Run system diagnostics.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/doctor.sh [--fix] [--output=json]
 ```
 
 **Examples:**
+
 ```bash
 # Check system status
 ./scripts/cli/doctor.sh
@@ -376,11 +425,13 @@ Run system diagnostics.
 Export CLI schema for AI integration.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/schema-export.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Export to stdout
 ./scripts/cli/schema-export.sh
@@ -397,11 +448,13 @@ Export CLI schema for AI integration.
 Export project context for AI assistants.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/context-export.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Export to stdout
 ./scripts/cli/context-export.sh
@@ -418,11 +471,13 @@ Export project context for AI assistants.
 Add a new screen to a project.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/add-screen.sh SCREEN_NAME [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Basic screen
 ./scripts/cli/add-screen.sh home --feature=auth
@@ -436,11 +491,13 @@ Add a new screen to a project.
 Add a new service to a project.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/add-service.sh SERVICE_NAME [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # API service
 ./scripts/cli/add-service.sh api --feature=core --type=api
@@ -454,11 +511,13 @@ Add a new service to a project.
 Run MCP diagnostics.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/mcp-doctor.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Run MCP diagnostics
 ./scripts/cli/mcp-doctor.sh
@@ -472,11 +531,13 @@ Run MCP diagnostics.
 Show Fly CLI version information.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/version.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Show version
 ./scripts/cli/version.sh
@@ -490,11 +551,13 @@ Show Fly CLI version information.
 Generate shell completion for Fly CLI.
 
 **Usage:**
+
 ```bash
 ./scripts/cli/completion.sh [SHELL] [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Generate bash completion
 ./scripts/cli/completion.sh bash
@@ -507,6 +570,7 @@ Generate shell completion for Fly CLI.
 ```
 
 **To install completion:**
+
 ```bash
 # Bash
 ./scripts/cli/completion.sh bash > /etc/bash_completion.d/fly
@@ -524,11 +588,13 @@ These scripts help you set up and use the MCP (Model Context Protocol) server fo
 Start the MCP server for Cursor/Claude integration.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/serve.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Start with stdio (for Cursor/Claude)
 ./scripts/mcp/serve.sh --stdio
@@ -542,11 +608,13 @@ Start the MCP server for Cursor/Claude integration.
 Run MCP diagnostics to check server configuration.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/doctor.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Check MCP configuration
 ./scripts/mcp/doctor.sh
@@ -560,11 +628,13 @@ Run MCP diagnostics to check server configuration.
 Run MCP conformance tests.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/test.sh [OPTIONS]
 ```
 
 **What it does:**
+
 - Runs `./scripts/mcp/conformance.sh` to test MCP protocol compliance
 
 ### `mcp/conformance.sh`
@@ -572,11 +642,13 @@ Run MCP conformance tests.
 Run MCP conformance tests directly.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/conformance.sh [OPTIONS]
 ```
 
 **What it does:**
+
 - Runs `dart run tool/ci/mcp_conformance_test.dart`
 - Tests MCP protocol compliance
 
@@ -585,11 +657,13 @@ Run MCP conformance tests directly.
 Interactive setup script for MCP integration.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/setup.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Interactive setup
 ./scripts/mcp/setup.sh
@@ -609,11 +683,13 @@ Interactive setup script for MCP integration.
 Setup Cursor MCP integration by creating `.cursor/mcp.json`.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/setup-cursor.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Create configuration
 ./scripts/mcp/setup-cursor.sh
@@ -623,6 +699,7 @@ Setup Cursor MCP integration by creating `.cursor/mcp.json`.
 ```
 
 **What it does:**
+
 - Creates `.cursor/mcp.json` with Fly MCP server configuration
 - Configures MCP server to run with stdio transport
 
@@ -631,11 +708,13 @@ Setup Cursor MCP integration by creating `.cursor/mcp.json`.
 Setup Claude Desktop MCP integration.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/setup-claude.sh [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Create configuration
 ./scripts/mcp/setup-claude.sh
@@ -645,6 +724,7 @@ Setup Claude Desktop MCP integration.
 ```
 
 **What it does:**
+
 - Creates or updates Claude Desktop configuration
 - Configures MCP server for Claude Desktop
 - Works on macOS and Linux
@@ -654,17 +734,20 @@ Setup Claude Desktop MCP integration.
 Verify MCP server setup and configuration.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/verify.sh [OPTIONS]
 ```
 
 **What it does:**
+
 - Checks if Fly CLI is installed
 - Verifies Flutter SDK is available
 - Checks MCP configuration files (Cursor/Claude)
 - Runs MCP diagnostics
 
 **Examples:**
+
 ```bash
 # Basic verification
 ./scripts/mcp/verify.sh
@@ -678,11 +761,13 @@ Verify MCP server setup and configuration.
 List and discover MCP tools, prompts, and resources.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/list.sh [OPTIONS]
 ```
 
 **What it does:**
+
 - Lists all registered MCP tools from `McpToolType` enum
 - Lists all registered prompts from `PromptType` enum
 - Lists all registered resources from `ResourceType` enum
@@ -690,11 +775,13 @@ List and discover MCP tools, prompts, and resources.
 - For prompts, shows associated template file paths
 
 **Options:**
+
 - `--type=TYPE` - Filter by type (tools, prompts, resources). Default: list all types
 - `--format=FORMAT` - Output format (table, json, yaml). Default: table
 - `-v, --verbose` - Show verbose output (file paths, etc.)
 
 **Examples:**
+
 ```bash
 # List all items
 ./scripts/mcp/list.sh
@@ -714,33 +801,38 @@ List and discover MCP tools, prompts, and resources.
 Validate and verify MCP tools, prompts, and resources.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/validate.sh [OPTIONS]
 ```
 
 **What it does:**
+
 - **Tools validation:**
-  - Checks that all `McpToolType` enum values have corresponding strategy classes
-  - Verifies tool schemas (paramsSchema, resultSchema) are valid
-  - Checks metadata consistency (readOnly, writesToDisk, etc.)
-  - Verifies handlers can be created successfully
+    - Checks that all `McpToolType` enum values have corresponding strategy classes
+    - Verifies tool schemas (paramsSchema, resultSchema) are valid
+    - Checks metadata consistency (readOnly, writesToDisk, etc.)
+    - Verifies handlers can be created successfully
 - **Prompts validation:**
-  - Checks that all `PromptType` enum values have corresponding strategy classes
-  - Verifies template files exist in `packages/fly_cli/lib/src/features/mcp/prompts/templates/`
-  - Validates template syntax (Mustache templates)
-  - Checks template variables match strategy definitions
+    - Checks that all `PromptType` enum values have corresponding strategy classes
+    - Verifies template files exist in `packages/fly_cli/lib/src/features/mcp/prompts/templates/`
+    - Validates template syntax (Mustache templates)
+    - Checks template variables match strategy definitions
 - **Resources validation:**
-  - Checks that all `ResourceType` enum values have corresponding strategy classes
-  - Verifies URI prefix patterns are valid
-  - Checks resource strategies implement required methods
+    - Checks that all `ResourceType` enum values have corresponding strategy classes
+    - Verifies URI prefix patterns are valid
+    - Checks resource strategies implement required methods
 
 **Options:**
+
 - `--type=TYPE` - Filter by type (tools, prompts, resources). Default: validate all types
 - `--format=FORMAT` - Output format (table, json). Default: table
-- `--strict` - Exit with error code on validation failures (default: exit with error code if errors found)
+- `--strict` - Exit with error code on validation failures (default: exit with error code if errors
+  found)
 - `-v, --verbose` - Show verbose output
 
 **Examples:**
+
 ```bash
 # Validate all items
 ./scripts/mcp/validate.sh
@@ -756,6 +848,7 @@ Validate and verify MCP tools, prompts, and resources.
 ```
 
 **Output:**
+
 - Summary counts (X tools, Y prompts, Z resources)
 - Individual validation results with error messages
 - Exit code 0 on success, non-zero on validation failures
@@ -765,23 +858,27 @@ Validate and verify MCP tools, prompts, and resources.
 Manage the test project used for validating Fly CLI features.
 
 **Usage:**
+
 ```bash
 ./scripts/mcp/test-project.sh [COMMAND]
 ```
 
 **What it does:**
+
 - Manages the test Flutter project at `examples/test_project/`
 - Helps reset/recreate the project for clean testing
 - Validates project structure and setup
 - Provides status information about the test project
 
 **Commands:**
+
 - `reset, recreate` - Delete and recreate test project
 - `status, info` - Show test project status and structure
 - `validate, check` - Validate test project structure and setup
 - `-h, --help` - Show help message
 
 **Examples:**
+
 ```bash
 # Reset test project (delete and recreate)
 ./scripts/mcp/test-project.sh reset
@@ -795,12 +892,14 @@ Manage the test project used for validating Fly CLI features.
 
 **Test Project Purpose:**
 The test project at `examples/test_project/` serves as a test bed for:
+
 - **Developers** to validate CLI changes
 - **AI Assistants** (Cursor, Claude Desktop, etc.) to test CLI features via MCP protocol
 - **Natural usage scenario testing** of all CLI capabilities
 
 **For AI Assistants:**
 AI assistants can use this project via MCP tools to test Fly CLI capabilities:
+
 1. Discover available tools via `./scripts/mcp/list.sh --type=tools`
 2. Execute CLI commands via MCP tools on the test project
 3. Validate results by checking project state
@@ -815,11 +914,13 @@ See `docs/testing/ai-testing-guide.md` for detailed testing instructions.
 Build all example apps.
 
 **Usage:**
+
 ```bash
 ./scripts/build/examples.sh [PLATFORM]
 ```
 
 **Examples:**
+
 ```bash
 # Build all examples as APK
 ./scripts/build/examples.sh
@@ -834,11 +935,13 @@ Build all example apps.
 Build a specific package.
 
 **Usage:**
+
 ```bash
 ./scripts/build/package.sh PACKAGE_NAME [OPTIONS]
 ```
 
 **Examples:**
+
 ```bash
 # Build fly_cli package
 ./scripts/build/package.sh fly_cli
@@ -854,11 +957,13 @@ Build a specific package.
 Run all CI tests (analysis, formatting, tests).
 
 **Usage:**
+
 ```bash
 ./scripts/ci/test-all.sh
 ```
 
 **What it does:**
+
 - Runs analysis
 - Checks formatting
 - Runs all tests
@@ -869,11 +974,13 @@ Run all CI tests (analysis, formatting, tests).
 Check license compatibility.
 
 **Usage:**
+
 ```bash
 ./scripts/ci/license-check.sh
 ```
 
 **What it does:**
+
 - Runs `melos run license:check`
 - Verifies all licenses are compatible (MIT)
 
@@ -882,11 +989,13 @@ Check license compatibility.
 Run security validation on templates.
 
 **Usage:**
+
 ```bash
 ./scripts/ci/security-scan.sh
 ```
 
 **What it does:**
+
 - Runs `melos run security:scan`
 - Validates template security
 
@@ -897,11 +1006,13 @@ Run security validation on templates.
 Bump version across packages.
 
 **Usage:**
+
 ```bash
 ./scripts/tools/version-bump.sh [VERSION]
 ```
 
 **Examples:**
+
 ```bash
 # Bump patch version (0.1.0 -> 0.1.1)
 ./scripts/tools/version-bump.sh
@@ -915,11 +1026,13 @@ Bump version across packages.
 Generate coverage report.
 
 **Usage:**
+
 ```bash
 ./scripts/tools/coverage-report.sh
 ```
 
 **What it does:**
+
 - Collects coverage from all test runs
 - Generates HTML coverage report
 - Opens report in browser (if available)
@@ -929,11 +1042,13 @@ Generate coverage report.
 Display help and usage information.
 
 **Usage:**
+
 ```bash
 ./scripts/tools/help.sh [CATEGORY]
 ```
 
 **Examples:**
+
 ```bash
 # Show all help
 ./scripts/tools/help.sh
@@ -1089,6 +1204,7 @@ If `fly` command is not found after installation:
 ## Cross-Platform Notes
 
 All scripts are designed to work on:
+
 - **macOS** (tested and primary)
 - **Linux** (should work)
 - **Windows** (may require Git Bash or WSL)

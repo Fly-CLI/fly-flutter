@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
 import '../helpers/test_temp_dir.dart';
 
 void main() {
@@ -13,7 +14,6 @@ void main() {
   tearDownAll(temp.cleanupSuite);
 
   group('Platform-Specific Testing', () {
-
     group('Windows Platform Tests', () {
       test('Windows path handling works correctly', () {
         if (Platform.isWindows) {
@@ -25,9 +25,11 @@ void main() {
 
       test('Windows file operations work correctly', () {
         if (Platform.isWindows) {
-          final testFile = File(path.join(temp.currentTestDir.path, 'test_file.txt'));
+          final testFile = File(
+            path.join(temp.currentTestDir.path, 'test_file.txt'),
+          );
           testFile.writeAsStringSync('Windows test content');
-          
+
           expect(testFile.existsSync(), isTrue);
           expect(testFile.readAsStringSync(), equals('Windows test content'));
         }
@@ -35,14 +37,16 @@ void main() {
 
       test('Windows directory operations work correctly', () {
         if (Platform.isWindows) {
-          final testDir = Directory(path.join(temp.currentTestDir.path, 'test_dir'));
+          final testDir = Directory(
+            path.join(temp.currentTestDir.path, 'test_dir'),
+          );
           testDir.createSync();
-          
+
           expect(testDir.existsSync(), isTrue);
-          
+
           final testFile = File(path.join(testDir.path, 'test.txt'));
           testFile.writeAsStringSync('test');
-          
+
           expect(testFile.existsSync(), isTrue);
         }
       });
@@ -59,9 +63,11 @@ void main() {
 
       test('macOS file operations work correctly', () {
         if (Platform.isMacOS) {
-          final testFile = File(path.join(temp.currentTestDir.path, 'test_file.txt'));
+          final testFile = File(
+            path.join(temp.currentTestDir.path, 'test_file.txt'),
+          );
           testFile.writeAsStringSync('macOS test content');
-          
+
           expect(testFile.existsSync(), isTrue);
           expect(testFile.readAsStringSync(), equals('macOS test content'));
         }
@@ -69,14 +75,16 @@ void main() {
 
       test('macOS directory operations work correctly', () {
         if (Platform.isMacOS) {
-          final testDir = Directory(path.join(temp.currentTestDir.path, 'test_dir'));
+          final testDir = Directory(
+            path.join(temp.currentTestDir.path, 'test_dir'),
+          );
           testDir.createSync();
-          
+
           expect(testDir.existsSync(), isTrue);
-          
+
           final testFile = File(path.join(testDir.path, 'test.txt'));
           testFile.writeAsStringSync('test');
-          
+
           expect(testFile.existsSync(), isTrue);
         }
       });
@@ -93,9 +101,11 @@ void main() {
 
       test('Linux file operations work correctly', () {
         if (Platform.isLinux) {
-          final testFile = File(path.join(temp.currentTestDir.path, 'test_file.txt'));
+          final testFile = File(
+            path.join(temp.currentTestDir.path, 'test_file.txt'),
+          );
           testFile.writeAsStringSync('Linux test content');
-          
+
           expect(testFile.existsSync(), isTrue);
           expect(testFile.readAsStringSync(), equals('Linux test content'));
         }
@@ -103,14 +113,16 @@ void main() {
 
       test('Linux directory operations work correctly', () {
         if (Platform.isLinux) {
-          final testDir = Directory(path.join(temp.currentTestDir.path, 'test_dir'));
+          final testDir = Directory(
+            path.join(temp.currentTestDir.path, 'test_dir'),
+          );
           testDir.createSync();
-          
+
           expect(testDir.existsSync(), isTrue);
-          
+
           final testFile = File(path.join(testDir.path, 'test.txt'));
           testFile.writeAsStringSync('test');
-          
+
           expect(testFile.existsSync(), isTrue);
         }
       });
@@ -134,7 +146,7 @@ void main() {
       test('path joining works across platforms', () {
         final segments = ['test', 'path', 'to', 'file'];
         final joined = path.joinAll(segments);
-        
+
         expect(joined, isNotEmpty);
         expect(joined, isA<String>());
       });
@@ -149,12 +161,15 @@ void main() {
           final basename = path.basename(testPath);
           expect(basename, equals('file.txt'));
         }
-        
+
         // Test Windows-style path separately
         if (Platform.isWindows) {
           const windowsPath = r'test\path\to\file.txt';
           final basename = path.basename(windowsPath);
-          expect(basename, equals(r'test\path\to\file.txt')); // path.basename doesn't normalize on Windows
+          expect(
+            basename,
+            equals(r'test\path\to\file.txt'),
+          ); // path.basename doesn't normalize on Windows
         }
       });
 
@@ -174,14 +189,14 @@ void main() {
 
     group('Platform-Specific CLI Tests', () {
       test('CLI works on current platform', () async {
-          final result = await Process.run(
+        final result = await Process.run(
           'dart',
           [
             'run',
             'packages/fly_cli/bin/fly.dart',
             '--version',
           ],
-            workingDirectory: temp.currentTestDir.path,
+          workingDirectory: temp.currentTestDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -189,7 +204,7 @@ void main() {
       });
 
       test('create command basic functionality', () async {
-          final result = await Process.run(
+        final result = await Process.run(
           'dart',
           [
             'run',
@@ -197,7 +212,7 @@ void main() {
             'create',
             'test_project',
           ],
-            workingDirectory: temp.currentTestDir.path,
+          workingDirectory: temp.currentTestDir.path,
         );
 
         expect(result.exitCode, equals(0));
@@ -247,28 +262,38 @@ void main() {
     group('Platform-Specific Performance Tests', () {
       test('file operations performance on current platform', () {
         final stopwatch = Stopwatch()..start();
-        
+
         // Create multiple files
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(temp.currentTestDir.path, 'test_file_$i.txt'));
+          final file = File(
+            path.join(temp.currentTestDir.path, 'test_file_$i.txt'),
+          );
           file.writeAsStringSync('Test content $i');
         }
-        
+
         stopwatch.stop();
-        expect(stopwatch.elapsedMilliseconds, lessThan(1000)); // Should complete within 1 second
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThan(1000),
+        ); // Should complete within 1 second
       });
 
       test('directory operations performance on current platform', () {
         final stopwatch = Stopwatch()..start();
-        
+
         // Create multiple directories
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(temp.currentTestDir.path, 'test_dir_$i'));
+          final dir = Directory(
+            path.join(temp.currentTestDir.path, 'test_dir_$i'),
+          );
           dir.createSync();
         }
-        
+
         stopwatch.stop();
-        expect(stopwatch.elapsedMilliseconds, lessThan(1000)); // Should complete within 1 second
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThan(1000),
+        ); // Should complete within 1 second
       });
     });
 
@@ -289,11 +314,13 @@ void main() {
       });
 
       test('file permissions handled correctly', () {
-        final testFile = File(path.join(temp.currentTestDir.path, 'permission_test.txt'));
+        final testFile = File(
+          path.join(temp.currentTestDir.path, 'permission_test.txt'),
+        );
         testFile.writeAsStringSync('test content');
-        
+
         expect(testFile.existsSync(), isTrue);
-        
+
         // Test reading
         final content = testFile.readAsStringSync();
         expect(content, equals('test content'));

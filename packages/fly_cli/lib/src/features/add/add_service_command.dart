@@ -1,35 +1,33 @@
-import 'dart:io';
-
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
-import 'package:path/path.dart' as path;
 
 /// AddServiceCommand using new architecture
 class AddServiceCommand extends FlyCommand {
   AddServiceCommand(super.context);
 
   /// Factory constructor for enum-based command creation
-  factory AddServiceCommand.create(CommandContext context) => AddServiceCommand(context);
+  factory AddServiceCommand.create(CommandContext context) =>
+      AddServiceCommand(context);
 
   @override
   String get name => 'service';
 
   @override
-  String get description => 'Add a new service component to the current project';
+  String get description =>
+      'Add a new service component to the current project';
 
   @override
   ArgParser get argParser {
     final parser = super.argParser
-
       ..addOption(
         'feature',
         help: 'Feature name',
@@ -67,7 +65,8 @@ class AddServiceCommand extends FlyCommand {
       )
       ..addOption(
         'output-dir',
-        help: 'Output directory for generated files (defaults to current directory)',
+        help:
+            'Output directory for generated files (defaults to current directory)',
         defaultsTo: null,
       );
     return parser;
@@ -75,28 +74,28 @@ class AddServiceCommand extends FlyCommand {
 
   @override
   List<CommandValidator> get validators => [
-    RequiredArgumentValidator('service_name'),
-    ServiceNameValidator(),
-    FlutterProjectValidator(),
-    DirectoryWritableValidator(),
-  ];
+        RequiredArgumentValidator('service_name'),
+        ServiceNameValidator(),
+        FlutterProjectValidator(),
+        DirectoryWritableValidator(),
+      ];
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-    DryRunMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+        DryRunMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
     final interactive = argResults!['interactive'] as bool? ?? false;
     final outputDir = argResults!['output-dir'] as String?;
-    
+
     if (interactive) {
       return _runInteractiveMode(outputDir);
     }
-    
+
     return _runNonInteractiveMode(outputDir);
   }
 
@@ -104,42 +103,44 @@ class AddServiceCommand extends FlyCommand {
   Future<CommandResult> _runInteractiveMode(String? outputDir) async {
     try {
       final prompter = context.interactivePrompt;
-      
+
       logger.info('🔧 Adding a new service');
       logger.info('');
-      
+
       // 1. Service name
       final serviceName = await prompter.promptString(
         prompt: 'Service name',
         validator: NameValidationRule.isValidServiceName,
-        validationError: 'Service name must contain only lowercase letters, numbers, and underscores',
+        validationError:
+            'Service name must contain only lowercase letters, numbers, and underscores',
       );
-      
+
       // 2. Feature
       final feature = await prompter.promptString(
         prompt: 'Feature name',
         defaultValue: 'core',
         validator: NameValidationRule.isValidFeatureName,
-        validationError: 'Feature name must contain only lowercase letters, numbers, and underscores',
+        validationError:
+            'Feature name must contain only lowercase letters, numbers, and underscores',
       );
-      
+
       // 3. Service type
       final serviceType = await prompter.promptChoice(
         prompt: 'Service type',
         choices: ['api', 'local', 'cache', 'analytics', 'storage'],
         defaultChoice: 'api',
       );
-      
+
       // 4. Tests
       final withTests = await prompter.promptConfirm(
         prompt: 'Include test files?',
       );
-      
+
       // 5. Mocks
       final withMocks = await prompter.promptConfirm(
         prompt: 'Include mock files?',
       );
-      
+
       // 6. Additional options based on service type
       var withInterceptors = false;
       var baseUrl = 'https://api.example.com';
@@ -147,13 +148,13 @@ class AddServiceCommand extends FlyCommand {
         withInterceptors = await prompter.promptConfirm(
           prompt: 'Include HTTP interceptors?',
         );
-        
+
         baseUrl = await prompter.promptString(
           prompt: 'Base URL',
           defaultValue: 'https://api.example.com',
         );
       }
-      
+
       // 7. Confirmation
       logger.info('');
       logger.info('Service Configuration:');
@@ -166,27 +167,29 @@ class AddServiceCommand extends FlyCommand {
         logger.info('  With Interceptors: $withInterceptors');
         logger.info('  Base URL: $baseUrl');
       }
-      
+
       final confirmed = await prompter.promptConfirm(
         prompt: '\nCreate service with this configuration?',
       );
-      
+
       if (!confirmed) {
         return CommandResult.error(
           message: 'Service creation cancelled',
           suggestion: 'Run the command again to start over',
         );
       }
-      
+
       // Resolve output directory via PathResolver
-      final resolvedOutputDir = await context.pathResolver.resolveOutputDirectory(
+      final resolvedOutputDir =
+          await context.pathResolver.resolveOutputDirectory(
         context,
         outputDir,
       );
 
       if (!resolvedOutputDir.success) {
         return CommandResult.error(
-          message: 'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
+          message:
+              'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
           suggestion: 'Specify a valid --output-dir or run from a project root',
           errorCode: ErrorCode.fileSystemError,
           context: ErrorContext.forCommand(
@@ -225,7 +228,8 @@ class AddServiceCommand extends FlyCommand {
     final withTests = argResults!['with-tests'] as bool? ?? false;
     final withMocks = argResults!['with-mocks'] as bool? ?? false;
     final withInterceptors = argResults!['with-interceptors'] as bool? ?? false;
-    final baseUrl = argResults!['base-url'] as String? ?? 'https://api.example.com';
+    final baseUrl =
+        argResults!['base-url'] as String? ?? 'https://api.example.com';
 
     // Resolve the target output directory, prioritizing --output-dir and FLY_OUTPUT_DIR.
     final outputDirResult = await context.pathResolver.resolveOutputDirectory(
@@ -234,7 +238,8 @@ class AddServiceCommand extends FlyCommand {
     );
     if (!outputDirResult.success) {
       return CommandResult.error(
-        message: 'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
+        message:
+            'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
         suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
@@ -270,7 +275,7 @@ class AddServiceCommand extends FlyCommand {
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
-      
+
       logger.info('Adding service: $serviceName');
       logger.info('Feature: $feature');
       logger.info('Type: $serviceType');
@@ -358,14 +363,16 @@ class AddServiceCommand extends FlyCommand {
   }
 
   @override
-  Future<void> onAfterExecute(CommandContext context, CommandResult result) async {
+  Future<void> onAfterExecute(
+      CommandContext context, CommandResult result) async {
     if (result.success) {
       logger.info('🎉 Service added successfully!');
     }
   }
 
   @override
-  Future<void> onError(CommandContext context, Object error, StackTrace stackTrace) async {
+  Future<void> onError(
+      CommandContext context, Object error, StackTrace stackTrace) async {
     logger.err('💥 Service creation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');

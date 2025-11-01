@@ -1,5 +1,5 @@
 /// Standardized validation result
-/// 
+///
 /// Provides a consistent way to represent validation results
 /// across all packages in the Fly CLI ecosystem.
 class ValidationResult {
@@ -23,15 +23,16 @@ class ValidationResult {
 
   /// Create a failed validation result with errors
   factory ValidationResult.failure(List<String> errors) => ValidationResult(
-    isValid: false,
-    errors: errors,
-  );
+        isValid: false,
+        errors: errors,
+      );
 
   /// Create a validation result with warnings
-  factory ValidationResult.withWarnings(List<String> warnings) => ValidationResult(
-    isValid: true,
-    warnings: warnings,
-  );
+  factory ValidationResult.withWarnings(List<String> warnings) =>
+      ValidationResult(
+        isValid: true,
+        warnings: warnings,
+      );
 
   /// Combine multiple validation results
   factory ValidationResult.combine(List<ValidationResult> results) {
@@ -102,4 +103,3 @@ class ValidationResult {
     return Object.hash(isValid, errors.length, warnings.length);
   }
 }
-

@@ -54,7 +54,7 @@ void main() {
       test('returns correct home directory', () async {
         final home = await PlatformUtils.getUserHome();
         expect(home, isNotEmpty);
-        
+
         if (Platform.isWindows) {
           // Windows uses USERPROFILE
           expect(Platform.environment['USERPROFILE'], isNotNull);
@@ -68,7 +68,7 @@ void main() {
     group('Config directory', () {
       test('returns platform-specific config directory', () async {
         final configDir = await PlatformUtils.getConfigDirectory();
-        
+
         if (Platform.isWindows) {
           expect(configDir, contains('AppData'));
           expect(configDir, contains('Local'));
@@ -86,10 +86,10 @@ void main() {
 
       test('config directory path format is valid', () async {
         final configDir = await PlatformUtils.getConfigDirectory();
-        
+
         // Should not contain double slashes (except protocol)
         expect(configDir.replaceAll(r'\', '/'), isNot(contains('//')));
-        
+
         // Should end with fly_cli
         expect(configDir, endsWith('fly_cli'));
       });
@@ -99,7 +99,7 @@ void main() {
       test('cache directory is under config directory', () async {
         final configDir = await PlatformUtils.getConfigDirectory();
         final cacheDir = await PlatformUtils.getCacheDirectory();
-        
+
         expect(cacheDir, contains(configDir));
         expect(cacheDir, contains('cache'));
       });
@@ -109,7 +109,7 @@ void main() {
       test('templates directory is under config directory', () async {
         final configDir = await PlatformUtils.getConfigDirectory();
         final templatesDir = await PlatformUtils.getTemplatesDirectory();
-        
+
         expect(templatesDir, contains(configDir));
         expect(templatesDir, contains('templates'));
       });
@@ -118,7 +118,7 @@ void main() {
     group('Ensure config directory', () {
       test('creates config directory if it does not exist', () async {
         final configDir = await PlatformUtils.ensureConfigDirectory();
-        
+
         expect(Directory(configDir).existsSync(), true);
       });
     });
@@ -127,7 +127,7 @@ void main() {
       test('returns shell for current platform', () {
         final shell = PlatformUtils.getShell();
         expect(shell, isNotEmpty);
-        
+
         if (Platform.isWindows) {
           // Windows should return COMSPEC or default to powershell
           expect(shell, anyOf(contains('cmd.exe'), contains('powershell.exe')));
@@ -141,11 +141,11 @@ void main() {
     group('CI detection', () {
       test('detects CI environment', () {
         final isCI = PlatformUtils.isCI;
-        
+
         // Check if running in CI
         final hasCIVar = Platform.environment.containsKey('CI') ||
             Platform.environment.containsKey('CONTINUOUS_INTEGRATION');
-        
+
         expect(isCI, hasCIVar);
       });
     });

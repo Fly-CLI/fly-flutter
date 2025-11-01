@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/create/create_command.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -39,7 +39,7 @@ void main() {
 
       test('should have required arguments', () {
         final parser = command.argParser;
-        
+
         expect(parser.options.containsKey('template'), isTrue);
         expect(parser.options.containsKey('organization'), isTrue);
         expect(parser.options.containsKey('platforms'), isTrue);
@@ -51,10 +51,12 @@ void main() {
 
       test('should have correct default values', () {
         final parser = command.argParser;
-        
+
         expect(parser.options['template']!.defaultsTo, equals('riverpod'));
-        expect(parser.options['organization']!.defaultsTo, equals('com.example'));
-        expect(parser.options['platforms']!.defaultsTo, equals(['ios', 'android']));
+        expect(
+            parser.options['organization']!.defaultsTo, equals('com.example'));
+        expect(parser.options['platforms']!.defaultsTo,
+            equals(['ios', 'android']));
         expect(parser.options['interactive']!.defaultsTo, equals(false));
       });
     });
@@ -62,36 +64,51 @@ void main() {
     group('Argument Validation', () {
       test('should accept valid project names', () {
         for (final projectName in TestFixtures.validProjectNames) {
-          expect(TestFixtures.isValidProjectName(projectName), isTrue,
-              reason: 'Project name "$projectName" should be valid',);
+          expect(
+            TestFixtures.isValidProjectName(projectName),
+            isTrue,
+            reason: 'Project name "$projectName" should be valid',
+          );
         }
       });
 
       test('should reject invalid project names', () {
         for (final projectName in TestFixtures.invalidProjectNames) {
-          expect(TestFixtures.isValidProjectName(projectName), isFalse,
-              reason: 'Project name "$projectName" should be invalid',);
+          expect(
+            TestFixtures.isValidProjectName(projectName),
+            isFalse,
+            reason: 'Project name "$projectName" should be invalid',
+          );
         }
       });
 
       test('should accept valid organizations', () {
         for (final org in TestFixtures.validOrganizations) {
-          expect(TestFixtures.isValidOrganization(org), isTrue,
-              reason: 'Organization "$org" should be valid',);
+          expect(
+            TestFixtures.isValidOrganization(org),
+            isTrue,
+            reason: 'Organization "$org" should be valid',
+          );
         }
       });
 
       test('should reject invalid organizations', () {
         for (final org in TestFixtures.invalidOrganizations) {
-          expect(TestFixtures.isValidOrganization(org), isFalse,
-              reason: 'Organization "$org" should be invalid',);
+          expect(
+            TestFixtures.isValidOrganization(org),
+            isFalse,
+            reason: 'Organization "$org" should be invalid',
+          );
         }
       });
 
       test('should accept valid platforms', () {
         for (final platform in TestFixtures.allPlatforms) {
-          expect(TestFixtures.allPlatforms.contains(platform), isTrue,
-              reason: 'Platform "$platform" should be valid',);
+          expect(
+            TestFixtures.allPlatforms.contains(platform),
+            isTrue,
+            reason: 'Platform "$platform" should be valid',
+          );
         }
       });
     });
@@ -125,23 +142,27 @@ void main() {
     group('Platform Selection', () {
       test('should default to ios and android', () {
         final parser = command.argParser;
-        expect(parser.options['platforms']!.defaultsTo, equals(['ios', 'android']));
+        expect(parser.options['platforms']!.defaultsTo,
+            equals(['ios', 'android']));
       });
 
       test('should accept all valid platforms', () {
         final parser = command.argParser;
         final allowed = parser.options['platforms']!.allowed;
-        
+
         for (final platform in TestFixtures.allPlatforms) {
-          expect(allowed, contains(platform),
-              reason: 'Platform "$platform" should be allowed',);
+          expect(
+            allowed,
+            contains(platform),
+            reason: 'Platform "$platform" should be allowed',
+          );
         }
       });
 
       test('should reject invalid platforms', () {
         final parser = command.argParser;
         final allowed = parser.options['platforms']!.allowed;
-        
+
         expect(allowed, isNot(contains('invalid_platform')));
         expect(allowed, isNot(contains('mobile')));
         expect(allowed, isNot(contains('desktop')));
@@ -204,7 +225,7 @@ void main() {
       test('should accept human and json outputs', () {
         final parser = command.argParser;
         final allowed = parser.options['output']!.allowed;
-        
+
         expect(allowed, contains('human'));
         expect(allowed, contains('json'));
       });
@@ -221,14 +242,14 @@ void main() {
         // For now, we'll test the argument parsing
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result.rest, isEmpty);
       });
 
       test('should accept project name as positional argument', () {
         final parser = command.argParser;
         final result = parser.parse(['test_app']);
-        
+
         expect(result.rest, equals(['test_app']));
       });
 
@@ -242,7 +263,7 @@ void main() {
           '--interactive',
           '--output=json',
         ]);
-        
+
         expect(result.rest, equals(['test_app']));
         expect(result['template'], equals('minimal'));
         expect(result['organization'], equals('com.test'));
@@ -255,10 +276,12 @@ void main() {
         final parser = command.argParser;
         final result = parser.parse([
           'test_app',
-          '-t', 'minimal',
-          '-o', 'com.test',
+          '-t',
+          'minimal',
+          '-o',
+          'com.test',
         ]);
-        
+
         expect(result['template'], equals('minimal'));
         expect(result['organization'], equals('com.test'));
       });
@@ -268,29 +291,35 @@ void main() {
       test('should handle missing project name', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result.rest, isEmpty);
       });
 
       test('should handle invalid template', () {
         final parser = command.argParser;
-        
-        expect(() => parser.parse(['test_app', '--template=invalid']),
-            throwsA(isA<FormatException>()),);
+
+        expect(
+          () => parser.parse(['test_app', '--template=invalid']),
+          throwsA(isA<FormatException>()),
+        );
       });
 
       test('should handle invalid platform', () {
         final parser = command.argParser;
-        
-        expect(() => parser.parse(['test_app', '--platforms=invalid']),
-            throwsA(isA<FormatException>()),);
+
+        expect(
+          () => parser.parse(['test_app', '--platforms=invalid']),
+          throwsA(isA<FormatException>()),
+        );
       });
 
       test('should handle invalid output format', () {
         final parser = command.argParser;
-        
-        expect(() => parser.parse(['test_app', '--output=invalid']),
-            throwsA(isA<FormatException>()),);
+
+        expect(
+          () => parser.parse(['test_app', '--output=invalid']),
+          throwsA(isA<FormatException>()),
+        );
       });
     });
 
@@ -302,7 +331,7 @@ void main() {
           '--template=minimal',
           '--organization=com.minimal',
         ]);
-        
+
         expect(result.rest, equals(['minimal_app']));
         expect(result['template'], equals('minimal'));
         expect(result['organization'], equals('com.minimal'));
@@ -317,7 +346,7 @@ void main() {
           '--organization=com.riverpod',
           '--platforms=ios,android,web',
         ]);
-        
+
         expect(result.rest, equals(['riverpod_app']));
         expect(result['template'], equals('riverpod'));
         expect(result['organization'], equals('com.riverpod'));
@@ -330,11 +359,19 @@ void main() {
           'cross_platform_app',
           '--platforms=ios,android,web,macos,windows,linux',
         ]);
-        
+
         expect(result.rest, equals(['cross_platform_app']));
-        expect(result['platforms'], equals([
-          'ios', 'android', 'web', 'macos', 'windows', 'linux',
-        ]),);
+        expect(
+          result['platforms'],
+          equals([
+            'ios',
+            'android',
+            'web',
+            'macos',
+            'windows',
+            'linux',
+          ]),
+        );
       });
 
       test('should handle interactive mode', () {
@@ -343,7 +380,7 @@ void main() {
           'interactive_app',
           '--interactive',
         ]);
-        
+
         expect(result.rest, equals(['interactive_app']));
         expect(result['interactive'], equals(true));
       });
@@ -353,7 +390,7 @@ void main() {
         final result = parser.parse([
           '--from-manifest=project.yaml',
         ]);
-        
+
         expect(result['from-manifest'], equals('project.yaml'));
       });
 
@@ -363,7 +400,7 @@ void main() {
           'planned_app',
           '--plan',
         ]);
-        
+
         expect(result.rest, equals(['planned_app']));
         expect(result['plan'], equals(true));
       });
@@ -374,7 +411,7 @@ void main() {
           'json_app',
           '--output=json',
         ]);
-        
+
         expect(result.rest, equals(['json_app']));
         expect(result['output'], equals('json'));
       });
@@ -384,7 +421,7 @@ void main() {
       test('should handle empty arguments', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result.rest, isEmpty);
         expect(result['template'], equals('riverpod')); // default
         expect(result['organization'], equals('com.example')); // default
@@ -394,7 +431,7 @@ void main() {
       test('should handle only project name', () {
         final parser = command.argParser;
         final result = parser.parse(['simple_app']);
-        
+
         expect(result.rest, equals(['simple_app']));
         expect(result['template'], equals('riverpod')); // default
         expect(result['organization'], equals('com.example')); // default
@@ -404,7 +441,7 @@ void main() {
       test('should handle multiple project names', () {
         final parser = command.argParser;
         final result = parser.parse(['app1', 'app2', 'app3']);
-        
+
         expect(result.rest, equals(['app1', 'app2', 'app3']));
       });
 
@@ -412,13 +449,13 @@ void main() {
         final longName = 'a' * 50; // exactly 50 characters
         final parser = command.argParser;
         final result = parser.parse([longName]);
-        
+
         expect(result.rest, equals([longName]));
       });
 
       test('should handle special characters in organization', () {
         final parser = command.argParser;
-        
+
         // Parser accepts the value, but validation should reject it during execution
         // The validation happens in command validators, not in the parser itself
         final result = parser.parse(['app', '--organization=com.test-org']);
@@ -450,7 +487,7 @@ void main() {
       test('should handle large argument lists efficiently', () {
         final parser = command.argParser;
         final largeArgs = List.generate(100, (i) => 'arg$i');
-        
+
         // Should not throw or take too long
         expect(() => parser.parse(largeArgs), returnsNormally);
       });
@@ -458,7 +495,7 @@ void main() {
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
         final args = ['test_app', '--template=minimal'];
-        
+
         // Parse multiple times
         for (var i = 0; i < 100; i++) {
           expect(() => parser.parse(args), returnsNormally);

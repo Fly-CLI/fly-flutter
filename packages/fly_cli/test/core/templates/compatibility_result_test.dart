@@ -60,11 +60,18 @@ void main() {
         expect(result1 == result2, isTrue);
       });
 
-      test('Compatible results with different warnings should not be equal', () {
-        const result1 = CompatibilityResult.compatible(warnings: ['Warning 1']);
-        const result2 = CompatibilityResult.compatible(warnings: ['Warning 2']);
-        expect(result1 == result2, isFalse);
-      });
+      test(
+        'Compatible results with different warnings should not be equal',
+        () {
+          const result1 = CompatibilityResult.compatible(
+            warnings: ['Warning 1'],
+          );
+          const result2 = CompatibilityResult.compatible(
+            warnings: ['Warning 2'],
+          );
+          expect(result1 == result2, isFalse);
+        },
+      );
 
       test('Incompatible results should be equal', () {
         const result1 = CompatibilityResult.incompatible(errors: ['Error']);
@@ -75,7 +82,9 @@ void main() {
 
       test('Compatible and Incompatible should not be equal', () {
         const compatible = CompatibilityResult.compatible();
-        const incompatible = CompatibilityResult.incompatible(errors: ['Error']);
+        const incompatible = CompatibilityResult.incompatible(
+          errors: ['Error'],
+        );
         expect(compatible == incompatible, isFalse);
       });
     });
@@ -99,4 +108,3 @@ void main() {
     });
   });
 }
-

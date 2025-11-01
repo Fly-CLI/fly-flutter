@@ -1,13 +1,12 @@
 import 'dart:io';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// Check for Flutter SDK installation and configuration
 class FlutterSdkCheck extends SystemCheck {
   FlutterSdkCheck({this.logger});
-  
+
   final Logger? logger;
 
   @override
@@ -17,26 +16,30 @@ class FlutterSdkCheck extends SystemCheck {
   String get category => 'Development Environment';
 
   @override
-  String get description => 'Check Flutter SDK installation and version compatibility';
+  String get description =>
+      'Check Flutter SDK installation and version compatibility';
 
   @override
   Future<CheckResult> run() async {
     try {
       // Check if flutter command is available with timeout
       final flutterResult = await Process.run(
-        'flutter', 
-        ['--version'], 
+        'flutter',
+        ['--version'],
         runInShell: true,
       ).timeout(
         const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(0, 1, '', 'Flutter --version timed out after 10 seconds'),
+        onTimeout: () => ProcessResult(
+            0, 1, '', 'Flutter --version timed out after 10 seconds'),
       );
-      
+
       if (flutterResult.exitCode != 0) {
         return CheckResult.error(
           message: 'Flutter SDK not found in PATH',
-          suggestion: 'Install Flutter SDK and add it to your PATH environment variable',
-          fixCommand: 'Visit https://flutter.dev/docs/get-started/install for installation instructions',
+          suggestion:
+              'Install Flutter SDK and add it to your PATH environment variable',
+          fixCommand:
+              'Visit https://flutter.dev/docs/get-started/install for installation instructions',
           data: {
             'exitCode': flutterResult.exitCode,
             'stderr': flutterResult.stderr,
@@ -46,8 +49,9 @@ class FlutterSdkCheck extends SystemCheck {
 
       // Parse Flutter version
       final versionOutput = flutterResult.stdout as String;
-      final versionMatch = RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(versionOutput);
-      
+      final versionMatch =
+          RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(versionOutput);
+
       if (versionMatch == null) {
         return CheckResult.warning(
           message: 'Could not parse Flutter version',
@@ -58,11 +62,11 @@ class FlutterSdkCheck extends SystemCheck {
 
       final flutterVersion = versionMatch.group(1)!;
       final versionParts = flutterVersion.split('.').map(int.parse).toList();
-      
+
       // Check minimum version (3.0.0)
       final minVersion = [3, 0, 0];
       var isCompatible = true;
-      
+
       for (var i = 0; i < minVersion.length; i++) {
         if (versionParts[i] < minVersion[i]) {
           isCompatible = false;
@@ -74,7 +78,8 @@ class FlutterSdkCheck extends SystemCheck {
 
       if (!isCompatible) {
         return CheckResult.error(
-          message: 'Flutter version $flutterVersion is too old (minimum: 3.0.0)',
+          message:
+              'Flutter version $flutterVersion is too old (minimum: 3.0.0)',
           suggestion: 'Update Flutter to version 3.0.0 or later',
           fixCommand: 'flutter upgrade',
           data: {
@@ -91,7 +96,8 @@ class FlutterSdkCheck extends SystemCheck {
         runInShell: true,
       ).timeout(
         const Duration(seconds: 15),
-        onTimeout: () => ProcessResult(0, 1, '', 'Flutter doctor timed out after 15 seconds'),
+        onTimeout: () => ProcessResult(
+            0, 1, '', 'Flutter doctor timed out after 15 seconds'),
       );
 
       if (doctorResult.exitCode != 0) {
@@ -115,7 +121,6 @@ class FlutterSdkCheck extends SystemCheck {
           'doctor': 'ok',
         },
       );
-
     } catch (e) {
       return CheckResult.error(
         message: 'Failed to check Flutter SDK: $e',
@@ -128,7 +133,8 @@ class FlutterSdkCheck extends SystemCheck {
   /// Get the Flutter SDK path
   String? _getFlutterPath() {
     try {
-      final whichResult = Process.runSync('which', ['flutter'], runInShell: true);
+      final whichResult =
+          Process.runSync('which', ['flutter'], runInShell: true);
       if (whichResult.exitCode == 0) {
         return whichResult.stdout.toString().trim();
       }

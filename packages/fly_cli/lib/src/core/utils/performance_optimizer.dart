@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:collection';
+
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
-import 'package:mason_logger/mason_logger.dart';
-
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
-
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
+import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// Performance metrics collector
 class PerformanceMetrics {
@@ -33,8 +31,8 @@ class PerformanceMetrics {
   /// Get average execution time for a command
   double getAverageExecutionTime(String commandName) {
     final times = _executionTimes[commandName];
-    if (times == null || times.isEmpty) return 0.0;
-    
+    if (times == null || times.isEmpty) return 0;
+
     return times.reduce((a, b) => a + b) / times.length;
   }
 
@@ -51,7 +49,7 @@ class PerformanceMetrics {
   /// Get all metrics
   Map<String, dynamic> getAllMetrics() {
     final metrics = <String, dynamic>{};
-    
+
     for (final command in _executionTimes.keys) {
       metrics[command] = {
         'execution_count': getExecutionCount(command),
@@ -60,7 +58,7 @@ class PerformanceMetrics {
         'success_rate': _calculateSuccessRate(command),
       };
     }
-    
+
     return metrics;
   }
 
@@ -152,7 +150,7 @@ class CommandResultCache {
       'args': args,
       'working_directory': context.workingDirectory,
     };
-    
+
     return '${commandName}_${keyData.hashCode}';
   }
 
@@ -174,7 +172,7 @@ class CommandResultCache {
 
 class _CacheEntry {
   _CacheEntry({required this.result, required this.timestamp});
-  
+
   final CommandResult result;
   final DateTime timestamp;
 }
@@ -209,7 +207,7 @@ class CommandPerformanceOptimizer {
         final cacheKey = _cache.generateKey(command.context, {
           'args': command.argResults?.arguments ?? {},
         });
-        
+
         final cachedResult = _cache.get(cacheKey);
         if (cachedResult != null) {
           _recordMetrics(commandName, stopwatch.elapsedMilliseconds);
@@ -219,7 +217,7 @@ class CommandPerformanceOptimizer {
 
       // Execute command
       final result = await execution();
-      
+
       // Cache successful results
       if (enableCaching && result.success) {
         final cacheKey = _cache.generateKey(command.context, {
@@ -285,7 +283,7 @@ class CommandBenchmark {
 
     for (int i = 0; i < iterations; i++) {
       final stopwatch = Stopwatch()..start();
-      
+
       try {
         await execution();
         stopwatch.stop();
@@ -299,7 +297,8 @@ class CommandBenchmark {
     final result = BenchmarkResult(
       commandName: command.name,
       iterations: iterations,
-      averageTime: times.isEmpty ? 0 : times.reduce((a, b) => a + b) / times.length,
+      averageTime:
+          times.isEmpty ? 0 : times.reduce((a, b) => a + b) / times.length,
       minTime: times.isEmpty ? 0 : times.reduce((a, b) => a < b ? a : b),
       maxTime: times.isEmpty ? 0 : times.reduce((a, b) => a > b ? a : b),
       errorCount: errors.length,
@@ -326,7 +325,9 @@ class CommandBenchmark {
       'previous': previous.toJson(),
       'improvement': {
         'average_time_ms': latest.averageTime - previous.averageTime,
-        'average_time_percent': ((latest.averageTime - previous.averageTime) / previous.averageTime) * 100,
+        'average_time_percent': ((latest.averageTime - previous.averageTime) /
+                previous.averageTime) *
+            100,
         'success_rate': latest.successRate - previous.successRate,
       },
     };
@@ -335,11 +336,11 @@ class CommandBenchmark {
   /// Get all benchmark results
   Map<String, dynamic> getAllResults() {
     final results = <String, dynamic>{};
-    
+
     for (final entry in _results.entries) {
       results[entry.key] = entry.value.map((r) => r.toJson()).toList();
     }
-    
+
     return results;
   }
 }
@@ -364,14 +365,14 @@ class BenchmarkResult {
   final double successRate;
 
   Map<String, dynamic> toJson() => {
-    'command_name': commandName,
-    'iterations': iterations,
-    'average_time_ms': averageTime,
-    'min_time_ms': minTime,
-    'max_time_ms': maxTime,
-    'error_count': errorCount,
-    'success_rate': successRate,
-  };
+        'command_name': commandName,
+        'iterations': iterations,
+        'average_time_ms': averageTime,
+        'min_time_ms': minTime,
+        'max_time_ms': maxTime,
+        'error_count': errorCount,
+        'success_rate': successRate,
+      };
 }
 
 /// Performance monitoring middleware
@@ -381,29 +382,30 @@ class PerformanceMonitoringMiddleware extends CommandMiddleware {
   final CommandPerformanceOptimizer _optimizer;
 
   @override
-  Future<CommandResult?> handle(CommandContext context, NextMiddleware next) async {
+  Future<CommandResult?> handle(
+      CommandContext context, NextMiddleware next) async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       final result = await next();
       stopwatch.stop();
-      
+
       // Record performance metrics
       _optimizer._recordMetrics(
         context.config['command_name'] as String? ?? 'unknown',
         stopwatch.elapsedMilliseconds,
       );
-      
+
       return result;
     } catch (e) {
       stopwatch.stop();
-      
+
       // Record error metrics
       _optimizer._metrics.recordError(
         context.config['command_name'] as String? ?? 'unknown',
         e.toString(),
       );
-      
+
       rethrow;
     }
   }

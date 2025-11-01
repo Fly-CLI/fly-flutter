@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 /// MCP Conformance Test
-/// 
+///
 /// Tests basic MCP protocol compliance:
 /// - initialize handshake
 /// - tools/list enumeration
@@ -12,7 +12,7 @@ import 'dart:io';
 /// - error handling
 Future<void> main() async {
   print('Starting MCP conformance test...');
-  
+
   // Spawn MCP server process
   final proc = await Process.start(
     'dart',
@@ -29,7 +29,7 @@ Future<void> main() async {
   // Buffer for stdout chunks
   final stdoutBuffer = <int>[];
   final stderrController = StreamController<String>.broadcast();
-  
+
   // Set up stdout listener
   proc.stdout.listen(
     (chunk) {
@@ -42,15 +42,17 @@ Future<void> main() async {
   );
 
   // Set up stderr listener
-  proc.stderr.transform(utf8.decoder).listen(
-    (line) {
-      stderrController.add(line);
-    },
-    onDone: () {},
-    onError: (e) {
-      print('Stderr error: $e');
-    },
-  );
+  proc.stderr
+      .transform(utf8.decoder)
+      .listen(
+        (line) {
+          stderrController.add(line);
+        },
+        onDone: () {},
+        onError: (e) {
+          print('Stderr error: $e');
+        },
+      );
 
   // Helper to send a framed JSON-RPC request
   Future<void> send(Object payload) async {
@@ -65,44 +67,46 @@ Future<void> main() async {
   Future<Map<String, Object?>> readResponse() async {
     // Wait a bit for response to arrive
     await Future.delayed(Duration(milliseconds: 100));
-    
+
     // Read headers and body from buffer
     while (true) {
       if (stdoutBuffer.isEmpty) {
         await Future.delayed(Duration(milliseconds: 50));
         continue;
       }
-      
+
       final bufferText = utf8.decode(stdoutBuffer);
       final idx = bufferText.indexOf('\r\n\r\n');
-      
+
       if (idx == -1) {
         await Future.delayed(Duration(milliseconds: 50));
         continue;
       }
-      
+
       final headerLines = bufferText.substring(0, idx);
       final rest = bufferText.substring(idx + 4);
-      
-      final contentLengthLine = headerLines.split('\n').firstWhere(
-        (l) => l.toLowerCase().startsWith('content-length'),
-        orElse: () => 'Content-Length: 0',
-      );
-      
+
+      final contentLengthLine = headerLines
+          .split('\n')
+          .firstWhere(
+            (l) => l.toLowerCase().startsWith('content-length'),
+            orElse: () => 'Content-Length: 0',
+          );
+
       final len = int.parse(contentLengthLine.split(':')[1].trim());
-      
+
       if (rest.length < len) {
         await Future.delayed(Duration(milliseconds: 50));
         continue;
       }
-      
+
       final body = rest.substring(0, len);
       final remaining = rest.substring(len);
-      
+
       // Remove consumed data from buffer
       stdoutBuffer.clear();
       stdoutBuffer.addAll(utf8.encode(remaining));
-      
+
       return (jsonDecode(body) as Map).cast<String, Object?>();
     }
   }
@@ -119,7 +123,8 @@ Future<void> main() async {
     final initResponse = await readResponse();
     assert(initResponse['id'] == 1);
     assert(initResponse['result'] != null);
-    final capabilities = (initResponse['result'] as Map)['capabilities'] as Map?;
+    final capabilities =
+        (initResponse['result'] as Map)['capabilities'] as Map?;
     assert(capabilities?['tools'] == true);
     assert(capabilities?['resources'] != null);
     assert(capabilities?['prompts'] == true);
@@ -212,4 +217,3 @@ Future<List<int>> _readExact(
   }
   return out;
 }
-

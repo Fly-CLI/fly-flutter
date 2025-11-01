@@ -1,7 +1,6 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_metadata/command_definition.dart';
 
 /// Extracts command metadata from Command instances and ArgParser
@@ -10,8 +9,10 @@ class MetadataExtractor {
   const MetadataExtractor();
 
   /// Extract metadata from a command instance
-  CommandDefinition extractMetadata(Command<int> command,
-      [List<OptionDefinition> globalOptions = const [],]) {
+  CommandDefinition extractMetadata(
+    Command<int> command, [
+    List<OptionDefinition> globalOptions = const [],
+  ]) {
     // Extract basic info
     final name = command.name;
     final description = command.description;
@@ -73,10 +74,12 @@ class MetadataExtractor {
 
     for (final entry in command.subcommands.entries) {
       final subcommand = entry.value;
-      subcommands.add(SubcommandDefinition(
-        name: entry.key,
-        description: subcommand.description,
-      ),);
+      subcommands.add(
+        SubcommandDefinition(
+          name: entry.key,
+          description: subcommand.description,
+        ),
+      );
     }
 
     return subcommands;
@@ -86,4 +89,3 @@ class MetadataExtractor {
   List<OptionDefinition> extractGlobalOptions(ArgParser parser) =>
       _extractOptions(parser, isGlobal: true);
 }
-

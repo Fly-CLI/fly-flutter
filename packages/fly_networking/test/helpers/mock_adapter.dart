@@ -58,5 +58,3 @@ class _Planned {
   final DioException? error;
   final bool isError;
 }
-
-

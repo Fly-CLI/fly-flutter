@@ -15,7 +15,7 @@ vars:
   platforms:
     type: list
     description: Target platforms
-    default: [ios, android]
+    default: [ ios, android ]
     prompt: Which platforms do you want to support?
   description:
     type: string

@@ -6,12 +6,13 @@ import 'package:{{project_name_snake}}/main.dart';
 import 'package:{{project_name_snake}}/features/home/providers/home_provider.dart';
 
 void main() {
-  testWidgets('Home screen displays welcome message', (WidgetTester tester) async {
+  testWidgets(
+      'Home screen displays welcome message', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       const ProviderScope(
-        child: {{project_name_pascal}}App(),
-      ),
+          child: {{project_name_pascal}}App(),
+    ),
     );
 
     // Wait for the app to load
@@ -19,15 +20,21 @@ void main() {
 
     // Verify that our welcome message is displayed.
     expect(find.text('Welcome to {{project_name}}!'), findsOneWidget);
-    expect(find.text('This is a Riverpod Flutter project created with Fly CLI.'), findsOneWidget);
+    expect(find.text('This is a Riverpod Flutter project created with Fly CLI.
+    '
+    )
+    ,
+    findsOneWidget
+    );
   });
 
-  testWidgets('Counter increments when button is pressed', (WidgetTester tester) async {
+  testWidgets(
+      'Counter increments when button is pressed', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       const ProviderScope(
-        child: {{project_name_pascal}}App(),
-      ),
+          child: {{project_name_pascal}}App(),
+    ),
     );
 
     // Wait for the app to load
@@ -36,11 +43,16 @@ void main() {
     // Find the increment button and tap it
     final incrementButton = find.text('Increment');
     expect(incrementButton, findsOneWidget);
-    
+
     await tester.tap(incrementButton);
     await tester.pump();
 
     // Verify counter has incremented
-    expect(find.text('Counter: 1'), findsOneWidget);
+    expect(find.text('Counter: 1
+    '
+    )
+    ,
+    findsOneWidget
+    );
   });
 }

@@ -12,20 +12,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'api_client.g.dart';
 
 /// HTTP client for API communication with Fly CLI applications
-/// 
+///
 /// Provides a standardized way to make HTTP requests with built-in
 /// error handling, logging, retry logic, and Riverpod integration.
 @riverpod
 class ApiClient extends _$ApiClient {
   late final Dio _dio;
-  
+
   @override
   ApiClient build() {
     _dio = Dio();
     _setupInterceptors();
     return this;
   }
-  
+
   void _setupInterceptors() {
     _dio.interceptors.addAll([
       LoggingInterceptor(),
@@ -57,37 +57,37 @@ class ApiClient extends _$ApiClient {
       ),
     );
   }
-  
+
   /// Configure the base URL for all requests
   String get baseUrl => _dio.options.baseUrl;
-  
+
   /// Configure the base URL for all requests
   set baseUrl(String baseUrl) {
     _dio.options.baseUrl = baseUrl;
   }
-  
+
   /// Configure request timeout
   void configureTimeout(Duration timeout) {
     _dio.options.connectTimeout = timeout;
     _dio.options.receiveTimeout = timeout;
     _dio.options.sendTimeout = timeout;
   }
-  
+
   /// Configure default headers
   void configureHeaders(Map<String, dynamic> headers) {
     _dio.options.headers.addAll(headers);
   }
-  
+
   /// Add authentication token
   void setAuthToken(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
-  
+
   /// Remove authentication token
   void clearAuthToken() {
     _dio.options.headers.remove('Authorization');
   }
-  
+
   /// Make a GET request
   Future<ApiResponse<T>> get<T>(
     String path, {
@@ -109,7 +109,7 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Make a POST request
   Future<ApiResponse<T>> post<T>(
     String path, {
@@ -133,7 +133,7 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Make a PUT request
   Future<ApiResponse<T>> put<T>(
     String path, {
@@ -157,7 +157,7 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Make a PATCH request
   Future<ApiResponse<T>> patch<T>(
     String path, {
@@ -181,7 +181,7 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Make a DELETE request
   Future<ApiResponse<T>> delete<T>(
     String path, {
@@ -205,7 +205,7 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Upload a file
   Future<ApiResponse<T>> uploadFile<T>(
     String path,
@@ -220,7 +220,7 @@ class ApiClient extends _$ApiClient {
         fieldName: await MultipartFile.fromFile(file.path),
         ...?additionalFields,
       });
-      
+
       final response = await _dio.post<T>(
         path,
         data: formData,
@@ -234,7 +234,7 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Download a file
   Future<ApiResponse<String>> downloadFile(
     String path,
@@ -258,12 +258,12 @@ class ApiClient extends _$ApiClient {
       return ApiResponse.failure(ApiErrorFactory.fromUnknownException(e));
     }
   }
-  
+
   /// Cancel all pending requests
   void cancelAllRequests() {
     _dio.close(force: true);
   }
-  
+
   /// Get the underlying Dio instance for advanced usage
   Dio get dio => _dio;
 }
@@ -272,7 +272,7 @@ class ApiClient extends _$ApiClient {
 @riverpod
 ApiClient defaultApiClient(Ref ref) {
   final client = ref.watch(apiClientProvider);
-  
+
   // Configure default settings
   client
     ..configureTimeout(const Duration(seconds: 30))
@@ -280,7 +280,7 @@ ApiClient defaultApiClient(Ref ref) {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     });
-  
+
   return client;
 }
 
@@ -293,11 +293,11 @@ ApiClient configuredApiClient(
   Map<String, dynamic>? headers,
 }) {
   final client = ref.watch(apiClientProvider);
-  
+
   client
     ..baseUrl = baseUrl
     ..configureTimeout(timeout ?? const Duration(seconds: 30))
     ..configureHeaders(headers ?? {});
-  
+
   return client;
 }

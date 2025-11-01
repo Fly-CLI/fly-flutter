@@ -1,12 +1,11 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
-
 
 void main() {
   group('MetadataExtractor', () {
@@ -31,7 +30,8 @@ void main() {
       test('extracts command with options', () {
         final parser = ArgParser();
         parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
-        parser.addOption('output', abbr: 'o', help: 'Output format', allowed: ['human', 'json']);
+        parser.addOption('output',
+            abbr: 'o', help: 'Output format', allowed: ['human', 'json']);
 
         final command = _TestCommand('test', 'Test command', parser: parser);
         final metadata = extractor.extractMetadata(command);
@@ -40,12 +40,14 @@ void main() {
         expect(metadata.description, equals('Test command'));
         expect(metadata.options, hasLength(3)); // verbose, output, help
 
-        final verboseOption = metadata.options.firstWhere((o) => o.name == 'verbose');
+        final verboseOption =
+            metadata.options.firstWhere((o) => o.name == 'verbose');
         expect(verboseOption.description, equals('Enable verbose output'));
         expect(verboseOption.short, equals('v'));
         expect(verboseOption.type, equals(OptionType.flag));
 
-        final outputOption = metadata.options.firstWhere((o) => o.name == 'output');
+        final outputOption =
+            metadata.options.firstWhere((o) => o.name == 'output');
         expect(outputOption.description, equals('Output format'));
         expect(outputOption.short, equals('o'));
         expect(outputOption.type, equals(OptionType.value));
@@ -97,14 +99,17 @@ void main() {
           ],
         );
 
-        final command = _TestCommandWithMetadata('test', 'Test command', manualMetadata);
+        final command =
+            _TestCommandWithMetadata('test', 'Test command', manualMetadata);
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('test'));
-        expect(metadata.description, equals('Manual metadata')); // Manual metadata is used
+        expect(metadata.description,
+            equals('Manual metadata')); // Manual metadata is used
         expect(metadata.examples, hasLength(1));
         expect(metadata.examples.first.command, equals('fly test --example'));
-        expect(metadata.globalOptions, isEmpty); // Manual metadata doesn't have global options
+        expect(metadata.globalOptions,
+            isEmpty); // Manual metadata doesn't have global options
       });
     });
 
@@ -133,8 +138,10 @@ void main() {
 
       test('extracts value options', () {
         final parser = ArgParser();
-        parser.addOption('output', abbr: 'o', help: 'Output format', allowed: ['human', 'json']);
-        parser.addOption('template', help: 'Project template', defaultsTo: 'minimal');
+        parser.addOption('output',
+            abbr: 'o', help: 'Output format', allowed: ['human', 'json']);
+        parser.addOption('template',
+            help: 'Project template', defaultsTo: 'minimal');
 
         final command = _TestCommand('test', 'Test command', parser: parser);
         final metadata = extractor.extractMetadata(command);
@@ -197,18 +204,22 @@ void main() {
     group('extractGlobalOptions', () {
       test('extracts global options from CommandRunner', () {
         final runner = CommandRunner<int>('test', 'Test runner');
-        runner.argParser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
-        runner.argParser.addOption('output', help: 'Output format', allowed: ['human', 'json']);
+        runner.argParser
+            .addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
+        runner.argParser.addOption('output',
+            help: 'Output format', allowed: ['human', 'json']);
 
         final globalOptions = extractor.extractGlobalOptions(runner.argParser);
 
         expect(globalOptions, hasLength(3)); // help, verbose, output
 
-        final verboseOption = globalOptions.firstWhere((o) => o.name == 'verbose');
+        final verboseOption =
+            globalOptions.firstWhere((o) => o.name == 'verbose');
         expect(verboseOption.type, equals(OptionType.flag));
         expect(verboseOption.short, equals('v'));
 
-        final outputOption = globalOptions.firstWhere((o) => o.name == 'output');
+        final outputOption =
+            globalOptions.firstWhere((o) => o.name == 'output');
         expect(outputOption.type, equals(OptionType.value));
         expect(outputOption.allowedValues, equals(['human', 'json']));
       });
@@ -225,7 +236,8 @@ void main() {
 
 /// Test command implementation for testing
 class _TestCommand extends Command<int> {
-  _TestCommand(this._name, this._description, {ArgParser? parser}) : _parser = parser;
+  _TestCommand(this._name, this._description, {ArgParser? parser})
+      : _parser = parser;
 
   final String _name;
   final String _description;
@@ -246,7 +258,8 @@ class _TestCommand extends Command<int> {
 
 /// Test command with manual metadata for testing
 class _TestCommandWithMetadata extends FlyCommand {
-  _TestCommandWithMetadata(this._name, this._description, this._metadata, {ArgParser? parser}) 
+  _TestCommandWithMetadata(this._name, this._description, this._metadata,
+      {ArgParser? parser})
       : _parser = parser,
         super(CommandTestHelper.createMockCommandContext());
 
@@ -269,7 +282,7 @@ class _TestCommandWithMetadata extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async => CommandResult.success(
-    command: _name,
-    message: 'Test command executed',
-  );
+        command: _name,
+        message: 'Test command executed',
+      );
 }

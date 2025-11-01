@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/interactive_prompt.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
@@ -49,6 +49,7 @@ class CommandTestHelper {
       quiet: false,
     );
   }
+
   /// Run a Fly CLI command and return the result
   static Future<CommandResult> runCommand(
     List<String> args, {
@@ -69,8 +70,8 @@ class CommandTestHelper {
 
     // Ensure output format is JSON to parse results
     final finalArgs = List<String>.from(args);
-    if (!finalArgs.contains('--output=json') && 
-        !finalArgs.contains('--output') && 
+    if (!finalArgs.contains('--output=json') &&
+        !finalArgs.contains('--output') &&
         !finalArgs.any((arg) => arg.startsWith('--output=')) &&
         !finalArgs.contains('-f')) {
       finalArgs.add('--output=json');
@@ -91,20 +92,22 @@ class CommandTestHelper {
     var current = Directory.current;
     while (current.path != current.parent.path) {
       // Check if this directory contains packages/fly_cli/bin/fly.dart
-      final flyDartPath = path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
+      final flyDartPath =
+          path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
       if (File(flyDartPath).existsSync()) {
         workspaceRoot = current.path;
         break;
       }
       current = current.parent;
     }
-    
+
     // If not found, try looking for melos.yaml or root pubspec.yaml (monorepo indicators)
     if (workspaceRoot == null) {
       current = Directory.current;
       while (current.path != current.parent.path) {
         if (File(path.join(current.path, 'melos.yaml')).existsSync()) {
-          final flyDartPath = path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
+          final flyDartPath =
+              path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
           if (File(flyDartPath).existsSync()) {
             workspaceRoot = current.path;
             break;
@@ -113,16 +116,19 @@ class CommandTestHelper {
         current = current.parent;
       }
     }
-    
+
     // Fallback: try from current directory or parent
     if (workspaceRoot == null) {
       // Try relative to current directory
       final possiblePaths = [
-        path.join(Directory.current.path, 'packages', 'fly_cli', 'bin', 'fly.dart'),
-        path.normalize(path.join(Directory.current.path, '..', '..', 'packages', 'fly_cli', 'bin', 'fly.dart')),
-        path.normalize(path.join(Directory.current.path, '..', 'packages', 'fly_cli', 'bin', 'fly.dart')),
+        path.join(
+            Directory.current.path, 'packages', 'fly_cli', 'bin', 'fly.dart'),
+        path.normalize(path.join(Directory.current.path, '..', '..', 'packages',
+            'fly_cli', 'bin', 'fly.dart')),
+        path.normalize(path.join(Directory.current.path, '..', 'packages',
+            'fly_cli', 'bin', 'fly.dart')),
       ];
-      
+
       for (final flyPath in possiblePaths) {
         final flyFile = File(flyPath);
         if (flyFile.existsSync()) {
@@ -133,24 +139,25 @@ class CommandTestHelper {
         }
       }
     }
-    
+
     // Final fallback to current directory
     workspaceRoot ??= Directory.current.path;
-    
-    final flyDartPath = path.join(workspaceRoot, 'packages', 'fly_cli', 'bin', 'fly.dart');
+
+    final flyDartPath =
+        path.join(workspaceRoot, 'packages', 'fly_cli', 'bin', 'fly.dart');
     final flyDartFile = File(flyDartPath);
-    
+
     if (!flyDartFile.existsSync()) {
       throw StateError('Could not find fly.dart at $flyDartPath');
     }
-    
+
     // Ensure we use an absolute path for fly.dart
     final absoluteFlyDartPath = flyDartFile.absolute.path;
-    
+
     // Performance optimization: Try to use pre-compiled executable first
     final executablePath = path.join(workspaceRoot, 'build', 'fly');
     final executableFile = File(executablePath);
-    
+
     ProcessResult processResult;
     if (executableFile.existsSync()) {
       // Use pre-compiled executable for better performance
@@ -164,26 +171,27 @@ class CommandTestHelper {
     } else {
       // Fallback to dart run (slower but works)
       processResult = await Process.run(
-      'dart',
-      ['run', absoluteFlyDartPath, ...finalArgs],
-      workingDirectory: workingDirectory ?? workspaceRoot,
-      environment: testEnvironment,
-    );
+        'dart',
+        ['run', absoluteFlyDartPath, ...finalArgs],
+        workingDirectory: workingDirectory ?? workspaceRoot,
+        environment: testEnvironment,
+      );
     }
-    
+
     final exitCode = processResult.exitCode;
-    
+
     // Parse JSON output
     final stdoutStr = processResult.stdout.toString().trim();
     if (stdoutStr.isNotEmpty) {
       try {
         // Try to parse the entire stdout as JSON first
         var jsonOutput = json.decode(stdoutStr) as Map<String, dynamic>;
-        
+
         // Convert JSON back to CommandResult
         return CommandResult(
           success: jsonOutput['success'] as bool? ?? (exitCode == 0),
-          command: jsonOutput['command'] as String? ?? _extractCommandName(args),
+          command:
+              jsonOutput['command'] as String? ?? _extractCommandName(args),
           message: jsonOutput['message'] as String? ?? 'Command executed',
           data: jsonOutput['data'] as Map<String, dynamic>?,
           suggestion: jsonOutput['suggestion'] as String?,
@@ -202,7 +210,8 @@ class CommandTestHelper {
               final candidate = json.decode(line) as Map<String, dynamic>;
               // Heuristic: prefer JSON objects that look like CommandResult
               final hasSuccess = candidate.containsKey('success');
-              final hasMessage = candidate.containsKey('message') || candidate.containsKey('summary');
+              final hasMessage = candidate.containsKey('message') ||
+                  candidate.containsKey('summary');
               if (hasSuccess && hasMessage) {
                 // Keep the last valid JSON object encountered
                 bestJson = candidate;
@@ -216,11 +225,17 @@ class CommandTestHelper {
             final jsonOutput = bestJson;
             return CommandResult(
               success: jsonOutput['success'] as bool? ?? (exitCode == 0),
-              command: jsonOutput['command'] as String? ?? _extractCommandName(args),
-              message: (jsonOutput['message'] as String?) ?? (jsonOutput['summary'] as String?) ?? 'Command executed',
-              data: (jsonOutput['data'] as Map<String, dynamic>?) ?? (jsonOutput['details'] as Map<String, dynamic>?),
-              suggestion: jsonOutput['suggestion'] as String? ?? jsonOutput['recommendation'] as String?,
-              metadata: (jsonOutput['metadata'] as Map<String, dynamic>?) ?? (jsonOutput['context'] as Map<String, dynamic>?),
+              command:
+                  jsonOutput['command'] as String? ?? _extractCommandName(args),
+              message: (jsonOutput['message'] as String?) ??
+                  (jsonOutput['summary'] as String?) ??
+                  'Command executed',
+              data: (jsonOutput['data'] as Map<String, dynamic>?) ??
+                  (jsonOutput['details'] as Map<String, dynamic>?),
+              suggestion: jsonOutput['suggestion'] as String? ??
+                  jsonOutput['recommendation'] as String?,
+              metadata: (jsonOutput['metadata'] as Map<String, dynamic>?) ??
+                  (jsonOutput['context'] as Map<String, dynamic>?),
             );
           }
         } catch (_) {
@@ -233,9 +248,11 @@ class CommandTestHelper {
             final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
             return CommandResult(
               success: false,
-              command: errorJson['command'] as String? ?? _extractCommandName(args),
-              message: errorJson['message'] as String? ?? 
-                  (errorJson['error'] as Map<String, dynamic>?)?['message'] as String? ?? 
+              command:
+                  errorJson['command'] as String? ?? _extractCommandName(args),
+              message: errorJson['message'] as String? ??
+                  (errorJson['error'] as Map<String, dynamic>?)?['message']
+                      as String? ??
                   'Command failed',
               suggestion: errorJson['suggestion'] as String?,
               metadata: errorJson['metadata'] as Map<String, dynamic>?,
@@ -244,12 +261,14 @@ class CommandTestHelper {
             // Not JSON, use plain text error
           }
         }
-        
+
         // If JSON parsing fails, create result from exit code and avoid noisy logs in message
         return CommandResult(
           success: exitCode == 0,
           command: _extractCommandName(args),
-          message: exitCode == 0 ? 'Command executed successfully' : 'Command failed',
+          message: exitCode == 0
+              ? 'Command executed successfully'
+              : 'Command failed',
           suggestion: exitCode != 0 && stderrStr.isNotEmpty ? stderrStr : null,
         );
       }
@@ -261,9 +280,11 @@ class CommandTestHelper {
           final errorJson = json.decode(stderrStr) as Map<String, dynamic>;
           return CommandResult(
             success: false,
-            command: errorJson['command'] as String? ?? _extractCommandName(args),
-            message: errorJson['message'] as String? ?? 
-                (errorJson['error'] as Map<String, dynamic>?)?['message'] as String? ?? 
+            command:
+                errorJson['command'] as String? ?? _extractCommandName(args),
+            message: errorJson['message'] as String? ??
+                (errorJson['error'] as Map<String, dynamic>?)?['message']
+                    as String? ??
                 'Command failed',
             suggestion: errorJson['suggestion'] as String?,
             metadata: errorJson['metadata'] as Map<String, dynamic>?,
@@ -272,15 +293,14 @@ class CommandTestHelper {
           // Not JSON, use plain text
         }
       }
-      
+
       // No stdout, create result from exit code
       return CommandResult(
         success: exitCode == 0,
         command: _extractCommandName(args),
-        message: exitCode == 0 ? 'Command executed successfully' : 'Command failed',
-        suggestion: exitCode != 0 && stderrStr.isNotEmpty
-            ? stderrStr
-            : null,
+        message:
+            exitCode == 0 ? 'Command executed successfully' : 'Command failed',
+        suggestion: exitCode != 0 && stderrStr.isNotEmpty ? stderrStr : null,
       );
     }
   }
@@ -288,12 +308,12 @@ class CommandTestHelper {
   /// Extract command name from args, handling subcommands like "add screen"
   static String _extractCommandName(List<String> args) {
     if (args.isEmpty) return 'unknown';
-    
+
     // Handle subcommands like "add screen", "add service"
     if (args.first == 'add' && args.length > 1) {
       return 'add ${args[1]}';
     }
-    
+
     // Handle other grouped commands similarly if needed
     return args.first;
   }
@@ -321,7 +341,8 @@ class CommandTestHelper {
       root.createSync(recursive: true);
     }
     final id = DateTime.now().millisecondsSinceEpoch;
-    final dir = Directory(path.join(root.path, (prefix ?? 'fly_test_') + id.toString()));
+    final dir = Directory(
+        path.join(root.path, (prefix ?? 'fly_test_') + id.toString()));
     dir.createSync(recursive: true);
     return dir;
   }
@@ -512,7 +533,8 @@ void main() {
   static bool fileExists(String filePath) => File(filePath).existsSync();
 
   /// Verify that a directory exists
-  static bool directoryExists(String dirPath) => Directory(dirPath).existsSync();
+  static bool directoryExists(String dirPath) =>
+      Directory(dirPath).existsSync();
 
   /// Read file content as string
   static String readFile(String filePath) => File(filePath).readAsStringSync();
@@ -534,7 +556,8 @@ void main() {
     List<String> requiredKeys,
   ) {
     for (final key in requiredKeys) {
-      expect(json.containsKey(key), isTrue, reason: 'Missing required key: $key');
+      expect(json.containsKey(key), isTrue,
+          reason: 'Missing required key: $key');
     }
   }
 

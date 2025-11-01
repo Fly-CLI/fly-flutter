@@ -1,6 +1,7 @@
 # AI Project Context Template
 
 ## Project Information
+
 - **Name**: {{project_name}}
 - **Template**: {{template}}
 - **Organization**: {{organization}}
@@ -11,11 +12,13 @@
 ## Architecture Overview
 
 ### Template: {{template}}
+
 {{#if template_description}}
 {{template_description}}
 {{/if}}
 
 ### Project Structure
+
 ```
 {{project_name}}/
 ├── lib/
@@ -45,7 +48,9 @@
 ## Development Patterns
 
 ### Screen Creation
+
 Screens extend `BaseScreen<ViewModel>` and follow this pattern:
+
 ```dart
 class {{ScreenName}}Screen extends BaseScreen<{{ScreenName}}ViewModel> {
   const {{ScreenName}}Screen({Key? key}) : super(key: key);
@@ -63,7 +68,9 @@ class {{ScreenName}}Screen extends BaseScreen<{{ScreenName}}ViewModel> {
 ```
 
 ### ViewModel Creation
+
 ViewModels extend `BaseViewModel` and follow this pattern:
+
 ```dart
 class {{ViewModelName}}ViewModel extends BaseViewModel {
   @override
@@ -76,11 +83,13 @@ class {{ViewModelName}}ViewModel extends BaseViewModel {
 ```
 
 ### State Management
+
 - **State**: Managed via `ViewState` sealed class (idle, loading, error, success)
 - **Providers**: Use Riverpod providers for dependency injection
 - **Error Handling**: Use `Result<T>` type for operations that can fail
 
 ### API Integration
+
 - **HTTP Client**: Use `ApiClient` from fly_networking package
 - **Error Handling**: Wrap API calls in `runSafe()` method
 - **Interceptors**: Configure logging, retry, and error handling
@@ -88,6 +97,7 @@ class {{ViewModelName}}ViewModel extends BaseViewModel {
 ## Available Commands
 
 ### Project Management
+
 ```bash
 # Create new project
 fly create <project_name> --template={{template}}
@@ -103,6 +113,7 @@ fly doctor
 ```
 
 ### AI Integration
+
 ```bash
 # Export CLI schema for AI context
 fly schema export --output=json
@@ -117,32 +128,38 @@ fly create --from-manifest=project.yaml
 ## Dependencies
 
 ### Core Packages
+
 - **fly_core**: BaseScreen, BaseViewModel, ViewState, Result types
 - **fly_networking**: HTTP client with Dio integration
 - **fly_state**: Riverpod state management utilities
 
 ### Template-Specific Dependencies
+
 {{#if template_dependencies}}
 {{#each template_dependencies}}
+
 - **{{this}}**: {{description}}
-{{/each}}
-{{/if}}
+  {{/each}}
+  {{/if}}
 
 ## Best Practices
 
 ### Code Organization
+
 1. **Feature-first structure**: Organize code by features, not by type
 2. **Separation of concerns**: Keep UI, business logic, and data separate
 3. **Dependency injection**: Use Riverpod providers for all dependencies
 4. **Error handling**: Always use `Result<T>` for operations that can fail
 
 ### Testing
+
 1. **Unit tests**: Test ViewModels and business logic
 2. **Widget tests**: Test UI components
 3. **Integration tests**: Test complete user flows
 4. **Coverage**: Aim for 90%+ test coverage
 
 ### Performance
+
 1. **Lazy loading**: Use lazy providers for expensive operations
 2. **Caching**: Cache API responses and computed values
 3. **Memory management**: Dispose of resources properly
@@ -151,6 +168,7 @@ fly create --from-manifest=project.yaml
 ## Common Patterns
 
 ### Loading States
+
 ```dart
 // In ViewModel
 Future<void> loadData() async {
@@ -172,6 +190,7 @@ Widget buildContent(BuildContext context, ViewModel viewModel) {
 ```
 
 ### Error Handling
+
 ```dart
 // In ViewModel
 Future<Result<User>> login(String email, String password) async {
@@ -189,6 +208,7 @@ result.when(
 ```
 
 ### API Integration
+
 ```dart
 // In ViewModel
 Future<void> fetchUsers() async {
@@ -202,12 +222,14 @@ Future<void> fetchUsers() async {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Build errors**: Run `flutter clean && flutter pub get`
 2. **State not updating**: Check if ViewModel is properly initialized
 3. **API errors**: Check network connection and API endpoints
 4. **Performance issues**: Use `flutter analyze` to check for issues
 
 ### Debug Commands
+
 ```bash
 # Check system health
 fly doctor
@@ -225,11 +247,13 @@ flutter pub deps
 ## AI Integration Examples
 
 ### Natural Language to Commands
+
 - "Create a login screen" → `fly add screen login --type=auth`
 - "Add user service" → `fly add service user`
 - "Check system health" → `fly doctor`
 
 ### Manifest Generation
+
 ```yaml
 # AI can generate this from natural language
 name: my_app
@@ -245,7 +269,9 @@ services:
 ```
 
 ### Code Generation
+
 AI can generate:
+
 - Screen implementations
 - ViewModel implementations
 - API service classes
@@ -255,11 +281,13 @@ AI can generate:
 ## Resources
 
 ### Documentation
+
 - [Fly CLI Documentation](https://fly-cli.dev/docs)
 - [Riverpod Documentation](https://riverpod.dev)
 - [Flutter Documentation](https://flutter.dev/docs)
 
 ### Community
+
 - [GitHub Repository](https://github.com/fly-cli/fly)
 - [Discord Community](https://discord.gg/fly-cli)
 - [Issue Tracker](https://github.com/fly-cli/fly/issues)

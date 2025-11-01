@@ -11,18 +11,18 @@ class FishCompletionGenerator extends CompletionGenerator {
   @override
   String generate(CommandMetadataRegistry registry) {
     final buffer = StringBuffer()
-
-    ..writeln('# Fly CLI fish completion script')
-    ..writeln()
-    ..writeln('complete -c fly -f')
-    ..writeln();
+      ..writeln('# Fly CLI fish completion script')
+      ..writeln()
+      ..writeln('complete -c fly -f')
+      ..writeln();
 
     // Generate commands
     final allCommands = registry.getAllCommands();
     for (final entry in allCommands.entries) {
       if (!entry.value.isHidden) {
         buffer.writeln(
-            'complete -c fly -n "__fish_use_subcommand" -a "${entry.key}" -d "${entry.value.description}"',);
+          'complete -c fly -n "__fish_use_subcommand" -a "${entry.key}" -d "${entry.value.description}"',
+        );
       }
     }
     buffer.writeln();
@@ -51,7 +51,10 @@ class FishCompletionGenerator extends CompletionGenerator {
   }
 
   void generateCommandCompletions(
-      StringBuffer buffer, String commandName, CommandDefinition command,) {
+    StringBuffer buffer,
+    String commandName,
+    CommandDefinition command,
+  ) {
     final condition = '__fish_seen_subcommand_from $commandName';
 
     // Add command options
@@ -72,7 +75,8 @@ class FishCompletionGenerator extends CompletionGenerator {
       buffer.writeln();
       for (final subcommand in command.subcommands) {
         buffer.writeln(
-            'complete -c fly -n "$condition" -a "${subcommand.name}" -d "${subcommand.description}"',);
+          'complete -c fly -n "$condition" -a "${subcommand.name}" -d "${subcommand.description}"',
+        );
       }
     }
 
@@ -94,7 +98,8 @@ class FishCompletionGenerator extends CompletionGenerator {
 
   @override
   String generateSubcommandsCompletion(
-          List<SubcommandDefinition> subcommands,) =>
+    List<SubcommandDefinition> subcommands,
+  ) =>
       subcommands.map((s) => s.name).join(' ');
 
   @override

@@ -5,7 +5,6 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
-
 import 'package:fly_cli/src/features/context/models.dart';
 
 /// Unified AST analysis result containing all metrics and issues
@@ -74,7 +73,7 @@ class AstAnalyzer {
     // Create a single analysis context for all files in the same directory tree
     final rootDir = _findCommonRoot(dartFiles);
     AnalysisContextCollection? collection;
-    
+
     try {
       collection = AnalysisContextCollection(
         includedPaths: [rootDir.path],
@@ -127,12 +126,12 @@ class AstAnalyzer {
   /// Find the common root directory for all files
   Directory _findCommonRoot(List<File> files) {
     if (files.isEmpty) return Directory.current;
-    
+
     var commonPath = files.first.parent.path;
     for (final file in files.skip(1)) {
       commonPath = _findCommonPath(commonPath, file.parent.path);
     }
-    
+
     return Directory(commonPath);
   }
 
@@ -140,10 +139,11 @@ class AstAnalyzer {
   String _findCommonPath(String path1, String path2) {
     final parts1 = path1.split('/');
     final parts2 = path2.split('/');
-    
+
     final commonParts = <String>[];
-    final minLength = parts1.length < parts2.length ? parts1.length : parts2.length;
-    
+    final minLength =
+        parts1.length < parts2.length ? parts1.length : parts2.length;
+
     for (int i = 0; i < minLength; i++) {
       if (parts1[i] == parts2[i]) {
         commonParts.add(parts1[i]);
@@ -151,7 +151,7 @@ class AstAnalyzer {
         break;
       }
     }
-    
+
     return commonParts.join('/');
   }
 
@@ -244,26 +244,26 @@ class FileAstResult {
 /// Unified AST visitor that performs all analysis in a single pass
 class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   final String filePath;
-  
+
   // Complexity metrics
   ComplexityMetrics complexityMetrics = ComplexityMetrics(
     cyclomaticComplexity: 0,
     cognitiveComplexity: 0,
     maintainabilityIndex: 100.0,
   );
-  
+
   // Quality analysis
   final List<QualityIssue> qualityIssues = [];
   final List<String> deadCode = [];
   final List<DuplicatedCode> duplicatedCode = [];
   final List<String> imports = [];
   final List<String> patterns = [];
-  
+
   // Symbol tracking
   final Set<String> _usedSymbols = {};
   final Set<String> _declaredSymbols = {};
   final Map<String, int> _symbolUsage = {};
-  
+
   // Pattern detection
   final Set<String> _detectedPatterns = {};
 
@@ -272,16 +272,16 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitCompilationUnit(CompilationUnit node) {
     super.visitCompilationUnit(node);
-    
+
     // Extract imports
     _extractImports(node);
-    
+
     // Detect patterns
     _detectPatterns(node);
-    
+
     // Check for dead code
     _checkDeadCode();
-    
+
     // Calculate maintainability index
     complexityMetrics = ComplexityMetrics(
       cyclomaticComplexity: complexityMetrics.cyclomaticComplexity,
@@ -293,50 +293,54 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitFunctionDeclaration(FunctionDeclaration node) {
     _declaredSymbols.add(node.name.lexeme);
-    
+
     // Calculate complexity for this function
     final functionVisitor = _FunctionComplexityVisitor();
     node.accept(functionVisitor);
-    
+
     complexityMetrics = ComplexityMetrics(
-      cyclomaticComplexity: complexityMetrics.cyclomaticComplexity + functionVisitor.cyclomaticComplexity,
-      cognitiveComplexity: complexityMetrics.cognitiveComplexity + functionVisitor.cognitiveComplexity,
+      cyclomaticComplexity: complexityMetrics.cyclomaticComplexity +
+          functionVisitor.cyclomaticComplexity,
+      cognitiveComplexity: complexityMetrics.cognitiveComplexity +
+          functionVisitor.cognitiveComplexity,
       maintainabilityIndex: complexityMetrics.maintainabilityIndex,
     );
-    
+
     // Check for quality issues
     _checkFunctionQuality(node, functionVisitor);
-    
+
     super.visitFunctionDeclaration(node);
   }
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
     _declaredSymbols.add(node.name.lexeme);
-    
+
     // Calculate complexity for this method
     final methodVisitor = _FunctionComplexityVisitor();
     node.accept(methodVisitor);
-    
+
     complexityMetrics = ComplexityMetrics(
-      cyclomaticComplexity: complexityMetrics.cyclomaticComplexity + methodVisitor.cyclomaticComplexity,
-      cognitiveComplexity: complexityMetrics.cognitiveComplexity + methodVisitor.cognitiveComplexity,
+      cyclomaticComplexity: complexityMetrics.cyclomaticComplexity +
+          methodVisitor.cyclomaticComplexity,
+      cognitiveComplexity: complexityMetrics.cognitiveComplexity +
+          methodVisitor.cognitiveComplexity,
       maintainabilityIndex: complexityMetrics.maintainabilityIndex,
     );
-    
+
     // Check for quality issues
     _checkMethodQuality(node, methodVisitor);
-    
+
     super.visitMethodDeclaration(node);
   }
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
     _declaredSymbols.add(node.name.lexeme);
-    
+
     // Check class quality
     _checkClassQuality(node);
-    
+
     super.visitClassDeclaration(node);
   }
 
@@ -365,7 +369,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
         file: filePath,
       ));
     }
-    
+
     super.visitIfStatement(node);
   }
 
@@ -381,7 +385,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
         file: filePath,
       ));
     }
-    
+
     super.visitForStatement(node);
   }
 
@@ -397,7 +401,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
         file: filePath,
       ));
     }
-    
+
     super.visitWhileStatement(node);
   }
 
@@ -413,7 +417,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
         file: filePath,
       ));
     }
-    
+
     super.visitTryStatement(node);
   }
 
@@ -429,7 +433,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
         file: filePath,
       ));
     }
-    
+
     super.visitCatchClause(node);
   }
 
@@ -457,7 +461,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     if (_hasPattern(node, ['ChangeNotifier', 'Provider'])) {
       _detectedPatterns.add('provider');
     }
-    
+
     // Architecture patterns
     if (_hasPattern(node, ['BaseScreen', 'BaseViewModel'])) {
       _detectedPatterns.add('fly_architecture');
@@ -465,7 +469,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     if (_hasPattern(node, ['ViewModel', 'Screen'])) {
       _detectedPatterns.add('mvvm');
     }
-    
+
     // UI patterns
     if (_hasPattern(node, ['Scaffold', 'AppBar'])) {
       _detectedPatterns.add('material_design');
@@ -473,7 +477,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     if (_hasPattern(node, ['CupertinoApp', 'CupertinoPageScaffold'])) {
       _detectedPatterns.add('cupertino_design');
     }
-    
+
     // Navigation patterns
     if (_hasPattern(node, ['GoRouter', 'go_router'])) {
       _detectedPatterns.add('go_router');
@@ -481,7 +485,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     if (_hasPattern(node, ['Navigator.push', 'Navigator.pop'])) {
       _detectedPatterns.add('imperative_navigation');
     }
-    
+
     // Error handling patterns
     if (_hasPattern(node, ['Result<', 'Either<'])) {
       _detectedPatterns.add('functional_error_handling');
@@ -489,7 +493,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     if (_hasPattern(node, ['try-catch', 'try {'])) {
       _detectedPatterns.add('exception_handling');
     }
-    
+
     patterns.addAll(_detectedPatterns);
   }
 
@@ -517,11 +521,13 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   }
 
   /// Check function quality
-  void _checkFunctionQuality(FunctionDeclaration node, _FunctionComplexityVisitor visitor) {
+  void _checkFunctionQuality(
+      FunctionDeclaration node, _FunctionComplexityVisitor visitor) {
     if (visitor.cyclomaticComplexity > 10) {
       qualityIssues.add(QualityIssue(
         type: 'high_complexity',
-        message: 'Function ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
+        message:
+            'Function ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
         severity: 'medium',
         line: 0,
         file: filePath,
@@ -530,11 +536,13 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   }
 
   /// Check method quality
-  void _checkMethodQuality(MethodDeclaration node, _FunctionComplexityVisitor visitor) {
+  void _checkMethodQuality(
+      MethodDeclaration node, _FunctionComplexityVisitor visitor) {
     if (visitor.cyclomaticComplexity > 10) {
       qualityIssues.add(QualityIssue(
         type: 'high_complexity',
-        message: 'Method ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
+        message:
+            'Method ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
         severity: 'medium',
         line: 0,
         file: filePath,
@@ -552,12 +560,19 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   double _calculateMaintainabilityIndex() {
     // Simplified maintainability index calculation
     final halsteadVolume = _declaredSymbols.length * 0.75;
-    final cyclomaticComplexityFactor = complexityMetrics.cyclomaticComplexity * 0.5;
-    final cognitiveComplexityFactor = complexityMetrics.cognitiveComplexity * 0.3;
-    final commentRatio = 0.1; // Placeholder - would need actual comment analysis
-    
-    final maintainabilityIndex = 171 - 5.2 * halsteadVolume - 0.23 * cyclomaticComplexityFactor - 16.2 * cognitiveComplexityFactor + 50 * commentRatio;
-    
+    final cyclomaticComplexityFactor =
+        complexityMetrics.cyclomaticComplexity * 0.5;
+    final cognitiveComplexityFactor =
+        complexityMetrics.cognitiveComplexity * 0.3;
+    final commentRatio =
+        0.1; // Placeholder - would need actual comment analysis
+
+    final maintainabilityIndex = 171 -
+        5.2 * halsteadVolume -
+        0.23 * cyclomaticComplexityFactor -
+        16.2 * cognitiveComplexityFactor +
+        50 * commentRatio;
+
     return maintainabilityIndex.clamp(0.0, 100.0);
   }
 
@@ -575,7 +590,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   /// Calculate overall quality score
   double _calculateOverallScore() {
     double score = 100.0;
-    
+
     for (final issue in qualityIssues) {
       switch (issue.severity) {
         case 'high':
@@ -589,7 +604,7 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
           break;
       }
     }
-    
+
     return score.clamp(0.0, 100.0);
   }
 }

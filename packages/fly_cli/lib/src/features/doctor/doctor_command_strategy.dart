@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_strategy.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_strategy.dart';
+import 'package:fly_cli/src/core/definitions/categories.dart';
 import 'package:fly_cli/src/features/doctor/doctor_command.dart';
 
 /// Strategy for doctor command
@@ -16,9 +16,6 @@ class DoctorCommandStrategy extends FlyCommandStrategy {
   List<String> get aliases => ['check', 'diagnose', 'health'];
 
   @override
-  FlyCommandType? get parentCommand => null;
-
-  @override
   CommandGroup? get group => null;
 
   @override
@@ -29,4 +26,3 @@ class DoctorCommandStrategy extends FlyCommandStrategy {
     return DoctorCommand.create(context);
   }
 }
-

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
+
 import '../helpers/cli_test_helper.dart';
 import '../helpers/test_temp_dir.dart';
 
@@ -24,14 +25,15 @@ void main() {
     group('Project Creation Performance', () {
       test('minimal project creation completes within 30 seconds', () async {
         const projectName = 'perf_test_minimal';
-        
+
         final result = await cli.createProject(projectName);
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final durationMs = data['duration_ms'] as int;
@@ -44,14 +46,18 @@ void main() {
 
       test('riverpod project creation completes within 30 seconds', () async {
         const projectName = 'perf_test_riverpod';
-        
-        final result = await cli.createProject(projectName, template: 'riverpod');
+
+        final result = await cli.createProject(
+          projectName,
+          template: 'riverpod',
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final durationMs = data['duration_ms'] as int;
@@ -64,13 +70,13 @@ void main() {
 
       test('multiple project creation performance', () async {
         const projectNames = ['perf1', 'perf2', 'perf3', 'perf4', 'perf5'];
-        
+
         for (final projectName in projectNames) {
-        final result = await cli.createProject(projectName);
+          final result = await cli.createProject(projectName);
 
           expect(result.exitCode, equals(0));
         }
-        
+
         // Verify all projects were created
         for (final projectName in projectNames) {
           final projectPath = path.join(temp.currentTestDir.path, projectName);
@@ -80,14 +86,18 @@ void main() {
 
       test('project creation with plan mode is fast', () async {
         const projectName = 'perf_test_plan';
-        
-        final result = await cli.runCommand('create', args: [projectName, '--template=minimal', '--plan']);
+
+        final result = await cli.runCommand(
+          'create',
+          args: [projectName, '--template=minimal', '--plan'],
+        );
 
         expect(result.exitCode, equals(0));
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
         final data = output['data'] as Map<String, dynamic>;
         final durationMs = data['duration_ms'] as int;
@@ -107,7 +117,8 @@ void main() {
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
       });
 
@@ -118,7 +129,8 @@ void main() {
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
       });
 
@@ -129,9 +141,13 @@ void main() {
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
-        expect((output['data'] as Map<String, dynamic>)['commands'], isA<List<dynamic>>());
+        expect(
+          (output['data'] as Map<String, dynamic>)['commands'],
+          isA<List<dynamic>>(),
+        );
       });
     });
 
@@ -139,9 +155,11 @@ void main() {
       late Directory testProject;
 
       setUp(() {
-        testProject = Directory(path.join(temp.currentTestDir.path, 'test_project'));
+        testProject = Directory(
+          path.join(temp.currentTestDir.path, 'test_project'),
+        );
         testProject.createSync();
-        
+
         // Create a minimal Flutter project structure
         File(path.join(testProject.path, 'pubspec.yaml')).writeAsStringSync('''
 name: test_project
@@ -163,7 +181,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 ''');
-        
+
         Directory(path.join(testProject.path, 'lib')).createSync();
         Directory(path.join(testProject.path, 'test')).createSync();
       });
@@ -180,7 +198,8 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
       });
 
@@ -197,7 +216,8 @@ flutter:
         expect(result.stdout, isNotEmpty);
 
         // Parse JSON output
-        final output = json.decode(result.stdout as String) as Map<String, dynamic>;
+        final output =
+            json.decode(result.stdout as String) as Map<String, dynamic>;
         expect(output['success'], isTrue);
       });
     });
@@ -206,9 +226,9 @@ flutter:
       test('project creation does not cause memory leaks', () async {
         // Create multiple projects and monitor memory usage
         final projectNames = List.generate(10, (index) => 'memory_test_$index');
-        
+
         for (final projectName in projectNames) {
-        final result = await cli.createProject(projectName);
+          final result = await cli.createProject(projectName);
 
           expect(result.exitCode, equals(0));
         }
@@ -222,8 +242,11 @@ flutter:
 
       test('large project creation handles memory efficiently', () async {
         const projectName = 'large_project_test';
-        
-        final result = await cli.createProject(projectName, template: 'riverpod');
+
+        final result = await cli.createProject(
+          projectName,
+          template: 'riverpod',
+        );
 
         expect(result.exitCode, equals(0));
 
@@ -237,13 +260,17 @@ flutter:
       test('file operations are efficient', () async {
         // Create multiple files
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(temp.currentTestDir.path, 'test_file_$i.txt'));
+          final file = File(
+            path.join(temp.currentTestDir.path, 'test_file_$i.txt'),
+          );
           file.writeAsStringSync('Test content $i');
         }
-        
+
         // Verify files were created
         for (var i = 0; i < 100; i++) {
-          final file = File(path.join(temp.currentTestDir.path, 'test_file_$i.txt'));
+          final file = File(
+            path.join(temp.currentTestDir.path, 'test_file_$i.txt'),
+          );
           expect(file.existsSync(), isTrue);
         }
       });
@@ -251,13 +278,17 @@ flutter:
       test('directory operations are efficient', () async {
         // Create multiple directories
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(temp.currentTestDir.path, 'test_dir_$i'));
+          final dir = Directory(
+            path.join(temp.currentTestDir.path, 'test_dir_$i'),
+          );
           dir.createSync();
         }
-        
+
         // Verify directories were created
         for (var i = 0; i < 50; i++) {
-          final dir = Directory(path.join(temp.currentTestDir.path, 'test_dir_$i'));
+          final dir = Directory(
+            path.join(temp.currentTestDir.path, 'test_dir_$i'),
+          );
           expect(dir.existsSync(), isTrue);
         }
       });
@@ -267,26 +298,29 @@ flutter:
       test('template loading optimization works', () async {
         final templatesDir = path.join(temp.currentTestDir.path, 'templates');
         Directory(templatesDir).createSync();
-        
+
         // Template optimization removed
-        
+
         // Verify optimization completed
         expect(templatesDir, isNotEmpty);
       });
 
       test('file operations optimization works', () async {
-        final filePaths = List.generate(50, (index) => 
-          path.join(temp.currentTestDir.path, 'optimized_file_$index.txt'));
-        
+        final filePaths = List.generate(
+          50,
+          (index) =>
+              path.join(temp.currentTestDir.path, 'optimized_file_$index.txt'),
+        );
+
         // File optimization removed
-        
+
         // Verify optimization completed
         expect(filePaths, isNotEmpty);
       });
 
       test('memory optimization works', () async {
         // Memory optimization removed
-        
+
         // Verify optimization completed
         expect(true, isTrue); // Memory optimization is internal
       });
@@ -294,12 +328,17 @@ flutter:
       test('comprehensive optimization works', () async {
         final templatesDir = path.join(temp.currentTestDir.path, 'templates');
         Directory(templatesDir).createSync();
-        
-        final filePaths = List.generate(20, (index) => 
-          path.join(temp.currentTestDir.path, 'comprehensive_file_$index.txt'));
-        
+
+        final filePaths = List.generate(
+          20,
+          (index) => path.join(
+            temp.currentTestDir.path,
+            'comprehensive_file_$index.txt',
+          ),
+        );
+
         // Comprehensive optimization removed
-        
+
         // Verify optimization completed
         expect(templatesDir, isNotEmpty);
         expect(filePaths, isNotEmpty);
@@ -309,13 +348,13 @@ flutter:
     group('Performance Benchmarking', () {
       test('template rendering benchmark', () async {
         // Benchmark removed
-        
+
         // Benchmark test removed
       });
 
       test('project creation benchmark', () async {
         // Benchmark removed
-        
+
         // Benchmark test removed
       });
     });
@@ -323,7 +362,7 @@ flutter:
     group('Performance Metrics', () {
       test('performance metrics are collected', () {
         // Metrics removed
-        
+
         // Metrics test removed
       });
 
@@ -332,7 +371,7 @@ flutter:
         for (var i = 0; i < 1000; i++) {
           // Do some work
         }
-        
+
         // Timing test removed
       });
     });
@@ -341,31 +380,34 @@ flutter:
       test('concurrent project creation', () async {
         final projectNames = List.generate(5, (index) => 'stress_test_$index');
         final futures = <Future<ProcessResult>>[];
-        
+
         for (final projectName in projectNames) {
           futures.add(cli.createProject(projectName));
         }
-        
+
         final results = await Future.wait(futures);
-        
+
         // Verify all projects were created successfully
         for (var i = 0; i < results.length; i++) {
           expect(results[i].exitCode, equals(0));
-          
-          final projectPath = path.join(temp.currentTestDir.path, 'stress_test_$i');
+
+          final projectPath = path.join(
+            temp.currentTestDir.path,
+            'stress_test_$i',
+          );
           expect(Directory(projectPath).existsSync(), isTrue);
         }
       });
 
       test('rapid command execution', () async {
         final futures = <Future<ProcessResult>>[];
-        
+
         futures.add(cli.runCommand('--version', jsonOutput: false));
         futures.add(cli.runCommand('doctor'));
         futures.add(cli.runCommand('schema', args: ['export']));
-        
+
         final results = await Future.wait(futures);
-        
+
         // Verify all commands executed successfully
         for (final result in results) {
           expect(result.exitCode, equals(0));

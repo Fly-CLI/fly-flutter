@@ -1,14 +1,14 @@
 import 'dart:io';
 
 /// Writer for file operations with atomic writes
-/// 
+///
 /// Provides safe file writing with atomic operations to prevent
 /// corruption during write failures.
 class FileWriter {
   const FileWriter();
 
   /// Write content to a file atomically
-  /// 
+  ///
   /// Creates a temporary file, writes content, then renames to target.
   /// This ensures the target file is only modified if write succeeds.
   Future<bool> writeFileAtomic(File file, String content) async {
@@ -18,13 +18,13 @@ class FileWriter {
 
       // Create temporary file
       final tempFile = File('${file.path}.tmp');
-      
+
       // Write to temp file
       await tempFile.writeAsString(content);
-      
+
       // Atomic rename
       await tempFile.rename(file.path);
-      
+
       return true;
     } catch (e) {
       return false;
@@ -78,7 +78,8 @@ class FileWriter {
   }
 
   /// Write to file with mode
-  Future<bool> writeFileWithMode(File file, String content, FileMode mode) async {
+  Future<bool> writeFileWithMode(
+      File file, String content, FileMode mode) async {
     try {
       await file.parent.create(recursive: true);
       await file.writeAsString(content, mode: mode);
@@ -104,21 +105,22 @@ class FileWriter {
   }
 
   /// Copy file contents to another file
-  Future<bool> copyFile(File source, File destination, {bool preserveMetadata = false}) async {
+  Future<bool> copyFile(File source, File destination,
+      {bool preserveMetadata = false}) async {
     try {
       if (!await source.exists()) {
         return false;
       }
 
       await destination.parent.create(recursive: true);
-      
+
       if (preserveMetadata) {
         await source.copy(destination.path);
       } else {
         final content = await source.readAsBytes();
         await destination.writeAsBytes(content);
       }
-      
+
       return true;
     } catch (e) {
       return false;
@@ -157,4 +159,3 @@ class FileWriter {
     return await file.parent.create(recursive: recursive);
   }
 }
-

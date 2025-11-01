@@ -53,7 +53,8 @@ class DirectoryAnalysisResult {
   Map<String, dynamic> toJson() {
     return {
       'files': files.map((key, value) => MapEntry(key, value.toJson())),
-      'directories': directories.map((key, value) => MapEntry(key, value.toJson())),
+      'directories':
+          directories.map((key, value) => MapEntry(key, value.toJson())),
       'dart_files': dartFiles,
       'test_files': testFiles,
       'generated_files': generatedFiles,
@@ -152,17 +153,18 @@ class UnifiedDirectoryAnalyzer {
 
         if (entity is File) {
           try {
-            final relativePath = path.relative(entity.path, from: projectDir.path);
+            final relativePath =
+                path.relative(entity.path, from: projectDir.path);
             final fileName = path.basename(entity.path);
             final extension = path.extension(entity.path);
-            
+
             // Count file types
             fileTypes[extension] = (fileTypes[extension] ?? 0) + 1;
 
             // Determine file type and importance
             final fileType = _determineFileType(relativePath, fileName);
             final importance = _determineImportance(fileType, fileName);
-            
+
             // Check if it's a generated file
             final isGenerated = _isGeneratedFile(relativePath, fileName);
             if (isGenerated) {
@@ -175,7 +177,7 @@ class UnifiedDirectoryAnalyzer {
               dartFiles.add(relativePath);
               linesOfCode = await FileUtils.countLines(entity);
               totalLinesOfCode += linesOfCode;
-              
+
               if (fileType == 'test') {
                 testFiles.add(relativePath);
               }
@@ -183,7 +185,7 @@ class UnifiedDirectoryAnalyzer {
 
             // Get file metadata
             final stat = await entity.stat();
-            
+
             files[relativePath] = FileInfo(
               path: relativePath,
               name: fileName,
@@ -200,7 +202,8 @@ class UnifiedDirectoryAnalyzer {
           }
         } else if (entity is Directory) {
           try {
-            final relativePath = path.relative(entity.path, from: projectDir.path);
+            final relativePath =
+                path.relative(entity.path, from: projectDir.path);
             final dirInfo = await _analyzeDirectory(entity);
             directories[relativePath] = dirInfo;
           } catch (e) {
@@ -266,15 +269,15 @@ class UnifiedDirectoryAnalyzer {
 
     try {
       await for (final entity in dir.list(recursive: false)) {
-      if (entity is File) {
-        files++;
-        if (entity.path.endsWith('.dart')) {
-          dartFiles++;
+        if (entity is File) {
+          files++;
+          if (entity.path.endsWith('.dart')) {
+            dartFiles++;
+          }
+        } else if (entity is Directory) {
+          subdirectories.add(path.basename(entity.path));
         }
-      } else if (entity is Directory) {
-        subdirectories.add(path.basename(entity.path));
       }
-    }
     } catch (e) {
       // If directory listing fails, return what we have so far
       return DirectoryInfo(
@@ -295,75 +298,77 @@ class UnifiedDirectoryAnalyzer {
   String _determineFileType(String relativePath, String fileName) {
     // Main entry point
     if (fileName == 'main.dart') return 'main';
-    
+
     // App configuration
     if (fileName == 'app.dart') return 'app';
-    
+
     // Routing
-    if (fileName.contains('router') || fileName.contains('route')) return 'routing';
-    
+    if (fileName.contains('router') || fileName.contains('route'))
+      return 'routing';
+
     // Screens
     if (fileName.contains('_screen.dart') || fileName.contains('_page.dart')) {
       return 'screen';
     }
-    
+
     // ViewModels/Controllers
-    if (fileName.contains('_viewmodel.dart') || 
+    if (fileName.contains('_viewmodel.dart') ||
         fileName.contains('_controller.dart') ||
         fileName.contains('_cubit.dart') ||
         fileName.contains('_bloc.dart')) {
       return 'viewmodel';
     }
-    
+
     // Services
-    if (fileName.contains('_service.dart') || 
+    if (fileName.contains('_service.dart') ||
         fileName.contains('_api.dart') ||
         fileName.contains('_repository.dart')) {
       return 'service';
     }
-    
+
     // Models
-    if (fileName.contains('_model.dart') || 
+    if (fileName.contains('_model.dart') ||
         fileName.contains('_entity.dart') ||
         fileName.contains('_data.dart')) {
       return 'model';
     }
-    
+
     // Providers
     if (fileName.contains('_provider.dart') || fileName == 'providers.dart') {
       return 'provider';
     }
-    
+
     // Widgets
     if (fileName.contains('_widget.dart') || fileName.contains('widgets/')) {
       return 'widget';
     }
-    
+
     // Utils
     if (fileName.contains('_util.dart') || fileName.contains('utils/')) {
       return 'util';
     }
-    
+
     // Constants
-    if (fileName.contains('_constant.dart') || fileName.contains('constants/')) {
+    if (fileName.contains('_constant.dart') ||
+        fileName.contains('constants/')) {
       return 'constant';
     }
-    
+
     // Tests
     if (fileName.contains('_test.dart') || fileName.contains('test/')) {
       return 'test';
     }
-    
+
     // Configuration files
     if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
       return 'config';
     }
-    
+
     // Documentation
     if (fileName.endsWith('.md')) {
       return 'documentation';
     }
-    
+
     return 'other';
   }
 
@@ -393,20 +398,20 @@ class UnifiedDirectoryAnalyzer {
   /// Check if file is generated
   bool _isGeneratedFile(String relativePath, String fileName) {
     // Check for common generated file patterns
-    if (fileName.endsWith('.g.dart') || 
+    if (fileName.endsWith('.g.dart') ||
         fileName.endsWith('.freezed.dart') ||
         fileName.endsWith('.gr.dart') ||
         fileName.endsWith('.config.dart')) {
       return true;
     }
-    
+
     // Check for generated directories
     if (relativePath.contains('/generated/') ||
         relativePath.contains('/build/') ||
         relativePath.contains('/.dart_tool/')) {
       return true;
     }
-    
+
     return false;
   }
 

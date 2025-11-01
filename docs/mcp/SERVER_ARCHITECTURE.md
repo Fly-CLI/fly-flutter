@@ -327,6 +327,7 @@ class ToolRegistry {
 ```
 
 **Key Features:**
+
 - Schema validation (params and results)
 - Safety metadata (read-only, writes-to-disk, confirmation required)
 - Cancellation support
@@ -401,6 +402,7 @@ class ResourceRegistry {
 ```
 
 **Resource Types:**
+
 - `workspace://` - Workspace files (code, configs)
 - `logs://run/` - Runtime application logs
 - `logs://build/` - Build-time logs
@@ -526,6 +528,7 @@ class ConcurrencyLimiter {
 ```
 
 **Features:**
+
 - Global concurrency limit (default: 10)
 - Per-tool limits (configurable)
 - Automatic cleanup on completion
@@ -559,6 +562,7 @@ class TimeoutManager {
 ```
 
 **Configuration:**
+
 - Default timeout: 5 minutes
 - Per-tool timeouts (configurable)
 - Graceful degradation with informative errors
@@ -630,6 +634,7 @@ class CancellationRegistry {
 ```
 
 **Features:**
+
 - Request-level cancellation via `$/cancelRequest` notification
 - Cooperative cancellation (tools must respect tokens)
 - Automatic cleanup
@@ -1005,6 +1010,7 @@ extension McpMethodTypeExtension on McpMethodType {
 ```
 
 **Benefits:**
+
 - Type-safe method routing
 - Exhaustive pattern matching
 - Centralized strategy registration
@@ -1068,6 +1074,7 @@ class InitializeMethodStrategy extends McpMethodStrategy {
 ```
 
 **Capabilities:**
+
 - ✅ Tools: Full CRUD with safety metadata
 - ✅ Resources: Workspace files + logs (read-only)
 - ✅ Prompts: Template-based AI interactions
@@ -1120,6 +1127,7 @@ All logs are emitted as structured JSON to stderr:
 ```
 
 **Fields:**
+
 - `component`: Server identifier
 - `level`: Log level (error, info)
 - `method`: MCP method name
@@ -1158,6 +1166,7 @@ All logs are emitted as structured JSON to stderr:
 ```
 
 **Configuration Options:**
+
 - `toolRegistry` (required): Registered tools
 - `resourceRegistry`: Custom resource providers
 - `promptRegistry`: Custom prompt templates
@@ -1219,7 +1228,9 @@ Future<void> runStdioServer(
 
 ## Summary
 
-The Fly MCP Server provides a **production-ready, type-safe, extensible** implementation of the Model Context Protocol specifically designed for AI-assisted Flutter development. Its architecture emphasizes:
+The Fly MCP Server provides a **production-ready, type-safe, extensible** implementation of the
+Model Context Protocol specifically designed for AI-assisted Flutter development. Its architecture
+emphasizes:
 
 - ✅ **Safety**: Concurrency limits, timeouts, cancellations
 - ✅ **Observability**: Structured logging, correlation IDs, performance metrics
@@ -1227,4 +1238,5 @@ The Fly MCP Server provides a **production-ready, type-safe, extensible** implem
 - ✅ **Type Safety**: Exhaustive enums, compile-time verification
 - ✅ **Standards Compliance**: Full MCP protocol support
 
-This foundation enables AI assistants to safely and efficiently interact with Flutter development tools through a standardized, well-documented interface.
+This foundation enables AI assistants to safely and efficiently interact with Flutter development
+tools through a standardized, well-documented interface.

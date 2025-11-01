@@ -72,16 +72,19 @@ graph TB
 The command foundation provides the core abstractions and base classes for all commands.
 
 #### Domain Layer
+
 - **`CommandContext`** - Encapsulates execution context with dependencies and configuration
-- **`CommandLifecycle`** - Defines lifecycle hooks for command execution phases  
+- **`CommandLifecycle`** - Defines lifecycle hooks for command execution phases
 - **`CommandMiddleware`** - Interface for cross-cutting concerns
 - **`CommandValidator`** - Interface for validation logic
 - **`CommandResult`** - Standardized result structure with AI-friendly formats
 
 #### Application Layer
+
 - **`FlyCommand`** - Enhanced base command class with integrated features
 
 #### Infrastructure Layer
+
 - **`CommandContextImpl`** - Concrete implementation of CommandContext
 - **`Environment`** - Environment information abstraction
 
@@ -90,10 +93,12 @@ The command foundation provides the core abstractions and base classes for all c
 Factory-based dependency injection system for managing service lifecycles and dependencies.
 
 #### Domain Layer
+
 - **`ServiceContainer`** - Service registration and resolution container
 - **`ServiceLifetime`** - Service lifetime management (transient, scoped, singleton)
 
 #### Application Layer
+
 - **`FlyCommand`** - Enhanced base command class with integrated features
 
 ### 3. Validation System (`core/validation/`)
@@ -101,6 +106,7 @@ Factory-based dependency injection system for managing service lifecycles and de
 Composable validation pipeline with common validators for argument and environment validation.
 
 #### Validators
+
 - **`RequiredArgumentValidator`** - Validates required arguments
 - **`ProjectNameValidator`** - Validates project name format
 - **`FlutterProjectValidator`** - Validates Flutter project structure
@@ -114,6 +120,7 @@ Composable validation pipeline with common validators for argument and environme
 Pipeline-based middleware for cross-cutting concerns.
 
 #### Built-in Middleware
+
 - **`LoggingMiddleware`** - Command execution logging
 - **`MetricsMiddleware`** - Performance metrics collection
 - **`DryRunMiddleware`** - Plan mode execution
@@ -125,12 +132,15 @@ Pipeline-based middleware for cross-cutting concerns.
 Extensible plugin architecture for third-party command registration.
 
 #### Domain Layer
+
 - **`FlyPlugin`** - Base plugin interface (moved to future implementation)
 - **`PluginContext`** - Plugin initialization context (moved to future implementation)
 - **`PluginConfig`** - Plugin configuration model (moved to future implementation)
 
 #### Application Layer
-- **`PluginRegistry`** - Plugin discovery, loading, and lifecycle management (moved to future implementation)
+
+- **`PluginRegistry`** - Plugin discovery, loading, and lifecycle management (moved to future
+  implementation)
 
 ## Command Execution Flow
 
@@ -424,30 +434,35 @@ Future<void> onError(CommandContext context, Object error, StackTrace stackTrace
 ## Best Practices
 
 ### 1. Command Design
+
 - Keep commands focused on a single responsibility
 - Use dependency injection for all external dependencies
 - Implement proper error handling with meaningful messages
 - Provide helpful suggestions in error results
 
 ### 2. Validation
+
 - Use composition over inheritance for validators
 - Order validators by priority (required args first, then business logic)
 - Provide clear, actionable error messages
 - Validate early and fail fast
 
 ### 3. Middleware
+
 - Keep middleware stateless when possible
 - Use appropriate priority ordering
 - Handle errors gracefully
 - Log meaningful information
 
 ### 4. Testing
+
 - Test commands in isolation using mocks
 - Test validation logic separately
 - Test middleware pipeline behavior
 - Use test harness for consistent setup
 
 ### 5. Performance
+
 - Use singleton services for expensive resources
 - Implement caching for idempotent operations
 - Use lazy loading for optional features
@@ -498,7 +513,8 @@ expect(harness.container.mockTemplateManager.generatedProjects, contains('test-p
 
 ## Related Documentation
 
-- [Command System Architecture](../docs/architecture/command-system.md) - Detailed technical documentation
+- [Command System Architecture](../docs/architecture/command-system.md) - Detailed technical
+  documentation
 - [Core Components](../core/) - Core implementation details
 - [Template System](../core/templates/) - Template management system
 - [Validation System](../core/validation/) - Validation framework details

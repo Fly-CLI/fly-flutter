@@ -139,13 +139,19 @@ class MockLogger implements Logger {
 
   // Test helper methods
   List<String> get logs => List.unmodifiable(_logs);
+
   List<String> get errors => List.unmodifiable(_errors);
+
   List<String> get warnings => List.unmodifiable(_warnings);
+
   List<String> get infos => List.unmodifiable(_infos);
 
   bool hasError(String message) => _errors.any((e) => e.contains(message));
+
   bool hasWarning(String message) => _warnings.any((w) => w.contains(message));
+
   bool hasInfo(String message) => _infos.any((i) => i.contains(message));
+
   bool hasLog(String message) => _logs.any((l) => l.contains(message));
 
   void reset() {

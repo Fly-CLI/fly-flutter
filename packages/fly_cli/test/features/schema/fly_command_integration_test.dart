@@ -1,30 +1,30 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:test/test.dart';
-
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart'
+    as base show FlyCommand;
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/definitions/fly_command.dart';
+import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
 
 /// Helper to create command instances from enum for testing
 ({
-  Map<FlyCommandType, Command<int>> commandInstances,
+  Map<FlyCommand, Command<int>> commandInstances,
   Map<String, Command<int>> commandGroups,
 }) _createCommandInstances() {
   final context = CommandTestHelper.createMockCommandContext();
-  final commandInstances = <FlyCommandType, Command<int>>{};
-  
+  final commandInstances = <FlyCommand, Command<int>>{};
+
   // Create instances for all command types
-  for (final commandType in FlyCommandType.values) {
+  for (final commandType in FlyCommand.values) {
     commandInstances[commandType] = commandType.createInstance(context);
   }
-  
+
   // Build command groups dynamically
   final commandGroups = <String, Command<int>>{};
-  final groupMap = <String, List<FlyCommandType>>{};
+  final groupMap = <String, List<FlyCommand>>{};
   for (final entry in commandInstances.entries) {
     final commandType = entry.key;
     final group = commandType.group;
@@ -32,7 +32,7 @@ import '../../helpers/command_test_helper.dart';
       groupMap.putIfAbsent(group.name, () => []).add(commandType);
     }
   }
-  
+
   // Create group commands
   for (final entry in groupMap.entries) {
     final groupName = entry.key;
@@ -46,7 +46,7 @@ import '../../helpers/command_test_helper.dart';
     }
     commandGroups[groupName] = groupCmd;
   }
-  
+
   return (commandInstances: commandInstances, commandGroups: commandGroups);
 }
 
@@ -81,7 +81,8 @@ void main() {
           ],
         );
 
-        final command = _TestFlyCommandWithMetadata('test', 'Test command', metadata);
+        final command =
+            _TestFlyCommandWithMetadata('test', 'Test command', metadata);
         expect(command.metadata, isNotNull);
         expect(command.metadata!.name, equals('test'));
         expect(command.metadata!.examples, hasLength(1));
@@ -96,7 +97,8 @@ void main() {
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new project'));
-        expect(metadata.options, hasLength(4)); // output, debug, verbose, plan from base class
+        expect(metadata.options,
+            hasLength(4)); // output, debug, verbose, plan from base class
         expect(metadata.subcommands, isEmpty);
       });
 
@@ -120,21 +122,24 @@ void main() {
           ],
         );
 
-        final command = _TestFlyCommandWithMetadata('create', 'Create command', manualMetadata);
+        final command = _TestFlyCommandWithMetadata(
+            'create', 'Create command', manualMetadata);
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
-        expect(metadata.options, hasLength(5)); // template + output + debug + verbose + plan
+        expect(metadata.options,
+            hasLength(5)); // template + output + debug + verbose + plan
         expect(metadata.options.first.name, equals('template'));
       });
 
       test('merges manual metadata with auto-discovered options', () {
         final parser = ArgParser();
         parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
-        parser.addOption('output', help: 'Output format', allowed: ['human', 'json']);
+        parser.addOption('output',
+            help: 'Output format', allowed: ['human', 'json']);
 
         const manualMetadata = CommandDefinition(
           name: 'create',
@@ -147,14 +152,17 @@ void main() {
           ],
         );
 
-        final command = _TestFlyCommandWithMetadata('create', 'Create command', manualMetadata, parser: parser);
+        final command = _TestFlyCommandWithMetadata(
+            'create', 'Create command', manualMetadata,
+            parser: parser);
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
-        expect(metadata.options, hasLength(4)); // output + debug + verbose + plan from base class
+        expect(metadata.options,
+            hasLength(4)); // output + debug + verbose + plan from base class
         expect(metadata.options.any((o) => o.name == 'verbose'), isTrue);
         expect(metadata.options.any((o) => o.name == 'output'), isTrue);
       });
@@ -177,7 +185,8 @@ void main() {
         final createCommand = registry.getCommand('create');
         expect(createCommand, isNotNull);
         expect(createCommand!.name, equals('create'));
-        expect(createCommand.description, equals('Create a new Flutter project'));
+        expect(
+            createCommand.description, equals('Create a new Flutter project'));
       });
 
       test('registers FlyCommand with manual metadata', () {
@@ -225,7 +234,8 @@ void main() {
       test('extracts subcommands from FlyCommand', () {
         final parentCommand = _TestFlyCommand('add', 'Add components');
         parentCommand.addSubcommand(_TestFlyCommand('screen', 'Add a screen'));
-        parentCommand.addSubcommand(_TestFlyCommand('service', 'Add a service'));
+        parentCommand
+            .addSubcommand(_TestFlyCommand('service', 'Add a service'));
 
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(parentCommand);
@@ -290,7 +300,8 @@ void main() {
           description: 'Invalid metadata',
         );
 
-        final command = _TestFlyCommandWithMetadata('valid-name', 'Valid command', invalidMetadata);
+        final command = _TestFlyCommandWithMetadata(
+            'valid-name', 'Valid command', invalidMetadata);
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
@@ -315,7 +326,8 @@ void main() {
           ],
         );
 
-        final command = _TestFlyCommandWithMetadata('create', 'Create command', mixedMetadata);
+        final command = _TestFlyCommandWithMetadata(
+            'create', 'Create command', mixedMetadata);
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
@@ -328,8 +340,8 @@ void main() {
 }
 
 /// Test FlyCommand implementation
-class _TestFlyCommand extends FlyCommand {
-  _TestFlyCommand(this._name, this._description, {ArgParser? parser}) 
+class _TestFlyCommand extends base.FlyCommand {
+  _TestFlyCommand(this._name, this._description, {ArgParser? parser})
       : _parser = parser,
         super(CommandTestHelper.createMockCommandContext());
 
@@ -375,9 +387,9 @@ class _TestFlyCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async => CommandResult.success(
-    command: _name,
-    message: 'Test command executed',
-  );
+        command: _name,
+        message: 'Test command executed',
+      );
 
   /// Add a subcommand for testing
   @override
@@ -388,7 +400,8 @@ class _TestFlyCommand extends FlyCommand {
 
 /// Test FlyCommand with manual metadata
 class _TestFlyCommandWithMetadata extends _TestFlyCommand {
-  _TestFlyCommandWithMetadata(super.name, super.description, this._metadata, {super.parser});
+  _TestFlyCommandWithMetadata(super.name, super.description, this._metadata,
+      {super.parser});
 
   final CommandDefinition _metadata;
 

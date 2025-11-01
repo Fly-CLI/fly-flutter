@@ -12,7 +12,9 @@ class DatadogAppender implements Appender {
   @override
   String get name => 'datadog';
 
-  bool get _enabled => (apiKey != null && apiKey!.isNotEmpty) && (site != null && site!.isNotEmpty);
+  bool get _enabled =>
+      (apiKey != null && apiKey!.isNotEmpty) &&
+      (site != null && site!.isNotEmpty);
 
   @override
   Future<void> append(LogEvent event) async {
@@ -28,5 +30,3 @@ class DatadogAppender implements Appender {
   @override
   Future<void> dispose() async {}
 }
-
-

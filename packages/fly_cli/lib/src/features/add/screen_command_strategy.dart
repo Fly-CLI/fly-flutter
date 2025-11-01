@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_strategy.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/fly_command_strategy.dart';
+import 'package:fly_cli/src/core/definitions/categories.dart';
 import 'package:fly_cli/src/features/add/add_screen_command.dart';
 
 /// Strategy for screen command
@@ -22,20 +22,16 @@ class ScreenCommandStrategy extends FlyCommandStrategy {
       ];
 
   @override
-  FlyCommandType? get parentCommand => null;
-
-  @override
   CommandGroup? get group => const CommandGroup(
         name: 'add',
         description: 'Add new components to the current project',
       );
 
   @override
-  CommandCategory get category => CommandCategory.codeGeneration;
+  CommandCategory get category => CommandCategory.generation;
 
   @override
   Command<int> createInstance(CommandContext context) {
     return AddScreenCommand.create(context);
   }
 }
-

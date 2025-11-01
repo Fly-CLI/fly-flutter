@@ -347,17 +347,10 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  fly_mcp_core:
+  fly_mcp:
     dependency: transitive
     description:
-      path: "packages/fly_mcp_core"
-      relative: true
-    source: path
-    version: "0.1.0"
-  fly_mcp_server:
-    dependency: transitive
-    description:
-      path: "packages/fly_mcp_server"
+      path: "packages/fly_mcp"
       relative: true
     source: path
     version: "0.1.0"

@@ -1,12 +1,12 @@
 import 'package:fly_core/src/retry/retry_policy.dart';
 
 /// Strategy interface for calculating retry delays
-/// 
+///
 /// Different implementations can provide various backoff strategies
 /// (exponential, fixed, adaptive, etc.)
 abstract class RetryStrategy {
   /// Calculate the delay before the next retry attempt
-  /// 
+  ///
   /// [attemptNumber] is 0-indexed (0 = first retry, 1 = second retry, etc.)
   /// [policy] provides configuration for the strategy
   Duration calculateDelay(int attemptNumber, RetryPolicy policy);
@@ -16,7 +16,7 @@ abstract class RetryStrategy {
 }
 
 /// Exponential backoff strategy
-/// 
+///
 /// Delays increase exponentially: initial * multiplier^attempt
 class ExponentialBackoffStrategy implements RetryStrategy {
   const ExponentialBackoffStrategy();
@@ -35,7 +35,9 @@ class ExponentialBackoffStrategy implements RetryStrategy {
       milliseconds: (policy.initialDelay.inMilliseconds * multiplier).round(),
     );
 
-    return calculatedDelay > policy.maxDelay ? policy.maxDelay : calculatedDelay;
+    return calculatedDelay > policy.maxDelay
+        ? policy.maxDelay
+        : calculatedDelay;
   }
 
   @override
@@ -43,7 +45,7 @@ class ExponentialBackoffStrategy implements RetryStrategy {
 }
 
 /// Fixed delay strategy
-/// 
+///
 /// Delays remain constant for all retry attempts
 class FixedDelayStrategy implements RetryStrategy {
   const FixedDelayStrategy();
@@ -60,7 +62,7 @@ class FixedDelayStrategy implements RetryStrategy {
 }
 
 /// Linear backoff strategy
-/// 
+///
 /// Delays increase linearly: initial * attempt
 class LinearBackoffStrategy implements RetryStrategy {
   const LinearBackoffStrategy();
@@ -70,10 +72,13 @@ class LinearBackoffStrategy implements RetryStrategy {
     if (attemptNumber <= 0) return policy.initialDelay;
 
     final calculatedDelay = Duration(
-      milliseconds: (policy.initialDelay.inMilliseconds * attemptNumber).round(),
+      milliseconds:
+          (policy.initialDelay.inMilliseconds * attemptNumber).round(),
     );
 
-    return calculatedDelay > policy.maxDelay ? policy.maxDelay : calculatedDelay;
+    return calculatedDelay > policy.maxDelay
+        ? policy.maxDelay
+        : calculatedDelay;
   }
 
   @override
@@ -81,7 +86,7 @@ class LinearBackoffStrategy implements RetryStrategy {
 }
 
 /// Adaptive strategy
-/// 
+///
 /// Combines multiple strategies based on error patterns
 class AdaptiveStrategy implements RetryStrategy {
   const AdaptiveStrategy({
@@ -142,4 +147,3 @@ class RetryStrategies {
     }
   }
 }
-

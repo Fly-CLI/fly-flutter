@@ -15,53 +15,53 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        dart-version: [stable, beta]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        dart-version: [ stable, beta ]
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.dart-version }}
-          
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
-          
+
       - name: Install Melos
         run: dart pub global activate melos
         if: matrix.os == 'ubuntu-latest'
-        
+
       - name: Bootstrap packages
         run: melos bootstrap
         if: matrix.os == 'ubuntu-latest'
-        
+
       - name: Install dependencies
         run: flutter pub get
         if: matrix.os != 'ubuntu-latest'
-        
+
       - name: Run analysis
         run: melos run analyze
         if: matrix.os == 'ubuntu-latest'
-        
+
       - name: Run analysis (single package)
         run: flutter analyze
         if: matrix.os != 'ubuntu-latest'
-        
+
       - name: Run tests
         run: melos run test
         if: matrix.os == 'ubuntu-latest'
-        
+
       - name: Run tests (single package)
         run: flutter test --coverage
         if: matrix.os != 'ubuntu-latest'
-        
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -77,18 +77,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-          
+
       - name: Install Melos
         run: dart pub global activate melos
-        
+
       - name: Bootstrap packages
         run: melos bootstrap
-        
+
       - name: Check formatting
         run: melos run format:check
 
@@ -99,57 +99,57 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-          
+
       - name: Install Melos
         run: dart pub global activate melos
-        
+
       - name: Bootstrap packages
         run: melos bootstrap
-        
+
       - name: Run security scan
         run: melos run security:scan
-        
+
       - name: Check licenses
         run: melos run license:check
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [test, format, security]
+    needs: [ test, format, security ]
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-          
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
-          
+
       - name: Install Melos
         run: dart pub global activate melos
-        
+
       - name: Bootstrap packages
         run: melos bootstrap
-        
+
       - name: Build examples
         run: melos run build:examples
-        
+
       - name: Test CLI installation
         run: melos run install
-        
+
       - name: Test CLI commands
         run: |
           fly --version
@@ -159,27 +159,27 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [ build ]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-          
+
       - name: Install Melos
         run: dart pub global activate melos
-        
+
       - name: Bootstrap packages
         run: melos bootstrap
-        
+
       - name: Dry run publish
         run: melos run publish:dry-run
-        
+
       - name: Publish packages
         run: melos publish --yes
         env:

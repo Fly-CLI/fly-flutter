@@ -11,9 +11,9 @@ void main() {
           'name': 'test_app',
           'template': 'minimal',
         };
-        
+
         final manifest = ProjectManifest.fromYaml(yaml);
-        
+
         expect(manifest.name, equals('test_app'));
         expect(manifest.template, equals('minimal'));
         expect(manifest.organization, equals('com.example'));
@@ -65,9 +65,9 @@ void main() {
             },
           },
         };
-        
+
         final manifest = ProjectManifest.fromYaml(yaml);
-        
+
         expect(manifest.name, equals('production_app'));
         expect(manifest.template, equals('riverpod'));
         expect(manifest.organization, equals('com.company'));
@@ -76,20 +76,20 @@ void main() {
         expect(manifest.screens.length, equals(2));
         expect(manifest.services.length, equals(1));
         expect(manifest.packages, equals(['firebase_core', 'firebase_auth']));
-        
+
         // Check screen configs
         final loginScreen = manifest.screens.first;
         expect(loginScreen.name, equals('login'));
         expect(loginScreen.type, equals('auth'));
         expect(loginScreen.features, equals(['validation', 'biometric_auth']));
-        
+
         // Check service configs
         final authService = manifest.services.first;
         expect(authService.name, equals('auth_service'));
         expect(authService.apiBase, equals('https://api.company.com'));
         expect(authService.type, equals('api'));
         expect(authService.features, equals(['token_refresh']));
-        
+
         // Check config
         expect(manifest.config.minSdkVersion, equals(21));
         expect(manifest.config.targetSdkVersion, equals(34));
@@ -104,7 +104,7 @@ void main() {
         final yaml = {
           'template': 'minimal',
         };
-        
+
         expect(
           () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
@@ -115,7 +115,7 @@ void main() {
         final yaml = {
           'name': 'test_app',
         };
-        
+
         expect(
           () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
@@ -127,7 +127,7 @@ void main() {
           'name': 'Invalid-Name',
           'template': 'minimal',
         };
-        
+
         expect(
           () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
@@ -139,7 +139,7 @@ void main() {
           'name': 'test_app',
           'template': 'invalid_template',
         };
-        
+
         expect(
           () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
@@ -152,7 +152,7 @@ void main() {
           'template': 'minimal',
           'platforms': ['ios', 'invalid_platform'],
         };
-        
+
         expect(
           () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
@@ -183,9 +183,9 @@ void main() {
             ),
           ],
         );
-        
+
         final variables = manifest.toTemplateVariables();
-        
+
         expect(variables.projectName, equals('test_app'));
         expect(variables.organization, equals('com.test'));
         expect(variables.platforms, equals(['ios', 'android', 'web']));
@@ -215,9 +215,9 @@ template: minimal
 organization: com.test
 platforms: [ios, android]
 ''');
-        
+
         final manifest = await ProjectManifest.fromFile(manifestFile.path);
-        
+
         expect(manifest.name, equals('test_app'));
         expect(manifest.template, equals('minimal'));
         expect(manifest.organization, equals('com.test'));
@@ -232,7 +232,7 @@ platforms: [ios, android]
 
       test('should throw exception for invalid YAML', () async {
         await manifestFile.writeAsString('invalid: yaml: content: [');
-        
+
         expect(
           () => ProjectManifest.fromFile(manifestFile.path),
           throwsA(isA<ManifestException>()),
@@ -248,9 +248,9 @@ platforms: [ios, android]
         'type': 'auth',
         'features': ['validation', 'biometric_auth'],
       };
-      
+
       final screen = ScreenConfig.fromYaml(yaml);
-      
+
       expect(screen.name, equals('login'));
       expect(screen.type, equals('auth'));
       expect(screen.features, equals(['validation', 'biometric_auth']));
@@ -260,9 +260,9 @@ platforms: [ios, android]
       final yaml = {
         'name': 'home',
       };
-      
+
       final screen = ScreenConfig.fromYaml(yaml);
-      
+
       expect(screen.name, equals('home'));
       expect(screen.type, isNull);
       expect(screen.features, isEmpty);
@@ -272,7 +272,7 @@ platforms: [ios, android]
       final yaml = {
         'type': 'auth',
       };
-      
+
       expect(
         () => ScreenConfig.fromYaml(yaml),
         throwsA(isA<ManifestException>()),
@@ -283,7 +283,7 @@ platforms: [ios, android]
       final yaml = {
         'name': 'Invalid-Name',
       };
-      
+
       expect(
         () => ScreenConfig.fromYaml(yaml),
         throwsA(isA<ManifestException>()),
@@ -299,9 +299,9 @@ platforms: [ios, android]
         'type': 'api',
         'features': ['token_refresh', 'offline_support'],
       };
-      
+
       final service = ServiceConfig.fromYaml(yaml);
-      
+
       expect(service.name, equals('auth_service'));
       expect(service.apiBase, equals('https://api.example.com'));
       expect(service.type, equals('api'));
@@ -312,9 +312,9 @@ platforms: [ios, android]
       final yaml = {
         'name': 'local_service',
       };
-      
+
       final service = ServiceConfig.fromYaml(yaml);
-      
+
       expect(service.name, equals('local_service'));
       expect(service.apiBase, isNull);
       expect(service.type, isNull);
@@ -325,7 +325,7 @@ platforms: [ios, android]
       final yaml = {
         'type': 'api',
       };
-      
+
       expect(
         () => ServiceConfig.fromYaml(yaml),
         throwsA(isA<ManifestException>()),
@@ -348,9 +348,9 @@ platforms: [ios, android]
           'include_examples': false,
         },
       };
-      
+
       final config = ManifestConfig.fromYaml(yaml);
-      
+
       expect(config.minSdkVersion, equals(21));
       expect(config.targetSdkVersion, equals(34));
       expect(config.iosDeploymentTarget, equals('12.0'));
@@ -362,7 +362,7 @@ platforms: [ios, android]
 
     test('should use defaults for null config', () {
       final config = ManifestConfig.fromYaml(null);
-      
+
       expect(config.minSdkVersion, isNull);
       expect(config.targetSdkVersion, isNull);
       expect(config.iosDeploymentTarget, isNull);
@@ -374,7 +374,7 @@ platforms: [ios, android]
 
     test('should use defaults for empty config', () {
       final config = ManifestConfig.fromYaml({});
-      
+
       expect(config.minSdkVersion, isNull);
       expect(config.targetSdkVersion, isNull);
       expect(config.iosDeploymentTarget, isNull);

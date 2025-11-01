@@ -4,7 +4,8 @@
 
 ## Getting Started
 
-This project is a production-ready Flutter application created with Fly CLI using the Riverpod template.
+This project is a production-ready Flutter application created with Fly CLI using the Riverpod
+template.
 
 ### Prerequisites
 

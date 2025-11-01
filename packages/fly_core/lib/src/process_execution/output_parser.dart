@@ -1,12 +1,12 @@
 /// Parser for process output
-/// 
+///
 /// Provides utilities for parsing and extracting information
 /// from command output.
 class OutputParser {
   const OutputParser();
 
   /// Parse version string from output
-  /// 
+  ///
   /// Extracts version information from command output.
   String? parseVersion(String output) {
     // Try common patterns for version strings
@@ -27,7 +27,7 @@ class OutputParser {
   }
 
   /// Parse key-value pairs from output
-  /// 
+  ///
   /// Extracts key-value pairs in formats like "key: value" or "key=value".
   Map<String, String> parseKeyValuePairs(String output) {
     final result = <String, String>{};
@@ -35,7 +35,7 @@ class OutputParser {
 
     for (final line in lines) {
       final trimmed = line.trim();
-      
+
       // Try "key: value" format
       if (trimmed.contains(':')) {
         final parts = trimmed.split(':');
@@ -47,7 +47,7 @@ class OutputParser {
           }
         }
       }
-      
+
       // Try "key=value" format
       else if (trimmed.contains('=')) {
         final parts = trimmed.split('=');
@@ -65,7 +65,7 @@ class OutputParser {
   }
 
   /// Parse lines from output
-  /// 
+  ///
   /// Returns non-empty lines from output.
   List<String> parseLines(String output) {
     return output
@@ -76,14 +76,14 @@ class OutputParser {
   }
 
   /// Parse JSON from output
-  /// 
+  ///
   /// Attempts to parse JSON from output.
   Map<String, dynamic>? parseJson(String output) {
     try {
       // Try to extract JSON from output
       final jsonStart = output.indexOf('{');
       final jsonEnd = output.lastIndexOf('}');
-      
+
       if (jsonStart >= 0 && jsonEnd >= jsonStart) {
         final jsonStr = output.substring(jsonStart, jsonEnd + 1);
         // Note: This would need dart:convert in actual implementation
@@ -98,17 +98,17 @@ class OutputParser {
   }
 
   /// Find specific line in output
-  /// 
+  ///
   /// Finds line matching a pattern.
   String? findLine(String output, Pattern pattern) {
     final lines = parseLines(output);
-    
+
     for (final line in lines) {
       if (pattern.allMatches(line).isNotEmpty) {
         return line;
       }
     }
-    
+
     return null;
   }
 
@@ -116,18 +116,18 @@ class OutputParser {
   List<String> findLines(String output, Pattern pattern) {
     final lines = parseLines(output);
     final matches = <String>[];
-    
+
     for (final line in lines) {
       if (pattern.allMatches(line).isNotEmpty) {
         matches.add(line);
       }
     }
-    
+
     return matches;
   }
 
   /// Extract first matching group from output
-  /// 
+  ///
   /// Uses regex to extract the first capture group.
   String? extractFirstMatch(String output, Pattern pattern) {
     if (pattern is! RegExp) {
@@ -144,13 +144,13 @@ class OutputParser {
   List<String> extractAllMatches(String output, Pattern pattern) {
     final matches = pattern.allMatches(output);
     final results = <String>[];
-    
+
     for (final match in matches) {
       if (match.groupCount >= 1) {
         results.add(match.group(1)!);
       }
     }
-    
+
     return results;
   }
 
@@ -192,4 +192,3 @@ class OutputParser {
     return lines.sublist(lines.length - count);
   }
 }
-

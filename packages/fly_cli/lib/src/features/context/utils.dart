@@ -38,25 +38,27 @@ class FileUtils {
   static Future<String?> _readFileWithStreaming(File file) async {
     try {
       final stat = await file.stat();
-      
+
       // For small files, read normally
-      if (stat.size < 1024 * 1024) { // Less than 1MB
+      if (stat.size < 1024 * 1024) {
+        // Less than 1MB
         return await file.readAsString();
       }
 
       // For larger files, use streaming
       final buffer = StringBuffer();
       final stream = file.openRead();
-      
+
       await for (final chunk in stream) {
         buffer.write(String.fromCharCodes(chunk));
-        
+
         // Prevent excessive memory usage
-        if (buffer.length > 10 * 1024 * 1024) { // 10MB limit
+        if (buffer.length > 10 * 1024 * 1024) {
+          // 10MB limit
           return null;
         }
       }
-      
+
       return buffer.toString();
     } catch (e) {
       return null;
@@ -67,9 +69,10 @@ class FileUtils {
   static Future<int> countLines(File file) async {
     try {
       final stat = await file.stat();
-      
+
       // For small files, read normally
-      if (stat.size < 1024 * 1024) { // Less than 1MB
+      if (stat.size < 1024 * 1024) {
+        // Less than 1MB
         final content = await file.readAsString();
         return content.split('\n').length;
       }
@@ -77,12 +80,13 @@ class FileUtils {
       // For larger files, use streaming
       int lineCount = 0;
       final stream = file.openRead();
-      
+
       await for (final chunk in stream) {
         final content = String.fromCharCodes(chunk);
-        lineCount += content.split('\n').length - 1; // -1 because split creates extra element
+        lineCount += content.split('\n').length -
+            1; // -1 because split creates extra element
       }
-      
+
       return lineCount + 1; // +1 for the last line
     } catch (e) {
       return 0;
@@ -108,9 +112,12 @@ class FileUtils {
   static Map<String, dynamic> getCacheStats() {
     return {
       'cached_files': _cache.length,
-      'cache_size_bytes': _cache.values.fold(0, (sum, content) => sum + content.length),
-      'oldest_entry': _cacheTimestamps.values.isNotEmpty 
-          ? _cacheTimestamps.values.reduce((a, b) => a.isBefore(b) ? a : b).toIso8601String()
+      'cache_size_bytes':
+          _cache.values.fold(0, (sum, content) => sum + content.length),
+      'oldest_entry': _cacheTimestamps.values.isNotEmpty
+          ? _cacheTimestamps.values
+              .reduce((a, b) => a.isBefore(b) ? a : b)
+              .toIso8601String()
           : null,
     };
   }
@@ -134,7 +141,7 @@ class RetryUtils {
         return await operation();
       } catch (e) {
         attempt++;
-        
+
         if (attempt >= maxRetries) {
           rethrow;
         }
@@ -164,7 +171,7 @@ class RetryUtils {
     Duration initialDelay = const Duration(milliseconds: 100),
   }) async {
     final results = <T?>[];
-    
+
     for (int i = 0; i < operations.length; i++) {
       try {
         final result = await retry(
@@ -177,7 +184,7 @@ class RetryUtils {
         results.add(null);
       }
     }
-    
+
     return results;
   }
 }
@@ -221,23 +228,23 @@ class ErrorHandler {
         }
       }
     }
-    
+
     final errorString = error.toString().toLowerCase();
-    
+
     // Check if it's a PathNotFoundException related to directory listing
     if (errorString.contains('pathnotfoundexception') &&
         (errorString.contains('directory listing') ||
-         errorString.contains('directory'))) {
+            errorString.contains('directory'))) {
       return true;
     }
-    
+
     // Check for common patterns indicating expected directory deletion
     if (errorString.contains('no such file or directory') &&
         (errorString.contains('directory') ||
-         errorString.contains('directory listing'))) {
+            errorString.contains('directory listing'))) {
       return true;
     }
-    
+
     return false;
   }
 

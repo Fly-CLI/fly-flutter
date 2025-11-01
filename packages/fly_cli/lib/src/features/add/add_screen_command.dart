@@ -1,25 +1,22 @@
-import 'dart:io';
 import 'package:args/args.dart' hide OptionType;
-
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
-import 'package:path/path.dart' as path;
+import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
 /// AddScreenCommand using new architecture
 class AddScreenCommand extends FlyCommand {
   AddScreenCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory AddScreenCommand.create(CommandContext context) => AddScreenCommand(context);
+  factory AddScreenCommand.create(CommandContext context) =>
+      AddScreenCommand(context);
 
   @override
   String get name => 'screen';
@@ -71,7 +68,8 @@ class AddScreenCommand extends FlyCommand {
       )
       ..addOption(
         'output-dir',
-        help: 'Output directory for generated files (defaults to current directory)',
+        help:
+            'Output directory for generated files (defaults to current directory)',
         defaultsTo: null,
       );
     return parser;
@@ -79,28 +77,28 @@ class AddScreenCommand extends FlyCommand {
 
   @override
   List<CommandValidator> get validators => [
-    RequiredArgumentValidator('screen_name'),
-    ScreenNameValidator(),
-    FlutterProjectValidator(),
-    DirectoryWritableValidator(),
-  ];
+        RequiredArgumentValidator('screen_name'),
+        ScreenNameValidator(),
+        FlutterProjectValidator(),
+        DirectoryWritableValidator(),
+      ];
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-    DryRunMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+        DryRunMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
     final interactive = argResults!['interactive'] as bool? ?? false;
     final outputDir = argResults!['output-dir'] as String?;
-    
+
     if (interactive) {
       return _runInteractiveMode(outputDir);
     }
-    
+
     return _runNonInteractiveMode(outputDir);
   }
 
@@ -108,42 +106,44 @@ class AddScreenCommand extends FlyCommand {
   Future<CommandResult> _runInteractiveMode(String? outputDir) async {
     try {
       final prompter = context.interactivePrompt;
-      
+
       logger.info('🎬 Adding a new screen');
       logger.info('');
-      
+
       // 1. Screen name
       final screenName = await prompter.promptString(
         prompt: 'Screen name',
         validator: NameValidationRule.isValidScreenName,
-        validationError: 'Screen name must contain only lowercase letters, numbers, and underscores',
+        validationError:
+            'Screen name must contain only lowercase letters, numbers, and underscores',
       );
-      
+
       // 2. Feature
       final feature = await prompter.promptString(
         prompt: 'Feature name',
         defaultValue: 'home',
         validator: NameValidationRule.isValidFeatureName,
-        validationError: 'Feature name must contain only lowercase letters, numbers, and underscores',
+        validationError:
+            'Feature name must contain only lowercase letters, numbers, and underscores',
       );
-      
+
       // 3. Screen type
       final screenType = await prompter.promptChoice(
         prompt: 'Screen type',
         choices: ['list', 'detail', 'form', 'auth', 'settings'],
         defaultChoice: 'list',
       );
-      
+
       // 4. ViewModel
       final withViewModel = await prompter.promptConfirm(
         prompt: 'Include ViewModel/Provider?',
       );
-      
+
       // 5. Tests
       final withTests = await prompter.promptConfirm(
         prompt: 'Include test files?',
       );
-      
+
       // 6. Additional options based on screen type
       var withValidation = false;
       if (screenType == 'form') {
@@ -151,11 +151,11 @@ class AddScreenCommand extends FlyCommand {
           prompt: 'Include form validation?',
         );
       }
-      
+
       final withNavigation = await prompter.promptConfirm(
         prompt: 'Include navigation logic?',
       );
-      
+
       // 7. Confirmation
       logger.info('');
       logger.info('Screen Configuration:');
@@ -168,27 +168,29 @@ class AddScreenCommand extends FlyCommand {
         logger.info('  With Validation: $withValidation');
       }
       logger.info('  With Navigation: $withNavigation');
-      
+
       final confirmed = await prompter.promptConfirm(
         prompt: '\nCreate screen with this configuration?',
       );
-      
+
       if (!confirmed) {
         return CommandResult.error(
           message: 'Screen creation cancelled',
           suggestion: 'Run the command again to start over',
         );
       }
-      
+
       // Resolve output directory via PathResolver
-      final resolvedOutputDir = await context.pathResolver.resolveOutputDirectory(
+      final resolvedOutputDir =
+          await context.pathResolver.resolveOutputDirectory(
         context,
         outputDir,
       );
 
       if (!resolvedOutputDir.success) {
         return CommandResult.error(
-          message: 'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
+          message:
+              'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
           suggestion: 'Specify a valid --output-dir or run from a project root',
           errorCode: ErrorCode.fileSystemError,
           context: ErrorContext.forCommand(
@@ -236,7 +238,8 @@ class AddScreenCommand extends FlyCommand {
     );
     if (!outputDirResult.success) {
       return CommandResult.error(
-        message: 'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
+        message:
+            'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
         suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
@@ -272,7 +275,7 @@ class AddScreenCommand extends FlyCommand {
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
-      
+
       logger.info('Adding screen: $screenName');
       logger.info('Feature: $feature');
       logger.info('Type: $screenType');
@@ -365,14 +368,16 @@ class AddScreenCommand extends FlyCommand {
   }
 
   @override
-  Future<void> onAfterExecute(CommandContext context, CommandResult result) async {
+  Future<void> onAfterExecute(
+      CommandContext context, CommandResult result) async {
     if (result.success) {
       logger.info('🎉 Screen added successfully!');
     }
   }
 
   @override
-  Future<void> onError(CommandContext context, Object error, StackTrace stackTrace) async {
+  Future<void> onError(
+      CommandContext context, Object error, StackTrace stackTrace) async {
     logger.err('💥 Screen creation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');

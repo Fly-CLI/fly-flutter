@@ -52,16 +52,17 @@ class ContextGeneratorConfig {
     bool? includeSuggestions,
     bool? includeTests,
     bool? includeGenerated,
-  }) => ContextGeneratorConfig(
-    includeCode: includeCode ?? this.includeCode,
-    includeDependencies: includeDependencies ?? this.includeDependencies,
-    maxFileSize: maxFileSize ?? this.maxFileSize,
-    maxFiles: maxFiles ?? this.maxFiles,
-    includeArchitecture: includeArchitecture ?? this.includeArchitecture,
-    includeSuggestions: includeSuggestions ?? this.includeSuggestions,
-    includeTests: includeTests ?? this.includeTests,
-    includeGenerated: includeGenerated ?? this.includeGenerated,
-  );
+  }) =>
+      ContextGeneratorConfig(
+        includeCode: includeCode ?? this.includeCode,
+        includeDependencies: includeDependencies ?? this.includeDependencies,
+        maxFileSize: maxFileSize ?? this.maxFileSize,
+        maxFiles: maxFiles ?? this.maxFiles,
+        includeArchitecture: includeArchitecture ?? this.includeArchitecture,
+        includeSuggestions: includeSuggestions ?? this.includeSuggestions,
+        includeTests: includeTests ?? this.includeTests,
+        includeGenerated: includeGenerated ?? this.includeGenerated,
+      );
 }
 
 /// Project metadata and information
@@ -542,10 +543,10 @@ class ComplexityMetrics {
 
   @JsonKey(name: 'cyclomatic_complexity')
   final int cyclomaticComplexity;
-  
+
   @JsonKey(name: 'cognitive_complexity')
   final int cognitiveComplexity;
-  
+
   @JsonKey(name: 'maintainability_index')
   final double maintainabilityIndex;
 
@@ -566,13 +567,13 @@ class QualityReport {
       _$QualityReportFromJson(json);
 
   final List<QualityIssue> issues;
-  
+
   @JsonKey(name: 'dead_code')
   final List<String> deadCode;
-  
+
   @JsonKey(name: 'duplicated_code')
   final List<DuplicatedCode> duplicatedCode;
-  
+
   @JsonKey(name: 'overall_score')
   final double overallScore;
 
@@ -662,16 +663,16 @@ class DependencyHealth {
       _$DependencyHealthFromJson(json);
 
   final String package;
-  
+
   @JsonKey(name: 'health_score')
   final double healthScore;
-  
+
   final List<String> vulnerabilities;
   final String license;
-  
+
   @JsonKey(name: 'is_maintained')
   final bool isMaintained;
-  
+
   final int popularity;
 
   Map<String, dynamic> toJson() => _$DependencyHealthToJson(this);
@@ -692,13 +693,13 @@ class PerformanceMetrics {
 
   @JsonKey(name: 'analysis_time_ms')
   final Duration analysisTime;
-  
+
   @JsonKey(name: 'memory_usage_mb')
   final int memoryUsage;
-  
+
   @JsonKey(name: 'files_processed')
   final int filesProcessed;
-  
+
   @JsonKey(name: 'lines_of_code')
   final int linesOfCode;
 

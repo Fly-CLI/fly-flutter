@@ -32,5 +32,3 @@ class ConsoleAppender implements Appender {
   @override
   Future<void> dispose() async {}
 }
-
-

@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/add/add_service_command.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/add/add_service_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -19,7 +19,8 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Add a new service component to the current project'));
+        expect(command.description,
+            equals('Add a new service component to the current project'));
       });
 
       test('should have required arguments', () {
@@ -28,7 +29,8 @@ void main() {
         expect(command.argParser.options.containsKey('with-tests'), isTrue);
         expect(command.argParser.options.containsKey('with-mocks'), isTrue);
         expect(command.argParser.options.containsKey('interactive'), isTrue);
-        expect(command.argParser.options.containsKey('with-interceptors'), isTrue);
+        expect(
+            command.argParser.options.containsKey('with-interceptors'), isTrue);
         expect(command.argParser.options.containsKey('base-url'), isTrue);
       });
 
@@ -54,12 +56,18 @@ void main() {
 
       test('should reject invalid service names', () {
         expect(NameValidationRule.isValidServiceName(''), isFalse);
-        expect(NameValidationRule.isValidServiceName('ApiService'), isFalse); // uppercase
-        expect(NameValidationRule.isValidServiceName('api-service'), isFalse); // hyphen
-        expect(NameValidationRule.isValidServiceName('api.service'), isFalse); // dot
-        expect(NameValidationRule.isValidServiceName('123service'), isFalse); // starts with number
-        expect(NameValidationRule.isValidServiceName('a'), isFalse); // too short
-        expect(NameValidationRule.isValidServiceName('a' * 51), isFalse); // too long
+        expect(NameValidationRule.isValidServiceName('ApiService'),
+            isFalse); // uppercase
+        expect(NameValidationRule.isValidServiceName('api-service'),
+            isFalse); // hyphen
+        expect(NameValidationRule.isValidServiceName('api.service'),
+            isFalse); // dot
+        expect(NameValidationRule.isValidServiceName('123service'),
+            isFalse); // starts with number
+        expect(
+            NameValidationRule.isValidServiceName('a'), isFalse); // too short
+        expect(NameValidationRule.isValidServiceName('a' * 51),
+            isFalse); // too long
       });
     });
 
@@ -149,7 +157,8 @@ void main() {
 
     group('API Service Options', () {
       test('should have with-interceptors flag', () {
-        expect(command.argParser.options.containsKey('with-interceptors'), isTrue);
+        expect(
+            command.argParser.options.containsKey('with-interceptors'), isTrue);
       });
 
       test('should have base-url option', () {
@@ -167,7 +176,8 @@ void main() {
       });
 
       test('should accept custom base-url', () {
-        final args = command.argParser.parse(['--base-url', 'https://api.custom.com']);
+        final args =
+            command.argParser.parse(['--base-url', 'https://api.custom.com']);
         expect(args['base-url'], equals('https://api.custom.com'));
       });
     });
@@ -179,16 +189,19 @@ void main() {
       });
 
       test('should handle service with custom feature', () {
-        final args = command.argParser.parse(['--feature', 'auth', 'auth_service']);
+        final args =
+            command.argParser.parse(['--feature', 'auth', 'auth_service']);
         expect(args['feature'], equals('auth'));
         expect(args.rest, equals(['auth_service']));
       });
 
       test('should handle API service with interceptors', () {
         final args = command.argParser.parse([
-          '--type', 'api',
+          '--type',
+          'api',
           '--with-interceptors',
-          '--base-url', 'https://api.example.com',
+          '--base-url',
+          'https://api.example.com',
           'api_service',
         ]);
         expect(args['type'], equals('api'));
@@ -198,31 +211,37 @@ void main() {
       });
 
       test('should handle cache service', () {
-        final args = command.argParser.parse(['--type', 'cache', 'cache_service']);
+        final args =
+            command.argParser.parse(['--type', 'cache', 'cache_service']);
         expect(args['type'], equals('cache'));
         expect(args.rest, equals(['cache_service']));
       });
 
       test('should handle analytics service', () {
-        final args = command.argParser.parse(['--type', 'analytics', 'analytics_service']);
+        final args = command.argParser
+            .parse(['--type', 'analytics', 'analytics_service']);
         expect(args['type'], equals('analytics'));
         expect(args.rest, equals(['analytics_service']));
       });
 
       test('should handle storage service', () {
-        final args = command.argParser.parse(['--type', 'storage', 'storage_service']);
+        final args =
+            command.argParser.parse(['--type', 'storage', 'storage_service']);
         expect(args['type'], equals('storage'));
         expect(args.rest, equals(['storage_service']));
       });
 
       test('should handle service with all options', () {
         final args = command.argParser.parse([
-          '--feature', 'user',
-          '--type', 'api',
+          '--feature',
+          'user',
+          '--type',
+          'api',
           '--with-tests',
           '--with-mocks',
           '--with-interceptors',
-          '--base-url', 'https://api.custom.com',
+          '--base-url',
+          'https://api.custom.com',
           'user_api_service',
         ]);
         expect(args['feature'], equals('user'));
@@ -255,8 +274,10 @@ void main() {
     group('Integration Scenarios', () {
       test('should handle authentication services', () {
         final args = command.argParser.parse([
-          '--feature', 'auth',
-          '--type', 'api',
+          '--feature',
+          'auth',
+          '--type',
+          'api',
           '--with-tests',
           '--with-mocks',
           '--with-interceptors',
@@ -272,8 +293,10 @@ void main() {
 
       test('should handle data services', () {
         final args = command.argParser.parse([
-          '--feature', 'data',
-          '--type', 'local',
+          '--feature',
+          'data',
+          '--type',
+          'local',
           '--with-tests',
           'data_service',
         ]);
@@ -285,8 +308,10 @@ void main() {
 
       test('should handle caching services', () {
         final args = command.argParser.parse([
-          '--feature', 'cache',
-          '--type', 'cache',
+          '--feature',
+          'cache',
+          '--type',
+          'cache',
           '--with-tests',
           'cache_service',
         ]);
@@ -319,11 +344,14 @@ void main() {
 
     group('Performance Considerations', () {
       test('should handle repeated parsing efficiently', () {
-        expect(() {
-          for (var i = 0; i < 100; i++) {
-            command.argParser.parse(['test_service_$i']);
-          }
-        }, returnsNormally,);
+        expect(
+          () {
+            for (var i = 0; i < 100; i++) {
+              command.argParser.parse(['test_service_$i']);
+            }
+          },
+          returnsNormally,
+        );
       });
     });
   });

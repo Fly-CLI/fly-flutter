@@ -6,7 +6,7 @@ repository: https://github.com/fly-cli/fly.git
 issue_tracker: https://github.com/fly-cli/fly/issues
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.5.0 <4.0.0"
 
 resolution: workspace
 
@@ -36,10 +36,8 @@ dependencies:
   json_annotation: ^4.9.0
   fly_core:
     path: ../fly_core
-  fly_mcp_server:
-    path: ../fly_mcp_server
-  fly_mcp_core:
-    path: ../fly_mcp_core
+  fly_mcp:
+    path: ../fly_mcp
   mustache_template: ^2.0.2
 
 dev_dependencies:

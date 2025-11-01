@@ -1,10 +1,9 @@
 import 'dart:io';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart' as path;
 
 /// Check template availability and validity
 class TemplateCheck extends SystemCheck {
@@ -12,7 +11,7 @@ class TemplateCheck extends SystemCheck {
     required this.templatesDirectory,
     this.logger,
   });
-  
+
   final String templatesDirectory;
   final Logger? logger;
 
@@ -48,9 +47,9 @@ class TemplateCheck extends SystemCheck {
         templatesDirectory: templatesDirectory,
         logger: logger ?? Logger(),
       );
-      
+
       final templates = await templateManager.getAvailableTemplates();
-      
+
       if (templates.isEmpty) {
         return CheckResult.error(
           message: 'No templates found in templates directory',
@@ -66,11 +65,11 @@ class TemplateCheck extends SystemCheck {
       // Check each template for validity
       final invalidTemplates = <String>[];
       final templateData = <String, dynamic>{};
-      
+
       for (final template in templates) {
         final templatePath = path.join(templatesDirectory, template.name);
         final templateDir = Directory(templatePath);
-        
+
         if (!await templateDir.exists()) {
           invalidTemplates.add('${template.name}: directory missing');
           continue;
@@ -79,19 +78,20 @@ class TemplateCheck extends SystemCheck {
         // Check for required files
         final requiredFiles = ['template.yaml', '__brick__'];
         final missingFiles = <String>[];
-        
+
         for (final requiredFile in requiredFiles) {
           final filePath = path.join(templatePath, requiredFile);
           final file = File(filePath);
           final dir = Directory(filePath);
-          
+
           if (!await file.exists() && !await dir.exists()) {
             missingFiles.add(requiredFile);
           }
         }
 
         if (missingFiles.isNotEmpty) {
-          invalidTemplates.add('${template.name}: missing ${missingFiles.join(', ')}');
+          invalidTemplates
+              .add('${template.name}: missing ${missingFiles.join(', ')}');
         }
 
         templateData[template.name] = {
@@ -125,7 +125,8 @@ class TemplateCheck extends SystemCheck {
 
       if (issues.isEmpty) {
         return CheckResult.success(
-          message: 'All templates are valid and accessible (${templates.length} templates)',
+          message:
+              'All templates are valid and accessible (${templates.length} templates)',
           data: data,
         );
       } else if (issues.length == 1) {
@@ -141,7 +142,6 @@ class TemplateCheck extends SystemCheck {
           data: data,
         );
       }
-
     } catch (e) {
       return CheckResult.error(
         message: 'Failed to check templates: $e',
@@ -156,7 +156,7 @@ class TemplateCheck extends SystemCheck {
     try {
       // Check if cache directory exists and is accessible
       final cacheDir = Directory(path.join(templatesDirectory, '..', 'cache'));
-      
+
       if (!await cacheDir.exists()) {
         return CheckResult.success(
           message: 'Template cache directory does not exist yet',

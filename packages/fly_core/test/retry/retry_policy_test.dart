@@ -5,7 +5,7 @@ void main() {
   group('RetryPolicy', () {
     test('default policy has correct values', () {
       const policy = RetryPolicy();
-      
+
       expect(policy.maxAttempts, 3);
       expect(policy.initialDelay, const Duration(seconds: 1));
       expect(policy.backoffMultiplier, 2.0);
@@ -39,13 +39,13 @@ void main() {
         backoffMultiplier: 2.0,
         maxAttempts: 5,
       );
-      
+
       // First retry (attempt 1)
       expect(policy.getDelayForAttempt(1).inSeconds, closeTo(2, 0.5));
-      
+
       // Second retry (attempt 2)
       expect(policy.getDelayForAttempt(2).inSeconds, closeTo(4, 0.5));
-      
+
       // Third retry (attempt 3)
       expect(policy.getDelayForAttempt(3).inSeconds, closeTo(8, 0.5));
     });
@@ -57,7 +57,7 @@ void main() {
         maxDelay: Duration(seconds: 5),
         maxAttempts: 5,
       );
-      
+
       // Should cap at maxDelay
       final delay = policy.getDelayForAttempt(2);
       expect(delay, equals(const Duration(seconds: 5)));
@@ -69,12 +69,12 @@ void main() {
         maxAttempts: 3,
         initialDelay: Duration(seconds: 1),
       );
-      
+
       final modified = original.copyWith(
         maxAttempts: 5,
         initialDelay: const Duration(seconds: 2),
       );
-      
+
       expect(modified.maxAttempts, 5);
       expect(modified.initialDelay, const Duration(seconds: 2));
       expect(modified.backoffMultiplier, original.backoffMultiplier);
@@ -82,7 +82,7 @@ void main() {
 
     test('default network policy has correct settings', () {
       const policy = RetryPolicy.network;
-      
+
       expect(policy.maxAttempts, 3);
       expect(policy.initialDelay, const Duration(seconds: 1));
       expect(policy.timeout, const Duration(seconds: 30));
@@ -90,7 +90,7 @@ void main() {
 
     test('default quick policy has shorter delays', () {
       const policy = RetryPolicy.quick;
-      
+
       expect(policy.maxAttempts, 3);
       expect(policy.initialDelay, const Duration(milliseconds: 50));
       expect(policy.maxDelay, const Duration(seconds: 5));
@@ -98,17 +98,16 @@ void main() {
 
     test('none policy has no retries', () {
       const policy = RetryPolicy.none;
-      
+
       expect(policy.maxAttempts, 1);
       expect(policy.allowsRetries, false);
     });
 
     test('aggressive policy has more attempts and jitter', () {
       const policy = RetryPolicy.aggressive;
-      
+
       expect(policy.maxAttempts, 5);
       expect(policy.jitterEnabled, true);
     });
   });
 }
-

@@ -1,9 +1,12 @@
 <!-- c749b399-caba-4d6f-9062-30b2752f57a3 4a3c9bbf-ca14-4856-9708-710111716f86 -->
+
 # Complete Fly CLI Architecture Redesign
 
 ## Overview
 
-Complete redesign of the command workflow system addressing all identified issues: path management, brick detection, middleware enforcement, validation decoupling, and workflow clarity. This is a fresh-start approach prioritizing clean architecture over backwards compatibility.
+Complete redesign of the command workflow system addressing all identified issues: path management,
+brick detection, middleware enforcement, validation decoupling, and workflow clarity. This is a
+fresh-start approach prioritizing clean architecture over backwards compatibility.
 
 ## Core Architectural Problems Identified
 

@@ -4,7 +4,8 @@ A minimal Flutter application created with Fly CLI.
 
 ## Getting Started
 
-This project is a minimal Flutter application created with Fly CLI to demonstrate the basic template functionality.
+This project is a minimal Flutter application created with Fly CLI to demonstrate the basic template
+functionality.
 
 ### Prerequisites
 

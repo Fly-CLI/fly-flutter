@@ -1,10 +1,12 @@
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 /// Test fixtures for analysis tests
 class AnalysisTestFixtures {
   /// Create a minimal Flutter project for testing
-  static Future<Directory> createMinimalFlutterProject(Directory tempDir) async {
+  static Future<Directory> createMinimalFlutterProject(
+      Directory tempDir) async {
     final projectDir = Directory(path.join(tempDir.path, 'minimal_project'));
     await projectDir.create(recursive: true);
 
@@ -24,7 +26,8 @@ class AnalysisTestFixtures {
   }
 
   /// Create a complex Flutter project for testing
-  static Future<Directory> createComplexFlutterProject(Directory tempDir) async {
+  static Future<Directory> createComplexFlutterProject(
+      Directory tempDir) async {
     final projectDir = Directory(path.join(tempDir.path, 'complex_project'));
     await projectDir.create(recursive: true);
 
@@ -39,10 +42,10 @@ class AnalysisTestFixtures {
     // Create core directories
     final coreDir = Directory(path.join(libDir.path, 'core'));
     await coreDir.create();
-    
+
     final routerDir = Directory(path.join(coreDir.path, 'router'));
     await routerDir.create();
-    
+
     final themeDir = Directory(path.join(coreDir.path, 'theme'));
     await themeDir.create();
 
@@ -65,12 +68,13 @@ class AnalysisTestFixtures {
     // Create feature files
     final homeDir = Directory(path.join(featuresDir.path, 'home'));
     await homeDir.create();
-    
+
     final homeFile = File(path.join(homeDir.path, 'home_screen.dart'));
     await homeFile.writeAsString(homeScreenContent);
 
     // Create README.md for documented convention
-    await File(path.join(projectDir.path, 'README.md')).writeAsString('# Complex Test Project\n\nA complex Flutter project for testing.');
+    await File(path.join(projectDir.path, 'README.md')).writeAsString(
+        '# Complex Test Project\n\nA complex Flutter project for testing.');
 
     return projectDir;
   }
@@ -85,7 +89,8 @@ class AnalysisTestFixtures {
     await pubspecFile.writeAsString(flyPubspecContent);
 
     // Create fly_project.yaml
-    final flyManifestFile = File(path.join(projectDir.path, 'fly_project.yaml'));
+    final flyManifestFile =
+        File(path.join(projectDir.path, 'fly_project.yaml'));
     await flyManifestFile.writeAsString(flyManifestContent);
 
     // Create lib directory
@@ -101,7 +106,8 @@ class AnalysisTestFixtures {
 
   /// Create a problematic project for error testing
   static Future<Directory> createProblematicProject(Directory tempDir) async {
-    final projectDir = Directory(path.join(tempDir.path, 'problematic_project'));
+    final projectDir =
+        Directory(path.join(tempDir.path, 'problematic_project'));
     await projectDir.create(recursive: true);
 
     // Create pubspec.yaml with conflicts
@@ -175,7 +181,8 @@ class ProviderWidget extends StatelessWidget {
     // Create many files for performance testing
     for (int i = 0; i < 50; i++) {
       final file = File(path.join(libDir.path, 'file_$i.dart'));
-      await file.writeAsString('// File $i\nclass File${i}Class {\n  void method$i() {\n    print("File $i");\n  }\n}');
+      await file.writeAsString(
+          '// File $i\nclass File${i}Class {\n  void method$i() {\n    print("File $i");\n  }\n}');
     }
 
     return projectDir;

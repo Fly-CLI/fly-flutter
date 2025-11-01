@@ -1,10 +1,11 @@
 import 'dart:io';
+
 import 'package:fly_cli/src/core/cache/template_cache_manager.dart';
 
 /// 4-level fallback strategy for template retrieval
 class FallbackStrategy {
-
   FallbackStrategy(this.cacheManager);
+
   final TemplateCacheManager cacheManager;
 
   /// Get template using fallback strategy
@@ -62,22 +63,25 @@ class FallbackStrategy {
   Future<Template> _loadBundledTemplate(String name) async {
     // Check if template is bundled
     final bundledTemplates = ['minimal', 'riverpod'];
-    
+
     if (!bundledTemplates.contains(name)) {
       throw BundledTemplateNotFoundException('Template "$name" is not bundled');
     }
 
     // Load from bundled templates directory
-    final bundledPath = 'packages/fly_cli/lib/src/templates/bundled/$name.template.json';
+    final bundledPath =
+        'packages/fly_cli/lib/src/templates/bundled/$name.template.json';
     final file = File(bundledPath);
-    
+
     if (!await file.exists()) {
-      throw BundledTemplateNotFoundException('Bundled template file not found: $bundledPath');
+      throw BundledTemplateNotFoundException(
+          'Bundled template file not found: $bundledPath');
     }
 
     // Load and return bundled template
     // This would parse the JSON and return a Template object
-    throw BundledTemplateNotFoundException('Bundled template loading not implemented');
+    throw BundledTemplateNotFoundException(
+        'Bundled template loading not implemented');
   }
 
   /// Generate helpful suggestions based on the error context
@@ -85,12 +89,15 @@ class FallbackStrategy {
     final suggestions = <String>[];
 
     if (offlineMode) {
-      suggestions.add('You are in offline mode. Try: fly template fetch $templateName (when online)');
-      suggestions.add('Check if template exists in cache: fly template cache list');
+      suggestions.add(
+          'You are in offline mode. Try: fly template fetch $templateName (when online)');
+      suggestions
+          .add('Check if template exists in cache: fly template cache list');
     } else {
       suggestions.add('Check your internet connection and try again');
       suggestions.add('Verify template name: fly template list');
-      suggestions.add('Download template manually: fly template fetch $templateName');
+      suggestions
+          .add('Download template manually: fly template fetch $templateName');
     }
 
     suggestions.add('For help: fly help template');
@@ -101,8 +108,8 @@ class FallbackStrategy {
 
 /// Exception for template not found
 class TemplateNotFoundException implements Exception {
-
   TemplateNotFoundException(this.message, {required this.suggestions});
+
   final String message;
   final List<String> suggestions;
 
@@ -119,8 +126,8 @@ class TemplateNotFoundException implements Exception {
 
 /// Exception for network download failures
 class NetworkDownloadException implements Exception {
-
   NetworkDownloadException(this.message);
+
   final String message;
 
   @override
@@ -129,10 +136,10 @@ class NetworkDownloadException implements Exception {
 
 /// Exception for bundled template not found
 class BundledTemplateNotFoundException implements Exception {
-
   BundledTemplateNotFoundException(this.message);
+
   final String message;
 
   @override
   String toString() => 'BundledTemplateNotFoundException: $message';
-} 
+}

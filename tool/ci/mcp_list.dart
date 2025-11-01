@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:fly_cli/src/integrations/mcp/prompts/prompt_template_engine.dart';
 import 'package:path/path.dart' as path;
-import 'package:fly_cli/src/features/mcp/prompts/prompt_template_engine.dart';
 
 /// MCP List Tool
-/// 
+///
 /// Lists all MCP tools, prompts, and resources by inspecting the Dart codebase.
-/// 
+///
 /// Usage:
 ///   dart run tool/ci/mcp_list.dart [--type=tools|prompts|resources] [--format=table|json|yaml]
 Future<void> main(List<String> args) async {
@@ -74,36 +75,41 @@ Future<void> main(List<String> args) async {
   }
 }
 
-Future<Map<String, Object?>> listTools(Directory projectRoot, bool verbose) async {
-  // Read McpToolType enum and extract tool names
-  final toolTypeFile = File(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_cli',
-    'lib',
-    'src',
-    'features',
-    'mcp',
-    'mcp_tool_type.dart',
-  ));
+Future<Map<String, Object?>> listTools(
+  Directory projectRoot,
+  bool verbose,
+) async {
+  // Read McpTool enum and extract tool names
+  final toolTypeFile = File(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_cli',
+      'lib',
+      'src',
+      'core',
+      'definitions',
+      'mcp_tool.dart',
+    ),
+  );
 
   if (!await toolTypeFile.exists()) {
     return {'items': [], 'count': 0};
   }
 
   final content = await toolTypeFile.readAsString();
-  
+
   // Extract enum values using regex
-  final enumPattern = RegExp(r'enum\s+McpToolType\s*\{([^}]+)\}');
+  final enumPattern = RegExp(r'enum\s+McpTool\s*\{([^}]+)\}');
   final match = enumPattern.firstMatch(content);
-  
+
   if (match == null) {
     return {'items': [], 'count': 0};
   }
 
   final enumBody = match.group(1)!;
   final toolNames = <String>[];
-  
+
   // Extract enum values (e.g., flyEcho, flutterDoctor)
   final enumValuePattern = RegExp(r'(\w+),?\s*');
   for (final match in enumValuePattern.allMatches(enumBody)) {
@@ -115,24 +121,26 @@ Future<Map<String, Object?>> listTools(Directory projectRoot, bool verbose) asyn
 
   // Get tool details from strategy registry
   final items = <Map<String, Object?>>[];
-  
+
   for (final toolName in toolNames) {
     // Convert enum name to tool name (e.g., flyEcho -> fly.echo)
     final toolId = _enumNameToToolId(toolName);
-    
+
     // Find strategy file
     final strategyFileName = _enumNameToStrategyFile(toolName);
-    final strategyFile = File(path.join(
-      projectRoot.path,
-      'packages',
-      'fly_cli',
-      'lib',
-      'src',
-      'features',
-      'mcp',
-      'tools',
-      strategyFileName,
-    ));
+    final strategyFile = File(
+      path.join(
+        projectRoot.path,
+        'packages',
+        'fly_cli',
+        'lib',
+        'src',
+        'features',
+        'mcp',
+        'tools',
+        strategyFileName,
+      ),
+    );
 
     final item = <String, Object?>{
       'name': toolId,
@@ -141,25 +149,36 @@ Future<Map<String, Object?>> listTools(Directory projectRoot, bool verbose) asyn
 
     if (await strategyFile.exists()) {
       final strategyContent = await strategyFile.readAsString();
-      
+
       // Extract description
-      final descMatch = RegExp(r"String\s+get\s+description\s*=>\s*['""]([^'""]+)['""]").firstMatch(strategyContent);
+      final descMatch = RegExp(
+        r"String\s+get\s+description\s*=>\s*['"
+        "]([^'"
+        "]+)['"
+        "]",
+      ).firstMatch(strategyContent);
       if (descMatch != null) {
         item['description'] = descMatch.group(1)!;
       }
 
       // Extract metadata
-      final readOnlyMatch = RegExp(r'bool\s+get\s+readOnly\s*=>\s*(\w+)').firstMatch(strategyContent);
+      final readOnlyMatch = RegExp(
+        r'bool\s+get\s+readOnly\s*=>\s*(\w+)',
+      ).firstMatch(strategyContent);
       if (readOnlyMatch != null) {
         item['readOnly'] = readOnlyMatch.group(1) == 'true';
       }
 
-      final writesToDiskMatch = RegExp(r'bool\s+get\s+writesToDisk\s*=>\s*(\w+)').firstMatch(strategyContent);
+      final writesToDiskMatch = RegExp(
+        r'bool\s+get\s+writesToDisk\s*=>\s*(\w+)',
+      ).firstMatch(strategyContent);
       if (writesToDiskMatch != null) {
         item['writesToDisk'] = writesToDiskMatch.group(1) == 'true';
       }
 
-      final idempotentMatch = RegExp(r'bool\s+get\s+idempotent\s*=>\s*(\w+)').firstMatch(strategyContent);
+      final idempotentMatch = RegExp(
+        r'bool\s+get\s+idempotent\s*=>\s*(\w+)',
+      ).firstMatch(strategyContent);
       if (idempotentMatch != null) {
         item['idempotent'] = idempotentMatch.group(1) == 'true';
       }
@@ -182,15 +201,17 @@ Future<Map<String, Object?>> listPrompts(
   bool parseOnly = false,
 }) async {
   // Read PromptType enum
-  final promptTypeFile = File(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_mcp_server',
-    'lib',
-    'src',
-    'domain',
-    'prompt_type.dart',
-  ));
+  final promptTypeFile = File(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_mcp_server',
+      'lib',
+      'src',
+      'domain',
+      'prompt_type.dart',
+    ),
+  );
 
   if (!await promptTypeFile.exists()) {
     return {'items': [], 'count': 0};
@@ -199,14 +220,14 @@ Future<Map<String, Object?>> listPrompts(
   final content = await promptTypeFile.readAsString();
   final enumPattern = RegExp(r'enum\s+PromptType\s*\{([^}]+)\}');
   final match = enumPattern.firstMatch(content);
-  
+
   if (match == null) {
     return {'items': [], 'count': 0};
   }
 
   final enumBody = match.group(1)!;
   final promptNames = <String>[];
-  
+
   final enumValuePattern = RegExp(r'(\w+),?\s*');
   for (final match in enumValuePattern.allMatches(enumBody)) {
     final name = match.group(1);
@@ -216,17 +237,19 @@ Future<Map<String, Object?>> listPrompts(
   }
 
   final items = <Map<String, Object?>>[];
-  final templatesDir = Directory(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_cli',
-    'lib',
-    'src',
-    'features',
-    'mcp',
-    'prompts',
-    'templates',
-  ));
+  final templatesDir = Directory(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_cli',
+      'lib',
+      'src',
+      'features',
+      'mcp',
+      'prompts',
+      'templates',
+    ),
+  );
 
   for (final promptName in promptNames) {
     final promptId = _enumNameToPromptId(promptName);
@@ -242,29 +265,41 @@ Future<Map<String, Object?>> listPrompts(
 
     // Find strategy file
     final strategyFileName = _enumNameToPromptStrategyFile(promptName);
-    final strategyFile = File(path.join(
-      projectRoot.path,
-      'packages',
-      'fly_cli',
-      'lib',
-      'src',
-      'features',
-      'mcp',
-      'prompts',
-      strategyFileName,
-    ));
+    final strategyFile = File(
+      path.join(
+        projectRoot.path,
+        'packages',
+        'fly_cli',
+        'lib',
+        'src',
+        'features',
+        'mcp',
+        'prompts',
+        strategyFileName,
+      ),
+    );
 
     if (await strategyFile.exists()) {
       final strategyContent = await strategyFile.readAsString();
-      
+
       // Extract title
-      final titleMatch = RegExp(r"String\s+get\s+title\s*=>\s*['""]([^'""]+)['""]").firstMatch(strategyContent);
+      final titleMatch = RegExp(
+        r"String\s+get\s+title\s*=>\s*['"
+        "]([^'"
+        "]+)['"
+        "]",
+      ).firstMatch(strategyContent);
       if (titleMatch != null) {
         item['title'] = titleMatch.group(1)!;
       }
 
       // Extract description
-      final descMatch = RegExp(r"String\s+get\s+description\s*=>\s*['""]([^'""]+)['""]").firstMatch(strategyContent);
+      final descMatch = RegExp(
+        r"String\s+get\s+description\s*=>\s*['"
+        "]([^'"
+        "]+)['"
+        "]",
+      ).firstMatch(strategyContent);
       if (descMatch != null) {
         item['description'] = descMatch.group(1)!;
       }
@@ -297,17 +332,22 @@ Future<Map<String, Object?>> listPrompts(
   return {'items': items, 'count': items.length};
 }
 
-Future<Map<String, Object?>> listResources(Directory projectRoot, bool verbose) async {
+Future<Map<String, Object?>> listResources(
+  Directory projectRoot,
+  bool verbose,
+) async {
   // Read ResourceType enum
-  final resourceTypeFile = File(path.join(
-    projectRoot.path,
-    'packages',
-    'fly_mcp_server',
-    'lib',
-    'src',
-    'domain',
-    'resource_type.dart',
-  ));
+  final resourceTypeFile = File(
+    path.join(
+      projectRoot.path,
+      'packages',
+      'fly_mcp_server',
+      'lib',
+      'src',
+      'domain',
+      'resource_type.dart',
+    ),
+  );
 
   if (!await resourceTypeFile.exists()) {
     return {'items': [], 'count': 0};
@@ -316,14 +356,14 @@ Future<Map<String, Object?>> listResources(Directory projectRoot, bool verbose) 
   final content = await resourceTypeFile.readAsString();
   final enumPattern = RegExp(r'enum\s+ResourceType\s*\{([^}]+)\}');
   final match = enumPattern.firstMatch(content);
-  
+
   if (match == null) {
     return {'items': [], 'count': 0};
   }
 
   final enumBody = match.group(1)!;
   final resourceNames = <String>[];
-  
+
   final enumValuePattern = RegExp(r'(\w+),?\s*');
   for (final match in enumValuePattern.allMatches(enumBody)) {
     final name = match.group(1);
@@ -337,17 +377,19 @@ Future<Map<String, Object?>> listResources(Directory projectRoot, bool verbose) 
   for (final resourceName in resourceNames) {
     // Find strategy file
     final strategyFileName = _enumNameToResourceStrategyFile(resourceName);
-    final strategyFile = File(path.join(
-      projectRoot.path,
-      'packages',
-      'fly_cli',
-      'lib',
-      'src',
-      'features',
-      'mcp',
-      'resources',
-      strategyFileName,
-    ));
+    final strategyFile = File(
+      path.join(
+        projectRoot.path,
+        'packages',
+        'fly_cli',
+        'lib',
+        'src',
+        'features',
+        'mcp',
+        'resources',
+        strategyFileName,
+      ),
+    );
 
     final item = <String, Object?>{
       'name': resourceName,
@@ -358,21 +400,33 @@ Future<Map<String, Object?>> listResources(Directory projectRoot, bool verbose) 
 
     if (await strategyFile.exists()) {
       final strategyContent = await strategyFile.readAsString();
-      
+
       // Extract URI prefix
-      final uriPrefixMatch = RegExp(r"String\s+get\s+uriPrefix\s*=>\s*['""]([^'""]+)['""]").firstMatch(strategyContent);
+      final uriPrefixMatch = RegExp(
+        r"String\s+get\s+uriPrefix\s*=>\s*['"
+        "]([^'"
+        "]+)['"
+        "]",
+      ).firstMatch(strategyContent);
       if (uriPrefixMatch != null) {
         item['uriPrefix'] = uriPrefixMatch.group(1)!;
       }
 
       // Extract description
-      final descMatch = RegExp(r"String\s+get\s+description\s*=>\s*['""]([^'""]+)['""]").firstMatch(strategyContent);
+      final descMatch = RegExp(
+        r"String\s+get\s+description\s*=>\s*['"
+        "]([^'"
+        "]+)['"
+        "]",
+      ).firstMatch(strategyContent);
       if (descMatch != null) {
         item['description'] = descMatch.group(1)!;
       }
 
       // Check read-only
-      final readOnlyMatch = RegExp(r'bool\s+get\s+readOnly\s*=>\s*(\w+)').firstMatch(strategyContent);
+      final readOnlyMatch = RegExp(
+        r'bool\s+get\s+readOnly\s*=>\s*(\w+)',
+      ).firstMatch(strategyContent);
       if (readOnlyMatch != null) {
         item['readOnly'] = readOnlyMatch.group(1) == 'true';
       }
@@ -475,38 +529,40 @@ Future<Map<String, Object?>?> parsePromptTemplate(File templateFile) async {
     // Use PromptTemplateParser to parse metadata
     Map<String, dynamic> metadata;
     String? parseError;
-    
+
     try {
       metadata = await PromptTemplateParser.parseMetadata(templateFile.path);
     } catch (e) {
       parseError = 'YAML parse error: $e';
       metadata = <String, dynamic>{};
     }
-    
+
     // Use PromptTemplateParser to extract template content
     String templateContent;
     try {
-      templateContent = await PromptTemplateParser.parseTemplateFile(templateFile.path);
+      templateContent = await PromptTemplateParser.parseTemplateFile(
+        templateFile.path,
+      );
     } catch (e) {
       if (parseError == null) {
         parseError = 'Template parse error: $e';
       }
       templateContent = '';
     }
-    
+
     // Extract Mustache variables from template
     final variables = extractMustacheVariables(templateContent);
-    
+
     final result = <String, Object?>{
       'metadata': metadata,
       'template': templateContent,
       'variables': variables,
     };
-    
+
     if (parseError != null) {
       result['parseError'] = parseError;
     }
-    
+
     return result;
   } catch (e) {
     return {
@@ -521,10 +577,10 @@ Future<Map<String, Object?>?> parsePromptTemplate(File templateFile) async {
 /// Extract Mustache variables from template content
 List<String> extractMustacheVariables(String template) {
   final variables = <String>{};
-  
+
   // Match Mustache variable patterns: {{variable}}, {{#variable}}, {{/variable}}, etc.
   final pattern = RegExp(r'\{\{([#/^]?)([a-zA-Z_][a-zA-Z0-9_\.]*)([#/])?\}\}');
-  
+
   for (final match in pattern.allMatches(template)) {
     final variable = match.group(2);
     if (variable != null && variable.isNotEmpty) {
@@ -533,7 +589,7 @@ List<String> extractMustacheVariables(String template) {
       variables.add(parts[0]); // Add the root variable name
     }
   }
-  
+
   return variables.toList()..sort();
 }
 
@@ -543,7 +599,7 @@ void printYamlMap(Map map, {int indent = 0}) {
   for (final entry in map.entries) {
     final key = entry.key.toString();
     final value = entry.value;
-    
+
     if (value is Map) {
       print('$prefix$key:');
       printYamlMap(value, indent: indent + 1);
@@ -583,7 +639,7 @@ void printTable(
     final tools = data['tools']!;
     final items = tools['items'] as List;
     print('Total: ${tools['count']}\n');
-    
+
     for (final item in items) {
       final map = item as Map<String, Object?>;
       print('  ${map['name']}');
@@ -613,14 +669,15 @@ void printTable(
     final prompts = data['prompts']!;
     final items = prompts['items'] as List;
     print('Total: ${prompts['count']}\n');
-    
+
     // Check if we should show parsed templates
-    final hasParsedData = items.isNotEmpty && 
+    final hasParsedData =
+        items.isNotEmpty &&
         (items[0] as Map<String, Object?>).containsKey('metadata');
-    
+
     for (final item in items) {
       final map = item as Map<String, Object?>;
-      
+
       // For parse-only mode, skip basic info and only show parsed templates
       if (!showParsed) {
         print('  ${map['id']}');
@@ -638,12 +695,12 @@ void printTable(
         print('');
         continue;
       }
-      
+
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('PROMPT: ${map['id']}');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('');
-      
+
       // Only show basic info if not parse-only mode
       if (!hasParsedData || !showParsed) {
         if (map['title'] != null) {
@@ -654,12 +711,12 @@ void printTable(
         }
         print('Template File: ${map['templateFile']}');
         print('Template exists: ${map['templateExists']}');
-        
+
         if (verbose && map['strategyFile'] != null) {
           print('Strategy: ${map['strategyFile']}');
         }
       }
-      
+
       // Show parsed template information if available
       if (hasParsedData && map.containsKey('metadata')) {
         print('');
@@ -674,7 +731,7 @@ void printTable(
         } else {
           print('  (No YAML front matter)');
         }
-        
+
         print('');
         print('Template Content:');
         if (map['template'] != null) {
@@ -688,7 +745,7 @@ void printTable(
             print('  (Empty template)');
           }
         }
-        
+
         if (map['variables'] != null) {
           final variables = map['variables'] as List;
           if (variables.isNotEmpty) {
@@ -697,7 +754,7 @@ void printTable(
           }
         }
       }
-      
+
       print('');
     }
   }
@@ -709,7 +766,7 @@ void printTable(
     final resources = data['resources']!;
     final items = resources['items'] as List;
     print('Total: ${resources['count']}\n');
-    
+
     for (final item in items) {
       final map = item as Map<String, Object?>;
       print('  ${map['name']}');
@@ -764,12 +821,11 @@ void printYaml(Map<String, Object?> data) {
       }
     }
   }
-  
+
   for (final entry in data.entries) {
     printYamlValue(entry.key, entry.value, 0);
   }
 }
-
 
 void printUsage() {
   print('Usage: dart run tool/ci/mcp_list.dart [OPTIONS]');
@@ -779,9 +835,13 @@ void printUsage() {
   print('Options:');
   print('  --type=TYPE          Filter by type (tools, prompts, resources)');
   print('  --format=FORMAT      Output format (table, json, yaml)');
-  print('  --show-parsed        When listing prompts, show parsed YAML metadata');
+  print(
+    '  --show-parsed        When listing prompts, show parsed YAML metadata',
+  );
   print('                      and template content');
-  print('  --parse-only         Only show parsed template information (for testing)');
+  print(
+    '  --parse-only         Only show parsed template information (for testing)',
+  );
   print('                      Only works with --type=prompts');
   print('  -v, --verbose       Show verbose output');
   print('  -h, --help          Show this help message');
@@ -793,4 +853,3 @@ void printUsage() {
   print('  dart run tool/ci/mcp_list.dart --type=prompts --parse-only');
   print('  dart run tool/ci/mcp_list.dart --format=yaml --verbose');
 }
-

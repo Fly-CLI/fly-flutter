@@ -1,26 +1,27 @@
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 /// Immutable path result with validation status
 abstract class ResolvedPath {
   /// Absolute path
   String get absolute;
-  
+
   /// Relative path from working directory
   String get relative;
-  
+
   /// Whether the path exists
   bool get exists;
-  
+
   /// Whether the path is writable
   bool get writable;
-  
+
   /// Whether the path is valid
   bool get isValid;
-  
+
   /// Validation errors if any
   List<String> get validationErrors;
-  
+
   /// Create a new path with updated validation status
   ResolvedPath copyWith({
     bool? exists,
@@ -71,7 +72,8 @@ class WorkingDirectoryPath extends ResolvedPath {
   }
 
   @override
-  String toString() => 'WorkingDirectoryPath(absolute: $absolute, exists: $exists, writable: $writable)';
+  String toString() =>
+      'WorkingDirectoryPath(absolute: $absolute, exists: $exists, writable: $writable)';
 }
 
 /// Template directory path
@@ -116,7 +118,8 @@ class TemplatePath extends ResolvedPath {
   }
 
   @override
-  String toString() => 'TemplatePath(absolute: $absolute, exists: $exists, writable: $writable)';
+  String toString() =>
+      'TemplatePath(absolute: $absolute, exists: $exists, writable: $writable)';
 }
 
 /// Project directory path
@@ -166,7 +169,8 @@ class ProjectPath extends ResolvedPath {
   }
 
   @override
-  String toString() => 'ProjectPath(absolute: $absolute, projectName: $projectName, exists: $exists, writable: $writable)';
+  String toString() =>
+      'ProjectPath(absolute: $absolute, projectName: $projectName, exists: $exists, writable: $writable)';
 }
 
 /// Component directory path (screen, service, etc.)
@@ -226,7 +230,8 @@ class ComponentPath extends ResolvedPath {
   }
 
   @override
-  String toString() => 'ComponentPath(absolute: $absolute, componentName: $componentName, componentType: $componentType, feature: $feature, exists: $exists, writable: $writable)';
+  String toString() =>
+      'ComponentPath(absolute: $absolute, componentName: $componentName, componentType: $componentType, feature: $feature, exists: $exists, writable: $writable)';
 }
 
 /// Path resolution result
@@ -250,5 +255,6 @@ class PathResolutionResult {
   }
 
   @override
-  String toString() => 'PathResolutionResult(success: $success, path: $path, errors: $errors)';
+  String toString() =>
+      'PathResolutionResult(success: $success, path: $path, errors: $errors)';
 }

@@ -4,7 +4,7 @@ import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
 
 /// Builder for constructing command strings and arguments
-/// 
+///
 /// Provides utilities for building commands with platform-aware
 /// handling of shells and arguments.
 class CommandBuilder {
@@ -19,7 +19,7 @@ class CommandBuilder {
   String getShell() {
     const env = EnvironmentManager();
     final platform = Platform.operatingSystem;
-    
+
     if (platform == 'windows') {
       return env.getString(EnvVar.comspec) ??
           env.getString(EnvVar.comSpec) ??
@@ -33,7 +33,7 @@ class CommandBuilder {
   String detectShell() {
     const env = EnvironmentManager();
     final shell = env.getString(EnvVar.shell) ?? env.getString(EnvVar.comSpec);
-    
+
     if (shell == null) {
       return 'unknown';
     }
@@ -129,4 +129,3 @@ class CommandBuilder {
     return '$command ${args.join(' ')}';
   }
 }
-

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/schema/schema_command.dart';
 import 'package:test/test.dart';
 
@@ -33,12 +33,13 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Export command schema in various formats'));
+        expect(command.description,
+            equals('Export command schema in various formats'));
       });
 
       test('should have required arguments', () {
         final parser = command.argParser;
-        
+
         expect(parser.options.containsKey('file'), isTrue);
         expect(parser.options.containsKey('include-examples'), isTrue);
         expect(parser.options.containsKey('plan'), isTrue);
@@ -47,7 +48,7 @@ void main() {
 
       test('should have correct default values', () {
         final parser = command.argParser;
-        
+
         expect(parser.options['include-examples']!.defaultsTo, equals(true));
       });
     });
@@ -56,7 +57,7 @@ void main() {
       test('should handle stdout output', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result['file'], isNull);
         expect(result['include-examples'], equals(true));
       });
@@ -64,21 +65,21 @@ void main() {
       test('should handle file output', () {
         final parser = command.argParser;
         final result = parser.parse(['--file=schema.json']);
-        
+
         expect(result['file'], equals('schema.json'));
       });
 
       test('should handle include examples flag', () {
         final parser = command.argParser;
         final result = parser.parse(['--include-examples']);
-        
+
         expect(result['include-examples'], equals(true));
       });
 
       test('should handle short file option', () {
         final parser = command.argParser;
         final result = parser.parse(['-o', 'output.json']);
-        
+
         expect(result['file'], equals('output.json'));
       });
 
@@ -88,7 +89,7 @@ void main() {
           '--file=schema.json',
           '--include-examples',
         ]);
-        
+
         expect(result['file'], equals('schema.json'));
         expect(result['include-examples'], equals(true));
       });
@@ -97,7 +98,7 @@ void main() {
     group('Error Handling', () {
       test('should handle invalid arguments gracefully', () {
         final parser = command.argParser;
-        
+
         // Should not throw for valid arguments
         expect(() => parser.parse([]), returnsNormally);
         expect(() => parser.parse(['--file=test.json']), returnsNormally);
@@ -107,7 +108,7 @@ void main() {
       test('should handle empty arguments', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result['file'], isNull);
         expect(result['include-examples'], equals(true));
       });
@@ -125,14 +126,14 @@ void main() {
       test('should handle large argument lists efficiently', () {
         final parser = command.argParser;
         final largeArgs = List.generate(100, (i) => 'arg$i');
-        
+
         expect(() => parser.parse(largeArgs), returnsNormally);
       });
 
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
         final args = ['test_command', '--file=test.json'];
-        
+
         for (var i = 0; i < 100; i++) {
           expect(() => parser.parse(args), returnsNormally);
         }
@@ -149,7 +150,7 @@ void main() {
       test('should have consistent naming conventions', () {
         // Command name should be lowercase
         expect(command.name, equals(command.name.toLowerCase()));
-        
+
         // Description should be meaningful
         expect(command.description.contains('schema'), isTrue);
       });

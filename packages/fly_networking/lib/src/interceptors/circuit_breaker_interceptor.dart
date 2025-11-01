@@ -81,8 +81,8 @@ class CircuitBreakerInterceptor extends Interceptor {
     final key = _keyFor(response.requestOptions);
     final state = _states.putIfAbsent(key, _BreakerState.closed)
 
-    // Success resets window and potentially closes breaker
-    ..record(success: true);
+      // Success resets window and potentially closes breaker
+      ..record(success: true);
     if (state.state == _State.halfOpen) {
       state.close();
     }
@@ -100,7 +100,8 @@ class CircuitBreakerInterceptor extends Interceptor {
 
     // Consider server errors and network errors as failures
     final statusCode = err.response?.statusCode;
-    final isServerFailure = statusCode != null && evaluateOnStatus.contains(statusCode);
+    final isServerFailure =
+        statusCode != null && evaluateOnStatus.contains(statusCode);
     final isNetworkFailure = err.type == DioExceptionType.connectionError ||
         err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
@@ -174,5 +175,3 @@ class _BreakerState {
     _window.clear();
   }
 }
-
-

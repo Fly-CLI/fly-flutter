@@ -162,7 +162,8 @@ void main() {
         description: 'Test command',
       );
 
-      expect(command.toString(), equals('CommandDefinition(name: test, description: Test command)'));
+      expect(command.toString(),
+          equals('CommandDefinition(name: test, description: Test command)'));
     });
   });
 
@@ -255,7 +256,8 @@ void main() {
         description: 'Description',
       );
 
-      expect(argument.toString(), equals('ArgumentDefinition(name: name, required: true)'));
+      expect(argument.toString(),
+          equals('ArgumentDefinition(name: name, required: true)'));
     });
   });
 
@@ -388,7 +390,8 @@ void main() {
         description: 'Verbose output',
       );
 
-      expect(option.toString(), equals('OptionDefinition(name: verbose, type: flag)'));
+      expect(option.toString(),
+          equals('OptionDefinition(name: verbose, type: flag)'));
     });
   });
 
@@ -460,7 +463,8 @@ void main() {
         description: 'Add a screen',
       );
 
-      expect(subcommand.toString(), equals('SubcommandDefinition(name: screen)'));
+      expect(
+          subcommand.toString(), equals('SubcommandDefinition(name: screen)'));
     });
   });
 
@@ -493,7 +497,8 @@ void main() {
         description: 'Create a new app',
       );
 
-      expect(example.toString(), equals('CommandExample(command: fly create my_app)'));
+      expect(example.toString(),
+          equals('CommandExample(command: fly create my_app)'));
     });
   });
 

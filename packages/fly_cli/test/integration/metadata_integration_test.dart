@@ -1,9 +1,9 @@
 import 'package:fly_cli/src/command_runner.dart';
+import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/powershell_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/zsh_generator.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
 import 'package:fly_cli/src/features/schema/exporters/schema_exporter.dart';
 import 'package:fly_cli/src/features/schema/exporters/schema_exporter_factory.dart';
@@ -52,9 +52,10 @@ void main() {
 
     group('Schema Export Integration', () {
       test('exports CLI spec format', () {
-        final exporter = SchemaExporterFactory.getExporter(ExportFormat.cliSpec);
+        final exporter =
+            SchemaExporterFactory.getExporter(ExportFormat.cliSpec);
         final schema = exporter.export(registry, const ExportConfig());
-        
+
         expect(schema, contains('"name": "fly"'));
         expect(schema, contains('"commands"'));
         expect(schema, contains('"create"'));
@@ -62,30 +63,34 @@ void main() {
       });
 
       test('exports JSON Schema format', () {
-        final exporter = SchemaExporterFactory.getExporter(ExportFormat.jsonSchema);
+        final exporter =
+            SchemaExporterFactory.getExporter(ExportFormat.jsonSchema);
         final schema = exporter.export(registry, const ExportConfig());
-        
+
         expect(schema, contains(r'"$schema"'));
         expect(schema, contains('"properties"'));
         expect(schema, contains('"create"'));
       });
 
       test('exports OpenAPI format', () {
-        final exporter = SchemaExporterFactory.getExporter(ExportFormat.openApi);
+        final exporter =
+            SchemaExporterFactory.getExporter(ExportFormat.openApi);
         final schema = exporter.export(registry, const ExportConfig());
-        
+
         expect(schema, contains('openapi'));
         expect(schema, contains('paths'));
         expect(schema, contains('/create'));
       });
 
       test('filters commands by name', () {
-        final exporter = SchemaExporterFactory.getExporter(ExportFormat.cliSpec);
+        final exporter =
+            SchemaExporterFactory.getExporter(ExportFormat.cliSpec);
         const config = ExportConfig(commandFilter: 'create');
         final schema = exporter.export(registry, config);
-        
+
         expect(schema, contains('"create"'));
-        expect(schema, isNot(contains('"doctor"'))); // Should not contain other commands
+        expect(schema,
+            isNot(contains('"doctor"'))); // Should not contain other commands
       });
     });
 
@@ -93,7 +98,7 @@ void main() {
       test('generates bash completion script', () {
         const bashGenerator = BashCompletionGenerator();
         final script = bashGenerator.generate(registry);
-        
+
         expect(script, contains('_fly_completion()'));
         expect(script, contains('create'));
         expect(script, contains('doctor'));
@@ -103,7 +108,7 @@ void main() {
       test('generates zsh completion script', () {
         const zshGenerator = ZshCompletionGenerator();
         final script = zshGenerator.generate(registry);
-        
+
         expect(script, contains('#compdef fly'));
         expect(script, contains('_fly()'));
         expect(script, contains('create'));
@@ -113,7 +118,7 @@ void main() {
       test('generates fish completion script', () {
         const fishGenerator = FishCompletionGenerator();
         final script = fishGenerator.generate(registry);
-        
+
         expect(script, contains('complete -c fly'));
         expect(script, contains('create'));
         expect(script, contains('doctor'));
@@ -122,7 +127,7 @@ void main() {
       test('generates PowerShell completion script', () {
         const powershellGenerator = PowerShellCompletionGenerator();
         final script = powershellGenerator.generate(registry);
-        
+
         expect(script, contains('Register-ArgumentCompleter'));
         expect(script, contains('fly'));
         expect(script, contains('create'));
@@ -134,12 +139,12 @@ void main() {
       test('create command has rich metadata', () {
         final createCommand = registry.getCommand('create');
         expect(createCommand, isNotNull);
-        
+
         // Check arguments
         expect(createCommand!.arguments, hasLength(1));
         expect(createCommand.arguments.first.name, equals('project_name'));
         expect(createCommand.arguments.first.required, isTrue);
-        
+
         // Check options
         expect(createCommand.options, isNotEmpty);
         final templateOption = createCommand.options.firstWhere(
@@ -147,7 +152,7 @@ void main() {
         );
         expect(templateOption.allowedValues, contains('minimal'));
         expect(templateOption.allowedValues, contains('riverpod'));
-        
+
         // Check examples
         expect(createCommand.examples, isNotEmpty);
         expect(createCommand.examples.first.command, contains('fly create'));
@@ -158,7 +163,7 @@ void main() {
         expect(doctorCommand, isNotNull);
         expect(doctorCommand!.examples, isNotEmpty);
         expect(doctorCommand.options, isNotEmpty);
-        
+
         final fixOption = doctorCommand.options.firstWhere(
           (opt) => opt.name == 'fix',
         );
@@ -169,7 +174,7 @@ void main() {
         final versionCommand = registry.getCommand('version');
         expect(versionCommand, isNotNull);
         expect(versionCommand!.options, isNotEmpty);
-        
+
         final checkUpdatesOption = versionCommand.options.firstWhere(
           (opt) => opt.name == 'check-updates',
         );
@@ -181,7 +186,7 @@ void main() {
       test('registry includes global options', () {
         final globalOptions = registry.getGlobalOptions();
         expect(globalOptions, isNotEmpty);
-        
+
         final verboseOption = globalOptions.firstWhere(
           (opt) => opt.name == 'verbose',
         );
@@ -195,11 +200,14 @@ void main() {
         final completionCommand = registry.getCommand('completion');
         expect(completionCommand, isNotNull);
         expect(completionCommand!.options, isNotEmpty);
-        
+
         // Check for specific options
-        expect(completionCommand.options.any((opt) => opt.name == 'shell'), isTrue);
-        expect(completionCommand.options.any((opt) => opt.name == 'install'), isTrue);
-        expect(completionCommand.options.any((opt) => opt.name == 'file'), isTrue);
+        expect(completionCommand.options.any((opt) => opt.name == 'shell'),
+            isTrue);
+        expect(completionCommand.options.any((opt) => opt.name == 'install'),
+            isTrue);
+        expect(
+            completionCommand.options.any((opt) => opt.name == 'file'), isTrue);
       });
     });
 

@@ -173,9 +173,8 @@ class FileExistsRule implements ValidationRule<String> {
     if (await file.exists()) {
       return ValidationResult.success();
     }
-    return ValidationResult.failure([
-      'File does not exist: ${fieldName ?? 'File'}'
-    ]);
+    return ValidationResult.failure(
+        ['File does not exist: ${fieldName ?? 'File'}']);
   }
 
   @override
@@ -196,9 +195,8 @@ class DirectoryExistsRule implements ValidationRule<String> {
     if (await directory.exists()) {
       return ValidationResult.success();
     }
-    return ValidationResult.failure([
-      'Directory does not exist: ${fieldName ?? 'Directory'}'
-    ]);
+    return ValidationResult.failure(
+        ['Directory does not exist: ${fieldName ?? 'Directory'}']);
   }
 
   @override
@@ -255,4 +253,3 @@ class NetworkConnectivityRule extends AsyncValidationRule<String> {
   @override
   bool shouldRun(String value) => value.isNotEmpty;
 }
-

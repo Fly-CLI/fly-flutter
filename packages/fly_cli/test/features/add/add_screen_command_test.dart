@@ -1,14 +1,13 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/add/add_screen_command.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
-import '../../helpers/test_fixtures.dart';
 import '../../helpers/mock_logger.dart';
-
+import '../../helpers/test_fixtures.dart';
 
 void main() {
   group('AddScreenCommand', () {
@@ -24,11 +23,11 @@ void main() {
       );
       command = AddScreenCommand(mockContext);
       tempDir = CommandTestHelper.createTempDir();
-      
+
       // Create a mock Flutter project
       projectDir = Directory(path.join(tempDir.path, 'test_project'));
       projectDir.createSync();
-      
+
       // Create pubspec.yaml
       final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
       pubspecFile.writeAsStringSync(TestFixtures.samplePubspecContent);
@@ -45,12 +44,13 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Add a new screen component to the current project'));
+        expect(command.description,
+            equals('Add a new screen component to the current project'));
       });
 
       test('should have required arguments', () {
         final parser = command.argParser;
-        
+
         expect(parser.options.containsKey('feature'), isTrue);
         expect(parser.options.containsKey('with-viewmodel'), isTrue);
         expect(parser.options.containsKey('with-tests'), isTrue);
@@ -60,7 +60,7 @@ void main() {
 
       test('should have correct default values', () {
         final parser = command.argParser;
-        
+
         expect(parser.options['feature']!.defaultsTo, equals('home'));
         expect(parser.options['with-viewmodel']!.defaultsTo, equals(false));
         expect(parser.options['with-tests']!.defaultsTo, equals(false));
@@ -70,15 +70,21 @@ void main() {
     group('Screen Name Validation', () {
       test('should accept valid screen names', () {
         for (final screenName in TestFixtures.validScreenNames) {
-          expect(TestFixtures.isValidScreenName(screenName), isTrue,
-              reason: 'Screen name "$screenName" should be valid',);
+          expect(
+            TestFixtures.isValidScreenName(screenName),
+            isTrue,
+            reason: 'Screen name "$screenName" should be valid',
+          );
         }
       });
 
       test('should reject invalid screen names', () {
         for (final screenName in TestFixtures.invalidScreenNames) {
-          expect(TestFixtures.isValidScreenName(screenName), isFalse,
-              reason: 'Screen name "$screenName" should be invalid',);
+          expect(
+            TestFixtures.isValidScreenName(screenName),
+            isFalse,
+            reason: 'Screen name "$screenName" should be invalid',
+          );
         }
       });
 
@@ -106,7 +112,7 @@ void main() {
       test('should accept custom feature name', () {
         final parser = command.argParser;
         final result = parser.parse(['login', '--feature=auth']);
-        
+
         expect(result['feature'], equals('auth'));
       });
     });
@@ -125,7 +131,7 @@ void main() {
       test('should accept with-viewmodel flag', () {
         final parser = command.argParser;
         final result = parser.parse(['login', '--with-viewmodel']);
-        
+
         expect(result['with-viewmodel'], equals(true));
       });
     });
@@ -144,7 +150,7 @@ void main() {
       test('should accept with-tests flag', () {
         final parser = command.argParser;
         final result = parser.parse(['login', '--with-tests']);
-        
+
         expect(result['with-tests'], equals(true));
       });
     });
@@ -153,7 +159,7 @@ void main() {
       test('should handle basic screen creation', () {
         final parser = command.argParser;
         final result = parser.parse(['login']);
-        
+
         expect(result.rest, equals(['login']));
         expect(result['feature'], equals('home')); // default
         expect(result['with-viewmodel'], equals(false)); // default
@@ -163,7 +169,7 @@ void main() {
       test('should handle screen with custom feature', () {
         final parser = command.argParser;
         final result = parser.parse(['login', '--feature=auth']);
-        
+
         expect(result.rest, equals(['login']));
         expect(result['feature'], equals('auth'));
       });
@@ -171,7 +177,7 @@ void main() {
       test('should handle screen with viewmodel', () {
         final parser = command.argParser;
         final result = parser.parse(['login', '--with-viewmodel']);
-        
+
         expect(result.rest, equals(['login']));
         expect(result['with-viewmodel'], equals(true));
       });
@@ -179,7 +185,7 @@ void main() {
       test('should handle screen with tests', () {
         final parser = command.argParser;
         final result = parser.parse(['login', '--with-tests']);
-        
+
         expect(result.rest, equals(['login']));
         expect(result['with-tests'], equals(true));
       });
@@ -192,7 +198,7 @@ void main() {
           '--with-viewmodel',
           '--with-tests',
         ]);
-        
+
         expect(result.rest, equals(['login']));
         expect(result['feature'], equals('auth'));
         expect(result['with-viewmodel'], equals(true));
@@ -204,28 +210,28 @@ void main() {
       test('should handle missing screen name', () {
         final parser = command.argParser;
         final result = parser.parse([]);
-        
+
         expect(result.rest, isEmpty);
       });
 
       test('should handle empty screen name', () {
         final parser = command.argParser;
         final result = parser.parse(['']);
-        
+
         expect(result.rest, equals(['']));
       });
 
       test('should handle invalid screen name', () {
         final parser = command.argParser;
         final result = parser.parse(['Invalid-Screen']);
-        
+
         expect(result.rest, equals(['Invalid-Screen']));
       });
 
       test('should handle multiple screen names', () {
         final parser = command.argParser;
         final result = parser.parse(['login', 'register', 'profile']);
-        
+
         expect(result.rest, equals(['login', 'register', 'profile']));
       });
     });
@@ -239,7 +245,7 @@ void main() {
           '--with-viewmodel',
           '--with-tests',
         ]);
-        
+
         expect(result.rest, equals(['login']));
         expect(result['feature'], equals('auth'));
         expect(result['with-viewmodel'], equals(true));
@@ -253,7 +259,7 @@ void main() {
           '--feature=user_management',
           '--with-viewmodel',
         ]);
-        
+
         expect(result.rest, equals(['user_profile']));
         expect(result['feature'], equals('user_management'));
         expect(result['with-viewmodel'], equals(true));
@@ -266,21 +272,21 @@ void main() {
         final longName = 'a' * 50; // exactly 50 characters
         final parser = command.argParser;
         final result = parser.parse([longName]);
-        
+
         expect(result.rest, equals([longName]));
       });
 
       test('should handle screen name with underscores', () {
         final parser = command.argParser;
         final result = parser.parse(['user_profile_screen']);
-        
+
         expect(result.rest, equals(['user_profile_screen']));
       });
 
       test('should handle single character screen name', () {
         final parser = command.argParser;
         final result = parser.parse(['a']);
-        
+
         expect(result.rest, equals(['a']));
       });
     });
@@ -297,14 +303,14 @@ void main() {
       test('should handle large argument lists efficiently', () {
         final parser = command.argParser;
         final largeArgs = List.generate(100, (i) => 'arg$i');
-        
+
         expect(() => parser.parse(largeArgs), returnsNormally);
       });
 
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
         final args = ['test_screen', '--feature=test'];
-        
+
         for (var i = 0; i < 100; i++) {
           expect(() => parser.parse(args), returnsNormally);
         }

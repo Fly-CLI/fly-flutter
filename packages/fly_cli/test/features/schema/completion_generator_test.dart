@@ -1,8 +1,8 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/definitions/fly_command.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/powershell_generator.dart';
@@ -13,20 +13,20 @@ import '../../helpers/command_test_helper.dart';
 
 /// Helper to create command instances from enum for testing
 ({
-  Map<FlyCommandType, Command<int>> commandInstances,
+  Map<FlyCommand, Command<int>> commandInstances,
   Map<String, Command<int>> commandGroups,
 }) _createCommandInstances() {
   final context = CommandTestHelper.createMockCommandContext();
-  final commandInstances = <FlyCommandType, Command<int>>{};
-  
+  final commandInstances = <FlyCommand, Command<int>>{};
+
   // Create instances for all command types
-  for (final commandType in FlyCommandType.values) {
+  for (final commandType in FlyCommand.values) {
     commandInstances[commandType] = commandType.createInstance(context);
   }
-  
+
   // Build command groups dynamically
   final commandGroups = <String, Command<int>>{};
-  final groupMap = <String, List<FlyCommandType>>{};
+  final groupMap = <String, List<FlyCommand>>{};
   for (final entry in commandInstances.entries) {
     final commandType = entry.key;
     final group = commandType.group;
@@ -34,7 +34,7 @@ import '../../helpers/command_test_helper.dart';
       groupMap.putIfAbsent(group.name, () => []).add(commandType);
     }
   }
-  
+
   // Create group commands
   for (final entry in groupMap.entries) {
     final groupName = entry.key;
@@ -48,7 +48,7 @@ import '../../helpers/command_test_helper.dart';
     }
     commandGroups[groupName] = groupCmd;
   }
-  
+
   return (commandInstances: commandInstances, commandGroups: commandGroups);
 }
 
@@ -57,8 +57,7 @@ void main() {
     late CommandMetadataRegistry registry;
 
     setUp(() {
-      registry = CommandMetadataRegistry.instance
-        ..clear();
+      registry = CommandMetadataRegistry.instance..clear();
 
       // Setup test registry with instances-based initialization
       final globalParser = ArgParser()
@@ -286,7 +285,8 @@ void main() {
       });
 
       test('escape handles special characters', () {
-        expect(generator.escape('text with spaces'), equals('text with spaces'));
+        expect(
+            generator.escape('text with spaces'), equals('text with spaces'));
       });
 
       test('quote wraps text in double quotes', () {
@@ -340,7 +340,6 @@ void main() {
         expect(generator.quote('text'), equals("'text'"));
       });
     });
-
 
     group('edge cases', () {
       test('handles empty registry', () {
@@ -465,7 +464,7 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
 
   @override
   void initializeFromInstances({
-    required Map<FlyCommandType, Command<int>> commandInstances,
+    required Map<FlyCommand, Command<int>> commandInstances,
     required Map<String, Command<int>> commandGroups,
     required ArgParser globalOptionsParser,
   }) {
@@ -572,10 +571,12 @@ class _TestCommandWithOptions extends Command<int> {
 }
 
 class _TestCommandWithSubcommands extends Command<int> {
-  _TestCommandWithSubcommands(this._name, this._description, this._subcommands) {
+  _TestCommandWithSubcommands(
+      this._name, this._description, this._subcommands) {
     // Add subcommands to the command
     for (final subcommandDef in _subcommands) {
-      addSubcommand(_TestCommand(subcommandDef.name, subcommandDef.description));
+      addSubcommand(
+          _TestCommand(subcommandDef.name, subcommandDef.description));
     }
   }
 

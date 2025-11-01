@@ -16,15 +16,15 @@ class LoggerImpl implements Logger {
     JsonMap? fields,
     RedactionPolicy? redaction,
     SamplingThrottlingOptions sampling = const SamplingThrottlingOptions(),
-  }) : _appenders = List<Appender>.unmodifiable(appenders),
-       _minLevel = minLevel,
-       _context = context,
-       _name = name,
-       _fields = fields == null
-           ? const <String, Object?>{}
-           : Map<String, Object?>.unmodifiable(fields),
-       _redaction = redaction ?? RedactionPolicy(),
-       _sampling = sampling;
+  })  : _appenders = List<Appender>.unmodifiable(appenders),
+        _minLevel = minLevel,
+        _context = context,
+        _name = name,
+        _fields = fields == null
+            ? const <String, Object?>{}
+            : Map<String, Object?>.unmodifiable(fields),
+        _redaction = redaction ?? RedactionPolicy(),
+        _sampling = sampling;
 
   final List<Appender> _appenders;
   final LogLevel _minLevel;
@@ -120,13 +120,14 @@ class LoggerImpl implements Logger {
     Object? error,
     StackTrace? stackTrace,
     JsonMap? fields,
-  }) => log(
-    LogLevel.trace,
-    message,
-    error: error,
-    stackTrace: stackTrace,
-    fields: fields,
-  );
+  }) =>
+      log(
+        LogLevel.trace,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        fields: fields,
+      );
 
   @override
   void debug(
@@ -134,13 +135,14 @@ class LoggerImpl implements Logger {
     Object? error,
     StackTrace? stackTrace,
     JsonMap? fields,
-  }) => log(
-    LogLevel.debug,
-    message,
-    error: error,
-    stackTrace: stackTrace,
-    fields: fields,
-  );
+  }) =>
+      log(
+        LogLevel.debug,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        fields: fields,
+      );
 
   @override
   void info(
@@ -148,13 +150,14 @@ class LoggerImpl implements Logger {
     Object? error,
     StackTrace? stackTrace,
     JsonMap? fields,
-  }) => log(
-    LogLevel.info,
-    message,
-    error: error,
-    stackTrace: stackTrace,
-    fields: fields,
-  );
+  }) =>
+      log(
+        LogLevel.info,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        fields: fields,
+      );
 
   @override
   void warn(
@@ -162,13 +165,14 @@ class LoggerImpl implements Logger {
     Object? error,
     StackTrace? stackTrace,
     JsonMap? fields,
-  }) => log(
-    LogLevel.warn,
-    message,
-    error: error,
-    stackTrace: stackTrace,
-    fields: fields,
-  );
+  }) =>
+      log(
+        LogLevel.warn,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        fields: fields,
+      );
 
   @override
   void error(
@@ -176,13 +180,14 @@ class LoggerImpl implements Logger {
     Object? error,
     StackTrace? stackTrace,
     JsonMap? fields,
-  }) => log(
-    LogLevel.error,
-    message,
-    error: error,
-    stackTrace: stackTrace,
-    fields: fields,
-  );
+  }) =>
+      log(
+        LogLevel.error,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        fields: fields,
+      );
 
   @override
   void fatal(
@@ -190,13 +195,14 @@ class LoggerImpl implements Logger {
     Object? error,
     StackTrace? stackTrace,
     JsonMap? fields,
-  }) => log(
-    LogLevel.fatal,
-    message,
-    error: error,
-    stackTrace: stackTrace,
-    fields: fields,
-  );
+  }) =>
+      log(
+        LogLevel.fatal,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        fields: fields,
+      );
 }
 
 class SamplingThrottlingOptions {

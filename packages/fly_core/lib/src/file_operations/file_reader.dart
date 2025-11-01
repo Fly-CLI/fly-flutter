@@ -1,7 +1,7 @@
 import 'dart:io';
 
 /// Reader for file operations with streaming support
-/// 
+///
 /// Provides efficient file reading with streaming for large files
 /// and automatic fallback to regular reading for small files.
 class FileReader {
@@ -14,13 +14,13 @@ class FileReader {
   const FileReader();
 
   /// Read file content as a string
-  /// 
+  ///
   /// Automatically chooses between streaming and regular reading
   /// based on file size.
   Future<String?> readFile(File file) async {
     try {
       final stat = await file.stat();
-      
+
       // For small files, read normally
       if (stat.size < streamingThreshold) {
         return await file.readAsString();
@@ -38,16 +38,16 @@ class FileReader {
     try {
       final buffer = StringBuffer();
       final stream = file.openRead();
-      
+
       await for (final chunk in stream) {
         buffer.write(String.fromCharCodes(chunk));
-        
+
         // Prevent excessive memory usage
         if (buffer.length > maxSize) {
           return null;
         }
       }
-      
+
       return buffer.toString();
     } catch (e) {
       return null;
@@ -58,7 +58,7 @@ class FileReader {
   Future<int> countLines(File file) async {
     try {
       final stat = await file.stat();
-      
+
       // For small files, read normally
       if (stat.size < streamingThreshold) {
         final content = await file.readAsString();
@@ -68,12 +68,13 @@ class FileReader {
       // For larger files, use streaming
       int lineCount = 0;
       final stream = file.openRead();
-      
+
       await for (final chunk in stream) {
         final content = String.fromCharCodes(chunk);
-        lineCount += content.split('\n').length - 1; // -1 because split creates extra element
+        lineCount += content.split('\n').length -
+            1; // -1 because split creates extra element
       }
-      
+
       return lineCount + 1; // +1 for the last line
     } catch (e) {
       return 0;
@@ -103,11 +104,11 @@ class FileReader {
     try {
       final bytes = await readBytes(file);
       if (bytes == null) return null;
-      
+
       if (bytes.length > maxBytes) {
         return String.fromCharCodes(bytes.take(maxBytes));
       }
-      
+
       return String.fromCharCodes(bytes);
     } catch (e) {
       return null;
@@ -163,4 +164,3 @@ class FileMetadata {
   final int mode;
   final FileSystemEntityType type;
 }
-

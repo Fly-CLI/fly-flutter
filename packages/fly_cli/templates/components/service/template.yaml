@@ -18,7 +18,7 @@ variables:
     type: string
     required: true
     default: "api"
-    choices: ["api", "local", "cache", "analytics", "storage"]
+    choices: [ "api", "local", "cache", "analytics", "storage" ]
     description: "Type of service to generate"
   with_tests:
     type: boolean

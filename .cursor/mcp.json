@@ -2,7 +2,11 @@
   "mcpServers": {
     "fly": {
       "command": "fly",
-      "args": ["mcp", "serve", "--stdio"],
+      "args": [
+        "mcp",
+        "serve",
+        "--stdio"
+      ],
       "cwd": "${workspaceRoot}"
     }
   }

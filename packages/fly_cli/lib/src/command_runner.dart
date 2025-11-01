@@ -3,24 +3,24 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/interactive_prompt.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/command_metadata/command_registry.dart';
 import 'package:fly_cli/src/core/command_metadata/command_wrappers.dart';
+import 'package:fly_cli/src/core/definitions/fly_command.dart';
 import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/logging/logger.dart' as flylog;
-import 'package:fly_cli/src/core/logging/structured_mason_logger.dart';
 import 'package:fly_cli/src/core/logging/logging_bootstrap.dart';
+import 'package:fly_cli/src/core/logging/structured_mason_logger.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
-import 'package:fly_cli/src/core/utils/performance_optimizer.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/utils/performance_optimizer.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Enhanced Fly CLI Command Runner with simplified dependency injection
@@ -39,7 +39,7 @@ class FlyCommandRunner extends CommandRunner<int> {
   void _initializeServices() {
     final baseMason = Logger();
     final isDevelopment = _isDevelopmentMode();
-    
+
     // Initialize structured logging (root logger)
     _appLogger = LoggingBootstrap.createRootLogger(
       isDevelopment: isDevelopment,
@@ -58,8 +58,10 @@ class FlyCommandRunner extends CommandRunner<int> {
         templatesDirectory: '', // Will be resolved by PathResolver
         logger: structuredLogger,
       ))
-      ..registerSingleton<SystemChecker>(SystemChecker(logger: structuredLogger))
-      ..registerSingleton<InteractivePrompt>(InteractivePrompt(structuredLogger));
+      ..registerSingleton<SystemChecker>(
+          SystemChecker(logger: structuredLogger))
+      ..registerSingleton<InteractivePrompt>(
+          InteractivePrompt(structuredLogger));
 
     _optimizer = CommandPerformanceOptimizer();
   }
@@ -68,8 +70,8 @@ class FlyCommandRunner extends CommandRunner<int> {
   bool _isDevelopmentMode() {
     // Check if we're running from source (development) vs installed package
     final scriptPath = Platform.script.toFilePath();
-    return scriptPath.contains('packages/fly_cli') || 
-           scriptPath.contains('bin/fly.dart');
+    return scriptPath.contains('packages/fly_cli') ||
+        scriptPath.contains('bin/fly.dart');
   }
 
   /// Register global options
@@ -160,9 +162,7 @@ class FlyCommandRunner extends CommandRunner<int> {
     }
 
     // Register all command groups
-    for (final group in registrationData.commandGroups.values) {
-      addCommand(group);
-    }
+    registrationData.commandGroups.values.forEach(addCommand);
   }
 
   @override
@@ -182,8 +182,8 @@ class FlyCommandRunner extends CommandRunner<int> {
         'args': args.toList(),
         'working_dir': Directory.current.path,
         'cli_version': VersionUtils.getCurrentVersion(),
-      });
-      runLogger.info('Fly CLI start');
+      })
+        ..info('Fly CLI start');
 
       // Handle version flag
       if (parsedArgs['version'] == true) {
@@ -207,10 +207,10 @@ class FlyCommandRunner extends CommandRunner<int> {
     // Respect environment variables for working directory (12-Factor App pattern)
     // FLY_OUTPUT_DIR for explicit test control, PWD for Unix standard
     const env = EnvironmentManager();
-    final workingDir = env.getString(EnvVar.flyOutputDir)
-        ?? env.getString(EnvVar.pwd)
-        ?? Directory.current.path;
-    
+    final workingDir = env.getString(EnvVar.flyOutputDir) ??
+        env.getString(EnvVar.pwd) ??
+        Directory.current.path;
+
     return CommandContextImpl(
       argResults: args,
       logger: _services.get<Logger>(),
@@ -228,10 +228,10 @@ class FlyCommandRunner extends CommandRunner<int> {
 
   /// Get configuration
   Map<String, dynamic> _getConfig() => {
-    'cli_version': VersionUtils.getCurrentVersion(),
-    'templates_directory': TemplateManager.findTemplatesDirectory(),
-    'plugins_enabled': true,
-  };
+        'cli_version': VersionUtils.getCurrentVersion(),
+        'templates_directory': TemplateManager.findTemplatesDirectory(),
+        'plugins_enabled': true,
+      };
 
   /// Handle version flag using CommandResult for consistency
   int _handleVersionFlag(String outputFormat) {
@@ -262,13 +262,17 @@ class FlyCommandRunner extends CommandRunner<int> {
   /// Handle errors with proper error handling
   int _handleError(Object e, StackTrace stackTrace, Iterable<String> args) {
     final logger = _services.get<Logger>();
-    _appLogger.error('Unhandled error', error: e, stackTrace: stackTrace, fields: {
+    _appLogger
+        .error('Unhandled error', error: e, stackTrace: stackTrace, fields: {
       'args': args.toList(),
       'cli_version': VersionUtils.getCurrentVersion(),
     });
-    final outputFormat = args.contains('--output=json') ? 'json' : 
-                        args.contains('--output=ai') ? 'ai' : 'human';
-    
+    final outputFormat = args.contains('--output=json')
+        ? 'json'
+        : args.contains('--output=ai')
+            ? 'ai'
+            : 'human';
+
     final errorResult = CommandResult.error(
       message: e.toString(),
       suggestion: 'Check your command syntax and try again',

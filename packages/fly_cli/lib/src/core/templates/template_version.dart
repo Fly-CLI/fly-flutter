@@ -6,7 +6,7 @@ class TemplateVersion {
   TemplateVersion(this._version);
 
   /// Create TemplateVersion from a version string
-  /// 
+  ///
   /// Throws [FormatException] if the version string is invalid
   factory TemplateVersion.parse(String versionString) {
     try {
@@ -37,7 +37,7 @@ class TemplateVersion {
   String get versionString => _version.toString();
 
   /// Compare this version with another
-  /// 
+  ///
   /// Returns:
   /// - Negative if this version is less than [other]
   /// - Zero if versions are equal
@@ -48,7 +48,7 @@ class TemplateVersion {
   bool satisfies(VersionConstraint constraint) => constraint.allows(_version);
 
   /// Check if this version is compatible with another using caret range
-  /// 
+  ///
   /// Example: 2.1.3 is compatible with ^2.0.0 (same major version)
   bool isCompatibleWith(TemplateVersion other) {
     // Same major version means compatible
@@ -71,7 +71,7 @@ class TemplateVersion {
   bool equals(TemplateVersion other) => compareTo(other) == 0;
 
   /// Parse a version range from a string
-  /// 
+  ///
   /// Supports formats like:
   /// - "^2.1.0" (compatible with 2.x.x)
   /// - ">=2.0.0 <3.0.0" (range)
@@ -97,4 +97,3 @@ class TemplateVersion {
   @override
   String toString() => versionString;
 }
-

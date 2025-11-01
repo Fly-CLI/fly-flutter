@@ -35,33 +35,43 @@ void main() {
     });
 
     test('should determine if error can be recovered', () {
-      expect(MasonErrorHandler.canRecover(MasonException('Brick not found')),
-          isTrue);
       expect(
-          MasonErrorHandler.canRecover(
-              FileSystemException('Permission denied')),
-          isTrue);
+        MasonErrorHandler.canRecover(MasonException('Brick not found')),
+        isTrue,
+      );
+      expect(
+        MasonErrorHandler.canRecover(FileSystemException('Permission denied')),
+        isTrue,
+      );
       expect(MasonErrorHandler.canRecover(Exception('Unknown error')), isFalse);
     });
 
     test('should provide suggestions for different error types', () {
-      final suggestion =
-          MasonErrorHandler.getSuggestion(MasonErrorType.brickNotFound, null);
+      final suggestion = MasonErrorHandler.getSuggestion(
+        MasonErrorType.brickNotFound,
+        null,
+      );
       expect(suggestion, contains('Check if the brick exists'));
 
-      final suggestion2 =
-          MasonErrorHandler.getSuggestion(MasonErrorType.fileSystemError, null);
+      final suggestion2 = MasonErrorHandler.getSuggestion(
+        MasonErrorType.fileSystemError,
+        null,
+      );
       expect(suggestion2, contains('Check file permissions'));
     });
 
     test('should get recovery strategies for different error types', () {
       final strategies = MasonErrorHandler.getRecoveryStrategies(
-          MasonErrorType.brickNotFound, null);
+        MasonErrorType.brickNotFound,
+        null,
+      );
       expect(strategies, isNotEmpty);
       expect(strategies.first, contains('fly template list'));
 
       final strategies2 = MasonErrorHandler.getRecoveryStrategies(
-          MasonErrorType.cacheError, null);
+        MasonErrorType.cacheError,
+        null,
+      );
       expect(strategies2, isNotEmpty);
       expect(strategies2.first, contains('fly template cache clear'));
     });

@@ -41,7 +41,7 @@ abstract class CodeAnalyzer<T> extends Analyzer<T> {
   int get priority => 50; // Medium priority for code analysis
 
   @override
-  bool shouldRun(ContextGeneratorConfig config) => 
+  bool shouldRun(ContextGeneratorConfig config) =>
       isEnabled && config.includeCode;
 }
 
@@ -51,7 +51,7 @@ abstract class DependencyAnalyzer<T> extends Analyzer<T> {
   int get priority => 30; // Medium-high priority for dependency analysis
 
   @override
-  bool shouldRun(ContextGeneratorConfig config) => 
+  bool shouldRun(ContextGeneratorConfig config) =>
       isEnabled && config.includeDependencies;
 }
 
@@ -61,14 +61,16 @@ abstract class ArchitectureAnalyzer<T> extends Analyzer<T> {
   int get priority => 40; // Medium priority for architecture analysis
 
   @override
-  bool shouldRun(ContextGeneratorConfig config) => 
+  bool shouldRun(ContextGeneratorConfig config) =>
       isEnabled && config.includeArchitecture;
 }
 
 /// Registry for managing analyzers
 class AnalyzerRegistry {
   factory AnalyzerRegistry() => _instance;
+
   AnalyzerRegistry._internal();
+
   static final AnalyzerRegistry _instance = AnalyzerRegistry._internal();
 
   final List<Analyzer> _analyzers = [];
@@ -81,9 +83,7 @@ class AnalyzerRegistry {
 
   /// Get all analyzers that should run for the given config
   List<Analyzer> getAnalyzers(ContextGeneratorConfig config) {
-    return _analyzers
-        .where((analyzer) => analyzer.shouldRun(config))
-        .toList();
+    return _analyzers.where((analyzer) => analyzer.shouldRun(config)).toList();
   }
 
   /// Get analyzers by type

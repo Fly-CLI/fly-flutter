@@ -5,7 +5,6 @@ part 'cache_models.g.dart';
 /// Represents a cached template with metadata
 @JsonSerializable()
 class CachedTemplate {
-
   const CachedTemplate({
     required this.name,
     required this.version,
@@ -25,6 +24,7 @@ class CachedTemplate {
   final String checksum;
   final Map<String, dynamic> templateData;
   final String cacheVersion;
+
   Map<String, dynamic> toJson() => _$CachedTemplateToJson(this);
 
   /// Check if the cached template is still valid
@@ -44,20 +44,19 @@ class CachedTemplate {
 
   /// Create a new CachedTemplate with updated expiration
   CachedTemplate withNewExpiration(int daysFromNow) => CachedTemplate(
-      name: name,
-      version: version,
-      cachedAt: cachedAt,
-      expiresAt: DateTime.now().add(Duration(days: daysFromNow)),
-      checksum: checksum,
-      templateData: templateData,
-      cacheVersion: cacheVersion,
-    );
+        name: name,
+        version: version,
+        cachedAt: cachedAt,
+        expiresAt: DateTime.now().add(Duration(days: daysFromNow)),
+        checksum: checksum,
+        templateData: templateData,
+        cacheVersion: cacheVersion,
+      );
 }
 
 /// Metadata about the cache system
 @JsonSerializable()
 class CacheMetadata {
-
   const CacheMetadata({
     required this.cacheVersion,
     required this.totalEntries,
@@ -75,6 +74,7 @@ class CacheMetadata {
   final DateTime lastCleanup;
   final int defaultExpirationDays;
   final int maxSizeBytes;
+
   Map<String, dynamic> toJson() => _$CacheMetadataToJson(this);
 
   /// Check if cache cleanup is needed
@@ -100,20 +100,21 @@ class CacheMetadata {
     DateTime? lastCleanup,
     int? defaultExpirationDays,
     int? maxSizeBytes,
-  }) => CacheMetadata(
-      cacheVersion: cacheVersion ?? this.cacheVersion,
-      totalEntries: totalEntries ?? this.totalEntries,
-      totalSizeBytes: totalSizeBytes ?? this.totalSizeBytes,
-      lastCleanup: lastCleanup ?? this.lastCleanup,
-      defaultExpirationDays: defaultExpirationDays ?? this.defaultExpirationDays,
-      maxSizeBytes: maxSizeBytes ?? this.maxSizeBytes,
-    );
+  }) =>
+      CacheMetadata(
+        cacheVersion: cacheVersion ?? this.cacheVersion,
+        totalEntries: totalEntries ?? this.totalEntries,
+        totalSizeBytes: totalSizeBytes ?? this.totalSizeBytes,
+        lastCleanup: lastCleanup ?? this.lastCleanup,
+        defaultExpirationDays:
+            defaultExpirationDays ?? this.defaultExpirationDays,
+        maxSizeBytes: maxSizeBytes ?? this.maxSizeBytes,
+      );
 }
 
 /// Individual cache entry with expiration tracking
 @JsonSerializable()
 class CacheEntry {
-
   const CacheEntry({
     required this.key,
     required this.template,
@@ -127,15 +128,16 @@ class CacheEntry {
   final CachedTemplate template;
   final DateTime lastAccessed;
   final int accessCount;
+
   Map<String, dynamic> toJson() => _$CacheEntryToJson(this);
 
   /// Update access tracking
   CacheEntry markAccessed() => CacheEntry(
-      key: key,
-      template: template,
-      lastAccessed: DateTime.now(),
-      accessCount: accessCount + 1,
-    );
+        key: key,
+        template: template,
+        lastAccessed: DateTime.now(),
+        accessCount: accessCount + 1,
+      );
 
   /// Check if entry is stale (not accessed recently)
   bool get isStale => DateTime.now().difference(lastAccessed).inDays > 30;
@@ -148,6 +150,7 @@ sealed class CacheResult {
 
 class CacheSuccess extends CacheResult {
   const CacheSuccess({required this.template});
+
   final CachedTemplate template;
 }
 
@@ -157,23 +160,25 @@ class CacheMiss extends CacheResult {
 
 class CacheExpired extends CacheResult {
   const CacheExpired({required this.template});
+
   final CachedTemplate template;
 }
 
 class CacheCorrupted extends CacheResult {
   const CacheCorrupted({required this.error});
+
   final String error;
 }
 
 class CacheError extends CacheResult {
   const CacheError({required this.message});
+
   final String message;
 }
 
 /// Cache statistics for monitoring
 @JsonSerializable()
 class CacheStats {
-
   const CacheStats({
     required this.totalEntries,
     required this.validEntries,
@@ -195,5 +200,6 @@ class CacheStats {
   final int hitCount;
   final int missCount;
   final double hitRate;
+
   Map<String, dynamic> toJson() => _$CacheStatsToJson(this);
 }

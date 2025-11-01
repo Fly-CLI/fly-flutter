@@ -28,5 +28,3 @@ class SentryAppender implements Appender {
   @override
   Future<void> dispose() async {}
 }
-
-

@@ -5,7 +5,7 @@ import 'package:fly_core/src/retry/retry_strategy.dart';
 import 'package:fly_core/src/retry/retryable_exception.dart';
 
 /// Main retry execution engine
-/// 
+///
 /// Executes operations with retry logic according to the provided policy
 /// and strategy.
 class RetryExecutor {
@@ -31,12 +31,12 @@ class RetryExecutor {
   final void Function(int totalAttempts, Object finalError)? onFailure;
 
   /// Custom condition to determine if an error is retryable
-  /// 
+  ///
   /// If provided, this overrides the default retryable exception checking.
   final bool Function(Object error)? customRetryCondition;
 
   /// Execute an operation with retry logic
-  /// 
+  ///
   /// Returns the result of the operation if successful.
   /// Throws the last error if all retries are exhausted.
   Future<T> execute<T>(Future<T> Function() operation) async {
@@ -81,7 +81,9 @@ class RetryExecutor {
     if (onFailure != null && lastException != null) {
       onFailure!(policy.maxAttempts, lastException!);
     }
-    throw lastException ?? Exception('Retry operation failed after ${policy.maxAttempts} attempts');
+    throw lastException ??
+        Exception(
+            'Retry operation failed after ${policy.maxAttempts} attempts');
   }
 
   /// Execute an operation with optional timeout
@@ -182,4 +184,3 @@ class TimeoutException implements Exception {
   @override
   String toString() => message;
 }
-

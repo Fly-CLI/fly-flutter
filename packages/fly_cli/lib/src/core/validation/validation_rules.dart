@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:fly_core/src/validation/validation.dart' as fly_core;
+import 'package:path/path.dart' as path;
 
 /// Re-export ValidationRule and ValidationResult from fly_core for backward compatibility
 typedef ValidationRule<T> = fly_core.ValidationRule<T>;
@@ -16,7 +16,7 @@ class NameValidationRule {
   static const int minLength = 2;
   static const int maxLength = 50;
   static final RegExp _pattern = RegExp(r'^[a-z][a-z0-9_]*$');
-  
+
   // Reserved words that cannot be used as names
   static const Set<String> _reservedWords = {
     'null',
@@ -296,8 +296,8 @@ class DirectoryValidationRule implements ValidationRule<String> {
     // Check if directory is writable by trying to create a temporary file
     try {
       File(
-          '${directory.path}/.fly_temp_${DateTime.now().millisecondsSinceEpoch}',
-        )
+        '${directory.path}/.fly_temp_${DateTime.now().millisecondsSinceEpoch}',
+      )
         ..createSync()
         ..deleteSync();
       return ValidationResult.success();
@@ -357,8 +357,15 @@ class PlatformValidationRule implements ValidationRule<List<String>> {
     List<String> platforms, {
     String? fieldName,
   }) async {
-    const validPlatforms = ['ios', 'android', 'web', 'macos', 'windows', 'linux'];
-    
+    const validPlatforms = [
+      'ios',
+      'android',
+      'web',
+      'macos',
+      'windows',
+      'linux'
+    ];
+
     for (final platform in platforms) {
       if (!validPlatforms.contains(platform)) {
         return ValidationResult.failure([
@@ -367,7 +374,7 @@ class PlatformValidationRule implements ValidationRule<List<String>> {
         ]);
       }
     }
-    
+
     return ValidationResult.success();
   }
 

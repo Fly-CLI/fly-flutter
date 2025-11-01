@@ -44,7 +44,8 @@ void main() {
         final template = TemplateContent(
           name: 'test',
           files: {
-            'config.dart': 'const openaiKey = "sk-1234567890123456789012345678901234";',
+            'config.dart':
+                'const openaiKey = "sk-1234567890123456789012345678901234";',
           },
           imports: [],
           dependencies: [],
@@ -58,7 +59,8 @@ void main() {
         final template = TemplateContent(
           name: 'test',
           files: {
-            'secrets.dart': 'final token = "ghp_123456789012345678901234567890123456";',
+            'secrets.dart':
+                'final token = "ghp_123456789012345678901234567890123456";',
           },
           imports: [],
           dependencies: [],
@@ -303,4 +305,4 @@ void main() {
       });
     });
   });
-} 
+}

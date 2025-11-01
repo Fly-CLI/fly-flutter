@@ -1,11 +1,12 @@
 import 'dart:io';
+
+import 'package:fly_cli/src/core/templates/brick_metadata.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:fly_cli/src/core/templates/brick_metadata.dart';
 
 /// Responsible ONLY for finding and loading brick metadata
-/// 
+///
 /// This service is decoupled from path resolution, validation, and generation.
 /// It focuses solely on discovering bricks and loading their metadata.
 class BrickDiscoveryService {
@@ -16,7 +17,7 @@ class BrickDiscoveryService {
   final Logger logger;
 
   /// Discover all available bricks in the templates directory
-  /// 
+  ///
   /// Searches in the standardized directory structure:
   /// - templates/projects/
   /// - templates/components/
@@ -37,9 +38,10 @@ class BrickDiscoveryService {
       for (final category in categories) {
         final categoryPath = path.join(templatesPath, category);
         final categoryDir = Directory(categoryPath);
-        
+
         if (await categoryDir.exists()) {
-          final categoryBricks = await _discoverBricksInCategory(categoryPath, category);
+          final categoryBricks =
+              await _discoverBricksInCategory(categoryPath, category);
           bricks.addAll(categoryBricks);
         } else {
           logger.detail('Category directory does not exist: $categoryPath');
@@ -60,7 +62,7 @@ class BrickDiscoveryService {
     String category,
   ) async {
     final bricks = <BrickMetadata>[];
-    
+
     try {
       await for (final entity in Directory(categoryPath).list()) {
         if (entity is Directory) {
@@ -71,9 +73,8 @@ class BrickDiscoveryService {
               bricks.add(brickMetadata);
             } else {
               logger.warn(
-                'Brick ${brickMetadata.name} has category ${brickMetadata.category.name} '
-                'but is located in $category directory'
-              );
+                  'Brick ${brickMetadata.name} has category ${brickMetadata.category.name} '
+                  'but is located in $category directory');
             }
           }
         }
@@ -86,14 +87,14 @@ class BrickDiscoveryService {
   }
 
   /// Load brick metadata from a directory
-  /// 
+  ///
   /// Looks for brick.yaml or template.yaml in the brick directory
   Future<BrickMetadata?> loadBrickMetadata(String brickPath) async {
     try {
       // Check for brick.yaml first, then template.yaml
       final brickYamlFile = File(path.join(brickPath, 'brick.yaml'));
       final templateYamlFile = File(path.join(brickPath, 'template.yaml'));
-      
+
       File? yamlFile;
       if (await brickYamlFile.exists()) {
         yamlFile = brickYamlFile;
@@ -117,9 +118,10 @@ class BrickDiscoveryService {
 
       // Create metadata from YAML
       final metadata = BrickMetadata.fromYaml(yaml, brickPath);
-      
+
       if (!metadata.isValid) {
-        logger.warn('Invalid brick metadata for ${metadata.name}: ${metadata.validationErrors.join(', ')}');
+        logger.warn(
+            'Invalid brick metadata for ${metadata.name}: ${metadata.validationErrors.join(', ')}');
       }
 
       return metadata;
@@ -140,27 +142,32 @@ class BrickDiscoveryService {
   Future<List<BrickMetadata>> getBricksByType(BrickType type) async {
     // This would typically use a cached registry
     // For now, we'll implement a simple search
-    throw UnimplementedError('getBricksByType will be implemented with BrickRegistry');
+    throw UnimplementedError(
+        'getBricksByType will be implemented with BrickRegistry');
   }
 
   /// Get all bricks of a specific category
-  Future<List<BrickMetadata>> getBricksByCategory(BrickCategory category) async {
+  Future<List<BrickMetadata>> getBricksByCategory(
+      BrickCategory category) async {
     // This would typically use a cached registry
     // For now, we'll implement a simple search
-    throw UnimplementedError('getBricksByCategory will be implemented with BrickRegistry');
+    throw UnimplementedError(
+        'getBricksByCategory will be implemented with BrickRegistry');
   }
 
   /// Check if a brick exists
   Future<bool> brickExists(String name) async {
     // This would typically use a cached registry
     // For now, we'll implement a simple search
-    throw UnimplementedError('brickExists will be implemented with BrickRegistry');
+    throw UnimplementedError(
+        'brickExists will be implemented with BrickRegistry');
   }
 
   /// Get all available brick names
   Future<List<String>> getAvailableBrickNames() async {
     // This would typically use a cached registry
     // For now, we'll implement a simple search
-    throw UnimplementedError('getAvailableBrickNames will be implemented with BrickRegistry');
+    throw UnimplementedError(
+        'getAvailableBrickNames will be implemented with BrickRegistry');
   }
 }

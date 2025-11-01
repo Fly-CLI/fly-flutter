@@ -1,17 +1,20 @@
 # AI Integration Examples
 
-This document provides real-world examples of integrating Fly CLI with various AI coding assistants and automation tools.
+This document provides real-world examples of integrating Fly CLI with various AI coding assistants
+and automation tools.
 
 ## Cursor Integration
 
 ### Setup Cursor with Fly CLI
 
 1. **Install Fly CLI globally:**
+
 ```bash
 dart pub global activate fly_cli
 ```
 
 2. **Create a Cursor workspace configuration:**
+
 ```json
 // .cursor/settings.json
 {
@@ -22,6 +25,7 @@ dart pub global activate fly_cli
 ```
 
 3. **Generate project context:**
+
 ```bash
 fly context export --output=.cursor/project_context.md
 ```
@@ -30,7 +34,8 @@ fly context export --output=.cursor/project_context.md
 
 **Prompt:** "Create a new Flutter project with authentication screens using Fly CLI"
 
-**AI Response:** "I'll help you create a Flutter project with authentication screens using Fly CLI. Let me generate the project and add the necessary screens."
+**AI Response:** "I'll help you create a Flutter project with authentication screens using Fly CLI.
+Let me generate the project and add the necessary screens."
 
 ```bash
 # Create the project
@@ -54,7 +59,8 @@ fly context export --include-dependencies=true --include-structure=true
 
 **User:** "I need to add a user profile screen with image upload functionality"
 
-**Copilot Response:** "I'll help you add a user profile screen with image upload using Fly CLI. Let me generate the necessary components."
+**Copilot Response:** "I'll help you add a user profile screen with image upload using Fly CLI. Let
+me generate the necessary components."
 
 ```bash
 # Add profile screen
@@ -116,6 +122,7 @@ class ProfileScreen extends ConsumerWidget {
 ### Upload Project Schema
 
 1. **Export comprehensive project information:**
+
 ```bash
 fly schema export --output=project_schema.json
 fly context export --include-dependencies=true --include-structure=true --output=project_context.json
@@ -124,6 +131,7 @@ fly context export --include-dependencies=true --include-structure=true --output
 2. **Upload to ChatGPT Code Interpreter**
 
 3. **Use in prompts:**
+
 ```
 Based on this Fly CLI project schema, help me:
 1. Add a shopping cart feature with the following requirements:
@@ -137,6 +145,7 @@ Based on this Fly CLI project schema, help me:
 ```
 
 ### ChatGPT Response:
+
 ```bash
 # Generate the shopping cart feature
 fly add screen cart --feature=shopping --type=list --with-viewmodel=true --with-tests=true
@@ -151,7 +160,8 @@ fly add service cart_service --feature=shopping --type=repository --with-tests=t
 
 **User:** "I need to migrate my existing Flutter app to use Fly CLI's Riverpod template"
 
-**Claude Response:** "I'll help you migrate your app to Fly CLI's Riverpod template. Let me analyze your current structure and provide a migration plan."
+**Claude Response:** "I'll help you migrate your app to Fly CLI's Riverpod template. Let me analyze
+your current structure and provide a migration plan."
 
 ```bash
 # First, let's analyze your current project
@@ -165,20 +175,21 @@ fly context export --output=migration_context.md
 ```
 
 **Migration Plan:**
+
 1. **State Management Migration:**
-   - Convert BLoC/Cubit to Riverpod providers
-   - Update UI components to use ConsumerWidget
-   - Migrate dependency injection
+    - Convert BLoC/Cubit to Riverpod providers
+    - Update UI components to use ConsumerWidget
+    - Migrate dependency injection
 
 2. **Project Structure:**
-   - Reorganize features into Fly CLI structure
-   - Update imports and exports
-   - Migrate routing to GoRouter
+    - Reorganize features into Fly CLI structure
+    - Update imports and exports
+    - Migrate routing to GoRouter
 
 3. **Services Migration:**
-   - Convert API clients to use fly_networking
-   - Update error handling with Result types
-   - Migrate to ViewState pattern
+    - Convert API clients to use fly_networking
+    - Update error handling with Result types
+    - Migrate to ViewState pattern
 
 ## Local AI Model Integration
 
@@ -421,18 +432,21 @@ fly init my_app
 ### Common Issues
 
 **JSON parsing errors:**
+
 ```bash
 # Ensure valid JSON output
 fly create my_app --template=riverpod --output=json | jq .
 ```
 
 **AI context not found:**
+
 ```bash
 # Regenerate context
 fly context export --output=.ai/project_context.md
 ```
 
 **Command not found:**
+
 ```bash
 # Check installation
 fly doctor

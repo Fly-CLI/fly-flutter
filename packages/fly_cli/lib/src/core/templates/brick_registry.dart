@@ -56,7 +56,7 @@ class BrickRegistry {
   final Map<String, BrickValidationResult> _validationCache = {};
 
   /// Discover all available bricks
-  /// 
+  ///
   /// Searches in the known template directory structure:
   /// - {templatesDirectory}/projects/
   /// - {templatesDirectory}/components/
@@ -70,7 +70,7 @@ class BrickRegistry {
 
     // Get templates directory from centralized location
     final templatesDirectory = TemplateManager.findTemplatesDirectory();
-    
+
     // Search in projects subdirectory
     final projectsPath = path.join(templatesDirectory, 'projects');
     final projectsBricks = await _discoverBricksInPath(projectsPath);
@@ -132,7 +132,7 @@ class BrickRegistry {
       // Check if brick.yaml or template.yaml exists
       final brickYamlFile = File(path.join(brickPath, 'brick.yaml'));
       final templateYamlFile = File(path.join(brickPath, 'template.yaml'));
-      
+
       File? yamlFile;
       if (await brickYamlFile.exists()) {
         yamlFile = brickYamlFile;
@@ -218,8 +218,8 @@ class BrickRegistry {
     if (pathSegments.contains('projects')) {
       // Make sure it's actually in the templates/projects directory structure
       final templatesIndex = pathSegments.indexOf('templates');
-      if (templatesIndex != -1 && 
-          templatesIndex + 1 < pathSegments.length && 
+      if (templatesIndex != -1 &&
+          templatesIndex + 1 < pathSegments.length &&
           pathSegments[templatesIndex + 1] == 'projects') {
         logger.detail('Detected as project brick');
         return BrickType.project;
@@ -312,7 +312,7 @@ class BrickRegistry {
       // Check if brick.yaml or template.yaml exists and is valid
       final brickYamlFile = File(path.join(brick.path, 'brick.yaml'));
       final templateYamlFile = File(path.join(brick.path, 'template.yaml'));
-      
+
       File? yamlFile;
       if (await brickYamlFile.exists()) {
         yamlFile = brickYamlFile;
@@ -321,7 +321,7 @@ class BrickRegistry {
       } else {
         errors.add('brick.yaml or template.yaml file does not exist');
       }
-      
+
       if (yamlFile != null && await yamlFile.exists()) {
         try {
           final yamlContent = await yamlFile.readAsString();

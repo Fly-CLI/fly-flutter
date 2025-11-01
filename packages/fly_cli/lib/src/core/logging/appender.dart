@@ -9,5 +9,3 @@ abstract class Appender {
 
   Future<void> dispose() async {}
 }
-
-

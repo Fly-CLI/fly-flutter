@@ -17,7 +17,7 @@ enum BrickType {
 }
 
 /// Self-describing brick metadata loaded from brick.yaml
-/// 
+///
 /// This replaces path-based type inference with explicit metadata
 /// declared in the brick.yaml file.
 class BrickMetadata {
@@ -132,14 +132,18 @@ class BrickMetadata {
       }
 
       // Parse optional fields
-      final features = (yaml['features'] as List<dynamic>?)?.cast<String>() ?? [];
-      final packages = (yaml['packages'] as List<dynamic>?)?.cast<String>() ?? [];
-      
+      final features =
+          (yaml['features'] as List<dynamic>?)?.cast<String>() ?? [];
+      final packages =
+          (yaml['packages'] as List<dynamic>?)?.cast<String>() ?? [];
+
       final minFlutterSdkStr = yaml['min_flutter_sdk'] as String?;
-      final minFlutterSdk = minFlutterSdkStr != null ? Version.parse(minFlutterSdkStr) : null;
-      
+      final minFlutterSdk =
+          minFlutterSdkStr != null ? Version.parse(minFlutterSdkStr) : null;
+
       final minDartSdkStr = yaml['min_dart_sdk'] as String?;
-      final minDartSdk = minDartSdkStr != null ? Version.parse(minDartSdkStr) : null;
+      final minDartSdk =
+          minDartSdkStr != null ? Version.parse(minDartSdkStr) : null;
 
       return BrickMetadata(
         name: yaml['name'] as String? ?? '',
@@ -245,8 +249,10 @@ class BrickMetadata {
         }
         break;
       case BrickCategory.component:
-        if (![BrickType.screen, BrickType.service, BrickType.widget].contains(type)) {
-          errors.add('Component category must have screen, service, or widget type');
+        if (![BrickType.screen, BrickType.service, BrickType.widget]
+            .contains(type)) {
+          errors.add(
+              'Component category must have screen, service, or widget type');
         }
         break;
       case BrickCategory.addon:
@@ -263,7 +269,8 @@ class BrickMetadata {
   }
 
   @override
-  String toString() => 'BrickMetadata(name: $name, type: $type, category: $category, version: $version)';
+  String toString() =>
+      'BrickMetadata(name: $name, type: $type, category: $category, version: $version)';
 
   @override
   bool operator ==(Object other) {
@@ -294,18 +301,22 @@ class BrickValidationResult {
   final List<String> errors;
   final List<String> warnings;
 
-  factory BrickValidationResult.success() => const BrickValidationResult(isValid: true);
+  factory BrickValidationResult.success() =>
+      const BrickValidationResult(isValid: true);
 
-  factory BrickValidationResult.failure(List<String> errors) => BrickValidationResult(
-    isValid: false,
-    errors: errors,
-  );
+  factory BrickValidationResult.failure(List<String> errors) =>
+      BrickValidationResult(
+        isValid: false,
+        errors: errors,
+      );
 
-  factory BrickValidationResult.withWarnings(List<String> warnings) => BrickValidationResult(
-    isValid: true,
-    warnings: warnings,
-  );
+  factory BrickValidationResult.withWarnings(List<String> warnings) =>
+      BrickValidationResult(
+        isValid: true,
+        warnings: warnings,
+      );
 
   @override
-  String toString() => 'BrickValidationResult(isValid: $isValid, errors: $errors, warnings: $warnings)';
+  String toString() =>
+      'BrickValidationResult(isValid: $isValid, errors: $errors, warnings: $warnings)';
 }

@@ -93,7 +93,8 @@ The cache is stored in platform-specific directories:
 
 ### Cache Expiration
 
-Templates are cached for 7 days by default. After this period, Fly CLI will attempt to download fresh versions when online.
+Templates are cached for 7 days by default. After this period, Fly CLI will attempt to download
+fresh versions when online.
 
 ## Best Practices for Offline Development
 

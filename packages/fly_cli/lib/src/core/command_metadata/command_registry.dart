@@ -1,20 +1,20 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/fly_command_type.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_metadata/command_definition.dart';
 import 'package:fly_cli/src/core/command_metadata/command_wrappers.dart';
 import 'package:fly_cli/src/core/command_metadata/metadata_extractor.dart';
+import 'package:fly_cli/src/core/definitions/fly_command.dart';
 
 /// Registration data returned to CommandRunner for command registration
 class CommandRegistrationData {
-
   CommandRegistrationData({
     required this.topLevelCommands,
     required this.commandGroups,
   });
+
   /// Top-level commands to register (keyed by command type)
-  final Map<FlyCommandType, Command<int>> topLevelCommands;
+  final Map<FlyCommand, Command<int>> topLevelCommands;
 
   /// Command groups to register (keyed by group name)
   final Map<String, Command<int>> commandGroups;
@@ -32,16 +32,16 @@ class CommandMetadataRegistry {
     return _instance!;
   }
 
-  final Map<FlyCommandType, Command<int>> _commandInstances = {};
+  final Map<FlyCommand, Command<int>> _commandInstances = {};
   final Map<String, Command<int>> _commandGroups = {};
   ArgParser? _globalOptionsParser;
   final MetadataExtractor _extractor = const MetadataExtractor();
 
   /// Create all commands and initialize registry
   ///
-  /// This method creates all command instances from the enum, builds groups
-  /// dynamically, stores them internally, and returns registration data for
-  /// CommandRunner to register.
+  /// This method creates all command instances from the unified registry,
+  /// builds groups dynamically, stores them internally, and returns registration
+  /// data for CommandRunner to register.
   ///
   /// [context] - CommandContext for creating command instances
   /// [globalOptionsParser] - ArgParser containing global options
@@ -52,9 +52,10 @@ class CommandMetadataRegistry {
     required CommandContext context,
     required ArgParser globalOptionsParser,
   }) {
-    // Create all command instances from enum
-    final commandInstances = <FlyCommandType, Command<int>>{};
-    for (final commandType in FlyCommandType.values) {
+    // Create all command instances from unified registry
+    // This ensures we only process commands that have factories registered
+    final commandInstances = <FlyCommand, Command<int>>{};
+    for (final commandType in FlyCommand.values) {
       commandInstances[commandType] = commandType.createInstance(context);
     }
 
@@ -68,17 +69,12 @@ class CommandMetadataRegistry {
 
     // Return top-level commands for registration
     // Commands with subcommands should only be registered as groups, not as top-level commands
-    final topLevelCommands = <FlyCommandType, Command<int>>{};
+    final topLevelCommands = <FlyCommand, Command<int>>{};
     for (final entry in commandInstances.entries) {
       final commandType = entry.key;
       if (commandType.isTopLevel && commandType.group == null) {
-        // Check if this command has subcommands by looking for commands that have this as parent
-        final hasSubcommands = commandInstances.keys.any((otherType) => 
-          otherType.parentCommand == commandType);
-        
-        if (!hasSubcommands) {
-          topLevelCommands[commandType] = entry.value;
-        }
+        // Top-level commands without groups are registered directly
+        topLevelCommands[commandType] = entry.value;
       }
     }
 
@@ -93,12 +89,12 @@ class CommandMetadataRegistry {
   /// Groups commands by their `group` property and creates group command
   /// instances containing their respective subcommands.
   Map<String, Command<int>> _buildCommandGroups(
-    Map<FlyCommandType, Command<int>> commandInstances,
+    Map<FlyCommand, Command<int>> commandInstances,
   ) {
     final groups = <String, Command<int>>{};
 
     // Group commands by group
-    final groupMap = <String, List<FlyCommandType>>{};
+    final groupMap = <String, List<FlyCommand>>{};
     for (final entry in commandInstances.entries) {
       final commandType = entry.key;
       final group = commandType.group;
@@ -143,7 +139,7 @@ class CommandMetadataRegistry {
   /// [commandGroups] - Map of group names to their pre-created group command instances
   /// [globalOptionsParser] - ArgParser containing global options
   void initializeFromInstances({
-    required Map<FlyCommandType, Command<int>> commandInstances,
+    required Map<FlyCommand, Command<int>> commandInstances,
     required Map<String, Command<int>> commandGroups,
     required ArgParser globalOptionsParser,
   }) {
@@ -274,7 +270,8 @@ class CommandMetadataRegistry {
     final globalOptions = _extractGlobalOptions();
 
     return {
-      'commands': allCommands.map((key, value) => MapEntry(key, value.toJson())),
+      'commands':
+          allCommands.map((key, value) => MapEntry(key, value.toJson())),
       'global_options': globalOptions.map((o) => o.toJson()).toList(),
     };
   }
@@ -287,5 +284,6 @@ class CommandMetadataRegistry {
   }
 
   /// Check if the registry has been initialized
-  bool get isInitialized => _commandInstances.isNotEmpty || _commandGroups.isNotEmpty;
+  bool get isInitialized =>
+      _commandInstances.isNotEmpty || _commandGroups.isNotEmpty;
 }

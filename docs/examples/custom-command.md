@@ -1,10 +1,12 @@
 # Custom Command Implementation Example
 
-This example demonstrates how to create a custom command using the new Fly CLI architecture. We'll build a `deploy` command that shows all the features of the enhanced architecture.
+This example demonstrates how to create a custom command using the new Fly CLI architecture. We'll
+build a `deploy` command that shows all the features of the enhanced architecture.
 
 ## Command Overview
 
 The `deploy` command will:
+
 - Deploy a Flutter app to various platforms
 - Support multiple deployment targets (Firebase, App Store, Google Play)
 - Include validation for deployment prerequisites
@@ -649,26 +651,31 @@ void main() {
 ## Usage Examples
 
 ### Basic Deployment
+
 ```bash
 fly deploy --target=firebase --environment=development
 ```
 
 ### Interactive Mode
+
 ```bash
 fly deploy --interactive
 ```
 
 ### Production Deployment
+
 ```bash
 fly deploy --target=appstore --environment=production --force
 ```
 
 ### Skip Tests
+
 ```bash
 fly deploy --target=web --skip-tests
 ```
 
 ### Dry Run
+
 ```bash
 fly deploy --target=playstore --plan
 ```
@@ -684,4 +691,5 @@ fly deploy --target=playstore --plan
 7. **Error Handling**: Meaningful error messages and suggestions
 8. **Result Structure**: Rich data and next steps
 
-This example shows how the new architecture enables clean, maintainable, and extensible command implementations while following SOLID principles.
+This example shows how the new architecture enables clean, maintainable, and extensible command
+implementations while following SOLID principles.

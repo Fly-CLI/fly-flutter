@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fly_core/src/retry/retry_executor.dart';
 import 'package:fly_core/src/retry/retry_policy.dart';
@@ -193,7 +191,7 @@ void main() {
       );
 
       final stopwatch = Stopwatch()..start();
-      
+
       try {
         await executor.execute(() async {
           throw Exception('SocketException: Connection failed');
@@ -201,7 +199,7 @@ void main() {
       } catch (e) {
         // Expected
       }
-      
+
       stopwatch.stop();
 
       // Should have waited for retries (2 retries with delays)
@@ -241,8 +239,9 @@ void main() {
 
     group('TimeoutException', () {
       test('includes timeout message and duration', () {
-        const exception = TimeoutException('Test timeout', Duration(seconds: 5));
-        
+        const exception =
+            TimeoutException('Test timeout', Duration(seconds: 5));
+
         expect(exception.message, 'Test timeout');
         expect(exception.duration, const Duration(seconds: 5));
         expect(exception.toString(), 'Test timeout');
@@ -250,4 +249,3 @@ void main() {
     });
   });
 }
-

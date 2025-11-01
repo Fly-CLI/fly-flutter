@@ -1,11 +1,10 @@
 import 'dart:io';
 
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart' as path;
-
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart' as path;
 
 /// Preview of what will be generated during dry-run
 class GenerationPreview {
@@ -161,7 +160,7 @@ class GenerationPreviewService {
     String? projectName,
   }) async {
     logger.detail('_generateNewPreview called with projectName: $projectName');
-    
+
     final warnings = <String>[];
     final filesToGenerate = <String>[];
     final directoriesToCreate = <String>[];
@@ -170,7 +169,7 @@ class GenerationPreviewService {
     final targetDir = projectName != null
         ? path.join(outputDirectory, projectName)
         : outputDirectory;
-    
+
     logger.detail('Target directory determined: $targetDir');
 
     // Analyze brick content
@@ -300,7 +299,7 @@ class GenerationPreviewService {
   /// Get brick path based on name and type
   String? _getBrickPath(String brickName, BrickType brickType) {
     final templatesDirectory = TemplateManager.findTemplatesDirectory();
-    
+
     switch (brickType) {
       case BrickType.project:
         final brickPath = path.join(templatesDirectory, 'projects', brickName);
@@ -312,7 +311,8 @@ class GenerationPreviewService {
       case BrickType.screen:
       case BrickType.service:
       case BrickType.component:
-        final brickPath = path.join(templatesDirectory, 'components', brickName);
+        final brickPath =
+            path.join(templatesDirectory, 'components', brickName);
         final dir = Directory(brickPath);
         if (dir.existsSync()) {
           return brickPath;

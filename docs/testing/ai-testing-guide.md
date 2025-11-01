@@ -1,10 +1,13 @@
 # AI Assistant Testing Guide for Fly CLI
 
-This guide explains how AI assistants can test Fly CLI capabilities using the test project via MCP protocol.
+This guide explains how AI assistants can test Fly CLI capabilities using the test project via MCP
+protocol.
 
 ## Overview
 
-The `examples/test_project/` directory contains a Flutter project specifically designed as a test bed for validating Fly CLI features. AI assistants can use MCP tools and prompts to test CLI capabilities naturally.
+The `examples/test_project/` directory contains a Flutter project specifically designed as a test
+bed for validating Fly CLI features. AI assistants can use MCP tools and prompts to test CLI
+capabilities naturally.
 
 ## Prerequisites
 
@@ -19,16 +22,19 @@ The `examples/test_project/` directory contains a Flutter project specifically d
 First, discover what CLI features are available:
 
 **List MCP Tools:**
+
 ```bash
 ./scripts/mcp/list.sh --type=tools
 ```
 
 **List MCP Prompts:**
+
 ```bash
 ./scripts/mcp/list.sh --type=prompts
 ```
 
 **List MCP Resources:**
+
 ```bash
 ./scripts/mcp/list.sh --type=resources
 ```
@@ -38,11 +44,13 @@ First, discover what CLI features are available:
 Call MCP tools to execute CLI commands:
 
 **Example: Test Template Listing**
+
 - Call MCP tool: `fly.template.list`
 - Verify it returns available templates
 - Validate JSON structure
 
 **Example: Test Adding a Screen**
+
 - Call MCP tool: `fly.add.screen` with parameters:
   ```json
   {
@@ -56,6 +64,7 @@ Call MCP tools to execute CLI commands:
 - Validate code compiles
 
 **Example: Test Adding a Service**
+
 - Call MCP tool: `fly.add.service` with parameters:
   ```json
   {
@@ -72,6 +81,7 @@ Call MCP tools to execute CLI commands:
 Call MCP prompts to test template rendering:
 
 **Example: Test Feature Scaffolding Prompt**
+
 - Call MCP prompt: `fly.scaffold.feature` with arguments:
   ```json
   {
@@ -90,19 +100,19 @@ Call MCP prompts to test template rendering:
 After executing CLI commands via MCP:
 
 1. **Check Project Structure**:
-   - Verify files are created in correct locations
-   - Check directory structure matches Fly conventions
-   - Ensure imports are correct
+    - Verify files are created in correct locations
+    - Check directory structure matches Fly conventions
+    - Ensure imports are correct
 
 2. **Validate Code Quality**:
-   - Run `flutter analyze` on test project
-   - Check for compilation errors
-   - Verify code follows Fly patterns
+    - Run `flutter analyze` on test project
+    - Check for compilation errors
+    - Verify code follows Fly patterns
 
 3. **Test Functionality**:
-   - Run `flutter pub get` in test project
-   - Run `flutter build apk --debug`
-   - Check that project compiles successfully
+    - Run `flutter pub get` in test project
+    - Run `flutter build apk --debug`
+    - Check that project compiles successfully
 
 ### 5. Reset Project When Needed
 
@@ -114,8 +124,8 @@ To start fresh testing:
    ```
 
 2. **Recreate Project** (via MCP or CLI):
-   - Call `fly.template.apply` with riverpod template
-   - Or use CLI: `cd examples && fly create test_project --template=riverpod`
+    - Call `fly.template.apply` with riverpod template
+    - Or use CLI: `cd examples && fly create test_project --template=riverpod`
 
 ## Common Test Scenarios
 
@@ -166,18 +176,21 @@ After testing CLI features, verify:
 ## Troubleshooting
 
 **Project doesn't compile:**
+
 - Check Flutter SDK version compatibility
 - Verify all dependencies are in pubspec.yaml
 - Run `flutter pub get` to fetch dependencies
 - Check for syntax errors in generated code
 
 **Files not created:**
+
 - Verify MCP tool was called with correct parameters
 - Check working directory is correct
 - Ensure project path is valid
 - Check file permissions
 
 **MCP tool errors:**
+
 - Verify MCP server is running
 - Check tool parameters match schema
 - Review error messages in MCP server logs

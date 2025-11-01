@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:fly_core/src/retry/retry.dart';
 
 /// Retry interceptor for API requests
-/// 
+///
 /// Automatically retries failed requests with exponential backoff
 /// for network errors and certain HTTP status codes.
 class RetryInterceptor extends Interceptor {
@@ -21,35 +21,36 @@ class RetryInterceptor extends Interceptor {
     this.retryIdempotentOnly = true,
   })  : _dio = dio,
         retryPolicy = RetryPolicy(
-          maxAttempts: (maxRetries ?? 3) + 1, // +1 for initial attempt
+          maxAttempts: (maxRetries ?? 3) + 1,
+          // +1 for initial attempt
           initialDelay: initialDelay ?? const Duration(seconds: 1),
           backoffMultiplier: 2.0,
           maxDelay: const Duration(seconds: 30),
           enableTimeout: false,
         ),
         retryStrategy = const ExponentialBackoffStrategy();
-  
+
   /// The owning Dio used to re-dispatch the request (preserves interceptors/options)
   final Dio _dio;
 
   /// Retry policy for network operations
   final RetryPolicy retryPolicy;
-  
+
   /// Retry strategy for calculating delays
   final RetryStrategy retryStrategy;
-  
+
   /// HTTP status codes that should be retried
   final List<int> retryableStatusCodes;
-  
+
   /// Exception types that should be retried
   final List<DioExceptionType> retryableExceptions;
 
   /// Whether to retry only idempotent HTTP methods by default
   final bool retryIdempotentOnly;
-  
+
   /// Maximum number of retries (for compatibility)
   int get maxRetries => retryPolicy.maxAttempts - 1;
-  
+
   @override
   Future<void> onError(
     DioException err,
@@ -59,14 +60,15 @@ class RetryInterceptor extends Interceptor {
       handler.next(err);
       return;
     }
-    
-    final currentRetryCount = (err.requestOptions.extra['retryCount'] as int?) ?? 0;
+
+    final currentRetryCount =
+        (err.requestOptions.extra['retryCount'] as int?) ?? 0;
 
     if (currentRetryCount >= maxRetries) {
       handler.next(err);
       return;
     }
-    
+
     final computedDelay = _getPlannedDelay(err, currentRetryCount);
 
     await Future<void>.delayed(computedDelay);
@@ -88,13 +90,13 @@ class RetryInterceptor extends Interceptor {
       handler.next(err);
     }
   }
-  
+
   bool _shouldRetry(DioException err) {
     // Check if the exception type is retryable
     if (retryableExceptions.contains(err.type)) {
       return _isMethodRetryable(err.requestOptions);
     }
-    
+
     // Check if the HTTP status code is retryable
     if (err.response != null) {
       final statusCode = err.response!.statusCode;
@@ -102,10 +104,10 @@ class RetryInterceptor extends Interceptor {
         return _isMethodRetryable(err.requestOptions);
       }
     }
-    
+
     return false;
   }
-  
+
   /// Determine if the HTTP method is safe to retry
   bool _isMethodRetryable(RequestOptions options) {
     if (!retryIdempotentOnly) {
@@ -131,7 +133,8 @@ class RetryInterceptor extends Interceptor {
   Duration _getPlannedDelay(DioException err, int retryCount) {
     // Honor Retry-After for 429/503 responses when provided
     final response = err.response;
-    if (response != null && response.statusCode != null &&
+    if (response != null &&
+        response.statusCode != null &&
         (response.statusCode == 429 || response.statusCode == 503)) {
       final retryAfter = response.headers.value('retry-after');
       final parsed = _parseRetryAfter(retryAfter);

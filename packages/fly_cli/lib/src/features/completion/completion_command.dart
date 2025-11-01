@@ -1,14 +1,13 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/command_middleware.dart';
-import 'package:fly_cli/src/core/command_foundation/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
-
 import 'package:fly_cli/src/features/completion/completion_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';
@@ -20,7 +19,8 @@ class CompletionCommand extends FlyCommand {
   CompletionCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory CompletionCommand.create(CommandContext context) => CompletionCommand(context);
+  factory CompletionCommand.create(CommandContext context) =>
+      CompletionCommand(context);
 
   @override
   String get name => 'completion';
@@ -57,9 +57,9 @@ class CompletionCommand extends FlyCommand {
 
   @override
   List<CommandMiddleware> get middleware => [
-    LoggingMiddleware(),
-    MetricsMiddleware(),
-  ];
+        LoggingMiddleware(),
+        MetricsMiddleware(),
+      ];
 
   @override
   Future<CommandResult> execute() async {
@@ -73,7 +73,7 @@ class CompletionCommand extends FlyCommand {
           suggestion: 'This command must be run through the command runner',
         );
       }
-      
+
       final shell = args['shell'] as String? ?? 'bash';
       final outputFile = args['file'] as String?;
       final install = args['install'] as bool? ?? false;
@@ -156,7 +156,8 @@ class CompletionCommand extends FlyCommand {
         data: enrichedData,
         nextSteps: [
           NextStep(
-            command: 'fly completion --shell=$shell --file=fly_${shell}_completion',
+            command:
+                'fly completion --shell=$shell --file=fly_${shell}_completion',
             description: 'Save completion script to a file',
           ),
           NextStep(
@@ -212,8 +213,8 @@ class CompletionCommand extends FlyCommand {
   }
 
   /// Handle installation of completion script
-  Future<CommandResult> _handleInstall(String shell, String script,
-      Map<String, dynamic> data) async {
+  Future<CommandResult> _handleInstall(
+      String shell, String script, Map<String, dynamic> data) async {
     try {
       logger.info('📦 Installing $shell completion script...');
 
@@ -248,8 +249,8 @@ class CompletionCommand extends FlyCommand {
   }
 
   /// Handle uninstallation of completion script
-  Future<CommandResult> _handleUninstall(String shell,
-      Map<String, dynamic> data) async {
+  Future<CommandResult> _handleUninstall(
+      String shell, Map<String, dynamic> data) async {
     try {
       logger.info('🗑️ Removing $shell completion script...');
 

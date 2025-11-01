@@ -1,6 +1,7 @@
 ## Fly MCP Quickstart (Cursor & Claude)
 
 ### Prerequisites
+
 - Flutter SDK installed and in PATH
 - Fly CLI installed and available in PATH
 - Working directory is a Flutter project (for some tools)
@@ -14,11 +15,13 @@ fly mcp serve --stdio
 ```
 
 **Configuration Options**:
+
 - `--max-message-mb`: Maximum message size in MB (default: 2)
 - `--default-timeout-seconds`: Default tool timeout in seconds (default: 300 = 5 minutes)
 - `--max-concurrency`: Maximum concurrent tool executions (default: 10)
 
 **Example with custom settings**:
+
 ```bash
 fly mcp serve --stdio --default-timeout-seconds=600 --max-concurrency=5
 ```
@@ -43,7 +46,8 @@ Restart Cursor after configuration.
 
 ### Claude Desktop Integration
 
-Add to Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Add to Claude Desktop configuration (
+`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
@@ -60,6 +64,7 @@ Add to Claude Desktop configuration (`~/Library/Application Support/Claude/claud
 ### Verification
 
 **Smoke Test Steps**:
+
 1. List available tools: Call `tools/list` - should return 7 tools
 2. Test connectivity: Call `fly.echo` with `{"message": "hello"}`
 3. Check diagnostics: Call `flutter.doctor` to verify Flutter SDK
@@ -69,19 +74,23 @@ Add to Claude Desktop configuration (`~/Library/Application Support/Claude/claud
 ### Troubleshooting
 
 **Server doesn't start**:
+
 - Check Flutter SDK: Run `flutter doctor -v`
 - Verify Fly CLI: Run `fly --version`
 - Check permissions: Ensure `fly` is executable
 
 **Tools timeout**:
+
 - Increase timeout: `--default-timeout-seconds=600` (10 minutes)
 - Check logs in stderr for timeout details
 
 **Concurrency limits**:
+
 - Adjust limits: `--max-concurrency=20` for more parallel operations
 - Some tools have per-tool limits (see tool documentation)
 
 **Message size errors**:
+
 - Increase limit: `--max-message-mb=5` for larger responses
 - Use pagination for large resources
 

@@ -5,12 +5,12 @@ part 'profile_provider.g.dart';
 
 // User Model
 class User {
-
   const User({
     required this.name,
     required this.email,
     required this.age,
   });
+
   final String name;
   final String email;
   final int age;
@@ -19,11 +19,12 @@ class User {
     String? name,
     String? email,
     int? age,
-  }) => User(
-      name: name ?? this.name,
-      email: email ?? this.email,
-      age: age ?? this.age,
-    );
+  }) =>
+      User(
+        name: name ?? this.name,
+        email: email ?? this.email,
+        age: age ?? this.age,
+      );
 }
 
 // User Provider using Riverpod v3 syntax
@@ -38,7 +39,7 @@ class UserNotifier extends _$UserNotifier {
   Future<void> _loadUser() async {
     // Simulate loading user data
     await Future<void>.delayed(const Duration(seconds: 1));
-    
+
     state = const AsyncValue.data(
       User(
         name: 'John Doe',
@@ -50,12 +51,13 @@ class UserNotifier extends _$UserNotifier {
 
   void updateUser(String name, String email, int age) {
     state.whenData((user) {
-      state = AsyncValue.data(user.copyWith(
-        name: name,
-        email: email,
-        age: age,
-      ),
-    );
+      state = AsyncValue.data(
+        user.copyWith(
+          name: name,
+          email: email,
+          age: age,
+        ),
+      );
     });
   }
 }

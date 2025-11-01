@@ -28,7 +28,8 @@ class MockLogger extends Logger {
 
   /// Detail messages only
   List<String> get detailMessages => _messages
-      .where((m) => m.level == Level.info) // Use info level since detail doesn't exist
+      .where((m) =>
+          m.level == Level.info) // Use info level since detail doesn't exist
       .map((m) => m.message)
       .toList();
 
@@ -39,22 +40,23 @@ class MockLogger extends Logger {
 
   /// Check if a specific message was logged
   bool hasMessage(String message, {Level? level}) => _messages.any((m) {
-      final messageMatch = m.message.contains(message);
-      if (level != null) {
-        return messageMatch && m.level == level;
-      }
-      return messageMatch;
-    });
+        final messageMatch = m.message.contains(message);
+        if (level != null) {
+          return messageMatch && m.level == level;
+        }
+        return messageMatch;
+      });
 
   /// Check if any message contains the given text
-  bool containsMessage(String text) => _messages.any((m) => m.message.contains(text));
+  bool containsMessage(String text) =>
+      _messages.any((m) => m.message.contains(text));
 
   /// Get the last message of a specific level
   String? getLastMessage({Level? level}) {
     final filteredMessages = level != null
         ? _messages.where((m) => m.level == level).toList()
         : _messages;
-    
+
     if (filteredMessages.isEmpty) return null;
     return filteredMessages.last.message;
   }
@@ -83,14 +85,16 @@ class MockLogger extends Logger {
   @override
   void detail(String? message, {LogStyle? style}) {
     if (message != null) {
-      _messages.add(LogMessage(Level.info, message)); // Use info level since detail doesn't exist
+      _messages.add(LogMessage(
+          Level.info, message)); // Use info level since detail doesn't exist
     }
   }
 
   @override
   void alert(String? message, {LogStyle? style}) {
     if (message != null) {
-      _messages.add(LogMessage(Level.error, message)); // Use error level since alert doesn't exist
+      _messages.add(LogMessage(
+          Level.error, message)); // Use error level since alert doesn't exist
     }
   }
 
@@ -115,29 +119,41 @@ class MockLogger extends Logger {
   }) {
     if (expectedInfo != null) {
       for (final expected in expectedInfo) {
-        expect(hasMessage(expected, level: Level.info), isTrue,
-            reason: 'Expected info message: $expected',);
+        expect(
+          hasMessage(expected, level: Level.info),
+          isTrue,
+          reason: 'Expected info message: $expected',
+        );
       }
     }
 
     if (expectedWarnings != null) {
       for (final expected in expectedWarnings) {
-        expect(hasMessage(expected, level: Level.warning), isTrue,
-            reason: 'Expected warning message: $expected',);
+        expect(
+          hasMessage(expected, level: Level.warning),
+          isTrue,
+          reason: 'Expected warning message: $expected',
+        );
       }
     }
 
     if (expectedErrors != null) {
       for (final expected in expectedErrors) {
-        expect(hasMessage(expected, level: Level.error), isTrue,
-            reason: 'Expected error message: $expected',);
+        expect(
+          hasMessage(expected, level: Level.error),
+          isTrue,
+          reason: 'Expected error message: $expected',
+        );
       }
     }
 
     if (expectedDetails != null) {
       for (final expected in expectedDetails) {
-        expect(hasMessage(expected, level: Level.info), isTrue, // Use info level since detail doesn't exist
-            reason: 'Expected detail message: $expected',);
+        expect(
+          hasMessage(expected, level: Level.info), isTrue,
+          // Use info level since detail doesn't exist
+          reason: 'Expected detail message: $expected',
+        );
       }
     }
   }
@@ -162,8 +178,8 @@ class MockLogger extends Logger {
 
 /// Represents a logged message with its level
 class LogMessage {
-
   LogMessage(this.level, this.message);
+
   final Level level;
   final String message;
 
@@ -175,8 +191,12 @@ class LogMessage {
 extension MockLoggerMatchers on MockLogger {
   /// Expect that a specific message was logged
   void expectMessage(String message, {Level? level}) {
-    expect(hasMessage(message, level: level), isTrue,
-        reason: 'Expected message: $message${level != null ? ' (${level.name})' : ''}',);
+    expect(
+      hasMessage(message, level: level),
+      isTrue,
+      reason:
+          'Expected message: $message${level != null ? ' (${level.name})' : ''}',
+    );
   }
 
   /// Expect that no messages were logged
@@ -186,7 +206,10 @@ extension MockLoggerMatchers on MockLogger {
 
   /// Expect that exactly N messages were logged
   void expectMessageCount(int count) {
-    expect(_messages.length, equals(count),
-        reason: 'Expected $count messages, got ${_messages.length}',);
+    expect(
+      _messages.length,
+      equals(count),
+      reason: 'Expected $count messages, got ${_messages.length}',
+    );
   }
 }

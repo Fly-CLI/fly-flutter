@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:riverpod_example/features/home/presentation/home_screen.dart';
 import 'package:riverpod_example/features/profile/presentation/profile_screen.dart';
 
-final appRouterProvider = Provider<GoRouter>((ref) => GoRouter(
+final appRouterProvider = Provider<GoRouter>(
+  (ref) => GoRouter(
     initialLocation: '/',
     routes: [
       GoRoute(
@@ -18,4 +18,5 @@ final appRouterProvider = Provider<GoRouter>((ref) => GoRouter(
         builder: (context, state) => const ProfileScreen(),
       ),
     ],
-  ),);
+  ),
+);

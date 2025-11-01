@@ -1,5 +1,5 @@
 /// Cache for file operations with TTL support
-/// 
+///
 /// Provides in-memory caching of file contents with expiration
 /// to reduce redundant file I/O operations.
 class FileCache {
@@ -72,7 +72,7 @@ class FileCache {
   CacheStats getStats() {
     var totalBytes = 0;
     DateTime? oldestEntry;
-    
+
     for (final entry in _cache.values) {
       totalBytes += entry.content.length;
       if (oldestEntry == null || entry.timestamp.isBefore(oldestEntry)) {
@@ -137,4 +137,3 @@ class CacheStats {
     };
   }
 }
-

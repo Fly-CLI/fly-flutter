@@ -4,7 +4,8 @@ A production-ready Flutter application created with Fly CLI using the Riverpod t
 
 ## Getting Started
 
-This project is a production-ready Flutter application created with Fly CLI using the Riverpod template. It demonstrates best practices for state management, navigation, and architecture.
+This project is a production-ready Flutter application created with Fly CLI using the Riverpod
+template. It demonstrates best practices for state management, navigation, and architecture.
 
 ### Prerequisites
 
@@ -85,16 +86,19 @@ This project follows the Riverpod architecture pattern with:
 ## Demo Features
 
 ### Counter Demo
+
 - Increment, decrement, and reset functionality
 - State managed with Riverpod StateProvider
 - Demonstrates basic state management patterns
 
 ### Todos Demo
+
 - Add and remove todos
 - AsyncValue for loading states
 - StateNotifier for complex state management
 
 ### Profile Screen
+
 - User information display
 - Theme switching (light/dark mode)
 - Navigation between screens

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:fly_core/fly_core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_provider.g.dart';
 
@@ -15,7 +15,9 @@ class CounterNotifier extends _$CounterNotifier {
   int build() => 0;
 
   void increment() => state++;
+
   void decrement() => state--;
+
   void reset() => state = 0;
 }
 

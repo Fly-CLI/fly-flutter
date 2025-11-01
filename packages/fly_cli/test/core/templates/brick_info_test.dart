@@ -19,7 +19,7 @@ void main() {
             'choices': null,
             'description': 'Project name',
             'prompt': null,
-          }
+          },
         },
         'features': ['feature1', 'feature2'],
         'packages': ['package1'],

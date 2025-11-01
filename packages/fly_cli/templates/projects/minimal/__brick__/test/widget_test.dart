@@ -11,5 +11,5 @@ void main() {
     // Verify that our welcome message is displayed.
     expect(find.text('Welcome to {{project_name}}!'), findsOneWidget);
     expect(find.text('This is a minimal Flutter project created with Fly CLI.'), findsOneWidget);
-  });
+    });
 }

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
+import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:path/path.dart' as path;
 import 'package:pubspec_parse/pubspec_parse.dart';
 
@@ -108,7 +108,8 @@ class VersionUtils {
     }
 
     // Try to get from environment variable (set during build)
-    _cachedBuildNumber = const EnvironmentManager().getString(EnvVar.buildNumber);
+    _cachedBuildNumber =
+        const EnvironmentManager().getString(EnvVar.buildNumber);
     return _cachedBuildNumber;
   }
 
@@ -119,7 +120,7 @@ class VersionUtils {
       final cliDir = _findCliDirectory();
       if (cliDir != null) {
         final result = Process.runSync(
-          'git', 
+          'git',
           ['rev-parse', '--short', 'HEAD'],
           workingDirectory: cliDir,
         );
@@ -140,7 +141,7 @@ class VersionUtils {
     if (buildDate != null) {
       return buildDate;
     }
-    
+
     // Fallback to current time
     return DateTime.now().toIso8601String();
   }
@@ -154,7 +155,8 @@ class VersionUtils {
       // Relative to current script
       path.join(path.dirname(Platform.script.toFilePath()), '..', '..'),
       // Relative to executable
-      path.join(path.dirname(Platform.resolvedExecutable), '..', '..', 'packages', 'fly_cli'),
+      path.join(path.dirname(Platform.resolvedExecutable), '..', '..',
+          'packages', 'fly_cli'),
       // Development path
       path.join(Directory.current.path, 'packages', 'fly_cli'),
     ];
@@ -172,11 +174,12 @@ class VersionUtils {
               return cliPath;
             }
           }
-          
+
           // Also check parent directories for the Fly repository root
           final parentDir = Directory(path.dirname(cliPath));
           if (parentDir.existsSync()) {
-            final parentPubspecFile = File(path.join(parentDir.path, 'pubspec.yaml'));
+            final parentPubspecFile =
+                File(path.join(parentDir.path, 'pubspec.yaml'));
             if (parentPubspecFile.existsSync()) {
               final content = parentPubspecFile.readAsStringSync();
               final pubspec = Pubspec.parse(content);
@@ -201,9 +204,11 @@ class VersionUtils {
       // Current working directory
       'pubspec.yaml',
       // Relative to current script
-      path.join(path.dirname(Platform.script.toFilePath()), '..', '..', 'pubspec.yaml'),
+      path.join(path.dirname(Platform.script.toFilePath()), '..', '..',
+          'pubspec.yaml'),
       // Relative to executable
-      path.join(path.dirname(Platform.resolvedExecutable), '..', '..', 'packages', 'fly_cli', 'pubspec.yaml'),
+      path.join(path.dirname(Platform.resolvedExecutable), '..', '..',
+          'packages', 'fly_cli', 'pubspec.yaml'),
       // Development path
       path.join(Directory.current.path, 'packages', 'fly_cli', 'pubspec.yaml'),
     ];

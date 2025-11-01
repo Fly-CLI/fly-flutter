@@ -67,4 +67,3 @@ class AliasCommand extends Command<int> {
     return result is int ? result : 1;
   }
 }
-

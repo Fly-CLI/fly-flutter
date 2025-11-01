@@ -3,10 +3,12 @@
 ## Overview
 
 Fly MCP provides two types of resources:
+
 - **Workspace Resources**: Read-only access to workspace files
 - **Log Resources**: Runtime and build logs from tool execution
 
 All resources support:
+
 - ✅ Pagination for large content
 - ✅ Byte-range reads
 - ✅ Path sandboxing (security)
@@ -17,24 +19,29 @@ All resources support:
 ## Workspace Resources (`workspace://`)
 
 ### Purpose
+
 Read-only access to files in the workspace that are relevant to Flutter development.
 
 ### Supported File Types
 
 **Dart Files**:
+
 - `.dart` - Dart source files
 
 **Configuration Files**:
+
 - `.yaml`, `.yml` - YAML configuration
 - `pubspec.yaml` - Flutter project manifest
 - `analysis_options.yaml` - Dart analyzer configuration
 
 **Native Platform Files**:
+
 - `.gradle`, `.kt`, `.kts` - Android/Gradle files
 - `.swift`, `.mm`, `.m` - iOS/Objective-C files
 - `.xml`, `.plist` - Platform-specific configs
 
 **Build Files**:
+
 - `CMakeLists.txt` - CMake configuration
 - `Podfile` - CocoaPods configuration
 - `Info.plist` - iOS app info
@@ -62,6 +69,7 @@ Read-only access to files in the workspace that are relevant to Flutter developm
 ```
 
 **Returns**:
+
 ```json
 {
   "items": [
@@ -90,6 +98,7 @@ Read-only access to files in the workspace that are relevant to Flutter developm
 ```
 
 **Returns**:
+
 ```json
 {
   "content": "string",
@@ -103,6 +112,7 @@ Read-only access to files in the workspace that are relevant to Flutter developm
 ### Examples
 
 **Read `pubspec.yaml`**:
+
 ```json
 {
   "method": "resources/read",
@@ -113,6 +123,7 @@ Read-only access to files in the workspace that are relevant to Flutter developm
 ```
 
 **List all Dart files (paginated)**:
+
 ```json
 {
   "method": "resources/list",
@@ -124,6 +135,7 @@ Read-only access to files in the workspace that are relevant to Flutter developm
 ```
 
 **Read file with byte range**:
+
 ```json
 {
   "method": "resources/read",
@@ -140,14 +152,17 @@ Read-only access to files in the workspace that are relevant to Flutter developm
 ## Log Resources (`logs://run`, `logs://build`)
 
 ### Purpose
+
 Access runtime and build logs from tool execution.
 
 ### Log Types
 
 #### `logs://run/{processId}`
+
 Flutter run logs from `flutter.run` tool execution.
 
 #### `logs://build/{buildId}`
+
 Flutter build logs from `flutter.build` tool execution.
 
 ### Storage
@@ -174,6 +189,7 @@ Flutter build logs from `flutter.build` tool execution.
 ```
 
 **Returns**:
+
 ```json
 {
   "items": [
@@ -208,6 +224,7 @@ Flutter build logs from `flutter.build` tool execution.
 ```
 
 **Returns**:
+
 ```json
 {
   "content": "string",
@@ -221,8 +238,10 @@ Flutter build logs from `flutter.build` tool execution.
 ### Examples
 
 **Get logs from flutter.run**:
+
 1. Call `flutter.run` - receive `logResourceUri` in response
 2. Read log resource:
+
 ```json
 {
   "method": "resources/read",
@@ -233,8 +252,10 @@ Flutter build logs from `flutter.build` tool execution.
 ```
 
 **Get logs from flutter.build**:
+
 1. Call `flutter.build` - receive `logResourceUri` in response
 2. Read log resource:
+
 ```json
 {
   "method": "resources/read",
@@ -245,6 +266,7 @@ Flutter build logs from `flutter.build` tool execution.
 ```
 
 **List all available logs**:
+
 ```json
 {
   "method": "resources/list",
@@ -272,6 +294,7 @@ Flutter build logs from `flutter.build` tool execution.
 ### Error Handling
 
 Resources return standard MCP errors:
+
 - **MCP_NOT_FOUND**: Resource URI not found
 - **MCP_TOO_LARGE**: Response exceeds size limits (use pagination)
 - **MCP_PERMISSION_DENIED**: Access denied (outside workspace, not allowed file type)
@@ -302,6 +325,7 @@ Resources return standard MCP errors:
 ### AI Assistant Workflow
 
 **Step 1: List available files**
+
 ```json
 {
   "method": "resources/list",
@@ -312,6 +336,7 @@ Resources return standard MCP errors:
 ```
 
 **Step 2: Read project manifest**
+
 ```json
 {
   "method": "resources/read",
@@ -322,6 +347,7 @@ Resources return standard MCP errors:
 ```
 
 **Step 3: Run app and get logs**
+
 ```json
 {
   "method": "tools/call",
@@ -343,6 +369,7 @@ Resources return standard MCP errors:
 ---
 
 **For more information**:
+
 - See `docs/mcp/quickstart.md` for setup instructions
 - See `docs/mcp/tools.md` for tool documentation
 - See `docs/mcp/MCP_TOOLS_REPORT.md` for comprehensive catalog

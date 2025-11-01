@@ -3,11 +3,13 @@
 ## Overview
 
 Fly MCP provides 7 production-ready tools across 3 categories:
+
 - **Diagnostic Tools**: Test connectivity and environment
 - **Template Tools**: Manage Fly templates
 - **Flutter Development Tools**: Project creation, running, and building
 
 All tools support:
+
 - ✅ JSON Schema validation
 - ✅ Cancellation (`$/cancelRequest`)
 - ✅ Progress notifications (`$/progress`)
@@ -26,6 +28,7 @@ All tools support:
 **Timeout**: Default (5 minutes)
 
 **Parameters**:
+
 ```json
 {
   "message": "string" // Required: Message to echo back
@@ -33,6 +36,7 @@ All tools support:
 ```
 
 **Returns**:
+
 ```json
 {
   "message": "string" // Echoed message
@@ -40,6 +44,7 @@ All tools support:
 ```
 
 **Example**:
+
 ```json
 {
   "name": "fly.echo",
@@ -60,6 +65,7 @@ All tools support:
 **Parameters**: None
 
 **Returns**:
+
 ```json
 {
   "stdout": "string", // Flutter doctor output (truncated to 8KB)
@@ -68,6 +74,7 @@ All tools support:
 ```
 
 **Features**:
+
 - Supports cancellation
 - Progress notifications
 - Output automatically truncated to fit assistant limits
@@ -87,6 +94,7 @@ All tools support:
 **Parameters**: None
 
 **Returns**:
+
 ```json
 {
   "templates": [
@@ -103,6 +111,7 @@ All tools support:
 ```
 
 **Example**:
+
 ```json
 {
   "name": "fly.template.list",
@@ -119,6 +128,7 @@ All tools support:
 **Timeout**: 15 minutes (extended for generation)
 
 **Parameters**:
+
 ```json
 {
   "templateId": "string",      // Required: Template identifier
@@ -134,6 +144,7 @@ All tools support:
 ```
 
 **Returns**:
+
 ```json
 {
   "success": true,
@@ -145,11 +156,13 @@ All tools support:
 ```
 
 **Safety Notes**:
+
 - ⚠️ **Writes to disk**: Creates files in outputDirectory
 - ⚠️ **Requires confirmation**: Must pass `confirm: true`
 - ✅ **Dry-run available**: Use `dryRun: true` for safe preview
 
 **Example**:
+
 ```json
 {
   "name": "fly.template.apply",
@@ -178,6 +191,7 @@ All tools support:
 **Timeout**: 10 minutes (extended for project creation)
 
 **Parameters**:
+
 ```json
 {
   "projectName": "string",        // Required: Project name
@@ -190,6 +204,7 @@ All tools support:
 ```
 
 **Returns**:
+
 ```json
 {
   "success": true,
@@ -200,6 +215,7 @@ All tools support:
 ```
 
 **Example**:
+
 ```json
 {
   "name": "flutter.create",
@@ -223,6 +239,7 @@ All tools support:
 **Concurrency Limit**: 2 concurrent runs
 
 **Parameters**:
+
 ```json
 {
   "deviceId": "string",       // Optional: Target device ID
@@ -237,6 +254,7 @@ All tools support:
 ```
 
 **Returns**:
+
 ```json
 {
   "success": true,
@@ -248,12 +266,14 @@ All tools support:
 ```
 
 **Features**:
+
 - Returns immediately (async execution)
 - Logs available via `logs://run/{processId}` resource
 - Supports cancellation (kills process)
 - Progress notifications
 
 **Example**:
+
 ```json
 {
   "name": "flutter.run",
@@ -268,6 +288,7 @@ All tools support:
 ```
 
 **Access Logs**:
+
 ```json
 {
   "method": "resources/read",
@@ -287,6 +308,7 @@ All tools support:
 **Concurrency Limit**: 3 concurrent builds
 
 **Parameters**:
+
 ```json
 {
   "platform": "string",       // Required: "android" | "ios" | "web" | "macos" | "windows" | "linux"
@@ -301,6 +323,7 @@ All tools support:
 ```
 
 **Returns**:
+
 ```json
 {
   "success": true,
@@ -312,12 +335,14 @@ All tools support:
 ```
 
 **Build Paths by Platform**:
+
 - Android: `build/app/outputs/flutter-apk/app-release.apk`
 - iOS: `build/ios/iphoneos/Runner.app`
 - Web: `build/web`
 - Others: `build/{platform}`
 
 **Example**:
+
 ```json
 {
   "name": "flutter.build",
@@ -351,10 +376,10 @@ Tools have configurable timeouts:
 
 - **Default**: 5 minutes (300 seconds)
 - **Extended timeouts**:
-  - `flutter.build`: 30 minutes
-  - `flutter.run`: 1 hour
-  - `flutter.create`: 10 minutes
-  - `fly.template.apply`: 15 minutes
+    - `flutter.build`: 30 minutes
+    - `flutter.run`: 1 hour
+    - `flutter.create`: 10 minutes
+    - `fly.template.apply`: 15 minutes
 
 Configure via `--default-timeout-seconds` flag or per-tool settings.
 
@@ -364,8 +389,8 @@ Configure via `--default-timeout-seconds` flag or per-tool settings.
 
 - **Global limit**: 10 concurrent tool executions (configurable)
 - **Per-tool limits**:
-  - `flutter.run`: 2 concurrent runs
-  - `flutter.build`: 3 concurrent builds
+    - `flutter.run`: 2 concurrent runs
+    - `flutter.build`: 3 concurrent builds
 
 When limit exceeded, tool returns `MCP_PERMISSION_DENIED` error with current/limit information.
 
@@ -383,6 +408,7 @@ Tools return structured errors with MCP error codes:
 - **-32804** (`MCP_NOT_FOUND`): Tool/resource not found
 
 All errors include:
+
 - `requestId`: Request identifier for correlation
 - `tool`: Tool name (if applicable)
 - `hint`: Helpful remediation message

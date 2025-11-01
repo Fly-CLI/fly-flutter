@@ -1,12 +1,15 @@
 # AI Integration Overview
 
-Fly CLI is the first Flutter CLI tool built specifically for AI coding assistants. Every command outputs machine-readable JSON, making it perfect for integration with Cursor, GitHub Copilot, ChatGPT Code Interpreter, and other AI tools.
+Fly CLI is the first Flutter CLI tool built specifically for AI coding assistants. Every command
+outputs machine-readable JSON, making it perfect for integration with Cursor, GitHub Copilot,
+ChatGPT Code Interpreter, and other AI tools.
 
 ## Why AI-Native?
 
 ### The Problem
 
-Traditional CLI tools output human-readable text that AI assistants struggle to parse and understand. This leads to:
+Traditional CLI tools output human-readable text that AI assistants struggle to parse and
+understand. This leads to:
 
 - **Inconsistent AI behavior** across different commands
 - **Poor error handling** when AI tools misinterpret output
@@ -38,6 +41,7 @@ fly create my_app --template=riverpod --output=json
 ```
 
 **JSON Response Format:**
+
 ```json
 {
   "success": true,
@@ -333,18 +337,21 @@ fi
 ### Common Issues
 
 **JSON parsing errors:**
+
 ```bash
 # Ensure valid JSON output
 fly create my_app --template=riverpod --output=json | jq .
 ```
 
 **Command not found:**
+
 ```bash
 # Check Fly CLI installation
 fly doctor
 ```
 
 **Permission issues:**
+
 ```bash
 # Check file permissions
 ls -la ~/.pub-cache/bin/fly

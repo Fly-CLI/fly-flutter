@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/models.dart';
 import 'package:fly_cli/src/features/context/analyzer_interface.dart';
-import 'package:fly_cli/src/features/context/utils.dart';
-import 'package:fly_cli/src/features/context/architecture_detector.dart';
 import 'package:fly_cli/src/features/context/analyzers/directory_analyzer.dart';
+import 'package:fly_cli/src/features/context/architecture_detector.dart';
+import 'package:fly_cli/src/features/context/models.dart';
+import 'package:fly_cli/src/features/context/utils.dart';
 import 'package:fly_core/src/retry/retry.dart';
 import 'package:path/path.dart' as path;
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -53,12 +53,14 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
       final manifestInfo = await _analyzeManifest(projectDir);
 
       // Determine if this is a Fly project (but keep type as 'flutter' per tests)
-      final isFlyProject = manifestInfo != null || _pubspecContainsFlyPackages(pubspecContent);
+      final isFlyProject =
+          manifestInfo != null || _pubspecContainsFlyPackages(pubspecContent);
       // Always report Flutter as the project type; Fly is indicated via flags
       final projectType = 'flutter';
 
       // Extract platforms
-      final platforms = manifestInfo?.platforms ?? await _extractPlatforms(projectDir);
+      final platforms =
+          manifestInfo?.platforms ?? await _extractPlatforms(projectDir);
 
       return ProjectInfo(
         name: pubspecInfo.name,
@@ -92,7 +94,7 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
     try {
       // Parse as YAML first to get environment constraints
       final yaml = loadYaml(content) as Map<dynamic, dynamic>;
-      
+
       // Extract environment constraints from YAML
       Map<String, String>? environment;
       final envSection = yaml['environment'] as Map<dynamic, dynamic>?;
@@ -104,10 +106,10 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
           environment[key] = value;
         }
       }
-      
+
       // Now parse with pubspec_parse for proper structure
       final pubspec = Pubspec.parse(content);
-      
+
       return PubspecInfo(
         name: pubspec.name,
         version: pubspec.version.toString(),
@@ -187,16 +189,16 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
 
       // Extract organization - required field, defaults to 'com.example'
       final organization = yaml['organization'] as String? ?? 'com.example';
-      
+
       // Extract template - required field
       final template = yaml['template'] as String? ?? 'riverpod';
-      
+
       // Extract name - required field
       final name = yaml['name'] as String? ?? 'fly_project';
-      
+
       // Extract description - optional
       final description = yaml['description'] as String?;
-      
+
       // Extract platforms - defaults to ios, android
       final platformsList = yaml['platforms'] as List?;
       final platforms = platformsList?.cast<String>() ?? ['ios', 'android'];
@@ -219,14 +221,15 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
   /// Check if project uses Fly packages via pubspec content
   bool _pubspecContainsFlyPackages(String pubspecContent) {
     // Look for common Fly packages in dependencies section
-    final flyDepPattern = RegExp(r'(^|\n)\s*fly_(core|state|networking)\s*:', multiLine: true);
+    final flyDepPattern =
+        RegExp(r'(^|\n)\s*fly_(core|state|networking)\s*:', multiLine: true);
     return flyDepPattern.hasMatch(pubspecContent);
   }
 
   /// Extract platforms from project directory structure
   Future<List<String>> _extractPlatforms(Directory projectDir) async {
     final platforms = <String>[];
-    
+
     // Check for platform-specific directories
     final platformDirs = ['ios', 'android', 'web', 'macos', 'windows', 'linux'];
     for (final platform in platformDirs) {
@@ -235,12 +238,12 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
         platforms.add(platform);
       }
     }
-    
+
     // Default to ios and android if no platforms found
     if (platforms.isEmpty) {
       return const ['ios', 'android'];
     }
-    
+
     return platforms;
   }
 
@@ -285,7 +288,7 @@ class UnifiedStructureAnalyzer extends ProjectAnalyzer<StructureInfo> {
         }
         return basename.replaceAll('.dart', '');
       }).toList();
-      
+
       return StructureInfo(
         rootDirectory: projectDir.path,
         directories: result.directories,

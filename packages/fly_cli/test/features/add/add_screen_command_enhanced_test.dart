@@ -1,9 +1,8 @@
-import 'package:fly_cli/src/features/add/add_screen_command.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/add/add_screen_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
-
 
 void main() {
   group('AddScreenCommand', () {
@@ -20,7 +19,8 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Add a new screen component to the current project'));
+        expect(command.description,
+            equals('Add a new screen component to the current project'));
       });
 
       test('should have required arguments', () {
@@ -29,8 +29,10 @@ void main() {
         expect(command.argParser.options.containsKey('with-viewmodel'), isTrue);
         expect(command.argParser.options.containsKey('with-tests'), isTrue);
         expect(command.argParser.options.containsKey('interactive'), isTrue);
-        expect(command.argParser.options.containsKey('with-validation'), isTrue);
-        expect(command.argParser.options.containsKey('with-navigation'), isTrue);
+        expect(
+            command.argParser.options.containsKey('with-validation'), isTrue);
+        expect(
+            command.argParser.options.containsKey('with-navigation'), isTrue);
       });
 
       test('should have correct default values', () {
@@ -55,12 +57,17 @@ void main() {
 
       test('should reject invalid screen names', () {
         expect(NameValidationRule.isValidScreenName(''), isFalse);
-        expect(NameValidationRule.isValidScreenName('Home'), isFalse); // uppercase
-        expect(NameValidationRule.isValidScreenName('user-profile'), isFalse); // hyphen
-        expect(NameValidationRule.isValidScreenName('user.profile'), isFalse); // dot
-        expect(NameValidationRule.isValidScreenName('123screen'), isFalse); // starts with number
+        expect(
+            NameValidationRule.isValidScreenName('Home'), isFalse); // uppercase
+        expect(NameValidationRule.isValidScreenName('user-profile'),
+            isFalse); // hyphen
+        expect(NameValidationRule.isValidScreenName('user.profile'),
+            isFalse); // dot
+        expect(NameValidationRule.isValidScreenName('123screen'),
+            isFalse); // starts with number
         expect(NameValidationRule.isValidScreenName('a'), isFalse); // too short
-        expect(NameValidationRule.isValidScreenName('a' * 51), isFalse); // too long
+        expect(NameValidationRule.isValidScreenName('a' * 51),
+            isFalse); // too long
       });
     });
 
@@ -152,11 +159,13 @@ void main() {
 
     group('Additional Options', () {
       test('should have with-validation flag', () {
-        expect(command.argParser.options.containsKey('with-validation'), isTrue);
+        expect(
+            command.argParser.options.containsKey('with-validation'), isTrue);
       });
 
       test('should have with-navigation flag', () {
-        expect(command.argParser.options.containsKey('with-navigation'), isTrue);
+        expect(
+            command.argParser.options.containsKey('with-navigation'), isTrue);
       });
 
       test('should default to true for with-navigation', () {
@@ -172,27 +181,32 @@ void main() {
       });
 
       test('should handle screen with custom feature', () {
-        final args = command.argParser.parse(['--feature', 'auth', 'login_screen']);
+        final args =
+            command.argParser.parse(['--feature', 'auth', 'login_screen']);
         expect(args['feature'], equals('auth'));
         expect(args.rest, equals(['login_screen']));
       });
 
       test('should handle screen with viewmodel', () {
-        final args = command.argParser.parse(['--with-viewmodel', 'profile_screen']);
+        final args =
+            command.argParser.parse(['--with-viewmodel', 'profile_screen']);
         expect(args['with-viewmodel'], equals(true));
         expect(args.rest, equals(['profile_screen']));
       });
 
       test('should handle screen with tests', () {
-        final args = command.argParser.parse(['--with-tests', 'settings_screen']);
+        final args =
+            command.argParser.parse(['--with-tests', 'settings_screen']);
         expect(args['with-tests'], equals(true));
         expect(args.rest, equals(['settings_screen']));
       });
 
       test('should handle screen with all options', () {
         final args = command.argParser.parse([
-          '--feature', 'user',
-          '--type', 'form',
+          '--feature',
+          'user',
+          '--type',
+          'form',
           '--with-viewmodel',
           '--with-tests',
           '--with-validation',
@@ -227,8 +241,10 @@ void main() {
     group('Integration Scenarios', () {
       test('should handle authentication screens', () {
         final args = command.argParser.parse([
-          '--feature', 'auth',
-          '--type', 'auth',
+          '--feature',
+          'auth',
+          '--type',
+          'auth',
           '--with-viewmodel',
           '--with-tests',
           'login_screen',
@@ -242,8 +258,10 @@ void main() {
 
       test('should handle user management screens', () {
         final args = command.argParser.parse([
-          '--feature', 'user',
-          '--type', 'list',
+          '--feature',
+          'user',
+          '--type',
+          'list',
           '--with-viewmodel',
           '--with-tests',
           'user_list_screen',
@@ -278,11 +296,14 @@ void main() {
 
     group('Performance Considerations', () {
       test('should handle repeated parsing efficiently', () {
-        expect(() {
-          for (var i = 0; i < 100; i++) {
-            command.argParser.parse(['test_screen_$i']);
-          }
-        }, returnsNormally,);
+        expect(
+          () {
+            for (var i = 0; i < 100; i++) {
+              command.argParser.parse(['test_screen_$i']);
+            }
+          },
+          returnsNormally,
+        );
       });
     });
   });
