@@ -1,7 +1,7 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/definitions/fly_command.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';

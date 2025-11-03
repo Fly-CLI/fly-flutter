@@ -1,7 +1,8 @@
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
@@ -11,6 +12,7 @@ import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
+import 'command_test_helper.dart';
 import 'mock_classes.dart';
 import 'mock_logger.dart';
 
@@ -33,11 +35,12 @@ class CommandTestHarness {
   }
 
   /// Create a mock command context
-  CommandContext createMockContext() {
+  CommandContext createMockContext({IContextFactory? factory}) {
     // Create a metrics collector for testing (disabled to avoid noise)
-    final metricsConfig = const MetricsConfig(enabled: false);
+    const metricsConfig = MetricsConfig(enabled: false);
     final metricsFactory = MetricsFactory(metricsConfig);
     final metricsCollector = metricsFactory.create();
+    final mockFactory = factory ?? MockContextFactory();
 
     return CommandContextImpl(
       argResults: ArgParser().parse([]),
@@ -52,6 +55,7 @@ class CommandTestHarness {
       workingDirectory: '/test/project',
       verbose: false,
       quiet: false,
+      factory: mockFactory,
     );
   }
 

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/features/context/context_generator.dart';
 import 'package:fly_cli/src/features/context/models.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';

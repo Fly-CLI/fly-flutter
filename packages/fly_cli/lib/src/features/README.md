@@ -67,7 +67,7 @@ graph TB
 
 ## Core Components
 
-### 1. Command Foundation (`core/command_foundation/`)
+### 1. Command Foundation (`core/command/foundation/`)
 
 The command foundation provides the core abstractions and base classes for all commands.
 

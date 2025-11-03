@@ -22,11 +22,11 @@ The `deploy` command will:
 import 'dart:io';
 import 'package:args/args.dart';
 
-import '../features/command_foundation/application/command_base.dart';
-import '../features/command_foundation/domain/command_context.dart';
-import '../features/command_foundation/domain/command_result.dart';
+import '../features/command/foundation/application/command_base.dart';
+import '../features/command/foundation/domain/command_context.dart';
+import '../features/command/foundation/domain/command_result.dart';
 import '../features/validation/validators/common_validators.dart';
-import '../features/command_foundation/domain/command_middleware.dart';
+import '../features/command/foundation/domain/command_middleware.dart';
 
 /// Deploy command for deploying Flutter applications
 class DeployCommand extends FlyCommand {

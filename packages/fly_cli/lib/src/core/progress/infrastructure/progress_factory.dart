@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/progress/domain/progress_indicator.dart';
 import 'package:fly_cli/src/core/progress/infrastructure/bar_progress_indicator.dart';
 import 'package:fly_cli/src/core/progress/infrastructure/silent_progress_indicator.dart';

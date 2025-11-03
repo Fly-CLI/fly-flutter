@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/create/create_command.dart';
 import 'package:test/test.dart';
 

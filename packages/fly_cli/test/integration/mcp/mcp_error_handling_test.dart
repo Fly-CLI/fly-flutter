@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:args/args.dart' as args;
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
@@ -17,6 +17,8 @@ import 'package:fly_mcp/fly_mcp.dart';
 import 'package:mason_logger/mason_logger.dart' as mason_logger;
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
+import '../../helpers/command_test_helper.dart';
 
 void main() {
   group('MCP Error Handling Integration Tests', () {
@@ -41,10 +43,11 @@ void main() {
       final interactivePrompt = InteractivePrompt(logger);
 
       // Create a metrics collector for testing (disabled to avoid noise)
-      final metricsConfig = const MetricsConfig(enabled: false);
+      const metricsConfig = MetricsConfig(enabled: false);
       final metricsFactory = MetricsFactory(metricsConfig);
       final metricsCollector = metricsFactory.create();
 
+      final mockFactory = MockContextFactory();
       context = CommandContextImpl(
         argResults: _createArgResults(),
         logger: logger,
@@ -58,6 +61,7 @@ void main() {
         workingDirectory: tempDir.path,
         verbose: false,
         quiet: false,
+        factory: mockFactory,
       );
 
       final logProvider = LogResourceProvider();

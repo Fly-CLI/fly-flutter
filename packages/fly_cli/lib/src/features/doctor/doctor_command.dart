@@ -1,12 +1,12 @@
 import 'package:args/args.dart' hide OptionType;
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
-import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart'
+import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
+import 'package:fly_cli/src/core/command/metadata/command_metadata.dart'
     show CommandDefinition, CommandExample, OptionDefinition;
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';

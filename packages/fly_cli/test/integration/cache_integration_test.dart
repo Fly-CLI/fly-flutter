@@ -123,7 +123,7 @@ packages: [test_package]
         expect(firstLoad, isNotNull);
 
         // Wait for expiration
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
         // Second load - should reload from source
         final secondLoad =

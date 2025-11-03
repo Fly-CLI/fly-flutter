@@ -85,7 +85,7 @@
 - Support cancellation tokens
 - Track execution phase (validation, middleware, execution)
 
-**Location:** `core/command_foundation/domain/command_execution_context.dart`
+**Location:** `core/command/foundation/domain/command_execution_context.dart`
 
 **1.2 Enhance CommandResult**
 
@@ -185,7 +185,7 @@
 - Implementations: `HumanFormatter`, `JsonFormatter`, `AiFormatter`
 - Support streaming results for long operations
 
-**Location:** `core/command_foundation/infrastructure/formatters/`
+**Location:** `core/command/foundation/infrastructure/formatters/`
 
 **7.2 Result Streaming**
 
@@ -247,15 +247,15 @@
 
 **New Files:**
 
-- `core/command_foundation/domain/command_execution_context.dart`
+- `core/command/foundation/domain/command_execution_context.dart`
 - `core/progress/domain/progress_indicator.dart`
 - `core/progress/infrastructure/spinner_progress_indicator.dart`
 - `core/progress/infrastructure/bar_progress_indicator.dart`
 - `core/middleware/infrastructure/optional/retry_middleware.dart`
-- `core/command_foundation/infrastructure/formatters/command_result_formatter.dart`
-- `core/command_foundation/infrastructure/formatters/human_formatter.dart`
-- `core/command_foundation/infrastructure/formatters/json_formatter.dart`
-- `core/command_foundation/infrastructure/formatters/ai_formatter.dart`
+- `core/command/foundation/infrastructure/formatters/command_result_formatter.dart`
+- `core/command/foundation/infrastructure/formatters/human_formatter.dart`
+- `core/command/foundation/infrastructure/formatters/json_formatter.dart`
+- `core/command/foundation/infrastructure/formatters/ai_formatter.dart`
 
 **Modify Files:**
 

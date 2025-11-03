@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/features/doctor/checks/dart_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/checks/flutter_sdk_check.dart';

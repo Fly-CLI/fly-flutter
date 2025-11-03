@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/logging/logger.dart' as flylog;
 import 'package:fly_cli/src/core/logging/logger_factory.dart' as flylog_factory;
 import 'package:fly_cli/src/core/logging/logging_config.dart' as flylog_cfg;

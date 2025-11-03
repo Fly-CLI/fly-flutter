@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:fly_core/src/validation/validation.dart' as fly_core;
 import 'package:path/path.dart' as path;

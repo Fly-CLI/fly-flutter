@@ -263,7 +263,7 @@ class BrickRegistry {
 
 ### 4. Enforced Middleware Pipeline
 
-**Rewrite:** `packages/fly_cli/lib/src/core/command_foundation/application/command_base.dart`
+**Rewrite:** `packages/fly_cli/lib/src/core/command/foundation/application/command_base.dart`
 
 ```dart
 /// Middleware execution is now mandatory and enforced
@@ -299,7 +299,7 @@ Future<CommandResult> _executeWithLifecycle() async {
 }
 ```
 
-**New file:** `packages/fly_cli/lib/src/core/command_foundation/domain/middleware_pipeline.dart`
+**New file:** `packages/fly_cli/lib/src/core/command/foundation/domain/middleware_pipeline.dart`
 
 ```dart
 /// Enforced middleware pipeline with guaranteed execution
@@ -415,7 +415,7 @@ class ValidationService {
 
 ### 6. Clear Workflow Documentation
 
-**New file:** `packages/fly_cli/lib/src/core/command_foundation/WORKFLOW.md`
+**New file:** `packages/fly_cli/lib/src/core/command/foundation/WORKFLOW.md`
 
 ```markdown
 # Command Execution Workflow
@@ -876,7 +876,7 @@ class BrickRegistryV2 {
 
 #### 3.1 Enforced Middleware Pipeline
 
-**New file:** `packages/fly_cli/lib/src/core/command_foundation/domain/middleware_pipeline_v2.dart`
+**New file:** `packages/fly_cli/lib/src/core/command/foundation/domain/middleware_pipeline_v2.dart`
 
 ```dart
 /// Enforced middleware pipeline following Chain of Responsibility pattern

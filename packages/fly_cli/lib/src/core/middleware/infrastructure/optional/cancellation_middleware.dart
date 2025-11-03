@@ -1,6 +1,7 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
 /// Optional middleware for cancellation support during command execution

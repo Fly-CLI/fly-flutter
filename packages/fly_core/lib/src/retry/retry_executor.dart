@@ -72,7 +72,7 @@ class RetryExecutor {
 
         // Wait before retrying (don't wait if this is the last attempt)
         if (attempt < policy.maxAttempts) {
-          await Future.delayed(delay);
+          await Future<void>.delayed(delay);
         }
       }
     }

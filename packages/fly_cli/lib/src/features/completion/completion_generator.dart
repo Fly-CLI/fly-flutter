@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 
 /// Abstract base class for shell-specific completion generators
 abstract class CompletionGenerator {

@@ -12,7 +12,7 @@ recommendations
 The Fly CLI has two separate middleware implementations that create confusion and potential
 inconsistencies:
 
-#### Implementation A: `/core/command_foundation/domain/command_middleware.dart`
+#### Implementation A: `/core/command/foundation/domain/command_middleware.dart`
 
 ```dart
 abstract class CommandMiddleware {
@@ -66,7 +66,7 @@ class LoggingMiddleware extends CommandMiddleware {
 
 ### Recommended Solution
 
-**Consolidate to single implementation in `/core/command_foundation/domain/command_middleware.dart`:
+**Consolidate to single implementation in `/core/command/foundation/domain/command_middleware.dart`:
 **
 
 ```dart

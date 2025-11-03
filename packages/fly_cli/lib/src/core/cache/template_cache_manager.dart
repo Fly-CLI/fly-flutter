@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_cli/src/core/utils/platform_utils.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_core/src/file_operations/file_operations.dart';
 import 'package:path/path.dart' as path;
 
@@ -214,7 +214,7 @@ class TemplateCacheManager {
   /// Download template (placeholder implementation)
   Future<Template> _downloadTemplate(String name) async {
     // Simulate download delay
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
 
     // Return mock template
     return Template(

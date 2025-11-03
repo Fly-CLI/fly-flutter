@@ -194,7 +194,7 @@ void main() {
       );
 
       // Wait a bit for time difference
-      Future.delayed(const Duration(milliseconds: 10), () {
+      Future<void>.delayed(const Duration(milliseconds: 10), () {
         final metrics = toolLogger.getMetrics();
 
         expect(metrics['correlation_id'], 'test-123');
@@ -249,7 +249,7 @@ void main() {
       );
 
       metrics.startTimer('test_timer');
-      Future.delayed(const Duration(milliseconds: 50), () {
+      Future<void>.delayed(const Duration(milliseconds: 50), () {
         metrics.stopTimer('test_timer');
 
         expect(metricLogged, true);

@@ -1,6 +1,6 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/fly_command_strategy.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/core/definitions/categories.dart';
 import 'package:fly_cli/src/features/add/add_service_command.dart';
 

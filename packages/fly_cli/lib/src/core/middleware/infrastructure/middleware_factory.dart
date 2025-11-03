@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/domain/middleware_pipeline.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/middleware_pipeline_impl.dart';

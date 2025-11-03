@@ -1,86 +1,96 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
-import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command_foundation/flags/global_flags_registry.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
-import 'package:fly_cli/src/core/command_metadata/command_registry.dart';
-import 'package:fly_cli/src/core/command_metadata/command_wrappers.dart';
-import 'package:fly_cli/src/core/definitions/fly_command.dart';
-import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
-import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-import 'package:fly_cli/src/core/logging/logger.dart' as flylog;
-import 'package:fly_cli/src/core/logging/logging_bootstrap.dart';
-import 'package:fly_cli/src/core/logging/structured_mason_logger.dart';
-import 'package:fly_cli/src/core/path_management/path_resolver.dart';
-import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
-import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
-import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/cli/bootstrapping/service_bootstrapper.dart';
+import 'package:fly_cli/src/core/cli/bootstrapping/service_bootstrapper_factory.dart';
+import 'package:fly_cli/src/core/cli/output_format.dart';
+import 'package:fly_cli/src/core/cli/error_handling/error_handler.dart';
+import 'package:fly_cli/src/core/cli/formatting/output_format_parser.dart';
+import 'package:fly_cli/src/core/cli/formatting/output_formatter.dart';
+import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/core/cli/interfaces/i_output_formatter.dart';
+import 'package:fly_cli/src/core/cli/registration/command_registrar.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
-import 'package:fly_core/src/environment/env_var.dart';
-import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
-/// Enhanced Fly CLI Command Runner with simplified dependency injection
+/// Enhanced Fly CLI Command Runner with SOLID principles
+///
+/// This class orchestrates command execution by delegating to specialized
+/// components for service initialization, command registration, output formatting,
+/// and error handling.
 class FlyCommandRunner extends CommandRunner<int> {
-  FlyCommandRunner() : super('fly', 'AI-native Flutter CLI tool') {
-    _initializeServices();
+  /// Create a FlyCommandRunner with default configuration
+  ///
+  /// Automatically detects the environment and initializes all services.
+  /// Parses global flags early from args to initialize logger with correct settings.
+  ///
+  /// [args] - Command line arguments to parse global flags early
+  factory FlyCommandRunner.create(Iterable<String> args) {
+    // Parse global flags early for logger initialization
+    final globalParser = GlobalFlagsRegistry.createGlobalParser();
+    ArgResults? parsedGlobalArgs;
+    try {
+      parsedGlobalArgs = globalParser.parse(args);
+    } catch (_) {
+      // If parsing fails (e.g., unknown command), continue without parsed args
+      // The logger will be initialized with defaults and rebuilt later in run()
+      parsedGlobalArgs = null;
+    }
+
+    final bootstrapper = ServiceBootstrapperFactory.create(args: args);
+    final formatter = OutputFormatter();
+    final errorHandler = ErrorHandler(
+      formatter: formatter,
+      logger: bootstrapper.container.get<Logger>(),
+    );
+
+    return FlyCommandRunner._(
+      bootstrapper: bootstrapper,
+      formatter: formatter,
+      errorHandler: errorHandler,
+      parsedGlobalArgs: parsedGlobalArgs,
+    );
+  }
+
+  /// Create a FlyCommandRunner with custom dependencies
+  ///
+  /// This constructor allows injection of dependencies for testing.
+  ///
+  /// [bootstrapper] - Service bootstrapper for service initialization
+  /// [formatter] - Output formatter for formatting output
+  /// [errorHandler] - Error handler for error handling
+  /// [parsedGlobalArgs] - Optional parsed global arguments (for early initialization)
+  FlyCommandRunner._({
+    required ServiceBootstrapper bootstrapper,
+    required IOutputFormatter formatter,
+    required ErrorHandler errorHandler,
+    ArgResults? parsedGlobalArgs,
+  })  : _bootstrapper = bootstrapper,
+        _formatter = formatter,
+        _errorHandler = errorHandler,
+        _parsedGlobalArgs = parsedGlobalArgs,
+        super('fly', 'AI-native Flutter CLI tool') {
     _registerGlobalOptions();
     _registerCommands();
   }
 
-  late final ServiceContainer _services;
-  late final MetricsCollector _metrics;
-  late flylog.Logger _appLogger;
+  final ServiceBootstrapper _bootstrapper;
+  final IOutputFormatter _formatter;
+  final ErrorHandler _errorHandler;
+  final ArgResults? _parsedGlobalArgs;
 
-  /// Initialize service container and dependencies
-  void _initializeServices() {
-    final baseMason = Logger();
-    final isDevelopment = _isDevelopmentMode();
+  /// Get the service bootstrapper
+  ServiceBootstrapper get bootstrapper => _bootstrapper;
 
-    // Initialize structured logging (root logger)
-    _appLogger = LoggingBootstrap.createRootLogger(
-      isDevelopment: isDevelopment,
-    );
-
-    final structuredLogger = StructuredMasonLogger(baseMason, _appLogger);
-
-    // Initialize metrics collector
-    final metricsConfig = MetricsConfig.fromEnvironment(isProd: !isDevelopment);
-    _metrics = MetricsFactory(metricsConfig).create();
-
-    _services = ServiceContainer()
-      ..registerSingleton<Logger>(structuredLogger)
-      ..registerSingleton<flylog.Logger>(_appLogger)
-      ..registerSingleton<MetricsCollector>(_metrics)
-      ..registerSingleton<PathResolver>(PathResolver(
-        logger: structuredLogger,
-        isDevelopment: isDevelopment,
-      ))
-      ..registerSingleton<TemplateManager>(TemplateManager(
-        templatesDirectory: '', // Will be resolved by PathResolver
-        logger: structuredLogger,
-      ))
-      ..registerSingleton<SystemChecker>(
-          SystemChecker(logger: structuredLogger))
-      ..registerSingleton<InteractivePrompt>(
-          InteractivePrompt(structuredLogger));
-  }
-
-  /// Determine if running in development mode
-  bool _isDevelopmentMode() {
-    // Check if we're running from source (development) vs installed package
-    final scriptPath = Platform.script.toFilePath();
-    return scriptPath.contains('packages/fly_cli') ||
-        scriptPath.contains('bin/fly.dart');
-  }
+  /// Get the context factory for creating execution contexts
+  ///
+  /// This factory is accessible to commands for creating execution contexts
+  /// with actual arguments during command execution.
+  IContextFactory get contextFactory => _bootstrapper.contextFactory;
 
   /// Register global options using flag registry
   void _registerGlobalOptions() {
@@ -89,31 +99,8 @@ class FlyCommandRunner extends CommandRunner<int> {
 
   /// Register all commands using enum-based architecture
   void _registerCommands() {
-    final context = _createContext(argParser.parse([]));
-
-    // Delegate command creation to registry
-    final registrationData =
-        CommandMetadataRegistry.instance.createAndInitialize(
-      context: context,
-      globalOptionsParser: argParser,
-    );
-
-    // Register top-level commands
-    for (final entry in registrationData.topLevelCommands.entries) {
-      final commandType = entry.key;
-      final commandInstance = entry.value;
-
-      // Register top-level command
-      addCommand(commandInstance);
-
-      // Register aliases for top-level commands
-      for (final alias in commandType.aliases) {
-        addCommand(AliasCommand(alias, commandInstance));
-      }
-    }
-
-    // Register all command groups
-    registrationData.commandGroups.values.forEach(addCommand);
+    final registrar = CommandRegistrar(_bootstrapper.contextFactory);
+    registrar.registerCommands(this, argParser);
   }
 
   @override
@@ -121,14 +108,15 @@ class FlyCommandRunner extends CommandRunner<int> {
     try {
       // Parse arguments to check for global flags
       final parsedArgs = argParser.parse(args);
-      // Rebuild logging with CLI overrides
-      final isDevelopment = _isDevelopmentMode();
-      _appLogger = LoggingBootstrap.createRootLogger(
-        isDevelopment: isDevelopment,
-        parsedArgs: parsedArgs,
-      );
+
+      // Rebuild logging with CLI overrides if not already initialized with parsed args
+      // (If we already parsed global args in create(), this is a no-op for global flags)
+      if (_parsedGlobalArgs == null || _parsedGlobalArgs != parsedArgs) {
+        _bootstrapper.rebuildLogger(parsedArgs);
+      }
+
       final traceId = DateTime.now().microsecondsSinceEpoch.toString();
-      final runLogger = _appLogger.child({
+      final runLogger = _bootstrapper.appLogger.child({
         'trace_id': traceId,
         'args': args.toList(),
         'working_dir': Directory.current.path,
@@ -138,118 +126,40 @@ class FlyCommandRunner extends CommandRunner<int> {
 
       // Handle version flag
       if (FlagAccessor.getBool(parsedArgs, const GlobalVersionFlag())) {
-        final format = FlagAccessor.getStringOrDefault(
-          parsedArgs,
-          GlobalFormatFlag(),
-          'human',
-        );
+        final format = OutputFormatParser.parseFromArgResults(parsedArgs);
         return _handleVersionFlag(format);
       }
 
       // Run the command
+      // Note: Context update happens in FlyCommand.run() at the very start,
+      // ensuring context has correct args before any code accesses it
       final result = await super.run(args);
       runLogger.info('Fly CLI finish', fields: {'exit_code': result ?? 1});
       return result ?? 1;
+    } on UsageException catch (e, stackTrace) {
+      return await _errorHandler.handleError(
+        e,
+        stackTrace,
+        args,
+        isVerbose: args.contains('--verbose'),
+      );
     } catch (e, stackTrace) {
-      return _handleError(e, stackTrace, args);
+      return await _errorHandler.handleError(
+        e,
+        stackTrace,
+        args,
+        isVerbose: args.contains('--verbose'),
+      );
     }
   }
 
-  /// Create a command context with services
-  CommandContext _createContext(ArgResults args) {
-    // Respect environment variables for working directory (12-Factor App pattern)
-    // FLY_OUTPUT_DIR for explicit test control, PWD for Unix standard
-    const env = EnvironmentManager();
-    final workingDir = env.getString(EnvVar.flyOutputDir) ??
-        env.getString(EnvVar.pwd) ??
-        Directory.current.path;
-
-    return CommandContextImpl(
-      argResults: args,
-      logger: _services.get<Logger>(),
-      templateManager: _services.get<TemplateManager>(),
-      systemChecker: _services.get<SystemChecker>(),
-      interactivePrompt: _services.get<InteractivePrompt>(),
-      pathResolver: _services.get<PathResolver>(),
-      metricsCollector: _services.get<MetricsCollector>(),
-      config: _getConfig(),
-      environment: Environment.current(),
-      workingDirectory: workingDir,
-      verbose: FlagAccessor.getBool(args, const GlobalVerboseFlag()),
-      quiet: FlagAccessor.getBool(args, const GlobalQuietFlag()),
-    );
-  }
-
-  /// Get configuration
-  Map<String, dynamic> _getConfig() => {
-        'cli_version': VersionUtils.getCurrentVersion(),
-        'templates_directory': TemplateManager.findTemplatesDirectory(),
-        'plugins_enabled': true,
-      };
-
-  /// Handle version flag using CommandResult for consistency
-  int _handleVersionFlag(String outputFormat) {
-    final logger = _services.get<Logger>();
+  /// Handle version flag using OutputFormatter
+  int _handleVersionFlag(OutputFormat format) {
     final versionInfo = VersionUtils.getVersionInfo().toJson();
-
-    final result = CommandResult.success(
-      command: 'version',
-      message: 'Version information retrieved',
-      data: versionInfo,
-      metadata: {
-        'cli_version': VersionUtils.getCurrentVersion(),
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-
-    // Use CommandResult's built-in output handling
-    if (outputFormat == 'json') {
-      logger.info(json.encode(result.toJson()));
-    } else if (outputFormat == 'ai') {
-      logger.info(json.encode(result.toAiJson()));
-    } else {
-      result.displayHuman();
-    }
-    return result.exitCode;
-  }
-
-  /// Handle errors with proper error handling
-  int _handleError(Object e, StackTrace stackTrace, Iterable<String> args) {
-    final logger = _services.get<Logger>();
-    _appLogger
-        .error('Unhandled error', error: e, stackTrace: stackTrace, fields: {
-      'args': args.toList(),
-      'cli_version': VersionUtils.getCurrentVersion(),
-    });
-    // Check for format flag (industry standard handling)
-    final outputFormat = args.contains('--format=json')
-        ? 'json'
-        : args.contains('--format=ai')
-            ? 'ai'
-            : 'human';
-
-    final errorResult = CommandResult.error(
-      message: e.toString(),
-      suggestion: 'Check your command syntax and try again',
-      metadata: {
-        'cli_version': VersionUtils.getCurrentVersion(),
-        'timestamp': DateTime.now().toIso8601String(),
-        'verbose': args.contains('--verbose'),
-      },
-    );
-
-    // Use CommandResult's built-in output handling
-    if (outputFormat == 'json') {
-      logger.info(json.encode(errorResult.toJson()));
-    } else if (outputFormat == 'ai') {
-      logger.info(json.encode(errorResult.toAiJson()));
-    } else {
-      errorResult.displayHuman();
-      if (args.contains('--verbose')) {
-        logger.err('Stack trace: $stackTrace');
-      }
-    }
-    return errorResult.exitCode;
+    final formattedOutput = _formatter.formatVersion(versionInfo, format);
+    // Use stdout instead of print for better control
+    stdout.writeln(formattedOutput);
+    return 0; // Success
   }
 
   @override

@@ -1,7 +1,8 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/utils/tool_logger.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
 /// Typed handler function for tool execution

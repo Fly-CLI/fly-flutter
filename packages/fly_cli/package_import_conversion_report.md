@@ -57,58 +57,58 @@ stock_ai/src/features/schema/domain/export_format.dart
 stock_ai/src/features/schema/infrastructure/metadata_extractor.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] Processing: lib/src/features/version/application/version_command.dart
-[2025-10-28 15:30:42]   Line 1: ../../../core/command_foundation/application/command_base.dart ->
-package:stock_ai/src/core/command_foundation/application/command_base.dart
-[2025-10-28 15:30:42]   Line 2: ../../../core/command_foundation/domain/command_context.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_context.dart
-[2025-10-28 15:30:42]   Line 3: ../../../core/command_foundation/domain/command_result.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_result.dart
-[2025-10-28 15:30:42]   Line 4: ../../../core/command_foundation/domain/command_middleware.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_middleware.dart
+[2025-10-28 15:30:42]   Line 1: ../../../core/command/foundation/application/command_base.dart ->
+package:stock_ai/src/core/command/foundation/application/command_base.dart
+[2025-10-28 15:30:42]   Line 2: ../../../core/command/foundation/domain/command_context.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_context.dart
+[2025-10-28 15:30:42]   Line 3: ../../../core/command/foundation/domain/command_result.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_result.dart
+[2025-10-28 15:30:42]   Line 4: ../../../core/command/foundation/domain/command_middleware.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] Processing: lib/src/features/screen/application/add_screen_command.dart
-[2025-10-28 15:30:42]   Line 4: ../../../core/command_foundation/application/command_base.dart ->
-package:stock_ai/src/core/command_foundation/application/command_base.dart
-[2025-10-28 15:30:42]   Line 5: ../../../core/command_foundation/domain/command_context.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_context.dart
-[2025-10-28 15:30:42]   Line 6: ../../../core/command_foundation/domain/command_result.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_result.dart
-[2025-10-28 15:30:42]   Line 7: ../../../core/command_foundation/domain/command_validator.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_validator.dart
-[2025-10-28 15:30:42]   Line 8: ../../../core/command_foundation/domain/command_middleware.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_middleware.dart
+[2025-10-28 15:30:42]   Line 4: ../../../core/command/foundation/application/command_base.dart ->
+package:stock_ai/src/core/command/foundation/application/command_base.dart
+[2025-10-28 15:30:42]   Line 5: ../../../core/command/foundation/domain/command_context.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_context.dart
+[2025-10-28 15:30:42]   Line 6: ../../../core/command/foundation/domain/command_result.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_result.dart
+[2025-10-28 15:30:42]   Line 7: ../../../core/command/foundation/domain/command_validator.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_validator.dart
+[2025-10-28 15:30:42]   Line 8: ../../../core/command/foundation/domain/command_middleware.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
 [2025-10-28 15:30:42]   Line 9: ../../../core/templates/models/brick_info.dart -> package:
 stock_ai/src/core/templates/models/brick_info.dart
 [2025-10-28 15:30:42]   Line 10: ../../../core/templates/template_manager.dart -> package:
 stock_ai/src/core/templates/template_manager.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] Processing: lib/src/features/service/application/add_service_command.dart
-[2025-10-28 15:30:42]   Line 4: ../../../core/command_foundation/application/command_base.dart ->
-package:stock_ai/src/core/command_foundation/application/command_base.dart
-[2025-10-28 15:30:42]   Line 5: ../../../core/command_foundation/domain/command_context.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_context.dart
-[2025-10-28 15:30:42]   Line 6: ../../../core/command_foundation/domain/command_result.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_result.dart
-[2025-10-28 15:30:42]   Line 7: ../../../core/command_foundation/domain/command_validator.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_validator.dart
-[2025-10-28 15:30:42]   Line 8: ../../../core/command_foundation/domain/command_middleware.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_middleware.dart
+[2025-10-28 15:30:42]   Line 4: ../../../core/command/foundation/application/command_base.dart ->
+package:stock_ai/src/core/command/foundation/application/command_base.dart
+[2025-10-28 15:30:42]   Line 5: ../../../core/command/foundation/domain/command_context.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_context.dart
+[2025-10-28 15:30:42]   Line 6: ../../../core/command/foundation/domain/command_result.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_result.dart
+[2025-10-28 15:30:42]   Line 7: ../../../core/command/foundation/domain/command_validator.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_validator.dart
+[2025-10-28 15:30:42]   Line 8: ../../../core/command/foundation/domain/command_middleware.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
 [2025-10-28 15:30:42]   Line 9: ../../../core/templates/models/brick_info.dart -> package:
 stock_ai/src/core/templates/models/brick_info.dart
 [2025-10-28 15:30:42]   Line 10: ../../../core/templates/template_manager.dart -> package:
 stock_ai/src/core/templates/template_manager.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] Processing: lib/src/features/create/application/create_command.dart
-[2025-10-28 15:30:42]   Line 4: ../../../core/command_foundation/application/command_base.dart ->
-package:stock_ai/src/core/command_foundation/application/command_base.dart
-[2025-10-28 15:30:42]   Line 5: ../../../core/command_foundation/domain/command_context.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_context.dart
-[2025-10-28 15:30:42]   Line 6: ../../../core/command_foundation/domain/command_result.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_result.dart
-[2025-10-28 15:30:42]   Line 7: ../../../core/command_foundation/domain/command_validator.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_validator.dart
-[2025-10-28 15:30:42]   Line 8: ../../../core/command_foundation/domain/command_middleware.dart ->
-package:stock_ai/src/core/command_foundation/domain/command_middleware.dart
+[2025-10-28 15:30:42]   Line 4: ../../../core/command/foundation/application/command_base.dart ->
+package:stock_ai/src/core/command/foundation/application/command_base.dart
+[2025-10-28 15:30:42]   Line 5: ../../../core/command/foundation/domain/command_context.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_context.dart
+[2025-10-28 15:30:42]   Line 6: ../../../core/command/foundation/domain/command_result.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_result.dart
+[2025-10-28 15:30:42]   Line 7: ../../../core/command/foundation/domain/command_validator.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_validator.dart
+[2025-10-28 15:30:42]   Line 8: ../../../core/command/foundation/domain/command_middleware.dart ->
+package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
 [2025-10-28 15:30:42]   Line 10: ../../../core/templates/template_manager.dart -> package:
 stock_ai/src/core/templates/template_manager.dart
 [2025-10-28 15:30:42]

@@ -1,6 +1,4 @@
-import '../cancellation.dart';
-import '../concurrency_limiter.dart';
-import '../timeout_manager.dart';
+import 'package:fly_core/fly_core.dart';
 import 'server_errors.dart';
 
 /// JSON-RPC error codes (standard and MCP-specific)
@@ -177,6 +175,7 @@ class ErrorConverter {
         code: JsonRpcErrorCode.mcpTimeout,
         message: error.toString(),
         data: {
+          'timeout': error.duration.inSeconds,
           if (requestId != null) 'requestId': requestId,
         },
       );

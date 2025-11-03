@@ -101,7 +101,8 @@ class ArchitectureDetector {
         ));
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError('ArchitectureDetector', e);
+      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
+          defaultValue: null);
     }
 
     return patterns;
@@ -135,7 +136,8 @@ class ArchitectureDetector {
       final testPatterns = _detectTestingPatterns(content);
       patterns.addAll(testPatterns);
     } catch (e) {
-      ErrorHandler.handleAnalyzerError('ArchitectureDetector', e);
+      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
+          defaultValue: null);
     }
 
     return patterns;
@@ -165,7 +167,8 @@ class ArchitectureDetector {
         }
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError('ArchitectureDetector', e);
+      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
+          defaultValue: null);
     }
 
     return patterns;
@@ -210,7 +213,8 @@ class ArchitectureDetector {
         ));
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError('ArchitectureDetector', e);
+      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
+          defaultValue: null);
     }
 
     return patterns;

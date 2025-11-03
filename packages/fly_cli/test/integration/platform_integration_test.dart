@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/utils/platform_utils.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:test/test.dart';
 
 void main() {

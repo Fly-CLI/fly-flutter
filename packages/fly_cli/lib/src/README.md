@@ -15,6 +15,12 @@ areas:
 lib/src/
 ├── command_runner.dart           # Main CLI runner
 ├── core/                         # Infrastructure & shared code
+│   ├── cli/                      # CLI infrastructure (runner, bootstrapping, formatting)
+│   │   ├── bootstrapping/        # Service bootstrapping
+│   │   ├── formatting/            # Output formatting
+│   │   ├── error_handling/       # Error handling
+│   │   ├── interfaces/            # CLI-specific interfaces
+│   │   └── registration/         # Command registration
 │   ├── cache/                    # Template caching
 │   ├── command_foundation/       # Command system abstractions
 │   ├── command_metadata/         # Command introspection & schema
@@ -36,7 +42,6 @@ lib/src/
     ├── context/                  # Project analysis
     ├── create/                   # Project creation
     ├── doctor/                   # System diagnostics
-    ├── mcp/                      # Model Context Protocol
     ├── schema/                   # Schema export
     └── version/                  # Version info
 ```
@@ -79,6 +84,7 @@ for detailed restructuring suggestions.
 
 ### Key Core Components
 
+- **CLI Infrastructure** (`cli/`) - Command runner, bootstrapping, formatting, error handling
 - **Command Foundation** - Base classes, middleware, lifecycle hooks
 - **Command Metadata** - Introspection and schema generation for AI
 - **Definitions** - Command types, categories, MCP tool types
@@ -108,7 +114,6 @@ Each feature typically contains:
 
 - `context/` - 11 files with analyzers, models, utils
 - `completion/` - 7 files with generators/ subdirectory
-- `mcp/` - 60 files (consider restructuring to integrations/)
 
 **Recommended Pattern:**
 

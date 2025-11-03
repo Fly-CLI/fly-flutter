@@ -1,3 +1,4 @@
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:test/test.dart';
 
@@ -287,7 +288,7 @@ void main() {
 
       test('should convert TimeoutException', () {
         final error =
-            TimeoutException('Operation timed out', Duration(seconds: 30));
+            const TimeoutException('Operation timed out', Duration(seconds: 30));
         const requestId = 1400;
 
         final result =
@@ -387,7 +388,7 @@ void main() {
       });
 
       test('should return true for TimeoutException', () {
-        final error = TimeoutException('Timeout', Duration(seconds: 30));
+        const error = TimeoutException('Timeout', Duration(seconds: 30));
         expect(ErrorConverter.isKnownError(error), isTrue);
       });
 

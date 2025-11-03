@@ -27,7 +27,7 @@ class ScreenConfig {
   final List<String> features;
 
   /// Parse ScreenConfig from YAML map
-  static ScreenConfig fromYaml(Map yaml) {
+  static ScreenConfig fromYaml(Map<dynamic, dynamic> yaml) {
     if (!yaml.containsKey('name')) {
       throw ManifestException('Screen missing required field: name');
     }
@@ -69,7 +69,7 @@ class ServiceConfig {
   final List<String> features;
 
   /// Parse ServiceConfig from YAML map
-  static ServiceConfig fromYaml(Map yaml) {
+  static ServiceConfig fromYaml(Map<dynamic, dynamic> yaml) {
     if (!yaml.containsKey('name')) {
       throw ManifestException('Service missing required field: name');
     }
@@ -213,13 +213,13 @@ class ManifestConfig {
   final bool includeExamples;
 
   /// Parse ManifestConfig from YAML map
-  static ManifestConfig fromYaml(Map? yaml) {
+  static ManifestConfig fromYaml(Map<dynamic, dynamic>? yaml) {
     if (yaml == null) {
       return const ManifestConfig();
     }
 
-    final codeGen = yaml['code_generation'] as Map?;
-    final aiIntegration = yaml['ai_integration'] as Map?;
+    final codeGen = yaml['code_generation'] as Map<dynamic, dynamic>?;
+    final aiIntegration = yaml['ai_integration'] as Map<dynamic, dynamic>?;
 
     return ManifestConfig(
       minSdkVersion: yaml['min_sdk_version'] as int?,
@@ -281,7 +281,7 @@ class ProjectManifest {
 
     try {
       final content = await file.readAsString();
-      final yaml = loadYaml(content) as Map;
+      final yaml = loadYaml(content) as Map<dynamic, dynamic>;
 
       return ProjectManifest.fromYaml(yaml);
     } catch (e) {
@@ -290,7 +290,7 @@ class ProjectManifest {
   }
 
   /// Parse manifest from YAML map
-  static ProjectManifest fromYaml(Map yaml) {
+  static ProjectManifest fromYaml(Map<dynamic, dynamic> yaml) {
     // Validate required fields
     if (!yaml.containsKey('name')) {
       throw ManifestException('Missing required field: name');
@@ -338,7 +338,7 @@ class ProjectManifest {
     final screensList = yaml['screens'] as List?;
     if (screensList != null) {
       for (final screenYaml in screensList) {
-        if (screenYaml is Map) {
+        if (screenYaml is Map<dynamic, dynamic>) {
           screens.add(ScreenConfig.fromYaml(screenYaml));
         }
       }
@@ -349,7 +349,7 @@ class ProjectManifest {
     final servicesList = yaml['services'] as List?;
     if (servicesList != null) {
       for (final serviceYaml in servicesList) {
-        if (serviceYaml is Map) {
+        if (serviceYaml is Map<dynamic, dynamic>) {
           services.add(ServiceConfig.fromYaml(serviceYaml));
         }
       }
@@ -359,7 +359,7 @@ class ProjectManifest {
     final packages = (yaml['packages'] as List?)?.cast<String>() ?? [];
 
     // Parse config
-    final config = ManifestConfig.fromYaml(yaml['config'] as Map?);
+    final config = ManifestConfig.fromYaml(yaml['config'] as Map<dynamic, dynamic>?);
 
     return ProjectManifest(
       name: name,

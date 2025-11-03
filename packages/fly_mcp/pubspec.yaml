@@ -9,6 +9,8 @@ environment:
 dependencies:
   dart_mcp: ^0.3.3
   meta: ^1.12.0
+  fly_core:
+    path: ../fly_core
 
 dev_dependencies:
   lints: ^4.0.0

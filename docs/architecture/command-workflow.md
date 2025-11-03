@@ -134,7 +134,7 @@ class BrickValidationService {
 
 #### Mandatory Middleware
 
-**Location**: `packages/fly_cli/lib/src/core/command_foundation/domain/mandatory_middleware.dart`
+**Location**: `packages/fly_cli/lib/src/core/command/foundation/domain/mandatory_middleware.dart`
 
 Core middleware that cannot be skipped:
 

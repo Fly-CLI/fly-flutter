@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'command_middleware.dart';
 
 /// Interface for middleware pipeline execution.

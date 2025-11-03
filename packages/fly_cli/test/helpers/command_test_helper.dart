@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
@@ -18,6 +19,54 @@ import 'package:test/test.dart';
 
 import 'mock_logger.dart';
 
+/// Mock context factory for testing
+class MockContextFactory implements IContextFactory {
+  @override
+  CommandContext createRegistrationContext() {
+    return createExecutionContext(ArgParser().parse([]));
+  }
+
+  @override
+  CommandContext createExecutionContext(ArgResults args) {
+    final logger = MockLogger();
+    const metricsConfig = MetricsConfig(enabled: false);
+    final metricsCollector = MetricsFactory(metricsConfig).create();
+
+    return CommandContextImpl(
+      argResults: args,
+      logger: logger,
+      templateManager: TemplateManager(
+        templatesDirectory: '/test/templates',
+        logger: logger,
+      ),
+      systemChecker: SystemChecker(logger: logger),
+      interactivePrompt: InteractivePrompt(logger),
+      pathResolver: PathResolver(
+        logger: logger,
+        isDevelopment: true,
+      ),
+      metricsCollector: metricsCollector,
+      config: <String, dynamic>{},
+      environment: Environment.current(),
+      workingDirectory: Directory.current.path,
+      verbose: false,
+      quiet: false,
+      factory: this,
+    );
+  }
+
+  @override
+  CommandContext createTestContext(
+    ArgResults args, {
+    dynamic services,
+    Map<String, dynamic>? config,
+    String? workingDirectory,
+    IContextFactory? factory,
+  }) {
+    return createExecutionContext(args);
+  }
+}
+
 /// Helper class for testing Fly CLI commands
 class CommandTestHelper {
   /// Create a mock CommandContext for testing
@@ -26,11 +75,13 @@ class CommandTestHelper {
     String? workingDirectory,
     Map<String, dynamic>? config,
     ArgResults? argResults,
+    IContextFactory? factory,
   }) {
     final mockLogger = logger ?? MockLogger();
     final workingDir = workingDirectory ?? Directory.current.path;
     final mockConfig = config ?? <String, dynamic>{};
     final mockArgResults = argResults ?? ArgParser().parse([]);
+    final mockFactory = factory ?? MockContextFactory();
 
     // Create a metrics collector for testing (disabled to avoid noise)
     final metricsConfig = const MetricsConfig(enabled: false);
@@ -56,6 +107,7 @@ class CommandTestHelper {
       workingDirectory: workingDir,
       verbose: false,
       quiet: false,
+      factory: mockFactory,
     );
   }
 
@@ -606,19 +658,4 @@ class {{name.pascalCase()}} {
 
     return templateDir;
   }
-}
-
-/// Mock TemplateManager for testing
-class MockTemplateManager {
-  // Add mock methods as needed
-}
-
-/// Mock SystemChecker for testing
-class MockSystemChecker {
-  // Add mock methods as needed
-}
-
-/// Mock InteractivePrompt for testing
-class MockInteractivePrompt {
-  // Add mock methods as needed
 }

@@ -1868,7 +1868,7 @@ Create a custom command plugin:
 
 ```dart
 // plugins/custom_command.dart
-import 'package:fly_cli/src/features/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/features/command/foundation/application/command_base.dart';
 
 class CustomCommand extends FlyCommand {
   @override

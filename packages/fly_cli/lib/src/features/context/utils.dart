@@ -151,7 +151,7 @@ class RetryUtils {
         }
 
         // Exponential backoff with jitter
-        await Future.delayed(delay);
+        await Future<void>.delayed(delay);
         delay = Duration(
           milliseconds: (delay.inMilliseconds * 2).clamp(
             initialDelay.inMilliseconds,

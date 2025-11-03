@@ -1,5 +1,5 @@
 import 'package:fly_cli/src/command_runner.dart';
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/powershell_generator.dart';
@@ -12,7 +12,7 @@ void main() {
     late CommandMetadataRegistry registry;
 
     setUp(() {
-      runner = FlyCommandRunner();
+      runner = FlyCommandRunner.create([]);
       registry = CommandMetadataRegistry.instance;
     });
 

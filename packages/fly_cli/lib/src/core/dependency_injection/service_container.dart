@@ -1,5 +1,7 @@
+import 'package:fly_cli/src/core/cli/interfaces/i_service_container.dart';
+
 /// Simple service container for dependency injection
-class ServiceContainer {
+class ServiceContainer implements IServiceContainer {
   /// Creates a new service container
   ServiceContainer();
 

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/context/models.dart';
 import 'package:fly_cli/src/features/context/analyzer_interface.dart';
@@ -181,12 +181,12 @@ class ContextGenerator {
 
     return {
       'root_directory': '',
-      'directories': {},
-      'features': [],
+      'directories': <String, dynamic>{},
+      'features': <String>[],
       'total_files': 0,
       'lines_of_code': 0,
-      'file_types': {},
-      'conventions': [],
+      'file_types': <String, dynamic>{},
+      'conventions': <String>[],
     };
   }
 
@@ -196,8 +196,8 @@ class ContextGenerator {
 
     if (!registry.isInitialized) {
       return {
-        'available': [],
-        'schemas': {},
+        'available': <String>[],
+        'schemas': <String, dynamic>{},
         'suggestions': ['Run "fly doctor" to initialize CLI'],
       };
     }
@@ -223,12 +223,12 @@ class ContextGenerator {
     }
 
     return {
-      'dependencies': {},
-      'dev_dependencies': {},
-      'categories': {},
-      'fly_packages': [],
-      'warnings': [],
-      'conflicts': [],
+      'dependencies': <String, dynamic>{},
+      'dev_dependencies': <String, dynamic>{},
+      'categories': <String, dynamic>{},
+      'fly_packages': <String>[],
+      'warnings': <String>[],
+      'conflicts': <String>[],
     };
   }
 
@@ -248,7 +248,7 @@ class ContextGenerator {
       };
     } catch (e) {
       logger.warn('Failed to analyze dependency health: $e');
-      return {'packages': [], 'error': e.toString()};
+      return {'packages': <Map<String, dynamic>>[], 'error': e.toString()};
     }
   }
 
@@ -260,11 +260,11 @@ class ContextGenerator {
     }
 
     return {
-      'key_files': [],
-      'file_contents': {},
-      'metrics': {},
-      'imports': {},
-      'patterns': [],
+      'key_files': <Map<String, dynamic>>[],
+      'file_contents': <String, dynamic>{},
+      'metrics': <String, dynamic>{},
+      'imports': <String, dynamic>{},
+      'patterns': <Map<String, dynamic>>[],
     };
   }
 
@@ -356,13 +356,13 @@ class ContextGenerator {
     return {
       'pattern': structureInfo?.architecturePattern ?? 'unknown',
       'confidence': 0.0,
-      'indicators': [],
-      'metadata': {},
-      'all_patterns': [],
+      'indicators': <String>[],
+      'metadata': <String, dynamic>{},
+      'all_patterns': <Map<String, dynamic>>[],
       'project_type': projectInfo?.type ?? 'unknown',
       'is_fly_project': projectInfo?.isFlyProject ?? false,
       'has_manifest': projectInfo?.hasManifest ?? false,
-      'conventions': structureInfo?.conventions ?? [],
+      'conventions': structureInfo?.conventions ?? <String>[],
     };
   }
 

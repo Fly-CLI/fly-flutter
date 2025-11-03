@@ -138,7 +138,7 @@ packages: [test_package]
             'test_template', testTemplate.toJson());
 
         // Wait for expiration
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
         final result = await shortCacheManager.getTemplate('test_template');
 

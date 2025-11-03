@@ -54,7 +54,7 @@ for efficient scaling to 50+ commands.
 The command system uses an enum-based registration mechanism (`FlyCommandType`) with factory
 methods:
 
-```12:191:packages/fly_cli/lib/src/core/command_foundation/domain/fly_command_type.dart
+```12:191:packages/fly_cli/lib/src/core/command/foundation/domain/fly_command_type.dart
 /// Enum representing all available Fly CLI commands
 enum FlyCommandType {
   create,
@@ -316,7 +316,7 @@ validation.
 
 Excellent lifecycle management through the `CommandLifecycle` interface:
 
-```1:23:packages/fly_cli/lib/src/core/command_foundation/domain/command_lifecycle.dart
+```1:23:packages/fly_cli/lib/src/core/command/foundation/domain/command_lifecycle.dart
 /// Lifecycle hooks for command execution phases
 abstract class CommandLifecycle {
   /// Called before command execution starts
@@ -352,7 +352,7 @@ abstract class CommandLifecycle {
 
 Robust middleware system with priority-based execution:
 
-```1:164:packages/fly_cli/lib/src/core/command_foundation/application/command_base.dart
+```1:164:packages/fly_cli/lib/src/core/command/foundation/application/command_base.dart
   /// Run middleware pipeline
   Future<CommandResult?> _runMiddlewarePipeline() async {
     final applicableMiddleware =
@@ -554,7 +554,7 @@ class TemplateManager {
 
 All commands inherit JSON output capability from `FlyCommand`:
 
-```31:48:packages/fly_cli/lib/src/core/command_foundation/application/command_base.dart
+```31:48:packages/fly_cli/lib/src/core/command/foundation/application/command_base.dart
   /// Whether to output JSON format for AI integration
   bool get jsonOutput => argResults?['output'] == 'json';
 
@@ -577,7 +577,7 @@ All commands inherit JSON output capability from `FlyCommand`:
 
 **CommandResult JSON Format:**
 
-```62:99:packages/fly_cli/lib/src/core/command_foundation/domain/command_result.dart
+```62:99:packages/fly_cli/lib/src/core/command/foundation/domain/command_result.dart
   /// Convert to JSON for AI integration
   Map<String, dynamic> toJson() => {
       'success': success,
@@ -639,7 +639,7 @@ Comprehensive schema extraction via `MetadataExtractor`:
 import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
 
-import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/schema/domain/command_definition.dart';
 
 
@@ -894,7 +894,7 @@ enum ErrorCode {
 
 1. **Structured Error Results:**
 
-```33:47:packages/fly_cli/lib/src/core/command_foundation/domain/command_result.dart
+```33:47:packages/fly_cli/lib/src/core/command/foundation/domain/command_result.dart
   factory CommandResult.error({
     required String message,
     String? suggestion,
@@ -920,7 +920,7 @@ enum ErrorCode {
 
 3. **Error Classification:**
 
-```198:211:packages/fly_cli/lib/src/core/command_foundation/application/command_base.dart
+```198:211:packages/fly_cli/lib/src/core/command/foundation/application/command_base.dart
   /// Simple error classification based on error message
   ErrorCode? _classifyError(Object error) {
     final errorStr = error.toString().toLowerCase();

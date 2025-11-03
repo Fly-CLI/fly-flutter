@@ -73,16 +73,16 @@ class AnalyzerRegistry {
 
   static final AnalyzerRegistry _instance = AnalyzerRegistry._internal();
 
-  final List<Analyzer> _analyzers = [];
+  final List<Analyzer<dynamic>> _analyzers = [];
 
   /// Register an analyzer
-  void register(Analyzer analyzer) {
+  void register(Analyzer<dynamic> analyzer) {
     _analyzers.add(analyzer);
     _analyzers.sort((a, b) => a.priority.compareTo(b.priority));
   }
 
   /// Get all analyzers that should run for the given config
-  List<Analyzer> getAnalyzers(ContextGeneratorConfig config) {
+  List<Analyzer<dynamic>> getAnalyzers(ContextGeneratorConfig config) {
     return _analyzers.where((analyzer) => analyzer.shouldRun(config)).toList();
   }
 

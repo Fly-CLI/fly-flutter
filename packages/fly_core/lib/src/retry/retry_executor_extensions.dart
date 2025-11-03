@@ -69,7 +69,13 @@ extension RetryExecutorExtensions on RetryExecutor {
     List<Future<T> Function()> operations,
   ) async {
     final results = await Future.wait(
-      operations.map((op) => op().catchError((e) => null)),
+      operations.map((op) async {
+        try {
+          return await op();
+        } catch (e) {
+          return null as T?;
+        }
+      }),
     );
 
     return results;

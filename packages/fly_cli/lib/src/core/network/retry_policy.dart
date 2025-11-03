@@ -34,7 +34,7 @@ class RetryPolicy {
         }
 
         print('Attempt $attempt failed, retrying in ${delay.inSeconds}s...');
-        await Future.delayed(delay);
+        await Future<void>.delayed(delay);
 
         delay = Duration(
           milliseconds: (delay.inMilliseconds * backoffMultiplier).round(),

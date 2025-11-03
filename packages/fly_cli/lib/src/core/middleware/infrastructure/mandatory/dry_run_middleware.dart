@@ -1,6 +1,6 @@
-import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/domain/middleware_priority.dart';
 

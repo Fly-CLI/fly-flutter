@@ -9,7 +9,7 @@ systems.
 
 ## Architecture Components
 
-### 1. Command Foundation (`features/command_foundation/`)
+### 1. Command Foundation (`features/command/foundation/`)
 
 The command foundation provides the core abstractions and base classes for all commands.
 

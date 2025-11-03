@@ -43,7 +43,8 @@ class DependencyHealthAnalyzer {
         healthReports.addAll(batchResults);
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError('DependencyHealthAnalyzer', e);
+      ErrorHandler.handleAnalyzerError<void>('DependencyHealthAnalyzer', e,
+          defaultValue: null);
     }
 
     return healthReports;
@@ -116,7 +117,7 @@ class DependencyHealthAnalyzer {
         );
       }
     } catch (e) {
-      ErrorHandler.handleNetworkError(
+      ErrorHandler.handleNetworkError<void>(
           'GET', 'https://pub.dev/api/packages/$packageName', e);
 
       // Return default health if API call fails
