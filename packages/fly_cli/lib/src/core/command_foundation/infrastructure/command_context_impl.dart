@@ -5,6 +5,7 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
@@ -54,6 +55,7 @@ class CommandContextImpl implements CommandContext {
     required this.systemChecker,
     required this.interactivePrompt,
     required this.pathResolver,
+    required this.metricsCollector,
     required this.config,
     required this.environment,
     required this.workingDirectory,
@@ -78,6 +80,9 @@ class CommandContextImpl implements CommandContext {
 
   @override
   final PathResolver pathResolver;
+
+  @override
+  final MetricsCollector metricsCollector;
 
   @override
   final Map<String, dynamic> config;

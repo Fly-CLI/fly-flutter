@@ -3,6 +3,7 @@ import 'package:fly_cli/src/core/command_foundation/infrastructure/command_conte
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
@@ -25,6 +26,9 @@ abstract class CommandContext {
 
   /// Path resolver for all path operations
   PathResolver get pathResolver;
+
+  /// Metrics collector for performance telemetry
+  MetricsCollector get metricsCollector;
 
   /// Configuration map for command-specific settings
   Map<String, dynamic> get config;

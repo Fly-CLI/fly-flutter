@@ -1,7 +1,7 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
@@ -82,9 +82,6 @@ class AddServiceCommand extends FlyCommand {
 
   @override
   List<CommandMiddleware> get middleware => [
-        LoggingMiddleware(),
-        MetricsMiddleware(),
-        DryRunMiddleware(),
       ];
 
   @override

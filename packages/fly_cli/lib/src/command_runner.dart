@@ -16,8 +16,10 @@ import 'package:fly_cli/src/core/logging/logger.dart' as flylog;
 import 'package:fly_cli/src/core/logging/logging_bootstrap.dart';
 import 'package:fly_cli/src/core/logging/structured_mason_logger.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/core/utils/performance_optimizer.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
@@ -32,7 +34,7 @@ class FlyCommandRunner extends CommandRunner<int> {
   }
 
   late final ServiceContainer _services;
-  late final CommandPerformanceOptimizer _optimizer;
+  late final MetricsCollector _metrics;
   late flylog.Logger _appLogger;
 
   /// Initialize service container and dependencies
@@ -47,9 +49,14 @@ class FlyCommandRunner extends CommandRunner<int> {
 
     final structuredLogger = StructuredMasonLogger(baseMason, _appLogger);
 
+    // Initialize metrics collector
+    final metricsConfig = MetricsConfig.fromEnvironment(isProd: !isDevelopment);
+    _metrics = MetricsFactory(metricsConfig).create();
+
     _services = ServiceContainer()
       ..registerSingleton<Logger>(structuredLogger)
       ..registerSingleton<flylog.Logger>(_appLogger)
+      ..registerSingleton<MetricsCollector>(_metrics)
       ..registerSingleton<PathResolver>(PathResolver(
         logger: structuredLogger,
         isDevelopment: isDevelopment,
@@ -62,8 +69,6 @@ class FlyCommandRunner extends CommandRunner<int> {
           SystemChecker(logger: structuredLogger))
       ..registerSingleton<InteractivePrompt>(
           InteractivePrompt(structuredLogger));
-
-    _optimizer = CommandPerformanceOptimizer();
   }
 
   /// Determine if running in development mode
@@ -190,9 +195,6 @@ class FlyCommandRunner extends CommandRunner<int> {
         return _handleVersionFlag(parsedArgs['output'] as String? ?? 'human');
       }
 
-      // Preload critical services for performance
-      await _optimizer.preloadCriticalServices();
-
       // Run the command
       final result = await super.run(args);
       runLogger.info('Fly CLI finish', fields: {'exit_code': result ?? 1});
@@ -218,6 +220,7 @@ class FlyCommandRunner extends CommandRunner<int> {
       systemChecker: _services.get<SystemChecker>(),
       interactivePrompt: _services.get<InteractivePrompt>(),
       pathResolver: _services.get<PathResolver>(),
+      metricsCollector: _services.get<MetricsCollector>(),
       config: _getConfig(),
       environment: Environment.current(),
       workingDirectory: workingDir,

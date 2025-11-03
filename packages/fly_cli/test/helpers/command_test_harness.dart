@@ -5,6 +5,9 @@ import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_p
 import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
@@ -30,19 +33,27 @@ class CommandTestHarness {
   }
 
   /// Create a mock command context
-  CommandContext createMockContext() => CommandContextImpl(
-        argResults: ArgParser().parse([]),
-        logger: container.get<Logger>(),
-        templateManager: container.get<TemplateManager>(),
-        systemChecker: container.get<SystemChecker>(),
-        interactivePrompt: container.get<InteractivePrompt>(),
-        pathResolver: container.get<PathResolver>(),
-        config: <String, dynamic>{},
-        environment: Environment.current(),
-        workingDirectory: '/test/project',
-        verbose: false,
-        quiet: false,
-      );
+  CommandContext createMockContext() {
+    // Create a metrics collector for testing (disabled to avoid noise)
+    final metricsConfig = const MetricsConfig(enabled: false);
+    final metricsFactory = MetricsFactory(metricsConfig);
+    final metricsCollector = metricsFactory.create();
+
+    return CommandContextImpl(
+      argResults: ArgParser().parse([]),
+      logger: container.get<Logger>(),
+      templateManager: container.get<TemplateManager>(),
+      systemChecker: container.get<SystemChecker>(),
+      interactivePrompt: container.get<InteractivePrompt>(),
+      pathResolver: container.get<PathResolver>(),
+      metricsCollector: metricsCollector,
+      config: <String, dynamic>{},
+      environment: Environment.current(),
+      workingDirectory: '/test/project',
+      verbose: false,
+      quiet: false,
+    );
+  }
 
   /// Clear all mock state
   void clearMocks() {

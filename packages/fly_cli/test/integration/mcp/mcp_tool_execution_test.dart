@@ -6,6 +6,8 @@ import 'package:fly_cli/src/core/command_foundation/infrastructure/command_conte
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_echo_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_template_apply_strategy.dart';
@@ -36,6 +38,11 @@ void main() {
       );
       final interactivePrompt = InteractivePrompt(logger);
 
+      // Create a metrics collector for testing (disabled to avoid noise)
+      final metricsConfig = const MetricsConfig(enabled: false);
+      final metricsFactory = MetricsFactory(metricsConfig);
+      final metricsCollector = metricsFactory.create();
+
       context = CommandContextImpl(
         argResults: _createArgResults(),
         logger: logger,
@@ -43,6 +50,7 @@ void main() {
         systemChecker: systemChecker,
         interactivePrompt: interactivePrompt,
         pathResolver: pathResolver,
+        metricsCollector: metricsCollector,
         config: {},
         environment: Environment.current(),
         workingDirectory: tempDir.path,

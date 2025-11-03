@@ -1,7 +1,8 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
@@ -138,9 +139,6 @@ class CreateCommand extends FlyCommand {
 
   @override
   List<CommandMiddleware> get middleware => [
-        LoggingMiddleware(),
-        MetricsMiddleware(),
-        DryRunMiddleware(),
         CachingMiddleware(),
       ];
 

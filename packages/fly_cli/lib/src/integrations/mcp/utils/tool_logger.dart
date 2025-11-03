@@ -3,6 +3,7 @@ import 'package:fly_cli/src/core/logging/logger.dart' as flylog;
 import 'package:fly_cli/src/core/logging/logger_factory.dart' as flylog_factory;
 import 'package:fly_cli/src/core/logging/logging_config.dart' as flylog_cfg;
 import 'package:fly_cli/src/core/logging/logging_context.dart' as flylog_ctx;
+import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 
 /// Structured logger for MCP tool execution
 ///
@@ -308,17 +309,26 @@ extension ToolLoggerFromContext on CommandContext {
 }
 
 /// Performance metrics tracker for tool operations
+/// 
+/// @deprecated Use MetricsCollector directly for new code.
+/// This class is maintained for backward compatibility.
 class ToolPerformanceMetrics {
-  ToolPerformanceMetrics({required this.logger, required this.toolName});
+  ToolPerformanceMetrics({
+    required this.logger,
+    required this.toolName,
+    MetricsCollector? metricsCollector,
+  }) : _metricsCollector = metricsCollector;
 
   final ToolLogger logger;
   final String toolName;
+  final MetricsCollector? _metricsCollector;
   final Map<String, Object?> _metrics = {};
   final Map<String, DateTime> _timers = {};
 
   /// Start timing an operation
   void startTimer(String timerName) {
     _timers[timerName] = DateTime.now();
+    _metricsCollector?.startTimer(timerName);
   }
 
   /// Stop timing an operation and record metric
@@ -326,6 +336,14 @@ class ToolPerformanceMetrics {
     final startTime = _timers.remove(timerName);
     if (startTime != null) {
       final durationMs = DateTime.now().difference(startTime).inMilliseconds;
+      
+      // Record using MetricsCollector if available
+      _metricsCollector?.stopTimer(
+        timerName,
+        tags: {'tool': toolName},
+      );
+      
+      // Also record locally for backward compatibility
       recordMetric('${timerName}_duration_ms', durationMs, unit: 'ms');
     }
   }
@@ -333,6 +351,18 @@ class ToolPerformanceMetrics {
   /// Record a performance metric
   void recordMetric(String metricName, Object value, {String? unit}) {
     _metrics[metricName] = value;
+    
+    // Record using MetricsCollector if available
+    if (_metricsCollector != null && value is num) {
+      _metricsCollector.recordGauge(
+        metricName,
+        value,
+        unit: unit,
+        tags: {'tool': toolName},
+      );
+    }
+    
+    // Also log to logger for backward compatibility
     logger.logMetric(
       metricName: metricName,
       value: value,
@@ -345,6 +375,15 @@ class ToolPerformanceMetrics {
     final current = (_metrics[counterName] as int?) ?? 0;
     final newValue = current + amount;
     _metrics[counterName] = newValue;
+    
+    // Record using MetricsCollector if available
+    _metricsCollector?.incrementCounter(
+      counterName,
+      amount: amount,
+      tags: {'tool': toolName},
+    );
+    
+    // Also log to logger for backward compatibility
     logger.logMetric(
       metricName: counterName,
       value: newValue,
@@ -353,11 +392,21 @@ class ToolPerformanceMetrics {
   }
 
   /// Get all recorded metrics
-  Map<String, Object?> getMetrics() => Map<String, Object?>.from(_metrics);
+  Map<String, Object?> getMetrics() {
+    if (_metricsCollector != null) {
+      // Get metrics from MetricsCollector and merge with local metrics
+      final collectorMetrics = _metricsCollector!
+          .getMetricsByOperation(toolName)
+          .map((key, value) => MapEntry(key, value.value));
+      return {..._metrics, ...collectorMetrics};
+    }
+    return Map<String, Object?>.from(_metrics);
+  }
 
   /// Clear all metrics
   void clear() {
     _metrics.clear();
     _timers.clear();
+    _metricsCollector?.clearByOperation(toolName);
   }
 }

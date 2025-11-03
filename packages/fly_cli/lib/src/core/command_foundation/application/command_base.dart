@@ -4,11 +4,12 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_lifecycle.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/domain/middleware_pipeline.dart';
+import 'package:fly_cli/src/core/middleware/infrastructure/middleware_factory.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/core/command_foundation/infrastructure/mandatory_middleware.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
@@ -25,11 +26,16 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   /// List of optional middleware to execute before command logic
   ///
   /// Mandatory middleware (DryRun, Logging, Metrics) are automatically included
+  /// via MiddlewareFactory. This list contains only optional command-specific middleware.
   List<CommandMiddleware> get middleware => [];
 
   /// Get the complete middleware pipeline including mandatory middleware
-  MandatoryMiddlewarePipeline get middlewarePipeline =>
-      MandatoryMiddlewarePipeline(
+  ///
+  /// Uses MiddlewareFactory to create a configured pipeline with mandatory
+  /// and optional middleware in the correct priority order.
+  MiddlewarePipeline get middlewarePipeline =>
+      MiddlewareFactory.create(
+        context: context,
         optional: middleware,
       );
 
@@ -102,45 +108,39 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       // so that middleware and validators see the correct flags (e.g., --plan, --output)
       try {
         if (context is CommandContextImpl && argResults != null) {
-          final contextImpl = context as CommandContextImpl;
-          contextImpl.argResults = argResults!;
-          contextImpl.commandName = name;
+          context as CommandContextImpl
+          ..argResults = argResults!
+          ..commandName = name;
         }
       } catch (_) {
         // Best-effort; continue even if context can't be updated
       }
 
-      // 1. Validate middleware pipeline
-      middlewarePipeline.validate();
-
-      // 2. Execute mandatory middleware pipeline (includes dry-run check)
-      final mandatoryResult = await _runMandatoryMiddlewarePipeline();
-      if (mandatoryResult != null) {
-        return _handleResult(mandatoryResult);
-      }
-
-      // 3. Run validators
+      // 1. Run validators
       final validationResult = await _runValidators();
       if (!validationResult.isValid) {
         return _handleValidationFailure(validationResult);
       }
 
-      // 4. Execute optional middleware pipeline
-      final optionalResult = await _runOptionalMiddlewarePipeline();
-      if (optionalResult != null) {
-        return _handleResult(optionalResult);
-      }
-
-      // 5. Call lifecycle hook
+      // 2. Call lifecycle hook
       await onBeforeExecute(context);
 
-      // 6. Execute command logic
-      final result = await execute();
+      // 3. Execute middleware pipeline (includes command execution)
+      // The pipeline handles all middleware and then calls execute()
+      // If middleware short-circuits (e.g., dry-run), it returns a result directly
+      final result = await _runMiddlewarePipeline();
 
-      // 7. Call lifecycle hook
-      await onAfterExecute(context, result);
+      // 4. Call lifecycle hook
+      // Create a default result if pipeline returned null (shouldn't happen normally)
+      final finalResult = result ??
+          CommandResult.error(
+            message: 'Command execution returned no result',
+            suggestion: 'Check command implementation',
+          );
 
-      return _handleResult(result);
+      await onAfterExecute(context, finalResult);
+
+      return _handleResult(finalResult);
     } catch (e, stackTrace) {
       // 8. Handle errors with lifecycle hook
       await onError(context, e, stackTrace);
@@ -173,10 +173,6 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     // This allows testing commands without CommandRunner
     final effectiveArgResults = argResults ?? context.argResults;
 
-    if (effectiveArgResults == null) {
-      return ValidationResult.failure(['No command arguments available']);
-    }
-
     for (final validator in applicableValidators) {
       final result = await validator.validate(context, effectiveArgResults);
       results.add(result);
@@ -190,48 +186,12 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     return ValidationResult.combine(results);
   }
 
-  /// Run mandatory middleware pipeline
-  Future<CommandResult?> _runMandatoryMiddlewarePipeline() async {
-    final mandatoryMiddleware = middlewarePipeline.mandatory
-      ..sort((a, b) => a.priority.compareTo(b.priority));
-
-    int currentIndex = 0;
-
-    Future<CommandResult?> next() async {
-      if (currentIndex >= mandatoryMiddleware.length) {
-        return null;
-      }
-
-      final middleware = mandatoryMiddleware[currentIndex++];
-      return middleware.handle(context, next);
-    }
-
-    return next();
-  }
-
-  /// Run optional middleware pipeline
-  Future<CommandResult?> _runOptionalMiddlewarePipeline() async {
-    final applicableMiddleware = middleware
-        .where((m) => m.shouldRun(context, name))
-        .toList()
-      ..sort((a, b) => a.priority.compareTo(b.priority));
-
-    if (applicableMiddleware.isEmpty) {
-      return null;
-    }
-
-    int currentIndex = 0;
-
-    Future<CommandResult?> next() async {
-      if (currentIndex >= applicableMiddleware.length) {
-        return null;
-      }
-
-      final middleware = applicableMiddleware[currentIndex++];
-      return middleware.handle(context, next);
-    }
-
-    return next();
+  /// Run middleware pipeline
+  ///
+  /// Executes the complete middleware pipeline (mandatory + optional)
+  /// followed by the command's execute method.
+  Future<CommandResult?> _runMiddlewarePipeline() async {
+    return middlewarePipeline.execute(context, execute);
   }
 
   /// Handle validation failure

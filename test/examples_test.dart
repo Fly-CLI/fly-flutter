@@ -217,17 +217,17 @@ void main() {
   });
 
   group('Performance Optimization', () {
-    test('performance optimizer exists', () {
-      final optimizerFile = File(
-        'packages/fly_cli/lib/src/utils/performance_optimizer.dart',
+    test('telemetry module exists', () {
+      final metricsCollectorFile = File(
+        'packages/fly_cli/lib/src/core/telemetry/domain/metrics_collector.dart',
       );
-      expect(optimizerFile.existsSync(), isTrue);
+      expect(metricsCollectorFile.existsSync(), isTrue);
 
-      final content = optimizerFile.readAsStringSync();
-      expect(content.contains('PerformanceOptimizer'), isTrue);
-      expect(content.contains('PerformanceMonitor'), isTrue);
-      expect(content.contains('optimizeTemplateLoading'), isTrue);
-      expect(content.contains('benchmarkTemplateRendering'), isTrue);
+      final content = metricsCollectorFile.readAsStringSync();
+      expect(content.contains('MetricsCollector'), isTrue);
+      expect(content.contains('recordDuration'), isTrue);
+      expect(content.contains('incrementCounter'), isTrue);
+      expect(content.contains('recordError'), isTrue);
     });
   });
 }

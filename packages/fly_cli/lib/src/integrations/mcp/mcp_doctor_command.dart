@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command_foundation/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 
 class McpDoctorCommand extends FlyCommand {
@@ -17,9 +17,6 @@ class McpDoctorCommand extends FlyCommand {
 
   @override
   List<CommandMiddleware> get middleware => [
-        LoggingMiddleware(),
-        MetricsMiddleware(),
-        DryRunMiddleware(),
       ];
 
   @override

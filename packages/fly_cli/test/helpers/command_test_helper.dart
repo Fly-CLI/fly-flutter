@@ -8,6 +8,9 @@ import 'package:fly_cli/src/core/command_foundation/infrastructure/command_conte
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
+import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
@@ -29,6 +32,11 @@ class CommandTestHelper {
     final mockConfig = config ?? <String, dynamic>{};
     final mockArgResults = argResults ?? ArgParser().parse([]);
 
+    // Create a metrics collector for testing (disabled to avoid noise)
+    final metricsConfig = const MetricsConfig(enabled: false);
+    final metricsFactory = MetricsFactory(metricsConfig);
+    final metricsCollector = metricsFactory.create();
+
     return CommandContextImpl(
       argResults: mockArgResults,
       logger: mockLogger,
@@ -42,6 +50,7 @@ class CommandTestHelper {
         logger: mockLogger,
         isDevelopment: true,
       ),
+      metricsCollector: metricsCollector,
       config: mockConfig,
       environment: Environment.current(),
       workingDirectory: workingDir,
