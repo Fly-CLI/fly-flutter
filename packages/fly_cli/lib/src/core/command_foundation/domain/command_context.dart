@@ -1,4 +1,5 @@
 import 'package:args/args.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_execution_context.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
@@ -100,4 +101,39 @@ abstract class CommandContext {
   /// This method is safe to call from any middleware or lifecycle hook, but be aware
   /// that data may be modified by other middleware running concurrently.
   dynamic getData(String key);
+
+  /// Get the command execution context (if available)
+  ///
+  /// Returns the [CommandExecutionContext] associated with the current command execution,
+  /// which provides structured tracking of execution state including:
+  /// - Phase transitions (validation → middleware → execution → completion)
+  /// - Duration tracking per phase
+  /// - Cancellation support
+  /// - Execution metadata
+  ///
+  /// Returns `null` if no execution context has been set. The execution context is typically
+  /// created at the start of command execution and stored via [setData]('execution_context', context).
+  ///
+  /// **Usage Examples:**
+  /// ```dart
+  /// final executionContext = context.executionContext;
+  /// if (executionContext != null) {
+  ///   // Check if cancelled
+  ///   if (executionContext.isCancelled) {
+  ///     return CommandResult.error(message: 'Operation was cancelled');
+  ///   }
+  ///
+  ///   // Track phase transitions
+  ///   executionContext.setPhase(ExecutionPhase.middleware);
+  ///
+  ///   // Get execution duration
+  ///   final elapsed = executionContext.elapsed;
+  /// }
+  /// ```
+  ///
+  /// **Best Practices:**
+  /// - Always check for null before using execution context
+  /// - Use execution context for structured tracking instead of scattered setData calls
+  /// - Respect cancellation token for long-running operations
+  CommandExecutionContext? get executionContext;
 }

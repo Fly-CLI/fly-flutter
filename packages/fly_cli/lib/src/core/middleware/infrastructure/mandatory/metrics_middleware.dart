@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/domain/command_execution_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/domain/middleware_priority.dart';
@@ -18,45 +19,77 @@ class MetricsMiddleware implements CommandMiddleware {
     final stopwatch = Stopwatch()..start();
     final commandName = context.argResults.command?.name ?? 'root';
     final metricsCollector = context.metricsCollector;
+    final executionContext = context.executionContext;
 
     try {
       final result = await next();
       stopwatch.stop();
 
       if (result != null) {
+        // Record phase duration in execution context if available
+        if (executionContext != null) {
+          executionContext.recordPhaseDurationMs(
+            ExecutionPhase.execution,
+            stopwatch.elapsedMilliseconds,
+          );
+        }
+
         // Record metrics using MetricsCollector
-        metricsCollector.recordDuration(
+        final tags = {
+          'command': commandName,
+          'success': result.success.toString(),
+        };
+
+        // Add execution phase to tags if available
+        if (executionContext != null) {
+          tags['phase'] = executionContext.currentPhase.name;
+        }
+
+        metricsCollector..recordDuration(
           'command.execution',
           stopwatch.elapsedMilliseconds,
-          tags: {
-            'command': commandName,
-            'success': result.success.toString(),
-          },
-        );
+          tags: tags,
+        )
 
-        metricsCollector.incrementCounter(
+        ..incrementCounter(
           'command.executions',
           tags: {'command': commandName},
         );
 
         // Store in context for backward compatibility
-        context.setData('execution_time_ms', stopwatch.elapsedMilliseconds);
-        context.setData('command_name', commandName);
-        context.setData('success', result.success);
+        context..setData('execution_time_ms', stopwatch.elapsedMilliseconds)
+        ..setData('command_name', commandName)
+        ..setData('success', result.success);
       }
 
       return result;
-    } catch (e, st) {
+    } catch (e) {
       stopwatch.stop();
 
+      // Record phase duration in execution context if available
+      if (executionContext != null) {
+        executionContext.setPhase(ExecutionPhase.error);
+        executionContext.recordPhaseDurationMs(
+          ExecutionPhase.execution,
+          stopwatch.elapsedMilliseconds,
+        );
+      }
+
       // Record error metrics
+      final tags = {
+        'command': commandName,
+        'error_type': e.runtimeType.toString(),
+      };
+
+      // Add execution phase to tags if available
+      if (executionContext != null) {
+        tags['phase'] = executionContext.currentPhase.name;
+      }
+
       metricsCollector.recordError(
         'command.execution',
         e.toString(),
-        tags: {
-          'command': commandName,
-          'error_type': e.runtimeType.toString(),
-        },
+        tags: tags,
       );
 
       metricsCollector.incrementCounter(

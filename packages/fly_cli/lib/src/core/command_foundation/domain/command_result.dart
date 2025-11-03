@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/core/command_foundation/domain/command_execution_context.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -14,6 +15,10 @@ class CommandResult {
     this.metadata,
     this.errorCode,
     this.errorContext,
+    this.executionDurationMs,
+    this.executionPhase,
+    this.wasCancelled,
+    this.progress,
   });
 
   factory CommandResult.success({
@@ -22,6 +27,10 @@ class CommandResult {
     Map<String, dynamic>? data,
     List<NextStep>? nextSteps,
     Map<String, dynamic>? metadata,
+    int? executionDurationMs,
+    ExecutionPhase? executionPhase,
+    bool? wasCancelled,
+    Map<String, dynamic>? progress,
   }) =>
       CommandResult(
         success: true,
@@ -30,6 +39,10 @@ class CommandResult {
         data: data,
         nextSteps: nextSteps,
         metadata: metadata,
+        executionDurationMs: executionDurationMs,
+        executionPhase: executionPhase,
+        wasCancelled: wasCancelled,
+        progress: progress,
       );
 
   factory CommandResult.error({
@@ -38,6 +51,10 @@ class CommandResult {
     Map<String, dynamic>? metadata,
     ErrorCode? errorCode,
     Map<String, dynamic>? context,
+    int? executionDurationMs,
+    ExecutionPhase? executionPhase,
+    bool? wasCancelled,
+    Map<String, dynamic>? progress,
   }) =>
       CommandResult(
         success: false,
@@ -47,6 +64,10 @@ class CommandResult {
         metadata: metadata,
         errorCode: errorCode,
         errorContext: context,
+        executionDurationMs: executionDurationMs,
+        executionPhase: executionPhase,
+        wasCancelled: wasCancelled,
+        progress: progress,
       );
 
   final bool success;
@@ -58,6 +79,19 @@ class CommandResult {
   final Map<String, dynamic>? metadata;
   final ErrorCode? errorCode;
   final Map<String, dynamic>? errorContext;
+
+  /// Execution duration in milliseconds
+  final int? executionDurationMs;
+
+  /// Execution phase when result was created
+  final ExecutionPhase? executionPhase;
+
+  /// Whether execution was cancelled
+  final bool? wasCancelled;
+
+  /// Progress information (for long-running commands)
+  /// This is a placeholder for Phase 3 progress tracking
+  final Map<String, dynamic>? progress;
 
   int get exitCode => success ? 0 : 1;
 
@@ -77,6 +111,17 @@ class CommandResult {
           'timestamp': DateTime.now().toIso8601String(),
           ...?metadata,
         },
+        if (executionDurationMs != null ||
+            executionPhase != null ||
+            wasCancelled != null ||
+            progress != null)
+          'execution_metadata': {
+            if (executionDurationMs != null)
+              'duration_ms': executionDurationMs,
+            if (executionPhase != null) 'phase': executionPhase!.name,
+            if (wasCancelled != null) 'cancelled': wasCancelled,
+            if (progress != null) 'progress': progress,
+          },
       };
 
   /// Convert to AI-optimized JSON format with enhanced structure
@@ -103,6 +148,17 @@ class CommandResult {
           'format': 'ai_optimized',
           ...?metadata,
         },
+        if (executionDurationMs != null ||
+            executionPhase != null ||
+            wasCancelled != null ||
+            progress != null)
+          'execution_metadata': {
+            if (executionDurationMs != null)
+              'duration_ms': executionDurationMs,
+            if (executionPhase != null) 'phase': executionPhase!.name,
+            if (wasCancelled != null) 'cancelled': wasCancelled,
+            if (progress != null) 'progress': progress,
+          },
       };
 
   /// Display human-readable output
@@ -136,6 +192,38 @@ class CommandResult {
       }
     }
   }
+
+  /// Create a copy of this result with updated fields
+  CommandResult copyWith({
+    bool? success,
+    String? command,
+    String? message,
+    Map<String, dynamic>? data,
+    List<NextStep>? nextSteps,
+    String? suggestion,
+    Map<String, dynamic>? metadata,
+    ErrorCode? errorCode,
+    Map<String, dynamic>? errorContext,
+    int? executionDurationMs,
+    ExecutionPhase? executionPhase,
+    bool? wasCancelled,
+    Map<String, dynamic>? progress,
+  }) =>
+      CommandResult(
+        success: success ?? this.success,
+        command: command ?? this.command,
+        message: message ?? this.message,
+        data: data ?? this.data,
+        nextSteps: nextSteps ?? this.nextSteps,
+        suggestion: suggestion ?? this.suggestion,
+        metadata: metadata ?? this.metadata,
+        errorCode: errorCode ?? this.errorCode,
+        errorContext: errorContext ?? this.errorContext,
+        executionDurationMs: executionDurationMs ?? this.executionDurationMs,
+        executionPhase: executionPhase ?? this.executionPhase,
+        wasCancelled: wasCancelled ?? this.wasCancelled,
+        progress: progress ?? this.progress,
+      );
 }
 
 /// Represents a next step for the user
