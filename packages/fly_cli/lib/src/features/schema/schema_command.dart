@@ -6,8 +6,11 @@ import 'package:fly_cli/src/core/command_foundation/application/command_base.dar
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
 import 'package:fly_cli/src/features/schema/exporters/schema_exporter.dart';
@@ -29,43 +32,16 @@ class SchemaCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addOption(
-        'format',
-        help: 'Export format',
-        allowed: ['json-schema', 'openapi', 'cli-spec'],
-        defaultsTo: 'json-schema',
-      )
-      ..addOption(
-        'command',
-        abbr: 'c',
-        help: 'Export schema for specific command only',
-      )
-      ..addOption(
-        'output-file',
-        abbr: 'o',
-        help: 'Output file path (default: stdout)',
-      )
-      ..addFlag(
-        'include-examples',
-        help: 'Include command examples in schema',
-        defaultsTo: true,
-      )
-      ..addFlag(
-        'include-validation',
-        help: 'Include validation rules in schema',
-        defaultsTo: true,
-      )
-      ..addFlag(
-        'include-global-options',
-        help: 'Include global options in schema',
-        defaultsTo: true,
-      )
-      ..addFlag(
-        'pretty-print',
-        help: 'Pretty print the output',
-        defaultsTo: true,
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const SchemaFormatFlag(),
+      const SchemaCommandFilterFlag(),
+      const OutputFileFlag(),
+      const SchemaIncludeExamplesFlag(),
+      const SchemaIncludeValidationFlag(),
+      const SchemaIncludeGlobalOptionsFlag(),
+      const SchemaPrettyPrintFlag(),
+    ]);
     return parser;
   }
 
@@ -81,15 +57,33 @@ class SchemaCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     try {
-      final formatStr = argResults!['format'] as String? ?? 'json-schema';
-      final commandFilter = argResults!['command'] as String?;
-      final outputFile = argResults!['output-file'] as String?;
-      final includeExamples = argResults!['include-examples'] as bool? ?? true;
-      final includeValidation =
-          argResults!['include-validation'] as bool? ?? true;
-      final includeGlobalOptions =
-          argResults!['include-global-options'] as bool? ?? true;
-      final prettyPrint = argResults!['pretty-print'] as bool? ?? true;
+      final formatStr = FlagAccessor.getStringOrDefault(
+        argResults,
+        const SchemaFormatFlag(),
+        'json-schema',
+      );
+      final commandFilter = FlagAccessor.getString(
+        argResults,
+        const SchemaCommandFilterFlag(),
+      );
+      final outputFile =
+          FlagAccessor.getString(argResults, const OutputFileFlag());
+      final includeExamples = FlagAccessor.getBool(
+        argResults,
+        const SchemaIncludeExamplesFlag(),
+      );
+      final includeValidation = FlagAccessor.getBool(
+        argResults,
+        const SchemaIncludeValidationFlag(),
+      );
+      final includeGlobalOptions = FlagAccessor.getBool(
+        argResults,
+        const SchemaIncludeGlobalOptionsFlag(),
+      );
+      final prettyPrint = FlagAccessor.getBool(
+        argResults,
+        const SchemaPrettyPrintFlag(),
+      );
 
       logger.info('📋 Exporting command schema...');
 

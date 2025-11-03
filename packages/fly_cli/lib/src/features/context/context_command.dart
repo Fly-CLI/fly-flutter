@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/context/context_generator.dart';
 import 'package:fly_cli/src/features/context/models.dart';
@@ -27,42 +30,16 @@ class ContextCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addOption(
-        'output-file',
-        abbr: 'o',
-        help: 'Output file path (default: stdout)',
-      )
-      ..addFlag(
-        'include-code',
-        help: 'Include source code in context export',
-        negatable: false,
-      )
-      ..addFlag(
-        'include-dependencies',
-        help: 'Include dependency analysis in context export',
-        negatable: false,
-      )
-      ..addFlag(
-        'include-architecture',
-        help: 'Include architecture analysis in context export',
-        defaultsTo: true,
-      )
-      ..addFlag(
-        'include-suggestions',
-        help: 'Include AI suggestions in context export',
-        defaultsTo: true,
-      )
-      ..addOption(
-        'max-files',
-        help: 'Maximum number of files to analyze',
-        defaultsTo: '50',
-      )
-      ..addOption(
-        'max-file-size',
-        help: 'Maximum file size to include (in bytes)',
-        defaultsTo: '10000',
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const OutputFileFlag(),
+      const ContextIncludeCodeFlag(),
+      const ContextIncludeDependenciesFlag(),
+      const ContextIncludeArchitectureFlag(),
+      const ContextIncludeSuggestionsFlag(),
+      const ContextMaxFilesFlag(),
+      const ContextMaxFileSizeFlag(),
+    ]);
     return parser;
   }
 
@@ -79,19 +56,40 @@ class ContextCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     try {
-      final outputFile = argResults!['output-file'] as String?;
-      final includeCode = argResults!['include-code'] as bool? ?? false;
-      final includeDependencies =
-          argResults!['include-dependencies'] as bool? ?? false;
-      final includeArchitecture =
-          argResults!['include-architecture'] as bool? ?? true;
-      final includeSuggestions =
-          argResults!['include-suggestions'] as bool? ?? true;
-      final maxFiles =
-          int.tryParse(argResults!['max-files'] as String? ?? '50') ?? 50;
-      final maxFileSize =
-          int.tryParse(argResults!['max-file-size'] as String? ?? '10000') ??
-              10000;
+      final outputFile =
+          FlagAccessor.getString(argResults, const OutputFileFlag());
+      final includeCode = FlagAccessor.getBool(
+        argResults,
+        const ContextIncludeCodeFlag(),
+      );
+      final includeDependencies = FlagAccessor.getBool(
+        argResults,
+        const ContextIncludeDependenciesFlag(),
+      );
+      final includeArchitecture = FlagAccessor.getBool(
+        argResults,
+        const ContextIncludeArchitectureFlag(),
+      );
+      final includeSuggestions = FlagAccessor.getBool(
+        argResults,
+        const ContextIncludeSuggestionsFlag(),
+      );
+      final maxFiles = int.tryParse(
+            FlagAccessor.getStringOrDefault(
+              argResults,
+              const ContextMaxFilesFlag(),
+              '50',
+            ),
+          ) ??
+          50;
+      final maxFileSize = int.tryParse(
+            FlagAccessor.getStringOrDefault(
+              argResults,
+              const ContextMaxFileSizeFlag(),
+              '10000',
+            ),
+          ) ??
+          10000;
 
       logger.info('🔍 Analyzing project context...');
 

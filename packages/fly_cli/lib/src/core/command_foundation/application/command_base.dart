@@ -9,6 +9,9 @@ import 'package:fly_cli/src/core/command_foundation/domain/command_execution_con
 import 'package:fly_cli/src/core/command_foundation/domain/command_lifecycle.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
@@ -51,25 +54,22 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   CommandDefinition? get metadata => null;
 
   /// Whether to output JSON format for AI integration
-  bool get isJsonOutputFormat => argResults?['format'] == 'json';
+  bool get isJsonOutputFormat =>
+      FlagAccessor.getString(argResults, GlobalFormatFlag()) == 'json';
 
   /// Whether to output AI-optimized format
-  bool get isAiOutputFormat => argResults?['format'] == 'ai';
+  bool get isAiOutputFormat =>
+      FlagAccessor.getString(argResults, GlobalFormatFlag()) == 'ai';
 
   /// Whether to run in debug mode with verbose error output
-  bool get debugMode => argResults?['debug'] == true;
+  bool get debugMode => FlagAccessor.getBool(argResults, const GlobalDebugFlag());
 
   /// Whether to run in plan mode (dry-run)
-  bool get planMode {
-    try {
-      return argResults?['plan'] == true;
-    } catch (e) {
-      return false;
-    }
-  }
+  bool get planMode => FlagAccessor.getBool(argResults, const GlobalPlanFlag());
 
   /// Whether to run in verbose mode
-  bool get verboseMode => argResults?['verbose'] == true || debugMode;
+  bool get verboseMode =>
+      FlagAccessor.getBool(argResults, const GlobalVerboseFlag()) || debugMode;
 
   /// Logger instance (respects output format settings)
   Logger get logger =>
@@ -77,30 +77,7 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
 
   @override
   ArgParser get argParser {
-    final parser = ArgParser()
-      ..addOption(
-        'format',
-        abbr: 'f',
-        allowed: ['human', 'json', 'ai'],
-        defaultsTo: 'human',
-        help: 'Output format (human, json, or ai)',
-      )
-      ..addFlag(
-        'debug',
-        abbr: 'd',
-        help: 'Enable debug mode with verbose error output',
-      )
-      ..addFlag(
-        'verbose',
-        abbr: 'v',
-        help: 'Enable verbose output',
-      )
-      ..addFlag(
-        'plan',
-        help: 'Run in plan mode (dry-run)',
-        negatable: false,
-      );
-    return parser;
+    return GlobalFlagsRegistry.createBaseCommandParser();
   }
 
   /// Execute the command logic - must be implemented by subclasses

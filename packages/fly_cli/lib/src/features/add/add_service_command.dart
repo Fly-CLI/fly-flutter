@@ -1,11 +1,14 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
@@ -27,48 +30,17 @@ class AddServiceCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addOption(
-        'feature',
-        help: 'Feature name',
-        defaultsTo: 'core',
-      )
-      ..addOption(
-        'type',
-        abbr: 't',
-        help: 'Service type',
-        allowed: ['api', 'local', 'cache', 'analytics', 'storage'],
-        defaultsTo: 'api',
-      )
-      ..addFlag(
-        'with-tests',
-        help: 'Include test files',
-      )
-      ..addFlag(
-        'with-mocks',
-        help: 'Include mock files',
-      )
-      ..addFlag(
-        'interactive',
-        abbr: 'i',
-        help: 'Run in interactive mode',
-        negatable: false,
-      )
-      ..addFlag(
-        'with-interceptors',
-        help: 'Include HTTP interceptors (for API services)',
-      )
-      ..addOption(
-        'base-url',
-        help: 'Base URL for API services',
-        defaultsTo: 'https://api.example.com',
-      )
-      ..addOption(
-        'output-dir',
-        help:
-            'Output directory for generated files (defaults to current directory)',
-        defaultsTo: null,
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const AddServiceFeatureFlag(),
+      const AddServiceTypeFlag(),
+      const AddServiceWithTestsFlag(),
+      const AddServiceWithMocksFlag(),
+      const InteractiveFlag(),
+      const AddServiceWithInterceptorsFlag(),
+      const AddServiceBaseUrlFlag(),
+      const OutputDirFlag(),
+    ]);
     return parser;
   }
 
@@ -86,8 +58,9 @@ class AddServiceCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-    final interactive = argResults!['interactive'] as bool? ?? false;
-    final outputDir = argResults!['output-dir'] as String?;
+    final interactive =
+        FlagAccessor.getBool(argResults, const InteractiveFlag());
+    final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
 
     if (interactive) {
       return _runInteractiveMode(outputDir);
@@ -220,13 +193,29 @@ class AddServiceCommand extends FlyCommand {
   /// Run in non-interactive mode
   Future<CommandResult> _runNonInteractiveMode(String? outputDir) async {
     final serviceName = argResults!.rest.first;
-    final feature = argResults!['feature'] as String? ?? 'core';
-    final serviceType = argResults!['type'] as String? ?? 'api';
-    final withTests = argResults!['with-tests'] as bool? ?? false;
-    final withMocks = argResults!['with-mocks'] as bool? ?? false;
-    final withInterceptors = argResults!['with-interceptors'] as bool? ?? false;
-    final baseUrl =
-        argResults!['base-url'] as String? ?? 'https://api.example.com';
+    final feature = FlagAccessor.getStringOrDefault(
+      argResults,
+      const AddServiceFeatureFlag(),
+      'core',
+    );
+    final serviceType = FlagAccessor.getStringOrDefault(
+      argResults,
+      const AddServiceTypeFlag(),
+      'api',
+    );
+    final withTests =
+        FlagAccessor.getBool(argResults, const AddServiceWithTestsFlag());
+    final withMocks =
+        FlagAccessor.getBool(argResults, const AddServiceWithMocksFlag());
+    final withInterceptors = FlagAccessor.getBool(
+      argResults,
+      const AddServiceWithInterceptorsFlag(),
+    );
+    final baseUrl = FlagAccessor.getStringOrDefault(
+      argResults,
+      const AddServiceBaseUrlFlag(),
+      'https://api.example.com',
+    );
 
     // Resolve the target output directory, prioritizing --output-dir and FLY_OUTPUT_DIR.
     final outputDirResult = await context.pathResolver.resolveOutputDirectory(
