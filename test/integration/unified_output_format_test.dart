@@ -18,7 +18,7 @@ void main() {
       test('version command outputs human-readable format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', '--version', '--output=human'],
+          ['run', 'bin/fly.dart', '--version', '--format=human'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -31,7 +31,7 @@ void main() {
       test('doctor command outputs human-readable format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'doctor', '--output=human'],
+          ['run', 'bin/fly.dart', 'doctor', '--format=human'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -50,7 +50,7 @@ void main() {
       test('context command outputs human-readable format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'context', '--output=human'],
+          ['run', 'bin/fly.dart', 'context', '--format=human'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -62,7 +62,7 @@ void main() {
       test('schema command outputs human-readable format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'schema', '--output=human'],
+          ['run', 'bin/fly.dart', 'schema', '--format=human'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -74,7 +74,7 @@ void main() {
       test('completion command outputs human-readable format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'completion', '--output=human'],
+          ['run', 'bin/fly.dart', 'completion', '--format=human'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -88,7 +88,7 @@ void main() {
       test('version command outputs valid JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', '--version', '--output=json'],
+          ['run', 'bin/fly.dart', '--version', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -111,7 +111,7 @@ void main() {
       test('doctor command outputs valid JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'doctor', '--output=json'],
+          ['run', 'bin/fly.dart', 'doctor', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -142,7 +142,7 @@ void main() {
       test('context command outputs valid JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'context', '--output=json'],
+          ['run', 'bin/fly.dart', 'context', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -165,7 +165,7 @@ void main() {
       test('schema command outputs valid JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'schema', '--output=json'],
+          ['run', 'bin/fly.dart', 'schema', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -189,7 +189,7 @@ void main() {
       test('completion command outputs valid JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'completion', '--output=json'],
+          ['run', 'bin/fly.dart', 'completion', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -216,7 +216,7 @@ void main() {
       test('version command outputs AI-optimized JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', '--version', '--output=ai'],
+          ['run', 'bin/fly.dart', '--version', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -241,7 +241,7 @@ void main() {
       test('doctor command outputs AI-optimized JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'doctor', '--output=ai'],
+          ['run', 'bin/fly.dart', 'doctor', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -268,7 +268,7 @@ void main() {
       test('context command outputs AI-optimized JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'context', '--output=ai'],
+          ['run', 'bin/fly.dart', 'context', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -291,7 +291,7 @@ void main() {
       test('schema command outputs AI-optimized JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'schema', '--output=ai'],
+          ['run', 'bin/fly.dart', 'schema', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -314,7 +314,7 @@ void main() {
       test('completion command outputs AI-optimized JSON', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'completion', '--output=ai'],
+          ['run', 'bin/fly.dart', 'completion', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -339,7 +339,7 @@ void main() {
       test('invalid command outputs consistent error format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'invalid-command', '--output=json'],
+          ['run', 'bin/fly.dart', 'invalid-command', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -357,7 +357,7 @@ void main() {
       test('invalid command outputs AI-optimized error format', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'invalid-command', '--output=ai'],
+          ['run', 'bin/fly.dart', 'invalid-command', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -382,7 +382,7 @@ void main() {
       test('successful commands include next steps', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'version', '--output=json'],
+          ['run', 'bin/fly.dart', 'version', '--format=json'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -405,7 +405,7 @@ void main() {
       test('AI mode includes actions instead of next_steps', () async {
         final result = await Process.run(
           'dart',
-          ['run', 'bin/fly.dart', 'version', '--output=ai'],
+          ['run', 'bin/fly.dart', 'version', '--format=ai'],
           workingDirectory: temp.currentTestDir.path,
         );
 
@@ -441,7 +441,7 @@ void main() {
         for (final command in commands) {
           final result = await Process.run(
             'dart',
-            ['run', 'bin/fly.dart', command, '--output=json'],
+            ['run', 'bin/fly.dart', command, '--format=json'],
             workingDirectory: temp.currentTestDir.path,
           );
 
@@ -472,7 +472,7 @@ void main() {
         for (final command in commands) {
           final result = await Process.run(
             'dart',
-            ['run', 'bin/fly.dart', command, '--output=ai'],
+            ['run', 'bin/fly.dart', command, '--format=ai'],
             workingDirectory: temp.currentTestDir.path,
           );
 

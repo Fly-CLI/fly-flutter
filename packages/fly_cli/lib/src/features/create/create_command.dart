@@ -98,7 +98,6 @@ class CreateCommand extends FlyCommand {
       )
       ..addOption(
         'organization',
-        abbr: 'o',
         help: 'Organization identifier',
         defaultsTo: 'com.example',
       )

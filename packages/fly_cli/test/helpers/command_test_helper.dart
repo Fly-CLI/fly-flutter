@@ -79,17 +79,17 @@ class CommandTestHelper {
 
     // Ensure output format is JSON to parse results
     final finalArgs = List<String>.from(args);
-    if (!finalArgs.contains('--output=json') &&
-        !finalArgs.contains('--output') &&
-        !finalArgs.any((arg) => arg.startsWith('--output=')) &&
+    if (!finalArgs.contains('--format=json') &&
+        !finalArgs.contains('--format') &&
+        !finalArgs.any((arg) => arg.startsWith('--format=')) &&
         !finalArgs.contains('-f')) {
-      finalArgs.add('--output=json');
+      finalArgs.add('--format=json');
     }
 
     final testEnvironment = <String, String>{
       'FLY_TEST_MODE': 'true',
-      if (finalArgs.contains('--output=json') ||
-          finalArgs.any((a) => a.startsWith('--output=json')))
+      if (finalArgs.contains('--format=json') ||
+          finalArgs.any((a) => a.startsWith('--format=json')))
         'FLY_JSON_OUTPUT': 'true',
       if (effectiveOutputDir != null) 'FLY_OUTPUT_DIR': effectiveOutputDir,
       ...?environment,

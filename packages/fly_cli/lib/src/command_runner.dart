@@ -129,7 +129,7 @@ class FlyCommandRunner extends CommandRunner<int> {
         negatable: false,
       )
       ..addOption(
-        'output',
+        'format',
         abbr: 'f',
         allowed: ['human', 'json', 'ai'],
         defaultsTo: 'human',
@@ -192,7 +192,8 @@ class FlyCommandRunner extends CommandRunner<int> {
 
       // Handle version flag
       if (parsedArgs['version'] == true) {
-        return _handleVersionFlag(parsedArgs['output'] as String? ?? 'human');
+        final format = parsedArgs['format'] as String? ?? 'human';
+        return _handleVersionFlag(format);
       }
 
       // Run the command
@@ -270,9 +271,10 @@ class FlyCommandRunner extends CommandRunner<int> {
       'args': args.toList(),
       'cli_version': VersionUtils.getCurrentVersion(),
     });
-    final outputFormat = args.contains('--output=json')
+    // Check for format flag
+    final outputFormat = args.contains('--format=json')
         ? 'json'
-        : args.contains('--output=ai')
+        : args.contains('--format=ai')
             ? 'ai'
             : 'human';
 

@@ -29,7 +29,7 @@ class ContextCommand extends FlyCommand {
   ArgParser get argParser {
     final parser = super.argParser
       ..addOption(
-        'file',
+        'output-file',
         abbr: 'o',
         help: 'Output file path (default: stdout)',
       )
@@ -79,7 +79,7 @@ class ContextCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     try {
-      final outputFile = argResults!['file'] as String?;
+      final outputFile = argResults!['output-file'] as String?;
       final includeCode = argResults!['include-code'] as bool? ?? false;
       final includeDependencies =
           argResults!['include-dependencies'] as bool? ?? false;
@@ -135,9 +135,9 @@ class ContextCommand extends FlyCommand {
       // Write to file if specified
       if (outputFile != null) {
         final file = File(outputFile);
-        await file.writeAsString(jsonOutput
+        await file.writeAsString(isJsonOutputFormat
             ? json.encode(enrichedData)
-            : aiOutput
+            : isAiOutputFormat
                 ? json.encode(enrichedData)
                 : _formatHumanOutput(enrichedData));
 
@@ -164,7 +164,7 @@ class ContextCommand extends FlyCommand {
         data: enrichedData,
         nextSteps: [
           const NextStep(
-            command: 'fly context --file=context.json',
+            command: 'fly context --output-file=context.json',
             description: 'Save context to a file for later use',
           ),
         ],

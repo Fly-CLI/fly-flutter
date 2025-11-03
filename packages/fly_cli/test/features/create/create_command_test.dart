@@ -261,7 +261,7 @@ void main() {
           '--organization=com.test',
           '--platforms=ios,android,web',
           '--interactive',
-          '--output=json',
+          '--format=json',
         ]);
 
         expect(result.rest, equals(['test_app']));
@@ -317,7 +317,7 @@ void main() {
         final parser = command.argParser;
 
         expect(
-          () => parser.parse(['test_app', '--output=invalid']),
+          () => parser.parse(['test_app', '--format=invalid']),
           throwsA(isA<FormatException>()),
         );
       });
@@ -409,7 +409,7 @@ void main() {
         final parser = command.argParser;
         final result = parser.parse([
           'json_app',
-          '--output=json',
+          '--format=json',
         ]);
 
         expect(result.rest, equals(['json_app']));

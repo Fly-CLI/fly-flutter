@@ -188,8 +188,8 @@ void main() {
     group('Workflow 2: JSON Output Chain', () {
       test('all commands support JSON output', () async {
         final commands = [
-          ['version', '--output=json'],
-          ['doctor', '--output=json'],
+          ['version', '--format=json'],
+          ['doctor', '--format=json'],
         ];
 
         for (final cmd in commands) {
@@ -215,7 +215,7 @@ void main() {
           'create',
           projectName,
           '--template=minimal',
-          '--output=json',
+          '--format=json',
           '--output-dir=${tempDir.path}',
         ]);
 
@@ -251,7 +251,7 @@ void main() {
           'login',
           '--feature=auth',
           '--with-viewmodel',
-          '--output=json',
+          '--format=json',
           '--output-dir=${projectDir.path}',
         ]);
 
@@ -284,7 +284,7 @@ void main() {
           '--feature=auth',
           '--type=api',
           '--with-tests',
-          '--output=json',
+          '--format=json',
           '--output-dir=${projectDir.path}',
         ]);
 

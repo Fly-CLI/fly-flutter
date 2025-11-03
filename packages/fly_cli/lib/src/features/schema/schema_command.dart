@@ -42,7 +42,7 @@ class SchemaCommand extends FlyCommand {
         help: 'Export schema for specific command only',
       )
       ..addOption(
-        'file',
+        'output-file',
         abbr: 'o',
         help: 'Output file path (default: stdout)',
       )
@@ -83,7 +83,7 @@ class SchemaCommand extends FlyCommand {
     try {
       final formatStr = argResults!['format'] as String? ?? 'json-schema';
       final commandFilter = argResults!['command'] as String?;
-      final outputFile = argResults!['file'] as String?;
+      final outputFile = argResults!['output-file'] as String?;
       final includeExamples = argResults!['include-examples'] as bool? ?? true;
       final includeValidation =
           argResults!['include-validation'] as bool? ?? true;

@@ -64,9 +64,9 @@ void main() {
 
       test('should handle file output', () {
         final parser = command.argParser;
-        final result = parser.parse(['--file=schema.json']);
+        final result = parser.parse(['--output-file=schema.json']);
 
-        expect(result['file'], equals('schema.json'));
+        expect(result['output-file'], equals('schema.json'));
       });
 
       test('should handle include examples flag', () {
@@ -86,11 +86,11 @@ void main() {
       test('should handle all options together', () {
         final parser = command.argParser;
         final result = parser.parse([
-          '--file=schema.json',
+          '--output-file=schema.json',
           '--include-examples',
         ]);
 
-        expect(result['file'], equals('schema.json'));
+        expect(result['output-file'], equals('schema.json'));
         expect(result['include-examples'], equals(true));
       });
     });
@@ -101,7 +101,7 @@ void main() {
 
         // Should not throw for valid arguments
         expect(() => parser.parse([]), returnsNormally);
-        expect(() => parser.parse(['--file=test.json']), returnsNormally);
+        expect(() => parser.parse(['--output-file=test.json']), returnsNormally);
         expect(() => parser.parse(['--include-examples']), returnsNormally);
       });
 
@@ -132,7 +132,7 @@ void main() {
 
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
-        final args = ['test_command', '--file=test.json'];
+        final args = ['test_command', '--output-file=test.json'];
 
         for (var i = 0; i < 100; i++) {
           expect(() => parser.parse(args), returnsNormally);

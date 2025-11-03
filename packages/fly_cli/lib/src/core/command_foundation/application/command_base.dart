@@ -51,10 +51,10 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   CommandDefinition? get metadata => null;
 
   /// Whether to output JSON format for AI integration
-  bool get jsonOutput => argResults?['output'] == 'json';
+  bool get isJsonOutputFormat => argResults?['format'] == 'json';
 
   /// Whether to output AI-optimized format
-  bool get aiOutput => argResults?['output'] == 'ai';
+  bool get isAiOutputFormat => argResults?['format'] == 'ai';
 
   /// Whether to run in debug mode with verbose error output
   bool get debugMode => argResults?['debug'] == true;
@@ -73,13 +73,13 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
 
   /// Logger instance (respects output format settings)
   Logger get logger =>
-      (jsonOutput || aiOutput) ? _SilentLogger() : context.logger;
+      (isJsonOutputFormat || isAiOutputFormat) ? _SilentLogger() : context.logger;
 
   @override
   ArgParser get argParser {
     final parser = ArgParser()
       ..addOption(
-        'output',
+        'format',
         abbr: 'f',
         allowed: ['human', 'json', 'ai'],
         defaultsTo: 'human',
@@ -123,12 +123,13 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
 
     try {
       // Ensure the context reflects the current command's parsed arguments
-      // so that middleware and validators see the correct flags (e.g., --plan, --output)
+      // so that middleware and validators see the correct flags (e.g., --plan, --format)
       try {
         if (context is CommandContextImpl && argResults != null) {
           context as CommandContextImpl
           ..argResults = argResults!
           ..commandName = name;
+
         }
       } catch (_) {
         // Best-effort; continue even if context can't be updated
@@ -298,9 +299,9 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
 
   /// Handle command result output
   int _handleResult(CommandResult result) {
-    if (jsonOutput) {
+    if (isJsonOutputFormat) {
       print(json.encode(result.toJson()));
-    } else if (aiOutput) {
+    } else if (isAiOutputFormat) {
       print(json.encode(result.toAiJson()));
     } else if (debugMode) {
       print('DEBUG: ${json.encode(result.toJson())}');

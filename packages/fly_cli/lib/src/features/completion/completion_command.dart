@@ -38,7 +38,11 @@ class CompletionCommand extends FlyCommand {
         allowed: ['bash', 'zsh', 'fish', 'powershell'],
         defaultsTo: 'bash',
       )
-      ..addOption('file', abbr: 'o', help: 'Output file path (default: stdout)')
+      ..addOption(
+        'output-file',
+        abbr: 'o',
+        help: 'Output file path (default: stdout)',
+      )
       ..addFlag(
         'install',
         help: 'Install completion script to shell configuration',
@@ -73,7 +77,7 @@ class CompletionCommand extends FlyCommand {
       }
 
       final shell = args['shell'] as String? ?? 'bash';
-      final outputFile = args['file'] as String?;
+      final outputFile = args['output-file'] as String?;
       final install = args['install'] as bool? ?? false;
       final uninstall = args['uninstall'] as bool? ?? false;
 
@@ -155,7 +159,7 @@ class CompletionCommand extends FlyCommand {
         nextSteps: [
           NextStep(
             command:
-                'fly completion --shell=$shell --file=fly_${shell}_completion',
+                'fly completion --shell=$shell --output-file=fly_${shell}_completion',
             description: 'Save completion script to a file',
           ),
           NextStep(

@@ -120,9 +120,9 @@ class MyHomePage extends StatelessWidget {
 
       test('should handle file output', () {
         final parser = command.argParser;
-        final result = parser.parse(['--file=context.json']);
+        final result = parser.parse(['--output-file=context.json']);
 
-        expect(result['file'], equals('context.json'));
+        expect(result['output-file'], equals('context.json'));
       });
 
       test('should handle include code flag', () {
@@ -149,12 +149,12 @@ class MyHomePage extends StatelessWidget {
       test('should handle all options together', () {
         final parser = command.argParser;
         final result = parser.parse([
-          '--file=context.json',
+          '--output-file=context.json',
           '--include-code',
           '--include-dependencies',
         ]);
 
-        expect(result['file'], equals('context.json'));
+        expect(result['output-file'], equals('context.json'));
         expect(result['include-code'], equals(true));
         expect(result['include-dependencies'], equals(true));
       });
@@ -166,7 +166,7 @@ class MyHomePage extends StatelessWidget {
 
         // Should not throw for valid arguments
         expect(() => parser.parse([]), returnsNormally);
-        expect(() => parser.parse(['--file=test.json']), returnsNormally);
+        expect(() => parser.parse(['--output-file=test.json']), returnsNormally);
         expect(() => parser.parse(['--include-code']), returnsNormally);
         expect(() => parser.parse(['--include-dependencies']), returnsNormally);
       });
@@ -260,7 +260,7 @@ class MyHomePage extends StatelessWidget {
 
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
-        final args = ['--file=test.json'];
+        final args = ['--output-file=test.json'];
 
         for (var i = 0; i < 100; i++) {
           expect(() => parser.parse(args), returnsNormally);
