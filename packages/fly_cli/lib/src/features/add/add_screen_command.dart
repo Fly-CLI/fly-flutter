@@ -1,11 +1,14 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
@@ -30,48 +33,16 @@ class AddScreenCommand extends FlyCommand {
   @override
   ArgParser get argParser {
     final parser = super.argParser;
-    parser
-      ..addOption(
-        'feature',
-        help: 'Feature name',
-        defaultsTo: 'home',
-      )
-      ..addOption(
-        'type',
-        abbr: 't',
-        help: 'Screen type',
-        allowed: ['list', 'detail', 'form', 'auth', 'settings'],
-        defaultsTo: 'list',
-      )
-      ..addFlag(
-        'with-viewmodel',
-        help: 'Include viewmodel/provider',
-      )
-      ..addFlag(
-        'with-tests',
-        help: 'Include test files',
-      )
-      ..addFlag(
-        'interactive',
-        abbr: 'i',
-        help: 'Run in interactive mode',
-        negatable: false,
-      )
-      ..addFlag(
-        'with-validation',
-        help: 'Include form validation (for form screens)',
-      )
-      ..addFlag(
-        'with-navigation',
-        help: 'Include navigation logic',
-        defaultsTo: true,
-      )
-      ..addOption(
-        'output-dir',
-        help:
-            'Output directory for generated files (defaults to current directory)',
-        defaultsTo: null,
-      );
+    FlagFactory.applyFlagsToParser(parser, [
+      const AddScreenFeatureFlag(),
+      const AddScreenTypeFlag(),
+      const AddScreenWithViewModelFlag(),
+      const AddScreenWithTestsFlag(),
+      const InteractiveFlag(),
+      const AddScreenWithValidationFlag(),
+      const AddScreenWithNavigationFlag(),
+      const OutputDirFlag(),
+    ]);
     return parser;
   }
 
@@ -89,8 +60,9 @@ class AddScreenCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-    final interactive = argResults!['interactive'] as bool? ?? false;
-    final outputDir = argResults!['output-dir'] as String?;
+    final interactive =
+        FlagAccessor.getBool(argResults, const InteractiveFlag());
+    final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
 
     if (interactive) {
       return _runInteractiveMode(outputDir);
@@ -221,12 +193,30 @@ class AddScreenCommand extends FlyCommand {
   /// Run in non-interactive mode
   Future<CommandResult> _runNonInteractiveMode(String? outputDir) async {
     final screenName = argResults!.rest.first;
-    final feature = argResults!['feature'] as String? ?? 'home';
-    final screenType = argResults!['type'] as String? ?? 'list';
-    final withViewModel = argResults!['with-viewmodel'] as bool? ?? false;
-    final withTests = argResults!['with-tests'] as bool? ?? false;
-    final withValidation = argResults!['with-validation'] as bool? ?? false;
-    final withNavigation = argResults!['with-navigation'] as bool? ?? true;
+    final feature = FlagAccessor.getStringOrDefault(
+      argResults,
+      const AddScreenFeatureFlag(),
+      'home',
+    );
+    final screenType = FlagAccessor.getStringOrDefault(
+      argResults,
+      const AddScreenTypeFlag(),
+      'list',
+    );
+    final withViewModel = FlagAccessor.getBool(
+      argResults,
+      const AddScreenWithViewModelFlag(),
+    );
+    final withTests =
+        FlagAccessor.getBool(argResults, const AddScreenWithTestsFlag());
+    final withValidation = FlagAccessor.getBool(
+      argResults,
+      const AddScreenWithValidationFlag(),
+    );
+    final withNavigation = FlagAccessor.getBool(
+      argResults,
+      const AddScreenWithNavigationFlag(),
+    );
 
     // Resolve the target output directory, prioritizing --output-dir and FLY_OUTPUT_DIR.
     final outputDirResult = await context.pathResolver.resolveOutputDirectory(

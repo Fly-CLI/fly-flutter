@@ -1,13 +1,16 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -88,41 +91,15 @@ class CreateCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addOption(
-        'template',
-        abbr: 't',
-        help: 'Project template to use',
-        allowed: ['minimal', 'riverpod'],
-        defaultsTo: 'riverpod',
-      )
-      ..addOption(
-        'organization',
-        help: 'Organization identifier',
-        defaultsTo: 'com.example',
-      )
-      ..addMultiOption(
-        'platforms',
-        help: 'Target platforms',
-        allowed: ['ios', 'android', 'web', 'macos', 'windows', 'linux'],
-        defaultsTo: ['ios', 'android'],
-      )
-      ..addFlag(
-        'interactive',
-        abbr: 'i',
-        help: 'Run in interactive mode',
-        negatable: false,
-      )
-      ..addOption(
-        'from-manifest',
-        help: 'Create project from manifest file',
-      )
-      ..addOption(
-        'output-dir',
-        help:
-            'Output directory for generated files (defaults to current directory)',
-        defaultsTo: null,
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const CreateTemplateFlag(),
+      const CreateOrganizationFlag(),
+      CreatePlatformsFlag(),
+      const InteractiveFlag(),
+      const CreateFromManifestFlag(),
+      const OutputDirFlag(),
+    ]);
     return parser;
   }
 
@@ -144,11 +121,25 @@ class CreateCommand extends FlyCommand {
   @override
   Future<CommandResult> execute() async {
     final projectName = argResults!.rest.first;
-    final template = argResults!['template'] as String;
-    final organization = argResults!['organization'] as String;
-    final platforms = argResults!['platforms'] as List<String>;
-    final interactive = argResults!['interactive'] as bool;
-    final outputDir = argResults!['output-dir'] as String?;
+    final template = FlagAccessor.getStringOrDefault(
+      argResults,
+      const CreateTemplateFlag(),
+      'riverpod',
+    );
+    final organization = FlagAccessor.getStringOrDefault(
+      argResults,
+      const CreateOrganizationFlag(),
+      'com.example',
+    );
+    final platforms = FlagAccessor.getStringList(
+      argResults,
+      CreatePlatformsFlag(),
+    );
+    final interactive = FlagAccessor.getBool(
+      argResults,
+      const InteractiveFlag(),
+    );
+    final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
 
     // Use PathResolver to resolve project path
     final projectPathResult = await context.pathResolver.resolveProjectPath(

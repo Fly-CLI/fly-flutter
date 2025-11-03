@@ -1,5 +1,7 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart'
     as cli_validation;
 import 'package:fly_core/src/validation/validation.dart';
@@ -137,7 +139,8 @@ class TemplateExistsValidator implements CommandValidator {
   @override
   Future<ValidationResult> validate(
       CommandContext context, ArgResults args) async {
-    final template = templateName ?? args['template'] as String?;
+    final template = templateName ??
+        FlagAccessor.getString(args, const CreateTemplateFlag());
     if (template == null) return ValidationResult.success();
 
     final rule = cli_validation.TemplateValidationRule(context);
@@ -253,7 +256,10 @@ class FeatureNameValidator implements CommandValidator {
   @override
   Future<ValidationResult> validate(
       CommandContext context, ArgResults args) async {
-    final featureName = args['feature'] as String?;
+    final featureName = FlagAccessor.getString(
+      args,
+      const AddScreenFeatureFlag(),
+    );
     if (featureName == null) {
       return ValidationResult.failure(['Feature name is required']);
     }
@@ -275,8 +281,9 @@ class PlatformValidator implements CommandValidator {
   @override
   Future<ValidationResult> validate(
       CommandContext context, ArgResults args) async {
-    final platforms = args['platforms'] as List<String>?;
-    if (platforms == null) return ValidationResult.success();
+    final platforms =
+        FlagAccessor.getStringList(args, CreatePlatformsFlag());
+    if (platforms.isEmpty) return ValidationResult.success();
 
     final rule = cli_validation.PlatformValidationRule();
     return rule.validate(platforms);

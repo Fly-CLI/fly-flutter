@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/completion/completion_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
@@ -30,29 +33,13 @@ class CompletionCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addOption(
-        'shell',
-        abbr: 's',
-        help: 'Target shell for completion script',
-        allowed: ['bash', 'zsh', 'fish', 'powershell'],
-        defaultsTo: 'bash',
-      )
-      ..addOption(
-        'output-file',
-        abbr: 'o',
-        help: 'Output file path (default: stdout)',
-      )
-      ..addFlag(
-        'install',
-        help: 'Install completion script to shell configuration',
-        negatable: false,
-      )
-      ..addFlag(
-        'uninstall',
-        help: 'Remove completion script from shell configuration',
-        negatable: false,
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const CompletionShellFlag(),
+      const OutputFileFlag(),
+      const CompletionInstallFlag(),
+      const CompletionUninstallFlag(),
+    ]);
     return parser;
   }
 
@@ -76,10 +63,15 @@ class CompletionCommand extends FlyCommand {
         );
       }
 
-      final shell = args['shell'] as String? ?? 'bash';
-      final outputFile = args['output-file'] as String?;
-      final install = args['install'] as bool? ?? false;
-      final uninstall = args['uninstall'] as bool? ?? false;
+      final shell = FlagAccessor.getStringOrDefault(
+        args,
+        const CompletionShellFlag(),
+        'bash',
+      );
+      final outputFile = FlagAccessor.getString(args, const OutputFileFlag());
+      final install = FlagAccessor.getBool(args, const CompletionInstallFlag());
+      final uninstall =
+          FlagAccessor.getBool(args, const CompletionUninstallFlag());
 
       logger.info('🔧 Generating $shell completion script...');
 

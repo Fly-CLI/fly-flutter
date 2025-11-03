@@ -4,8 +4,11 @@ import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/definitions/mcp_tool.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/integrations/mcp/prompt_strategy_registry_provider.dart';
 import 'package:fly_cli/src/integrations/mcp/resources/dependencies_resource_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/resources/logs_build_resource_strategy.dart';
@@ -32,27 +35,13 @@ class McpServeCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addFlag(
-        'stdio',
-        help: 'Use stdio transport (required for MCP desktop clients)',
-        defaultsTo: true,
-      )
-      ..addOption(
-        'max-message-mb',
-        defaultsTo: '2',
-        help: 'Max message size in MB',
-      )
-      ..addOption(
-        'default-timeout-seconds',
-        defaultsTo: '300',
-        help: 'Default timeout for tools in seconds (default: 5 minutes)',
-      )
-      ..addOption(
-        'max-concurrency',
-        defaultsTo: '10',
-        help: 'Maximum concurrent tool executions',
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const McpServeStdioFlag(),
+      const McpServeMaxMessageMbFlag(),
+      const McpServeDefaultTimeoutSecondsFlag(),
+      const McpServeMaxConcurrencyFlag(),
+    ]);
     return parser;
   }
 
@@ -88,18 +77,30 @@ class McpServeCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-    final maxMb = int.tryParse(
-          argResults?['max-message-mb'] as String? ?? '2',
-        ) ??
-        2;
-    final defaultTimeoutSeconds = int.tryParse(
-          argResults?['default-timeout-seconds'] as String? ?? '300',
-        ) ??
-        300;
-    final maxConcurrency = int.tryParse(
-          argResults?['max-concurrency'] as String? ?? '10',
-        ) ??
-        10;
+      final maxMb = int.tryParse(
+            FlagAccessor.getStringOrDefault(
+              argResults,
+              const McpServeMaxMessageMbFlag(),
+              '2',
+            ),
+          ) ??
+          2;
+      final defaultTimeoutSeconds = int.tryParse(
+            FlagAccessor.getStringOrDefault(
+              argResults,
+              const McpServeDefaultTimeoutSecondsFlag(),
+              '300',
+            ),
+          ) ??
+          300;
+      final maxConcurrency = int.tryParse(
+            FlagAccessor.getStringOrDefault(
+              argResults,
+              const McpServeMaxConcurrencyFlag(),
+              '10',
+            ),
+          ) ??
+          10;
 
     // Initialize prompt strategy registry provider
     initializePromptStrategyRegistry();

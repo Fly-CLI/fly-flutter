@@ -5,6 +5,9 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/command_metadata/command_registry.dart';
@@ -79,71 +82,14 @@ class FlyCommandRunner extends CommandRunner<int> {
         scriptPath.contains('bin/fly.dart');
   }
 
-  /// Register global options
+  /// Register global options using flag registry
   void _registerGlobalOptions() {
-    argParser
-      ..addFlag(
-        'verbose',
-        abbr: 'v',
-        help: 'Enable verbose output',
-        negatable: false,
-      )
-      ..addFlag(
-        'quiet',
-        abbr: 'q',
-        help: 'Suppress output',
-        negatable: false,
-      )
-      ..addOption(
-        'log-level',
-        help: 'Logging level (trace, debug, info, warn, error, fatal)',
-        allowed: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
-      )
-      ..addOption(
-        'log-format',
-        help: 'Logging format (human or json)',
-        allowed: ['human', 'json'],
-      )
-      ..addOption(
-        'log-file',
-        help: 'Write logs to file (in addition to console)',
-      )
-      ..addFlag(
-        'no-color',
-        help: 'Disable color output for human logs',
-        negatable: false,
-      )
-      ..addFlag(
-        'trace',
-        help: 'Enable extra diagnostic tracing in logs',
-        negatable: false,
-      )
-      ..addFlag(
-        'version',
-        help: 'Show version information',
-        negatable: false,
-      )
-      ..addFlag(
-        'plan',
-        help: 'Show execution plan without running',
-        negatable: false,
-      )
-      ..addOption(
-        'format',
-        abbr: 'f',
-        allowed: ['human', 'json', 'ai'],
-        defaultsTo: 'human',
-        help: 'Output format (human, json, or ai)',
-      );
+    GlobalFlagsRegistry.applyToParser(argParser);
   }
 
   /// Register all commands using enum-based architecture
   void _registerCommands() {
-    // Create a temporary context for command registration
-    final tempArgs = ArgParser()
-      ..addFlag('verbose', negatable: false)
-      ..addFlag('quiet', negatable: false);
-    final context = _createContext(tempArgs.parse([]));
+    final context = _createContext(argParser.parse([]));
 
     // Delegate command creation to registry
     final registrationData =
@@ -191,8 +137,12 @@ class FlyCommandRunner extends CommandRunner<int> {
         ..info('Fly CLI start');
 
       // Handle version flag
-      if (parsedArgs['version'] == true) {
-        final format = parsedArgs['format'] as String? ?? 'human';
+      if (FlagAccessor.getBool(parsedArgs, const GlobalVersionFlag())) {
+        final format = FlagAccessor.getStringOrDefault(
+          parsedArgs,
+          GlobalFormatFlag(),
+          'human',
+        );
         return _handleVersionFlag(format);
       }
 
@@ -225,8 +175,8 @@ class FlyCommandRunner extends CommandRunner<int> {
       config: _getConfig(),
       environment: Environment.current(),
       workingDirectory: workingDir,
-      verbose: args['verbose'] as bool? ?? false,
-      quiet: args['quiet'] as bool? ?? false,
+      verbose: FlagAccessor.getBool(args, const GlobalVerboseFlag()),
+      quiet: FlagAccessor.getBool(args, const GlobalQuietFlag()),
     );
   }
 
@@ -271,7 +221,7 @@ class FlyCommandRunner extends CommandRunner<int> {
       'args': args.toList(),
       'cli_version': VersionUtils.getCurrentVersion(),
     });
-    // Check for format flag
+    // Check for format flag (industry standard handling)
     final outputFormat = args.contains('--format=json')
         ? 'json'
         : args.contains('--format=ai')

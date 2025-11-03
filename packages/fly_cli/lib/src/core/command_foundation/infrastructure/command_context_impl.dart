@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_execution_context.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/command_foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
@@ -104,19 +106,16 @@ class CommandContextImpl implements CommandContext {
   String? _commandName;
 
   @override
-  bool get jsonOutput => argResults['output'] == 'json';
+  bool get jsonOutput =>
+      FlagAccessor.getString(argResults, GlobalFormatFlag()) == 'json';
 
   @override
-  bool get aiOutput => argResults['output'] == 'ai';
+  bool get aiOutput =>
+      FlagAccessor.getString(argResults, GlobalFormatFlag()) == 'ai';
 
   @override
-  bool get planMode {
-    try {
-      return argResults['plan'] == true;
-    } catch (e) {
-      return false;
-    }
-  }
+  bool get planMode =>
+      FlagAccessor.getBool(argResults, const GlobalPlanFlag());
 
   @override
   String getErrorSuggestion(Object error) => _getErrorSuggestion(error);

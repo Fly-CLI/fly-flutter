@@ -1,14 +1,17 @@
 import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command_foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command_foundation/domain/command_validator.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command_foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command_metadata/command_metadata.dart'
     show CommandDefinition, CommandExample, OptionDefinition;
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/doctor/checks/dart_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/checks/flutter_sdk_check.dart';
 import 'package:fly_cli/src/features/doctor/checks/platform_tools_check.dart';
@@ -51,12 +54,10 @@ class DoctorCommand extends FlyCommand {
 
   @override
   ArgParser get argParser {
-    final parser = super.argParser
-      ..addFlag(
-        'fix',
-        help: 'Attempt to fix common issues',
-        negatable: false,
-      );
+    final parser = super.argParser;
+    FlagFactory.applyFlagsToParser(parser, [
+      const DoctorFixFlag(),
+    ]);
     return parser;
   }
 
@@ -72,7 +73,7 @@ class DoctorCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-    final fix = argResults!['fix'] as bool? ?? false;
+    final fix = FlagAccessor.getBool(argResults, const DoctorFixFlag());
 
     try {
       logger.info('Running system diagnostics...');
