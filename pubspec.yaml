@@ -10,7 +10,6 @@ workspace:
   - packages/fly_cli
   - packages/fly_core
   - packages/fly_networking
-  - packages/fly_state
 
 dependencies:
   yaml: ^3.1.2

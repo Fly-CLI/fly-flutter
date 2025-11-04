@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
-import 'package:fly_cli/src/features/create/create_command.dart';
+import 'package:fly_cli/src/features/generate/project/generate_project_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -9,8 +9,8 @@ import '../../helpers/mock_logger.dart' as mock_logger;
 import '../../helpers/test_fixtures.dart';
 
 void main() {
-  group('CreateCommand', () {
-    late CreateCommand command;
+  group('GenerateProjectCommand', () {
+    late GenerateProjectCommand command;
     late mock_logger.MockLogger mockLogger;
     late Directory tempDir;
 
@@ -19,7 +19,7 @@ void main() {
       final mockContext = CommandTestHelper.createMockCommandContext(
         logger: mockLogger,
       );
-      command = CreateCommand(mockContext);
+      command = GenerateProjectCommand(mockContext);
       tempDir = CommandTestHelper.createTempDir();
     });
 
@@ -30,11 +30,11 @@ void main() {
 
     group('Basic Properties', () {
       test('should have correct name', () {
-        expect(command.name, equals('create'));
+        expect(command.name, equals('project'));
       });
 
       test('should have correct description', () {
-        expect(command.description, equals('Create a new Flutter project'));
+        expect(command.description, equals('Generate a new Flutter project'));
       });
 
       test('should have required arguments', () {
@@ -504,3 +504,4 @@ void main() {
     });
   });
 }
+

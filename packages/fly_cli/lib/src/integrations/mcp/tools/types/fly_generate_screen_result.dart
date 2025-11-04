@@ -1,8 +1,8 @@
 import 'package:fly_mcp/fly_mcp.dart';
 
-/// Typed result for fly.add.screen tool
-class FlyAddScreenResult extends ToolResult {
-  FlyAddScreenResult({
+/// Typed result for fly.generate.screen tool
+class FlyGenerateScreenResult extends ToolResult {
+  FlyGenerateScreenResult({
     required this.success,
     required this.message,
     this.filesGenerated,
@@ -10,8 +10,8 @@ class FlyAddScreenResult extends ToolResult {
   });
 
   /// Create from JSON Map
-  factory FlyAddScreenResult.fromJson(Map<String, Object?> json) {
-    return FlyAddScreenResult(
+  factory FlyGenerateScreenResult.fromJson(Map<String, Object?> json) {
+    return FlyGenerateScreenResult(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
       filesGenerated: json['filesGenerated'] as int?,
@@ -39,3 +39,4 @@ class FlyAddScreenResult extends ToolResult {
         if (screenPath != null) 'screenPath': screenPath,
       };
 }
+

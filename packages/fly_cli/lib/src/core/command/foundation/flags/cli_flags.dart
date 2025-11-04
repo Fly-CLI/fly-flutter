@@ -8,7 +8,7 @@ part 'definitions/schema_flags.dart';
 part 'definitions/context_flags.dart';
 part 'definitions/completion_flags.dart';
 part 'definitions/create_flags.dart';
-part '../../../command/foundation/flags/definitions/add_flags.dart';
+part '../../../command/foundation/flags/definitions/generate_flags.dart';
 part 'definitions/doctor_flags.dart';
 part 'definitions/version_flags.dart';
 part 'definitions/mcp_flags.dart';

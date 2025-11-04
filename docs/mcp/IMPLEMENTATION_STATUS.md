@@ -33,7 +33,7 @@ test coverage.
 
 - **Phase 1 Complete** (7/7): `fly.echo`, `flutter.doctor`, `fly.template.list`,
   `fly.template.apply`, `flutter.create`, `flutter.run`, `flutter.build`
-- **Phase 2 Planned**: `fly.add.screen`, `fly.add.service`, `flutter.devices.list`, `flutter.test`,
+- **Phase 2 Planned**: `fly.generate.screen`, `fly.generate.service`, `flutter.devices.list`, `flutter.test`,
   `fly.scaffold.feature`
 - **Phase 3 Planned**: `fly.context.analyze`, `fly.schema.export`, `fly.template.describe`,
   `fly.project.info`
@@ -183,7 +183,7 @@ test coverage.
 
 **Timeline**: Next 4-6 weeks
 
-- [ ] Code generation tools (`fly.add.screen`, `fly.add.service`)
+- [ ] Code generation tools (`fly.generate.screen`, `fly.generate.service`)
 - [ ] Advanced Flutter tools (`flutter.test`, `flutter.devices.list`)
 - [ ] Additional prompts (`fly.scaffold.feature`, `fly.scaffold.api_client`)
 - [ ] Manifest resource (`manifest://`)

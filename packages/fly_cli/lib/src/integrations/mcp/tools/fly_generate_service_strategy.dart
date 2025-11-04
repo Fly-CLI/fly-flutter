@@ -4,19 +4,19 @@ import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/fly_add_service_params.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/fly_add_service_result.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_params.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_result.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
-/// Strategy for fly.add.service tool
-class FlyAddServiceStrategy
-    extends McpToolStrategy<FlyAddServiceParams, FlyAddServiceResult> {
+/// Strategy for fly.generate.service tool
+class FlyGenerateServiceStrategy extends McpToolStrategy<
+    FlyGenerateServiceParams, FlyGenerateServiceResult> {
   @override
-  String get name => 'fly.add.service';
+  String get name => 'fly.generate.service';
 
   @override
   String get description =>
-      'Add a new service component to the current project';
+      'Generate a new service component to the current project';
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
@@ -61,12 +61,13 @@ class FlyAddServiceStrategy
   Duration? get timeout => const Duration(minutes: 2);
 
   @override
-  FlyAddServiceParams paramsFromJson(Map<String, Object?> json) {
-    return FlyAddServiceParams.fromJson(json);
+  FlyGenerateServiceParams paramsFromJson(Map<String, Object?> json) {
+    return FlyGenerateServiceParams.fromJson(json);
   }
 
   @override
-  TypedToolHandler<FlyAddServiceParams, FlyAddServiceResult> createTypedHandler(
+  TypedToolHandler<FlyGenerateServiceParams, FlyGenerateServiceResult>
+      createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -74,7 +75,7 @@ class FlyAddServiceStrategy
       cancelToken?.throwIfCancelled();
 
       if (params.serviceName.isEmpty) {
-        return FlyAddServiceResult(
+        return FlyGenerateServiceResult(
           success: false,
           message: 'Missing required parameter: serviceName',
         );
@@ -88,7 +89,7 @@ class FlyAddServiceStrategy
       final baseUrl = params.baseUrl ?? 'https://api.example.com';
 
       await progressNotifier?.notify(
-          message: 'Adding service: ${params.serviceName}...', percent: 10);
+          message: 'Generating service: ${params.serviceName}...', percent: 10);
 
       final templateManager = context.templateManager;
 
@@ -117,22 +118,22 @@ class FlyAddServiceStrategy
       cancelToken?.throwIfCancelled();
 
       if (result is TemplateGenerationFailure) {
-        return FlyAddServiceResult(
+        return FlyGenerateServiceResult(
           success: false,
           message: 'Failed to generate service: ${result.error}',
         );
       }
 
       if (result is! TemplateGenerationSuccess) {
-        return FlyAddServiceResult(
+        return FlyGenerateServiceResult(
           success: false,
           message: 'Unexpected generation result',
         );
       }
 
-      return FlyAddServiceResult(
+      return FlyGenerateServiceResult(
         success: true,
-        message: 'Service added successfully',
+        message: 'Service generated successfully',
         filesGenerated: result.filesGenerated,
         servicePath: result.targetDirectory,
       );

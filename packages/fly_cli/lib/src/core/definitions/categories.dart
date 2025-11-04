@@ -24,7 +24,7 @@ enum ToolCategory {
   /// Template management tools (list, apply)
   template,
 
-  /// Code generation tools (add screen, add service)
+  /// Code generation tools (generate screen, generate service)
   generation,
 
   /// Export tools (context, schema)

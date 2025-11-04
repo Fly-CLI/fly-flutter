@@ -1,4 +1,5 @@
 /// MCP (Model Context Protocol) feature for Fly CLI
+library;
 
 // Error handling exports
 export 'errors/mcp_error.dart';
@@ -14,13 +15,13 @@ export 'prompts/prompt_error.dart';
 export 'prompts/prompt_validator.dart';
 // Resource exports
 export 'resources/resource_error.dart';
-// Tool strategy exports
-export 'tools/fly_add_screen_strategy.dart';
-export 'tools/fly_add_service_strategy.dart';
 export 'tools/fly_completion_strategy.dart';
 export 'tools/fly_context_export_strategy.dart';
 export 'tools/fly_doctor_strategy.dart';
 export 'tools/fly_echo_strategy.dart';
+// Tool strategy exports
+export 'tools/fly_generate_screen_strategy.dart';
+export 'tools/fly_generate_service_strategy.dart';
 export 'tools/fly_schema_export_strategy.dart';
 export 'tools/fly_template_apply_strategy.dart';
 export 'tools/fly_version_strategy.dart';

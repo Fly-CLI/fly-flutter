@@ -258,7 +258,7 @@ class FeatureNameValidator implements CommandValidator {
       CommandContext context, ArgResults args) async {
     final featureName = FlagAccessor.getString(
       args,
-      const AddScreenFeatureFlag(),
+      const GenerateScreenFeatureFlag(),
     );
     if (featureName == null) {
       return ValidationResult.failure(['Feature name is required']);

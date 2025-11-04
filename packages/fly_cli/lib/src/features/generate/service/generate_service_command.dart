@@ -13,32 +13,32 @@ import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
-/// AddServiceCommand using new architecture
-class AddServiceCommand extends FlyCommand {
-  AddServiceCommand(super.context);
+/// GenerateServiceCommand using new architecture
+class GenerateServiceCommand extends FlyCommand {
+  GenerateServiceCommand(super.context);
 
   /// Factory constructor for enum-based command creation
-  factory AddServiceCommand.create(CommandContext context) =>
-      AddServiceCommand(context);
+  factory GenerateServiceCommand.create(CommandContext context) =>
+      GenerateServiceCommand(context);
 
   @override
   String get name => 'service';
 
   @override
   String get description =>
-      'Add a new service component to the current project';
+      'Generate a new service component to the current project';
 
   @override
   ArgParser get argParser {
     final parser = super.argParser;
     FlagFactory.applyFlagsToParser(parser, [
-      const AddServiceFeatureFlag(),
-      const AddServiceTypeFlag(),
-      const AddServiceWithTestsFlag(),
-      const AddServiceWithMocksFlag(),
+      const GenerateServiceFeatureFlag(),
+      const GenerateServiceTypeFlag(),
+      const GenerateServiceWithTestsFlag(),
+      const GenerateServiceWithMocksFlag(),
       const InteractiveFlag(),
-      const AddServiceWithInterceptorsFlag(),
-      const AddServiceBaseUrlFlag(),
+      const GenerateServiceWithInterceptorsFlag(),
+      const GenerateServiceBaseUrlFlag(),
       const OutputDirFlag(),
     ]);
     return parser;
@@ -53,8 +53,7 @@ class AddServiceCommand extends FlyCommand {
       ];
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {
@@ -74,7 +73,7 @@ class AddServiceCommand extends FlyCommand {
     try {
       final prompter = context.interactivePrompt;
 
-      logger.info('🔧 Adding a new service');
+      logger.info('🔧 Generating a new service');
       logger.info('');
 
       // 1. Service name
@@ -163,7 +162,7 @@ class AddServiceCommand extends FlyCommand {
           suggestion: 'Specify a valid --output-dir or run from a project root',
           errorCode: ErrorCode.fileSystemError,
           context: ErrorContext.forCommand(
-            'add service',
+            'generate service',
             arguments: argResults?.arguments,
           ),
         );
@@ -195,25 +194,25 @@ class AddServiceCommand extends FlyCommand {
     final serviceName = argResults!.rest.first;
     final feature = FlagAccessor.getStringOrDefault(
       argResults,
-      const AddServiceFeatureFlag(),
+      const GenerateServiceFeatureFlag(),
       'core',
     );
     final serviceType = FlagAccessor.getStringOrDefault(
       argResults,
-      const AddServiceTypeFlag(),
+      const GenerateServiceTypeFlag(),
       'api',
     );
     final withTests =
-        FlagAccessor.getBool(argResults, const AddServiceWithTestsFlag());
+        FlagAccessor.getBool(argResults, const GenerateServiceWithTestsFlag());
     final withMocks =
-        FlagAccessor.getBool(argResults, const AddServiceWithMocksFlag());
+        FlagAccessor.getBool(argResults, const GenerateServiceWithMocksFlag());
     final withInterceptors = FlagAccessor.getBool(
       argResults,
-      const AddServiceWithInterceptorsFlag(),
+      const GenerateServiceWithInterceptorsFlag(),
     );
     final baseUrl = FlagAccessor.getStringOrDefault(
       argResults,
-      const AddServiceBaseUrlFlag(),
+      const GenerateServiceBaseUrlFlag(),
       'https://api.example.com',
     );
 
@@ -229,7 +228,7 @@ class AddServiceCommand extends FlyCommand {
         suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
-          'add service',
+          'generate service',
           arguments: argResults?.arguments,
         ),
       );
@@ -262,7 +261,7 @@ class AddServiceCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Adding service: $serviceName');
+      logger.info('Generating service: $serviceName');
       logger.info('Feature: $feature');
       logger.info('Type: $serviceType');
       logger.info('With tests: $withTests');
@@ -314,8 +313,8 @@ class AddServiceCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'add service',
-        message: 'Service added successfully',
+        command: 'generate service',
+        message: 'Service generated successfully',
         data: {
           'service_name': serviceName,
           'feature': feature,
@@ -336,7 +335,7 @@ class AddServiceCommand extends FlyCommand {
       );
     } catch (e) {
       return CommandResult.error(
-        message: 'Failed to add service: $e',
+        message: 'Failed to generate service: $e',
         suggestion: 'Check your project structure and try again',
       );
     }
@@ -345,21 +344,21 @@ class AddServiceCommand extends FlyCommand {
   // Lifecycle hooks implementation
   @override
   Future<void> onBeforeExecute(CommandContext context) async {
-    logger.info('🔧 Preparing to add service...');
+    logger.info('🔧 Preparing to generate service...');
   }
 
   @override
   Future<void> onAfterExecute(
       CommandContext context, CommandResult result) async {
     if (result.success) {
-      logger.info('🎉 Service added successfully!');
+      logger.info('🎉 Service generated successfully!');
     }
   }
 
   @override
   Future<void> onError(
       CommandContext context, Object error, StackTrace stackTrace) async {
-    logger.err('💥 Service creation failed: $error');
+    logger.err('💥 Service generation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');
     }

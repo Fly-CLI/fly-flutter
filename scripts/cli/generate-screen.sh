@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Add a new screen to a project
-# Wrapper for fly add screen command
+# Generate a new screen to a project
+# Wrapper for fly generate screen command
 
 set -e
 
@@ -21,10 +21,10 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Usage: $0 SCREEN_NAME [OPTIONS]"
       echo ""
-      echo "Add a new screen to a Flutter project using Fly CLI."
+      echo "Generate a new screen to a Flutter project using Fly CLI."
       echo ""
       echo "Arguments:"
-      echo "  SCREEN_NAME      Name of the screen to add (required)"
+      echo "  SCREEN_NAME      Name of the screen to generate (required)"
       echo ""
       echo "Options:"
       echo "  --feature=FEATURE           Feature module name (required)"
@@ -62,22 +62,22 @@ if ! command -v fly &> /dev/null; then
   echo "  ./scripts/setup/install.sh"
   echo ""
   echo "Or run directly:"
-  echo "  dart pub global run fly_cli:fly add screen \"$@\""
+  echo "  dart pub global run fly_cli:fly generate screen \"$@\""
   exit 1
 fi
 
-# Run fly add screen with all arguments
-fly add screen "$@"
+# Run fly generate screen with all arguments
+fly generate screen "$@"
 
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
   echo ""
-  echo -e "${GREEN}✓ Screen added successfully${NC}"
+  echo -e "${GREEN}✓ Screen generated successfully${NC}"
   exit 0
 else
   echo ""
-  echo -e "${RED}✗ Failed to add screen${NC}"
+  echo -e "${RED}✗ Failed to generate screen${NC}"
   exit $EXIT_CODE
 fi
 

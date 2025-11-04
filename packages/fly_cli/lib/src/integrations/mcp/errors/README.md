@@ -69,7 +69,7 @@ and remediation suggestions.
 
 ```dart
 final errorData = McpErrorHints.invalidParams(
-  tool: 'fly.add.screen',
+  tool: 'fly.generate.screen',
   errors: ['Missing required parameter: screenName'],
   context: {'feature': 'home'},
 );
@@ -202,7 +202,7 @@ All errors include structured data in the following format:
 
 ```dart
 {
-  'tool': 'fly.add.screen',           // Tool name
+  'tool': 'fly.generate.screen',           // Tool name
   'hint': 'Screen names must be lowercase',  // Actionable hint
   'remediation': [                    // Remediation steps
     'Convert screen name to lowercase: "Home" → "home"',

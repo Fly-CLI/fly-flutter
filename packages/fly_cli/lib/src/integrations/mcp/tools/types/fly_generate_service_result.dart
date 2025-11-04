@@ -1,8 +1,8 @@
 import 'package:fly_mcp/fly_mcp.dart';
 
-/// Typed result for fly.add.service tool
-class FlyAddServiceResult extends ToolResult {
-  FlyAddServiceResult({
+/// Typed result for fly.generate.service tool
+class FlyGenerateServiceResult extends ToolResult {
+  FlyGenerateServiceResult({
     required this.success,
     required this.message,
     this.filesGenerated,
@@ -10,8 +10,8 @@ class FlyAddServiceResult extends ToolResult {
   });
 
   /// Create from JSON Map
-  factory FlyAddServiceResult.fromJson(Map<String, Object?> json) {
-    return FlyAddServiceResult(
+  factory FlyGenerateServiceResult.fromJson(Map<String, Object?> json) {
+    return FlyGenerateServiceResult(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
       filesGenerated: json['filesGenerated'] as int?,
@@ -39,3 +39,4 @@ class FlyAddServiceResult extends ToolResult {
         if (servicePath != null) 'servicePath': servicePath,
       };
 }
+

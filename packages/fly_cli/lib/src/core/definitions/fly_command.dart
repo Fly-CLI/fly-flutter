@@ -3,11 +3,11 @@ import 'package:fly_cli/src/core/command/foundation/application/fly_command_regi
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/core/definitions/categories.dart';
-import 'package:fly_cli/src/features/add/screen_command_strategy.dart';
-import 'package:fly_cli/src/features/add/service_command_strategy.dart';
+import 'package:fly_cli/src/features/generate/project/project_command_strategy.dart';
+import 'package:fly_cli/src/features/generate/screen/screen_command_strategy.dart';
+import 'package:fly_cli/src/features/generate/service/service_command_strategy.dart';
 import 'package:fly_cli/src/features/completion/completion_command_strategy.dart';
 import 'package:fly_cli/src/features/context/context_command_strategy.dart';
-import 'package:fly_cli/src/features/create/create_command_strategy.dart';
 import 'package:fly_cli/src/features/doctor/doctor_command_strategy.dart';
 import 'package:fly_cli/src/features/schema/schema_command_strategy.dart';
 import 'package:fly_cli/src/features/version/version_command_strategy.dart';
@@ -17,18 +17,15 @@ import 'package:fly_cli/src/integrations/mcp/mcp_serve_command_strategy.dart';
 /// Enum representing all available Fly CLI commands
 ///
 /// Commands are organized by category for better discoverability:
-/// - Project: create
-/// - Generation: addScreen, addService
+/// - Generation: generateProject, generateScreen, generateService
 /// - Information: version, context, schema
 /// - Diagnostics: doctor
 /// - Integration: completion, mcpServe, mcpDoctor
 enum FlyCommand {
-  // Project commands
-  create,
-
   // Generation commands
-  addScreen,
-  addService,
+  generateProject,
+  generateScreen,
+  generateService,
 
   // Information commands
   version,
@@ -58,14 +55,14 @@ extension FlyCommandExtension on FlyCommand {
   ///
   /// This is the single source of truth for command-to-strategy mapping.
   FlyCommandStrategy Function() get strategyFactory => switch (this) {
-        FlyCommand.create => CreateCommandStrategy.new,
+        FlyCommand.generateProject => ProjectCommandStrategy.new,
         FlyCommand.doctor => DoctorCommandStrategy.new,
         FlyCommand.schema => SchemaCommandStrategy.new,
         FlyCommand.version => VersionCommandStrategy.new,
         FlyCommand.context => ContextCommandStrategy.new,
         FlyCommand.completion => CompletionCommandStrategy.new,
-        FlyCommand.addScreen => ScreenCommandStrategy.new,
-        FlyCommand.addService => ServiceCommandStrategy.new,
+        FlyCommand.generateScreen => ScreenCommandStrategy.new,
+        FlyCommand.generateService => ServiceCommandStrategy.new,
         FlyCommand.mcpServe => McpServeCommandStrategy.new,
         FlyCommand.mcpDoctor => McpDoctorCommandStrategy.new,
       };

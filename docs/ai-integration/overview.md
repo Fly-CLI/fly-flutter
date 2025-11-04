@@ -192,9 +192,9 @@ class FlyCLIAgent:
         result = subprocess.run(cmd, capture_output=True, text=True)
         return json.loads(result.stdout as String)
     
-    def add_screen(self, name, feature):
+    def generate_screen(self, name, feature):
         cmd = self.base_command + [
-            "add", "screen", name,
+            "generate", "screen", name,
             "--feature", feature,
             "--output", "json"
         ]
@@ -209,7 +209,7 @@ class FlyCLIAgent:
 # Usage
 agent = FlyCLIAgent()
 project = agent.create_project("my_app", "riverpod")
-screen = agent.add_screen("home", "auth")
+screen = agent.generate_screen("home", "auth")
 schema = agent.get_schema()
 ```
 
@@ -229,8 +229,8 @@ class FlyCLIAgent {
         return JSON.parse(result);
     }
     
-    addScreen(name, feature) {
-        const cmd = `${this.baseCommand} add screen ${name} --feature ${feature} --output json`;
+    generateScreen(name, feature) {
+        const cmd = `${this.baseCommand} generate screen ${name} --feature ${feature} --output json`;
         const result = execSync(cmd, { encoding: 'utf8' });
         return JSON.parse(result);
     }
@@ -264,11 +264,11 @@ create_project() {
     $FLY_CMD create "$name" --template "$template" --output json
 }
 
-add_screen() {
+generate_screen() {
     local name=$1
     local feature=$2
     
-    $FLY_CMD add screen "$name" --feature "$feature" --output json
+    $FLY_CMD generate screen "$name" --feature "$feature" --output json
 }
 
 get_schema() {
@@ -277,7 +277,7 @@ get_schema() {
 
 # Usage
 create_project "my_app" "riverpod"
-add_screen "home" "auth"
+generate_screen "home" "auth"
 get_schema
 ```
 

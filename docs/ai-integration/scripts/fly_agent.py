@@ -7,7 +7,7 @@ with AI coding assistants like ChatGPT, Claude, or local AI models.
 
 Usage:
     python fly_agent.py create my_app --template=riverpod
-    python fly_agent.py add screen home --feature=auth
+    python fly_agent.py generate screen home --feature=auth
     python fly_agent.py schema export
 """
 
@@ -114,7 +114,7 @@ class FlyCLIAgent:
         
         return self._run_command(args)
     
-    def add_screen(
+    def generate_screen(
         self,
         name: str,
         feature: str,
@@ -135,7 +135,7 @@ class FlyCLIAgent:
             Screen creation result
         """
         args = [
-            "add", "screen", name,
+            "generate", "screen", name,
             "--feature", feature,
             "--type", screen_type
         ]
@@ -147,7 +147,7 @@ class FlyCLIAgent:
         
         return self._run_command(args)
     
-    def add_service(
+    def generate_service(
         self,
         name: str,
         feature: str,
@@ -170,7 +170,7 @@ class FlyCLIAgent:
             Service creation result
         """
         args = [
-            "add", "service", name,
+            "generate", "service", name,
             "--feature", feature,
             "--type", service_type
         ]
@@ -259,16 +259,16 @@ def main():
     create_parser.add_argument("--platforms", nargs="+", default=["ios", "android"])
     create_parser.add_argument("--plan", action="store_true", help="Show plan without creating files")
     
-    # Add screen command
-    screen_parser = subparsers.add_parser("add-screen", help="Add a new screen")
+    # Generate screen command
+    screen_parser = subparsers.add_parser("generate-screen", help="Generate a new screen")
     screen_parser.add_argument("name", help="Screen name")
     screen_parser.add_argument("--feature", required=True, help="Feature module name")
     screen_parser.add_argument("--type", default="generic", choices=["generic", "list", "detail", "form", "settings"])
     screen_parser.add_argument("--with-viewmodel", action="store_true", default=True)
     screen_parser.add_argument("--with-tests", action="store_true", default=True)
     
-    # Add service command
-    service_parser = subparsers.add_parser("add-service", help="Add a new service")
+    # Generate service command
+    service_parser = subparsers.add_parser("generate-service", help="Generate a new service")
     service_parser.add_argument("name", help="Service name")
     service_parser.add_argument("--feature", required=True, help="Feature module name")
     service_parser.add_argument("--type", default="api", choices=["api", "repository", "storage", "analytics"])
@@ -310,16 +310,16 @@ def main():
                 platforms=args.platforms,
                 plan=args.plan
             )
-        elif args.command == "add-screen":
-            result = agent.add_screen(
+        elif args.command == "generate-screen":
+            result = agent.generate_screen(
                 name=args.name,
                 feature=args.feature,
                 screen_type=args.type,
                 with_viewmodel=args.with_viewmodel,
                 with_tests=args.with_tests
             )
-        elif args.command == "add-service":
-            result = agent.add_service(
+        elif args.command == "generate-service":
+            result = agent.generate_service(
                 name=args.name,
                 feature=args.feature,
                 service_type=args.type,

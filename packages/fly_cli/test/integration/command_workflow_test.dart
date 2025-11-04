@@ -37,7 +37,7 @@ void main() {
     });
 
     group('Workflow 1: Full Project Setup', () {
-      test('create project → add screen → add service → build', () async {
+      test('create project → generate screen → generate service → build', () async {
         // This test simulates a complete project setup workflow
         // Performance optimized: reduced complexity while maintaining coverage
         final projectName = TestFixtures.createTestProjectName();
@@ -61,9 +61,9 @@ void main() {
             File(path.join(projectDir.path, 'lib', 'main.dart')).existsSync(),
             isTrue);
 
-        // Step 2: Add screen
+        // Step 2: Generate screen
         await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'login',
           '--feature=auth',
@@ -89,9 +89,9 @@ void main() {
                 .existsSync(),
             isTrue);
 
-        // Step 3: Add service
+        // Step 3: Generate service
         await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'service',
           'auth',
           '--feature=auth',
@@ -125,7 +125,7 @@ void main() {
             isTrue);
       }, timeout: Timeout(Duration(minutes: 2)));
 
-      test('create minimal project → add multiple screens → add services',
+      test('create minimal project → generate multiple screens → generate services',
           () async {
         final projectName = TestFixtures.createTestProjectName();
         final projectDir = Directory(path.join(tempDir.path, projectName));
@@ -141,11 +141,11 @@ void main() {
 
         expect(projectDir.existsSync(), isTrue);
 
-        // Add multiple screens - reduce to 2 screens for performance
+        // Generate multiple screens - reduce to 2 screens for performance
         final screens = ['home', 'profile'];
         for (final screen in screens) {
           await CommandTestHelper.runCommand([
-            'add',
+            'generate',
             'screen',
             screen,
             '--feature=main',
@@ -160,11 +160,11 @@ void main() {
               isTrue);
         }
 
-        // Add multiple services - reduce to 2 services for performance
+        // Generate multiple services - reduce to 2 services for performance
         final services = ['api', 'storage'];
         for (final service in services) {
           await CommandTestHelper.runCommand([
-            'add',
+            'generate',
             'service',
             service,
             '--feature=core',
@@ -232,7 +232,7 @@ void main() {
         expect(projectDir.existsSync(), isTrue);
       });
 
-      test('add screen with JSON output → verify response', () async {
+      test('generate screen with JSON output → verify response', () async {
         // First create a project
         final projectName = TestFixtures.createTestProjectName();
         await CommandTestHelper.runCommand([
@@ -244,9 +244,9 @@ void main() {
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
 
-        // Add screen with JSON output
+        // Generate screen with JSON output
         final result = await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'login',
           '--feature=auth',
@@ -257,14 +257,14 @@ void main() {
 
         // Verify JSON response structure
         expect(result.success, isTrue);
-        expect(result.command, equals('add screen'));
+        expect(result.command, equals('generate screen'));
         expect(result.data?.containsKey('screen_name'), isTrue);
         expect(result.data?.containsKey('feature'), isTrue);
         expect(result.data?.containsKey('files_generated'), isTrue);
         expect(result.data?.containsKey('duration_ms'), isTrue);
       });
 
-      test('add service with JSON output → verify response', () async {
+      test('generate service with JSON output → verify response', () async {
         // First create a project
         final projectName = TestFixtures.createTestProjectName();
         await CommandTestHelper.runCommand([
@@ -276,9 +276,9 @@ void main() {
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
 
-        // Add service with JSON output
+        // Generate service with JSON output
         final result = await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'service',
           'auth',
           '--feature=auth',
@@ -290,7 +290,7 @@ void main() {
 
         // Verify JSON response structure
         expect(result.success, isTrue);
-        expect(result.command, equals('add service'));
+        expect(result.command, equals('generate service'));
         expect(result.data?.containsKey('service_name'), isTrue);
         expect(result.data?.containsKey('feature'), isTrue);
         expect(result.data?.containsKey('type'), isTrue);
@@ -312,10 +312,10 @@ void main() {
       });
 
       test('handle missing project directory gracefully', () async {
-        // Try to add screen without being in a project directory
+        // Try to generate screen without being in a project directory
         final result = await CommandTestHelper.runCommand(
           [
-            'add',
+            'generate',
             'screen',
             'login',
           ],
@@ -339,18 +339,18 @@ void main() {
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
 
-        // Add screen first time
+        // Generate screen first time
         await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'login',
           '--feature=auth',
           '--output-dir=${projectDir.path}',
         ]);
 
-        // Try to add same screen again
+        // Try to generate same screen again
         final result = await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'login',
           '--feature=auth',
@@ -418,7 +418,7 @@ void main() {
         expect(projectDir.existsSync(), isTrue);
       });
 
-      test('add screen plan → execute → verify', () async {
+      test('generate screen plan → execute → verify', () async {
         // Create project first
         final projectName = TestFixtures.createTestProjectName();
         await CommandTestHelper.runCommand([
@@ -430,9 +430,9 @@ void main() {
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
 
-        // Plan screen addition
+        // Plan screen generation
         final planResult = await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'login',
           '--feature=auth',
@@ -444,9 +444,9 @@ void main() {
         expect(planResult.success, isTrue);
         expect(planResult.message, contains('Execution plan generated'));
 
-        // Execute screen addition
-        final addResult = await CommandTestHelper.runCommand([
-          'add',
+        // Execute screen generation
+        final generateResult = await CommandTestHelper.runCommand([
+          'generate',
           'screen',
           'login',
           '--feature=auth',
@@ -454,9 +454,9 @@ void main() {
           '--output-dir=${projectDir.path}',
         ]);
 
-        expect(addResult.success, isTrue);
+        expect(generateResult.success, isTrue);
 
-        // Verify screen was added
+        // Verify screen was generated
         expect(
             File(path.join(projectDir.path, 'lib', 'features', 'auth',
                     'presentation', 'login_screen.dart'))
@@ -466,7 +466,7 @@ void main() {
     });
 
     group('Workflow 5: Cross-Command Integration', () {
-      test('doctor → create → add → doctor again', () async {
+      test('doctor → create → generate → doctor again', () async {
         // Step 1: Check system health
         final doctorResult1 = await CommandTestHelper.runCommand(['doctor']);
         expect(doctorResult1, isNotNull);
@@ -485,7 +485,7 @@ void main() {
         final projectDir = Directory(path.join(tempDir.path, projectName));
 
         await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'home',
           '--feature=main',
@@ -493,7 +493,7 @@ void main() {
         ]);
 
         await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'service',
           'api',
           '--feature=core',
@@ -539,7 +539,7 @@ void main() {
         }
       });
 
-      test('add multiple screens efficiently', () async {
+      test('generate multiple screens efficiently', () async {
         // Create project
         final projectName = TestFixtures.createTestProjectName();
         await CommandTestHelper.runCommand([
@@ -556,7 +556,7 @@ void main() {
 
         for (final screenName in screenNames) {
           await CommandTestHelper.runCommand([
-            'add',
+            'generate',
             'screen',
             screenName,
             '--feature=main',
@@ -566,7 +566,7 @@ void main() {
 
         stopwatch.stop();
 
-        // Should add 5 screens in reasonable time
+        // Should generate 5 screens in reasonable time
         expect(stopwatch.elapsedMilliseconds, lessThan(10000)); // 10 seconds
 
         // Verify all screens were added
@@ -598,7 +598,7 @@ void main() {
 
         // Try to continue workflow
         await CommandTestHelper.runCommand([
-          'add',
+          'generate',
           'screen',
           'home',
           '--feature=main',

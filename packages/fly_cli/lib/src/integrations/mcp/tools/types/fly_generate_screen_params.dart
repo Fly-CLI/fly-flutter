@@ -1,8 +1,8 @@
 import 'package:fly_mcp/fly_mcp.dart';
 
-/// Typed parameters for fly.add.screen tool
-class FlyAddScreenParams extends ToolParameter {
-  FlyAddScreenParams({
+/// Typed parameters for fly.generate.screen tool
+class FlyGenerateScreenParams extends ToolParameter {
+  FlyGenerateScreenParams({
     required this.screenName,
     this.feature,
     this.screenType,
@@ -13,8 +13,8 @@ class FlyAddScreenParams extends ToolParameter {
   });
 
   /// Create from JSON Map
-  factory FlyAddScreenParams.fromJson(Map<String, Object?> json) {
-    return FlyAddScreenParams(
+  factory FlyGenerateScreenParams.fromJson(Map<String, Object?> json) {
+    return FlyGenerateScreenParams(
       screenName: json['screenName'] as String? ?? '',
       feature: json['feature'] as String?,
       screenType: json['screenType'] as String?,
@@ -57,3 +57,4 @@ class FlyAddScreenParams extends ToolParameter {
         if (withNavigation != null) 'withNavigation': withNavigation,
       };
 }
+

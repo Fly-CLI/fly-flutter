@@ -184,7 +184,7 @@ Use package-relative imports:
 ```dart
 // ✅ Good
 import 'package:fly_cli/src/core/logging/logger.dart';
-import 'package:fly_cli/src/features/create/create_command.dart';
+import 'package:fly_cli/src/features/generate/project/generate_project_command.dart';
 
 // ❌ Avoid
 import '../../core/logging/logger.dart';

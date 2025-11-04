@@ -5,26 +5,26 @@ import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/fly_add_screen_params.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/fly_add_screen_result.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_screen_params.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_screen_result.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
-/// Strategy for fly.add.screen tool
-class FlyAddScreenStrategy
-    extends McpToolStrategy<FlyAddScreenParams, FlyAddScreenResult> {
+/// Strategy for fly.generate.screen tool
+class FlyGenerateScreenStrategy
+    extends McpToolStrategy<FlyGenerateScreenParams, FlyGenerateScreenResult> {
   @override
-  String get name => 'fly.add.screen';
+  String get name => 'fly.generate.screen';
 
   @override
   String get description =>
-      'Add a new screen component to the current Flutter project. '
+      'Generate a new screen component to the current Flutter project. '
       'Screen names must be lowercase (e.g., "home" not "Home"). '
       'The tool generates a screen widget with optional view model, tests, validation, and navigation setup.';
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
         description:
-            'Parameters for adding a screen. Screen names follow Fly conventions: lowercase with snake_case for multi-word names.',
+            'Parameters for generating a screen. Screen names follow Fly conventions: lowercase with snake_case for multi-word names.',
         properties: {
           'screenName': Schema.string(
             description:
@@ -70,7 +70,7 @@ class FlyAddScreenStrategy
   @override
   ObjectSchema get resultSchema => ObjectSchema(
         description:
-            'Result from adding a screen. Contains success status, generated files count, and screen path.',
+            'Result from generating a screen. Contains success status, generated files count, and screen path.',
         properties: {
           'success': Schema.bool(
             description: 'Whether the screen was generated successfully',
@@ -107,12 +107,13 @@ class FlyAddScreenStrategy
   Duration? get timeout => const Duration(minutes: 2);
 
   @override
-  FlyAddScreenParams paramsFromJson(Map<String, Object?> json) {
-    return FlyAddScreenParams.fromJson(json);
+  FlyGenerateScreenParams paramsFromJson(Map<String, Object?> json) {
+    return FlyGenerateScreenParams.fromJson(json);
   }
 
   @override
-  TypedToolHandler<FlyAddScreenParams, FlyAddScreenResult> createTypedHandler(
+  TypedToolHandler<FlyGenerateScreenParams, FlyGenerateScreenResult>
+      createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -170,7 +171,7 @@ class FlyAddScreenStrategy
       final withNavigation = params.withNavigation ?? true;
 
       await progressNotifier?.notify(
-          message: 'Adding screen: ${params.screenName}...', percent: 10);
+          message: 'Generating screen: ${params.screenName}...', percent: 10);
 
       final templateManager = context.templateManager;
 
@@ -212,15 +213,15 @@ class FlyAddScreenStrategy
       }
 
       if (result is! TemplateGenerationSuccess) {
-        return FlyAddScreenResult(
+        return FlyGenerateScreenResult(
           success: false,
           message: 'Unexpected generation result',
         );
       }
 
-      return FlyAddScreenResult(
+      return FlyGenerateScreenResult(
         success: true,
-        message: 'Screen added successfully',
+        message: 'Screen generated successfully',
         filesGenerated: result.filesGenerated,
         screenPath: result.targetDirectory,
       );

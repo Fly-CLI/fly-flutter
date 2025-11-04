@@ -107,9 +107,9 @@ extension FlyCommandTypeExtension on FlyCommandType {
       case FlyCommandType.completion:
         return 'Generate shell completion scripts for command line';
       case FlyCommandType.screen:
-        return 'Add a new screen component to the current project';
+        return 'Generate a new screen component to the current project';
       case FlyCommandType.service:
-        return 'Add a new service component to the current project';
+        return 'Generate a new service component to the current project';
     }
   }
 
@@ -130,19 +130,19 @@ extension FlyCommandTypeExtension on FlyCommandType {
         return ['completions', 'complete', 'tab'];
       case FlyCommandType.screen:
         return [
-          'add-screen',
           'generate-screen',
+          'add-screen',
           'new-screen',
           'make-screen',
-          'addScreen'
+          'generateScreen'
         ];
       case FlyCommandType.service:
         return [
-          'add-service',
           'generate-service',
+          'add-service',
           'new-service',
           'make-service',
-          'addService'
+          'generateService'
         ];
     }
   }
@@ -163,12 +163,12 @@ extension FlyCommandTypeExtension on FlyCommandType {
     }
   }
 
-  /// The group name for subcommands (e.g., 'add' for screen, service)
+  /// The group name for subcommands (e.g., 'generate' for screen, service)
   String? get groupName {
     switch (this) {
       case FlyCommandType.screen:
       case FlyCommandType.service:
-        return 'add';
+        return 'generate';
       case FlyCommandType.create:
       case FlyCommandType.doctor:
       case FlyCommandType.schema:
@@ -220,9 +220,9 @@ extension FlyCommandTypeExtension on FlyCommandType {
       case FlyCommandType.completion:
         return CompletionCommand.create(context);
       case FlyCommandType.screen:
-        return AddScreenCommand.create(context);
+        return GenerateScreenCommand.create(context);
       case FlyCommandType.service:
-        return AddServiceCommand.create(context);
+        return GenerateServiceCommand.create(context);
     }
   }
 }

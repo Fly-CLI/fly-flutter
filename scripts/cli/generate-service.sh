@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Add a new service to a project
-# Wrapper for fly add service command
+# Generate a new service to a project
+# Wrapper for fly generate service command
 
 set -e
 
@@ -21,10 +21,10 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Usage: $0 SERVICE_NAME [OPTIONS]"
       echo ""
-      echo "Add a new service to a Flutter project using Fly CLI."
+      echo "Generate a new service to a Flutter project using Fly CLI."
       echo ""
       echo "Arguments:"
-      echo "  SERVICE_NAME     Name of the service to add (required)"
+      echo "  SERVICE_NAME     Name of the service to generate (required)"
       echo ""
       echo "Options:"
       echo "  --feature=FEATURE           Feature module name (required)"
@@ -63,22 +63,22 @@ if ! command -v fly &> /dev/null; then
   echo "  ./scripts/setup/install.sh"
   echo ""
   echo "Or run directly:"
-  echo "  dart pub global run fly_cli:fly add service \"$@\""
+  echo "  dart pub global run fly_cli:fly generate service \"$@\""
   exit 1
 fi
 
-# Run fly add service with all arguments
-fly add service "$@"
+# Run fly generate service with all arguments
+fly generate service "$@"
 
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
   echo ""
-  echo -e "${GREEN}✓ Service added successfully${NC}"
+  echo -e "${GREEN}✓ Service generated successfully${NC}"
   exit 0
 else
   echo ""
-  echo -e "${RED}✗ Failed to add service${NC}"
+  echo -e "${RED}✗ Failed to generate service${NC}"
   exit $EXIT_CODE
 fi
 

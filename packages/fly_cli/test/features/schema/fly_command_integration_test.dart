@@ -232,10 +232,10 @@ void main() {
 
     group('subcommand handling', () {
       test('extracts subcommands from FlyCommand', () {
-        final parentCommand = _TestFlyCommand('add', 'Add components');
-        parentCommand.addSubcommand(_TestFlyCommand('screen', 'Add a screen'));
+        final parentCommand = _TestFlyCommand('generate', 'Generate components');
+        parentCommand.addSubcommand(_TestFlyCommand('screen', 'Generate a screen'));
         parentCommand
-            .addSubcommand(_TestFlyCommand('service', 'Add a service'));
+            .addSubcommand(_TestFlyCommand('service', 'Generate a service'));
 
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(parentCommand);

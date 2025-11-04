@@ -553,18 +553,18 @@ async function createFlutterProject(projectName, options = {}) {
 }
 ```
 
-### Workflow 2: Add Screen to Project
+### Workflow 2: Generate Screen to Project
 
 ```javascript
-async function addScreenToProject(screenName, options = {}) {
+async function generateScreenToProject(screenName, options = {}) {
   try {
     // Validate screen name
     if (!/^[a-z][a-z0-9_]*$/.test(screenName)) {
       throw new Error('Screen name must be lowercase with underscores (snake_case)');
     }
     
-    // Add screen with progress tracking
-    const result = await callTool('fly.add.screen', {
+    // Generate screen with progress tracking
+    const result = await callTool('fly.generate.screen', {
       screenName,
       feature: options.feature,
       screenType: options.screenType || 'list',

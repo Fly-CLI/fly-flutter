@@ -1,8 +1,8 @@
 import 'package:fly_mcp/fly_mcp.dart';
 
-/// Typed parameters for fly.add.service tool
-class FlyAddServiceParams extends ToolParameter {
-  FlyAddServiceParams({
+/// Typed parameters for fly.generate.service tool
+class FlyGenerateServiceParams extends ToolParameter {
+  FlyGenerateServiceParams({
     required this.serviceName,
     this.feature,
     this.serviceType,
@@ -13,8 +13,8 @@ class FlyAddServiceParams extends ToolParameter {
   });
 
   /// Create from JSON Map
-  factory FlyAddServiceParams.fromJson(Map<String, Object?> json) {
-    return FlyAddServiceParams(
+  factory FlyGenerateServiceParams.fromJson(Map<String, Object?> json) {
+    return FlyGenerateServiceParams(
       serviceName: json['serviceName'] as String? ?? '',
       feature: json['feature'] as String?,
       serviceType: json['serviceType'] as String?,
@@ -57,3 +57,4 @@ class FlyAddServiceParams extends ToolParameter {
         if (baseUrl != null) 'baseUrl': baseUrl,
       };
 }
+

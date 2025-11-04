@@ -205,7 +205,7 @@ fly_cli/
 
 ```bash
 fly create <project_name> [options]      # Create new project
-fly add <type> <name> [options]          # Add component (screen, service, etc.)
+fly generate <type> <name> [options]    # Generate component (screen, service, etc.)
 fly update [options]                     # Update foundation packages
 fly migrate [version]                    # Migrate between versions
 fly config [options]                     # Configure CLI settings
@@ -497,7 +497,7 @@ $ fly create my_app
 
 Next steps:
   cd my_app
-  fly add screen login
+  fly generate screen login
   flutter run
 ```
 
@@ -1065,7 +1065,7 @@ docs/
 ```bash
 # Every command supports JSON output
 fly create my_app --output=json
-fly add screen login --output=json --dry-run
+fly generate screen login --output=json --dry-run
 fly doctor --output=json
 
 # Structured JSON Response
@@ -1218,15 +1218,15 @@ fly context export --output=.ai/project_context.md
 - State managed via sealed ViewState classes
 - API calls through fly_networking ApiClient
 
-## To add a new screen:
+## To generate a new screen:
 ```bash
-fly add screen <name>
+fly generate screen <name>
 ```
 
-## To add a new service:
+## To generate a new service:
 
 ```bash
-fly add service <name>
+fly generate service <name>
 ```
 
 ```

@@ -277,7 +277,7 @@ _For detailed documentation of code generation tools, see the individual tool do
 
 ### 4. Code Generation Tools
 
-#### `fly.add.screen`
+#### `fly.generate.screen`
 
 **Purpose**: Generate a new Flutter screen component  
 **Category**: Code Generation  
@@ -307,7 +307,7 @@ _For detailed documentation of code generation tools, see the individual tool do
 
 ---
 
-#### `fly.add.service`
+#### `fly.generate.service`
 
 **Purpose**: Generate a new service class  
 **Category**: Code Generation  
@@ -757,8 +757,8 @@ _For detailed documentation of code generation tools, see the individual tool do
 
 ### Phase 2 (High Priority - 3-4 weeks)
 
-1. `fly.add.screen` - Code generation integration
-2. `fly.add.service` - Code generation integration
+1. `fly.generate.screen` - Code generation integration
+2. `fly.generate.service` - Code generation integration
 3. `fly.scaffold.feature` - Multi-component prompts
 4. `flutter.devices.list` - Device management
 5. `flutter.test` - Testing integration
@@ -851,7 +851,7 @@ _For detailed documentation of code generation tools, see the individual tool do
 
 ### Short-term Enhancements
 
-1. Implement `fly.add.screen` and `fly.add.service` for code generation
+1. Implement `fly.generate.screen` and `fly.generate.service` for code generation
 2. Add `flutter.devices.list` for better device management
 3. Expand prompts with `fly.scaffold.feature`
 4. Enhance log resources with filtering and search

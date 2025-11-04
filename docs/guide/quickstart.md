@@ -41,26 +41,26 @@ flutter pub get
 flutter run
 ```
 
-## Add Components
+## Generate Components
 
-### Add a New Screen
+### Generate a New Screen
 
 ```bash
-# Add a screen to the home feature
-fly add screen profile --feature=home
+# Generate a screen to the home feature
+fly generate screen profile --feature=home
 
-# Add a screen with ViewModel and tests
-fly add screen settings --feature=home --with-viewmodel=true --with-tests=true
+# Generate a screen with ViewModel and tests
+fly generate screen settings --feature=home --with-viewmodel=true --with-tests=true
 ```
 
-### Add a New Service
+### Generate a New Service
 
 ```bash
-# Add an API service
-fly add service user_api --feature=core --type=api --base-url=https://api.example.com
+# Generate an API service
+fly generate service user_api --feature=core --type=api --base-url=https://api.example.com
 
-# Add a service with tests and mocks
-fly add service auth_service --feature=auth --type=api --with-tests=true --with-mocks=true
+# Generate a service with tests and mocks
+fly generate service auth_service --feature=auth --type=api --with-tests=true --with-mocks=true
 ```
 
 ## AI Integration
@@ -93,7 +93,7 @@ All commands support machine-readable JSON output:
 fly create my_app --template=riverpod --output=json
 
 # Get JSON output for adding components
-fly add screen home --feature=auth --output=json
+fly generate screen home --feature=auth --output=json
 ```
 
 ### Plan Mode
@@ -105,7 +105,7 @@ Preview what will be created without actually creating files:
 fly create my_app --template=riverpod --plan
 
 # Preview component addition
-fly add screen home --feature=auth --plan
+fly generate screen home --feature=auth --plan
 ```
 
 ## Explore Your Project

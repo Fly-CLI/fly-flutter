@@ -366,13 +366,13 @@ class CommandTestHelper {
     }
   }
 
-  /// Extract command name from args, handling subcommands like "add screen"
+  /// Extract command name from args, handling subcommands like "generate screen"
   static String _extractCommandName(List<String> args) {
     if (args.isEmpty) return 'unknown';
 
-    // Handle subcommands like "add screen", "add service"
-    if (args.first == 'add' && args.length > 1) {
-      return 'add ${args[1]}';
+    // Handle subcommands like "generate screen", "generate service"
+    if (args.first == 'generate' && args.length > 1) {
+      return 'generate ${args[1]}';
     }
 
     // Handle other grouped commands similarly if needed

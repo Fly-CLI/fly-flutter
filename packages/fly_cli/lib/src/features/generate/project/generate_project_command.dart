@@ -14,20 +14,20 @@ import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_midd
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
-/// CreateCommand using new architecture
-class CreateCommand extends FlyCommand {
-  /// Creates a new CreateCommand instance
-  CreateCommand(super.context);
+/// GenerateProjectCommand using new architecture
+class GenerateProjectCommand extends FlyCommand {
+  /// Creates a new GenerateProjectCommand instance
+  GenerateProjectCommand(super.context);
 
   /// Factory constructor for enum-based command creation
-  factory CreateCommand.create(CommandContext context) =>
-      CreateCommand(context);
+  factory GenerateProjectCommand.create(CommandContext context) =>
+      GenerateProjectCommand(context);
 
   @override
-  String get name => 'create';
+  String get name => 'project';
 
   @override
-  String get description => 'Create a new Flutter project';
+  String get description => 'Generate a new Flutter project';
 
   @override
   CommandDefinition? get metadata => CommandDefinition(
@@ -78,11 +78,11 @@ class CreateCommand extends FlyCommand {
         ],
         examples: [
           const CommandExample(
-            command: 'fly create my_app --template=minimal',
+            command: 'fly generate project my_app --template=minimal',
             description: 'Create a minimal Flutter project',
           ),
           const CommandExample(
-            command: 'fly create my_app --template=riverpod '
+            command: 'fly generate project my_app --template=riverpod '
                 '--platforms=ios,android,web',
             description: 'Create a Riverpod project with multiple platforms',
           ),
@@ -155,7 +155,7 @@ class CreateCommand extends FlyCommand {
         suggestion: 'Check your output directory and permissions',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
-          'create',
+          'generate project',
           arguments: argResults?.arguments,
         ),
       );
@@ -246,7 +246,7 @@ class CreateCommand extends FlyCommand {
           suggestion: 'Run the command again to start over',
           errorCode: ErrorCode.invalidArgumentValue,
           context: ErrorContext.forCommand(
-            'create',
+            'generate project',
             arguments: argResults?.arguments,
             extra: {'interactive': true, 'cancelled': true},
           ),
@@ -268,7 +268,7 @@ class CreateCommand extends FlyCommand {
         suggestion: 'Try running without --interactive flag',
         errorCode: ErrorCode.internalError,
         context: ErrorContext.forCommand(
-          'create',
+          'generate project',
           arguments: argResults?.arguments,
           extra: {'interactive': true, 'error': e.toString()},
         ),
@@ -341,7 +341,7 @@ class CreateCommand extends FlyCommand {
       stopwatch.stop();
 
       return CommandResult.success(
-        command: 'create',
+        command: 'generate project',
         message: 'Project created successfully',
         data: {
           'project_name': projectName,
@@ -405,3 +405,4 @@ class CreateCommand extends FlyCommand {
     }
   }
 }
+

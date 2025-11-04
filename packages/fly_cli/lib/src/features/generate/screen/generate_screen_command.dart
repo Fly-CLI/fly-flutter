@@ -13,19 +13,20 @@ import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
-/// AddScreenCommand using new architecture
-class AddScreenCommand extends FlyCommand {
-  AddScreenCommand(CommandContext context) : super(context);
+/// GenerateScreenCommand using new architecture
+class GenerateScreenCommand extends FlyCommand {
+  GenerateScreenCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory AddScreenCommand.create(CommandContext context) =>
-      AddScreenCommand(context);
+  factory GenerateScreenCommand.create(CommandContext context) =>
+      GenerateScreenCommand(context);
 
   @override
   String get name => 'screen';
 
   @override
-  String get description => 'Add a new screen component to the current project';
+  String get description =>
+      'Generate a new screen component to the current project';
 
   // @override
   // CommandDefinition? get metadata => null;
@@ -34,13 +35,13 @@ class AddScreenCommand extends FlyCommand {
   ArgParser get argParser {
     final parser = super.argParser;
     FlagFactory.applyFlagsToParser(parser, [
-      const AddScreenFeatureFlag(),
-      const AddScreenTypeFlag(),
-      const AddScreenWithViewModelFlag(),
-      const AddScreenWithTestsFlag(),
+      const GenerateScreenFeatureFlag(),
+      const GenerateScreenTypeFlag(),
+      const GenerateScreenWithViewModelFlag(),
+      const GenerateScreenWithTestsFlag(),
       const InteractiveFlag(),
-      const AddScreenWithValidationFlag(),
-      const AddScreenWithNavigationFlag(),
+      const GenerateScreenWithValidationFlag(),
+      const GenerateScreenWithNavigationFlag(),
       const OutputDirFlag(),
     ]);
     return parser;
@@ -55,8 +56,7 @@ class AddScreenCommand extends FlyCommand {
       ];
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {
@@ -76,7 +76,7 @@ class AddScreenCommand extends FlyCommand {
     try {
       final prompter = context.interactivePrompt;
 
-      logger.info('🎬 Adding a new screen');
+      logger.info('🎬 Generating a new screen');
       logger.info('');
 
       // 1. Screen name
@@ -163,7 +163,7 @@ class AddScreenCommand extends FlyCommand {
           suggestion: 'Specify a valid --output-dir or run from a project root',
           errorCode: ErrorCode.fileSystemError,
           context: ErrorContext.forCommand(
-            'add screen',
+            'generate screen',
             arguments: argResults?.arguments,
           ),
         );
@@ -195,27 +195,27 @@ class AddScreenCommand extends FlyCommand {
     final screenName = argResults!.rest.first;
     final feature = FlagAccessor.getStringOrDefault(
       argResults,
-      const AddScreenFeatureFlag(),
+      const GenerateScreenFeatureFlag(),
       'home',
     );
     final screenType = FlagAccessor.getStringOrDefault(
       argResults,
-      const AddScreenTypeFlag(),
+      const GenerateScreenTypeFlag(),
       'list',
     );
     final withViewModel = FlagAccessor.getBool(
       argResults,
-      const AddScreenWithViewModelFlag(),
+      const GenerateScreenWithViewModelFlag(),
     );
     final withTests =
-        FlagAccessor.getBool(argResults, const AddScreenWithTestsFlag());
+        FlagAccessor.getBool(argResults, const GenerateScreenWithTestsFlag());
     final withValidation = FlagAccessor.getBool(
       argResults,
-      const AddScreenWithValidationFlag(),
+      const GenerateScreenWithValidationFlag(),
     );
     final withNavigation = FlagAccessor.getBool(
       argResults,
-      const AddScreenWithNavigationFlag(),
+      const GenerateScreenWithNavigationFlag(),
     );
 
     // Resolve the target output directory, prioritizing --output-dir and FLY_OUTPUT_DIR.
@@ -230,7 +230,7 @@ class AddScreenCommand extends FlyCommand {
         suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
-          'add screen',
+          'generate screen',
           arguments: argResults?.arguments,
         ),
       );
@@ -263,7 +263,7 @@ class AddScreenCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Adding screen: $screenName');
+      logger.info('Generating screen: $screenName');
       logger.info('Feature: $feature');
       logger.info('Type: $screenType');
       logger.info('With viewmodel: $withViewModel');
@@ -320,8 +320,8 @@ class AddScreenCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'add screen',
-        message: 'Screen added successfully',
+        command: 'generate screen',
+        message: 'Screen generated successfully',
         data: {
           'screen_name': screenName,
           'feature': feature,
@@ -342,7 +342,7 @@ class AddScreenCommand extends FlyCommand {
       );
     } catch (e) {
       return CommandResult.error(
-        message: 'Failed to add screen: $e',
+        message: 'Failed to generate screen: $e',
         suggestion: 'Check your project structure and try again',
       );
     }
@@ -351,21 +351,21 @@ class AddScreenCommand extends FlyCommand {
   // Lifecycle hooks implementation
   @override
   Future<void> onBeforeExecute(CommandContext context) async {
-    logger.info('🔧 Preparing to add screen...');
+    logger.info('🔧 Preparing to generate screen...');
   }
 
   @override
   Future<void> onAfterExecute(
       CommandContext context, CommandResult result) async {
     if (result.success) {
-      logger.info('🎉 Screen added successfully!');
+      logger.info('🎉 Screen generated successfully!');
     }
   }
 
   @override
   Future<void> onError(
       CommandContext context, Object error, StackTrace stackTrace) async {
-    logger.err('💥 Screen creation failed: $error');
+    logger.err('💥 Screen generation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');
     }

@@ -7,7 +7,7 @@
  * 
  * Usage:
  *   node fly_agent.js create my_app --template=riverpod
- *   node fly_agent.js add-screen home --feature=auth
+ *   node fly_agent.js generate-screen home --feature=auth
  *   node fly_agent.js export-schema
  */
 
@@ -103,12 +103,12 @@ class FlyCLIAgent {
   }
 
   /**
-   * Add a new screen to the project.
+   * Generate a new screen to the project.
    * @param {string} name - Screen name
    * @param {Object} options - Screen options
-   * @returns {Object} Screen creation result
+   * @returns {Object} Screen generation result
    */
-  addScreen(name, options = {}) {
+  generateScreen(name, options = {}) {
     const {
       feature,
       screenType = 'generic',
@@ -117,11 +117,11 @@ class FlyCLIAgent {
     } = options;
 
     if (!feature) {
-      throw new Error('Feature is required for addScreen');
+      throw new Error('Feature is required for generateScreen');
     }
 
     const args = [
-      'add', 'screen', name,
+      'generate', 'screen', name,
       '--feature', feature,
       '--type', screenType
     ];
@@ -137,12 +137,12 @@ class FlyCLIAgent {
   }
 
   /**
-   * Add a new service to the project.
+   * Generate a new service to the project.
    * @param {string} name - Service name
    * @param {Object} options - Service options
-   * @returns {Object} Service creation result
+   * @returns {Object} Service generation result
    */
-  addService(name, options = {}) {
+  generateService(name, options = {}) {
     const {
       feature,
       serviceType = 'api',
@@ -152,11 +152,11 @@ class FlyCLIAgent {
     } = options;
 
     if (!feature) {
-      throw new Error('Feature is required for addService');
+      throw new Error('Feature is required for generateService');
     }
 
     const args = [
-      'add', 'service', name,
+      'generate', 'service', name,
       '--feature', feature,
       '--type', serviceType
     ];
@@ -318,8 +318,8 @@ Usage:
 
 Commands:
   create <name>              Create a new project
-  add-screen <name>          Add a new screen
-  add-service <name>         Add a new service
+  generate-screen <name>    Generate a new screen
+  generate-service <name>   Generate a new service
   export-context             Export project context
   export-schema              Export CLI schemas
   doctor                     Run system diagnostics
@@ -327,7 +327,7 @@ Commands:
 
 Examples:
   node fly_agent.js create my_app --template=riverpod
-  node fly_agent.js add-screen home --feature=auth
+  node fly_agent.js generate-screen home --feature=auth
   node fly_agent.js export-context
     `);
     return;
@@ -357,7 +357,7 @@ Examples:
         break;
       }
       
-      case 'add-screen': {
+      case 'generate-screen': {
         const name = args[1];
         if (!name) {
           throw new Error('Screen name is required');
@@ -370,11 +370,11 @@ Examples:
           options[key] = value;
         }
         
-        result = agent.addScreen(name, options);
+        result = agent.generateScreen(name, options);
         break;
       }
       
-      case 'add-service': {
+      case 'generate-service': {
         const name = args[1];
         if (!name) {
           throw new Error('Service name is required');
@@ -387,7 +387,7 @@ Examples:
           options[key] = value;
         }
         
-        result = agent.addService(name, options);
+        result = agent.generateService(name, options);
         break;
       }
       

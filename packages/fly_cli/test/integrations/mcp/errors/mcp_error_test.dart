@@ -67,7 +67,7 @@ void main() {
 
     test('should include field errors in context', () {
       final error = McpError.invalidParams(
-        tool: 'fly.add.screen',
+        tool: 'fly.generate.screen',
         errors: [
           'Missing required parameter: screenName',
           'Invalid value for screenType',

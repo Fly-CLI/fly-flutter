@@ -380,9 +380,9 @@ class ContextGenerator {
     // Project-specific suggestions
     if (projectInfo?.isFlyProject == true) {
       suggestions.add(
-        'This is a Fly CLI project. Use "fly add screen <name>" to add new screens',
+        'This is a Fly CLI project. Use "fly generate screen <name>" to generate new screens',
       );
-      suggestions.add('Use "fly add service <name>" to add new API services');
+      suggestions.add('Use "fly generate service <name>" to generate new API services');
 
       if (projectInfo?.hasManifest == false) {
         suggestions.add(
@@ -442,7 +442,7 @@ class ContextGenerator {
 
       if (screenFiles > 0 && testFiles == 0) {
         suggestions.add(
-          'Add tests for your screens using "fly add test <screen_name>"',
+          'Generate tests for your screens using "fly generate test <screen_name>"',
         );
       }
 
@@ -506,9 +506,9 @@ class ContextGenerator {
       );
     }
 
-    if (allCommands.containsKey('add')) {
+    if (allCommands.containsKey('generate')) {
       suggestions.add(
-        'Add components with: fly add screen <name> or fly add service <name>',
+        'Generate components with: fly generate screen <name> or fly generate service <name>',
       );
     }
 

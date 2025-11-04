@@ -35,7 +35,7 @@ void main() {
 
       const subcommand = SubcommandDefinition(
         name: 'screen',
-        description: 'Add a screen',
+        description: 'Generate a screen',
       );
 
       const example = CommandExample(
@@ -399,7 +399,7 @@ void main() {
     test('creates with required fields', () {
       const subcommand = SubcommandDefinition(
         name: 'screen',
-        description: 'Add a screen',
+        description: 'Generate a screen',
       );
 
       expect(subcommand.name, equals('screen'));
@@ -410,7 +410,7 @@ void main() {
     test('creates with all fields', () {
       const subcommand = SubcommandDefinition(
         name: 'service',
-        description: 'Add a service',
+        description: 'Generate a service',
         isHidden: true,
       );
 
@@ -422,7 +422,7 @@ void main() {
     test('toJson serializes correctly', () {
       const subcommand = SubcommandDefinition(
         name: 'screen',
-        description: 'Add a screen',
+        description: 'Generate a screen',
         isHidden: true,
       );
 
@@ -460,7 +460,7 @@ void main() {
     test('toString returns readable representation', () {
       const subcommand = SubcommandDefinition(
         name: 'screen',
-        description: 'Add a screen',
+        description: 'Generate a screen',
       );
 
       expect(

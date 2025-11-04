@@ -235,8 +235,8 @@ class TestFixtures {
     'doctor_fix': ['doctor', '--fix'],
     'version': ['version'],
     'schema': ['schema', 'export'],
-    'add_screen': ['add', 'screen', 'login'],
-    'add_service': ['add', 'service', 'auth'],
+    'generate_screen': ['generate', 'screen', 'login'],
+    'generate_service': ['generate', 'service', 'auth'],
   };
 
   /// Sample manifest content

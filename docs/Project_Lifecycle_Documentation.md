@@ -420,36 +420,36 @@ fly create my_app \
 
 ### 5.2 Component Generation Commands
 
-#### Add Screen Command
+#### Generate Screen Command
 
 ```bash
 # Basic screen creation
-fly add screen home
+fly generate screen home
 
 # With feature
-fly add screen home --feature=auth
+fly generate screen home --feature=auth
 
 # With viewmodel
-fly add screen profile --feature=user --with-viewmodel=true
+fly generate screen profile --feature=user --with-viewmodel=true
 
 # With JSON output
-fly add screen settings --output=json
+fly generate screen settings --output=json
 ```
 
-#### Add Service Command
+#### Generate Service Command
 
 ```bash
 # Basic service
-fly add service api --feature=core
+fly generate service api --feature=core
 
 # API service with networking
-fly add service api --feature=core --type=api
+fly generate service api --feature=core --type=api
 
 # Database service
-fly add service database --feature=core --type=database
+fly generate service database --feature=core --type=database
 
 # Custom service
-fly add service cache --feature=core --type=cache
+fly generate service cache --feature=core --type=cache
 ```
 
 ### 5.3 System Commands
@@ -1072,7 +1072,7 @@ Preview operations before execution:
 fly create my_app --dry-run
 
 # Preview component addition
-fly add screen home --dry-run
+fly generate screen home --dry-run
 ```
 
 ---

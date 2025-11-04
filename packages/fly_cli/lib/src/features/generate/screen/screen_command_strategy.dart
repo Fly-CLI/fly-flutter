@@ -2,30 +2,30 @@ import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/core/definitions/categories.dart';
-import 'package:fly_cli/src/features/add/add_service_command.dart';
+import 'package:fly_cli/src/features/generate/screen/generate_screen_command.dart';
 
-/// Strategy for service command
-class ServiceCommandStrategy extends FlyCommandStrategy {
+/// Strategy for screen command
+class ScreenCommandStrategy extends FlyCommandStrategy {
   @override
-  String get name => 'service';
+  String get name => 'screen';
 
   @override
   String get description =>
-      'Add a new service component to the current project';
+      'Generate a new screen component to the current project';
 
   @override
   List<String> get aliases => [
-        'add-service',
-        'generate-service',
-        'new-service',
-        'make-service',
-        'addService',
+        'generate-screen',
+        'add-screen',
+        'new-screen',
+        'make-screen',
+        'generateScreen',
       ];
 
   @override
   CommandGroup? get group => const CommandGroup(
-        name: 'add',
-        description: 'Add new components to the current project',
+        name: 'generate',
+        description: 'Generate new components for the current project',
       );
 
   @override
@@ -33,6 +33,6 @@ class ServiceCommandStrategy extends FlyCommandStrategy {
 
   @override
   Command<int> createInstance(CommandContext context) {
-    return AddServiceCommand.create(context);
+    return GenerateScreenCommand.create(context);
   }
 }
