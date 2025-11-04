@@ -1,0 +1,79 @@
+import 'package:foundation_project/core/foundation/operations/result.dart';
+import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/repositories/task_repository.dart';
+import 'package:foundation_project/core/services/cache_service.dart';
+import 'package:foundation_project/features/home/data/models/statistics.dart';
+import 'package:foundation_project/features/home/domain/models/task.dart';
+
+/// Service for calculating statistics
+class StatisticsService {
+  final TaskRepository _taskRepository;
+  final CacheService _cacheService;
+  final AppLogger _logger = AppLogger('StatisticsService');
+
+  StatisticsService({
+    required TaskRepository taskRepository,
+    required CacheService cacheService,
+  })  : _taskRepository = taskRepository,
+        _cacheService = cacheService;
+
+  /// Get statistics with caching
+  Future<AppResult<Statistics>> getStatistics() async {
+    try {
+      // Check cache first
+      final cacheKey = 'statistics';
+      final cached = _cacheService.get<Statistics>(cacheKey);
+      if (cached != null) {
+        _logger.debug('Returning cached statistics');
+        return Success(cached);
+      }
+
+      // Get all tasks
+      final tasksResult = await _taskRepository.getAllTasks();
+      if (tasksResult.isFailure) {
+        return Failure(
+          'Failed to get tasks: ${tasksResult.error}',
+          tasksResult.data,
+        );
+      }
+
+      final tasks = tasksResult.data ?? [];
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // Calculate statistics
+      final totalTasks = tasks.length;
+      final completedTasks =
+          tasks.where((task) => task.isCompleted).length;
+      final overdueTasks = tasks.where((task) {
+        if (task.dueDate == null) return false;
+        return task.isOverdue;
+      }).length;
+      final todayTasks = tasks.where((task) {
+        if (task.dueDate == null) return false;
+        return task.isDueToday && !task.isCompleted;
+      }).length;
+
+      final statistics = Statistics(
+        totalTasks: totalTasks,
+        completedTasks: completedTasks,
+        overdueTasks: overdueTasks,
+        todayTasks: todayTasks,
+      );
+
+      // Cache the result
+      _cacheService.set(cacheKey, statistics);
+
+      return Success(statistics);
+    } catch (e) {
+      _logger.error('Failed to get statistics: ${e.toString()}', stackTrace: StackTrace.current);
+      return Failure('Failed to get statistics: ${e.toString()}', e);
+    }
+  }
+
+  /// Refresh statistics (clear cache and recalculate)
+  Future<AppResult<Statistics>> refreshStatistics() async {
+    _cacheService.remove('statistics');
+    return getStatistics();
+  }
+}

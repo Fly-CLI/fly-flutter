@@ -1,0 +1,13 @@
+name: foundation_project_lints
+description: Custom lint rules for Foundation Project
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  # Analyzer for inspecting Dart files
+  analyzer:
+  analyzer_plugin:
+

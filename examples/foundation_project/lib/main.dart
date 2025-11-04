@@ -1,0 +1,57 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/providers/providers.dart';
+import 'package:foundation_project/core/storage/storage_providers.dart';
+import 'package:foundation_project/l10n/app_localizations.dart';
+import 'package:foundation_project/shared/navigation/app_router.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize error handling
+  CustomErrorHandler.initialize();
+
+  // Initialize dependency injection
+  GlobalContainer.initialize();
+
+  // Initialize storage services
+  final regularStorage = GlobalContainer.instance.read(regularStorageProvider);
+  final secureStorage = GlobalContainer.instance.read(secureStorageProvider);
+  await regularStorage.init();
+  await secureStorage.init();
+
+  // Initialize app data manager
+  final appDataManager = GlobalContainer.instance.read(appDataManagerProvider);
+  await appDataManager.init();
+
+  // Initialize navigation with container for analytics tracking
+  AppNavigation.initialize(GlobalContainer.instance);
+
+  runApp(
+    UncontrolledProviderScope(
+      container: GlobalContainer.instance,
+      child: const FoundationProjectApp(),
+    ),
+  );
+}
+
+class FoundationProjectApp extends StatelessWidget {
+  const FoundationProjectApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: AppLocalizations.of(context).appTitle,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+      ),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    );
+  }
+}

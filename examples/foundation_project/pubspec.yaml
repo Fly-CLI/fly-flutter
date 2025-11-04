@@ -1,0 +1,74 @@
+name: foundation_project
+description: A comprehensive Flutter foundation project with Riverpod, MVVM architecture, and best practices
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^3.0.3
+  riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.0
+
+  # Navigation
+  go_router: ^12.1.0
+
+  # Utilities
+  logging: ^1.3.0
+  intl: ^0.20.2
+  uuid: ^4.2.1
+
+  # Networking (optional, for connectivity service)
+  connectivity_plus: ^7.0.0
+
+  # Device condition checking (for DeviceConditionService)
+  battery_plus: ^7.0.0
+
+  # Database
+  drift: ^2.29.0
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.1.2
+  path: ^1.8.3
+
+  # Storage
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+
+  # HTTP Client
+  http: ^1.1.0
+
+  # Custom Linting (no longer needed here - moved to separate package)
+
+  # Fly packages
+  fly_core:
+    path: ../../packages/fly_core
+  fly_networking:
+    path: ../../packages/fly_networking
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  
+  # Code Generation
+  build_runner: ^2.4.8
+  riverpod_generator: ^3.0.3
+
+  # Database Code Generation
+  drift_dev: ^2.29.0
+  
+  # Custom Linting (analyzer plugin)
+  foundation_project_lints:
+    path: ../../packages/foundation_project_lints
+
+flutter:
+  uses-material-design: true
+  generate: true  # Enable Flutter gen-l10n

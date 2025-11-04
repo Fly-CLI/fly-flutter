@@ -1,0 +1,12 @@
+name: foundation_project_lints_analyzer_plugin
+description: Bootstrap package for foundation_project_lints analyzer plugin
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  analyzer_plugin:
+  analyzer:
+

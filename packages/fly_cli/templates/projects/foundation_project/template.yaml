@@ -1,0 +1,48 @@
+name: foundation_project
+version: 1.0.0
+description: Comprehensive Flutter foundation project with Riverpod, MVVM architecture, and best practices
+min_flutter_sdk: "3.10.0"
+min_dart_sdk: "3.0.0"
+
+variables:
+  project_name:
+    type: string
+    required: true
+    description: "Name of the project"
+  organization:
+    type: string
+    required: true
+    default: "com.example"
+    description: "Organization identifier"
+  platforms:
+    type: list
+    required: true
+    default: [ "ios", "android" ]
+    choices: [ "ios", "android", "web", "macos", "windows", "linux" ]
+    description: "Target platforms"
+  description:
+    type: string
+    default: "A comprehensive Flutter foundation project with Riverpod, MVVM architecture, and best practices"
+    description: "Project description"
+
+features:
+  - state_management
+  - routing
+  - error_handling
+  - theming
+  - networking
+  - mvvm_architecture
+  - feedback_system
+  - lifecycle_management
+
+packages:
+  - fly_core
+  - fly_networking
+  - riverpod
+  - riverpod_annotation
+  - go_router
+  - connectivity_plus
+  - logging
+  - uuid
+
+

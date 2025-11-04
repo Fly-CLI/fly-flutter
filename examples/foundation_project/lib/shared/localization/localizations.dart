@@ -1,0 +1,29 @@
+import 'package:flutter/material.dart';
+import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/l10n/app_localizations.dart';
+import 'package:foundation_project/l10n/app_localizations_en.dart';
+import 'package:foundation_project/core/navigation/app.dart';
+
+/// Get localizations from the current app context
+///
+/// This function safely retrieves localizations from the current context.
+/// It will throw a meaningful error if the context is not available.
+AppLocalizations get localizations {
+  try {
+    final context = App.navigatorKey.currentContext;
+    final defaultLocalizations = AppLocalizationsEn();
+    if (context == null) return defaultLocalizations;
+
+    return AppLocalizations.of(context);
+  } catch (e) {
+    AppLogger('localizations').logError('Error getting localizations: $e');
+    return AppLocalizationsEn();
+  }
+}
+
+/// Get localizations from a specific context
+///
+/// Use this when you have access to a BuildContext
+AppLocalizations getLocalizations(BuildContext context) {
+  return AppLocalizations.of(context);
+}
