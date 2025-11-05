@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show protected, nonVirtual;
 import 'package:foundation_project/core/foundation/operations/result.dart';
-import 'package:foundation_project/core/models/base/base_entity.dart';
-import 'package:foundation_project/core/models/base/sync_status.dart';
+import 'package:foundation_project/core/database/models/base_entity.dart';
+import 'package:foundation_project/core/models/sync_status.dart';
 import 'package:foundation_project/core/repositories/interfaces/i_base_repository.dart';
 
 /// Base repository implementation with common functionality

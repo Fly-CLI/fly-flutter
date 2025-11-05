@@ -1,4 +1,4 @@
-import 'package:foundation_project/core/models/base/sync_status.dart';
+import 'package:foundation_project/core/models/sync_status.dart';
 
 /// Base entity class that all domain models extend
 /// Provides common fields and functionality with sync metadata

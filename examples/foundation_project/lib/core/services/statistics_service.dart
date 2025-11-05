@@ -2,8 +2,7 @@ import 'package:foundation_project/core/foundation/operations/result.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
 import 'package:foundation_project/core/repositories/task_repository.dart';
 import 'package:foundation_project/core/services/cache_service.dart';
-import 'package:foundation_project/features/home/data/models/statistics.dart';
-import 'package:foundation_project/features/home/domain/models/task.dart';
+import 'package:foundation_project/features/home/data/models/statistics_entity.dart';
 
 /// Service for calculating statistics
 class StatisticsService {
@@ -18,11 +17,11 @@ class StatisticsService {
         _cacheService = cacheService;
 
   /// Get statistics with caching
-  Future<AppResult<Statistics>> getStatistics() async {
+  Future<AppResult<StatisticsEntity>> getStatistics() async {
     try {
       // Check cache first
-      final cacheKey = 'statistics';
-      final cached = _cacheService.get<Statistics>(cacheKey);
+      const cacheKey = 'statistics';
+      final cached = _cacheService.get<StatisticsEntity>(cacheKey);
       if (cached != null) {
         _logger.debug('Returning cached statistics');
         return Success(cached);
@@ -38,8 +37,6 @@ class StatisticsService {
       }
 
       final tasks = tasksResult.data ?? [];
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
 
       // Calculate statistics
       final totalTasks = tasks.length;
@@ -54,7 +51,7 @@ class StatisticsService {
         return task.isDueToday && !task.isCompleted;
       }).length;
 
-      final statistics = Statistics(
+      final statistics = StatisticsEntity(
         totalTasks: totalTasks,
         completedTasks: completedTasks,
         overdueTasks: overdueTasks,
@@ -72,7 +69,7 @@ class StatisticsService {
   }
 
   /// Refresh statistics (clear cache and recalculate)
-  Future<AppResult<Statistics>> refreshStatistics() async {
+  Future<AppResult<StatisticsEntity>> refreshStatistics() async {
     _cacheService.remove('statistics');
     return getStatistics();
   }

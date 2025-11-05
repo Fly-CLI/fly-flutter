@@ -1,5 +1,5 @@
 import 'package:foundation_project/core/foundation/operations/result.dart';
-import 'package:foundation_project/core/models/base/base_entity.dart';
+import 'package:foundation_project/core/database/models/base_entity.dart';
 
 /// Base repository interface for all data operations
 /// Supports different data sources (local, remote, hybrid)

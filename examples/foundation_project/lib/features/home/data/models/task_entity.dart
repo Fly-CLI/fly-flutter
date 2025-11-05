@@ -1,5 +1,5 @@
-import 'package:foundation_project/core/models/base/base_entity.dart';
-import 'package:foundation_project/core/models/base/sync_status.dart';
+import 'package:foundation_project/core/database/models/base_entity.dart';
+import 'package:foundation_project/core/models/sync_status.dart';
 
 /// Task entity for data/persistence layer
 /// Extends BaseEntity with persistence concerns (serialization, sync status)

@@ -1,6 +1,7 @@
 /// Simplified offline module for foundation project
 /// This provides stub implementations for offline queue functionality
 /// In production, this would be replaced with a full offline queue implementation
+library;
 
 /// Stub class for queued operations
 class QueuedOperation<T> {

@@ -1,14 +1,14 @@
-import 'package:foundation_project/core/models/base/sync_status.dart' as core_sync;
+import 'package:foundation_project/core/models/sync_status.dart' as core_sync;
 
-/// Sync status model for home screen
-class SyncStatus {
+/// Sync status entity for home screen
+class SyncStatusEntity {
   final core_sync.SyncStatus status;
   final DateTime? lastSync;
   final int pendingOperations;
   final bool isSyncing;
   final String? errorMessage;
 
-  const SyncStatus({
+  const SyncStatusEntity({
     required this.status,
     this.lastSync,
     this.pendingOperations = 0,
@@ -17,8 +17,8 @@ class SyncStatus {
   });
 
   /// Create empty sync status
-  factory SyncStatus.initial() {
-    return const SyncStatus(
+  factory SyncStatusEntity.initial() {
+    return const SyncStatusEntity(
       status: core_sync.SyncStatus.idle,
       pendingOperations: 0,
       isSyncing: false,
@@ -26,14 +26,14 @@ class SyncStatus {
   }
 
   /// Copy with new values
-  SyncStatus copyWith({
+  SyncStatusEntity copyWith({
     core_sync.SyncStatus? status,
     DateTime? lastSync,
     int? pendingOperations,
     bool? isSyncing,
     String? errorMessage,
   }) {
-    return SyncStatus(
+    return SyncStatusEntity(
       status: status ?? this.status,
       lastSync: lastSync ?? this.lastSync,
       pendingOperations: pendingOperations ?? this.pendingOperations,
@@ -44,7 +44,7 @@ class SyncStatus {
 
   @override
   String toString() {
-    return 'SyncStatus(status: $status, lastSync: $lastSync, pendingOperations: $pendingOperations, isSyncing: $isSyncing, errorMessage: $errorMessage)';
+    return 'SyncStatusEntity(status: $status, lastSync: $lastSync, pendingOperations: $pendingOperations, isSyncing: $isSyncing, errorMessage: $errorMessage)';
   }
 }
 

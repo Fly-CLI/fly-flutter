@@ -49,6 +49,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  auto_mappr:
+    dependency: "direct dev"
+    description:
+      name: auto_mappr
+      sha256: "3ce49379f250df99b3b2e40b25210fedb2846210b7c7d9a1dbc341e9d4d0c3fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
+  auto_mappr_annotation:
+    dependency: "direct main"
+    description:
+      name: auto_mappr_annotation
+      sha256: "6b004ddabca19094c78bfdbd5185893cf3e70c5f11148878274238328bdb258e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   battery_plus:
     dependency: "direct main"
     description:
@@ -305,6 +321,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.29.0"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.7"
   fake_async:
     dependency: transitive
     description:
@@ -458,6 +482,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  get_it:
+    dependency: transitive
+    description:
+      name: get_it
+      sha256: ae78de7c3f2304b8d81f2bb6e320833e5e81de942188542328f074978cc0efa9
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.3.0"
   glob:
     dependency: transitive
     description:

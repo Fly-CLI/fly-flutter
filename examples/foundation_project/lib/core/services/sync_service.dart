@@ -1,11 +1,11 @@
 import 'package:foundation_project/core/foundation/operations/result.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
-import 'package:foundation_project/core/models/base/sync_status.dart' as core_sync;
+import 'package:foundation_project/core/models/sync_status.dart' as core_sync;
 import 'package:foundation_project/core/repositories/note_repository.dart';
 import 'package:foundation_project/core/repositories/task_repository.dart';
 import 'package:foundation_project/core/services/api_service.dart';
 import 'package:foundation_project/core/storage/managers/sync_data_manager.dart';
-import 'package:foundation_project/features/home/data/models/sync_status.dart' as home_sync;
+import 'package:foundation_project/features/home/data/models/sync_status_entity.dart' as home_sync;
 
 /// Service for synchronization operations
 class SyncService {
@@ -26,7 +26,7 @@ class SyncService {
         _syncDataManager = syncDataManager;
 
   /// Get sync status
-  Future<AppResult<home_sync.SyncStatus>> getSyncStatus() async {
+  Future<AppResult<home_sync.SyncStatusEntity>> getSyncStatus() async {
     try {
       // Get pending sync items (using domain model methods)
       final pendingTasksResult = await _taskRepository.getPendingSyncTasks();
@@ -49,7 +49,7 @@ class SyncService {
       // Determine overall status
       final status = _determineStatus(pendingCount, lastSync);
 
-      final syncStatus = home_sync.SyncStatus(
+      final syncStatus = home_sync.SyncStatusEntity(
         status: status,
         lastSync: lastSync,
         pendingOperations: pendingCount,

@@ -1,11 +1,11 @@
-/// Statistics model for home screen
-class Statistics {
+/// Statistics entity for home screen
+class StatisticsEntity {
   final int totalTasks;
   final int completedTasks;
   final int overdueTasks;
   final int todayTasks;
 
-  const Statistics({
+  const StatisticsEntity({
     required this.totalTasks,
     required this.completedTasks,
     required this.overdueTasks,
@@ -13,8 +13,8 @@ class Statistics {
   });
 
   /// Create empty statistics
-  factory Statistics.empty() {
-    return const Statistics(
+  factory StatisticsEntity.empty() {
+    return const StatisticsEntity(
       totalTasks: 0,
       completedTasks: 0,
       overdueTasks: 0,
@@ -23,13 +23,13 @@ class Statistics {
   }
 
   /// Copy with new values
-  Statistics copyWith({
+  StatisticsEntity copyWith({
     int? totalTasks,
     int? completedTasks,
     int? overdueTasks,
     int? todayTasks,
   }) {
-    return Statistics(
+    return StatisticsEntity(
       totalTasks: totalTasks ?? this.totalTasks,
       completedTasks: completedTasks ?? this.completedTasks,
       overdueTasks: overdueTasks ?? this.overdueTasks,
@@ -39,7 +39,7 @@ class Statistics {
 
   @override
   String toString() {
-    return 'Statistics(totalTasks: $totalTasks, completedTasks: $completedTasks, overdueTasks: $overdueTasks, todayTasks: $todayTasks)';
+    return 'StatisticsEntity(totalTasks: $totalTasks, completedTasks: $completedTasks, overdueTasks: $overdueTasks, todayTasks: $todayTasks)';
   }
 }
 

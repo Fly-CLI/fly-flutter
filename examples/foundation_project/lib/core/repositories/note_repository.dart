@@ -2,9 +2,9 @@ import 'package:drift/drift.dart';
 import 'package:foundation_project/core/database/app_database.dart';
 import 'package:foundation_project/core/database/daos/notes_dao.dart';
 import 'package:foundation_project/core/foundation/operations/result.dart';
-import 'package:foundation_project/core/models/base/sync_status.dart';
+import 'package:foundation_project/core/models/sync_status.dart';
 import 'package:foundation_project/core/repositories/base/base_repository.dart';
-import 'package:foundation_project/features/home/data/mappers/note_mapper.dart';
+import 'package:foundation_project/features/home/mappers/home_mappr.dart';
 import 'package:foundation_project/features/home/data/models/note_entity.dart';
 import 'package:foundation_project/features/home/domain/models/note.dart';
 
@@ -14,6 +14,7 @@ import 'package:foundation_project/features/home/domain/models/note.dart';
 class NoteRepository extends BaseRepository<NoteEntity> {
   final AppDatabase _database;
   late final NotesDao _dao;
+  final HomeMappr _mappr = HomeMappr();
 
   NoteRepository(this._database)
       : _dao = NotesDao(_database),
@@ -33,7 +34,7 @@ class NoteRepository extends BaseRepository<NoteEntity> {
     try {
       final notesData = await _dao.getAllNotes();
       final entities = notesData.map((data) => _mapNoteDataToEntity(data)).toList();
-      final domainNotes = NoteMapper.instance.toSourceList(entities);
+      final domainNotes = _mappr.convertList<NoteEntity, Note>(entities);
       return Success(domainNotes);
     } catch (e) {
       return Failure('Failed to getAllNotes: ${e.toString()}', e);
@@ -46,7 +47,7 @@ class NoteRepository extends BaseRepository<NoteEntity> {
       final noteData = await _dao.getNoteById(id);
       if (noteData == null) return Success(null);
       final entity = _mapNoteDataToEntity(noteData);
-      final domainNote = NoteMapper.instance.toSource(entity);
+      final domainNote = _mappr.convert<NoteEntity, Note>(entity);
       return Success(domainNote);
     } catch (e) {
       return Failure('Failed to getNoteById: ${e.toString()}', e);
@@ -87,13 +88,13 @@ class NoteRepository extends BaseRepository<NoteEntity> {
 
   /// Create note from domain model
   Future<AppResult<Note>> createNote(Note note) async {
-    final entity = NoteMapper.instance.toTarget(note);
+    final entity = _mappr.convert<Note, NoteEntity>(note);
     final result = await super.create(entity);
     if (result.isFailure) {
       final originalError = result is Failure<NoteEntity> ? result.originalError : null;
       return Failure(result.error!, originalError);
     }
-    return Success(NoteMapper.instance.toSource(result.data!));
+    return Success(_mappr.convert<NoteEntity, Note>(result.data!));
   }
 
   @override
@@ -117,16 +118,15 @@ class NoteRepository extends BaseRepository<NoteEntity> {
 
   /// Update note from domain model
   Future<AppResult<Note>> updateNote(Note note) async {
-    final entity = NoteMapper.instance.toTarget(
-      note,
-      options: {'syncStatus': SyncStatus.pending},
+    final entity = _mappr.convert<Note, NoteEntity>(note).copyWith(
+      syncStatus: SyncStatus.pending,
     );
     final result = await super.update(entity);
     if (result.isFailure) {
       final originalError = result is Failure<NoteEntity> ? result.originalError : null;
       return Failure(result.error!, originalError);
     }
-    return Success(NoteMapper.instance.toSource(result.data!));
+    return Success(_mappr.convert<NoteEntity, Note>(result.data!));
   }
 
   @override
@@ -190,7 +190,7 @@ class NoteRepository extends BaseRepository<NoteEntity> {
           })
           .toList();
       final entities = filtered.map((data) => _mapNoteDataToEntity(data)).toList();
-      final domainNotes = NoteMapper.instance.toSourceList(entities);
+      final domainNotes = _mappr.convertList<NoteEntity, Note>(entities);
       return Success(domainNotes);
     } catch (e) {
       return Failure('Failed to searchNotes: ${e.toString()}', e);
@@ -213,7 +213,7 @@ class NoteRepository extends BaseRepository<NoteEntity> {
     try {
       final notesData = await _dao.getPendingSyncNotes();
       final entities = notesData.map((data) => _mapNoteDataToEntity(data)).toList();
-      final domainNotes = NoteMapper.instance.toSourceList(entities);
+      final domainNotes = _mappr.convertList<NoteEntity, Note>(entities);
       return Success(domainNotes);
     } catch (e) {
       return Failure('Failed to getPendingSyncNotes: ${e.toString()}', e);
@@ -276,7 +276,7 @@ class NoteRepository extends BaseRepository<NoteEntity> {
     try {
       final notesData = await _dao.getFavoriteNotes();
       final entities = notesData.map((data) => _mapNoteDataToEntity(data)).toList();
-      final domainNotes = NoteMapper.instance.toSourceList(entities);
+      final domainNotes = _mappr.convertList<NoteEntity, Note>(entities);
       return Success(domainNotes);
     } catch (e) {
       return Failure('Failed to getFavoriteNotes: ${e.toString()}', e);

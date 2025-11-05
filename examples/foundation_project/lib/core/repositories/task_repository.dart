@@ -2,9 +2,9 @@ import 'package:drift/drift.dart';
 import 'package:foundation_project/core/database/app_database.dart';
 import 'package:foundation_project/core/database/daos/tasks_dao.dart';
 import 'package:foundation_project/core/foundation/operations/result.dart';
-import 'package:foundation_project/core/models/base/sync_status.dart';
+import 'package:foundation_project/core/models/sync_status.dart';
 import 'package:foundation_project/core/repositories/base/base_repository.dart';
-import 'package:foundation_project/features/home/data/mappers/task_mapper.dart';
+import 'package:foundation_project/features/home/mappers/home_mappr.dart';
 import 'package:foundation_project/features/home/data/models/task_entity.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';
 
@@ -13,6 +13,7 @@ import 'package:foundation_project/features/home/domain/models/task.dart';
 class TaskRepository extends BaseRepository<TaskEntity> {
   final AppDatabase _database;
   late final TasksDao _dao;
+  final HomeMappr _mappr = HomeMappr();
 
   TaskRepository(this._database) : _dao = TasksDao(_database), super(
         tableName: 'tasks',
@@ -30,7 +31,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
     try {
       final tasksData = await _dao.getAllTasks();
       final entities = tasksData.map((data) => _mapTaskDataToEntity(data)).toList();
-      final domainTasks = TaskMapper.instance.toSourceList(entities);
+      final domainTasks = _mappr.convertList<TaskEntity, Task>(entities);
       return Success(domainTasks);
     } catch (e) {
       return Failure('Failed to getAllTasks: ${e.toString()}', e);
@@ -43,7 +44,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
       final taskData = await _dao.getTaskById(id);
       if (taskData == null) return Success(null);
       final entity = _mapTaskDataToEntity(taskData);
-      final domainTask = TaskMapper.instance.toSource(entity);
+      final domainTask = _mappr.convert<TaskEntity, Task>(entity);
       return Success(domainTask);
     } catch (e) {
       return Failure('Failed to getTaskById: ${e.toString()}', e);
@@ -84,13 +85,13 @@ class TaskRepository extends BaseRepository<TaskEntity> {
 
   /// Create task from domain model
   Future<AppResult<Task>> createTask(Task task) async {
-    final entity = TaskMapper.instance.toTarget(task);
+    final entity = _mappr.convert<Task, TaskEntity>(task);
     final result = await super.create(entity);
     if (result.isFailure) {
       final originalError = result is Failure<TaskEntity> ? result.originalError : null;
       return Failure(result.error!, originalError);
     }
-    return Success(TaskMapper.instance.toSource(result.data!));
+    return Success(_mappr.convert<TaskEntity, Task>(result.data!));
   }
 
   @override
@@ -114,16 +115,15 @@ class TaskRepository extends BaseRepository<TaskEntity> {
 
   /// Update task from domain model
   Future<AppResult<Task>> updateTask(Task task) async {
-    final entity = TaskMapper.instance.toTarget(
-      task,
-      options: {'syncStatus': SyncStatus.pending},
+    final entity = _mappr.convert<Task, TaskEntity>(task).copyWith(
+      syncStatus: SyncStatus.pending,
     );
     final result = await super.update(entity);
     if (result.isFailure) {
       final originalError = result is Failure<TaskEntity> ? result.originalError : null;
       return Failure(result.error!, originalError);
     }
-    return Success(TaskMapper.instance.toSource(result.data!));
+    return Success(_mappr.convert<TaskEntity, Task>(result.data!));
   }
 
   @override
@@ -187,7 +187,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
           })
           .toList();
       final entities = filtered.map((data) => _mapTaskDataToEntity(data)).toList();
-      final domainTasks = TaskMapper.instance.toSourceList(entities);
+      final domainTasks = _mappr.convertList<TaskEntity, Task>(entities);
       return Success(domainTasks);
     } catch (e) {
       return Failure('Failed to searchTasks: ${e.toString()}', e);
@@ -210,7 +210,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
     try {
       final tasksData = await _dao.getPendingSyncTasks();
       final entities = tasksData.map((data) => _mapTaskDataToEntity(data)).toList();
-      final domainTasks = TaskMapper.instance.toSourceList(entities);
+      final domainTasks = _mappr.convertList<TaskEntity, Task>(entities);
       return Success(domainTasks);
     } catch (e) {
       return Failure('Failed to getPendingSyncTasks: ${e.toString()}', e);
@@ -273,7 +273,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
     try {
       final tasksData = await _dao.getTasksByStatus(status);
       final entities = tasksData.map((data) => _mapTaskDataToEntity(data)).toList();
-      final domainTasks = TaskMapper.instance.toSourceList(entities);
+      final domainTasks = _mappr.convertList<TaskEntity, Task>(entities);
       return Success(domainTasks);
     } catch (e) {
       return Failure('Failed to getTasksByStatus: ${e.toString()}', e);
@@ -285,7 +285,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
     try {
       final tasksData = await _dao.getOverdueTasks();
       final entities = tasksData.map((data) => _mapTaskDataToEntity(data)).toList();
-      final domainTasks = TaskMapper.instance.toSourceList(entities);
+      final domainTasks = _mappr.convertList<TaskEntity, Task>(entities);
       return Success(domainTasks);
     } catch (e) {
       return Failure('Failed to getOverdueTasks: ${e.toString()}', e);
@@ -297,7 +297,7 @@ class TaskRepository extends BaseRepository<TaskEntity> {
     try {
       final tasksData = await _dao.getTodayTasks();
       final entities = tasksData.map((data) => _mapTaskDataToEntity(data)).toList();
-      final domainTasks = TaskMapper.instance.toSourceList(entities);
+      final domainTasks = _mappr.convertList<TaskEntity, Task>(entities);
       return Success(domainTasks);
     } catch (e) {
       return Failure('Failed to getTodayTasks: ${e.toString()}', e);

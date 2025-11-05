@@ -4,13 +4,13 @@ import 'package:foundation_project/core/foundation/utils/app_logger.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
 import 'package:foundation_project/core/services/sync_service.dart';
-import 'package:foundation_project/features/home/data/models/statistics.dart';
-import 'package:foundation_project/features/home/data/models/sync_status.dart';
+import 'package:foundation_project/features/home/data/models/statistics_entity.dart';
+import 'package:foundation_project/features/home/data/models/sync_status_entity.dart';
 
 /// Home ViewModel state
 class HomeViewModelState extends ViewModelState {
-  final Statistics? statistics;
-  final SyncStatus? syncStatus;
+  final StatisticsEntity? statistics;
+  final SyncStatusEntity? syncStatus;
   final bool isRefreshing;
 
   @override
@@ -41,8 +41,8 @@ class HomeViewModelState extends ViewModelState {
     bool? isLoading,
     String? error,
     bool clearError = false,
-    Statistics? statistics,
-    SyncStatus? syncStatus,
+    StatisticsEntity? statistics,
+    SyncStatusEntity? syncStatus,
     bool? isRefreshing,
     bool clearStatistics = false,
     bool clearSyncStatus = false,

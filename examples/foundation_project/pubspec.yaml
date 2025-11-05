@@ -45,6 +45,9 @@ dependencies:
   # HTTP Client
   http: ^1.1.0
 
+  # Mapping
+  auto_mappr_annotation: ^2.0.0
+
   # Custom Linting (no longer needed here - moved to separate package)
 
   # Fly packages
@@ -61,6 +64,7 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.4.8
   riverpod_generator: ^3.0.3
+  auto_mappr: ^2.0.0
 
   # Database Code Generation
   drift_dev: ^2.29.0

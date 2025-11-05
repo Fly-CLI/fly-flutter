@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/core/models/base/sync_status.dart' as core_sync;
-import 'package:foundation_project/features/home/data/models/sync_status.dart';
+import 'package:foundation_project/core/models/sync_status.dart' as core_sync;
+import 'package:foundation_project/features/home/data/models/sync_status_entity.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 /// Sync status widget
 class SyncStatusWidget extends StatelessWidget {
-  final SyncStatus syncStatus;
+  final SyncStatusEntity syncStatus;
   final VoidCallback? onSyncPressed;
 
   const SyncStatusWidget({
