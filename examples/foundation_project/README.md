@@ -10,9 +10,9 @@ This foundation project serves as a playground for Flutter development and can b
 
 ### Architecture
 
-- **MVVM Pattern**: Complete MVVM architecture with BaseScreen, ViewModel, and ViewModelState
+- **MVVM Pattern**: Complete MVVM architecture with FlyScreen, FlyViewModel, and FlyViewModelState
 - **Riverpod State Management**: Full Riverpod integration with providers and state management
-- **Lifecycle Management**: Comprehensive screen and ViewModel lifecycle support
+- **Lifecycle Management**: Comprehensive screen and FlyViewModel lifecycle support
 - **Error Handling**: Robust error handling with custom exceptions and error classification
 - **Feedback System**: User feedback system with snackbars, dialogs, and custom displays
 - **Async Operations**: Advanced async operation handling with retry logic and connectivity checking
@@ -35,19 +35,19 @@ This foundation project serves as a playground for Flutter development and can b
   - `FeedbackListenerMixin`: Mixin for listening to feedback
 
 - **MVVM** (`mvvm/`):
-  - `BaseScreen`: Base screen class with lifecycle management
-  - `ViewModel`: Base ViewModel class with state management
-  - `ViewModelState`: Base state interface
+  - `FlyScreen`: Base screen class with lifecycle management
+  - `FlyViewModel`: Base FlyViewModel class with state management
+  - `FlyViewModelState`: Base state interface
 
 - **Operations** (`operations/`):
-  - `AsyncHandler`: Async operation handler with retry logic
+  - `AsyncOperationHandler`: Async operation handler with retry logic
   - `ConnectivityService`: Network connectivity checking
   - `Result`: Result pattern for operation outcomes
   - `RetryConfig`: Retry configuration
 
 - **Forms** (`forms/`):
-  - `FormViewModelInterface`: Form ViewModel interface
-  - `FormViewModelMixin`: Form ViewModel mixin (requires flutter_form package)
+  - `FormFlyViewModelInterface`: Form FlyViewModel interface
+  - `FormFlyViewModelMixin`: Form FlyViewModel mixin (requires flutter_form package)
 
 - **State** (`state/`):
   - `StateNotifier`: State notifier implementation
@@ -107,26 +107,26 @@ lib/
 
 ## Usage Examples
 
-### Basic ViewModel
+### Basic FlyViewModel
 
 ```dart
-class MyViewModelState extends ViewModelState {
+class MyFlyViewModelState extends FlyViewModelState {
   final bool isLoading;
   final String? error;
   final List<String> items;
 
-  MyViewModelState({
+  MyFlyViewModelState({
     this.isLoading = false,
     this.error,
     this.items = const [],
   });
 
-  MyViewModelState copyWith({
+  MyFlyViewModelState copyWith({
     bool? isLoading,
     String? error,
     List<String>? items,
   }) {
-    return MyViewModelState(
+    return MyFlyViewModelState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
       items: items ?? this.items,
@@ -134,12 +134,12 @@ class MyViewModelState extends ViewModelState {
   }
 }
 
-class MyViewModel extends ViewModel<MyViewModelState> {
+class MyFlyViewModel extends FlyViewModel<MyFlyViewModelState> {
   @override
-  MyViewModelState build() => MyViewModelState();
+  MyFlyViewModelState build() => MyFlyViewModelState();
 
   @override
-  MyViewModelState copyState({bool? isLoading, String? error}) {
+  MyFlyViewModelState copyState({bool? isLoading, String? error}) {
     return state.copyWith(isLoading: isLoading, error: error);
   }
 
@@ -159,25 +159,25 @@ class MyViewModel extends ViewModel<MyViewModelState> {
 ### Basic Screen
 
 ```dart
-class MyScreen extends BaseScreen<MyViewModel, MyViewModelState> {
+class MyScreen extends FlyScreen<MyFlyViewModel, MyFlyViewModelState> {
   const MyScreen({super.key});
 
   @override
-  NotifierProvider<MyViewModel, MyViewModelState> getViewModelProvider() {
-    return myViewModelProvider;
+  NotifierProvider<MyFlyViewModel, MyFlyViewModelState> getFlyViewModelProvider() {
+    return myFlyViewModelProvider;
   }
 
   @override
   Color getBackgroundColor(theme) => theme.colors.background;
 
   @override
-  Future<void> onRefresh(MyViewModel viewModel) => viewModel.loadData();
+  Future<void> onRefresh(MyFlyViewModel FlyViewModel) => FlyViewModel.loadData();
 
   @override
   Widget buildContent(
     BuildContext context,
-    MyViewModel viewModel,
-    MyViewModelState state,
+    MyFlyViewModel FlyViewModel,
+    MyFlyViewModelState state,
     Color primary,
     WidgetRef ref,
   ) {
@@ -228,7 +228,7 @@ class MyScreen extends BaseScreen<MyViewModel, MyViewModelState> {
 2. **Error Handling**: Always use the error handling system for consistent error display
 3. **Lifecycle**: Override lifecycle methods when needed for proper resource management
 4. **Feedback**: Use the feedback system for user notifications
-5. **Async Operations**: Use AsyncHandler for all async operations with proper error handling
+5. **Async Operations**: Use AsyncOperationHandler for all async operations with proper error handling
 
 ## Converting to Template
 

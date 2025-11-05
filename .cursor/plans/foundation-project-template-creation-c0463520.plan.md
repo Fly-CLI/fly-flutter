@@ -32,7 +32,7 @@ Implement a comprehensive Task & Notes Manager application with bottom navigatio
 ### Network Strategy
 
 - Mock API service using http package
-- AsyncHandler for all network operations
+- AsyncOperationHandler for all network operations
 - ConnectivityService for network checks
 - Offline queue for failed operations
 - Result pattern (AppResult<T>) for all operations
@@ -264,7 +264,7 @@ Create core data models:
 - Manages statistics (total tasks, completed, overdue, today)
 - Handles sync operations
 - Manages network connectivity status
-- Uses AsyncHandler for all async operations
+- Uses AsyncOperationHandler for all async operations
 - Uses AppResult pattern for error handling
 - Implements lifecycle methods (onInitialize, onAppear)
 - Uses storage managers via Riverpod providers
@@ -327,7 +327,7 @@ Create core data models:
 #### 2.6 Sync Service
 
 - `SyncService`: Handles sync with mock API
-- Uses AsyncHandler for network operations
+- Uses AsyncOperationHandler for network operations
 - Implements offline queue
 - Uses SyncDataManager to track sync status
 - Handles conflicts

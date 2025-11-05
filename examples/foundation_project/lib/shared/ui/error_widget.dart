@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/l10n/app_localizations.dart';
 
 /// Custom error widget for displaying errors
+/// 
+/// [retryText] - Optional label for retry button. If not provided and [onRetry] is set,
+/// an icon-only button will be shown.
 class AppErrorWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
+  final String? retryText;
 
   const AppErrorWidget({
     super.key,
     required this.message,
     this.onRetry,
+    this.retryText,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -34,10 +37,15 @@ class AppErrorWidget extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: onRetry,
-                child: Text(l10n.retry),
-              ),
+              retryText != null
+                  ? ElevatedButton(
+                      onPressed: onRetry,
+                      child: Text(retryText!),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: onRetry,
+                    ),
             ],
           ],
         ),

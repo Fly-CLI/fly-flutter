@@ -402,4 +402,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToSync => 'Failed to sync';
+
+  @override
+  String get lifecycleEmitterDisposed =>
+      'Cannot register controller: emitter is disposed';
+
+  @override
+  String lifecycleControllerAlreadyRegistered(String key) {
+    return 'Controller with key \"$key\" already registered';
+  }
+
+  @override
+  String lifecycleNoControllerRegistered(String key) {
+    return 'No controller registered with key \"$key\"';
+  }
+
+  @override
+  String get lifecycleEmitterMixinDisposed =>
+      'LifecycleEmitterMixin is disposed';
+
+  @override
+  String lifecycleEmitterAccessError(String error) {
+    return 'Error accessing lifecycle emitter: $error. Make sure lifecycle_providers.dart is exported and GlobalContainer is initialized.';
+  }
 }

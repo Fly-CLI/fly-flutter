@@ -410,27 +410,27 @@ class BottomNavigationProvider extends Notifier<int> {
 
 ## 7. MVVM Patterns
 
-### Pattern: BaseScreen with ViewModel Lifecycle
+### Pattern: FlyScreen with ViewModel Lifecycle
 
 **Location**: `lib/core/foundation/mvvm/`
 
 **Key Components**:
-- **BaseScreen**: Abstract screen with lifecycle management
+- **FlyScreen**: Abstract screen with lifecycle management
 - **ViewModel**: Base ViewModel with state management
 - **ViewModelState**: Base state interface
 - **Lifecycle Hooks**: `onInitialize`, `onAppear`, `onDisappear`
 
 **Pattern Structure**:
 ```dart
-abstract class BaseScreen<VM extends ViewModel<S>, S extends ViewModelState>
+abstract class FlyScreen<VM extends ViewModel<S>, S extends ViewModelState>
     extends StatefulWidget {
   
   @override
-  State<BaseScreen<VM, S>> createState() => _BaseScreenState<VM, S>();
+  State<FlyScreen<VM, S>> createState() => _BaseScreenState<VM, S>();
 }
 
 class _BaseScreenState<VM extends ViewModel<S>, S extends ViewModelState>
-    extends ConsumerState<BaseScreen<VM, S>> {
+    extends ConsumerState<FlyScreen<VM, S>> {
   
   late VM viewModel;
   

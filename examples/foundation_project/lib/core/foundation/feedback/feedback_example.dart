@@ -2,12 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/feedback/feedback_emitter_mixin.dart';
-import 'package:foundation_project/core/foundation/feedback/feedback_event.dart';
-import 'package:foundation_project/core/foundation/feedback/feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/feedback_listener_mixin.dart';
-import 'package:foundation_project/core/foundation/mvvm/base_screen.dart';
-import 'package:foundation_project/core/foundation/mvvm/view_model.dart';
+import 'package:foundation_project/core/foundation/feedback/mixins/fly_feedback_emitter_mixin.dart';
+import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
+import 'package:foundation_project/core/foundation/feedback/handlers/composite_feedback_handler.dart';
+import 'package:foundation_project/core/foundation/feedback/handlers/snackbar_feedback_handler.dart';
+import 'package:foundation_project/core/foundation/feedback/handlers/dialog_feedback_handler.dart';
+import 'package:foundation_project/core/foundation/feedback/handlers/bottom_sheet_feedback_handler.dart';
+import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/foundation/feedback/mixins/fly_feedback_listener_mixin.dart';
+import 'package:foundation_project/core/foundation/mvvm/fly_screen.dart';
+import 'package:foundation_project/core/foundation/mvvm/fly_view_model.dart';
+import 'package:foundation_project/core/foundation/feedback/service/feedback_service.dart';
+import 'package:foundation_project/core/foundation/feedback/service/feedback_service_provider.dart';
 
 /// ============================================================================
 /// FEEDBACK SYSTEM USAGE EXAMPLES
@@ -18,11 +25,11 @@ import 'package:foundation_project/core/foundation/mvvm/view_model.dart';
 /// emit UI feedback without knowing about Flutter widgets or BuildContext.
 
 // ============================================================================
-// EXAMPLE 1: Basic Usage with BaseScreen (Automatic)
+// EXAMPLE 1: Basic Usage with FlyScreen (Automatic)
 // ============================================================================
 
 /// Example ViewModel with feedback
-class ExampleViewModelState extends ViewModelState {
+class ExampleViewModelState extends FlyViewModelState {
   @override
   final bool isLoading;
   @override
@@ -41,7 +48,7 @@ class ExampleViewModelState extends ViewModelState {
   }
 }
 
-class ExampleViewModel extends ViewModel<ExampleViewModelState> {
+class ExampleViewModel extends FlyViewModel<ExampleViewModelState> {
   // FeedbackEmitterMixin already included via ViewModel base class
 
   @override
@@ -58,7 +65,7 @@ class ExampleViewModel extends ViewModel<ExampleViewModelState> {
 
     // Simulate async operation
     await Future.delayed(const Duration(seconds: 1));
-    final success = true; // Simulate result
+    const success = true; // Simulate result
 
     state = copyState(isLoading: false);
 
@@ -107,9 +114,9 @@ final exampleViewModelProvider =
   () => ExampleViewModel(),
 );
 
-/// Example Screen using BaseScreen (Automatic feedback handling)
+/// Example Screen using FlyScreen (Automatic feedback handling)
 class ExampleScreen
-    extends BaseScreen<ExampleViewModel, ExampleViewModelState> {
+    extends FlyScreen<ExampleViewModel, ExampleViewModelState> {
   const ExampleScreen({super.key});
 
   @override
@@ -119,9 +126,6 @@ class ExampleScreen
   }
 
   @override
-  Color getBackgroundColor(theme) => theme.colors.background;
-
-  @override
   Future<void> onRefresh(ExampleViewModel viewModel) => Future.value();
 
   @override
@@ -129,10 +133,9 @@ class ExampleScreen
     BuildContext context,
     ExampleViewModel viewModel,
     ExampleViewModelState state,
-    Color primary,
     WidgetRef ref,
   ) {
-    // Feedback automatically handled by BaseScreen!
+    // Feedback automatically handled by FlyScreen!
     // No manual setup needed - just build your UI
 
     return Center(
@@ -159,11 +162,29 @@ class ExampleScreen
   }
 }
 
+/// Example wrapper showing how to use ExampleScreen with Scaffold
+/// Users must wrap FlyScreen in their own Scaffold or layout widget
+class ExampleScreenWrapper extends ConsumerWidget {
+  const ExampleScreenWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const exampleScreen = ExampleScreen();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Feedback Example'),
+      ),
+      body: exampleScreen,
+    );
+  }
+}
+
 // ============================================================================
 // EXAMPLE 2: Custom Widget with Manual Setup
 // ============================================================================
 
-/// Example custom widget that doesn't extend BaseScreen
+/// Example custom widget that doesn't extend FlyScreen
 class CustomFeedbackWidget extends ConsumerStatefulWidget {
   const CustomFeedbackWidget({super.key});
 
@@ -173,7 +194,7 @@ class CustomFeedbackWidget extends ConsumerStatefulWidget {
 }
 
 class _CustomFeedbackWidgetState extends ConsumerState<CustomFeedbackWidget>
-    with FeedbackListenerMixin<CustomFeedbackWidget> {
+    with FlyFeedbackListenerMixin<CustomFeedbackWidget> {
   @override
   void initState() {
     super.initState();
@@ -211,13 +232,13 @@ class _CustomFeedbackWidgetState extends ConsumerState<CustomFeedbackWidget>
 // ============================================================================
 
 /// Example service that emits feedback
-class DataSyncService with FeedbackEmitterMixin {
+class DataSyncService with FlyFeedbackEmitterMixin {
   Future<void> performSync() async {
     try {
       // Simulate network operation
       await Future.delayed(const Duration(seconds: 2));
 
-      final success = true; // Simulate result
+      const success = true; // Simulate result
 
       if (success) {
         emitSuccess('Data synchronized successfully!');
@@ -249,7 +270,7 @@ class ServiceFeedbackExample extends ConsumerStatefulWidget {
 
 class _ServiceFeedbackExampleState
     extends ConsumerState<ServiceFeedbackExample>
-    with FeedbackListenerMixin<ServiceFeedbackExample> {
+    with FlyFeedbackListenerMixin<ServiceFeedbackExample> {
   final DataSyncService _syncService = DataSyncService();
 
   @override
@@ -289,7 +310,7 @@ class _ServiceFeedbackExampleState
 // ============================================================================
 
 /// Custom animated feedback handler
-class AnimatedFeedbackHandler with FeedbackHandlerMixin implements FeedbackHandler {
+class AnimatedFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandler {
   @override
   bool supports(FeedbackDisplay display) => display == FeedbackDisplay.custom;
 
@@ -382,7 +403,7 @@ class CustomHandlerExample extends ConsumerStatefulWidget {
 }
 
 class _CustomHandlerExampleState extends ConsumerState<CustomHandlerExample>
-    with FeedbackListenerMixin<CustomHandlerExample> {
+    with FlyFeedbackListenerMixin<CustomHandlerExample> {
   @override
   void initState() {
     super.initState();
@@ -397,7 +418,7 @@ class _CustomHandlerExampleState extends ConsumerState<CustomHandlerExample>
   }
 
   @override
-  FeedbackHandler getFeedbackHandler() {
+  FlyFeedbackHandler getFeedbackHandler() {
     // Use custom handler + standard handlers
     return CompositeFeedbackHandler([
       AnimatedFeedbackHandler(), // Custom!
@@ -426,12 +447,123 @@ class _CustomHandlerExampleState extends ConsumerState<CustomHandlerExample>
 }
 
 // ============================================================================
-// EXAMPLE 5: Analytics Integration
+// EXAMPLE 5: Direct Service Usage (With BuildContext)
+// ============================================================================
+
+/// Widget using FeedbackService directly (without mixin)
+/// Use this pattern when you have BuildContext and want direct control
+class DirectServiceExample extends ConsumerWidget {
+  const DirectServiceExample({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final feedbackService = ref.read(feedbackServiceProvider);
+
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                feedbackService.showSuccess(context, 'Operation successful!');
+              },
+              child: const Text('Show Success (Service)'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                feedbackService.showError(
+                  context,
+                  'Operation failed',
+                  retryAction: () {
+                    // Retry logic
+                    feedbackService.showInfo(context, 'Retrying...');
+                  },
+                  retryLabel: 'Retry',
+                );
+              },
+              child: const Text('Show Error with Retry (Service)'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                feedbackService.showConfirmation(
+                  context: context,
+                  title: 'Confirm Action',
+                  message: 'Are you sure you want to proceed?',
+                  confirmLabel: 'Confirm',
+                  cancelLabel: 'Cancel',
+                  isDangerous: true,
+                  onConfirm: () {
+                    feedbackService.showSuccess(context, 'Action confirmed!');
+                  },
+                );
+              },
+              child: const Text('Show Confirmation (Service)'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// EXAMPLE 6: Custom Feedback Type with Service
+// ============================================================================
+
+/// Custom feedback type extending FeedbackEvent
+class CustomFeedback extends FeedbackEvent {
+  final String? customField;
+
+  CustomFeedback.success(String message, {this.customField})
+      : super(
+          message: message,
+          type: FeedbackType.success,
+        );
+
+  // Note: For custom feedback types, use show() directly
+  // Convenience methods may not work with custom types
+}
+
+/// Widget using custom feedback type
+class CustomFeedbackTypeExample extends ConsumerWidget {
+  const CustomFeedbackTypeExample({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // For custom types, you would need a custom provider
+    // This is a conceptual example
+    // final customService = ref.read(customFeedbackServiceProvider);
+
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            // Example: Using default service with custom feedback
+            final service = ref.read(feedbackServiceProvider);
+            final customFeedback = CustomFeedback.success(
+              'Custom feedback shown!',
+              customField: 'custom value',
+            );
+            // Use show() method directly for custom types
+            service.show(context, customFeedback, ref);
+          },
+          child: const Text('Show Custom Feedback Type'),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// EXAMPLE 7: Analytics Integration
 // ============================================================================
 
 /// Widget with analytics tracking
 class _AnalyticsTrackingState extends ConsumerState<CustomFeedbackWidget>
-    with FeedbackListenerMixin<CustomFeedbackWidget> {
+    with FlyFeedbackListenerMixin<CustomFeedbackWidget> {
   @override
   void initState() {
     super.initState();

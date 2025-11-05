@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/mvvm/base_screen.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/foundation/mvvm/fly_screen.dart';
+import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/features/home/presentation/view_models/home_view_model.dart';
 import 'package:foundation_project/features/home/presentation/widgets/quick_action_button.dart';
 import 'package:foundation_project/features/home/presentation/widgets/statistics_card.dart';
 import 'package:foundation_project/features/home/presentation/widgets/sync_status_widget.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
-import 'package:foundation_project/shared/themes/themes.dart';
 
 /// Home screen
-class HomeScreen extends BaseScreen<HomeViewModel, HomeViewModelState> {
+class HomeScreen extends FlyScreen<HomeViewModel, HomeViewModelState> {
   const HomeScreen({super.key});
 
   @override
   NotifierProvider<HomeViewModel, HomeViewModelState> getViewModelProvider() {
     return homeViewModelProvider;
-  }
-
-  @override
-  Color getBackgroundColor(AppThemeData theme) {
-    return theme.colors.surface;
   }
 
   @override
@@ -33,7 +27,6 @@ class HomeScreen extends BaseScreen<HomeViewModel, HomeViewModelState> {
     BuildContext context,
     HomeViewModel viewModel,
     HomeViewModelState viewModelState,
-    Color primary,
     WidgetRef ref,
   ) {
     final l10n = AppLocalizations.of(context);
@@ -132,14 +125,14 @@ class HomeScreen extends BaseScreen<HomeViewModel, HomeViewModelState> {
           label: l10n.addTask,
           icon: Icons.add_task,
           onPressed: () {
-            AppNavigation.navigateTo(Feature.taskForm);
+            FlyRouter.instance.navigateTo(FeatureScreenType.taskForm);
           },
         ),
         QuickActionButton(
           label: l10n.addNote,
           icon: Icons.note_add,
           onPressed: () {
-            AppNavigation.navigateTo(Feature.noteForm);
+            FlyRouter.instance.navigateTo(FeatureScreenType.noteForm);
           },
         ),
         QuickActionButton(

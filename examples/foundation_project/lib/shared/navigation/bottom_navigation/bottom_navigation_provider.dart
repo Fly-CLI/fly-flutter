@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
 
 /// Bottom navigation state provider
@@ -21,7 +21,7 @@ class BottomNavigationProvider extends Notifier<int> {
   }
 
   /// Navigate to specific feature
-  void navigateToFeature(Feature feature, BuildContext context) {
+  void navigateToFeature(FeatureScreenType feature, BuildContext context) {
     final index = NavigationItemsHelper.getIndexByFeature(feature, context);
     if (index != -1) {
       setIndex(index, context);
@@ -29,7 +29,7 @@ class BottomNavigationProvider extends Notifier<int> {
   }
 
   /// Get current feature
-  Feature getCurrentFeature(BuildContext context) {
+  FeatureScreenType getCurrentFeature(BuildContext context) {
     final items = getBottomNavigationItems(context);
     return items[state].feature;
   }
@@ -62,7 +62,7 @@ class BottomNavigationProvider extends Notifier<int> {
 
   /// Reset to home
   void resetToHome(BuildContext context) {
-    navigateToFeature(Feature.home, context);
+    navigateToFeature(FeatureScreenType.home, context);
   }
 
   /// Get navigation history (for future enhancement)

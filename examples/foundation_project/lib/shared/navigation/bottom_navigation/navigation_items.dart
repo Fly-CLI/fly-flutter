@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
 
 /// Navigation item configuration for bottom navigation
@@ -7,7 +7,7 @@ class NavigationItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  final Feature feature;
+  final FeatureScreenType feature;
   final bool showFAB;
 
   const NavigationItem({
@@ -44,27 +44,27 @@ List<NavigationItem> getBottomNavigationItems(BuildContext context) {
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
       label: l10n.home,
-      feature: Feature.home,
+      feature: FeatureScreenType.home,
     ),
     NavigationItem(
       icon: Icons.task_outlined,
       activeIcon: Icons.task,
       label: l10n.tasks,
-      feature: Feature.tasks,
+      feature: FeatureScreenType.tasks,
       showFAB: true,
     ),
     NavigationItem(
       icon: Icons.note_outlined,
       activeIcon: Icons.note,
       label: l10n.notes,
-      feature: Feature.notes,
+      feature: FeatureScreenType.notes,
       showFAB: true,
     ),
     NavigationItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: l10n.settings,
-      feature: Feature.settings,
+      feature: FeatureScreenType.settings,
     ),
   ];
 }
@@ -73,7 +73,7 @@ List<NavigationItem> getBottomNavigationItems(BuildContext context) {
 class NavigationItemsHelper {
   /// Get navigation item by feature
   static NavigationItem? getItemByFeature(
-    Feature feature,
+    FeatureScreenType feature,
     BuildContext context,
   ) {
     try {
@@ -86,7 +86,7 @@ class NavigationItemsHelper {
   }
 
   /// Get index by feature
-  static int getIndexByFeature(Feature feature, BuildContext context) {
+  static int getIndexByFeature(FeatureScreenType feature, BuildContext context) {
     final items = getBottomNavigationItems(context);
     for (int i = 0; i < items.length; i++) {
       if (items[i].feature == feature) {
@@ -97,7 +97,7 @@ class NavigationItemsHelper {
   }
 
   /// Get feature by index
-  static Feature? getFeatureByIndex(int index, BuildContext context) {
+  static FeatureScreenType? getFeatureByIndex(int index, BuildContext context) {
     final items = getBottomNavigationItems(context);
     if (index >= 0 && index < items.length) {
       return items[index].feature;
@@ -106,7 +106,7 @@ class NavigationItemsHelper {
   }
 
   /// Check if feature should show FAB
-  static bool shouldShowFAB(Feature feature, BuildContext context) {
+  static bool shouldShowFAB(FeatureScreenType feature, BuildContext context) {
     final item = getItemByFeature(feature, context);
     return item?.showFAB ?? false;
   }

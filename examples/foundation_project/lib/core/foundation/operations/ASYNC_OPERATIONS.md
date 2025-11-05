@@ -1,6 +1,6 @@
 # Async Operations Guide
 
-This guide explains how to handle async operations in ViewModels using the `performAsync` method and `AsyncHandler` class.
+This guide explains how to handle async operations in ViewModels using the `performAsync` method and `AsyncOperationHandler` class.
 
 ## Table of Contents
 
@@ -614,7 +614,7 @@ await performAsync(
 - [ViewModel Lifecycle](./../mvvm/LIFECYCLE_USAGE.md) - ViewModel lifecycle methods
 - [Feedback System](./../feedback/README.md) - Feedback message system
 - [Error Handling](./../error/) - Error handling patterns
-- [AsyncHandlerConfig](./async_handler_config.dart) - Timeout and retry configuration
+- [AsyncHandlerConfig](async_operation_config.dart) - Timeout and retry configuration
 
 ## Examples
 

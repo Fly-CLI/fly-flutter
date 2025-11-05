@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/core/storage/managers/app_data_manager.dart';
 import 'package:foundation_project/core/storage/models/storage_key.dart';
 
@@ -17,22 +19,60 @@ class _Config {
 /// Service for tracking recently accessed features
 ///
 /// Handles automatic tracking with debouncing, exclusion, and error handling.
-/// This service is automatically called when users navigate to features via
-/// AppNavigation methods.
+/// This service listens to lifecycle events emitted by navigation components.
 class RecentlyAccessedTrackingService {
   final AppDataManager _dataManager;
+  final AppLifecycleEmitter _lifecycleEmitter;
   final AppLogger _logger = AppLogger('RecentlyAccessedTrackingService');
 
   Timer? _debounceTimer;
-  Feature? _pendingFeature;
+  FeatureScreenType? _pendingFeature;
+  StreamSubscription<LifecycleEvent>? _navigationSubscription;
 
-  RecentlyAccessedTrackingService(this._dataManager);
+  RecentlyAccessedTrackingService(
+    this._dataManager,
+    this._lifecycleEmitter,
+  ) {
+    _initialize();
+  }
+
+  /// Initialize the service by subscribing to lifecycle events
+  void _initialize() {
+    // Get navigation stream using generic API
+    final navigationStream = _lifecycleEmitter.getStream('navigation');
+    if (navigationStream == null) {
+      _logger.error(
+        'Navigation stream not found. Make sure navigation controller is registered.',
+        stackTrace: StackTrace.current,
+      );
+      return;
+    }
+
+    _navigationSubscription = navigationStream.listen(
+      (event) {
+        if (event is NavigationStartedEvent) {
+          // Track when navigation starts (before completion)
+          trackFeatureAccess(event.feature);
+        } else if (event is NavigationCompletedEvent) {
+          // Alternatively, track when navigation completes
+          // Using NavigationStartedEvent for consistency with previous behavior
+          // where tracking happened before navigation
+        }
+      },
+      onError: (error) {
+        _logger.error(
+          'Error listening to navigation events: ${error.toString()}',
+          stackTrace: StackTrace.current,
+        );
+      },
+    );
+  }
 
   /// Track feature access with debouncing
   ///
   /// If the same feature is accessed repeatedly within debounce window,
   /// only the last access is tracked.
-  void trackFeatureAccess(Feature feature) {
+  void trackFeatureAccess(FeatureScreenType feature) {
     // Cancel existing timer
     _debounceTimer?.cancel();
 
@@ -46,7 +86,7 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Perform the actual tracking
-  Future<void> _performTracking(Feature feature) async {
+  Future<void> _performTracking(FeatureScreenType feature) async {
     try {
       // Get current recently accessed features
       final recentFeaturesJson =
@@ -81,7 +121,7 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Get recently accessed features
-  Future<List<Feature>> getRecentlyAccessed({int limit = _Config.maxItems}) async {
+  Future<List<FeatureScreenType>> getRecentlyAccessed({int limit = _Config.maxItems}) async {
     try {
       final recentFeaturesJson =
           await _dataManager.getJson(StorageKey.recentlyAccessedFeatures);
@@ -104,16 +144,16 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Parse features list from JSON
-  List<Feature> _parseFeaturesList(Map<String, dynamic>? json) {
+  List<FeatureScreenType> _parseFeaturesList(Map<String, dynamic>? json) {
     if (json == null || json['features'] == null) return [];
 
     try {
       final featuresList = json['features'] as List<dynamic>;
       return featuresList
-          .map((f) => Feature.values.firstWhere(
+          .map((f) => FeatureScreenType.values.firstWhere(
                 (feature) => feature.name == f,
-                orElse: () => Feature.home,
-              ))
+                orElse: () => FeatureScreenType.home,
+              ),)
           .toList();
     } catch (e) {
       _logger.error('Failed to parse features list: ${e.toString()}', stackTrace: StackTrace.current);
@@ -122,7 +162,7 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Convert features list to JSON
-  Map<String, dynamic> _featuresToJson(List<Feature> features) {
+  Map<String, dynamic> _featuresToJson(List<FeatureScreenType> features) {
     return {
       'features': features.map((f) => f.name).toList(),
     };
@@ -130,10 +170,11 @@ class RecentlyAccessedTrackingService {
 
   /// Dispose resources
   ///
-  /// Cancels any pending timers to prevent memory leaks.
+  /// Cancels any pending timers and stream subscriptions to prevent memory leaks.
   void dispose() {
     _debounceTimer?.cancel();
     _debounceTimer = null;
+    _navigationSubscription?.cancel();
+    _navigationSubscription = null;
   }
 }
-

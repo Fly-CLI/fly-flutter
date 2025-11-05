@@ -138,6 +138,41 @@
   "failedToLoadStatistics": "Failed to load statistics",
   "failedToLoadSyncStatus": "Failed to load sync status",
   "failedToRefresh": "Failed to refresh",
-  "failedToSync": "Failed to sync"
+  "failedToSync": "Failed to sync",
+  "lifecycleEmitterDisposed": "Cannot register controller: emitter is disposed",
+  "@lifecycleEmitterDisposed": {
+    "description": "Error message when trying to register a controller on a disposed emitter"
+  },
+  "lifecycleControllerAlreadyRegistered": "Controller with key \"{key}\" already registered",
+  "@lifecycleControllerAlreadyRegistered": {
+    "description": "Error message when trying to register a controller with an existing key",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "lifecycleNoControllerRegistered": "No controller registered with key \"{key}\"",
+  "@lifecycleNoControllerRegistered": {
+    "description": "Error message when trying to access a non-existent controller",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "lifecycleEmitterMixinDisposed": "LifecycleEmitterMixin is disposed",
+  "@lifecycleEmitterMixinDisposed": {
+    "description": "Error message when trying to use a disposed lifecycle emitter mixin"
+  },
+  "lifecycleEmitterAccessError": "Error accessing lifecycle emitter: {error}. Make sure lifecycle_providers.dart is exported and GlobalContainer is initialized.",
+  "@lifecycleEmitterAccessError": {
+    "description": "Error message when accessing lifecycle emitter fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
 

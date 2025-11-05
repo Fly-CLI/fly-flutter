@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
-import 'package:foundation_project/shared/themes/themes.dart';
 
 /// Main bottom navigation widget
 class AppBottomNavigation extends ConsumerStatefulWidget {
@@ -22,9 +21,9 @@ class AppBottomNavigation extends ConsumerStatefulWidget {
 class _AppBottomNavigationState extends ConsumerState<AppBottomNavigation> {
   @override
   Widget build(BuildContext context) {
-    final themeData = getAppTheme(context);
-    final colors = themeData.colors;
-    final typography = themeData.textTheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final typography = theme.textTheme;
 
     final items = getBottomNavigationItems(context);
 

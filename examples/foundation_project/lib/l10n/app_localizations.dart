@@ -825,6 +825,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to sync'**
   String get failedToSync;
+
+  /// Error message when trying to register a controller on a disposed emitter
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot register controller: emitter is disposed'**
+  String get lifecycleEmitterDisposed;
+
+  /// Error message when trying to register a controller with an existing key
+  ///
+  /// In en, this message translates to:
+  /// **'Controller with key \"{key}\" already registered'**
+  String lifecycleControllerAlreadyRegistered(String key);
+
+  /// Error message when trying to access a non-existent controller
+  ///
+  /// In en, this message translates to:
+  /// **'No controller registered with key \"{key}\"'**
+  String lifecycleNoControllerRegistered(String key);
+
+  /// Error message when trying to use a disposed lifecycle emitter mixin
+  ///
+  /// In en, this message translates to:
+  /// **'LifecycleEmitterMixin is disposed'**
+  String get lifecycleEmitterMixinDisposed;
+
+  /// Error message when accessing lifecycle emitter fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error accessing lifecycle emitter: {error}. Make sure lifecycle_providers.dart is exported and GlobalContainer is initialized.'**
+  String lifecycleEmitterAccessError(String error);
 }
 
 class _AppLocalizationsDelegate

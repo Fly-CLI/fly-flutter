@@ -290,7 +290,7 @@ fly/
 **Example Architecture:**
 
 ```dart
-// fly_core/lib/src/screens/base_screen.dart
+// fly_core/lib/src/screens/fly_screen.dart
 abstract class BaseScreen<VM extends BaseViewModel> extends StatefulWidget {
   const BaseScreen({Key? key}) : super(key: key);
   

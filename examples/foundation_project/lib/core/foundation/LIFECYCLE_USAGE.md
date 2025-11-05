@@ -2,16 +2,16 @@
 
 ## Overview
 
-The BaseScreen architecture now supports lifecycle notifications at both the screen and ViewModel
+The FlyScreen architecture now supports lifecycle notifications at both the screen and ViewModel
 levels. This allows both screens and ViewModels to respond to lifecycle events automatically.
 
 ## Available Lifecycle Methods
 
 Both screens and ViewModels can override these optional lifecycle methods:
 
-### Screen Lifecycle Methods (BaseScreen)
+### Screen Lifecycle Methods (FlyScreen)
 
-Screens extending `BaseScreen` can override:
+Screens extending `FlyScreen` can override:
 
 - `onInitialize()` - Called once when screen is first built
 - `onAppear()` - Called every time the screen appears
@@ -241,7 +241,7 @@ class MyViewModel extends ViewModel {
 - The lifecycle system is **backward compatible** - existing screens and ViewModels work without
   changes
 - Lifecycle methods are called automatically - no manual triggering needed
-- Works with all BaseScreen variants: BaseSearchableScreen, BaseListScreen,
+- Works with all FlyScreen variants: BaseSearchableScreen, BaseListScreen,
   BaseSearchableListScreen, BaseFormScreen
 - **Execution order**: Screen lifecycle methods are called **before** ViewModel lifecycle methods
 - Screen methods receive the `onScreenXxx` prefix to distinguish them from ViewModel methods

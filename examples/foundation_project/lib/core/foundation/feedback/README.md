@@ -1,15 +1,16 @@
 # Reusable Feedback System
 
 A completely decoupled, composable feedback system for Flutter applications that allows any class to
-emit UI feedback without knowing about widgets or BuildContext.
+emit UI feedback without knowing about widgets or BuildContext. The system supports both stream-based
+emission (for ViewModels) and direct service-based display (for components with BuildContext).
 
 ## Quick Start
 
-### Basic Usage (With BaseScreen)
+### Basic Usage (With FlyScreen - Stream-Based)
 
 ```dart
 // 1. ViewModel emits feedback
-class MyViewModel extends ViewModel<MyState> {
+class MyViewModel extends FlyViewModel<MyState> {
   Future<void> saveData() async {
     final result = await repository.save();
     
@@ -22,7 +23,7 @@ class MyViewModel extends ViewModel<MyState> {
 }
 
 // 2. Screen - NO manual setup needed!
-class MyScreen extends BaseScreen<MyViewModel, MyState> {
+class MyScreen extends FlyScreen<MyViewModel, MyState> {
   @override
   Widget buildContent(...) {
     // Feedback automatically displayed! ✨
@@ -31,11 +32,30 @@ class MyScreen extends BaseScreen<MyViewModel, MyState> {
 }
 ```
 
-### Advanced Usage (Custom Widgets)
+### Direct Service Usage (With BuildContext)
+
+```dart
+// Use FeedbackService directly when you have BuildContext
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final feedbackService = ref.read(feedbackServiceProvider);
+    
+    return ElevatedButton(
+      onPressed: () {
+        feedbackService.showSuccess(context, 'Operation successful!');
+      },
+      child: const Text('Save'),
+    );
+  }
+}
+```
+
+### Advanced Usage (Custom Widgets with Stream)
 
 ```dart
 class _MyWidgetState extends ConsumerState<MyWidget>
-    with FeedbackListenerMixin<MyWidget> {  // 👈 Add mixin
+    with FlyFeedbackListenerMixin<MyWidget> {  // 👈 Add mixin
   
   @override
   void initState() {
@@ -63,20 +83,23 @@ class _MyWidgetState extends ConsumerState<MyWidget>
 
 ### Components
 
-1. **FeedbackEvent** - Immutable data classes (what to show)
-2. **FeedbackEmitterMixin** - Emit feedback from any class (ViewModels, Services, etc.)
-3. **FeedbackHandler** - Display logic (how to show: snackbar, dialog, etc.)
-4. **FeedbackListenerMixin** - Listen to feedback in any StatefulWidget
+1. **FeedbackEvent** - Abstract base class (what to show) - can be extended for custom types
+2. **FeedbackService<F>** - Generic service interface for displaying feedback (direct display)
+3. **DefaultFeedbackService<F>** - Default implementation using handlers
+4. **FeedbackEmitterMixin** - Emit feedback to stream from any class (ViewModels, Services, etc.)
+5. **FeedbackHandler** - Display logic (how to show: snackbar, dialog, etc.)
+6. **FeedbackListenerMixin** - Listen to feedback stream in any StatefulWidget
 
-### Design
+### Design Patterns
 
+#### Pattern 1: Stream-Based (For ViewModels)
 ```
 ┌─────────────┐
 │  ViewModel  │ with FeedbackEmitterMixin
 │    or       │
 │   Service   │
 └──────┬──────┘
-       │ emits
+       │ emits to stream
        ▼
 ┌─────────────────┐
 │ FeedbackEvent   │ (Pure Data)
@@ -102,11 +125,70 @@ class _MyWidgetState extends ConsumerState<MyWidget>
 └─────────────────┘
 ```
 
+#### Pattern 2: Service-Based (Direct Display)
+```
+┌─────────────────┐
+│  Widget/Service │ with BuildContext
+└──────┬──────────┘
+       │ uses
+       ▼
+┌─────────────────┐
+│ FeedbackService │<F extends FeedbackEvent>
+│ - show()         │
+│ - showSuccess()  │
+│ - showError()    │
+│ - showWarning() │
+│ - showInfo()     │
+│ - showConfirmation()│
+└──────┬──────────┘
+       │ delegates to
+       ▼
+┌─────────────────┐
+│ FeedbackHandler │
+│ - Snackbar      │ (Display Logic)
+│ - Dialog        │
+│ - Custom        │
+└─────────────────┘
+```
+
+---
+
+## Service Pattern with Generics
+
+### Generic Feedback Service
+
+The `FeedbackService<F>` pattern allows custom feedback types while maintaining backward compatibility:
+
+```dart
+// Default usage with FeedbackEvent
+FeedbackService<FeedbackEvent> service;
+service.showSuccess(context, 'Saved!');
+
+// Custom feedback type
+class CustomFeedback extends FeedbackEvent {
+  final String? customField;
+  CustomFeedback.success(String message, {this.customField})
+      : super(message: message, type: FeedbackType.success);
+}
+
+// Use with custom type
+FeedbackService<CustomFeedback> customService;
+customService.show(context, CustomFeedback.success('Saved!'), ref);
+```
+
+### Why Abstract (Not Sealed)?
+
+`FeedbackEvent` is **abstract** (not sealed) to allow:
+- ✅ Custom feedback types in other libraries
+- ✅ Generic service pattern with `FeedbackService<F>`
+- ✅ Extensibility while maintaining type safety
+- ✅ Backward compatibility with existing handlers
+
 ---
 
 ## API Reference
 
-### Emitting Feedback
+### Stream-Based Emission (FeedbackEmitterMixin)
 
 ```dart
 // Success message
@@ -135,6 +217,44 @@ emitConfirmation(
 );
 ```
 
+### Direct Service Display (FeedbackService<F>)
+
+```dart
+final service = ref.read(feedbackServiceProvider);
+
+// Success message
+service.showSuccess(context, 'Operation completed!');
+
+// Error message with retry
+service.showError(
+  context,
+  'Operation failed',
+  retryAction: () => retryOperation(),
+  retryLabel: 'Retry',
+  technicalDetails: error.toString(),
+);
+
+// Warning message
+service.showWarning(context, 'Disk space low');
+
+// Info message
+service.showInfo(context, 'Processing in background');
+
+// Confirmation dialog
+service.showConfirmation(
+  context: context,
+  title: 'Delete Item',
+  message: 'Are you sure?',
+  confirmLabel: 'Delete',
+  cancelLabel: 'Cancel',
+  isDangerous: true,
+  onConfirm: () => delete(),
+);
+
+// Direct feedback event
+service.show(context, customFeedback, ref);
+```
+
 ### Event Types
 
 | Class | Type | Display | Use Case |
@@ -159,19 +279,72 @@ emitConfirmation(
 
 ## Usage Patterns
 
-### Pattern 1: Simple Operations
+### Pattern 1: Stream-Based (ViewModels)
 
 ```dart
-Future<void> save() async {
-  final result = await repository.save();
-  
-  result.isSuccess 
-    ? emitSuccess('Saved!')
-    : emitError('Failed', retryAction: save);
+class MyViewModel extends FlyViewModel<MyState> {
+  Future<void> save() async {
+    final result = await repository.save();
+    
+    result.isSuccess 
+      ? emitSuccess('Saved!')
+      : emitError('Failed', retryAction: save);
+  }
 }
 ```
 
-### Pattern 2: Contextual Errors
+### Pattern 2: Direct Service (Widgets with BuildContext)
+
+```dart
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final service = ref.read(feedbackServiceProvider);
+    
+    return ElevatedButton(
+      onPressed: () {
+        service.showSuccess(context, 'Saved!');
+      },
+      child: const Text('Save'),
+    );
+  }
+}
+```
+
+### Pattern 3: Custom Feedback Types
+
+```dart
+// Define custom feedback type
+class RichFeedback extends FeedbackEvent {
+  final String? subtitle;
+  final IconData? customIcon;
+  
+  RichFeedback.success(String message, {this.subtitle, this.customIcon})
+      : super(message: message, type: FeedbackType.success);
+}
+
+// Use with service
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final service = ref.read(feedbackServiceProvider);
+    
+    return ElevatedButton(
+      onPressed: () {
+        final feedback = RichFeedback.success(
+          'Operation completed!',
+          subtitle: 'Additional details',
+          customIcon: Icons.check_circle,
+        );
+        service.show(context, feedback, ref);
+      },
+      child: const Text('Execute'),
+    );
+  }
+}
+```
+
+### Pattern 4: Contextual Errors
 
 ```dart
 Future<void> purchase() async {
@@ -193,7 +366,7 @@ Future<void> purchase() async {
 }
 ```
 
-### Pattern 3: Confirmation Flows
+### Pattern 5: Confirmation Flows
 
 ```dart
 void deleteProduct(String id) {
@@ -212,17 +385,29 @@ void deleteProduct(String id) {
 }
 ```
 
-### Pattern 4: With Convenience Method
+### Pattern 6: Service Override
 
 ```dart
-Future<void> syncData() async {
-  await performAsyncWithFeedback(
-    () => syncService.sync(),
-    successMessage: 'Synced!',
-    errorMessage: 'Sync failed',
-    // Automatic error handling with retry
+// Override service for custom implementation
+final container = ProviderContainer(
+  overrides: [
+    feedbackServiceProvider.overrideWithValue(
+      CustomFeedbackService(),
+    ),
+  ],
+);
+
+// Or create custom provider for custom feedback types
+final customFeedbackServiceProvider = 
+    Provider<FeedbackService<CustomFeedback>>((ref) {
+  return DefaultFeedbackService<CustomFeedback>(
+    handler: CompositeFeedbackHandler([
+      SnackbarFeedbackHandler(),
+      DialogFeedbackHandler(),
+      CustomFeedbackHandler(),
+    ]),
   );
-}
+});
 ```
 
 ---
@@ -232,7 +417,7 @@ Future<void> syncData() async {
 ### Custom Handlers
 
 ```dart
-class ToastHandler implements FeedbackHandler {
+class ToastHandler implements FlyFeedbackHandler {
   @override
   bool supports(FeedbackDisplay display) => display == FeedbackDisplay.toast;
   
@@ -244,10 +429,10 @@ class ToastHandler implements FeedbackHandler {
 
 // Use in widget
 class _MyState extends ConsumerState<MyWidget>
-    with FeedbackListenerMixin<MyWidget> {
+    with FlyFeedbackListenerMixin<MyWidget> {
   
   @override
-  FeedbackHandler getFeedbackHandler() {
+  FlyFeedbackHandler getFeedbackHandler() {
     return CompositeFeedbackHandler([
       ToastHandler(),  // Your custom handler
       SnackbarFeedbackHandler(),
@@ -255,6 +440,17 @@ class _MyState extends ConsumerState<MyWidget>
     ]);
   }
 }
+
+// Or use in service
+final customServiceProvider = Provider<FeedbackService<FeedbackEvent>>((ref) {
+  return DefaultFeedbackService<FeedbackEvent>(
+    handler: CompositeFeedbackHandler([
+      ToastHandler(),
+      SnackbarFeedbackHandler(),
+      DialogFeedbackHandler(),
+    ]),
+  );
+});
 ```
 
 ### Multiple Feedback Sources
@@ -277,7 +473,7 @@ Stream<FeedbackEvent>? getFeedbackStream(BuildContext context) {
 
 ```dart
 class _MyState extends ConsumerState<MyWidget>
-    with FeedbackListenerMixin<MyWidget> {
+    with FlyFeedbackListenerMixin<MyWidget> {
   
   @override
   void onFeedbackHandled(FeedbackEvent event) {
@@ -296,7 +492,7 @@ class _MyState extends ConsumerState<MyWidget>
 
 ## Testing
 
-### Unit Testing ViewModels
+### Unit Testing ViewModels (Stream-Based)
 
 ```dart
 test('emitSuccess sends SuccessFeedback event', () {
@@ -325,11 +521,28 @@ test('emitError with retry action', () async {
 });
 ```
 
+### Testing Services (Direct Display)
+
+```dart
+test('FeedbackService shows success', () {
+  final handler = MockFlyFeedbackHandler();
+  final service = DefaultFeedbackService<FeedbackEvent>(
+    handler: handler,
+  );
+  
+  service.showSuccess(context, 'Success!');
+  
+  expect(handler.handledEvents.length, 1);
+  expect(handler.handledEvents.first, isA<SuccessFeedback>());
+  expect(handler.handledEvents.first.message, 'Success!');
+});
+```
+
 ### Testing Handlers
 
 ```dart
 test('MockFeedbackHandler records events', () {
-  final handler = MockFeedbackHandler();
+  final handler = MockFlyFeedbackHandler();
   final event = SuccessFeedback('Test');
   
   handler.handle(context, event, ref);
@@ -380,6 +593,13 @@ emitWarning('Low disk space');  // Not an error
 // Add technical details for debugging
 emitError('Failed', technicalDetails: error.toString());
 
+// Use service when you have BuildContext
+final service = ref.read(feedbackServiceProvider);
+service.showSuccess(context, 'Saved!');
+
+// Use stream emission for ViewModels without BuildContext
+emitSuccess('Saved!');  // Stream-based
+
 // Cleanup in dispose
 @override
 void dispose() {
@@ -411,6 +631,14 @@ if (error.contains('cancel')) {
   emitError('Cancelled');  // ❌ Annoying
   return;  // ✅ Silent
 }
+
+// Don't use service without BuildContext
+class MyViewModel {
+  void save() {
+    service.showSuccess(context, 'Saved!');  // ❌ No context in ViewModel
+    emitSuccess('Saved!');  // ✅ Use stream emission
+  }
+}
 ```
 
 ---
@@ -421,7 +649,7 @@ if (error.contains('cancel')) {
 
 ```dart
 // Before
-class MyViewModel extends ViewModel<MyState> {
+class MyViewModel extends FlyViewModel<MyState> {
   Future<void> save() async {
     state = copyState(
       isLoading: true,
@@ -439,8 +667,8 @@ class MyViewModel extends ViewModel<MyState> {
   }
 }
 
-// After
-class MyViewModel extends ViewModel<MyState> {
+// After (Stream-Based)
+class MyViewModel extends FlyViewModel<MyState> {
   Future<void> save() async {
     state = copyState(isLoading: true);
     
@@ -453,6 +681,26 @@ class MyViewModel extends ViewModel<MyState> {
     } else {
       emitError('Failed', retryAction: save);
     }
+  }
+}
+
+// After (Direct Service - when you have BuildContext)
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final service = ref.read(feedbackServiceProvider);
+    
+    return ElevatedButton(
+      onPressed: () async {
+        final result = await repository.save();
+        if (result.isSuccess) {
+          service.showSuccess(context, 'Saved!');
+        } else {
+          service.showError(context, 'Failed', retryAction: () => save());
+        }
+      },
+      child: const Text('Save'),
+    );
   }
 }
 ```
@@ -474,12 +722,26 @@ class _MyScreenState extends ConsumerState<MyScreen> {
   }
 }
 
-// After
+// After (Stream-Based)
 class _MyScreenState extends ConsumerState<MyScreen> {
   @override
   Widget build(BuildContext context) {
-    // No listener needed - automatic via BaseScreen!
+    // No listener needed - automatic via FlyScreen!
     return UI();
+  }
+}
+
+// After (Direct Service)
+class MyScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final service = ref.read(feedbackServiceProvider);
+    
+    return UI(
+      onSave: () {
+        service.showSuccess(context, 'Saved!');
+      },
+    );
   }
 }
 ```
@@ -490,12 +752,13 @@ class _MyScreenState extends ConsumerState<MyScreen> {
 
 ### Issue: Feedback not showing
 
-**Cause:** Listener not set up  
-**Solution:** Add `FeedbackListenerMixin` and call `setupFeedbackListener()`
+**Cause:** Listener not set up (stream-based) or service not used (direct)  
+**Solution:** 
 
+For stream-based:
 ```dart
 class _State extends ConsumerState<Widget>
-    with FeedbackListenerMixin<Widget> {  // ✅
+    with FlyFeedbackListenerMixin<Widget> {  // ✅
   
   @override
   void initState() {
@@ -505,6 +768,12 @@ class _State extends ConsumerState<Widget>
     });
   }
 }
+```
+
+For direct service:
+```dart
+final service = ref.read(feedbackServiceProvider);
+service.showSuccess(context, 'Saved!');  // ✅
 ```
 
 ### Issue: Memory leak warning
@@ -537,6 +806,18 @@ emitConfirmation(...);
 **Cause:** Context no longer mounted  
 **Solution:** Handled automatically with `context.mounted` checks
 
+### Issue: Custom feedback types not working
+
+**Cause:** FeedbackEvent was sealed (now fixed - it's abstract)  
+**Solution:** Ensure `FeedbackEvent` is abstract (not sealed) to allow custom types
+
+```dart
+// ✅ Now works - FeedbackEvent is abstract
+class CustomFeedback extends FeedbackEvent {
+  // Your custom implementation
+}
+```
+
 ---
 
 ## Performance
@@ -545,6 +826,7 @@ emitConfirmation(...);
 |-----------|------|-------|
 | Stream creation | O(1), lazy | Only when first listener |
 | Event emission | O(1) | Broadcast stream |
+| Service call | O(1) | Direct handler call |
 | Handler lookup | O(n) | n = 2-3 typically |
 | Memory overhead | < 1KB | Per emitter instance |
 
@@ -558,7 +840,9 @@ emitConfirmation(...);
 | Reusable | ✅ Everywhere | ❌ Per screen | ⚠️ UI only |
 | Testable | ✅ No UI needed | ❌ Needs mocking | ❌ Needs UI |
 | Retry Support | ✅ Built-in | ❌ Manual | ❌ None |
-| Type-Safe | ✅ Sealed classes | ⚠️ Callbacks | ❌ Strings |
+| Type-Safe | ✅ Abstract classes | ⚠️ Callbacks | ❌ Strings |
+| Generic Types | ✅ FeedbackService<F> | ❌ Hard-coded | ❌ None |
+| Custom Types | ✅ Extensible | ❌ Fixed | ❌ Fixed |
 | Composable | ✅ Pure mixins | ❌ Hard-coded | ❌ Static |
 | Analytics | ✅ Hooks | ❌ Manual | ❌ Manual |
 
@@ -568,46 +852,94 @@ emitConfirmation(...);
 
 See `feedback_example.dart` for comprehensive examples including:
 
-1. ✅ Basic usage with BaseScreen
-2. ✅ Custom widget with manual setup
-3. ✅ Service with feedback (no UI dependencies)
-4. ✅ Custom animated handler
-5. ✅ Analytics integration
-6. ✅ Multiple feedback sources
+1. ✅ Basic usage with FlyScreen (stream-based)
+2. ✅ Custom widget with manual setup (stream-based)
+3. ✅ Service with feedback (no UI dependencies, stream-based)
+4. ✅ Direct service usage (with BuildContext)
+5. ✅ Custom feedback types
+6. ✅ Custom animated handler
+7. ✅ Analytics integration
+8. ✅ Multiple feedback sources
+9. ✅ Service override patterns
 
 ---
 
 ## API Documentation
 
+### FeedbackService<F>
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `show()` | context, feedback, ref? | Show feedback event directly |
+| `showSuccess()` | context, message, {...} | Show success feedback |
+| `showError()` | context, message, {...} | Show error feedback |
+| `showWarning()` | context, message, {...} | Show warning feedback |
+| `showInfo()` | context, message, {...} | Show info feedback |
+| `showConfirmation()` | context, title, message, {...} | Show confirmation dialog |
+
 ### FeedbackEmitterMixin
 
 | Method | Parameters | Description |
 |--------|------------|-------------|
-| `emitSuccess()` | message, action?, duration? | Show success feedback |
-| `emitError()` | message, retryAction?, details? | Show error feedback |
-| `emitWarning()` | message, duration? | Show warning feedback |
-| `emitInfo()` | message, duration? | Show info feedback |
-| `emitConfirmation()` | title, message, onConfirm? | Show confirmation dialog |
+| `emitSuccess()` | message, action?, duration? | Emit success feedback to stream |
+| `emitError()` | message, retryAction?, details? | Emit error feedback to stream |
+| `emitWarning()` | message, duration? | Emit warning feedback to stream |
+| `emitInfo()` | message, duration? | Emit info feedback to stream |
+| `emitConfirmation()` | title, message, onConfirm? | Emit confirmation dialog to stream |
 | `disposeFeedbackEmitter()` | - | Clean up resources |
+| `feedbackStream` | - | Stream of feedback events |
 
 ### FeedbackListenerMixin
 
 | Method | Description |
 |--------|-------------|
-| `setupFeedbackListener()` | Start listening to feedback |
+| `setupFeedbackListener()` | Start listening to feedback stream |
 | `getFeedbackStream()` | Override to provide feedback source |
 | `getFeedbackHandler()` | Override to provide custom handler |
 | `onFeedbackHandled()` | Override for analytics/logging |
 | `disposeFeedbackListener()` | Automatic cleanup |
+
+### feedbackServiceProvider
+
+Riverpod provider for `FeedbackService<FeedbackEvent>`. Can be overridden for custom implementations.
+
+---
+
+## Architecture Decisions
+
+### Why Abstract (Not Sealed)?
+
+- **Extensibility**: Allows custom feedback types in other libraries
+- **Generic Support**: Enables `FeedbackService<F>` pattern
+- **Type Safety**: Maintains compile-time checks while allowing customization
+- **Backward Compatibility**: Existing handlers work with base type
+
+### Why Two Patterns (Stream + Service)?
+
+- **Stream-Based**: For ViewModels without BuildContext (decoupled, testable)
+- **Service-Based**: For components with BuildContext (direct, immediate)
+- **Flexibility**: Choose the right pattern for your use case
+
+### Why Generic Service?
+
+- **Custom Types**: `FeedbackService<CustomFeedback>` allows custom implementations
+- **Type Safety**: Compile-time guarantees for feedback types
+- **Reusability**: Same pattern as `NavigationService<R>`
+- **Extensibility**: Easy to override for custom behavior
 
 ---
 
 ## Migration Checklist
 
 - [x] Create feedback infrastructure files
+- [x] Create generic FeedbackService<F> interface
+- [x] Create DefaultFeedbackService<F> implementation
+- [x] Create feedbackServiceProvider
+- [x] Update FeedbackEvent to abstract (not sealed)
 - [x] Update ViewModel base class
-- [x] Update BaseScreen
+- [x] Update FlyScreen
 - [x] Migrate subscription feature
+- [x] Add service pattern examples
 - [ ] Create unit tests
 - [ ] Create widget tests
 - [ ] Update developer documentation
@@ -622,10 +954,10 @@ For questions or issues:
 1. See examples in `feedback_example.dart`
 2. Check tests in `test/core/foundation/feedback/`
 3. Review implementation summary
+4. Check service pattern documentation
 
 ---
 
-**Version:** 1.0.0  
+**Version:** 2.0.0  
 **Status:** Production Ready  
-**Last Updated:** October 29, 2025
-
+**Last Updated:** December 2024

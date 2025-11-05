@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foundation_project/core/navigation/app.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/features/home/presentation/screens/home_screen.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/tasks_screen.dart';
 import 'package:foundation_project/features/notes/presentation/screens/notes_screen.dart';
@@ -17,7 +17,7 @@ class AppRouter {
 
   static final GoRouter _router = GoRouter(
     navigatorKey: navigatorKey,
-    initialLocation: Feature.home.route,
+    initialLocation: FeatureScreenType.home.route,
     routes: [
       ShellRoute(
         builder: (context, state, child) {
@@ -25,31 +25,31 @@ class AppRouter {
         },
         routes: [
           GoRoute(
-            path: Feature.home.route,
-            name: Feature.home.name,
+            path: FeatureScreenType.home.route,
+            name: FeatureScreenType.home.name,
             builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
-            path: Feature.tasks.route,
-            name: Feature.tasks.name,
+            path: FeatureScreenType.tasks.route,
+            name: FeatureScreenType.tasks.name,
             builder: (context, state) => const TasksScreen(),
           ),
           GoRoute(
-            path: Feature.notes.route,
-            name: Feature.notes.name,
+            path: FeatureScreenType.notes.route,
+            name: FeatureScreenType.notes.name,
             builder: (context, state) => const NotesScreen(),
           ),
           GoRoute(
-            path: Feature.settings.route,
-            name: Feature.settings.name,
+            path: FeatureScreenType.settings.route,
+            name: FeatureScreenType.settings.name,
             builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),
       // Detail routes (outside shell for full screen)
       GoRoute(
-        path: Feature.taskDetail.route,
-        name: Feature.taskDetail.name,
+        path: FeatureScreenType.taskDetail.route,
+        name: FeatureScreenType.taskDetail.name,
         builder: (context, state) {
           final l10n = AppLocalizations.of(context);
           final id = state.pathParameters['id'] ?? '';
@@ -61,8 +61,8 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: Feature.noteDetail.route,
-        name: Feature.noteDetail.name,
+        path: FeatureScreenType.noteDetail.route,
+        name: FeatureScreenType.noteDetail.name,
         builder: (context, state) {
           final l10n = AppLocalizations.of(context);
           final id = state.pathParameters['id'] ?? '';
@@ -75,8 +75,8 @@ class AppRouter {
       ),
       // Form routes (outside shell for full screen)
       GoRoute(
-        path: Feature.taskForm.route,
-        name: Feature.taskForm.name,
+        path: FeatureScreenType.taskForm.route,
+        name: FeatureScreenType.taskForm.name,
         builder: (context, state) {
           final l10n = AppLocalizations.of(context);
           // TODO: Navigate to task form screen
@@ -87,8 +87,8 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: Feature.noteForm.route,
-        name: Feature.noteForm.name,
+        path: FeatureScreenType.noteForm.route,
+        name: FeatureScreenType.noteForm.name,
         builder: (context, state) {
           final l10n = AppLocalizations.of(context);
           // TODO: Navigate to note form screen

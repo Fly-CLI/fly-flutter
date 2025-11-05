@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/mvvm/view_model.dart';
+import 'package:foundation_project/core/foundation/mvvm/fly_view_model.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
@@ -8,7 +8,7 @@ import 'package:foundation_project/features/home/data/models/statistics_entity.d
 import 'package:foundation_project/features/home/data/models/sync_status_entity.dart';
 
 /// Home ViewModel state
-class HomeViewModelState extends ViewModelState {
+class HomeViewModelState extends FlyViewModelState {
   final StatisticsEntity? statistics;
   final SyncStatusEntity? syncStatus;
   final bool isRefreshing;
@@ -70,7 +70,7 @@ class HomeViewModelState extends ViewModelState {
 /// Example ViewModel demonstrating proper use of performAsync for async operations.
 /// All async operations use performAsync to ensure consistent error handling,
 /// loading state management, and network awareness.
-class HomeViewModel extends ViewModel<HomeViewModelState> {
+class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   final AppLogger _logger = AppLogger('HomeViewModel');
 
   HomeViewModel();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
+import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/app_bottom_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/bottom_navigation_provider.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
@@ -41,9 +41,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final currentLocation = router.routerDelegate.currentConfiguration.uri.path;
 
     // Find matching feature
-    final feature = Feature.values.firstWhere(
+    final feature = FeatureScreenType.values.firstWhere(
       (f) => _matchesRoute(f.route, currentLocation),
-      orElse: () => Feature.home,
+      orElse: () => FeatureScreenType.home,
     );
 
     // Update navigation index
@@ -70,7 +70,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final items = getBottomNavigationItems(context);
     if (index >= 0 && index < items.length) {
       final feature = items[index].feature;
-      AppNavigation.navigateTo(feature);
+      FlyRouter.instance.navigateTo(feature);
     }
   }
 
@@ -90,10 +90,10 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           ? FloatingActionButton(
               onPressed: () {
                 final feature = items[currentIndex].feature;
-                if (feature == Feature.tasks) {
-                  AppNavigation.navigateTo(Feature.taskForm);
-                } else if (feature == Feature.notes) {
-                  AppNavigation.navigateTo(Feature.noteForm);
+                if (feature == FeatureScreenType.tasks) {
+                  FlyRouter.instance.navigateTo(FeatureScreenType.taskForm);
+                } else if (feature == FeatureScreenType.notes) {
+                  FlyRouter.instance.navigateTo(FeatureScreenType.noteForm);
                 }
               },
               child: const Icon(Icons.add),

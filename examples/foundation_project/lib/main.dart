@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/foundation/foundation.dart';
-import 'package:foundation_project/core/navigation/app_navigation.dart';
 import 'package:foundation_project/core/providers/providers.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
-import 'package:foundation_project/shared/navigation/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +24,6 @@ void main() async {
   // Initialize app data manager
   final appDataManager = GlobalContainer.instance.read(appDataManagerProvider);
   await appDataManager.init();
-
-  // Initialize navigation with container for analytics tracking
-  AppNavigation.initialize(GlobalContainer.instance);
 
   runApp(
     UncontrolledProviderScope(
