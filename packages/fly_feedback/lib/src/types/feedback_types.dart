@@ -96,7 +96,7 @@ extension FeedbackDisplayFactory on FeedbackDisplay {
   /// except [FeedbackDisplay.custom]. If a new display type is added, it will
   /// be included automatically.
   static List<FlyFeedbackHandler> get allDefaultHandlers {
-    return FeedbackDisplay.values
+      return FeedbackDisplay.values
         .where((display) => display != FeedbackDisplay.custom)
         .map((display) => display.createDefaultHandler())
         .toList();

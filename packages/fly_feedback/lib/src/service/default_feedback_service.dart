@@ -23,14 +23,6 @@ import 'package:fly_feedback/src/types/feedback_types.dart';
 /// service.showSuccess(context, 'Saved!');
 /// ```
 class DefaultFeedbackService implements FeedbackService<FeedbackEvent> {
-  /// The feedback handler to use for displaying feedback
-  final FlyFeedbackHandler handler;
-
-  /// Haptic feedback configuration
-  final HapticConfig? hapticConfig;
-
-  /// Haptic feedback service instance
-  final HapticFeedbackService _hapticService;
 
   /// Creates a DefaultFeedbackService
   ///
@@ -41,6 +33,14 @@ class DefaultFeedbackService implements FeedbackService<FeedbackEvent> {
     HapticConfig? hapticConfig,
   })  : hapticConfig = hapticConfig ?? HapticConfig.defaults(),
         _hapticService = const HapticFeedbackService();
+  /// The feedback handler to use for displaying feedback
+  final FlyFeedbackHandler handler;
+
+  /// Haptic feedback configuration
+  final HapticConfig? hapticConfig;
+
+  /// Haptic feedback service instance
+  final HapticFeedbackService _hapticService;
 
   @override
   void show(BuildContext context, FeedbackEvent feedback) {

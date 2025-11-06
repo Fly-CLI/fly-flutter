@@ -6,9 +6,8 @@ import 'package:fly_feedback/fly_feedback.dart' as feedback;
 
 part 'lifecycle_events.g.dart';
 
-// Note: FeedbackEvent classes have been moved to fly_feedback package
-// Feedback events are handled through ViewModel streams directly via
-// FlyFeedbackEmitterMixin, not through the lifecycle emitter system.
+// Feedback events originate from the fly_feedback package and are wrapped
+// inside lifecycle events to participate in the shared AppLifecycleEmitter.
 
 /// Base lifecycle event - pure data, no logic
 ///
@@ -238,16 +237,22 @@ int _durationToJson(Duration duration) => duration.inMilliseconds;
 /// Convert JSON (milliseconds) to Duration
 Duration _durationFromJson(int json) => Duration(milliseconds: json);
 
-// ============================================================================
-// Feedback Events - MOVED TO fly_feedback PACKAGE
-// ============================================================================
-// 
-// FeedbackEvent and related classes have been moved to the fly_feedback package
-// for reusability. Import from fly_feedback package:
-// 
-//   import 'package:fly_feedback/fly_feedback.dart';
-//
-// Feedback events are handled through ViewModel streams directly via
-// FlyFeedbackEmitterMixin and FlyFeedbackListenerMixin, not through the
-// lifecycle emitter system.
+/// Lifecycle event that wraps a Fly feedback payload.
+///
+/// Allows feedback events to move through the shared application lifecycle
+/// emitter so that listeners can handle them alongside other lifecycle signals.
+class FeedbackLifecycleEvent extends LifecycleEvent {
+  FeedbackLifecycleEvent({
+    required this.scope,
+    required this.payload,
+    super.id,
+    super.timestamp,
+    super.metadata = const {},
+  });
 
+  /// Identifier used to route feedback to the appropriate listener.
+  final String scope;
+
+  /// The original feedback payload emitted by the producer (e.g., ViewModel).
+  final feedback.FeedbackEvent payload;
+}

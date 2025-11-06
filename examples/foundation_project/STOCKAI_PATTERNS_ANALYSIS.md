@@ -631,47 +631,55 @@ class Loading<T> extends AppResult<T> {
 
 ## 12. Feedback System Patterns
 
-### Pattern: Decoupled Feedback with Mixins
+### Pattern: Feedback Routed via AppLifecycleEmitter
 
-**Location**: `lib/core/foundation/feedback/`
+**Location**: `lib/core/lifecycle/` & `lib/core/foundation/mvvm/`
 
 **Key Components**:
-- **FeedbackEvent**: Sealed classes for feedback types
-- **FeedbackEmitterMixin**: Mixin for emitting feedback
-- **FeedbackHandler**: Handlers for displaying feedback
-- **FeedbackListenerMixin**: Mixin for listening to feedback
+- **FeedbackEvent**: Payload types from the `fly_feedback` package.
+- **FeedbackLifecycleEvent**: Lifecycle wrapper that carries the payload plus scope metadata.
+- **LifecycleEmitterMixin**: Shared mixin used by services/view models to emit lifecycle events.
+- **AppLifecycleEmitter.getFeedbackStream()**: Central stream for subscribers.
+- **FlyFeedbackHandler**: UI adapters for presenting feedback.
 
 **Pattern Structure**:
 ```dart
-sealed class FeedbackEvent {}
+class MyViewModel extends FlyViewModel<BaseViewModelState> {
+  @override
+  BaseViewModelState build() => const BaseViewModelState();
 
-class SuccessFeedback extends FeedbackEvent {
-  final String message;
-  const SuccessFeedback(this.message);
-}
-
-mixin FeedbackEmitterMixin {
-  final _feedbackController = StreamController<FeedbackEvent>.broadcast();
-  
-  void emitSuccess(String message) {
-    _feedbackController.add(SuccessFeedback(message));
+  Future<void> save() async {
+    await performAsync(
+      () async => repository.save(),
+      successMessage: 'Saved successfully',
+    );
   }
 }
 
-mixin FeedbackListenerMixin<T extends StatefulWidget> on State<T> {
-  void setupFeedbackListener(Stream<FeedbackEvent> stream) {
-    stream.listen((event) {
-      // Display feedback
+class MyScreenState extends ConsumerState<MyScreen>
+    with LifecycleEmitterMixin {
+  late final StreamSubscription<FeedbackLifecycleEvent> _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final emitter = ref.read(lifecycleEmitterProvider);
+      final viewModel = ref.read(widget.provider.notifier);
+      _subscription = emitter
+          .getFeedbackStream()
+          .where((event) => event.scope == viewModel.feedbackScope)
+          .listen((event) => handler.handle(context, event.payload));
     });
   }
 }
 ```
 
 **Benefits**:
-- ✅ Decoupled feedback system
-- ✅ Reusable across ViewModels and Services
-- ✅ Flexible display handlers
-- ✅ Easy to test
+- ✅ Feedback travels through the same lifecycle event infrastructure as navigation/screen telemetry.
+- ✅ Emission/listening logic is reusable across widgets, services, and background tasks.
+- ✅ Maintains compatibility with existing `FlyFeedbackHandler` implementations.
+- ✅ Simplifies testing by centralizing feedback observation in the lifecycle emitter.
 
 ---
 

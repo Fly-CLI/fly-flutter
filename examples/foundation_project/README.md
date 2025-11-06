@@ -29,10 +29,10 @@ This foundation project serves as a playground for Flutter development and can b
   - `ErrorMessageFormatter`: Error message formatting
 
 - **Feedback System** (`feedback/`):
-  - `FeedbackEvent`: Feedback event types
-  - `FeedbackHandler`: Feedback display handlers
-  - `FeedbackEmitterMixin`: Mixin for emitting feedback
-  - `FeedbackListenerMixin`: Mixin for listening to feedback
+  - `FeedbackEvent`: Feedback event types supplied by the `fly_feedback` package
+  - `FeedbackLifecycleEvent`: Lifecycle wrapper that routes feedback through `AppLifecycleEmitter`
+  - `LifecycleEmitterMixin`: Shared emitter mixin used by services and view models
+  - `FlyFeedbackHandler`: Feedback display handlers (snackbar, dialog, toast, etc.)
 
 - **MVVM** (`mvvm/`):
   - `FlyScreen`: Base screen class with lifecycle management

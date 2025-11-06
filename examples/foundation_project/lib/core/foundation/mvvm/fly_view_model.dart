@@ -1,14 +1,161 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_emitter_mixin.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
 
 /// Base class for Riverpod-based ViewModels
 /// Provides common state management functionality using Riverpod
 abstract class FlyViewModel<T extends FlyViewModelState> extends Notifier<T>
-    with FlyFeedbackEmitterMixin {
+    with LifecycleEmitterMixin {
   final AsyncOperationHandler _asyncHandler = AsyncOperationHandler();
 
   FlyViewModel();
+
+  /// Identifier used to scope feedback events for this ViewModel.
+  ///
+  /// Defaults to the runtime type name but can be overridden by subclasses
+  /// to provide a custom scope (e.g., when multiple instances of the same
+  /// ViewModel type are active simultaneously).
+  String get feedbackScope => runtimeType.toString();
+
+  /// Emit a feedback event through the lifecycle emitter.
+  ///
+  /// Packages the feedback event inside a [FeedbackLifecycleEvent] so that
+  /// listeners can leverage the shared lifecycle infrastructure.
+  @protected
+  bool emitFeedback(
+    FeedbackEvent event, {
+    Map<String, dynamic> metadata = const {},
+  }) {
+    final combinedMetadata = <String, dynamic>{
+      'feedback_scope': feedbackScope,
+      'feedback_type': event.runtimeType.toString(),
+      ...event.metadata,
+      ...metadata,
+    };
+
+    return emit(
+      FeedbackLifecycleEvent(
+        scope: feedbackScope,
+        payload: event,
+        metadata: combinedMetadata,
+      ),
+    );
+  }
+
+  /// Emit success feedback.
+  void emitSuccess(
+    String message, {
+    FeedbackDisplay display = FeedbackDisplay.snackBar,
+    Duration? duration,
+    VoidCallback? action,
+    String? actionLabel,
+    Map<String, dynamic> metadata = const {},
+  }) {
+    emitFeedback(
+      SuccessFeedback(
+        message,
+        display: display,
+        duration: duration,
+        action: action,
+        actionLabel: actionLabel,
+        metadata: metadata,
+      ),
+      metadata: metadata,
+    );
+  }
+
+  /// Emit error feedback.
+  void emitError(
+    String message, {
+    String? technicalDetails,
+    VoidCallback? retryAction,
+    String? retryLabel,
+    bool showTechnicalDetails = false,
+    FeedbackDisplay display = FeedbackDisplay.snackBar,
+    Duration? duration,
+    Map<String, dynamic> metadata = const {},
+  }) {
+    emitFeedback(
+      ErrorFeedback(
+        message,
+        technicalDetails: technicalDetails,
+        retryAction: retryAction,
+        retryLabel: retryLabel,
+        showTechnicalDetails: showTechnicalDetails,
+        display: display,
+        duration: duration,
+        metadata: metadata,
+      ),
+      metadata: metadata,
+    );
+  }
+
+  /// Emit warning feedback.
+  void emitWarning(
+    String message, {
+    FeedbackDisplay display = FeedbackDisplay.snackBar,
+    Duration? duration,
+    Map<String, dynamic> metadata = const {},
+  }) {
+    emitFeedback(
+      WarningFeedback(
+        message,
+        display: display,
+        duration: duration,
+        metadata: metadata,
+      ),
+      metadata: metadata,
+    );
+  }
+
+  /// Emit informational feedback.
+  void emitInfo(
+    String message, {
+    FeedbackDisplay display = FeedbackDisplay.snackBar,
+    Duration? duration,
+    Map<String, dynamic> metadata = const {},
+  }) {
+    emitFeedback(
+      InfoFeedback(
+        message,
+        display: display,
+        duration: duration,
+        metadata: metadata,
+      ),
+      metadata: metadata,
+    );
+  }
+
+  /// Emit confirmation dialog feedback.
+  void emitConfirmation({
+    required String title,
+    required String message,
+    String? confirmLabel,
+    String? cancelLabel,
+    VoidCallback? onConfirm,
+    VoidCallback? onCancel,
+    bool isDangerous = false,
+    bool barrierDismissible = true,
+    Map<String, dynamic> metadata = const {},
+  }) {
+    emitFeedback(
+      ConfirmationFeedback(
+        title: title,
+        message: message,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        onConfirm: onConfirm,
+        onCancel: onCancel,
+        isDangerous: isDangerous,
+        barrierDismissible: barrierDismissible,
+        metadata: metadata,
+      ),
+      metadata: metadata,
+    );
+  }
 
   /// Abstract method for copying state with updated values
   /// Subclasses must implement this to provide state-specific copying logic
@@ -165,8 +312,7 @@ abstract class FlyViewModel<T extends FlyViewModelState> extends Notifier<T>
   /// Called when the screen is being permanently disposed
   /// Override this to cleanup resources that need to be released
   void onDispose() {
-    // Note: Feedback emitter is managed by the lifecycle system
-    // No manual disposal needed
+    disposeLifecycleEmitter();
     // Default implementation - can be overridden by subclasses
   }
 

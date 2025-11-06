@@ -7,9 +7,13 @@ extension NavigationStreamExtension on AppLifecycleEmitter {
   ///
   /// Returns a stream of NavigationEvent, or an empty stream if not registered.
   Stream<NavigationEvent> getNavigationStream() {
-    final stream = getStream('navigation');
-    if (stream == null) return const Stream<NavigationEvent>.empty();
-    return stream.cast<NavigationEvent>();
+    try {
+      final stream = getStream('navigation');
+      if (stream == null) return const Stream<NavigationEvent>.empty();
+      return stream.cast<NavigationEvent>();
+    } on StateError {
+      return const Stream<NavigationEvent>.empty();
+    }
   }
 }
 
@@ -19,9 +23,13 @@ extension ScreenStreamExtension on AppLifecycleEmitter {
   ///
   /// Returns a stream of ScreenEvent, or an empty stream if not registered.
   Stream<ScreenEvent> getScreenStream() {
-    final stream = getStream('screen');
-    if (stream == null) return const Stream<ScreenEvent>.empty();
-    return stream.cast<ScreenEvent>();
+    try {
+      final stream = getStream('screen');
+      if (stream == null) return const Stream<ScreenEvent>.empty();
+      return stream.cast<ScreenEvent>();
+    } on StateError {
+      return const Stream<ScreenEvent>.empty();
+    }
   }
 }
 
@@ -31,9 +39,29 @@ extension FoundationOperationStreamExtension on AppLifecycleEmitter {
   ///
   /// Returns a stream of FoundationOperationEvent, or an empty stream if not registered.
   Stream<FoundationOperationEvent> getFoundationOperationStream() {
-    final stream = getStream('foundation_operation');
-    if (stream == null) return const Stream<FoundationOperationEvent>.empty();
-    return stream.cast<FoundationOperationEvent>();
+    try {
+      final stream = getStream('foundation_operation');
+      if (stream == null) return const Stream<FoundationOperationEvent>.empty();
+      return stream.cast<FoundationOperationEvent>();
+    } on StateError {
+      return const Stream<FoundationOperationEvent>.empty();
+    }
+  }
+}
+
+/// Extension for type-safe feedback event streams
+extension FeedbackStreamExtension on AppLifecycleEmitter {
+  /// Get type-safe feedback event stream
+  ///
+  /// Returns a stream of FeedbackLifecycleEvent, or an empty stream if not registered.
+  Stream<FeedbackLifecycleEvent> getFeedbackStream() {
+    try {
+      final stream = getStream('feedback');
+      if (stream == null) return const Stream<FeedbackLifecycleEvent>.empty();
+      return stream.cast<FeedbackLifecycleEvent>();
+    } on StateError {
+      return const Stream<FeedbackLifecycleEvent>.empty();
+    }
   }
 }
 
@@ -44,8 +72,12 @@ extension LifecycleEmitterFilterExtension on AppLifecycleEmitter {
   /// [key] - The stream key
   /// Returns a stream that only emits events of type T
   Stream<T> getEventsOfType<T extends LifecycleEvent>(String key) {
-    final stream = getStream(key);
-    if (stream == null) return Stream<T>.empty();
-    return stream.where((event) => event is T).cast<T>();
+    try {
+      final stream = getStream(key);
+      if (stream == null) return Stream<T>.empty();
+      return stream.where((event) => event is T).cast<T>();
+    } on StateError {
+      return Stream<T>.empty();
+    }
   }
 }

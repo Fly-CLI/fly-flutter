@@ -1,11 +1,14 @@
+import 'package:fly_feedback/fly_feedback.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/lifecycle/managers/feedback_stream_manager.dart';
 import 'package:foundation_project/core/lifecycle/managers/navigation_stream_manager.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('LifecycleEmitterExtensions', () {
     late AppLifecycleEmitter emitter;
 
@@ -40,6 +43,40 @@ void main() {
 
       test('should return empty stream when not registered', () {
         final stream = emitter.getNavigationStream();
+
+        expect(stream, isNotNull);
+        // Should not throw
+      });
+    });
+
+    group('FeedbackStreamExtension', () {
+      test('should return type-safe feedback stream', () async {
+        emitter.register<FeedbackLifecycleEvent>(
+          key: 'feedback',
+          manager: FeedbackStreamManager(),
+        );
+
+        final events = <FeedbackLifecycleEvent>[];
+        final subscription = emitter.getFeedbackStream().listen(events.add);
+
+        final feedback = SuccessFeedback('Hello');
+        emitter.emit(
+          FeedbackLifecycleEvent(
+            scope: 'TestScope',
+            payload: feedback,
+          ),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 10));
+
+        expect(events.length, 1);
+        expect(events.first.payload, same(feedback));
+
+        await subscription.cancel();
+      });
+
+      test('should return empty stream when feedback not registered', () {
+        final stream = emitter.getFeedbackStream();
 
         expect(stream, isNotNull);
         // Should not throw

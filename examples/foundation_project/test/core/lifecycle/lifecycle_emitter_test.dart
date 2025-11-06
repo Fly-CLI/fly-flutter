@@ -1,11 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:fly_feedback/fly_feedback.dart';
+import 'package:foundation_project/core/lifecycle/managers/feedback_stream_manager.dart';
 import 'package:foundation_project/core/lifecycle/managers/navigation_stream_manager.dart';
 import 'package:foundation_project/core/lifecycle/managers/screen_stream_manager.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('AppLifecycleEmitter', () {
     late AppLifecycleEmitter emitter;
 
@@ -206,6 +209,36 @@ void main() {
 
         navSubscription?.cancel();
         screenSubscription?.cancel();
+      });
+
+      test('should emit wrapped feedback events through feedback manager', () async {
+        final feedbackManager = FeedbackStreamManager();
+        emitter.register<FeedbackLifecycleEvent>(
+          key: 'feedback',
+          manager: feedbackManager,
+        );
+
+        final received = <FeedbackLifecycleEvent>[];
+        final subscription = emitter
+            .getStream('feedback')
+            ?.cast<FeedbackLifecycleEvent>()
+            .listen(received.add);
+
+        final feedback = SuccessFeedback('Completed');
+        final lifecycleEvent = FeedbackLifecycleEvent(
+          scope: 'TestScope',
+          payload: feedback,
+        );
+
+        final emitted = emitter.emit(lifecycleEvent);
+        await Future.delayed(const Duration(milliseconds: 10));
+
+        expect(emitted, isTrue);
+        expect(received, hasLength(1));
+        expect(received.first.payload, same(feedback));
+        expect(received.first.scope, 'TestScope');
+
+        await subscription?.cancel();
       });
 
       test('should return false when no matching controller', () {

@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:foundation_project/core/foundation/mvvm/fly_view_model.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter_mixin.dart';
-import 'package:foundation_project/shared/ui/error_widget.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 
 /// Abstract base screen class for handling common UI logic
 /// Provides standard patterns for loading, error, and content management
@@ -105,13 +109,16 @@ abstract class FlyScreen<V extends FlyViewModel<S>, S extends FlyViewModelState>
   /// Get custom feedback handler (optional override)
   /// Override to provide custom feedback display logic
   FlyFeedbackHandler? getFeedbackHandler() {
-    return null; // Use default handler from mixin
+    return null; // Use default handler provided by the screen state
   }
 
   /// Get the screen name for lifecycle events
   /// Override this to provide a custom screen name
   /// Defaults to the runtime type name
   String get screenName => runtimeType.toString();
+
+  /// Provide haptic configuration for feedback presentation (optional).
+  HapticConfig? getHapticConfig() => null;
 
   /// Check if view model is loading
   bool isLoading(FlyViewModelState state) => state.isLoading;
@@ -126,8 +133,11 @@ abstract class FlyScreen<V extends FlyViewModel<S>, S extends FlyViewModelState>
 /// State class for FlyScreen with lifecycle management
 class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
     extends ConsumerState<FlyScreen<V, S>>
-    with FlyFeedbackListenerMixin<FlyScreen<V, S>>, LifecycleEmitterMixin {
+    with LifecycleEmitterMixin {
   bool _hasInitialized = false;
+  StreamSubscription<FeedbackLifecycleEvent>? _feedbackSubscription;
+  DefaultFeedbackService? _feedbackService;
+  String? _feedbackScope;
 
   @override
   void initState() {
@@ -137,7 +147,7 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
       if (mounted) {
         // Set up automatic feedback listener if enabled
         if (widget.enableFeedback) {
-          setupFeedbackListener();
+          _restartFeedbackSubscription();
         }
 
         if (!_hasInitialized) {
@@ -155,30 +165,14 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
   }
 
   @override
-  Stream<FeedbackEvent>? getFeedbackStream(BuildContext context) {
-    if (!widget.enableFeedback) return null;
-
-    try {
-      // Get feedback stream directly from ViewModel's feedback emitter
-      final viewModel = ref.read(widget.getViewModelProvider().notifier);
-      return viewModel.feedbackStream;
-    } catch (e) {
-      debugPrint('⚠️ Error accessing ViewModel feedback stream: $e');
-      return null;
-    }
-  }
-
-  @override
-  FlyFeedbackHandler getFeedbackHandler() {
-    return widget.getFeedbackHandler() ?? super.getFeedbackHandler();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Call onAppear every time the screen becomes visible
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        if (widget.enableFeedback) {
+          _restartFeedbackSubscription();
+        }
         // Emit screen shown event
         emitScreenShown(screenName: widget.screenName);
         // Call screen lifecycle first
@@ -188,6 +182,19 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
         viewModel.onAppear();
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant FlyScreen<V, S> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _feedbackService = null;
+    if (oldWidget.enableFeedback != widget.enableFeedback) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _restartFeedbackSubscription();
+        }
+      });
+    }
   }
 
   @override
@@ -208,6 +215,7 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
       // Silently handle cases where ref is no longer available
       // This can happen during widget disposal in certain scenarios
     }
+    _cancelFeedbackSubscription();
     // Dispose lifecycle emitter
     disposeLifecycleEmitter();
     super.dispose();
@@ -240,5 +248,78 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
     }
 
     return content;
+  }
+
+  DefaultFeedbackService _resolveFeedbackService() {
+    return _feedbackService ??= DefaultFeedbackService(
+      handler: widget.getFeedbackHandler() ??
+          CompositeFeedbackHandler(FeedbackDisplayFactory.allDefaultHandlers),
+      hapticConfig: widget.getHapticConfig() ?? HapticConfig.disabled(),
+    );
+  }
+
+  void _restartFeedbackSubscription() {
+    if (!widget.enableFeedback) {
+      _cancelFeedbackSubscription();
+      return;
+    }
+
+    _cancelFeedbackSubscription();
+    _feedbackSubscription = _createFeedbackSubscription();
+  }
+
+  StreamSubscription<FeedbackLifecycleEvent>? _createFeedbackSubscription() {
+    if (!mounted) return null;
+
+    Stream<FeedbackLifecycleEvent> stream;
+    try {
+      final viewModel = ref.read(widget.getViewModelProvider().notifier);
+      _feedbackScope = viewModel.feedbackScope;
+
+      final emitter = ref.read(lifecycleEmitterProvider);
+      stream = emitter
+          .getFeedbackStream()
+          .where((event) => event.scope == _feedbackScope);
+    } catch (error) {
+      debugPrint('⚠️ Unable to subscribe to feedback events: $error');
+      return null;
+    }
+
+    return stream.listen(
+      (event) => _handleFeedbackEvent(event.payload),
+      onError: _handleFeedbackStreamError,
+      onDone: () => _feedbackSubscription = null,
+      cancelOnError: false,
+    );
+  }
+
+  void _cancelFeedbackSubscription() {
+    _feedbackSubscription?.cancel();
+    _feedbackSubscription = null;
+  }
+
+  void _handleFeedbackEvent(FeedbackEvent event) {
+    if (!mounted) {
+      debugPrint('⚠️ Cannot handle feedback - widget not mounted');
+      return;
+    }
+
+    try {
+      final service = _resolveFeedbackService();
+      service.show(context, event);
+    } catch (error, stackTrace) {
+      debugPrint('❌ Feedback handling error: $error');
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'FlyScreen',
+        ),
+      );
+    }
+  }
+
+  void _handleFeedbackStreamError(Object error, StackTrace stackTrace) {
+    debugPrint('❌ Feedback stream error: $error');
   }
 }
