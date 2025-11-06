@@ -102,11 +102,6 @@ abstract class FlyScreen<V extends FlyViewModel<S>, S extends FlyViewModelState>
   // OPTIONAL OVERRIDE METHODS
   // =============================================================================
 
-  /// Handle add button press (optional override)
-  void onAddPressed(BuildContext context, WidgetRef ref, V viewModel) {
-    // Default implementation - can be overridden
-  }
-
   /// Get custom feedback handler (optional override)
   /// Override to provide custom feedback display logic
   FlyFeedbackHandler? getFeedbackHandler() {
@@ -117,109 +112,6 @@ abstract class FlyScreen<V extends FlyViewModel<S>, S extends FlyViewModelState>
   /// Override this to provide a custom screen name
   /// Defaults to the runtime type name
   String get screenName => runtimeType.toString();
-
-  // =============================================================================
-  // UTILITY METHODS
-  // =============================================================================
-
-  /// Build loading state widget
-  Widget buildLoadingState() {
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  /// Show error toast/snackbar instead of error widget
-  /// 
-  /// [retryLabel] - Optional label for retry action. If not provided, the action button will be omitted.
-  void showErrorToast(
-    BuildContext context,
-      WidgetRef ref,
-    String message,
-    VoidCallback? onRetry, {
-    V? viewModel,
-    String? retryLabel,
-  }) {
-    final colors = Theme.of(context).colorScheme;
-
-    // Clear the error from the ViewModel after displaying the toast
-    viewModel?.clearError();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(message, style: const TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-        backgroundColor: colors.error,
-        duration: const Duration(seconds: 4),
-        action: onRetry != null && retryLabel != null
-            ? SnackBarAction(
-                label: retryLabel,
-                textColor: Colors.white,
-                onPressed: onRetry,
-              )
-            : null,
-      ),
-    );
-  }
-
-  /// Build error state widget (kept for backward compatibility)
-  /// 
-  /// [retryText] - Optional label for retry button. If not provided and [onRetry] is set,
-  /// an icon-only button will be shown.
-  Widget buildErrorState(String message, VoidCallback? onRetry, {String? retryText}) {
-    return AppErrorWidget(message: message, onRetry: onRetry, retryText: retryText);
-  }
-
-  /// Build empty state widget
-  Widget buildEmptyStateWidget({
-    required String message,
-    required IconData icon,
-    required Color color,
-    VoidCallback? onAction,
-    String? actionText,
-  }) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 80, color: color),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(
-              color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (onAction != null && actionText != null) ...[
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onAction,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(actionText, style: const TextStyle(fontSize: 18)),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 
   /// Check if view model is loading
   bool isLoading(FlyViewModelState state) => state.isLoading;

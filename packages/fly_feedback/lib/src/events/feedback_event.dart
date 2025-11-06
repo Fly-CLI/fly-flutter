@@ -27,6 +27,22 @@ abstract class FeedbackEvent {
   final DateTime timestamp;
 
   /// Additional metadata for the event
+  ///
+  /// Supported metadata keys:
+  /// - `'haptic_type'` (String): Override haptic feedback type.
+  ///   Must be a valid [HapticType] enum name (e.g., 'lightImpact', 'mediumImpact').
+  /// - `'haptic_enabled'` (bool): Enable or disable haptic feedback for this event.
+  ///   Set to `false` to disable haptics for this specific event.
+  ///
+  /// Example:
+  /// ```dart
+  /// SuccessFeedback(
+  ///   'Saved!',
+  ///   metadata: {
+  ///     'haptic_type': 'heavyImpact',  // Override default haptic
+  ///   },
+  /// );
+  /// ```
   final Map<String, dynamic> metadata;
 
   /// Feedback message (already localized)

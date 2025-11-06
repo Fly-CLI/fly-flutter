@@ -21,6 +21,11 @@ export 'src/handlers/fly_feedback_handler.dart';
 export 'src/handlers/implementations/snackbar_feedback_handler.dart';
 export 'src/handlers/implementations/toast_feedback_handler.dart';
 
+// Haptics
+export 'src/haptics/haptic_config.dart';
+export 'src/haptics/haptic_feedback_service.dart';
+export 'src/haptics/haptic_types.dart';
+
 // Mixins
 export 'src/mixins/fly_feedback_emitter_mixin.dart';
 export 'src/mixins/fly_feedback_listener_mixin.dart';

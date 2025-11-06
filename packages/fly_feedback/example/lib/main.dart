@@ -6,6 +6,7 @@ import 'screens/emitter_listener_screen.dart';
 import 'screens/custom_handler_screen.dart';
 import 'screens/real_world_scenarios_screen.dart';
 import 'screens/semantics_screen.dart';
+import 'screens/haptic_feedback_screen.dart';
 
 void main() {
   runApp(const FlyFeedbackExampleApp());
@@ -167,6 +168,21 @@ class HomeScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const SemanticsScreen(),
+                ),
+              );
+            },
+          ),
+          _ExampleCard(
+            title: '8. Haptic Feedback',
+            description:
+                'Enhance user experience with tactile feedback. Configure haptic feedback globally or per feedback type.',
+            icon: Icons.vibration,
+            color: Colors.indigo,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const HapticFeedbackScreen(),
                 ),
               );
             },

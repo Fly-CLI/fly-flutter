@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:fly_feedback/src/handlers/implementations/composite_feedback_handler.dart';
+import 'package:fly_feedback/src/haptics/haptic_config.dart';
 import 'package:fly_feedback/src/mixins/fly_feedback_listener_mixin.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -301,6 +302,137 @@ void main() {
       
       // Listener should be cancelled
       expect(controller.hasListener, isFalse);
+      
+      controller.close();
+    });
+
+    testWidgets('should return null for haptic config by default', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestWidget(),
+        ),
+      );
+
+      final state = tester.state<_TestWidgetState>(find.byType(TestWidget));
+      
+      expect(state.getHapticConfig(), isNull);
+    });
+
+    testWidgets('should set and get haptic config', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestWidget(),
+        ),
+      );
+
+      final state = tester.state<_TestWidgetState>(find.byType(TestWidget));
+      final hapticConfig = HapticConfig.defaults();
+      
+      state.setHapticConfig(hapticConfig);
+      
+      expect(state.getHapticConfig(), hapticConfig);
+    });
+
+    testWidgets('should trigger haptic feedback when handling event', (tester) async {
+      final controller = StreamController<FeedbackEvent>.broadcast();
+      final mockHandler = MockFlyFeedbackHandler();
+      final hapticConfig = HapticConfig.defaults();
+      
+      when(() => mockHandler.supports(any())).thenReturn(true);
+      when(() => mockHandler.handle(any(), any())).thenReturn(null);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestWidget(
+            feedbackStream: controller.stream,
+            handler: mockHandler,
+          ),
+        ),
+      );
+
+      final state = tester.state<_TestWidgetState>(find.byType(TestWidget));
+      state.setHapticConfig(hapticConfig);
+      
+      state.setupFeedbackListener();
+      await tester.pump();
+      
+      // Emit event
+      final event = SuccessFeedback('Message');
+      controller.add(event);
+      await tester.pump();
+      
+      // Handler should be called (haptic is triggered before handler)
+      verify(() => mockHandler.handle(any(), event)).called(1);
+      
+      controller.close();
+    });
+
+    testWidgets('should respect haptic_enabled metadata override', (tester) async {
+      final controller = StreamController<FeedbackEvent>.broadcast();
+      final mockHandler = MockFlyFeedbackHandler();
+      final hapticConfig = HapticConfig.defaults();
+      
+      when(() => mockHandler.supports(any())).thenReturn(true);
+      when(() => mockHandler.handle(any(), any())).thenReturn(null);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestWidget(
+            feedbackStream: controller.stream,
+            handler: mockHandler,
+          ),
+        ),
+      );
+
+      final state = tester.state<_TestWidgetState>(find.byType(TestWidget));
+      state.setHapticConfig(hapticConfig);
+      
+      state.setupFeedbackListener();
+      await tester.pump();
+      
+      // Emit event with haptic disabled
+      final event = SuccessFeedback(
+        'Message',
+        metadata: {'haptic_enabled': false},
+      );
+      controller.add(event);
+      await tester.pump();
+      
+      // Handler should still be called
+      verify(() => mockHandler.handle(any(), event)).called(1);
+      
+      controller.close();
+    });
+
+    testWidgets('should not trigger haptic when config is null', (tester) async {
+      final controller = StreamController<FeedbackEvent>.broadcast();
+      final mockHandler = MockFlyFeedbackHandler();
+      
+      when(() => mockHandler.supports(any())).thenReturn(true);
+      when(() => mockHandler.handle(any(), any())).thenReturn(null);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestWidget(
+            feedbackStream: controller.stream,
+            handler: mockHandler,
+          ),
+        ),
+      );
+
+      final state = tester.state<_TestWidgetState>(find.byType(TestWidget));
+      // Don't set haptic config (should be null)
+      
+      state.setupFeedbackListener();
+      await tester.pump();
+      
+      // Emit event
+      final event = SuccessFeedback('Message');
+      controller.add(event);
+      await tester.pump();
+      
+      // Handler should still be called
+      verify(() => mockHandler.handle(any(), event)).called(1);
       
       controller.close();
     });

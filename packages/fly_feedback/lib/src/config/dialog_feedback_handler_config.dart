@@ -14,6 +14,7 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     super.textColors,
     super.defaultDurations,
     super.semanticsConfig,
+    super.hapticConfig,
     this.queueConfig,
   });
 
@@ -32,6 +33,7 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     Map<FeedbackType, Color?>? textColors,
     Map<FeedbackType, Duration?>? defaultDurations,
     FeedbackSemanticsConfig? semanticsConfig,
+    HapticConfig? hapticConfig,
     FeedbackQueueConfig? queueConfig,
   }) {
     return DialogFeedbackHandlerConfig(
@@ -41,6 +43,7 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       textColors: textColors ?? this.textColors,
       defaultDurations: defaultDurations ?? this.defaultDurations,
       semanticsConfig: semanticsConfig ?? this.semanticsConfig,
+      hapticConfig: hapticConfig ?? this.hapticConfig,
       queueConfig: queueConfig ?? this.queueConfig,
     );
   }
@@ -63,6 +66,7 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       textColors: {...textColors, ...other.textColors},
       defaultDurations: {...defaultDurations, ...other.defaultDurations},
       semanticsConfig: other.semanticsConfig ?? semanticsConfig,
+      hapticConfig: other.hapticConfig ?? hapticConfig,
       queueConfig: mergedQueueConfig,
     );
   }

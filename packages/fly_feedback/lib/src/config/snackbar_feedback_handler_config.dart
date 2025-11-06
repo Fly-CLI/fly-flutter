@@ -17,6 +17,7 @@ class SnackbarFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     super.textColors,
     super.defaultDurations,
     super.semanticsConfig,
+    super.hapticConfig,
     this.iconSize,
     this.behavior,
   });
@@ -55,6 +56,7 @@ class SnackbarFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     Map<FeedbackType, Color?>? textColors,
     Map<FeedbackType, Duration?>? defaultDurations,
     FeedbackSemanticsConfig? semanticsConfig,
+    HapticConfig? hapticConfig,
     double? iconSize,
     SnackBarBehavior? behavior,
   }) {
@@ -65,6 +67,7 @@ class SnackbarFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       textColors: textColors ?? this.textColors,
       defaultDurations: defaultDurations ?? this.defaultDurations,
       semanticsConfig: semanticsConfig ?? this.semanticsConfig,
+      hapticConfig: hapticConfig ?? this.hapticConfig,
       iconSize: iconSize ?? this.iconSize,
       behavior: behavior ?? this.behavior,
     );
@@ -83,6 +86,7 @@ class SnackbarFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
         textColors: {...textColors, ...other.textColors},
         defaultDurations: {...defaultDurations, ...other.defaultDurations},
         semanticsConfig: other.semanticsConfig ?? semanticsConfig,
+        hapticConfig: other.hapticConfig ?? hapticConfig,
         iconSize: other.iconSize ?? iconSize,
         behavior: other.behavior ?? behavior,
       );
@@ -96,6 +100,7 @@ class SnackbarFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       textColors: {...textColors, ...other.textColors},
       defaultDurations: {...defaultDurations, ...other.defaultDurations},
       semanticsConfig: other.semanticsConfig ?? semanticsConfig,
+      hapticConfig: other.hapticConfig ?? hapticConfig,
       iconSize: iconSize,
       behavior: behavior,
     );

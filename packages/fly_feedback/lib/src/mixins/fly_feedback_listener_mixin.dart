@@ -8,6 +8,9 @@ import 'package:fly_feedback/src/handlers/implementations/bottom_sheet_feedback_
 import 'package:fly_feedback/src/handlers/implementations/toast_feedback_handler.dart';
 import 'package:fly_feedback/src/handlers/implementations/banner_feedback_handler.dart';
 import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/haptics/haptic_config.dart';
+import 'package:fly_feedback/src/haptics/haptic_feedback_service.dart';
+import 'package:fly_feedback/src/haptics/haptic_types.dart';
 
 /// Mixin for StatefulWidgets to listen to feedback events
 ///
@@ -39,6 +42,8 @@ import 'package:fly_feedback/src/events/feedback_event.dart';
 mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
   StreamSubscription<FeedbackEvent>? _feedbackSubscription;
   FlyFeedbackHandler? _feedbackHandler;
+  HapticConfig? _hapticConfig;
+  final HapticFeedbackService _hapticService = const HapticFeedbackService();
   bool _isListening = false;
 
   /// Get the feedback stream to listen to
@@ -61,6 +66,21 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
       ToastFeedbackHandler(),
       BannerFeedbackHandler(),
     ]);
+  }
+
+  /// Get the haptic feedback configuration
+  ///
+  /// Override this to provide custom haptic configuration.
+  /// Returns null by default, which means haptic feedback is disabled.
+  HapticConfig? getHapticConfig() {
+    return _hapticConfig;
+  }
+
+  /// Set the haptic feedback configuration
+  ///
+  /// This can be called to configure haptic feedback for this mixin.
+  void setHapticConfig(HapticConfig? config) {
+    _hapticConfig = config;
   }
 
   /// Setup feedback listener
@@ -112,6 +132,9 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
       return;
     }
 
+    // Trigger haptic feedback before showing feedback
+    _triggerHapticFeedback(event);
+
     final handler = getFeedbackHandler();
 
     if (!handler.supports(event.display)) {
@@ -125,6 +148,41 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
     } catch (error, stackTrace) {
       onFeedbackHandlingError(event, error, stackTrace);
     }
+  }
+
+  /// Trigger haptic feedback for the given feedback event
+  ///
+  /// This method checks for haptic configuration and metadata overrides
+  /// before triggering haptic feedback.
+  void _triggerHapticFeedback(FeedbackEvent feedback) {
+    final config = getHapticConfig();
+    if (config == null) {
+      return;
+    }
+
+    // Check for metadata override
+    final hapticEnabled = feedback.metadata['haptic_enabled'] as bool?;
+    if (hapticEnabled == false) {
+      return;
+    }
+
+    // Get haptic type from metadata override or config
+    HapticType hapticType;
+    final hapticTypeString = feedback.metadata['haptic_type'] as String?;
+    if (hapticTypeString != null) {
+      try {
+        hapticType = HapticType.values.firstWhere(
+          (type) => type.name == hapticTypeString,
+        );
+      } catch (e) {
+        // Invalid haptic type in metadata, fall back to config
+        hapticType = config.getHapticType(feedback.type);
+      }
+    } else {
+      hapticType = config.getHapticType(feedback.type);
+    }
+
+    _hapticService.triggerHaptic(hapticType);
   }
 
   /// Called when feedback stream has an error

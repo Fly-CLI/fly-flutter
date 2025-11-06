@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/haptics/haptic_config.dart';
+import 'package:fly_feedback/src/haptics/haptic_feedback_service.dart';
+import 'package:fly_feedback/src/haptics/haptic_types.dart';
 import 'package:fly_feedback/src/service/feedback_service.dart';
 import 'package:fly_feedback/src/events/feedback_event.dart';
 import 'package:fly_feedback/src/types/feedback_types.dart';
@@ -23,14 +26,62 @@ class DefaultFeedbackService implements FeedbackService<FeedbackEvent> {
   /// The feedback handler to use for displaying feedback
   final FlyFeedbackHandler handler;
 
+  /// Haptic feedback configuration
+  final HapticConfig? hapticConfig;
+
+  /// Haptic feedback service instance
+  final HapticFeedbackService _hapticService;
+
   /// Creates a DefaultFeedbackService
   ///
   /// [handler] - The feedback handler to use for displaying feedback
-  DefaultFeedbackService({required this.handler});
+  /// [hapticConfig] - Optional haptic feedback configuration
+  DefaultFeedbackService({
+    required this.handler,
+    HapticConfig? hapticConfig,
+  })  : hapticConfig = hapticConfig ?? HapticConfig.defaults(),
+        _hapticService = const HapticFeedbackService();
 
   @override
   void show(BuildContext context, FeedbackEvent feedback) {
+    // Trigger haptic feedback before showing feedback
+    _triggerHapticFeedback(feedback);
+
     handler.handle(context, feedback);
+  }
+
+  /// Trigger haptic feedback for the given feedback event
+  ///
+  /// This method checks for haptic configuration and metadata overrides
+  /// before triggering haptic feedback.
+  void _triggerHapticFeedback(FeedbackEvent feedback) {
+    if (hapticConfig == null) {
+      return;
+    }
+
+    // Check for metadata override
+    final hapticEnabled = feedback.metadata['haptic_enabled'] as bool?;
+    if (hapticEnabled == false) {
+      return;
+    }
+
+    // Get haptic type from metadata override or config
+    HapticType hapticType;
+    final hapticTypeString = feedback.metadata['haptic_type'] as String?;
+    if (hapticTypeString != null) {
+      try {
+        hapticType = HapticType.values.firstWhere(
+          (type) => type.name == hapticTypeString,
+        );
+      } catch (e) {
+        // Invalid haptic type in metadata, fall back to config
+        hapticType = hapticConfig!.getHapticType(feedback.type);
+      }
+    } else {
+      hapticType = hapticConfig!.getHapticType(feedback.type);
+    }
+
+    _hapticService.triggerHaptic(hapticType);
   }
 
   @override

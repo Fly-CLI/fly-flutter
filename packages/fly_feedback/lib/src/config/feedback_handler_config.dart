@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fly_feedback/fly_feedback.dart';
+import 'package:fly_feedback/src/haptics/haptic_config.dart';
 
 /// Base configuration for feedback handlers
 ///
@@ -27,6 +28,9 @@ abstract class FeedbackHandlerConfig {
   /// Get semantics configuration
   FeedbackSemanticsConfig? get semanticsConfig;
 
+  /// Get haptic feedback configuration
+  HapticConfig? get hapticConfig;
+
   /// Create a copy of this configuration with updated values
   FeedbackHandlerConfig copyWith({
     Map<FeedbackType, Color?>? backgroundColors,
@@ -35,6 +39,7 @@ abstract class FeedbackHandlerConfig {
     Map<FeedbackType, Color?>? textColors,
     Map<FeedbackType, Duration?>? defaultDurations,
     FeedbackSemanticsConfig? semanticsConfig,
+    HapticConfig? hapticConfig,
   });
 
   /// Merge this configuration with another
@@ -63,6 +68,9 @@ class DefaultFeedbackHandlerConfig extends FeedbackHandlerConfig {
   /// Semantics configuration
   final FeedbackSemanticsConfig? semanticsConfig;
 
+  /// Haptic feedback configuration
+  final HapticConfig? hapticConfig;
+
   /// Default constructor with standard values
   const DefaultFeedbackHandlerConfig({
     this.backgroundColors = const {},
@@ -71,6 +79,7 @@ class DefaultFeedbackHandlerConfig extends FeedbackHandlerConfig {
     this.textColors = const {},
     this.defaultDurations = const {},
     this.semanticsConfig,
+    this.hapticConfig,
   });
 
   /// Create with default values matching current handler behavior
@@ -166,6 +175,7 @@ class DefaultFeedbackHandlerConfig extends FeedbackHandlerConfig {
     Map<FeedbackType, Color?>? textColors,
     Map<FeedbackType, Duration?>? defaultDurations,
     FeedbackSemanticsConfig? semanticsConfig,
+    HapticConfig? hapticConfig,
   }) {
     return DefaultFeedbackHandlerConfig(
       backgroundColors: backgroundColors ?? this.backgroundColors,
@@ -174,6 +184,7 @@ class DefaultFeedbackHandlerConfig extends FeedbackHandlerConfig {
       textColors: textColors ?? this.textColors,
       defaultDurations: defaultDurations ?? this.defaultDurations,
       semanticsConfig: semanticsConfig ?? this.semanticsConfig,
+      hapticConfig: hapticConfig ?? this.hapticConfig,
     );
   }
 
@@ -189,6 +200,7 @@ class DefaultFeedbackHandlerConfig extends FeedbackHandlerConfig {
       textColors: {...textColors, ...other.textColors},
       defaultDurations: {...defaultDurations, ...other.defaultDurations},
       semanticsConfig: other.semanticsConfig ?? semanticsConfig,
+      hapticConfig: other.hapticConfig ?? hapticConfig,
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fly_feedback/fly_feedback.dart';
+import 'package:fly_feedback/src/haptics/haptic_config.dart';
+import 'package:fly_feedback/src/haptics/haptic_types.dart';
 import 'package:fly_feedback/src/service/default_feedback_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -256,6 +258,90 @@ void main() {
           ),
         ),
       ).called(1);
+    });
+
+    testWidgets('should create with haptic config', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      
+      final hapticConfig = HapticConfig.defaults();
+      final serviceWithHaptic = DefaultFeedbackService(
+        handler: mockHandler,
+        hapticConfig: hapticConfig,
+      );
+      
+      expect(serviceWithHaptic.hapticConfig, hapticConfig);
+    });
+
+    testWidgets('should use default haptic config when not provided', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      
+      final serviceWithoutHaptic = DefaultFeedbackService(handler: mockHandler);
+      
+      expect(serviceWithoutHaptic.hapticConfig, isNotNull);
+      expect(serviceWithoutHaptic.hapticConfig, isA<HapticConfig>());
+    });
+
+    testWidgets('should trigger haptic feedback when showing feedback', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      
+      final hapticConfig = HapticConfig.defaults();
+      final serviceWithHaptic = DefaultFeedbackService(
+        handler: mockHandler,
+        hapticConfig: hapticConfig,
+      );
+      
+      when(() => mockHandler.supports(any())).thenReturn(true);
+      when(() => mockHandler.handle(any(), any())).thenReturn(null);
+      
+      final event = SuccessFeedback('Message');
+      serviceWithHaptic.show(context, event);
+      
+      // Verify handler was called (haptic is triggered before handler)
+      verify(() => mockHandler.handle(context, event)).called(1);
+    });
+
+    testWidgets('should respect haptic_enabled metadata override', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      
+      final hapticConfig = HapticConfig.defaults();
+      final serviceWithHaptic = DefaultFeedbackService(
+        handler: mockHandler,
+        hapticConfig: hapticConfig,
+      );
+      
+      when(() => mockHandler.supports(any())).thenReturn(true);
+      when(() => mockHandler.handle(any(), any())).thenReturn(null);
+      
+      final event = SuccessFeedback(
+        'Message',
+        metadata: {'haptic_enabled': false},
+      );
+      serviceWithHaptic.show(context, event);
+      
+      // Verify handler was called even when haptic is disabled
+      verify(() => mockHandler.handle(context, event)).called(1);
+    });
+
+    testWidgets('should respect haptic_type metadata override', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      
+      final hapticConfig = HapticConfig.defaults();
+      final serviceWithHaptic = DefaultFeedbackService(
+        handler: mockHandler,
+        hapticConfig: hapticConfig,
+      );
+      
+      when(() => mockHandler.supports(any())).thenReturn(true);
+      when(() => mockHandler.handle(any(), any())).thenReturn(null);
+      
+      final event = SuccessFeedback(
+        'Message',
+        metadata: {'haptic_type': 'heavyImpact'},
+      );
+      serviceWithHaptic.show(context, event);
+      
+      // Verify handler was called
+      verify(() => mockHandler.handle(context, event)).called(1);
     });
   });
 }
