@@ -3,6 +3,9 @@ import 'package:fly_feedback/fly_feedback.dart';
 
 /// Configuration for dialog feedback handler
 class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
+  /// Queue configuration for dialog queue management
+  final FeedbackQueueConfig? queueConfig;
+
   /// Default constructor
   const DialogFeedbackHandlerConfig({
     super.backgroundColors,
@@ -11,11 +14,14 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     super.textColors,
     super.defaultDurations,
     super.semanticsConfig,
+    this.queueConfig,
   });
 
   /// Create with default values matching current dialog handler behavior
   factory DialogFeedbackHandlerConfig.defaults() {
-    return const DialogFeedbackHandlerConfig();
+    return DialogFeedbackHandlerConfig(
+      queueConfig: FeedbackQueueConfig.defaults(),
+    );
   }
 
   @override
@@ -26,6 +32,7 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     Map<FeedbackType, Color?>? textColors,
     Map<FeedbackType, Duration?>? defaultDurations,
     FeedbackSemanticsConfig? semanticsConfig,
+    FeedbackQueueConfig? queueConfig,
   }) {
     return DialogFeedbackHandlerConfig(
       backgroundColors: backgroundColors ?? this.backgroundColors,
@@ -34,6 +41,7 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       textColors: textColors ?? this.textColors,
       defaultDurations: defaultDurations ?? this.defaultDurations,
       semanticsConfig: semanticsConfig ?? this.semanticsConfig,
+      queueConfig: queueConfig ?? this.queueConfig,
     );
   }
 
@@ -42,6 +50,12 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     if (other == null) return this;
     if (other is! DefaultFeedbackHandlerConfig) return this;
     
+    // Handle queue config merging if other is DialogFeedbackHandlerConfig
+    FeedbackQueueConfig? mergedQueueConfig = queueConfig;
+    if (other is DialogFeedbackHandlerConfig && other.queueConfig != null) {
+      mergedQueueConfig = queueConfig?.merge(other.queueConfig) ?? other.queueConfig;
+    }
+    
     return DialogFeedbackHandlerConfig(
       backgroundColors: {...backgroundColors, ...other.backgroundColors},
       icons: {...icons, ...other.icons},
@@ -49,7 +63,9 @@ class DialogFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       textColors: {...textColors, ...other.textColors},
       defaultDurations: {...defaultDurations, ...other.defaultDurations},
       semanticsConfig: other.semanticsConfig ?? semanticsConfig,
+      queueConfig: mergedQueueConfig,
     );
   }
 }
+
 

@@ -10,6 +10,11 @@ import 'package:fly_feedback/src/types/feedback_types.dart';
 ///
 /// Displays feedback events as a MaterialBanner at the top of the screen.
 /// Banners are persistent until dismissed by the user or programmatically.
+///
+/// **Queue Management**: This handler does not use FeedbackQueue because:
+/// - Flutter's ScaffoldMessenger automatically handles queue management for MaterialBanner
+/// - Multiple banners are automatically queued and shown one at a time
+/// - The framework provides built-in queue management, so no custom queue is needed
 class BannerFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandler {
   /// Configuration for this handler
   final BannerFeedbackHandlerConfig config;
@@ -32,57 +37,66 @@ class BannerFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
       return;
     }
 
-    try {
-      final colors = _getColors(context);
-      final backgroundColor = config.getBackgroundColor(event.type, colors) ?? 
-          colors.surfaceContainer;
-      final icon = config.getIcon(event.type) ?? Icons.info_outline;
-      final iconColor = config.getIconColor(event.type, colors) ?? 
-          colors.onSurface;
-      final textColor = config.getTextColor(event.type, colors) ?? 
-          colors.onSurface;
-      final iconSize = config.iconSize ?? 24.0;
-      final leadingPadding = config.leadingPadding ?? const EdgeInsets.only(left: 16);
-      final padding = config.padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
-
-      ScaffoldMessenger.of(context).showMaterialBanner(
-        MaterialBanner(
-          content: SemanticsBuilder.buildSemantics(
-            child: Row(
-              children: [
-                Icon(icon, color: iconColor, size: iconSize),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    event.message,
-                    style: TextStyle(color: textColor),
-                  ),
-                ),
-              ],
-            ),
-            event: event,
-            config: config.semanticsConfig,
-            context: context,
-          ),
-          backgroundColor: backgroundColor,
-          leadingPadding: leadingPadding,
-          padding: padding,
-          actions: _buildActions(event, context, iconColor),
-        ),
-      );
-
-      // Auto-dismiss after duration if specified
-      if (event.duration != null) {
-        Future.delayed(event.duration!, () {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-          }
-        });
+    // Defer showing banner until after the current build phase completes
+    // This prevents "setState() called during build" errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        debugPrint('⚠️ Context invalidated before showing banner: ${event.message}');
+        return;
       }
-    } catch (e) {
-      debugPrint('❌ Error showing banner: $e');
-      _fallbackDisplay(context, event);
-    }
+
+      try {
+        final colors = _getColors(context);
+        final backgroundColor = config.getBackgroundColor(event.type, colors) ?? 
+            colors.surfaceContainer;
+        final icon = config.getIcon(event.type) ?? Icons.info_outline;
+        final iconColor = config.getIconColor(event.type, colors) ?? 
+            colors.onSurface;
+        final textColor = config.getTextColor(event.type, colors) ?? 
+            colors.onSurface;
+        final iconSize = config.iconSize ?? 24.0;
+        final leadingPadding = config.leadingPadding ?? const EdgeInsets.only(left: 16);
+        final padding = config.padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
+
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
+            content: SemanticsBuilder.buildSemantics(
+              child: Row(
+                children: [
+                  Icon(icon, color: iconColor, size: iconSize),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      event.message,
+                      style: TextStyle(color: textColor),
+                    ),
+                  ),
+                ],
+              ),
+              event: event,
+              config: config.semanticsConfig,
+              context: context,
+            ),
+            backgroundColor: backgroundColor,
+            leadingPadding: leadingPadding,
+            padding: padding,
+            actions: _buildActions(event, context, iconColor),
+          ),
+        );
+
+        // Auto-dismiss after duration if specified
+        if (event.duration != null) {
+          Future.delayed(event.duration!, () {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+            }
+          });
+        }
+      } catch (e) {
+        debugPrint('❌ Error showing banner: $e');
+        _fallbackDisplay(context, event);
+      }
+    });
   }
 
   List<Widget> _buildActions(FeedbackEvent event, BuildContext context, Color iconColor) {
@@ -159,13 +173,19 @@ class BannerFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
 
   void _fallbackDisplay(BuildContext context, FeedbackEvent event) {
     // Simple fallback - use snackbar
-    try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(event.message)),
-      );
-    } catch (e) {
-      debugPrint('❌ Fallback display also failed: $e');
-    }
+    // Defer showing snackbar until after the current build phase completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        return;
+      }
+      try {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(event.message)),
+        );
+      } catch (e) {
+        debugPrint('❌ Fallback display also failed: $e');
+      }
+    });
   }
 
 }

@@ -32,11 +32,19 @@ class CompositeFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackH
       try {
         final snackbarHandler = handlers.firstWhere(
           (h) => h is SnackbarFeedbackHandler,
+          orElse: () => throw UnsupportedError(
+            'No fallback handler available',
+          ),
         );
         snackbarHandler.handle(context, event);
       } catch (fallbackError) {
         debugPrint('❌ No fallback handler available: $fallbackError');
-        rethrow;
+        // Preserve the original error type if it was UnsupportedError
+        if (e is UnsupportedError) {
+          rethrow;
+        }
+        // Otherwise, rethrow the fallback error
+        throw fallbackError;
       }
     }
   }

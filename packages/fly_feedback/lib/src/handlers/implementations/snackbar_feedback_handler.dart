@@ -6,6 +6,13 @@ import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
 import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Snackbar feedback handler
+///
+/// Displays feedback events as a SnackBar at the bottom of the screen.
+///
+/// **Queue Management**: This handler does not use FeedbackQueue because:
+/// - Flutter's ScaffoldMessenger automatically handles queue management for SnackBar
+/// - Multiple snackbars are automatically queued and shown one at a time
+/// - The framework provides built-in queue management, so no custom queue is needed
 class SnackbarFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandler {
   /// Configuration for this handler
   final SnackbarFeedbackHandlerConfig config;
@@ -28,50 +35,59 @@ class SnackbarFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHa
       return;
     }
 
-    try {
-      final colors = _getColors(context);
-      final backgroundColor = config.getBackgroundColor(event.type, colors) ?? 
-          colors.surfaceContainer;
-      final icon = config.getIcon(event.type) ?? Icons.info_outline;
-      final iconColor = config.getIconColor(event.type, colors) ?? 
-          colors.onSurface;
-      final textColor = config.getTextColor(event.type, colors) ?? 
-          colors.onSurface;
-      final iconSize = config.iconSize ?? 20.0;
-      final duration = event.duration ?? 
-          config.getDefaultDuration(event.type) ?? 
-          const Duration(seconds: 3);
-      final behavior = config.behavior ?? SnackBarBehavior.floating;
+    // Defer showing snackbar until after the current build phase completes
+    // This prevents "setState() called during build" errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        debugPrint('⚠️ Context invalidated before showing snackbar: ${event.message}');
+        return;
+      }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: SemanticsBuilder.buildSemantics(
-            child: Row(
-              children: [
-                Icon(icon, color: iconColor, size: iconSize),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    event.message,
-                    style: TextStyle(color: textColor),
+      try {
+        final colors = _getColors(context);
+        final backgroundColor = config.getBackgroundColor(event.type, colors) ?? 
+            colors.surfaceContainer;
+        final icon = config.getIcon(event.type) ?? Icons.info_outline;
+        final iconColor = config.getIconColor(event.type, colors) ?? 
+            colors.onSurface;
+        final textColor = config.getTextColor(event.type, colors) ?? 
+            colors.onSurface;
+        final iconSize = config.iconSize ?? 20.0;
+        final duration = event.duration ?? 
+            config.getDefaultDuration(event.type) ?? 
+            const Duration(seconds: 3);
+        final behavior = config.behavior ?? SnackBarBehavior.floating;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: SemanticsBuilder.buildSemantics(
+              child: Row(
+                children: [
+                  Icon(icon, color: iconColor, size: iconSize),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      event.message,
+                      style: TextStyle(color: textColor),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              event: event,
+              config: config.semanticsConfig,
+              context: context,
             ),
-            event: event,
-            config: config.semanticsConfig,
-            context: context,
+            backgroundColor: backgroundColor,
+            duration: duration,
+            behavior: behavior,
+            action: _buildAction(event, context, iconColor),
           ),
-          backgroundColor: backgroundColor,
-          duration: duration,
-          behavior: behavior,
-          action: _buildAction(event, context, iconColor),
-        ),
-      );
-    } catch (e) {
-      debugPrint('❌ Error showing snackbar: $e');
-      _fallbackDisplay(context, event);
-    }
+        );
+      } catch (e) {
+        debugPrint('❌ Error showing snackbar: $e');
+        _fallbackDisplay(context, event);
+      }
+    });
   }
 
   ColorScheme _getColors(BuildContext context) {
@@ -105,13 +121,19 @@ class SnackbarFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHa
 
   void _fallbackDisplay(BuildContext context, FeedbackEvent event) {
     // Simple fallback - just show text
-    try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(event.message)),
-      );
-    } catch (e) {
-      debugPrint('❌ Fallback display also failed: $e');
-    }
+    // Defer showing snackbar until after the current build phase completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        return;
+      }
+      try {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(event.message)),
+        );
+      } catch (e) {
+        debugPrint('❌ Fallback display also failed: $e');
+      }
+    });
   }
 }
 

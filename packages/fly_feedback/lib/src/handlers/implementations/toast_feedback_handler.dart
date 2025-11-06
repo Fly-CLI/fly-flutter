@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fly_feedback/src/config/semantics_builder.dart';
 import 'package:fly_feedback/src/config/toast_feedback_handler_config.dart';
@@ -10,6 +11,13 @@ import 'package:fly_feedback/src/types/feedback_types.dart';
 /// Displays feedback events as a toast notification using an overlay.
 /// Toast notifications are small, unobtrusive messages that appear briefly
 /// and automatically dismiss after a short duration.
+///
+/// **Queue Management**: This handler does not use FeedbackQueue because:
+/// - Toasts are designed to be non-intrusive and can overlap
+/// - Each toast auto-dismisses after its duration, naturally clearing itself
+/// - Multiple toasts can be shown simultaneously without blocking user interaction
+/// If queue management is needed, consider using DialogFeedbackHandler or
+/// BottomSheetFeedbackHandler instead.
 class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandler {
   /// Configuration for this handler
   final ToastFeedbackHandlerConfig config;
@@ -32,34 +40,43 @@ class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandl
       return;
     }
 
-    try {
-      final colors = _getColors(context);
-      final backgroundColor = config.getBackgroundColor(event.type, colors) ??
-          colors.surfaceContainer;
-      final icon = config.getIcon(event.type) ?? Icons.info_outline;
-      final iconColor =
-          config.getIconColor(event.type, colors) ?? colors.onSurface;
-      final textColor =
-          config.getTextColor(event.type, colors) ?? colors.onSurface;
-      final duration = event.duration ?? 
-          config.getDefaultDuration(event.type) ?? 
-          const Duration(seconds: 2);
+    // Defer showing toast until after the current build phase completes
+    // This prevents "setState() called during build" errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        debugPrint('⚠️ Context invalidated before showing toast: ${event.message}');
+        return;
+      }
 
-      _showToast(
-        context,
-        message: event.message,
-        feedbackType: event.type,
-        backgroundColor: backgroundColor,
-        icon: icon,
-        iconColor: iconColor,
-        textColor: textColor,
-        duration: duration,
-        event: event,
-      );
-    } catch (e) {
-      debugPrint('❌ Error showing toast: $e');
-      _fallbackDisplay(context, event);
-    }
+      try {
+        final colors = _getColors(context);
+        final backgroundColor = config.getBackgroundColor(event.type, colors) ??
+            colors.surfaceContainer;
+        final icon = config.getIcon(event.type) ?? Icons.info_outline;
+        final iconColor =
+            config.getIconColor(event.type, colors) ?? colors.onSurface;
+        final textColor =
+            config.getTextColor(event.type, colors) ?? colors.onSurface;
+        final duration = event.duration ?? 
+            config.getDefaultDuration(event.type) ?? 
+            const Duration(seconds: 2);
+
+        _showToast(
+          context,
+          message: event.message,
+          feedbackType: event.type,
+          backgroundColor: backgroundColor,
+          icon: icon,
+          iconColor: iconColor,
+          textColor: textColor,
+          duration: duration,
+          event: event,
+        );
+      } catch (e) {
+        debugPrint('❌ Error showing toast: $e');
+        _fallbackDisplay(context, event);
+      }
+    });
   }
 
   void _showToast(
@@ -75,6 +92,15 @@ class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandl
   }) {
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
+    late Timer autoDismissTimer;
+    
+    // Create timer that will auto-dismiss the toast
+    autoDismissTimer = Timer(duration, () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    });
+    
     overlayEntry = OverlayEntry(
       builder: (context) => _ToastWidget(
         message: message,
@@ -84,19 +110,16 @@ class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandl
         iconColor: iconColor,
         textColor: textColor,
         config: config,
-        onDismiss: () => overlayEntry.remove(),
+        onDismiss: () {
+          autoDismissTimer.cancel();
+          overlayEntry.remove();
+        },
         event: event,
+        autoDismissTimer: autoDismissTimer,
       ),
     );
 
     overlay.insert(overlayEntry);
-
-    // Auto-dismiss after duration
-    Future.delayed(duration, () {
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
-    });
   }
 
   ColorScheme _getColors(BuildContext context) {
@@ -110,16 +133,22 @@ class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandl
 
   void _fallbackDisplay(BuildContext context, FeedbackEvent event) {
     // Simple fallback - use snackbar
-    try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(event.message),
-          duration: event.duration ?? const Duration(seconds: 2),
-        ),
-      );
-    } catch (e) {
-      debugPrint('❌ Fallback display also failed: $e');
-    }
+    // Defer showing snackbar until after the current build phase completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        return;
+      }
+      try {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(event.message),
+            duration: event.duration ?? const Duration(seconds: 2),
+          ),
+        );
+      } catch (e) {
+        debugPrint('❌ Fallback display also failed: $e');
+      }
+    });
   }
 }
 
@@ -134,8 +163,9 @@ class _ToastWidget extends StatefulWidget {
   final ToastFeedbackHandlerConfig config;
   final VoidCallback onDismiss;
   final FeedbackEvent? event;
+  final Timer? autoDismissTimer;
 
-  const _ToastWidget({
+  _ToastWidget({
     required this.message,
     required this.feedbackType,
     required this.backgroundColor,
@@ -145,6 +175,7 @@ class _ToastWidget extends StatefulWidget {
     required this.config,
     required this.onDismiss,
     this.event,
+    this.autoDismissTimer,
   });
 
   @override
@@ -183,6 +214,8 @@ class _ToastWidgetState extends State<_ToastWidget>
 
   @override
   void dispose() {
+    // Cancel the auto-dismiss timer if it's still pending
+    widget.autoDismissTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

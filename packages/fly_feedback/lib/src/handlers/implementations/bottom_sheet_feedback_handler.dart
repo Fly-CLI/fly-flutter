@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:fly_feedback/src/config/bottom_sheet_feedback_handler_config.dart';
+import 'package:fly_feedback/src/config/feedback_queue_config.dart';
 import 'package:fly_feedback/src/config/feedback_semantics_config.dart';
 import 'package:fly_feedback/src/config/semantics_builder.dart';
 import 'package:fly_feedback/src/events/feedback_event.dart';
 import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/queue/feedback_queue.dart';
 import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Bottom sheet feedback handler with queue management
 ///
 /// Displays feedback events in a modal bottom sheet with:
-/// - Queue management to prevent stacking
+/// - Queue management to prevent stacking using reusable FeedbackQueue
+/// - Priority-based sorting for critical feedback
 /// - Support for confirmation dialogs
 /// - Color-coded feedback types
 /// - Action buttons for success/error feedback
@@ -19,8 +22,10 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
   /// Configuration for this handler
   final BottomSheetFeedbackHandlerConfig config;
 
+  /// Queue manager for bottom sheet feedback events
+  final FeedbackQueue _queue;
+
   bool _isShowingBottomSheet = false;
-  final List<_PendingBottomSheet> _pendingQueue = [];
 
   /// Create a bottom sheet feedback handler with optional configuration
   ///
@@ -28,12 +33,30 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
   /// the original behavior.
   BottomSheetFeedbackHandler({
     BottomSheetFeedbackHandlerConfig? config,
-  }) : config = config ?? BottomSheetFeedbackHandlerConfig.defaults();
+  })  : config = config ?? BottomSheetFeedbackHandlerConfig.defaults(),
+        _queue = FeedbackQueue(
+          config: _createQueueConfigFromHandlerConfig(
+            config ?? BottomSheetFeedbackHandlerConfig.defaults(),
+          ),
+        );
 
-  Duration get _queueRetryDelay => 
-      config.queueRetryDelay ?? const Duration(milliseconds: 300);
-  Duration get _maxQueueWait => 
-      config.maxQueueWait ?? const Duration(seconds: 5);
+  /// Create queue config from handler config
+  ///
+  /// Handles backward compatibility by using deprecated properties
+  /// if queueConfig is not provided.
+  static FeedbackQueueConfig _createQueueConfigFromHandlerConfig(
+    BottomSheetFeedbackHandlerConfig config,
+  ) {
+    if (config.queueConfig != null) {
+      return config.queueConfig!;
+    }
+
+    // Backward compatibility: use deprecated properties if queueConfig is null
+    return FeedbackQueueConfig(
+      queueRetryDelay: config.queueRetryDelay,
+      maxQueueWait: config.maxQueueWait,
+    );
+  }
 
   @override
   bool supports(FeedbackDisplay display) => display == FeedbackDisplay.bottomSheet;
@@ -45,48 +68,67 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
       return;
     }
 
-    // Prevent bottom sheet stacking with proper queue management
+    // If bottom sheet is already showing, add to queue
     if (_isShowingBottomSheet) {
       debugPrint('⚠️ Bottom sheet already showing, queuing: ${event.message}');
-      _pendingQueue.add(_PendingBottomSheet(
-        event: event,
-        context: context,
-        timestamp: DateTime.now(),
-      ),);
-      _processQueue();
+      _queue.add(context, event);
       return;
     }
 
-    _showBottomSheet(context, event);
-  }
+    // Set flag immediately to prevent race conditions when multiple calls
+    // happen in the same frame before post-frame callbacks execute
+    _isShowingBottomSheet = true;
 
-  /// Process the pending queue
-  void _processQueue() {
-    if (_pendingQueue.isEmpty || _isShowingBottomSheet) {
-      return;
-    }
+    // Defer showing bottom sheet until after the current build phase completes
+    // This prevents "setState() called during build" errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isValidContext(context)) {
+        debugPrint('⚠️ Context invalidated before showing bottom sheet: ${event.message}');
+        _isShowingBottomSheet = false;
+        _processQueue();
+        return;
+      }
 
-    final pending = _pendingQueue.first;
-    final waitTime = DateTime.now().difference(pending.timestamp);
-
-    // Remove stale items from queue
-    if (waitTime > _maxQueueWait) {
-      debugPrint('⚠️ Removing stale bottom sheet from queue: ${pending.event.message}');
-      _pendingQueue.removeAt(0);
-      _processQueue();
-      return;
-    }
-
-    // Try to show after a short delay
-    Future.delayed(_queueRetryDelay, () {
-      if (!_isShowingBottomSheet && _pendingQueue.isNotEmpty) {
-        final next = _pendingQueue.removeAt(0);
-        if (next.context.mounted) {
-          _showBottomSheet(next.context, next.event);
-        }
+      // Try to show immediately
+      try {
+        _showBottomSheet(context, event);
+      } catch (e) {
+        debugPrint('❌ Error showing bottom sheet: $e');
+        _isShowingBottomSheet = false;
+        // Try to process queue after error
         _processQueue();
       }
     });
+  }
+
+  /// Process the queue
+  ///
+  /// This method delegates to the FeedbackQueue to process pending items.
+  void _processQueue() {
+    _queue.process(
+      (context, event) {
+        // Defer showing bottom sheet until after the current build phase completes
+        // This prevents "setState() called during build" errors
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!isValidContext(context)) {
+            debugPrint('⚠️ Context invalidated before showing queued bottom sheet: ${event.message}');
+            _isShowingBottomSheet = false;
+            _processQueue();
+            return;
+          }
+
+          try {
+            _showBottomSheet(context, event);
+          } catch (e) {
+            debugPrint('❌ Error showing queued bottom sheet: $e');
+            _isShowingBottomSheet = false;
+            // Continue processing queue after error
+            _processQueue();
+          }
+        });
+      },
+      () => _isShowingBottomSheet,
+    );
   }
 
   /// Show the bottom sheet (main entry point)
@@ -116,7 +158,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     BuildContext context,
     ConfirmationFeedback event,
   ) {
-    _isShowingBottomSheet = true;
+    // Flag is already set in handle() to prevent race conditions
 
     final colors = _getColors(context);
     final borderRadius = config.borderRadius ?? 20.0;
@@ -342,7 +384,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     BuildContext context,
     FeedbackEvent event,
   ) {
-    _isShowingBottomSheet = true;
+    // Flag is already set in handle() to prevent race conditions
 
     final colors = _getColors(context);
     final backgroundColor = config.getBackgroundColor(event.type, colors) ?? 
@@ -463,6 +505,10 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     required Color backgroundColor,
   }) {
     final colors = _getColors(context);
+    // Use onSurface for text color to ensure proper contrast on surface background
+    // This maintains WCAG AA compliance (4.5:1 contrast ratio for text)
+    final textColor = colors.onSurface;
+    
     if (event is SuccessFeedback && event.action != null && event.actionLabel != null) {
       return SizedBox(
         width: double.infinity,
@@ -471,7 +517,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
             onPressed: () => _handleAction(context, event.action!),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.surface,
-              foregroundColor: backgroundColor,
+              foregroundColor: textColor,
               padding: EdgeInsets.symmetric(
                 vertical: config.buttonVerticalPadding ?? 16,
               ),
@@ -493,7 +539,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
             onPressed: () => _handleAction(context, event.retryAction!),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.surface,
-              foregroundColor: backgroundColor,
+              foregroundColor: textColor,
               padding: EdgeInsets.symmetric(
                 vertical: config.buttonVerticalPadding ?? 16,
               ),
@@ -554,18 +600,5 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     }
   }
 
-}
-
-/// Internal class for pending bottom sheet queue items
-class _PendingBottomSheet {
-  final FeedbackEvent event;
-  final BuildContext context;
-  final DateTime timestamp;
-
-  _PendingBottomSheet({
-    required this.event,
-    required this.context,
-    required this.timestamp,
-  });
 }
 

@@ -28,10 +28,21 @@ class BottomSheetFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
   final bool? useSafeArea;
 
   /// Queue retry delay
+  ///
+  /// Deprecated: Use [queueConfig] instead. This property is kept for
+  /// backward compatibility and will be removed in a future version.
+  @Deprecated('Use queueConfig.queueRetryDelay instead')
   final Duration? queueRetryDelay;
 
   /// Max queue wait time
+  ///
+  /// Deprecated: Use [queueConfig] instead. This property is kept for
+  /// backward compatibility and will be removed in a future version.
+  @Deprecated('Use queueConfig.maxQueueWait instead')
   final Duration? maxQueueWait;
+
+  /// Queue configuration for bottom sheet queue management
+  final FeedbackQueueConfig? queueConfig;
 
   /// Button vertical padding
   final double? buttonVerticalPadding;
@@ -54,35 +65,37 @@ class BottomSheetFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     this.useSafeArea,
     this.queueRetryDelay,
     this.maxQueueWait,
+    this.queueConfig,
     this.buttonVerticalPadding,
   });
 
   /// Create with default values matching current bottom sheet handler behavior
   factory BottomSheetFeedbackHandlerConfig.defaults() {
-    return const BottomSheetFeedbackHandlerConfig(
+    return BottomSheetFeedbackHandlerConfig(
       // No hardcoded colors - all colors derived from theme
-      backgroundColors: {},
-      icons: {
+      backgroundColors: const {},
+      icons: const {
         FeedbackType.success: Icons.check_circle,
         FeedbackType.error: Icons.error_outline,
         FeedbackType.warning: Icons.warning_amber,
         FeedbackType.info: Icons.info_outline,
       },
       // No hardcoded colors - all colors derived from theme
-      iconColors: {},
+      iconColors: const {},
       // No hardcoded colors - all colors derived from theme
-      textColors: {},
+      textColors: const {},
       iconSize: 24.0,
       borderRadius: 20.0,
-      contentPadding: EdgeInsets.fromLTRB(24, 16, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       handleBarWidth: 40.0,
       handleBarHeight: 4.0,
       handleBarMarginBottom: 16.0,
       // No hardcoded handle bar color - use theme outline
       handleBarColor: null,
       useSafeArea: true,
-      queueRetryDelay: Duration(milliseconds: 300),
-      maxQueueWait: Duration(seconds: 5),
+      queueRetryDelay: const Duration(milliseconds: 300),
+      maxQueueWait: const Duration(seconds: 5),
+      queueConfig: FeedbackQueueConfig.defaults(),
       buttonVerticalPadding: 16.0,
     );
   }
@@ -105,6 +118,7 @@ class BottomSheetFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     bool? useSafeArea,
     Duration? queueRetryDelay,
     Duration? maxQueueWait,
+    FeedbackQueueConfig? queueConfig,
     double? buttonVerticalPadding,
   }) {
     return BottomSheetFeedbackHandlerConfig(
@@ -124,6 +138,7 @@ class BottomSheetFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
       useSafeArea: useSafeArea ?? this.useSafeArea,
       queueRetryDelay: queueRetryDelay ?? this.queueRetryDelay,
       maxQueueWait: maxQueueWait ?? this.maxQueueWait,
+      queueConfig: queueConfig ?? this.queueConfig,
       buttonVerticalPadding: buttonVerticalPadding ?? this.buttonVerticalPadding,
     );
   }
@@ -134,6 +149,12 @@ class BottomSheetFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
     if (other is! DefaultFeedbackHandlerConfig) return this;
     
     if (other is BottomSheetFeedbackHandlerConfig) {
+      // Handle queue config merging
+      FeedbackQueueConfig? mergedQueueConfig = queueConfig;
+      if (other.queueConfig != null) {
+        mergedQueueConfig = queueConfig?.merge(other.queueConfig) ?? other.queueConfig;
+      }
+      
       return BottomSheetFeedbackHandlerConfig(
         backgroundColors: {...backgroundColors, ...other.backgroundColors},
         icons: {...icons, ...other.icons},
@@ -151,6 +172,7 @@ class BottomSheetFeedbackHandlerConfig extends DefaultFeedbackHandlerConfig {
         useSafeArea: other.useSafeArea ?? useSafeArea,
         queueRetryDelay: other.queueRetryDelay ?? queueRetryDelay,
         maxQueueWait: other.maxQueueWait ?? maxQueueWait,
+        queueConfig: mergedQueueConfig,
         buttonVerticalPadding: other.buttonVerticalPadding ?? buttonVerticalPadding,
       );
     }
