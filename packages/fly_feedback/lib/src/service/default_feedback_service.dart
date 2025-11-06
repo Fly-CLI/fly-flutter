@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/service/feedback_service.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
+import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/service/feedback_service.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Default implementation of FeedbackService using standard feedback handlers
 ///
@@ -31,10 +30,10 @@ class DefaultFeedbackService<F extends FeedbackEvent>
   DefaultFeedbackService({required this.handler});
 
   @override
-  void show(BuildContext context, F feedback, WidgetRef? ref) {
+  void show(BuildContext context, F feedback) {
     // Convert F to FeedbackEvent for handler compatibility
     // Since F extends FeedbackEvent, we can pass it directly
-    handler.handle(context, feedback, ref);
+    handler.handle(context, feedback);
   }
 
   @override
@@ -59,7 +58,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       metadata: metadata,
     ) as F;
 
-    show(context, feedback, null);
+    show(context, feedback);
   }
 
   @override
@@ -85,7 +84,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       metadata: metadata,
     ) as F;
 
-    show(context, feedback, null);
+    show(context, feedback);
   }
 
   @override
@@ -103,7 +102,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       metadata: metadata,
     ) as F;
 
-    show(context, feedback, null);
+    show(context, feedback);
   }
 
   @override
@@ -121,7 +120,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       metadata: metadata,
     ) as F;
 
-    show(context, feedback, null);
+    show(context, feedback);
   }
 
   @override
@@ -149,7 +148,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       metadata: metadata,
     ) as F;
 
-    show(context, feedback, null);
+    show(context, feedback);
   }
 }
 

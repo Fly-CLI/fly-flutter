@@ -1,13 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fly_feedback/fly_feedback.dart';
 import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/core/lifecycle/feedback_lifecycle_integration.dart';
 
 /// Base class for Riverpod-based ViewModels
 /// Provides common state management functionality using Riverpod
 abstract class FlyViewModel<T extends FlyViewModelState> extends Notifier<T>
-    with FlyFeedbackEmitterMixin {
+    with FlyFeedbackEmitterMixin, FeedbackLifecycleIntegration {
   final AsyncOperationHandler _asyncHandler = AsyncOperationHandler();
 
   FlyViewModel();
+
+  /// Override emitFeedback to also emit to lifecycle emitter
+  @override
+  bool emitFeedback(FeedbackEvent event) {
+    // First emit to ViewModel's own stream (via FlyFeedbackEmitterMixin)
+    final result = super.emitFeedback(event);
+    
+    // Also emit to lifecycle emitter for centralized management
+    emitFeedbackToLifecycle(event);
+    
+    return result;
+  }
 
   /// Abstract method for copying state with updated values
   /// Subclasses must implement this to provide state-specific copying logic

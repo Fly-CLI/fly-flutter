@@ -452,6 +452,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  fly_feedback:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_feedback"
+      relative: true
+    source: path
+    version: "0.1.0"
   fly_networking:
     dependency: "direct main"
     description:

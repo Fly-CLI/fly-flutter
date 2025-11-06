@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/shared/themes/extensions/theme_extensions.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Bottom sheet feedback handler with queue management
 ///
@@ -24,7 +22,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
   bool supports(FeedbackDisplay display) => display == FeedbackDisplay.bottomSheet;
 
   @override
-  void handle(BuildContext context, FeedbackEvent event, WidgetRef? ref) {
+  void handle(BuildContext context, FeedbackEvent event) {
     if (!isValidContext(context)) {
       debugPrint('⚠️ Invalid context for bottom sheet: ${event.message}');
       return;
@@ -36,14 +34,13 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
       _pendingQueue.add(_PendingBottomSheet(
         event: event,
         context: context,
-        ref: ref,
         timestamp: DateTime.now(),
       ),);
       _processQueue();
       return;
     }
 
-    _showBottomSheet(context, event, ref);
+    _showBottomSheet(context, event);
   }
 
   /// Process the pending queue
@@ -68,7 +65,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
       if (!_isShowingBottomSheet && _pendingQueue.isNotEmpty) {
         final next = _pendingQueue.removeAt(0);
         if (next.context.mounted) {
-          _showBottomSheet(next.context, next.event, next.ref);
+          _showBottomSheet(next.context, next.event);
         }
         _processQueue();
       }
@@ -76,7 +73,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
   }
 
   /// Show the bottom sheet (main entry point)
-  void _showBottomSheet(BuildContext context, FeedbackEvent event, WidgetRef? ref) {
+  void _showBottomSheet(BuildContext context, FeedbackEvent event) {
     if (!isValidContext(context)) {
       debugPrint('⚠️ Invalid context for bottom sheet: ${event.message}');
       return;
@@ -84,9 +81,9 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
 
     try {
       if (event is ConfirmationFeedback) {
-        _showConfirmationBottomSheet(context, event, ref);
+        _showConfirmationBottomSheet(context, event);
       } else {
-        _showFeedbackBottomSheet(context, event, ref);
+        _showFeedbackBottomSheet(context, event);
       }
     } catch (e, stackTrace) {
       debugPrint('❌ Error showing bottom sheet: $e');
@@ -101,7 +98,6 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
   void _showConfirmationBottomSheet(
     BuildContext context,
     ConfirmationFeedback event,
-    WidgetRef? ref,
   ) {
     _isShowingBottomSheet = true;
 
@@ -167,7 +163,6 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
                     context: context,
                     event: event,
                     bottomSheetContext: bottomSheetContext,
-                    ref: ref,
                   ),
                 ],
               ),
@@ -178,7 +173,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     ).then((_) {
       _isShowingBottomSheet = false;
       _processQueue();
-    }).catchError((error) {
+    }).catchError((Object error) {
       debugPrint('❌ Error in bottom sheet: $error');
       _isShowingBottomSheet = false;
       _processQueue();
@@ -190,7 +185,6 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     required BuildContext context,
     required ConfirmationFeedback event,
     required BuildContext bottomSheetContext,
-    required WidgetRef? ref,
   }) {
     final hasCancel = event.cancelLabel != null || event.onCancel != null;
     final hasConfirm = event.confirmLabel != null || event.onConfirm != null;
@@ -211,7 +205,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
               onPressed: () => _handleConfirm(bottomSheetContext, event),
               style: event.isDangerous
                   ? ElevatedButton.styleFrom(
-                      backgroundColor: _getErrorColor(ref),
+                      backgroundColor: _getErrorColor(context),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     )
@@ -250,7 +244,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
         },
         style: event.isDangerous
             ? ElevatedButton.styleFrom(
-                backgroundColor: _getErrorColor(ref),
+                backgroundColor: _getErrorColor(context),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               )
@@ -292,11 +286,10 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
   void _showFeedbackBottomSheet(
     BuildContext context,
     FeedbackEvent event,
-    WidgetRef? ref,
   ) {
     _isShowingBottomSheet = true;
 
-    final colors = _getColors(ref);
+    final colors = _getColors(context);
     final (backgroundColor, icon) = _getStyleForType(event.type, colors);
 
     showModalBottomSheet<void>(
@@ -368,7 +361,7 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     ).then((_) {
       _isShowingBottomSheet = false;
       _processQueue();
-    }).catchError((error) {
+    }).catchError((Object error) {
       debugPrint('❌ Error in bottom sheet: $error');
       _isShowingBottomSheet = false;
       _processQueue();
@@ -444,32 +437,31 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
     _processQueue();
   }
 
-  dynamic _getColors(WidgetRef? ref) {
+  ColorScheme _getColors(BuildContext context) {
     try {
-      return ref?.colors;
+      return Theme.of(context).colorScheme;
     } catch (e) {
-      debugPrint('⚠️ Error accessing colors from ref: $e');
-      return null;
+      debugPrint('⚠️ Error accessing colors from context: $e');
+      return const ColorScheme.light();
     }
   }
 
-  (Color, IconData) _getStyleForType(FeedbackType type, dynamic colors) {
+  (Color, IconData) _getStyleForType(FeedbackType type, ColorScheme colors) {
     switch (type) {
       case FeedbackType.success:
-        return (colors?.success ?? Colors.green, Icons.check_circle);
+        return (Colors.green, Icons.check_circle);
       case FeedbackType.error:
-        return (colors?.error ?? Colors.red, Icons.error_outline);
+        return (colors.error, Icons.error_outline);
       case FeedbackType.warning:
-        return (colors?.warning ?? Colors.orange, Icons.warning_amber);
+        return (Colors.orange, Icons.warning_amber);
       case FeedbackType.info:
         return (Colors.blue, Icons.info_outline);
     }
   }
 
-  Color _getErrorColor(WidgetRef? ref) {
+  Color _getErrorColor(BuildContext context) {
     try {
-      final colors = ref?.colors;
-      return colors?.error ?? Colors.red;
+      return Theme.of(context).colorScheme.error;
     } catch (e) {
       return Colors.red;
     }
@@ -480,13 +472,11 @@ class BottomSheetFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbac
 class _PendingBottomSheet {
   final FeedbackEvent event;
   final BuildContext context;
-  final WidgetRef? ref;
   final DateTime timestamp;
 
   _PendingBottomSheet({
     required this.event,
     required this.context,
-    required this.ref,
     required this.timestamp,
   });
 }

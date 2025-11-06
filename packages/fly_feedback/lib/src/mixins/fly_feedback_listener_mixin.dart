@@ -1,29 +1,25 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/composite_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/snackbar_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/dialog_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/bottom_sheet_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/toast_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/banner_feedback_handler.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/composite_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/snackbar_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/dialog_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/bottom_sheet_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/toast_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/banner_feedback_handler.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
 
 /// Mixin for StatefulWidgets to listen to feedback events
 ///
 /// **Lifecycle:** This mixin automatically disposes the listener in `dispose()`.
 ///
-/// By default, this mixin listens to the lifecycle emitter's feedback stream.
-/// Override `getFeedbackStream()` to provide a custom feedback source.
+/// By default, this mixin requires you to provide a feedback stream via `getFeedbackStream()`.
+/// Override `getFeedbackStream()` to provide a feedback source (e.g., from a ViewModel or service).
 ///
 /// **Usage:**
 /// ```dart
-/// class _MyScreenState extends ConsumerState<MyScreen>
-///     with FeedbackListenerMixin<MyScreen> {
+/// class _MyScreenState extends State<MyScreen>
+///     with FlyFeedbackListenerMixin<MyScreen> {
 ///
 ///   @override
 ///   void initState() {
@@ -33,11 +29,11 @@ import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 ///     });
 ///   }
 ///
-///   // Optional: Override to use custom feedback source
-///   // @override
-///   // Stream<FeedbackEvent>? getFeedbackStream(BuildContext context) {
-///   //   return customStream;
-///   // }
+///   // Override to use custom feedback source
+///   @override
+///   Stream<FeedbackEvent>? getFeedbackStream(BuildContext context) {
+///     return viewModel.feedbackStream;
+///   }
 /// }
 /// ```
 mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
@@ -47,17 +43,12 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
 
   /// Get the feedback stream to listen to
   ///
-  /// Default implementation returns the lifecycle emitter's feedback stream.
+  /// Default implementation returns null - users must override to provide a feedback source.
   /// Override this to provide a custom feedback source (e.g., from a specific ViewModel).
   /// Return null to disable feedback listening.
   Stream<FeedbackEvent>? getFeedbackStream(BuildContext context) {
-    try {
-      final emitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
-      return emitter.getFeedbackStream();
-    } catch (e) {
-      debugPrint('⚠️ Error accessing lifecycle emitter: $e');
-      return null;
-    }
+    // Default: no stream - users must override
+    return null;
   }
 
   /// Get the feedback handler to use
@@ -91,7 +82,7 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
 
     final stream = getFeedbackStream(context);
     if (stream == null) {
-      debugPrint('ℹ️ No feedback stream available');
+      debugPrint('ℹ️ No feedback stream available - skipping listener setup');
       return;
     }
 
@@ -101,7 +92,7 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
         if (!mounted) return;
         _handleFeedbackEvent(event);
       },
-      onError: (error, stackTrace) {
+      onError: (Object error, StackTrace stackTrace) {
         debugPrint('❌ Feedback stream error: $error');
         onFeedbackStreamError(error, stackTrace);
       },
@@ -129,8 +120,7 @@ mixin FlyFeedbackListenerMixin<T extends StatefulWidget> on State<T> {
     }
 
     try {
-      final ref = this is ConsumerState ? (this as ConsumerState).ref : null;
-      handler.handle(context, event, ref);
+      handler.handle(context, event);
       onFeedbackHandled(event);
     } catch (error, stackTrace) {
       onFeedbackHandlingError(event, error, stackTrace);

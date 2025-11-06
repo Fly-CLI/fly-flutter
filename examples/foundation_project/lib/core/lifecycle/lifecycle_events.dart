@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:json_annotation/json_annotation.dart';
+// Import here so we can use FeedbackEvent in the wrapper
+import 'package:fly_feedback/fly_feedback.dart' as feedback;
 
 part 'lifecycle_events.g.dart';
 
-// Feedback events - must be in this library to extend LifecycleEvent
-// Note: FeedbackType and FeedbackDisplay enums are in feedback_types.dart
+// Note: FeedbackEvent classes have been moved to fly_feedback package
+// See feedback_lifecycle_adapter.dart for integration with lifecycle system
 
 /// Base lifecycle event - pure data, no logic
 ///
@@ -237,144 +238,31 @@ int _durationToJson(Duration duration) => duration.inMilliseconds;
 Duration _durationFromJson(int json) => Duration(milliseconds: json);
 
 // ============================================================================
-// Feedback Events
+// Feedback Events - MOVED TO fly_feedback PACKAGE
+// ============================================================================
+// 
+// FeedbackEvent and related classes have been moved to the fly_feedback package
+// for reusability. Import from fly_feedback package:
+// 
+//   import 'package:fly_feedback/fly_feedback.dart';
+//
+// For lifecycle integration, see feedback_lifecycle_adapter.dart
+
+// ============================================================================
+// Feedback Event Wrapper for Lifecycle Integration
 // ============================================================================
 
-/// Base feedback event - pure data, no logic
-/// Extends LifecycleEvent to integrate with the lifecycle system
-///
-/// This class is abstract (not sealed) to allow custom feedback types
-/// to be created in other libraries, enabling the generic FeedbackService<F>
-/// pattern to work with custom feedback implementations.
-abstract class FeedbackEvent extends LifecycleEvent {
-  final String message; // Already localized string from ViewModel
-  final FeedbackType type;
-  final FeedbackDisplay display;
-  final Duration? duration;
-  final String? title; // Optional title for dialog display - user provides localization
-  final String? okLabel; // Optional OK button label for alert dialogs - user provides localization
+/// Wrapper class to make FeedbackEvent compatible with LifecycleEvent
+/// This is defined in lifecycle_events.dart because LifecycleEvent is sealed
+/// and can only be extended within this library.
+class FeedbackEventWrapper extends LifecycleEvent {
+  final feedback.FeedbackEvent feedbackEvent;
 
-  FeedbackEvent({
-    super.id, // Inherited from LifecycleEvent
-    required this.message,
-    required this.type,
-    this.display = FeedbackDisplay.snackBar,
-    this.duration,
-    this.title, // Optional - user provides if they want dialog title
-    this.okLabel, // Optional - user provides if they want OK button with text
-    super.timestamp, // Inherited from LifecycleEvent
-    super.metadata = const {}, // Inherited from LifecycleEvent
-  });
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is FeedbackEvent && other.id == id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
-}
-
-/// Success feedback
-class SuccessFeedback extends FeedbackEvent {
-  final VoidCallback? action;
-  final String? actionLabel;
-
-  SuccessFeedback(
-    String message, {
-    super.id,
-    super.display = FeedbackDisplay.snackBar,
-    super.duration,
-    this.action,
-    this.actionLabel,
-    super.timestamp,
-    super.metadata = const {},
-  }) : super(
-          message: message,
-          type: FeedbackType.success,
-        );
-}
-
-/// Error feedback
-class ErrorFeedback extends FeedbackEvent {
-  final String? technicalDetails;
-  final VoidCallback? retryAction;
-  final String? retryLabel; // Optional - user provides localization
-  final bool showTechnicalDetails; // Control detail visibility
-
-  ErrorFeedback(
-    String message, {
-    super.id,
-    this.technicalDetails,
-    this.retryAction,
-    this.retryLabel, // Optional - user must provide if they want retry button with text
-    this.showTechnicalDetails = false, // Hidden by default
-    super.display = FeedbackDisplay.snackBar,
-    super.duration,
-    super.timestamp,
-    super.metadata = const {},
-  }) : super(
-          message: message,
-          type: FeedbackType.error,
-        );
-}
-
-/// Warning feedback
-class WarningFeedback extends FeedbackEvent {
-  WarningFeedback(
-    String message, {
-    super.id,
-    super.display = FeedbackDisplay.snackBar,
-    super.duration,
-    super.timestamp,
-    super.metadata = const {},
-  }) : super(
-          message: message,
-          type: FeedbackType.warning,
-        );
-}
-
-/// Info feedback
-class InfoFeedback extends FeedbackEvent {
-  InfoFeedback(
-    String message, {
-    super.id,
-    super.display = FeedbackDisplay.snackBar,
-    super.duration,
-    super.timestamp,
-    super.metadata = const {},
-  }) : super(
-          message: message,
-          type: FeedbackType.info,
-        );
-}
-
-/// Confirmation dialog feedback
-class ConfirmationFeedback extends FeedbackEvent {
-  final String? confirmLabel; // Optional - user provides localization
-  final String? cancelLabel; // Optional - user provides localization
-  final VoidCallback? onConfirm;
-  final VoidCallback? onCancel;
-  final bool isDangerous;
-  final bool barrierDismissible; // Control dialog dismissal
-
-  ConfirmationFeedback({
-    super.id,
-    required String title, // Title is required for confirmation dialogs
-    required super.message,
-    this.confirmLabel, // Optional - user must provide if they want button text
-    this.cancelLabel, // Optional - user must provide if they want button text
-    this.onConfirm,
-    this.onCancel,
-    this.isDangerous = false,
-    this.barrierDismissible = true, // Default dismissible
-    super.timestamp,
-    super.metadata = const {},
-  }) : super(
-          type: FeedbackType.info,
-          display: FeedbackDisplay.dialog,
-          title: title, // Pass title to base class
+  FeedbackEventWrapper(this.feedbackEvent)
+      : super(
+          id: feedbackEvent.id,
+          timestamp: feedbackEvent.timestamp,
+          metadata: feedbackEvent.metadata,
         );
 }
 

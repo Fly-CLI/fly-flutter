@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/mixins/fly_feedback_listener_mixin.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:fly_feedback/fly_feedback.dart';
+import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/foundation/mvvm/fly_view_model.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter_mixin.dart';
+import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 import 'package:foundation_project/shared/ui/error_widget.dart';
 
 /// Abstract base screen class for handling common UI logic
@@ -268,9 +269,14 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
   Stream<FeedbackEvent>? getFeedbackStream(BuildContext context) {
     if (!widget.enableFeedback) return null;
 
-    // Use default implementation from FeedbackListenerMixin
-    // which gets stream from lifecycle emitter
-    return super.getFeedbackStream(context);
+    try {
+      // Get feedback stream from lifecycle emitter
+      final emitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
+      return emitter.getFeedbackStream();
+    } catch (e) {
+      debugPrint('⚠️ Error accessing lifecycle emitter for feedback: $e');
+      return null;
+    }
   }
 
   @override

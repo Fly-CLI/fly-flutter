@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/shared/themes/extensions/theme_extensions.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
 
 /// Dialog feedback handler with queue management
 class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandler {
@@ -13,7 +11,7 @@ class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
   bool supports(FeedbackDisplay display) => display == FeedbackDisplay.dialog;
 
   @override
-  void handle(BuildContext context, FeedbackEvent event, WidgetRef? ref) {
+  void handle(BuildContext context, FeedbackEvent event) {
     if (!isValidContext(context)) {
       debugPrint('⚠️ Invalid context for dialog: ${event.message}');
       return;
@@ -25,7 +23,7 @@ class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
       // Queue the dialog (simple implementation - could be enhanced)
       Future.delayed(const Duration(milliseconds: 500), () {
         if (context.mounted) {
-          handle(context, event, ref);
+          handle(context, event);
         }
       });
       return;
@@ -33,7 +31,7 @@ class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
 
     try {
       if (event is ConfirmationFeedback) {
-        _showConfirmationDialog(context, event, ref);
+        _showConfirmationDialog(context, event);
       } else {
         _showAlertDialog(context, event);
       }
@@ -46,7 +44,6 @@ class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
   void _showConfirmationDialog(
     BuildContext context,
     ConfirmationFeedback event,
-    WidgetRef? ref,
   ) {
     _isShowingDialog = true;
 
@@ -84,7 +81,7 @@ class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
                   },
                   style: event.isDangerous
                       ? ElevatedButton.styleFrom(
-                          backgroundColor: _getErrorColor(ref),
+                          backgroundColor: _getErrorColor(context),
                         )
                       : null,
                   child: Text(event.confirmLabel ?? ''),
@@ -133,10 +130,9 @@ class DialogFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHand
     });
   }
 
-  Color _getErrorColor(WidgetRef? ref) {
+  Color _getErrorColor(BuildContext context) {
     try {
-      final colors = ref?.colors;
-      return colors?.error ?? Colors.red;
+      return Theme.of(context).colorScheme.error;
     } catch (e) {
       return Colors.red;
     }

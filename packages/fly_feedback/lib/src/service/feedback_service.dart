@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Abstract interface for feedback operations with generic feedback types
 ///
@@ -27,15 +26,14 @@ import 'package:foundation_project/core/foundation/feedback/types/feedback_types
 ///
 /// // Custom feedback type
 /// FeedbackService<CustomFeedback> service;
-/// service.show(context, CustomFeedback.success('Saved!'), ref);
+/// service.show(context, CustomFeedback.success('Saved!'));
 /// ```
 abstract class FeedbackService<F extends FeedbackEvent> {
   /// Show feedback event
   ///
   /// [context] - BuildContext for displaying feedback
   /// [feedback] - Feedback event of type F
-  /// [ref] - Optional WidgetRef for theme access
-  void show(BuildContext context, F feedback, WidgetRef? ref);
+  void show(BuildContext context, F feedback);
 
   /// Show success feedback (convenience method)
   ///

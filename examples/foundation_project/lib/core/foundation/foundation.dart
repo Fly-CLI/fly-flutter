@@ -7,21 +7,8 @@ export 'error/app_exception.dart';
 export 'error/custom_error_handler.dart';
 export 'error/error_handler.dart';
 export 'error/network_errors.dart';
-// Feedback exports
-// Note: FeedbackEvent classes are exported from lifecycle/lifecycle_events.dart
-export 'feedback/types/feedback_types.dart';
-export 'feedback/service/feedback_service.dart';
-export 'feedback/service/default_feedback_service.dart';
-export 'feedback/service/feedback_service_provider.dart';
-export 'feedback/mixins/fly_feedback_emitter_mixin.dart';
-export 'feedback/handlers/fly_feedback_handler.dart';
-export 'feedback/handlers/snackbar_feedback_handler.dart';
-export 'feedback/handlers/dialog_feedback_handler.dart';
-export 'feedback/handlers/bottom_sheet_feedback_handler.dart';
-export 'feedback/handlers/toast_feedback_handler.dart';
-export 'feedback/handlers/banner_feedback_handler.dart';
-export 'feedback/handlers/composite_feedback_handler.dart';
-export 'feedback/mixins/fly_feedback_listener_mixin.dart';
+// Feedback exports (from fly_feedback package)
+export 'package:fly_feedback/fly_feedback.dart';
 // MVVM exports
 export 'mvvm/fly_screen.dart';
 export 'mvvm/fly_view_model.dart';

@@ -58,6 +58,8 @@ dependencies:
     path: ../../packages/fly_core
   fly_networking:
     path: ../../packages/fly_networking
+  fly_feedback:
+    path: ../../packages/fly_feedback
 
 dev_dependencies:
   flutter_test:

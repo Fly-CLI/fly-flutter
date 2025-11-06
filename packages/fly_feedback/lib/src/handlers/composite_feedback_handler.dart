@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/snackbar_feedback_handler.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/snackbar_feedback_handler.dart';
 
 /// Composite handler that delegates to multiple handlers
 class CompositeFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandler {
@@ -17,7 +16,7 @@ class CompositeFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackH
   }
 
   @override
-  void handle(BuildContext context, FeedbackEvent event, WidgetRef? ref) {
+  void handle(BuildContext context, FeedbackEvent event) {
     try {
       final handler = handlers.firstWhere(
         (h) => h.supports(event.display),
@@ -26,7 +25,7 @@ class CompositeFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackH
         ),
       );
 
-      handler.handle(context, event, ref);
+      handler.handle(context, event);
     } catch (e) {
       debugPrint('❌ Error in composite handler: $e');
       // Fallback to snackbar if available
@@ -34,7 +33,7 @@ class CompositeFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackH
         final snackbarHandler = handlers.firstWhere(
           (h) => h is SnackbarFeedbackHandler,
         );
-        snackbarHandler.handle(context, event, ref);
+        snackbarHandler.handle(context, event);
       } catch (fallbackError) {
         debugPrint('❌ No fallback handler available: $fallbackError');
         rethrow;

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/shared/themes/extensions/theme_extensions.dart';
-import 'package:foundation_project/core/foundation/feedback/handlers/fly_feedback_handler.dart';
-import 'package:foundation_project/core/foundation/feedback/types/feedback_types.dart';
+import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Toast feedback handler
 ///
@@ -15,14 +13,14 @@ class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandl
   bool supports(FeedbackDisplay display) => display == FeedbackDisplay.toast;
 
   @override
-  void handle(BuildContext context, FeedbackEvent event, WidgetRef? ref) {
+  void handle(BuildContext context, FeedbackEvent event) {
     if (!isValidContext(context)) {
       debugPrint('⚠️ Invalid context for toast: ${event.message}');
       return;
     }
 
     try {
-      final colors = _getColors(ref);
+      final colors = _getColors(context);
       final (backgroundColor, icon) = _getStyleForType(event.type, colors);
       final duration = event.duration ?? _getDefaultDuration(event.type);
 
@@ -67,23 +65,23 @@ class ToastFeedbackHandler with FeedbackHandlerMixin implements FlyFeedbackHandl
     });
   }
 
-  dynamic _getColors(WidgetRef? ref) {
+  ColorScheme _getColors(BuildContext context) {
     try {
-      return ref?.colors;
+      return Theme.of(context).colorScheme;
     } catch (e) {
-      debugPrint('⚠️ Error accessing colors from ref: $e');
-      return null;
+      debugPrint('⚠️ Error accessing colors from context: $e');
+      return const ColorScheme.light();
     }
   }
 
-  (Color, IconData) _getStyleForType(FeedbackType type, dynamic colors) {
+  (Color, IconData) _getStyleForType(FeedbackType type, ColorScheme colors) {
     switch (type) {
       case FeedbackType.success:
-        return (colors?.success ?? Colors.green, Icons.check_circle);
+        return (Colors.green, Icons.check_circle);
       case FeedbackType.error:
-        return (colors?.error ?? Colors.red, Icons.error_outline);
+        return (colors.error, Icons.error_outline);
       case FeedbackType.warning:
-        return (colors?.warning ?? Colors.orange, Icons.warning_amber);
+        return (Colors.orange, Icons.warning_amber);
       case FeedbackType.info:
         return (Colors.blue, Icons.info_outline);
     }

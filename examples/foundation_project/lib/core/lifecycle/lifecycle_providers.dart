@@ -1,3 +1,4 @@
+import 'package:fly_feedback/fly_feedback.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
@@ -34,7 +35,7 @@ final lifecycleEmitterProvider =
     manager: FoundationOperationStreamManager(),
   );
 
-  emitter.register<FeedbackEvent>(
+  emitter.register<FeedbackEventWrapper>(
     key: 'feedback',
     manager: FeedbackStreamManager(),
   );
