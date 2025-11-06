@@ -72,9 +72,7 @@ class _CustomFeedbackWidgetState extends State<CustomFeedbackWidget>
       appBar: AppBar(title: const Text('Feedback Example')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            _service.saveData();
-          },
+          onPressed: _service.saveData,
           child: const Text('Trigger Feedback'),
         ),
       ),
@@ -93,7 +91,7 @@ class DirectServiceExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Create service instance directly (in real apps, use dependency injection)
-    final feedbackService = DefaultFeedbackService<FeedbackEvent>(
+    final feedbackService = DefaultFeedbackService(
       handler: CompositeFeedbackHandler([
         SnackbarFeedbackHandler(),
         DialogFeedbackHandler(),

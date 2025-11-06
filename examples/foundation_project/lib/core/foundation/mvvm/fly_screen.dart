@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_feedback/fly_feedback.dart';
-import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/foundation/mvvm/fly_view_model.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter_mixin.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 import 'package:foundation_project/shared/ui/error_widget.dart';
 
 /// Abstract base screen class for handling common UI logic
@@ -270,11 +267,11 @@ class _FlyScreenState<V extends FlyViewModel<S>, S extends FlyViewModelState>
     if (!widget.enableFeedback) return null;
 
     try {
-      // Get feedback stream from lifecycle emitter
-      final emitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
-      return emitter.getFeedbackStream();
+      // Get feedback stream directly from ViewModel's feedback emitter
+      final viewModel = ref.read(widget.getViewModelProvider().notifier);
+      return viewModel.feedbackStream;
     } catch (e) {
-      debugPrint('⚠️ Error accessing lifecycle emitter for feedback: $e');
+      debugPrint('⚠️ Error accessing ViewModel feedback stream: $e');
       return null;
     }
   }

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:fly_feedback/fly_feedback.dart';
 import 'package:fly_feedback/src/types/feedback_types.dart';
-import 'package:fly_feedback/src/events/feedback_event.dart';
 
 /// Mixin to add feedback emission capability to any class
 ///

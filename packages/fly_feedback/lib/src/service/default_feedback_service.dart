@@ -11,7 +11,7 @@ import 'package:fly_feedback/src/types/feedback_types.dart';
 ///
 /// Example usage:
 /// ```dart
-/// final service = DefaultFeedbackService<FeedbackEvent>(
+/// final service = DefaultFeedbackService(
 ///   handler: CompositeFeedbackHandler([
 ///     SnackbarFeedbackHandler(),
 ///     DialogFeedbackHandler(),
@@ -19,8 +19,7 @@ import 'package:fly_feedback/src/types/feedback_types.dart';
 /// );
 /// service.showSuccess(context, 'Saved!');
 /// ```
-class DefaultFeedbackService<F extends FeedbackEvent>
-    implements FeedbackService<F> {
+class DefaultFeedbackService implements FeedbackService<FeedbackEvent> {
   /// The feedback handler to use for displaying feedback
   final FlyFeedbackHandler handler;
 
@@ -30,9 +29,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
   DefaultFeedbackService({required this.handler});
 
   @override
-  void show(BuildContext context, F feedback) {
-    // Convert F to FeedbackEvent for handler compatibility
-    // Since F extends FeedbackEvent, we can pass it directly
+  void show(BuildContext context, FeedbackEvent feedback) {
     handler.handle(context, feedback);
   }
 
@@ -46,9 +43,6 @@ class DefaultFeedbackService<F extends FeedbackEvent>
     String? actionLabel,
     Map<String, dynamic> metadata = const {},
   }) {
-    // Construct SuccessFeedback and cast to F
-    // Note: This assumes F can be SuccessFeedback, which is true for default case
-    // For custom F types, users should use show() directly with their custom types
     final feedback = SuccessFeedback(
       message,
       display: display,
@@ -56,7 +50,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       action: action,
       actionLabel: actionLabel,
       metadata: metadata,
-    ) as F;
+    );
 
     show(context, feedback);
   }
@@ -82,7 +76,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       display: display,
       duration: duration,
       metadata: metadata,
-    ) as F;
+    );
 
     show(context, feedback);
   }
@@ -100,7 +94,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       display: display,
       duration: duration,
       metadata: metadata,
-    ) as F;
+    );
 
     show(context, feedback);
   }
@@ -118,7 +112,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       display: display,
       duration: duration,
       metadata: metadata,
-    ) as F;
+    );
 
     show(context, feedback);
   }
@@ -146,7 +140,7 @@ class DefaultFeedbackService<F extends FeedbackEvent>
       isDangerous: isDangerous,
       barrierDismissible: barrierDismissible,
       metadata: metadata,
-    ) as F;
+    );
 
     show(context, feedback);
   }

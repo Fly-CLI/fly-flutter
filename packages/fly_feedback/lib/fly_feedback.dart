@@ -1,14 +1,24 @@
+// Config
+export 'src/config/banner_feedback_handler_config.dart';
+export 'src/config/bottom_sheet_feedback_handler_config.dart';
+export 'src/config/dialog_feedback_handler_config.dart';
+export 'src/config/feedback_handler_config.dart';
+export 'src/config/feedback_semantics_config.dart';
+export 'src/config/semantics_builder.dart';
+export 'src/config/snackbar_feedback_handler_config.dart';
+export 'src/config/toast_feedback_handler_config.dart';
+
 // Events
 export 'src/events/feedback_event.dart';
 
 // Handlers
-export 'src/handlers/banner_feedback_handler.dart';
-export 'src/handlers/bottom_sheet_feedback_handler.dart';
-export 'src/handlers/composite_feedback_handler.dart';
-export 'src/handlers/dialog_feedback_handler.dart';
+export 'src/handlers/implementations/banner_feedback_handler.dart';
+export 'src/handlers/implementations/bottom_sheet_feedback_handler.dart';
+export 'src/handlers/implementations/composite_feedback_handler.dart';
+export 'src/handlers/implementations/dialog_feedback_handler.dart';
 export 'src/handlers/fly_feedback_handler.dart';
-export 'src/handlers/snackbar_feedback_handler.dart';
-export 'src/handlers/toast_feedback_handler.dart';
+export 'src/handlers/implementations/snackbar_feedback_handler.dart';
+export 'src/handlers/implementations/toast_feedback_handler.dart';
 
 // Mixins
 export 'src/mixins/fly_feedback_emitter_mixin.dart';

@@ -1,7 +1,5 @@
-import 'package:fly_feedback/fly_feedback.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/managers/feedback_stream_manager.dart';
 
 /// Extension for type-safe navigation event streams
 extension NavigationStreamExtension on AppLifecycleEmitter {
@@ -36,26 +34,6 @@ extension FoundationOperationStreamExtension on AppLifecycleEmitter {
     final stream = getStream('foundation_operation');
     if (stream == null) return const Stream<FoundationOperationEvent>.empty();
     return stream.cast<FoundationOperationEvent>();
-  }
-}
-
-/// Extension for type-safe feedback event streams
-extension FeedbackStreamExtension on AppLifecycleEmitter {
-  /// Get type-safe feedback event stream
-  ///
-  /// Returns a stream of FeedbackEvent, or an empty stream if not registered.
-  /// Uses the FeedbackStreamManager's direct feedbackStream for type safety.
-  Stream<FeedbackEvent> getFeedbackStream() {
-    // Try to get the manager directly to access its feedbackStream
-    // Since we can't easily access the manager through the emitter API,
-    // we'll unwrap from the wrapper stream
-    final stream = getStream('feedback');
-    if (stream == null) return const Stream<FeedbackEvent>.empty();
-    
-    // The stream contains FeedbackEventWrapper, so we need to unwrap
-    return stream
-        .where((event) => event is FeedbackEventWrapper)
-        .map((event) => (event as FeedbackEventWrapper).feedbackEvent);
   }
 }
 

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:fly_feedback/src/handlers/fly_feedback_handler.dart';
-import 'package:fly_feedback/src/handlers/composite_feedback_handler.dart';
-import 'package:fly_feedback/src/handlers/snackbar_feedback_handler.dart';
-import 'package:fly_feedback/src/handlers/dialog_feedback_handler.dart';
-import 'package:fly_feedback/src/handlers/bottom_sheet_feedback_handler.dart';
-import 'package:fly_feedback/src/handlers/toast_feedback_handler.dart';
-import 'package:fly_feedback/src/handlers/banner_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/implementations/composite_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/implementations/snackbar_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/implementations/dialog_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/implementations/bottom_sheet_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/implementations/toast_feedback_handler.dart';
+import 'package:fly_feedback/src/handlers/implementations/banner_feedback_handler.dart';
 import 'package:fly_feedback/src/events/feedback_event.dart';
 
 /// Mixin for StatefulWidgets to listen to feedback events

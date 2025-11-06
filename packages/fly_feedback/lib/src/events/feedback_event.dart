@@ -7,6 +7,19 @@ import 'package:fly_feedback/src/types/feedback_types.dart';
 /// to be created in other libraries, enabling the generic FeedbackService<F>
 /// pattern to work with custom feedback implementations.
 abstract class FeedbackEvent {
+
+  FeedbackEvent({
+    String? id,
+    DateTime? timestamp,
+    this.metadata = const {},
+    required this.message,
+    required this.type,
+    this.display = FeedbackDisplay.snackBar,
+    this.duration,
+    this.title,
+    this.okLabel,
+  })  : id = id ?? _generateId(),
+        timestamp = timestamp ?? DateTime.now();
   /// Unique identifier for this event
   final String id;
 
@@ -34,19 +47,6 @@ abstract class FeedbackEvent {
   /// Optional OK button label for alert dialogs
   final String? okLabel;
 
-  FeedbackEvent({
-    String? id,
-    DateTime? timestamp,
-    this.metadata = const {},
-    required this.message,
-    required this.type,
-    this.display = FeedbackDisplay.snackBar,
-    this.duration,
-    this.title,
-    this.okLabel,
-  })  : id = id ?? _generateId(),
-        timestamp = timestamp ?? DateTime.now();
-
   /// Generate a unique ID for the event
   static String _generateId() {
     return 'feedback_${DateTime.now().millisecondsSinceEpoch}_${_idCounter++}';
@@ -66,8 +66,6 @@ abstract class FeedbackEvent {
 
 /// Success feedback
 class SuccessFeedback extends FeedbackEvent {
-  final VoidCallback? action;
-  final String? actionLabel;
 
   SuccessFeedback(
     String message, {
@@ -82,14 +80,12 @@ class SuccessFeedback extends FeedbackEvent {
           message: message,
           type: FeedbackType.success,
         );
+  final VoidCallback? action;
+  final String? actionLabel;
 }
 
 /// Error feedback
 class ErrorFeedback extends FeedbackEvent {
-  final String? technicalDetails;
-  final VoidCallback? retryAction;
-  final String? retryLabel;
-  final bool showTechnicalDetails;
 
   ErrorFeedback(
     String message, {
@@ -106,6 +102,10 @@ class ErrorFeedback extends FeedbackEvent {
           message: message,
           type: FeedbackType.error,
         );
+  final String? technicalDetails;
+  final VoidCallback? retryAction;
+  final String? retryLabel;
+  final bool showTechnicalDetails;
 }
 
 /// Warning feedback
@@ -140,12 +140,6 @@ class InfoFeedback extends FeedbackEvent {
 
 /// Confirmation dialog feedback
 class ConfirmationFeedback extends FeedbackEvent {
-  final String? confirmLabel;
-  final String? cancelLabel;
-  final VoidCallback? onConfirm;
-  final VoidCallback? onCancel;
-  final bool isDangerous;
-  final bool barrierDismissible;
 
   ConfirmationFeedback({
     super.id,
@@ -164,5 +158,11 @@ class ConfirmationFeedback extends FeedbackEvent {
           display: FeedbackDisplay.dialog,
           title: title,
         );
+  final String? confirmLabel;
+  final String? cancelLabel;
+  final VoidCallback? onConfirm;
+  final VoidCallback? onCancel;
+  final bool isDangerous;
+  final bool barrierDismissible;
 }
 

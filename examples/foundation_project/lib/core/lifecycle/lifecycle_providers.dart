@@ -1,8 +1,6 @@
-import 'package:fly_feedback/fly_feedback.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
 import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/managers/feedback_stream_manager.dart';
 import 'package:foundation_project/core/lifecycle/managers/foundation_operation_stream_manager.dart';
 import 'package:foundation_project/core/lifecycle/managers/navigation_stream_manager.dart';
 import 'package:foundation_project/core/lifecycle/managers/screen_stream_manager.dart';
@@ -35,10 +33,8 @@ final lifecycleEmitterProvider =
     manager: FoundationOperationStreamManager(),
   );
 
-  emitter.register<FeedbackEventWrapper>(
-    key: 'feedback',
-    manager: FeedbackStreamManager(),
-  );
+  // Note: Feedback events are handled through ViewModel streams directly
+  // via FlyFeedbackEmitterMixin, not through the lifecycle emitter system.
 
   // Dispose emitter when provider is disposed
   ref.onDispose(() {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fly_feedback/src/types/feedback_types.dart';
 import 'package:fly_feedback/src/events/feedback_event.dart';
+import 'package:fly_feedback/src/types/feedback_types.dart';
 
 /// Abstract feedback handler
 /// Implement this to create custom feedback displays
