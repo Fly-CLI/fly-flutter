@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
+import 'package:foundation_project/foundation/logger/fly_logger.dart';
 import 'package:foundation_project/core/event_system/event_emitter.dart';
 import 'package:foundation_project/core/event_system/events.dart';
-import 'package:foundation_project/core/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/foundation/navigation/fly_router.dart';
 import 'package:foundation_project/core/storage/managers/app_data_manager.dart';
 import 'package:foundation_project/core/storage/models/storage_key.dart';
 

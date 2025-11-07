@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
+import 'package:foundation_project/foundation/logger/fly_logger.dart';
 import 'package:foundation_project/core/event_system/event_emitter.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/event_system/event_providers.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:foundation_project/core/foundation/navigation/app.dart';
-import 'package:foundation_project/core/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/foundation/navigation/app.dart';
+import 'package:foundation_project/foundation/navigation/fly_router.dart';
 import 'package:foundation_project/features/home/presentation/screens/home_screen.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/tasks_screen.dart';
 import 'package:foundation_project/features/notes/presentation/screens/notes_screen.dart';

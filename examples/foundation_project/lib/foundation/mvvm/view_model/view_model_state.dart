@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/mvvm/view_model/fly_view_model.dart';
+import 'package:foundation_project/foundation/mvvm/view_model/fly_view_model.dart';
 
 /// Abstract interface for ViewModel state
 /// All ViewModel states must implement this interface to ensure

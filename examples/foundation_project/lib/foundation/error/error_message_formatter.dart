@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/foundation/foundation.dart';
 import 'package:foundation_project/shared/localization/localizations.dart';
 
 /// Formats technical errors into user-friendly localized messages

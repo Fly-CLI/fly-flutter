@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:foundation_project/core/foundation/navigation/navigation_service.dart';
+import 'package:foundation_project/foundation/navigation/navigation_service.dart';
 
 /// Example implementation of NavigationService using GoRouter
 ///

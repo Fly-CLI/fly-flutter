@@ -20,7 +20,7 @@ This foundation project serves as a playground for Flutter development and can b
 
 ### Foundation Components
 
-#### Core Foundation (`lib/core/foundation/`)
+#### Core Foundation (`lib/foundation/`)
 
 - **Error Handling** (`error/`):
   - `AppException`: Base exception class
@@ -83,15 +83,15 @@ flutter run
 
 ```
 lib/
+├── foundation/              # Core foundation components
+│   ├── error/              # Error handling
+│   ├── feedback/           # Feedback system
+│   ├── forms/              # Form handling
+│   ├── mvvm/               # MVVM architecture
+│   ├── operations/         # Async operations
+│   ├── state/              # State management
+│   └── utils/              # Utilities
 ├── core/
-│   ├── foundation/          # Core foundation components
-│   │   ├── error/          # Error handling
-│   │   ├── feedback/       # Feedback system
-│   │   ├── forms/          # Form handling
-│   │   ├── mvvm/           # MVVM architecture
-│   │   ├── operations/      # Async operations
-│   │   ├── state/          # State management
-│   │   └── utils/          # Utilities
 │   ├── features/          # Feature-specific code
 │   │   └── product/
 │   │       └── services/

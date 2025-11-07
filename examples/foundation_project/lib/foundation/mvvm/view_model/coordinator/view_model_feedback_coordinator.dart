@@ -1,7 +1,9 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter/foundation.dart';
-import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/core/event_system/event_emitter_mixin.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/foundation/foundation.dart';
 
 typedef FeedbackAction = void Function();
 typedef EventEmitter = bool Function(AppEvent event);

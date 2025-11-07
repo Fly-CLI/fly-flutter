@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:foundation_project/core/foundation/error/network_errors.dart';
+import 'package:foundation_project/foundation/error/network_errors.dart';
 
 /// Configuration for retry behavior with exponential backoff
 class RetryConfig {

@@ -1,4 +1,4 @@
-import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
+import 'package:foundation_project/foundation/logger/fly_logger.dart';
 
 /// In-memory cache service with TTL (Time To Live) support
 class CacheService {

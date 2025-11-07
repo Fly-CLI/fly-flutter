@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:foundation_project/core/foundation/error/app_exception.dart';
+import 'package:foundation_project/foundation/error/app_exception.dart';
 import 'package:foundation_project/shared/localization/localizations.dart';
 
 /// Base class for all network-related errors

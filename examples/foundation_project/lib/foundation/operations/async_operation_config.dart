@@ -1,5 +1,5 @@
-import 'package:foundation_project/core/foundation/operations/retry_config.dart';
-import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
+import 'package:foundation_project/foundation/operations/retry_config.dart';
+import 'package:foundation_project/foundation/logger/fly_logger.dart';
 import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 

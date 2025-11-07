@@ -1,4 +1,4 @@
-import 'package:foundation_project/core/foundation/operations/result.dart';
+import 'package:foundation_project/foundation/operations/result.dart';
 import 'package:foundation_project/core/database/models/base_entity.dart';
 
 /// Base repository interface for all data operations

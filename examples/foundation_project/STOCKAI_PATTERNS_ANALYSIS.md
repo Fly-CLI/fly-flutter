@@ -412,7 +412,7 @@ class BottomNavigationProvider extends Notifier<int> {
 
 ### Pattern: FlyScreen with ViewModel Lifecycle
 
-**Location**: `lib/core/foundation/mvvm/`
+**Location**: `lib/foundation/mvvm/`
 
 **Key Components**:
 - **FlyScreen**: Abstract screen with lifecycle management
@@ -591,7 +591,7 @@ validators/
 
 ### Pattern: Result Pattern with Custom Exceptions
 
-**Location**: `lib/core/foundation/error/`
+**Location**: `lib/foundation/error/`
 
 **Key Components**:
 - **AppResult**: Sealed class for results (`Success`, `Failure`, `Loading`)
@@ -633,7 +633,7 @@ class Loading<T> extends AppResult<T> {
 
 ### Pattern: Feedback Routed via AppLifecycleEmitter
 
-**Location**: `lib/core/lifecycle/` & `lib/core/foundation/mvvm/`
+**Location**: `lib/core/lifecycle/` & `lib/foundation/mvvm/`
 
 **Key Components**:
 - **FeedbackEvent**: Payload types from the `fly_feedback` package.

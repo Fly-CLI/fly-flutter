@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:foundation_project/core/database/app_database.dart';
 import 'package:foundation_project/core/database/daos/notes_dao.dart';
-import 'package:foundation_project/core/foundation/operations/result.dart';
+import 'package:foundation_project/foundation/operations/result.dart';
 import 'package:foundation_project/core/models/sync_status.dart';
 import 'package:foundation_project/core/repositories/base/base_repository.dart';
 import 'package:foundation_project/features/home/mappers/home_mappr.dart';
