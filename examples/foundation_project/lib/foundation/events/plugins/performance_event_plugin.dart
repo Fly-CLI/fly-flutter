@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:foundation_project/foundation/di/global_container.dart';
+import 'package:foundation_project/foundation/di/dependency_container.dart';
 import 'package:foundation_project/foundation/events/event_emitter.dart';
 import 'package:foundation_project/foundation/events/app_event.dart';
 import 'package:foundation_project/foundation/events/event_providers.dart';
@@ -29,7 +29,7 @@ class PerformanceEventPlugin {
 
   /// Initialize the plugin and start listening to events
   void initialize() {
-    _emitter = GlobalContainer.instance.read(eventEmitterProvider);
+    _emitter = DependencyContainer.instance.read(eventEmitterProvider);
 
     // Listen to foundation operation events
     _operationSubscription = _emitter!.getStreamFor<FoundationOperationEvent>().listen(

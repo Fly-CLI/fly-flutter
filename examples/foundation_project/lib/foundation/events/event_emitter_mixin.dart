@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:foundation_project/foundation/di/global_container.dart';
+import 'package:foundation_project/foundation/di/dependency_container.dart';
 import 'package:foundation_project/foundation/events/event_emitter.dart';
 import 'package:foundation_project/foundation/events/app_event.dart';
 import 'package:foundation_project/foundation/events/event_providers.dart';
@@ -11,7 +11,7 @@ import 'package:foundation_project/foundation/events/event_providers.dart';
 /// from the main isolate.
 ///
 /// **Lifecycle:** This mixin provides access to the event emitter
-/// via GlobalContainer. The emitter is managed by the provider system
+/// via DependencyContainer. The emitter is managed by the provider system
 /// and handles its own lifecycle, so no disposal is needed from the mixin.
 ///
 /// Example:
@@ -30,11 +30,11 @@ mixin EventEmitterMixin {
   /// Get the event emitter instance
   ///
   /// Uses lazy initialization and caching for performance.
-  /// Accesses the emitter via GlobalContainer.
+  /// Accesses the emitter via DependencyContainer.
   AppEventEmitter get _emitter {
     if (_cachedEmitter == null) {
       try {
-        _cachedEmitter = GlobalContainer.instance.read(eventEmitterProvider);
+        _cachedEmitter = DependencyContainer.instance.read(eventEmitterProvider);
       } catch (e) {
         debugPrint('❌ Error accessing event emitter: $e');
         rethrow;

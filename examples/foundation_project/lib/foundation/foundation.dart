@@ -32,6 +32,8 @@ export 'logger/fly_logger.dart';
 export 'logger/error_reporter.dart';
 // Dependency Injection exports
 export 'di/global_container.dart';
+export 'di/dependency_container.dart';
+export 'di/riverpod_dependency_container.dart';
 // Event system exports
 export 'events/app_event.dart';
 export 'events/event_emitter.dart';
