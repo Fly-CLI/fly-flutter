@@ -33,13 +33,13 @@ The implementation:
 
 ### ViewModel Async Rule
 
-The plugin enforces that async methods in ViewModels use `performAsync()` for error handling and loading state management.
+The plugin enforces that async methods in ViewModels use `runAsyncOperation()` for error handling and loading state management.
 
 **Rule Logic:**
 - Checks for async methods in classes extending `ViewModel`
 - Skips private methods (starting with `_`)
 - Skips lifecycle methods (`onInitialize`, `onAppear`, `onDisappear`, `onDispose`)
-- Verifies that the method body uses `performAsync()`
+- Verifies that the method body uses `runAsyncOperation()`
 - Reports violations with clear error messages
 
 ### Usage
@@ -67,4 +67,4 @@ class HomeViewModel extends ViewModel<HomeViewModelState> {
 }
 ```
 
-The rule will report: `Async methods in ViewModels must use performAsync() for error handling and loading state management.`
+The rule will report: `Async methods in ViewModels must use runAsyncOperation() for error handling and loading state management.`

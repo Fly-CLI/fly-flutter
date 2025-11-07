@@ -10,8 +10,8 @@ export 'error/network_errors.dart';
 // Feedback exports (from fly_feedback package)
 export 'package:fly_feedback/fly_feedback.dart';
 // MVVM exports
-export 'mvvm/fly_screen.dart';
-export 'mvvm/fly_view_model.dart';
+export 'mvvm/screen/fly_screen.dart';
+export 'mvvm/view_model/fly_view_model.dart';
 // Navigation service exports
 export 'mvvm/services/navigation_service.dart';
 export 'mvvm/services/default_navigation_service.dart';

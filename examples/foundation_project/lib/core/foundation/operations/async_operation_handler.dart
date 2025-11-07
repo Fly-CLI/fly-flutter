@@ -343,7 +343,7 @@ class AsyncOperationHandler with LifecycleEmitterMixin {
   /// 
   /// This method maintains compatibility with existing ViewModel usage
   /// while adding network awareness
-  Future<AppResult<T>> performAsync<T>(
+  Future<AppResult<T>> runAsyncOperation<T>(
     Future<T> Function() operation, {
     String? errorMessage,
     Duration? timeout,

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/mvvm/fly_view_model.dart';
+import 'package:foundation_project/core/foundation/mvvm/view_model/fly_view_model.dart';
+import 'package:foundation_project/core/foundation/mvvm/view_model/view_model_state.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
@@ -8,7 +9,8 @@ import 'package:foundation_project/features/home/data/models/statistics_entity.d
 import 'package:foundation_project/features/home/data/models/sync_status_entity.dart';
 
 /// Home ViewModel state
-class HomeViewModelState extends FlyViewModelState {
+class HomeViewModelState
+    implements FlyViewModelState<HomeViewModelState> {
   final StatisticsEntity? statistics;
   final SyncStatusEntity? syncStatus;
   final bool isRefreshing;
@@ -19,6 +21,9 @@ class HomeViewModelState extends FlyViewModelState {
   @override
   final String? error;
 
+  @override
+  bool get hasError => error != null;
+
   HomeViewModelState({
     required this.isLoading,
     this.error,
@@ -27,20 +32,11 @@ class HomeViewModelState extends FlyViewModelState {
     this.isRefreshing = false,
   });
 
-  HomeViewModelState copyState({bool? isLoading, String? error}) {
-    return HomeViewModelState(
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-      statistics: statistics,
-      syncStatus: syncStatus,
-      isRefreshing: isRefreshing,
-    );
-  }
-
+  @override
   HomeViewModelState copyWith({
     bool? isLoading,
     String? error,
-    bool clearError = false,
+    bool updateError = false,
     StatisticsEntity? statistics,
     SyncStatusEntity? syncStatus,
     bool? isRefreshing,
@@ -49,11 +45,26 @@ class HomeViewModelState extends FlyViewModelState {
   }) {
     return HomeViewModelState(
       isLoading: isLoading ?? this.isLoading,
-      error: clearError ? null : (error ?? this.error),
+      error: updateError ? error : this.error,
       statistics: clearStatistics ? null : (statistics ?? this.statistics),
       syncStatus: clearSyncStatus ? null : (syncStatus ?? this.syncStatus),
       isRefreshing: isRefreshing ?? this.isRefreshing,
     );
+  }
+
+  @override
+  HomeViewModelState withLoading(bool isLoading) {
+    return copyWith(isLoading: isLoading);
+  }
+
+  @override
+  HomeViewModelState withError(String? error) {
+    return copyWith(error: error, updateError: true);
+  }
+
+  @override
+  HomeViewModelState clearError() {
+    return copyWith(error: null, updateError: true);
   }
 
   factory HomeViewModelState.initial() {
@@ -67,8 +78,8 @@ class HomeViewModelState extends FlyViewModelState {
 
 /// Home ViewModel
 /// 
-/// Example ViewModel demonstrating proper use of performAsync for async operations.
-/// All async operations use performAsync to ensure consistent error handling,
+/// Example ViewModel demonstrating proper use of runAsyncOperation for async operations.
+/// All async operations use runAsyncOperation to ensure consistent error handling,
 /// loading state management, and network awareness.
 class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   final AppLogger _logger = AppLogger('HomeViewModel');
@@ -84,11 +95,6 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   }
 
   @override
-  HomeViewModelState copyState({bool? isLoading, String? error}) {
-    return state.copyState(isLoading: isLoading, error: error);
-  }
-
-  @override
   void onInitialize() {
     super.onInitialize();
     loadData();
@@ -98,7 +104,7 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   /// 
   /// Loads both statistics and sync status concurrently.
   Future<void> loadData() async {
-    await performAsync(() async {
+    await runAsyncOperation(() async {
       await Future.wait([
         loadStatistics(),
         loadSyncStatus(),
@@ -108,10 +114,10 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
 
   /// Load statistics
   /// 
-  /// Uses performAsync to handle loading states and errors automatically.
+  /// Uses runAsyncOperation to handle loading states and errors automatically.
   /// The service returns AppResult, so we unwrap it in the operation closure.
   Future<void> loadStatistics() async {
-    await performAsync(
+    await runAsyncOperation(
       () async {
         final serviceResult = await _statisticsService.getStatistics();
         state = state.copyWith(statistics: serviceResult.data);
@@ -122,12 +128,12 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
 
   /// Load sync status
   /// 
-  /// Uses performAsync to handle errors automatically.
+  /// Uses runAsyncOperation to handle errors automatically.
   /// This operation doesn't set loading state since it's typically called
   /// alongside other operations that manage the loading state.
   /// The service returns AppResult, so we unwrap it in the operation closure.
   Future<void> loadSyncStatus() async {
-    await performAsync(
+    await runAsyncOperation(
       () async {
         final serviceResult = await _syncService.getSyncStatus();
         state = state.copyWith(syncStatus: serviceResult.data);
@@ -141,10 +147,10 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   /// 
   /// Refreshes all data and shows a refreshing indicator.
   Future<void> refresh() async {
-    await performAsync(
+    await runAsyncOperation(
       loadData,
       loadingHandler: (isLoading) {
-        state.copyWith(isRefreshing: isLoading);
+        state = state.copyWith(isRefreshing: isLoading);
       },
     );
   }
@@ -154,7 +160,7 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   /// Performs a sync operation and reloads related data on success.
   /// The service returns AppResult, so we unwrap it in the operation closure.
   Future<void> syncNow() async {
-    await performAsync(
+    await runAsyncOperation(
       () async {
         await _syncService.sync();
         await loadSyncStatus();

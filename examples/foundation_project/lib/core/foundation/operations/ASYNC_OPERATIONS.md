@@ -1,11 +1,11 @@
 # Async Operations Guide
 
-This guide explains how to handle async operations in ViewModels using the `performAsync` method and `AsyncOperationHandler` class.
+This guide explains how to handle async operations in ViewModels using the `runAsyncOperation` method and `AsyncOperationHandler` class.
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Why Use performAsync?](#why-use-performasync)
+- [Why Use runAsyncOperation?](#why-use-performasync)
 - [Basic Usage](#basic-usage)
 - [Advanced Usage](#advanced-usage)
 - [Timeout Configuration](#timeout-configuration)
@@ -18,7 +18,7 @@ This guide explains how to handle async operations in ViewModels using the `perf
 
 ## Overview
 
-The `performAsync` method is the recommended way to handle async operations in ViewModels. It provides:
+The `runAsyncOperation` method is the recommended way to handle async operations in ViewModels. It provides:
 
 - ✅ Automatic loading state management
 - ✅ Consistent error handling
@@ -28,9 +28,9 @@ The `performAsync` method is the recommended way to handle async operations in V
 - ✅ Optional feedback messages
 - ✅ Result pattern integration
 
-## Why Use performAsync?
+## Why Use runAsyncOperation?
 
-### ❌ Without performAsync (Manual Approach)
+### ❌ Without runAsyncOperation (Manual Approach)
 
 ```dart
 Future<void> loadData() async {
@@ -64,11 +64,11 @@ Future<void> loadData() async {
 - No retry logic
 - Duplicate code across methods
 
-### ✅ With performAsync (Recommended)
+### ✅ With runAsyncOperation (Recommended)
 
 ```dart
 Future<void> loadData() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => repository.fetchData(),
     errorMessage: 'Failed to load data',
   );
@@ -92,7 +92,7 @@ Future<void> loadData() async {
 
 ```dart
 Future<void> fetchUserData() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => userService.getUser(userId),
     errorMessage: 'Failed to fetch user data',
   );
@@ -107,7 +107,7 @@ Future<void> fetchUserData() async {
 
 ```dart
 Future<void> saveData() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => repository.save(data),
     successMessage: 'Data saved successfully!',
     errorMessage: 'Failed to save data',
@@ -125,7 +125,7 @@ Future<void> saveData() async {
 
 ```dart
 Future<void> uploadLargeFile(File file) async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => fileService.upload(file),
     timeout: AsyncHandlerConfig.veryLongTimeout, // 120 seconds
     errorMessage: 'Upload failed',
@@ -139,7 +139,7 @@ Future<void> uploadLargeFile(File file) async {
 ```dart
 Future<void> backgroundSync() async {
   // Don't show loading indicator for background operations
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => syncService.sync(),
     loadingHandler: (_) {}, // Empty handler = no loading state changes
     errorMessage: 'Sync failed',
@@ -151,7 +151,7 @@ Future<void> backgroundSync() async {
 
 ```dart
 Future<void> performCriticalOperation() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => criticalService.execute(),
     errorMessage: 'Operation failed',
     onError: (errorMessage) {
@@ -168,7 +168,7 @@ Future<void> performCriticalOperation() async {
 Future<void> loadData() async {
   bool wasRefreshing = state.isRefreshing;
   
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => repository.fetchData(),
     errorMessage: 'Failed to load data',
     onFinally: () {
@@ -183,7 +183,7 @@ Future<void> loadData() async {
 
 ## Timeout Configuration
 
-The `performAsync` method uses `AsyncHandlerConfig.standardTimeout` (30 seconds) by default.
+The `runAsyncOperation` method uses `AsyncHandlerConfig.standardTimeout` (30 seconds) by default.
 
 ### Available Timeouts
 
@@ -216,18 +216,18 @@ AsyncHandlerConfig.backgroundTimeout
 
 ```dart
 // Validation
-await performAsync(
+await runAsyncOperation(
   () => validationService.validate(data),
   timeout: AsyncHandlerConfig.quickTimeout,
 );
 
 // Standard operation (uses default)
-await performAsync(
+await runAsyncOperation(
   () => repository.save(data),
 );
 
 // Large file upload
-await performAsync(
+await runAsyncOperation(
   () => fileService.uploadLargeFile(file),
   timeout: AsyncHandlerConfig.veryLongTimeout,
 );
@@ -237,7 +237,7 @@ await performAsync(
 
 ### Automatic Error Handling
 
-`performAsync` automatically:
+`runAsyncOperation` automatically:
 - Catches exceptions
 - Formats error messages
 - Updates error state
@@ -262,7 +262,7 @@ clearError(); // Method from ViewModel base class
 ### Custom Error Messages
 
 ```dart
-final result = await performAsync(
+final result = await runAsyncOperation(
   () => repository.fetchData(),
   errorMessage: 'Unable to load data. Please check your connection.',
 );
@@ -271,7 +271,7 @@ final result = await performAsync(
 ### Error Feedback
 
 ```dart
-final result = await performAsync(
+final result = await runAsyncOperation(
   () => repository.save(data),
   errorMessage: 'Failed to save data',
   showError: true, // Show error feedback (default: true)
@@ -282,12 +282,12 @@ final result = await performAsync(
 
 ### Automatic Loading State
 
-`performAsync` automatically manages loading state:
+`runAsyncOperation` automatically manages loading state:
 
 ```dart
 // Loading state is automatically set to true at start
 // and false when operation completes (success or error)
-final result = await performAsync(
+final result = await runAsyncOperation(
   () => repository.fetchData(),
 );
 
@@ -302,7 +302,7 @@ if (state.isLoading) {
 For background operations that shouldn't show loading indicators:
 
 ```dart
-final result = await performAsync(
+final result = await runAsyncOperation(
   () => syncService.syncInBackground(),
   loadingHandler: (_) {}, // Empty handler = no loading state changes
 );
@@ -311,7 +311,7 @@ final result = await performAsync(
 ### Custom Loading Handler
 
 ```dart
-final result = await performAsync(
+final result = await runAsyncOperation(
   () => repository.fetchData(),
   loadingHandler: (isLoading) {
     // Custom loading state management
@@ -329,7 +329,7 @@ final result = await performAsync(
 ### Success Feedback
 
 ```dart
-await performAsync(
+await runAsyncOperation(
   () => repository.save(data),
   successMessage: 'Data saved successfully!',
   showSuccess: true, // Show success feedback (default: true)
@@ -339,7 +339,7 @@ await performAsync(
 ### Error Feedback
 
 ```dart
-await performAsync(
+await runAsyncOperation(
   () => repository.save(data),
   errorMessage: 'Failed to save data',
   showError: true, // Show error feedback (default: true)
@@ -349,7 +349,7 @@ await performAsync(
 ### Disable Feedback
 
 ```dart
-await performAsync(
+await runAsyncOperation(
   () => repository.fetchData(),
   showSuccess: false, // Don't show success feedback
   showError: false,   // Don't show error feedback
@@ -360,16 +360,16 @@ await performAsync(
 
 ### ✅ DO
 
-1. **Always use performAsync for async operations**
+1. **Always use runAsyncOperation for async operations**
    ```dart
    Future<void> loadData() async {
-     await performAsync(() => repository.fetchData());
+     await runAsyncOperation(() => repository.fetchData());
    }
    ```
 
 2. **Provide meaningful error messages**
    ```dart
-   await performAsync(
+   await runAsyncOperation(
      () => repository.save(data),
      errorMessage: 'Failed to save data. Please try again.',
    );
@@ -377,7 +377,7 @@ await performAsync(
 
 3. **Use appropriate timeouts**
    ```dart
-   await performAsync(
+   await runAsyncOperation(
      () => fileService.uploadLargeFile(file),
      timeout: AsyncHandlerConfig.veryLongTimeout,
    );
@@ -385,7 +385,7 @@ await performAsync(
 
 4. **Handle success results explicitly**
    ```dart
-   final result = await performAsync(
+   final result = await runAsyncOperation(
      () => repository.fetchData(),
    );
    
@@ -396,7 +396,7 @@ await performAsync(
 
 5. **Use success messages for user actions**
    ```dart
-   await performAsync(
+   await runAsyncOperation(
      () => repository.save(data),
      successMessage: 'Changes saved successfully!',
    );
@@ -419,14 +419,14 @@ await performAsync(
 2. **Don't forget to check result.isSuccess**
    ```dart
    // ❌ BAD - might crash if result is failure
-   final result = await performAsync(() => repository.fetchData());
+   final result = await runAsyncOperation(() => repository.fetchData());
    state = state.copyWith(data: result.data!); // Unsafe!
    ```
 
 3. **Don't use generic error messages**
    ```dart
    // ❌ BAD
-   await performAsync(
+   await runAsyncOperation(
      () => repository.save(data),
      errorMessage: 'Error', // Too generic
    );
@@ -435,7 +435,7 @@ await performAsync(
 4. **Don't ignore errors**
    ```dart
    // ❌ BAD - errors are silently ignored
-   await performAsync(() => repository.save(data));
+   await runAsyncOperation(() => repository.save(data));
    // Always check result or provide error message
    ```
 
@@ -451,7 +451,7 @@ void onInitialize() {
 }
 
 Future<void> loadData() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => repository.fetchData(),
     errorMessage: 'Failed to load data',
   );
@@ -480,7 +480,7 @@ Future<void> refresh() async {
 
 ```dart
 Future<void> saveData() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => repository.save(data),
     successMessage: 'Data saved successfully!',
     errorMessage: 'Failed to save data',
@@ -504,7 +504,7 @@ Future<void> loadAllData() async {
 }
 
 Future<void> loadStatistics() async {
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => statisticsService.getStatistics(),
     errorMessage: 'Failed to load statistics',
   );
@@ -516,7 +516,7 @@ Future<void> loadStatistics() async {
 
 Future<void> loadSyncStatus() async {
   // Don't show loading for background sync status
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => syncService.getSyncStatus(),
     errorMessage: 'Failed to load sync status',
     loadingHandler: (_) {}, // No loading state changes
@@ -534,7 +534,7 @@ Future<void> loadSyncStatus() async {
 Future<void> syncIfNeeded() async {
   if (!state.needsSync) return;
   
-  final result = await performAsync(
+  final result = await runAsyncOperation(
     () => syncService.sync(),
     errorMessage: 'Sync failed',
     successMessage: 'Sync completed successfully',
@@ -551,11 +551,11 @@ Future<void> syncIfNeeded() async {
 
 ### Issue: Loading state not updating
 
-**Solution**: Ensure you're using `performAsync` and not manually managing loading state.
+**Solution**: Ensure you're using `runAsyncOperation` and not manually managing loading state.
 
 ```dart
 // ✅ Correct
-await performAsync(() => repository.fetchData());
+await runAsyncOperation(() => repository.fetchData());
 
 // ❌ Incorrect
 try {
@@ -573,7 +573,7 @@ try {
 
 ```dart
 // ✅ Correct
-await performAsync(
+await runAsyncOperation(
   () => repository.fetchData(),
   errorMessage: 'Failed to load data',
 );
@@ -590,7 +590,7 @@ if (state.hasError) {
 
 ```dart
 // For long operations
-await performAsync(
+await runAsyncOperation(
   () => fileService.uploadLargeFile(file),
   timeout: AsyncHandlerConfig.veryLongTimeout,
   errorMessage: 'Upload timed out',
@@ -603,7 +603,7 @@ await performAsync(
 
 ```dart
 // For background operations
-await performAsync(
+await runAsyncOperation(
   () => backgroundService.sync(),
   loadingHandler: (_) {}, // Don't change loading state
 );
@@ -618,5 +618,5 @@ await performAsync(
 
 ## Examples
 
-See `examples/foundation_project/lib/features/home/presentation/view_models/home_view_model.dart` for a complete example of using `performAsync` in a real ViewModel.
+See `examples/foundation_project/lib/features/home/presentation/view_models/home_view_model.dart` for a complete example of using `runAsyncOperation` in a real ViewModel.
 

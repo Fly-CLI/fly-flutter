@@ -13,7 +13,7 @@ linter:
     - prefer_final_locals
     - prefer_single_quotes
     - require_trailing_commas
-  # Note: For ViewModels extending ViewModel base class, always use performAsync()
+  # Note: For ViewModels extending ViewModel base class, always use runAsyncOperation()
   # for async operations to ensure consistent error handling, loading state management,
   # and network awareness. Manual try-catch blocks with state updates should be avoided.
   # This is enforced by the analyzer plugin rule: view_model_async_must_use_perform_async

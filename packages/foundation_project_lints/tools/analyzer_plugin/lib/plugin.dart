@@ -162,7 +162,7 @@ class _ViewModelAsyncAnalyzerVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    // Check if the method body uses performAsync
+    // Check if the method body uses runAsyncOperation
     if (!_usesPerformAsync(node.body)) {
       // Create error using protocol_common AnalysisError
       final location = _createLocation(node.offset, node.length);
@@ -170,10 +170,10 @@ class _ViewModelAsyncAnalyzerVisitor extends RecursiveAstVisitor<void> {
         AnalysisErrorSeverity.INFO,
         AnalysisErrorType.LINT,
         location,
-        'Async methods in ViewModels must use performAsync() for error handling and loading state management.',
+        'Async methods in ViewModels must use runAsyncOperation() for error handling and loading state management.',
         'view_model_async_must_use_perform_async',
         correction:
-            'Wrap your async operation in performAsync() instead of using manual try-catch blocks.',
+            'Wrap your async operation in runAsyncOperation() instead of using manual try-catch blocks.',
       );
       errors.add(error);
     }
@@ -271,7 +271,7 @@ class _ViewModelAsyncAnalyzerVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-/// Visitor to check for performAsync usage
+/// Visitor to check for runAsyncOperation usage
 class _PerformAsyncChecker extends RecursiveAstVisitor<void> {
   final void Function(bool) _onFound;
 
@@ -280,7 +280,7 @@ class _PerformAsyncChecker extends RecursiveAstVisitor<void> {
   @override
   void visitMethodInvocation(MethodInvocation node) {
     final methodName = node.methodName.name;
-    if (methodName == 'performAsync') {
+    if (methodName == 'runAsyncOperation') {
       _onFound(true);
     }
     super.visitMethodInvocation(node);

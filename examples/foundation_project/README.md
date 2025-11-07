@@ -144,7 +144,7 @@ class MyFlyViewModel extends FlyViewModel<MyFlyViewModelState> {
   }
 
   Future<void> loadData() async {
-    await performAsync(
+    await runAsyncOperation(
       () async {
         // Your async operation
         return ['Item 1', 'Item 2'];

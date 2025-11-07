@@ -133,7 +133,7 @@ After removing `custom_lint`, verify:
 2. Run `flutter analyze` 
 3. Check `/tmp/foundation_project_lints_debug.log` for plugin startup
 4. Verify lint violations are detected
-5. Test with a ViewModel that has an async method without `performAsync()`
+5. Test with a ViewModel that has an async method without `runAsyncOperation()`
 
 ## Conclusion
 

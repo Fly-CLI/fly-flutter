@@ -649,7 +649,7 @@ class MyViewModel extends FlyViewModel<BaseViewModelState> {
   BaseViewModelState build() => const BaseViewModelState();
 
   Future<void> save() async {
-    await performAsync(
+    await runAsyncOperation(
       () async => repository.save(),
       successMessage: 'Saved successfully',
     );

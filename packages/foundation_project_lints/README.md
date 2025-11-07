@@ -4,11 +4,11 @@ Custom lint rules for the Foundation Project using the standard analyzer plugin.
 
 ## ViewModel Async Rule
 
-The `view_model_async_must_use_perform_async` rule enforces that async methods in ViewModels use `performAsync()` instead of manual try-catch blocks.
+The `view_model_async_must_use_perform_async` rule enforces that async methods in ViewModels use `runAsyncOperation()` instead of manual try-catch blocks.
 
 ### ✅ Status
 
-**The analyzer plugin is working correctly!** It successfully detects async methods in ViewModels that don't use `performAsync()`.
+**The analyzer plugin is working correctly!** It successfully detects async methods in ViewModels that don't use `runAsyncOperation()`.
 
 The plugin works with `flutter analyze` and `dart analyze` commands.
 
@@ -36,7 +36,7 @@ analyzer:
 
 The rule is automatically enabled when you run `flutter analyze` or `dart analyze`. It will report warnings for:
 
-- Async methods in ViewModels that don't use `performAsync`
+- Async methods in ViewModels that don't use `runAsyncOperation`
 - Methods with manual try-catch blocks and state management
 - Direct state assignments for loading/error states
 
@@ -49,7 +49,7 @@ The rule is automatically enabled when you run `flutter analyze` or `dart analyz
 ### Testing
 
 To test the rule:
-1. Create an async method in a ViewModel that doesn't use `performAsync`
+1. Create an async method in a ViewModel that doesn't use `runAsyncOperation`
 2. Run `flutter analyze` or `dart analyze`
 3. The rule will report a violation
 
@@ -63,4 +63,4 @@ class HomeViewModel extends ViewModel<HomeViewModelState> {
 }
 ```
 
-The rule will report: `Async methods in ViewModels must use performAsync() for error handling and loading state management.`
+The rule will report: `Async methods in ViewModels must use runAsyncOperation() for error handling and loading state management.`
