@@ -1,10 +1,9 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter/foundation.dart';
-import 'package:foundation_project/foundation/foundation.dart';
 import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
-import 'package:foundation_project/core/providers/localization_provider.dart';
+import 'package:foundation_project/foundation/foundation.dart';
 
 typedef SuccessFeedbackHandler = void Function(String message);
 typedef ErrorFeedbackHandler = void Function(
@@ -34,9 +33,7 @@ class ViewModelAsyncCoordinator {
             AsyncOperationHandler(
               logger: GlobalContainer.instance
                   .read(loggerProvider('AsyncOperationHandler')),
-              localizations: localizations ??
-                  GlobalContainer.instance
-                      .read(foundationLocalizationProvider),
+              localizations: localizations,
             );
 
   Future<AppResult<R>> execute<R>(

@@ -35,9 +35,13 @@ class ErrorHandler {
   }
 
   /// Converts technical errors to user-friendly messages
-  static String getUserFriendlyMessage(dynamic error) {
+  static String getUserFriendlyMessage(
+    dynamic error, {
+    FoundationLocalizationProvider? localizations,
+  }) {
+    final loc = localizations ?? DefaultFoundationLocalizationProvider();
     if (error is NetworkException) {
-      return 'Network error. Please check your connection and try again.';
+      return loc.networkErrorConnectionRecovery;
     }
 
     if (error is ValidationException) {
@@ -45,19 +49,19 @@ class ErrorHandler {
     }
 
     if (error is DatabaseException) {
-      return 'Database error. Please try again or contact support.';
+      return loc.databaseErrorPleaseTryAgain;
     }
 
     if (error is AuthenticationException) {
-      return 'Authentication error. Please log in again.';
+      return loc.networkErrorAuthRecovery;
     }
 
     if (error is PermissionException) {
-      return 'You don\'t have permission to perform this action.';
+      return loc.permissionDenied;
     }
 
     if (error is TimeoutException) {
-      return 'Request timed out. Please try again.';
+      return loc.networkErrorTimeoutRecovery;
     }
 
     if (error is AppException) {
@@ -65,7 +69,7 @@ class ErrorHandler {
     }
 
     // Generic error message
-    return 'An unexpected error occurred. Please try again.';
+    return loc.unexpectedErrorOccurred;
   }
 
   /// Handles async operations with error catching

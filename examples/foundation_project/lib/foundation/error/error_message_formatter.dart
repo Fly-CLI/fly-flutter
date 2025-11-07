@@ -91,36 +91,16 @@ class ErrorMessageFormatter {
   /// 1. Add the exception type to this map with its formatter function
   /// 2. Ensure the formatter returns a user-friendly, localized message
   /// 3. Add tests to verify the formatting behavior
-  static Map<Type, String Function(AppException, FoundationLocalizationProvider?)> _exceptionFormatters(
-    FoundationLocalizationProvider? localizations,
+  static Map<Type, String Function(AppException, FoundationLocalizationProvider)> _exceptionFormatters(
+    FoundationLocalizationProvider localizations,
   ) {
     return {
       ValidationException: (e, _) => e.message,
-      NetworkException: (e, loc) => _getLocalizedString(
-        localizations: loc,
-        getter: (l) => l.networkErrorConnectionRecovery,
-        fallback: 'Network error. Please check your connection and try again.',
-      ),
-      DatabaseException: (e, loc) => _getLocalizedString(
-        localizations: loc,
-        getter: (l) => l.databaseErrorPleaseTryAgain,
-        fallback: 'Database error. Please try again or contact support.',
-      ),
-      AuthenticationException: (e, loc) => _getLocalizedString(
-        localizations: loc,
-        getter: (l) => l.networkErrorAuthRecovery,
-        fallback: 'Authentication error. Please log in again.',
-      ),
-      PermissionException: (e, loc) => _getLocalizedString(
-        localizations: loc,
-        getter: (l) => l.permissionDenied,
-        fallback: 'You don\'t have permission to perform this action.',
-      ),
-      TimeoutException: (e, loc) => _getLocalizedString(
-        localizations: loc,
-        getter: (l) => l.networkErrorTimeoutRecovery,
-        fallback: 'Request timed out. Please try again.',
-      ),
+      NetworkException: (e, loc) => loc.networkErrorConnectionRecovery,
+      DatabaseException: (e, loc) => loc.databaseErrorPleaseTryAgain,
+      AuthenticationException: (e, loc) => loc.networkErrorAuthRecovery,
+      PermissionException: (e, loc) => loc.permissionDenied,
+      TimeoutException: (e, loc) => loc.networkErrorTimeoutRecovery,
   };
   }
 
@@ -132,7 +112,7 @@ class ErrorMessageFormatter {
   ///
   /// Parameters:
   /// - [error]: The error or exception to format
-  /// - [localizations]: Optional localization provider (if null, uses default English messages)
+  /// - [localizations]: Localization provider (defaults to DefaultFoundationLocalizationProvider)
   /// - [logError]: Whether to log the technical error (default: true)
   ///
   /// Returns a localized, user-friendly error message
@@ -141,6 +121,7 @@ class ErrorMessageFormatter {
     FoundationLocalizationProvider? localizations,
     bool logError = true,
   }) {
+    final loc = localizations ?? DefaultFoundationLocalizationProvider();
     // Log technical error for debugging
     if (logError) {
       _logger.error('Formatting error for user display: $error');
@@ -148,40 +129,28 @@ class ErrorMessageFormatter {
 
     // Handle custom app exceptions first
     if (error is AppException) {
-      return _formatAppException(error, localizations);
+      return _formatAppException(error, loc);
     }
 
     // Handle common system exceptions
     if (error is SocketException) {
-      return _formatNetworkError(error, localizations);
+      return _formatNetworkError(error, loc);
     }
 
     if (error is TimeoutException) {
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.networkErrorTimeoutRecovery,
-        fallback: 'Request timed out. Please try again.',
-      );
+      return loc.networkErrorTimeoutRecovery;
     }
 
     if (error is FileSystemException) {
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.databaseErrorPleaseTryAgain,
-        fallback: 'Database error. Please try again or contact support.',
-      );
+      return loc.databaseErrorPleaseTryAgain;
     }
 
     if (error is FormatException) {
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.unexpectedErrorOccurred,
-        fallback: 'An unexpected error occurred. Please try again.',
-      );
+      return loc.unexpectedErrorOccurred;
     }
 
     // Check error string for common patterns
-    return _formatByErrorString(error, localizations);
+    return _formatByErrorString(error, loc);
   }
 
   /// Formats custom AppException types using the registry
@@ -191,7 +160,7 @@ class ErrorMessageFormatter {
   /// to use the exception's message if meaningful, otherwise returns a generic error.
   static String _formatAppException(
     AppException exception,
-    FoundationLocalizationProvider? localizations,
+    FoundationLocalizationProvider localizations,
   ) {
     // Look up formatter in registry
     final formatters = _exceptionFormatters(localizations);
@@ -213,52 +182,32 @@ class ErrorMessageFormatter {
       'Unregistered AppException type: ${exception.runtimeType}. '
       'Consider adding it to _exceptionFormatters registry.',
     );
-    return _getLocalizedString(
-      localizations: localizations,
-      getter: (l) => l.unexpectedErrorOccurred,
-      fallback: 'An unexpected error occurred. Please try again.',
-    );
+    return localizations.unexpectedErrorOccurred;
   }
 
   /// Formats network-related errors
   static String _formatNetworkError(
     SocketException exception,
-    FoundationLocalizationProvider? localizations,
+    FoundationLocalizationProvider localizations,
   ) {
     final message = exception.message.toLowerCase();
 
     if (message.contains('failed host lookup') ||
         message.contains('no address associated')) {
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.networkErrorDnsRecovery,
-        fallback: 'Failed to resolve hostname. Please check your connection and try again.',
-      );
+      return localizations.networkErrorDnsRecovery;
     }
 
     if (message.contains('connection refused') ||
         message.contains('connection failed')) {
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.networkErrorConnectionRecovery,
-        fallback: 'Connection failed. Please check your connection and try again.',
-      );
+      return localizations.networkErrorConnectionRecovery;
     }
 
     if (message.contains('network is unreachable')) {
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.networkErrorNoInternetRecovery,
-        fallback: 'No internet connection. Please check your connection and try again.',
-      );
+      return localizations.networkErrorNoInternetRecovery;
     }
 
     // Generic network error
-    return _getLocalizedString(
-      localizations: localizations,
-      getter: (l) => l.networkErrorConnectionRecovery,
-      fallback: 'Connection failed. Please check your connection and try again.',
-    );
+    return localizations.networkErrorConnectionRecovery;
   }
 
   /// Extracts the meaningful message from an error string
@@ -272,7 +221,7 @@ class ErrorMessageFormatter {
   /// contains no useful information.
   static String _extractMessage(
     String errorString,
-    FoundationLocalizationProvider? localizations,
+    FoundationLocalizationProvider localizations,
   ) {
     String message = errorString.trim();
     
@@ -284,11 +233,7 @@ class ErrorMessageFormatter {
     // Check if message is empty or just technical noise
     if (message.isEmpty) {
       _logger.warn('Empty error message encountered');
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.unexpectedErrorOccurred,
-        fallback: 'An unexpected error occurred. Please try again.',
-      );
+      return localizations.unexpectedErrorOccurred;
     }
     
     // Check for technical noise patterns that aren't useful to users
@@ -299,11 +244,7 @@ class ErrorMessageFormatter {
         messageLower == 'exception:' ||  // Handle empty exception toString
         messageLower == 'error') {
       _logger.warn('Technical error message encountered: $message');
-      return _getLocalizedString(
-        localizations: localizations,
-        getter: (l) => l.unexpectedErrorOccurred,
-        fallback: 'An unexpected error occurred. Please try again.',
-      );
+      return localizations.unexpectedErrorOccurred;
     }
     
     return message;
@@ -324,30 +265,13 @@ class ErrorMessageFormatter {
   /// from _extractMessage.
   static String _formatByErrorString(
     Object error,
-    FoundationLocalizationProvider? localizations,
+    FoundationLocalizationProvider localizations,
   ) {
     final errorString = error.toString();
     
     // Clean the message and pass through - no string pattern matching
     // All business rules should be handled by typed exceptions in the registry
     return _extractMessage(errorString, localizations);
-  }
-
-  /// Helper method to get localized string with fallback
-  static String _getLocalizedString({
-    required FoundationLocalizationProvider? localizations,
-    required String Function(FoundationLocalizationProvider) getter,
-    required String fallback,
-  }) {
-    if (localizations != null) {
-      try {
-        return getter(localizations);
-      } catch (e) {
-        _logger.warn('Error getting localized string: $e, using fallback');
-        return fallback;
-      }
-    }
-    return fallback;
   }
 
   /// Checks if an error is network-related
