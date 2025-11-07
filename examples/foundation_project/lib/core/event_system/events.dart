@@ -1,4 +1,4 @@
-import 'package:foundation_project/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:json_annotation/json_annotation.dart';
 // Import here so we can use FeedbackEvent in the wrapper
 import 'package:fly_feedback/fly_feedback.dart' as feedback;

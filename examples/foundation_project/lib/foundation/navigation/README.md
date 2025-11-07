@@ -30,8 +30,10 @@ await service.navigateTo('/home');
 
 **Feature enum-based service:**
 ```dart
-NavigationService<Feature> service = AppNavigation.instance;
-await service.navigateTo(Feature.home);
+// Note: FeatureScreenType enum is defined in your application layer
+// (e.g., shared/navigation/feature_screen_type.dart)
+NavigationService<FeatureScreenType> service = FlyRouter.instance;
+await service.navigateTo(FeatureScreenType.home);
 ```
 
 ## Usage
@@ -86,7 +88,8 @@ class MyScreen extends FlyScreen<MyViewModel, MyState> {
         ref.read(navigationServiceProvider).navigateTo('/details');
         
         // Or Feature enum-based service
-        AppNavigation.instance.navigateTo(Feature.taskDetail);
+        // Note: FeatureScreenType is defined in application layer
+        FlyRouter.instance.navigateTo(FeatureScreenType.taskDetail);
       },
       child: Text('Navigate'),
     );
@@ -134,9 +137,10 @@ class CustomNavigationService implements NavigationService<String> {
 }
 
 // Feature enum-based service
-class CustomFeatureNavigationService implements NavigationService<Feature> {
+// Note: Define your Feature enum in the application layer
+class CustomFeatureNavigationService implements NavigationService<FeatureScreenType> {
   @override
-  Future<T?> navigateTo<T>(Feature route, {Object? arguments}) {
+  Future<T?> navigateTo<T>(FeatureScreenType route, {Object? arguments}) {
     // Your custom implementation
   }
   
@@ -157,8 +161,10 @@ final navigationServiceProvider = Provider<NavigationService<String>>((ref) {
 ### Feature enum-based Navigation Service
 
 ```dart
-final appNavigationProvider = Provider<NavigationService<Feature>>((ref) {
-  return AppNavigation.instance;
+// Note: FeatureScreenType enum should be defined in your application layer
+// (e.g., shared/navigation/feature_screen_type.dart)
+final appNavigationProvider = Provider<NavigationService<FeatureScreenType>>((ref) {
+  return FlyRouter.instance;
 });
 ```
 
@@ -207,17 +213,27 @@ class MyScreen extends FlyScreen {
     ref.read(navigationServiceProvider).navigateTo('/route');
     
     // Or Feature enum-based
-    AppNavigation.instance.navigateTo(Feature.home);
+    // Note: FeatureScreenType is defined in application layer
+    FlyRouter.instance.navigateTo(FeatureScreenType.home);
   }
 }
 ```
 
 Note: No BuildContext is required when using the service.
 
+## Feature Enum Location
+
+**Important:** The `FeatureScreenType` enum (or your application's feature enum) should be defined in the **application layer**, not in the foundation. This keeps foundation components generic and reusable.
+
+**Example Location:** `shared/navigation/feature_screen_type.dart`
+
+The foundation's `FlyRouter` class is generic and can work with any enum type that provides a `route` property (String). Define your feature enum in your application and use it with `FlyRouter` or create your own `NavigationService<YourFeatureEnum>` implementation.
+
 ## Benefits of Generic Route Types
 
 1. **Type Safety** - Feature enum provides compile-time safety
 2. **Consistent API** - Single interface method, no duplicates
 3. **Flexibility** - Supports String, Feature enum, and custom types
-4. **Cleaner Code** - Direct enum usage: `navigateTo(Feature.home)` vs `navigateTo(Feature.home.route)`
+4. **Cleaner Code** - Direct enum usage: `navigateTo(FeatureScreenType.home)` vs `navigateTo('/home')`
 5. **Better DX** - Type-safe navigation with IDE autocomplete support
+6. **Reusability** - Foundation remains generic, applications define their own routes

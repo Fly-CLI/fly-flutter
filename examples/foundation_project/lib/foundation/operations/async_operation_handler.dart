@@ -6,7 +6,6 @@ import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/offline/offline.dart';
 import 'package:foundation_project/foundation/error/error_message_formatter.dart';
 import 'package:foundation_project/foundation/foundation.dart';
-import 'package:foundation_project/shared/localization/localizations.dart';
 import 'package:uuid/uuid.dart';
 
 /// Enhanced async operation handler with network awareness
@@ -24,16 +23,19 @@ class AsyncOperationHandler with EventEmitterMixin {
   final Logger _logger;
   final ConnectivityService _connectivityService;
   final OfflineQueueManager? _offlineQueueManager;
+  final FoundationLocalizationProvider? _localizations;
   final Uuid _uuid = const Uuid();
 
   AsyncOperationHandler({
     required Logger logger,
     ConnectivityService? connectivityService,
     OfflineQueueManager? offlineQueueManager,
+    FoundationLocalizationProvider? localizations,
   })  : _logger = logger,
         _connectivityService =
             connectivityService ?? ConnectivityService(logger: logger),
-        _offlineQueueManager = offlineQueueManager;
+        _offlineQueueManager = offlineQueueManager,
+        _localizations = localizations;
 
   /// Execute an operation with basic error handling and timeout
   /// 
@@ -82,8 +84,14 @@ class AsyncOperationHandler with EventEmitterMixin {
           final duration = DateTime.now().difference(startTime);
           final errorMessageText = errorMessage ?? 
               (effectiveQueueIfOffline 
-                  ? localizations.noInternetConnectionQueuedShort
-                  : localizations.networkNoInternet);
+                  ? _getLocalizedString(
+                      getter: (l) => l.noInternetConnectionQueuedShort,
+                      fallback: 'No internet connection. Operation queued.',
+                    )
+                  : _getLocalizedString(
+                      getter: (l) => l.networkNoInternet,
+                      fallback: 'No internet connection. Please check your connection and try again.',
+                    ));
 
           // Emit operation failed event
           emit(AsyncOperationFailedEvent(
@@ -137,8 +145,14 @@ class AsyncOperationHandler with EventEmitterMixin {
         'Operation timed out after ${duration.inSeconds} seconds',
       );
 
-      final errorMessageText = errorMessage ?? localizations.networkTimeout;
-      final error = TimeoutError(timeout: effectiveTimeout);
+      final errorMessageText = errorMessage ?? _getLocalizedString(
+        getter: (l) => l.networkTimeout,
+        fallback: 'Request timed out. Please try again.',
+      );
+      final error = TimeoutError(
+        timeout: effectiveTimeout,
+        localizations: _localizations,
+      );
       
       // Emit operation failed event
       emit(AsyncOperationFailedEvent(
@@ -159,7 +173,10 @@ class AsyncOperationHandler with EventEmitterMixin {
     } on SocketException catch (e, stackTrace) {
       _logger.error('Socket exception: ${e.message}', stackTrace: stackTrace);
 
-      final error = NetworkErrorClassifier.classifyError(e);
+      final error = NetworkErrorClassifier.classifyError(
+        e,
+        localizations: _localizations,
+      );
       final duration = DateTime.now().difference(startTime);
       final errorMessageText = errorMessage ?? error.message;
 
@@ -186,10 +203,14 @@ class AsyncOperationHandler with EventEmitterMixin {
       final classifiedError = NetworkErrorClassifier.classifyError(
         e,
         timeout: effectiveTimeout,
+        localizations: _localizations,
       );
 
       // Format error message for user display
-      final formattedError = errorMessage ?? ErrorMessageFormatter.format(e);
+      final formattedError = errorMessage ?? ErrorMessageFormatter.format(
+        e,
+        localizations: _localizations,
+      );
       final duration = DateTime.now().difference(startTime);
 
       // Emit operation failed event
@@ -290,8 +311,14 @@ class AsyncOperationHandler with EventEmitterMixin {
     // Format error message for user display
     final formattedError = errorMessage ?? 
         (lastError != null 
-            ? ErrorMessageFormatter.format(lastError)
-            : localizations.networkOperationFailedAfterRetries);
+            ? ErrorMessageFormatter.format(
+                lastError,
+                localizations: _localizations,
+              )
+            : _getLocalizedString(
+                getter: (l) => l.networkOperationFailedAfterRetries,
+                fallback: 'Network operation failed after multiple retries. Please try again.',
+              ));
 
     return Failure(formattedError, lastError);
   }
@@ -323,14 +350,20 @@ class AsyncOperationHandler with EventEmitterMixin {
       if (effectiveQueueIfOffline && _offlineQueueManager != null) {
         await _queueOperation(operation, errorMessage);
         return Failure(
-          errorMessage ?? localizations.noInternetConnectionQueuedLong,
-          NoInternetError(),
+          errorMessage ?? _getLocalizedString(
+            getter: (l) => l.noInternetConnectionQueuedLong,
+            fallback: 'No internet connection. Operation will be executed when connection is available.',
+          ),
+          NoInternetError(localizations: _localizations),
         );
       }
 
       return Failure(
-        errorMessage ?? localizations.networkNoInternet,
-        NoInternetError(),
+        errorMessage ?? _getLocalizedString(
+          getter: (l) => l.networkNoInternet,
+          fallback: 'No internet connection. Please check your connection and try again.',
+        ),
+        NoInternetError(localizations: _localizations),
       );
     }
 
@@ -398,7 +431,10 @@ class AsyncOperationHandler with EventEmitterMixin {
         if (notifyChange) onNotify?.call();
         return result;
       } else {
-        final errorMessage = result.error ?? localizations.networkUnknownError;
+        final errorMessage = result.error ?? _getLocalizedString(
+          getter: (l) => l.networkUnknownError,
+          fallback: 'Unknown network error occurred. Please try again.',
+        );
         _handleError(
           errorMessage,
           onLoadingChanged,
@@ -412,7 +448,10 @@ class AsyncOperationHandler with EventEmitterMixin {
       _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
       // Format error message for user display
-      final formattedError = errorMessage ?? ErrorMessageFormatter.format(e);
+      final formattedError = errorMessage ?? ErrorMessageFormatter.format(
+        e,
+        localizations: _localizations,
+      );
       
       _handleError(
         formattedError,
@@ -448,7 +487,10 @@ class AsyncOperationHandler with EventEmitterMixin {
       _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
       // Format error message for user display
-      final formattedError = errorMessage ?? ErrorMessageFormatter.format(e);
+      final formattedError = errorMessage ?? ErrorMessageFormatter.format(
+        e,
+        localizations: _localizations,
+      );
       
       return Failure(formattedError, e);
     }
@@ -467,7 +509,10 @@ class AsyncOperationHandler with EventEmitterMixin {
     final queuedOp = QueuedOperation<T>(
       id: _uuid.v4(),
       operation: operation,
-      operationType: errorMessage ?? localizations.networkOperationDefault,
+      operationType: errorMessage ?? _getLocalizedString(
+        getter: (l) => l.networkOperationDefault,
+        fallback: 'Network operation',
+      ),
       priority: QueuePriority.normal,
       expiresAt: DateTime.now().add(AsyncOperationConfig.defaultQueueExpiry),
       maxRetries: AsyncOperationConfig.maxQueuedOperationRetries,
@@ -493,5 +538,21 @@ class AsyncOperationHandler with EventEmitterMixin {
     onLoadingChanged?.call(false);
     onErrorChanged?.call(error);
     if (notifyChange) onNotify?.call();
+  }
+
+  /// Helper method to get localized string with fallback
+  String _getLocalizedString({
+    required String Function(FoundationLocalizationProvider) getter,
+    required String fallback,
+  }) {
+    if (_localizations != null) {
+      try {
+        return getter(_localizations!);
+      } catch (e) {
+        _logger.warn('Error getting localized string: $e, using fallback');
+        return fallback;
+      }
+    }
+    return fallback;
   }
 }

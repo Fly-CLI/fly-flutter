@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:foundation_project/foundation/error/app_exception.dart';
-import 'package:foundation_project/shared/localization/localizations.dart';
+import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
 
 /// Base class for all network-related errors
 /// Extends AppException to integrate with existing error handling infrastructure
@@ -38,8 +38,14 @@ class TimeoutError extends NetworkError {
   TimeoutError({
     required this.timeout,
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.operationTimedOut,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.operationTimedOut,
+                fallback: 'Operation timed out. Please try again.',
+              ),
           isRetryable: true,
           errorCode: 'network_timeout',
         );
@@ -56,8 +62,14 @@ class TimeoutError extends NetworkError {
 class ConnectionError extends NetworkError {
   ConnectionError({
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.networkConnectionFailed,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.networkConnectionFailed,
+                fallback: 'Network connection failed. Please check your connection and try again.',
+              ),
           isRetryable: true,
           errorCode: 'network_connection_failed',
         );
@@ -70,8 +82,14 @@ class ConnectionError extends NetworkError {
 class NoInternetError extends NetworkError {
   NoInternetError({
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.networkNoInternet,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.networkNoInternet,
+                fallback: 'No internet connection. Please check your connection and try again.',
+              ),
           isRetryable: false, // Don't retry if offline
           errorCode: 'network_no_internet',
         );
@@ -89,21 +107,38 @@ class HttpError extends NetworkError {
     required int statusCode,
     this.responseBody,
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? _getDefaultMessage(statusCode),
+          customMessage ?? _getDefaultMessage(statusCode, localizations),
           statusCode: statusCode,
           isRetryable: _isRetryableStatusCode(statusCode),
           errorCode: _errorCodeForStatus(statusCode),
         );
 
   /// Get default localized message based on status code
-  static String _getDefaultMessage(int statusCode) {
+  static String _getDefaultMessage(
+    int statusCode,
+    FoundationLocalizationProvider? localizations,
+  ) {
     if (statusCode >= 400 && statusCode < 500) {
-      return localizations.networkHttpClientError;
+      return _getLocalizedString(
+        localizations: localizations,
+        getter: (l) => l.networkHttpClientError,
+        fallback: 'Client error occurred. Please check your request and try again.',
+      );
     } else if (statusCode >= 500 && statusCode < 600) {
-      return localizations.networkHttpServerError;
+      return _getLocalizedString(
+        localizations: localizations,
+        getter: (l) => l.networkHttpServerError,
+        fallback: 'Server error occurred. Please try again later.',
+      );
     }
-    return '${localizations.networkUnknownError} ($statusCode)';
+    final unknownError = _getLocalizedString(
+      localizations: localizations,
+      getter: (l) => l.networkUnknownError,
+      fallback: 'Unknown network error occurred. Please try again.',
+    );
+    return '$unknownError ($statusCode)';
   }
 
   /// Check if the status code indicates a retryable error
@@ -158,8 +193,14 @@ class DnsError extends NetworkError {
   DnsError({
     this.hostname,
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.networkDnsFailed,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.networkDnsFailed,
+                fallback: 'Failed to resolve hostname. Please check your connection and try again.',
+              ),
           isRetryable: true,
           errorCode: 'network_dns_failed',
         );
@@ -175,8 +216,14 @@ class DnsError extends NetworkError {
 class CaptivePortalError extends NetworkError {
   CaptivePortalError({
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.networkCaptivePortal,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.networkCaptivePortal,
+                fallback: 'Captive portal detected. Please connect to the network and try again.',
+              ),
           isRetryable: false,
           errorCode: 'network_captive_portal',
         );
@@ -189,8 +236,14 @@ class CaptivePortalError extends NetworkError {
 class CertificateError extends NetworkError {
   CertificateError({
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.networkCertificateError,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.networkCertificateError,
+                fallback: 'Certificate error. Please check your connection and try again.',
+              ),
           isRetryable: false, // Don't retry certificate errors
           errorCode: 'network_certificate_error',
         );
@@ -206,8 +259,14 @@ class UnknownNetworkError extends NetworkError {
   UnknownNetworkError({
     this.originalError,
     String? customMessage,
+    FoundationLocalizationProvider? localizations,
   }) : super(
-          customMessage ?? localizations.networkUnknownError,
+          customMessage ??
+              _getLocalizedString(
+                localizations: localizations,
+                getter: (l) => l.networkUnknownError,
+                fallback: 'Unknown network error occurred. Please try again.',
+              ),
           isRetryable: true, // Conservative: try to retry
           errorCode: 'network_unknown_error',
         );
@@ -227,6 +286,7 @@ class NetworkErrorClassifier {
     Object error, {
     StackTrace? stackTrace,
     Duration? timeout,
+    FoundationLocalizationProvider? localizations,
   }) {
     // Handle already classified network errors
     if (error is NetworkError) {
@@ -237,6 +297,7 @@ class NetworkErrorClassifier {
     if (error is TimeoutException) {
       return TimeoutError(
         timeout: timeout ?? const Duration(seconds: 30),
+        localizations: localizations,
       );
     }
 
@@ -245,15 +306,18 @@ class NetworkErrorClassifier {
       final message = error.message.toLowerCase();
       if (message.contains('failed host lookup') ||
           message.contains('no address associated')) {
-        return DnsError(hostname: error.address?.host);
+        return DnsError(
+          hostname: error.address?.host,
+          localizations: localizations,
+        );
       }
-      return ConnectionError();
+      return ConnectionError(localizations: localizations);
     }
 
     // Handle HTTP exceptions (if using http package)
     if (error.toString().contains('ClientException')) {
       return ConnectionError(
-        customMessage: localizations.networkConnectionFailed,
+        localizations: localizations,
       );
     }
 
@@ -261,20 +325,21 @@ class NetworkErrorClassifier {
     if (error is FormatException) {
       return HttpError(
         statusCode: 502, // Bad Gateway for malformed responses
-        customMessage: localizations.invalidResponseFormat,
+        localizations: localizations,
       );
     }
 
     // Handle certificate exceptions
     if (error.toString().toLowerCase().contains('certificate') ||
         error.toString().toLowerCase().contains('handshake')) {
-      return CertificateError();
+      return CertificateError(localizations: localizations);
     }
 
     // Default to unknown network error
     return UnknownNetworkError(
       originalError: error,
       customMessage: error.toString(),
+      localizations: localizations,
     );
   }
 
@@ -286,5 +351,22 @@ class NetworkErrorClassifier {
     // Conservative: assume retryable for unknown errors
     return true;
   }
+}
+
+/// Helper function to get localized string with fallback
+String _getLocalizedString({
+  required FoundationLocalizationProvider? localizations,
+  required String Function(FoundationLocalizationProvider) getter,
+  required String fallback,
+}) {
+  if (localizations != null) {
+    try {
+      return getter(localizations);
+    } catch (e) {
+      // Return fallback on error
+      return fallback;
+    }
+  }
+  return fallback;
 }
 

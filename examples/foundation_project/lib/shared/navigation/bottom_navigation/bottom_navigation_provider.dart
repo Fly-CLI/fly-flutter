@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/navigation/fly_router.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 /// Bottom navigation state provider
 final bottomNavigationProvider =

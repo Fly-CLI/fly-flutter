@@ -7,6 +7,9 @@ export 'error/error_handler.dart';
 export 'error/network_errors.dart';
 // Feedback exports (from fly_feedback package)
 export 'package:fly_feedback/fly_feedback.dart';
+// Localization exports
+export 'localization/foundation_localization_provider.dart';
+export 'localization/default_foundation_localization_provider.dart';
 // MVVM exports
 export 'mvvm/screen/fly_screen.dart';
 export 'mvvm/view_model/fly_view_model.dart';

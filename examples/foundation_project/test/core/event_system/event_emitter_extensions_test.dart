@@ -4,7 +4,7 @@ import 'package:foundation_project/core/event_system/event_emitter.dart';
 import 'package:foundation_project/core/event_system/event_emitter_extensions.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
-import 'package:foundation_project/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

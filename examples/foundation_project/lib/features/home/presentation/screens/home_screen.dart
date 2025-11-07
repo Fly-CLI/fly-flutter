@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/foundation/mvvm/screen/fly_screen.dart';
 import 'package:foundation_project/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:foundation_project/features/home/presentation/view_models/home_view_model.dart';
 import 'package:foundation_project/features/home/presentation/widgets/quick_action_button.dart';
 import 'package:foundation_project/features/home/presentation/widgets/statistics_card.dart';

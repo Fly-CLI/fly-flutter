@@ -5,6 +5,7 @@ import 'package:foundation_project/foundation/navigation/fly_router.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/app_bottom_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/bottom_navigation_provider.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 /// Main navigation screen that wraps bottom navigation
 class MainNavigationScreen extends ConsumerStatefulWidget {

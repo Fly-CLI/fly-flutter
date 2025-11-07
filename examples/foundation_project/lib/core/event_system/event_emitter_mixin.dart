@@ -3,7 +3,7 @@ import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/event_system/event_emitter.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/event_system/event_providers.dart';
-import 'package:foundation_project/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 /// Mixin to add app event emission capability to any class
 ///

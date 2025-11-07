@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:foundation_project/foundation/foundation.dart';
 import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
+import 'package:foundation_project/core/providers/localization_provider.dart';
 
 typedef SuccessFeedbackHandler = void Function(String message);
 typedef ErrorFeedbackHandler = void Function(
@@ -26,11 +27,16 @@ class ViewModelFeedbackHandlers {
 class ViewModelAsyncCoordinator {
   final AsyncOperationHandler _asyncHandler;
 
-  ViewModelAsyncCoordinator({AsyncOperationHandler? asyncHandler})
-      : _asyncHandler = asyncHandler ??
+  ViewModelAsyncCoordinator({
+    AsyncOperationHandler? asyncHandler,
+    FoundationLocalizationProvider? localizations,
+  })  : _asyncHandler = asyncHandler ??
             AsyncOperationHandler(
               logger: GlobalContainer.instance
                   .read(loggerProvider('AsyncOperationHandler')),
+              localizations: localizations ??
+                  GlobalContainer.instance
+                      .read(foundationLocalizationProvider),
             );
 
   Future<AppResult<R>> execute<R>(
@@ -82,7 +88,7 @@ class ViewModelAsyncCoordinator {
             canShowSuccess: canShowSuccess,
             canShowError: canShowError,
             feedbackHandlers: feedbackHandlers,
-          ));
+          ),);
         }
 
         feedbackHandlers.showError?.call(
