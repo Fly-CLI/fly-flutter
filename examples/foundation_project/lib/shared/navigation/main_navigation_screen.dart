@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:foundation_project/foundation/navigation/fly_router.dart';
+import 'package:foundation_project/shared/navigation/app_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/app_bottom_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/bottom_navigation_provider.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
@@ -71,7 +71,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final items = getBottomNavigationItems(context);
     if (index >= 0 && index < items.length) {
       final feature = items[index].feature;
-      FlyRouter.instance.navigateTo(feature);
+      AppNavigation.instance.navigateTo(feature);
     }
   }
 
@@ -92,9 +92,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               onPressed: () {
                 final feature = items[currentIndex].feature;
                 if (feature == FeatureScreenType.tasks) {
-                  FlyRouter.instance.navigateTo(FeatureScreenType.taskForm);
+                  AppNavigation.instance.navigateTo(FeatureScreenType.taskForm);
                 } else if (feature == FeatureScreenType.notes) {
-                  FlyRouter.instance.navigateTo(FeatureScreenType.noteForm);
+                  AppNavigation.instance.navigateTo(FeatureScreenType.noteForm);
                 }
               },
               child: const Icon(Icons.add),

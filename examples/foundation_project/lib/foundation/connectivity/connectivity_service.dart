@@ -1,22 +1,25 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/core/services/device_condition_service.dart';
+import 'package:foundation_project/foundation/connectivity/connectivity_checker.dart';
+import 'package:foundation_project/foundation/connectivity/connectivity_type.dart';
 
 /// Network-specific connectivity service for async operations
 /// 
-/// Wraps DeviceConditionService to provide focused connectivity checking
-/// for network operations, with real-time monitoring and connection state tracking
+/// Provides focused connectivity checking for network operations,
+/// with real-time monitoring and connection state tracking.
+/// 
+/// Uses [ConnectivityChecker] interface for pluggable connectivity implementations.
+/// 
+/// Applications must provide a [ConnectivityChecker] implementation.
 class ConnectivityService {
-  final DeviceConditionService _deviceConditionService;
+  final ConnectivityChecker _checker;
   final FlyLogger _logger;
 
   ConnectivityService({
-    DeviceConditionService? deviceConditionService,
+    required ConnectivityChecker checker,
     required FlyLogger logger,
-  })  : _deviceConditionService =
-            deviceConditionService ?? DeviceConditionService(logger: logger),
+  })  : _checker = checker,
         _logger = logger;
 
   /// Check if device has internet connection
@@ -24,7 +27,7 @@ class ConnectivityService {
   /// Returns true if any internet connection is available (WiFi or mobile data)
   Future<bool> hasInternetConnection() async {
     try {
-      final hasConnection = await _deviceConditionService.hasInternetConnection();
+      final hasConnection = await _checker.hasInternetConnection();
       _logger.debug('Internet connection check: $hasConnection');
       return hasConnection;
     } catch (e) {
@@ -37,7 +40,7 @@ class ConnectivityService {
   /// Check if device is connected to WiFi specifically
   Future<bool> isConnectedToWifi() async {
     try {
-      final isWifi = await _deviceConditionService.isConnectedToWifi();
+      final isWifi = await _checker.isConnectedToWifi();
       _logger.debug('WiFi connection check: $isWifi');
       return isWifi;
     } catch (e) {
@@ -49,47 +52,23 @@ class ConnectivityService {
   /// Get current connectivity status
   /// 
   /// Returns the type of connection (wifi, mobile, none, etc.)
-  Future<ConnectivityResult> getConnectivityStatus() async {
+  Future<ConnectivityType> getConnectivityStatus() async {
     try {
-      final status = await _deviceConditionService.getConnectivityStatus();
+      final status = await _checker.getConnectivityStatus();
       _logger.debug('Connectivity status: $status');
       return status;
     } catch (e) {
       _logger.warn('Failed to get connectivity status: $e');
-      return ConnectivityResult.none;
+      return ConnectivityType.none;
     }
   }
 
   /// Stream of connectivity changes
   /// 
   /// Subscribe to be notified when network connection changes
-  /// Returns a stream of connectivity results
-  Stream<List<ConnectivityResult>> get onConnectivityChanged {
-    return _deviceConditionService.onConnectivityChanged;
-  }
-
-  /// Check if the connection is suitable for network operations
-  /// 
-  /// [requireWifi] - If true, only WiFi connections are considered suitable
-  /// [minBatteryLevel] - Minimum battery level required (0-100)
-  /// [requireCharging] - If true, device must be charging
-  /// 
-  /// Useful for large operations like backups or bulk syncs
-  Future<bool> isOptimalForNetworkOperation({
-    bool requireWifi = false,
-    int minBatteryLevel = 0,
-    bool requireCharging = false,
-  }) async {
-    try {
-      return await _deviceConditionService.isOptimalForBackup(
-        requireWifi: requireWifi,
-        minBatteryLevel: minBatteryLevel,
-        requireCharging: requireCharging,
-      );
-    } catch (e) {
-      _logger.warn('Failed to check optimal conditions: $e');
-      return false;
-    }
+  /// Returns a stream of connectivity types
+  Stream<List<ConnectivityType>> get onConnectivityChanged {
+    return _checker.onConnectivityChanged;
   }
 
   /// Wait for internet connection with timeout
@@ -125,7 +104,7 @@ class ConnectivityService {
     return onConnectivityChanged.asyncMap((results) async {
       // Check if any result indicates connectivity
       final hasConnection = results.isNotEmpty &&
-          !results.every((result) => result == ConnectivityResult.none);
+          !results.every((result) => result == ConnectivityType.none);
 
       // For connected state, verify actual internet (not just WiFi connection)
       if (hasConnection) {

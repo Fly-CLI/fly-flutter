@@ -1,7 +1,5 @@
-import 'package:foundation_project/foundation/operations/retry_config.dart';
 import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/foundation/di/global_container.dart';
-import 'package:foundation_project/core/providers/logger_provider.dart';
+import 'package:foundation_project/foundation/operations/retry_config.dart';
 
 /// Central configuration for AsyncOperationHandler default values
 /// 
@@ -13,10 +11,6 @@ import 'package:foundation_project/core/providers/logger_provider.dart';
 class AsyncOperationConfig {
   // Prevent instantiation - this is a configuration class
   AsyncOperationConfig._();
-
-  /// Logger instance for configuration-related logging
-  static FlyLogger get _logger =>
-      GlobalContainer.instance.read(loggerProvider('AsyncHandlerConfig'));
 
   // ==========================================================================
   // TIMEOUT CONFIGURATION
@@ -349,10 +343,12 @@ class AsyncOperationConfig {
     };
   }
 
-  /// Print configuration summary to console
+  /// Print configuration summary using logger
   /// 
   /// Useful for debugging and verification
-  static void printConfigSummary() {
+  /// 
+  /// [logger] - Logger instance to use for output
+  static void printConfigSummary(FlyLogger logger) {
     final summary = getConfigSummary();
     final buffer = StringBuffer();
     
@@ -370,7 +366,7 @@ class AsyncOperationConfig {
     });
     buffer.writeln('================================');
     
-    _logger.info(buffer.toString());
+    logger.info(buffer.toString());
   }
 }
 

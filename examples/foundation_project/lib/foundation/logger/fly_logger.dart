@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:logging/logging.dart' as logging;
-import 'package:foundation_project/shared/firebase/crashlytics_manager.dart';
+import 'package:foundation_project/foundation/logger/error_reporter.dart';
 
 /// Standard log levels following industry conventions (RFC 5424).
 /// 
@@ -333,20 +333,26 @@ abstract class FlyLogger {
 }
 
 /// Concrete implementation of [FlyLogger] using `logging` package, `dart:developer`,
-/// and Firebase Crashlytics.
+/// and optional error reporting.
 /// 
 /// This implementation provides:
 /// - Console logging via `dart:developer`
 /// - Structured logging via `logging` package
-/// - Error reporting to Firebase Crashlytics
+/// - Optional error reporting via [ErrorReporter] interface
 /// - Child logger support with context inheritance
 /// - Lazy message evaluation
 /// 
 /// **Example:**
 /// ```dart
-/// final logger = AppLogger('MyService');
+/// final logger = FlyLoggerImpl('MyService');
 /// final childLogger = logger.child({'requestId': '123'});
 /// childLogger.info('Request started');
+/// 
+/// // With error reporter
+/// final loggerWithReporter = FlyLoggerImpl(
+///   'MyService',
+///   errorReporter: CrashlyticsErrorReporter(),
+/// );
 /// ```
 class FlyLoggerImpl implements FlyLogger {
   /// Creates an [FlyLoggerImpl] instance with the specified name.
@@ -354,13 +360,16 @@ class FlyLoggerImpl implements FlyLogger {
   /// [name] - The logger name (typically the class or module name)
   /// [minLevel] - Minimum log level (defaults to [LogLevel.debug] in debug mode, [LogLevel.info] in release)
   /// [contextFields] - Initial context fields to include in all log entries
+  /// [errorReporter] - Optional error reporter for external error reporting services
   FlyLoggerImpl(
     this.name, {
     LogLevel? minLevel,
     LogFields? contextFields,
+    ErrorReporter? errorReporter,
   })  : _logger = logging.Logger(name),
         _minLevel = minLevel ?? (kDebugMode ? LogLevel.debug : LogLevel.info),
-        _contextFields = contextFields ?? <String, Object?>{};
+        _contextFields = contextFields ?? <String, Object?>{},
+        _errorReporter = errorReporter;
 
   @override
   final String name;
@@ -368,6 +377,7 @@ class FlyLoggerImpl implements FlyLogger {
   final logging.Logger _logger;
   final LogLevel _minLevel;
   final LogFields _contextFields;
+  final ErrorReporter? _errorReporter;
 
   @override
   bool isEnabled(LogLevel level) => level.isAtLeast(_minLevel);
@@ -378,6 +388,7 @@ class FlyLoggerImpl implements FlyLogger {
       name,
       minLevel: _minLevel,
       contextFields: {..._contextFields, ...fields},
+      errorReporter: _errorReporter,
     );
   }
 
@@ -571,12 +582,12 @@ class FlyLoggerImpl implements FlyLogger {
     String? reason,
     LogFields? fields,
   }) {
-    // Convert LogFields to Map<String, String> for Crashlytics
+    // Convert LogFields to Map<String, String> for error reporter
     final Map<String, String>? customKeys = fields?.map(
       (key, value) => MapEntry(key, value?.toString() ?? 'null'),
     );
 
-    CrashlyticsManager.instance.recordErrorWithCustomKeys(
+    _errorReporter?.recordError(
       error,
       stackTrace,
       reason: reason,

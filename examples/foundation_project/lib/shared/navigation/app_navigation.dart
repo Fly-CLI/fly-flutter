@@ -7,7 +7,7 @@ import 'package:foundation_project/foundation/navigation/app.dart';
 import 'package:foundation_project/foundation/navigation/navigation_service.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
-/// Enhanced navigation service implementing NavigationService with Feature enum
+/// Application-specific navigation service implementing NavigationService with Feature enum
 ///
 /// This service implements NavigationService with Feature enum as the route type,
 /// providing type-safe navigation with automatic event emission.
@@ -16,20 +16,20 @@ import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 /// ```dart
 /// // Using NavigationService interface with Feature enum
 /// final service = AppNavigation.instance;
-/// await service.navigateTo(Feature.home);
+/// await service.navigateTo(FeatureScreenType.home);
 ///
 /// // Direct navigation
-/// AppNavigation.instance.navigateTo(Feature.tasks);
+/// AppNavigation.instance.navigateTo(FeatureScreenType.tasks);
 /// ```
-class FlyRouter implements NavigationService<FeatureScreenType> {
+class AppNavigation implements NavigationService<FeatureScreenType> {
   /// Singleton instance
-  static final FlyRouter _instance = FlyRouter._internal();
+  static final AppNavigation _instance = AppNavigation._internal();
 
   /// Get the singleton instance
-  static FlyRouter get instance => _instance;
+  static AppNavigation get instance => _instance;
 
   /// Private constructor for singleton
-  FlyRouter._internal();
+  AppNavigation._internal();
 
   /// The NavigatorKey to use for navigation
   final GlobalKey<NavigatorState> navigatorKey = App.navigatorKey;
@@ -82,7 +82,7 @@ class FlyRouter implements NavigationService<FeatureScreenType> {
   }
 
   // ============================================================================
-  // NavigationService<Feature> Interface Implementation
+  // NavigationService<FeatureScreenType> Interface Implementation
   // ============================================================================
 
   @override
@@ -228,3 +228,4 @@ class FlyRouter implements NavigationService<FeatureScreenType> {
     return future;
   }
 }
+

@@ -2,7 +2,6 @@
 
 // Error exports
 export 'error/app_exception.dart';
-export 'error/custom_error_handler.dart';
 export 'error/error_handler.dart';
 export 'error/error_message_formatter.dart';
 export 'error/error_message_formatter_provider.dart';
@@ -21,11 +20,16 @@ export '../foundation/navigation/default_navigation_service.dart';
 // Operations exports
 export 'operations/async_operation_handler.dart';
 export 'operations/async_operation_config.dart';
-export 'connectivity/connectivity_service.dart';
+export 'operations/offline_queue.dart';
 export 'operations/result.dart';
 export 'operations/retry_config.dart';
-// Utils exports
+// Connectivity exports
+export 'connectivity/connectivity_service.dart';
+export 'connectivity/connectivity_checker.dart';
+export 'connectivity/connectivity_type.dart';
+// Logger exports
 export 'logger/fly_logger.dart';
+export 'logger/error_reporter.dart';
 // Dependency Injection exports
 export 'di/global_container.dart';
 // Event system exports

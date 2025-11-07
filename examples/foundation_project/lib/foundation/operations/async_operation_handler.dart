@@ -1,10 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:foundation_project/foundation/events/event_emitter_mixin.dart';
-import 'package:foundation_project/foundation/events/app_event.dart';
-import 'package:foundation_project/core/offline/offline.dart';
-import 'package:foundation_project/foundation/error/error_message_formatter.dart';
 import 'package:foundation_project/foundation/foundation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -22,7 +18,7 @@ import 'package:uuid/uuid.dart';
 class AsyncOperationHandler with EventEmitterMixin {
   final FlyLogger _logger;
   final ConnectivityService _connectivityService;
-  final OfflineQueueManager? _offlineQueueManager;
+  final OfflineQueue? _offlineQueue;
   final FoundationLocalizationProvider _localizations;
   final ErrorMessageFormatter _errorMessageFormatter;
   final Uuid _uuid = const Uuid();
@@ -30,13 +26,17 @@ class AsyncOperationHandler with EventEmitterMixin {
   AsyncOperationHandler({
     required FlyLogger logger,
     ConnectivityService? connectivityService,
-    OfflineQueueManager? offlineQueueManager,
+    ConnectivityChecker? connectivityChecker,
+    OfflineQueue? offlineQueue,
     FoundationLocalizationProvider? localizations,
     ErrorMessageFormatter? errorMessageFormatter,
   })  : _logger = logger,
-        _connectivityService =
-            connectivityService ?? ConnectivityService(logger: logger),
-        _offlineQueueManager = offlineQueueManager,
+        _connectivityService = connectivityService ??
+            (connectivityChecker != null
+                ? ConnectivityService(checker: connectivityChecker, logger: logger)
+                : throw ArgumentError(
+                    'Either connectivityService or connectivityChecker must be provided')),
+        _offlineQueue = offlineQueue,
         _localizations = localizations ?? DefaultFoundationLocalizationProvider(),
         _errorMessageFormatter = errorMessageFormatter ??
             ErrorMessageFormatter(
@@ -102,12 +102,12 @@ class AsyncOperationHandler with EventEmitterMixin {
             duration: duration,
             metadata: {
               'errorType': 'NoInternetError',
-              'queued': effectiveQueueIfOffline && _offlineQueueManager != null,
+              'queued': effectiveQueueIfOffline && _offlineQueue != null,
             },
           ),);
 
           // Queue operation if requested
-          if (effectiveQueueIfOffline && _offlineQueueManager != null) {
+          if (effectiveQueueIfOffline && _offlineQueue != null) {
             await _queueOperation(operation, errorMessage);
             return Failure(
               errorMessageText,
@@ -341,8 +341,8 @@ class AsyncOperationHandler with EventEmitterMixin {
     if (!hasConnection) {
       _logger.warn('No internet connection for network operation');
 
-      // Queue operation if requested and queue manager available
-      if (effectiveQueueIfOffline && _offlineQueueManager != null) {
+      // Queue operation if requested and queue available
+      if (effectiveQueueIfOffline && _offlineQueue != null) {
         await _queueOperation(operation, errorMessage);
         return Failure(
           errorMessage ?? _localizations.noInternetConnectionQueuedLong,
@@ -486,8 +486,8 @@ class AsyncOperationHandler with EventEmitterMixin {
     Future<T> Function() operation,
     String? errorMessage,
   ) async {
-    if (_offlineQueueManager == null) {
-      _logger.warn('No queue manager available for offline operation');
+    if (_offlineQueue == null) {
+      _logger.warn('No queue available for offline operation');
       return;
     }
 
@@ -495,12 +495,10 @@ class AsyncOperationHandler with EventEmitterMixin {
       id: _uuid.v4(),
       operation: operation,
       operationType: errorMessage ?? _localizations.networkOperationDefault,
-      priority: QueuePriority.normal,
       expiresAt: DateTime.now().add(AsyncOperationConfig.defaultQueueExpiry),
-      maxRetries: AsyncOperationConfig.maxQueuedOperationRetries,
     );
 
-    final queued = await _offlineQueueManager!.enqueue(queuedOp);
+    final queued = await _offlineQueue!.enqueue(queuedOp);
     if (queued) {
       _logger.info('Operation queued: ${queuedOp.id}');
     } else {

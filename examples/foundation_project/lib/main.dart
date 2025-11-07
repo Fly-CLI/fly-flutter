@@ -9,9 +9,6 @@ import 'package:foundation_project/l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize error handling
-  CustomErrorHandler.initialize();
-
   // Initialize dependency injection
   GlobalContainer.initialize();
 
