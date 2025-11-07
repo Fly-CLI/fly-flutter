@@ -26,9 +26,6 @@ export 'operations/retry_config.dart';
 export 'logger/fly_logger.dart';
 // Dependency Injection exports
 export 'di/global_container.dart';
-// Storage interface exports
-export 'storage/interfaces/i_storage_service.dart';
-export 'storage/interfaces/i_secure_storage_service.dart';
 // Event system exports
 export 'events/app_event.dart';
 export 'events/event_emitter.dart';

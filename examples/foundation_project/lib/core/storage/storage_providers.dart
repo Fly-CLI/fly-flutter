@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/storage/implementations/secure_storage_service.dart';
 import 'package:foundation_project/core/storage/implementations/shared_preferences_storage_service.dart';
-import 'package:foundation_project/foundation/storage/interfaces/i_secure_storage_service.dart';
-import 'package:foundation_project/foundation/storage/interfaces/i_storage_service.dart';
+import 'package:foundation_project/core/storage/interfaces/i_secure_storage_service.dart';
+import 'package:foundation_project/core/storage/interfaces/i_storage_service.dart';
 import 'package:foundation_project/core/storage/managers/app_config_data_manager.dart';
 import 'package:foundation_project/core/storage/managers/app_data_manager.dart';
 import 'package:foundation_project/core/storage/managers/sync_data_manager.dart';

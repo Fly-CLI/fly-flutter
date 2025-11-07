@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:foundation_project/foundation/storage/interfaces/i_secure_storage_service.dart';
-import 'package:foundation_project/foundation/storage/interfaces/i_storage_service.dart';
+import 'package:foundation_project/core/storage/interfaces/i_secure_storage_service.dart';
+import 'package:foundation_project/core/storage/interfaces/i_storage_service.dart';
 import 'package:foundation_project/core/storage/models/storage_key.dart';
 import 'package:foundation_project/core/storage/models/storage_type.dart';
 
