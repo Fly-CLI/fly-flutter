@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/foundation/di/global_container.dart';
 import 'package:foundation_project/foundation/foundation.dart';
 import 'package:foundation_project/core/providers/providers.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';

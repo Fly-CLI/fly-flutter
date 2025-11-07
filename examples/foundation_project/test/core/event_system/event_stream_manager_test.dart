@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:foundation_project/foundation/events/app_event.dart';
+import 'package:foundation_project/foundation/events/managers/event_stream_manager.dart';
 import 'package:foundation_project/core/event_system/events.dart';
-import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 void main() {

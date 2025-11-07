@@ -24,4 +24,17 @@ export 'operations/result.dart';
 export 'operations/retry_config.dart';
 // Utils exports
 export 'logger/fly_logger.dart';
-// Event system integration exports
+// Dependency Injection exports
+export 'di/global_container.dart';
+// Storage interface exports
+export 'storage/interfaces/i_storage_service.dart';
+export 'storage/interfaces/i_secure_storage_service.dart';
+// Event system exports
+export 'events/app_event.dart';
+export 'events/event_emitter.dart';
+export 'events/event_emitter_mixin.dart';
+export 'events/event_providers.dart';
+export 'events/managers/event_stream_manager.dart';
+export 'events/plugins/analytics_event_plugin.dart';
+export 'events/plugins/logging_event_plugin.dart';
+export 'events/plugins/performance_event_plugin.dart';

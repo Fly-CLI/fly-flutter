@@ -1,14 +1,14 @@
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/core/event_system/event_emitter.dart';
-import 'package:foundation_project/core/event_system/event_emitter_extensions.dart';
+import 'package:foundation_project/foundation/events/event_emitter.dart';
+import 'package:foundation_project/foundation/events/app_event.dart';
+import 'package:foundation_project/foundation/events/managers/event_stream_manager.dart';
 import 'package:foundation_project/core/event_system/events.dart';
-import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  group('EventEmitterExtensions', () {
+  group('AppEventEmitter Type-Safe Streams', () {
     late AppEventEmitter emitter;
 
     setUp(() {
@@ -19,7 +19,7 @@ void main() {
       emitter.dispose();
     });
 
-    group('NavigationStreamExtension', () {
+    group('getStreamFor<T>', () {
       test('should return type-safe navigation stream', () async {
         emitter.register<NavigationEvent>(
           key: 'navigation',
@@ -27,7 +27,7 @@ void main() {
         );
 
         final events = <NavigationEvent>[];
-        final subscription = emitter.getNavigationStream().listen(events.add);
+        final subscription = emitter.getStreamFor<NavigationEvent>().listen(events.add);
 
         final event = NavigationStartedEvent(feature: FeatureScreenType.home);
         emitter.emit(event);
@@ -41,14 +41,12 @@ void main() {
       });
 
       test('should return empty stream when not registered', () {
-        final stream = emitter.getNavigationStream();
+        final stream = emitter.getStreamFor<NavigationEvent>();
 
         expect(stream, isNotNull);
         // Should not throw
       });
-    });
 
-    group('FeedbackStreamExtension', () {
       test('should return type-safe feedback stream', () async {
         emitter.register<FeedbackAppEvent>(
           key: 'feedback',
@@ -56,7 +54,7 @@ void main() {
         );
 
         final events = <FeedbackAppEvent>[];
-        final subscription = emitter.getFeedbackStream().listen(events.add);
+        final subscription = emitter.getStreamFor<FeedbackAppEvent>().listen(events.add);
 
         final feedback = SuccessFeedback('Hello');
         emitter.emit(
@@ -74,16 +72,7 @@ void main() {
         await subscription.cancel();
       });
 
-      test('should return empty stream when feedback not registered', () {
-        final stream = emitter.getFeedbackStream();
-
-        expect(stream, isNotNull);
-        // Should not throw
-      });
-    });
-
-    group('LifecycleEmitterFilterExtension', () {
-      test('should filter events by type', () async {
+      test('should filter events by type using stream operations', () async {
         emitter.register<NavigationEvent>(
           key: 'navigation',
           manager: EventStreamManager.create<NavigationEvent>(),
@@ -91,7 +80,9 @@ void main() {
 
         final startedEvents = <NavigationStartedEvent>[];
         final subscription = emitter
-            .getEventsOfType<NavigationStartedEvent>('navigation')
+            .getStreamFor<NavigationEvent>()
+            .where((event) => event is NavigationStartedEvent)
+            .cast<NavigationStartedEvent>()
             .listen(startedEvents.add);
 
         emitter.emit(NavigationStartedEvent(feature: FeatureScreenType.home));
@@ -104,13 +95,6 @@ void main() {
         expect(startedEvents, everyElement(isA<NavigationStartedEvent>()));
 
         subscription.cancel();
-      });
-
-      test('should return empty stream when key not registered', () {
-        final stream = emitter.getEventsOfType<NavigationEvent>('nonexistent');
-
-        expect(stream, isNotNull);
-        // Should not throw
       });
     });
   });

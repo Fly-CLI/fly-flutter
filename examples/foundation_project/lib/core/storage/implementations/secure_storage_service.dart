@@ -1,5 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:foundation_project/core/storage/interfaces/i_secure_storage_service.dart';
+import 'package:foundation_project/foundation/storage/interfaces/i_secure_storage_service.dart';
 
 /// Implementation of [ISecureStorageService] using FlutterSecureStorage
 ///

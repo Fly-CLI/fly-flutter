@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:foundation_project/core/storage/interfaces/i_storage_service.dart';
+import 'package:foundation_project/foundation/storage/interfaces/i_storage_service.dart';
 
 /// Implementation of [IStorageService] using SharedPreferences
 ///

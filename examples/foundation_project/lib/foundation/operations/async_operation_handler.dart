@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:foundation_project/core/event_system/event_emitter_mixin.dart';
-import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/foundation/events/event_emitter_mixin.dart';
+import 'package:foundation_project/foundation/events/app_event.dart';
 import 'package:foundation_project/core/offline/offline.dart';
 import 'package:foundation_project/foundation/error/error_message_formatter.dart';
 import 'package:foundation_project/foundation/foundation.dart';
@@ -361,8 +361,7 @@ class AsyncOperationHandler with EventEmitterMixin {
 
   /// Execute operation with progress callbacks (for ViewModel integration)
   /// 
-  /// This method maintains compatibility with existing ViewModel usage
-  /// while adding network awareness
+  /// Provides network-aware async operation execution with progress tracking
   Future<AppResult<T>> runAsyncOperation<T>(
     Future<T> Function() operation, {
     String? errorMessage,

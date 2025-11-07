@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:foundation_project/foundation/foundation.dart';
-import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/foundation/di/global_container.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 
 /// Centralized error handling system for the application

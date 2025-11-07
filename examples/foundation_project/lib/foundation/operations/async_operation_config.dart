@@ -1,6 +1,6 @@
 import 'package:foundation_project/foundation/operations/retry_config.dart';
 import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/foundation/di/global_container.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 
 /// Central configuration for AsyncOperationHandler default values
@@ -49,7 +49,6 @@ class AsyncOperationConfig {
   /// Default timeout for background operations
   /// 
   /// Used for non-critical background tasks that can afford to take time
-  /// Legacy compatibility: 100 minutes (to match old implementation)
   static const Duration backgroundTimeout = Duration(seconds: 100 * 60);
 
   // ==========================================================================

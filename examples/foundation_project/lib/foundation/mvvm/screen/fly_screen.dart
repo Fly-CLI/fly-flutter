@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:foundation_project/foundation/mvvm/view_model/fly_view_model.dart';
 import 'package:foundation_project/foundation/mvvm/view_model/view_model_state.dart';
-import 'package:foundation_project/core/event_system/event_emitter.dart';
-import 'package:foundation_project/core/event_system/event_emitter_mixin.dart';
-import 'package:foundation_project/core/event_system/events.dart';
-import 'package:foundation_project/core/event_system/event_providers.dart';
+import 'package:foundation_project/foundation/events/event_emitter.dart';
+import 'package:foundation_project/foundation/events/event_emitter_mixin.dart';
+import 'package:foundation_project/foundation/events/app_event.dart';
+import 'package:foundation_project/foundation/events/event_providers.dart';
 
 /// Abstract base screen class for handling common UI logic
 /// Provides standard patterns for loading, error, and content management
@@ -28,7 +28,7 @@ import 'package:foundation_project/core/event_system/event_providers.dart';
 /// - Merge multiple scopes (e.g. nested ViewModels or child flows)
 /// - Filter or transform feedback events before display
 /// - Inject custom services, handlers, or haptic behavior
-/// The default configuration mirrors the legacy behavior by listening to the
+/// The default configuration listens to the
 /// ViewModel scope with the composite handler.
 abstract class FlyScreen<
 V extends FlyViewModel<S>,
