@@ -23,10 +23,11 @@ import 'package:foundation_project/foundation/foundation.dart';
 ///
 /// Basic error formatting:
 /// ```dart
+/// final formatter = ref.read(errorMessageFormatterProvider);
 /// try {
 ///   await someOperation();
 /// } catch (e) {
-///   final userMessage = ErrorMessageFormatter.format(e);
+///   final userMessage = formatter.format(e);
 ///   ScaffoldMessenger.of(context).showSnackBar(
 ///     SnackBar(content: Text(userMessage)),
 ///   );
@@ -46,17 +47,22 @@ import 'package:foundation_project/foundation/foundation.dart';
 ///
 /// 2. **Register the exception** in `_exceptionFormatters`:
 /// ```dart
-/// static final Map<Type, String Function(AppException)> _exceptionFormatters = {
-///   // ... existing entries ...
-///   MyCustomException: (e) => e.message,
-/// };
+/// Map<Type, String Function(AppException, FoundationLocalizationProvider)> _exceptionFormatters(
+///   FoundationLocalizationProvider localizations,
+/// ) {
+///   return {
+///     // ... existing entries ...
+///     MyCustomException: (e, _) => e.message,
+///   };
+/// }
 /// ```
 ///
 /// 3. **Add tests** to verify formatting behavior:
 /// ```dart
 /// test('should format MyCustomException', () {
+///   final formatter = ErrorMessageFormatter(logger: mockLogger);
 ///   final error = MyCustomException('Custom error');
-///   final formatted = ErrorMessageFormatter.format(error);
+///   final formatted = formatter.format(error);
 ///   expect(formatted, equals('Custom error'));
 /// });
 /// ```
@@ -80,7 +86,18 @@ import 'package:foundation_project/foundation/foundation.dart';
 /// See also:
 /// - [AppException] - Base class for custom exceptions
 class ErrorMessageFormatter {
-  static final FlyLoggerImpl _logger = FlyLoggerImpl('ErrorMessageFormatter');
+  final FlyLogger _logger;
+  final FoundationLocalizationProvider? _defaultLocalizations;
+
+  /// Creates an [ErrorMessageFormatter] instance.
+  ///
+  /// [logger] - Logger instance for error logging (required)
+  /// [defaultLocalizations] - Optional default localization provider
+  ErrorMessageFormatter({
+    required FlyLogger logger,
+    FoundationLocalizationProvider? defaultLocalizations,
+  })  : _logger = logger,
+        _defaultLocalizations = defaultLocalizations;
 
   /// Registry of known AppException types and their formatters
   /// 
@@ -91,7 +108,7 @@ class ErrorMessageFormatter {
   /// 1. Add the exception type to this map with its formatter function
   /// 2. Ensure the formatter returns a user-friendly, localized message
   /// 3. Add tests to verify the formatting behavior
-  static Map<Type, String Function(AppException, FoundationLocalizationProvider)> _exceptionFormatters(
+  Map<Type, String Function(AppException, FoundationLocalizationProvider)> _exceptionFormatters(
     FoundationLocalizationProvider localizations,
   ) {
     return {
@@ -116,12 +133,12 @@ class ErrorMessageFormatter {
   /// - [logError]: Whether to log the technical error (default: true)
   ///
   /// Returns a localized, user-friendly error message
-  static String format(
+  String format(
     Object error, {
     FoundationLocalizationProvider? localizations,
     bool logError = true,
   }) {
-    final loc = localizations ?? DefaultFoundationLocalizationProvider();
+    final loc = localizations ?? _defaultLocalizations ?? DefaultFoundationLocalizationProvider();
     // Log technical error for debugging
     if (logError) {
       _logger.error('Formatting error for user display: $error');
@@ -158,7 +175,7 @@ class ErrorMessageFormatter {
   /// This method looks up the exception type in the registry and applies
   /// the registered formatter. For unregistered exception types, it attempts
   /// to use the exception's message if meaningful, otherwise returns a generic error.
-  static String _formatAppException(
+  String _formatAppException(
     AppException exception,
     FoundationLocalizationProvider localizations,
   ) {
@@ -186,7 +203,7 @@ class ErrorMessageFormatter {
   }
 
   /// Formats network-related errors
-  static String _formatNetworkError(
+  String _formatNetworkError(
     SocketException exception,
     FoundationLocalizationProvider localizations,
   ) {
@@ -219,7 +236,7 @@ class ErrorMessageFormatter {
   /// 
   /// Returns a user-friendly message or a generic fallback if the message
   /// contains no useful information.
-  static String _extractMessage(
+  String _extractMessage(
     String errorString,
     FoundationLocalizationProvider localizations,
   ) {
@@ -263,7 +280,7 @@ class ErrorMessageFormatter {
   /// meaningful error messages to reach users while removing technical prefixes.
   /// If the error is truly unknown/technical, the user will get a fallback message
   /// from _extractMessage.
-  static String _formatByErrorString(
+  String _formatByErrorString(
     Object error,
     FoundationLocalizationProvider localizations,
   ) {
@@ -275,7 +292,7 @@ class ErrorMessageFormatter {
   }
 
   /// Checks if an error is network-related
-  static bool isNetworkError(Object error) {
+  bool isNetworkError(Object error) {
     if (error is SocketException || error is NetworkException) {
       return true;
     }
@@ -287,7 +304,7 @@ class ErrorMessageFormatter {
   }
 
   /// Checks if an error is database-related
-  static bool isDatabaseError(Object error) {
+  bool isDatabaseError(Object error) {
     if (error is DatabaseException) {
       return true;
     }
@@ -299,7 +316,7 @@ class ErrorMessageFormatter {
   }
 
   /// Checks if an error is timeout-related
-  static bool isTimeoutError(Object error) {
+  bool isTimeoutError(Object error) {
     if (error is TimeoutException) {
       return true;
     }

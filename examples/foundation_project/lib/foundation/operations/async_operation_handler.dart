@@ -24,6 +24,7 @@ class AsyncOperationHandler with EventEmitterMixin {
   final ConnectivityService _connectivityService;
   final OfflineQueueManager? _offlineQueueManager;
   final FoundationLocalizationProvider _localizations;
+  final ErrorMessageFormatter _errorMessageFormatter;
   final Uuid _uuid = const Uuid();
 
   AsyncOperationHandler({
@@ -31,11 +32,17 @@ class AsyncOperationHandler with EventEmitterMixin {
     ConnectivityService? connectivityService,
     OfflineQueueManager? offlineQueueManager,
     FoundationLocalizationProvider? localizations,
+    ErrorMessageFormatter? errorMessageFormatter,
   })  : _logger = logger,
         _connectivityService =
             connectivityService ?? ConnectivityService(logger: logger),
         _offlineQueueManager = offlineQueueManager,
-        _localizations = localizations ?? DefaultFoundationLocalizationProvider();
+        _localizations = localizations ?? DefaultFoundationLocalizationProvider(),
+        _errorMessageFormatter = errorMessageFormatter ??
+            ErrorMessageFormatter(
+              logger: logger,
+              defaultLocalizations: localizations ?? DefaultFoundationLocalizationProvider(),
+            );
 
   /// Execute an operation with basic error handling and timeout
   /// 
@@ -198,7 +205,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       );
 
       // Format error message for user display
-      final formattedError = errorMessage ?? ErrorMessageFormatter.format(
+      final formattedError = errorMessage ?? _errorMessageFormatter.format(
         e,
         localizations: _localizations,
       );
@@ -302,7 +309,7 @@ class AsyncOperationHandler with EventEmitterMixin {
     // Format error message for user display
     final formattedError = errorMessage ?? 
         (lastError != null 
-            ? ErrorMessageFormatter.format(
+            ? _errorMessageFormatter.format(
                 lastError,
                 localizations: _localizations,
               )
@@ -426,7 +433,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
       // Format error message for user display
-      final formattedError = errorMessage ?? ErrorMessageFormatter.format(
+      final formattedError = errorMessage ?? _errorMessageFormatter.format(
         e,
         localizations: _localizations,
       );
@@ -465,7 +472,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
       // Format error message for user display
-      final formattedError = errorMessage ?? ErrorMessageFormatter.format(
+      final formattedError = errorMessage ?? _errorMessageFormatter.format(
         e,
         localizations: _localizations,
       );

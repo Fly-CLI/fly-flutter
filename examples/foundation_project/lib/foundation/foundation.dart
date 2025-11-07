@@ -4,6 +4,8 @@
 export 'error/app_exception.dart';
 export 'error/custom_error_handler.dart';
 export 'error/error_handler.dart';
+export 'error/error_message_formatter.dart';
+export 'error/error_message_formatter_provider.dart';
 export 'error/network_errors.dart';
 // Feedback exports (from fly_feedback package)
 export 'package:fly_feedback/fly_feedback.dart';

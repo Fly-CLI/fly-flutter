@@ -42,8 +42,11 @@ Provides centralized error handling and user-friendly error message formatting.
 
 **Usage:**
 ```dart
+// Get formatter from provider (Riverpod)
+final formatter = ref.read(errorMessageFormatterProvider);
+
 // Format error for display
-final userMessage = ErrorMessageFormatter.format(
+final userMessage = formatter.format(
   error,
   localizations: localizationProvider, // Optional
 );
@@ -273,10 +276,13 @@ class MyViewModel extends FlyViewModel<MyState> {
 ### Error Handling
 
 ```dart
+// Get formatter from provider (Riverpod)
+final formatter = ref.read(errorMessageFormatterProvider);
+
 try {
   await someOperation();
 } catch (e, stackTrace) {
-  final userMessage = ErrorMessageFormatter.format(
+  final userMessage = formatter.format(
     e,
     localizations: localizationProvider,
   );
