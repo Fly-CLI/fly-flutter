@@ -4,7 +4,7 @@ import 'package:foundation_project/core/event_system/event_emitter.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/event_system/event_providers.dart';
 import 'package:foundation_project/core/navigation/app.dart';
-import 'package:foundation_project/core/foundation/mvvm/services/navigation_service.dart';
+import 'package:foundation_project/core/navigation/navigation_service.dart';
 
 /// Enum for application features with their corresponding routes
 ///

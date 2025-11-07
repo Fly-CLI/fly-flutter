@@ -7,9 +7,12 @@ import 'package:foundation_project/features/home/domain/models/note.dart';
 /// Pagination service for notes
 class NotePaginationService {
   final NoteRepository _noteRepository;
-  final AppLogger _logger = AppLogger('NotePaginationService');
+  final Logger _logger;
 
-  NotePaginationService(this._noteRepository);
+  NotePaginationService(
+    this._noteRepository, {
+    required Logger logger,
+  }) : _logger = logger;
 
   /// Get paginated notes
   Future<AppResult<PaginatedResult<Note>>> getPaginated({

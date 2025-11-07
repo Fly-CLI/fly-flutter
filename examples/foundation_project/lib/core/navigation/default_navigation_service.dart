@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/core/foundation/mvvm/services/navigation_service.dart';
+import 'package:foundation_project/core/navigation/navigation_service.dart';
 
 /// Default implementation of NavigationService using standard Flutter Navigator
 ///

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/foundation/mvvm/view_model/fly_view_model.dart';
 import 'package:foundation_project/core/foundation/mvvm/view_model/view_model_state.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
 import 'package:foundation_project/core/services/sync_service.dart';
@@ -82,9 +84,9 @@ class HomeViewModelState
 /// All async operations use runAsyncOperation to ensure consistent error handling,
 /// loading state management, and network awareness.
 class HomeViewModel extends FlyViewModel<HomeViewModelState> {
-  final AppLogger _logger = AppLogger('HomeViewModel');
+  final Logger _logger;
 
-  HomeViewModel();
+  HomeViewModel({required Logger logger}) : _logger = logger;
 
   StatisticsService get _statisticsService => ref.read(statisticsServiceProvider);
   SyncService get _syncService => ref.read(syncServiceProvider);
@@ -173,6 +175,12 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
 }
 
 /// Home ViewModel provider
-final homeViewModelProvider =
-    NotifierProvider<HomeViewModel, HomeViewModelState>(HomeViewModel.new);
+final homeViewModelProvider = NotifierProvider<HomeViewModel, HomeViewModelState>(
+  () {
+    // Note: In a real app, you'd get logger from GlobalContainer or ref
+    // For now, we'll use GlobalContainer since this is a NotifierProvider
+    final logger = GlobalContainer.instance.read(loggerProvider('HomeViewModel'));
+    return HomeViewModel(logger: logger);
+  },
+);
 

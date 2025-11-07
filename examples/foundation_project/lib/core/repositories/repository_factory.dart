@@ -8,9 +8,12 @@ import 'package:foundation_project/core/repositories/task_repository.dart';
 class RepositoryFactory {
   final AppDatabase _database;
   final Map<String, dynamic> _repositories = {};
-  final AppLogger _logger = AppLogger('RepositoryFactory');
+  final Logger _logger;
 
-  RepositoryFactory(this._database);
+  RepositoryFactory(
+    this._database, {
+    required Logger logger,
+  }) : _logger = logger;
 
   /// Get task repository
   TaskRepository get taskRepository =>

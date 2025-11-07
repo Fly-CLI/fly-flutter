@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/core/providers/logger_provider.dart';
 
 /// Centralized error handling system for the application
 class ErrorHandler {
-  static final AppLogger _logger = AppLogger('ErrorHandler');
+  static Logger get _logger =>
+      GlobalContainer.instance.read(loggerProvider('ErrorHandler'));
 
   /// Handles errors with proper logging and user-friendly messages
   static void handleError(
@@ -16,8 +19,8 @@ class ErrorHandler {
     _logger.error(
       'Error in $context: $error',
       stackTrace: stackTrace,
-      customKeys: additionalData?.map(
-        (key, value) => MapEntry(key, value.toString()),
+      fields: additionalData?.map(
+        (key, value) => MapEntry(key, value),
       ),
     );
 

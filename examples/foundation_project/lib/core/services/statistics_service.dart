@@ -8,13 +8,15 @@ import 'package:foundation_project/features/home/data/models/statistics_entity.d
 class StatisticsService {
   final TaskRepository _taskRepository;
   final CacheService _cacheService;
-  final AppLogger _logger = AppLogger('StatisticsService');
+  final Logger _logger;
 
   StatisticsService({
     required TaskRepository taskRepository,
     required CacheService cacheService,
+    required Logger logger,
   })  : _taskRepository = taskRepository,
-        _cacheService = cacheService;
+        _cacheService = cacheService,
+        _logger = logger;
 
   /// Get statistics with caching
   Future<AppResult<StatisticsEntity>> getStatistics() async {

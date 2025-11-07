@@ -23,7 +23,7 @@ class _Config {
 class RecentlyAccessedTrackingService {
   final AppDataManager _dataManager;
   final AppEventEmitter _lifecycleEmitter;
-  final AppLogger _logger = AppLogger('RecentlyAccessedTrackingService');
+  final Logger _logger;
 
   Timer? _debounceTimer;
   FeatureScreenType? _pendingFeature;
@@ -31,8 +31,9 @@ class RecentlyAccessedTrackingService {
 
   RecentlyAccessedTrackingService(
     this._dataManager,
-    this._lifecycleEmitter,
-  ) {
+    this._lifecycleEmitter, {
+    required Logger logger,
+  })  : _logger = logger {
     _initialize();
   }
 

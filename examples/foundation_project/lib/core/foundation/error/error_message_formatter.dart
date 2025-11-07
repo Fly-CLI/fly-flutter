@@ -1,153 +1,256 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/shared/localization/localizations.dart';
 
-/// Formats technical errors into user-friendly messages
+/// Formats technical errors into user-friendly localized messages
 ///
-/// This utility converts exceptions and errors into messages suitable
-/// for display to end users, while logging technical details for debugging.
+/// This utility provides a centralized, type-safe system for converting exceptions
+/// into messages suitable for display to end users. It uses an explicit registry
+/// pattern to ensure only known exception types are formatted, preventing accidental
+/// exposure of sensitive data.
 ///
-/// Users can provide their own formatter function for localization.
+/// ## Architecture
 ///
-/// Usage:
+/// The formatter uses a three-tier approach:
+/// 1. **Registry-based formatting**: Known AppException types are looked up in a
+///    type-safe registry and formatted using registered handlers
+/// 2. **System exception handling**: Common system exceptions (SocketException,
+///    FileSystemException, etc.) receive appropriate user-friendly messages
+/// 3. **Fallback processing**: Unknown errors are cleaned of technical prefixes
+///    and passed through, or replaced with generic messages if unusable
+///
+/// ## Usage
+///
+/// Basic error formatting:
 /// ```dart
 /// try {
 ///   await someOperation();
 /// } catch (e) {
-///   final userMessage = ErrorMessageFormatter.format(
-///     e,
-///     formatter: (error) => AppLocalizations.of(context).formatError(error),
-///   );
+///   final userMessage = ErrorMessageFormatter.format(e);
 ///   ScaffoldMessenger.of(context).showSnackBar(
 ///     SnackBar(content: Text(userMessage)),
 ///   );
 /// }
 /// ```
+///
+/// ## Adding New Exception Types
+///
+/// To add support for a new exception type:
+///
+/// 1. **Create a custom exception class** extending `AppException`:
+/// ```dart
+/// class MyCustomException extends AppException {
+///   MyCustomException(String message) : super(message);
+/// }
+/// ```
+///
+/// 2. **Register the exception** in `_exceptionFormatters`:
+/// ```dart
+/// static final Map<Type, String Function(AppException)> _exceptionFormatters = {
+///   // ... existing entries ...
+///   MyCustomException: (e) => e.message,
+/// };
+/// ```
+///
+/// 3. **Add tests** to verify formatting behavior:
+/// ```dart
+/// test('should format MyCustomException', () {
+///   final error = MyCustomException('Custom error');
+///   final formatted = ErrorMessageFormatter.format(error);
+///   expect(formatted, equals('Custom error'));
+/// });
+/// ```
+///
+/// ## Design Principles
+///
+/// - **Type Safety**: Use explicit exception types instead of string matching
+/// - **Security**: Only registered exception types are formatted to prevent data leaks
+/// - **Maintainability**: Clear registry makes it easy to see all handled exceptions
+/// - **Localization**: All formatted messages use localized strings
+/// - **Logging**: Technical details are logged for debugging while users see friendly messages
+///
+/// ## Error Handling Strategy
+///
+/// - **Validation errors**: Pass through the exception message (usually already user-friendly)
+/// - **Network errors**: Provide recovery suggestions based on error type
+/// - **Database errors**: Generic message to avoid exposing database structure
+/// - **Business rule violations**: Show detailed, actionable information to users
+/// - **Unknown errors**: Clean technical prefixes or use generic fallback
+///
+/// See also:
+/// - [AppException] - Base class for custom exceptions
 class ErrorMessageFormatter {
-  static final AppLogger _logger = AppLogger('ErrorMessageFormatter');
+  static final FlyLogger _logger = FlyLogger('ErrorMessageFormatter');
 
-  /// Formats an error into a user-friendly message
+  /// Registry of known AppException types and their formatters
+  /// 
+  /// This explicit mapping provides type-safe exception handling and prevents
+  /// accidental exposure of sensitive data through unhandled exception types.
+  /// 
+  /// To add a new exception type:
+  /// 1. Add the exception type to this map with its formatter function
+  /// 2. Ensure the formatter returns a user-friendly, localized message
+  /// 3. Add tests to verify the formatting behavior
+  static final Map<Type, String Function(AppException)> _exceptionFormatters = {
+    ValidationException: (e) => e.message,
+    NetworkException: (e) => localizations.networkErrorConnectionRecovery,
+    DatabaseException: (e) => localizations.databaseErrorPleaseTryAgain,
+    AuthenticationException: (e) => localizations.networkErrorAuthRecovery,
+    PermissionException: (e) => localizations.permissionDenied,
+    TimeoutException: (e) => localizations.networkErrorTimeoutRecovery,
+  };
+
+  /// Formats an error into a user-friendly localized message
   ///
-  /// Converts technical exception details into messages appropriate for displaying
-  /// to users. Technical details are logged for debugging purposes.
+  /// Converts technical exception details into localized messages
+  /// appropriate for displaying to users. Technical details are
+  /// logged for debugging purposes.
   ///
   /// Parameters:
   /// - [error]: The error or exception to format
-  /// - [formatter]: Optional formatter function for localization. If provided, this
-  ///   function will be called with the error to get a localized message.
-  ///   If not provided, returns basic error message or exception.toString().
   /// - [logError]: Whether to log the technical error (default: true)
   ///
-  /// Returns a user-friendly error message (localized if formatter is provided)
-  static String format(
-    Object error, {
-    String Function(Object error)? formatter,
-    bool logError = true,
-  }) {
+  /// Returns a localized, user-friendly error message
+  static String format(Object error, {bool logError = true}) {
     // Log technical error for debugging
     if (logError) {
-      _logger.logError('Formatting error for user display: $error');
+      _logger.error('Formatting error for user display: $error');
     }
 
-    // If user provides formatter, use it
-    if (formatter != null) {
-      return formatter(error);
+    // Handle custom app exceptions first
+    if (error is AppException) {
+      return _formatAppException(error);
     }
 
-    // Otherwise, return basic error message (no localization)
-    if (error is AppException && error.message.isNotEmpty) {
-      return error.message;
+    // Handle common system exceptions
+    if (error is SocketException) {
+      return _formatNetworkError(error);
     }
 
-    return error.toString(); // Fallback to raw error string
+    if (error is TimeoutException) {
+      return localizations.networkErrorTimeoutRecovery;
+    }
+
+    if (error is FileSystemException) {
+      return localizations.databaseErrorPleaseTryAgain;
+    }
+
+    if (error is FormatException) {
+      return localizations.unexpectedErrorOccurred;
+    }
+
+    // Check error string for common patterns
+    return _formatByErrorString(error);
   }
 
-  /// Formats custom AppException types
-  /// @deprecated Use [format] with a formatter function instead
-  @Deprecated('Use format() with a formatter function for localization')
-  static String _formatAppException(AppException exception, dynamic l10n) {
-    // This method is kept for backward compatibility but is no longer used
-    // Users should provide their own formatter function
-    return exception.message.isNotEmpty ? exception.message : exception.toString();
+  /// Formats custom AppException types using the registry
+  /// 
+  /// This method looks up the exception type in the registry and applies
+  /// the registered formatter. For unregistered exception types, it attempts
+  /// to use the exception's message if meaningful, otherwise returns a generic error.
+  static String _formatAppException(AppException exception) {
+    // Look up formatter in registry
+    final formatter = _exceptionFormatters[exception.runtimeType];
+    if (formatter != null) {
+      return formatter(exception);
+    }
+    
+    // Fallback for unregistered AppException types
+    // Use the exception's message if it's meaningful (not just technical noise)
+    if (exception.message.isNotEmpty &&
+        !exception.message.contains('Exception') &&
+        !exception.message.contains('Error:')) {
+      return exception.message;
+    }
+
+    // Last resort: generic error message
+    _logger.warn(
+      'Unregistered AppException type: ${exception.runtimeType}. '
+      'Consider adding it to _exceptionFormatters registry.',
+    );
+    return localizations.unexpectedErrorOccurred;
   }
 
   /// Formats network-related errors
-  /// @deprecated Use [format] with a formatter function instead
-  @Deprecated('Use format() with a formatter function for localization')
-  static String _formatNetworkError(SocketException exception, dynamic l10n) {
-    // This method is kept for backward compatibility but is no longer used
-    return exception.message;
+  static String _formatNetworkError(SocketException exception) {
+    final message = exception.message.toLowerCase();
+
+    if (message.contains('failed host lookup') ||
+        message.contains('no address associated')) {
+      return localizations.networkErrorDnsRecovery;
+    }
+
+    if (message.contains('connection refused') ||
+        message.contains('connection failed')) {
+      return localizations.networkErrorConnectionRecovery;
+    }
+
+    if (message.contains('network is unreachable')) {
+      return localizations.networkErrorNoInternetRecovery;
+    }
+
+    // Generic network error
+    return localizations.networkErrorConnectionRecovery;
   }
 
-  /// Formats errors by analyzing the error string
-  /// @deprecated Use [format] with a formatter function instead
-  @Deprecated('Use format() with a formatter function for localization')
-  static String _formatByErrorString(Object error, dynamic l10n) {
-    final errorString = error.toString().toLowerCase();
-
-    // Network-related errors
-    if (errorString.contains('socketexception') ||
-        errorString.contains('failed host lookup') ||
-        errorString.contains('network')) {
-      return error.toString();
+  /// Extracts the meaningful message from an error string
+  /// 
+  /// This method cleans up error strings by:
+  /// - Removing technical prefixes like "Exception: "
+  /// - Detecting and handling empty or purely technical messages
+  /// - Providing a fallback for unusable error messages
+  /// 
+  /// Returns a user-friendly message or a generic fallback if the message
+  /// contains no useful information.
+  static String _extractMessage(String errorString) {
+    String message = errorString.trim();
+    
+    // Remove technical prefixes (handle multiple occurrences)
+    while (message.startsWith('Exception: ')) {
+      message = message.substring('Exception: '.length).trim();
     }
-
-    // Database-related errors
-    if (errorString.contains('sqliteexception') ||
-        errorString.contains('database') ||
-        errorString.contains('sql')) {
-      return error.toString();
+    
+    // Check if message is empty or just technical noise
+    if (message.isEmpty) {
+      _logger.warn('Empty error message encountered');
+      return localizations.unexpectedErrorOccurred;
     }
-
-    // Timeout errors
-    if (errorString.contains('timeout') || errorString.contains('timed out')) {
-      return error.toString();
+    
+    // Check for technical noise patterns that aren't useful to users
+    final messageLower = message.toLowerCase();
+    if (messageLower.startsWith('instance of ') ||
+        messageLower == 'null' ||
+        messageLower == 'exception' ||
+        messageLower == 'exception:' ||  // Handle empty exception toString
+        messageLower == 'error') {
+      _logger.warn('Technical error message encountered: $message');
+      return localizations.unexpectedErrorOccurred;
     }
+    
+    return message;
+  }
 
-    // Permission errors
-    if (errorString.contains('permission') ||
-        errorString.contains('denied') ||
-        errorString.contains('access denied')) {
-      return error.toString();
-    }
-
-    // Authentication errors
-    if (errorString.contains('authentication') ||
-        errorString.contains('unauthorized') ||
-        errorString.contains('401')) {
-      return error.toString();
-    }
-
-    // Not found errors
-    if (errorString.contains('not found') || errorString.contains('404')) {
-      return error.toString();
-    }
-
-    // Rate limit errors
-    if (errorString.contains('rate limit') ||
-        errorString.contains('too many requests') ||
-        errorString.contains('429')) {
-      return error.toString();
-    }
-
-    // Server errors
-    if (errorString.contains('500') ||
-        errorString.contains('503') ||
-        errorString.contains('server error')) {
-      return error.toString();
-    }
-
-    // Certificate/SSL errors
-    if (errorString.contains('certificate') ||
-        errorString.contains('ssl') ||
-        errorString.contains('handshake')) {
-      return error.toString();
-    }
-
-    // Generic fallback
-    _logger.logWarning('Unknown error type, using generic message: $error');
-    return error.toString();
+  /// Formats errors by analyzing the error string (fallback for non-typed exceptions)
+  /// 
+  /// This method is a last resort for errors that are not properly typed exceptions.
+  /// Most errors should be handled through the type-based registry system instead.
+  /// 
+  /// IMPORTANT: String pattern matching is fragile and should be avoided.
+  /// Always create custom exception types for business rules instead of relying
+  /// on string patterns.
+  /// 
+  /// This method simply cleans the error message and passes it through, allowing
+  /// meaningful error messages to reach users while removing technical prefixes.
+  /// If the error is truly unknown/technical, the user will get a fallback message
+  /// from _extractMessage.
+  static String _formatByErrorString(Object error) {
+    final errorString = error.toString();
+    
+    // Clean the message and pass through - no string pattern matching
+    // All business rules should be handled by typed exceptions in the registry
+    return _extractMessage(errorString);
   }
 
   /// Checks if an error is network-related
@@ -184,5 +287,3 @@ class ErrorMessageFormatter {
     return errorString.contains('timeout') || errorString.contains('timed out');
   }
 }
-
-

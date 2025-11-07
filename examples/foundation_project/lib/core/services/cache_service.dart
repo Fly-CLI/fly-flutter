@@ -3,7 +3,9 @@ import 'package:foundation_project/core/foundation/utils/app_logger.dart';
 /// In-memory cache service with TTL (Time To Live) support
 class CacheService {
   final Map<String, _CacheEntry> _cache = {};
-  final AppLogger _logger = AppLogger('CacheService');
+  final Logger _logger;
+
+  CacheService({required Logger logger}) : _logger = logger;
 
   /// Get cached value
   T? get<T>(String key) {

@@ -1,5 +1,7 @@
 import 'package:foundation_project/core/foundation/operations/retry_config.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/di/global_container.dart';
+import 'package:foundation_project/core/providers/logger_provider.dart';
 
 /// Central configuration for AsyncOperationHandler default values
 /// 
@@ -13,7 +15,8 @@ class AsyncOperationConfig {
   AsyncOperationConfig._();
 
   /// Logger instance for configuration-related logging
-  static final AppLogger _logger = AppLogger('AsyncHandlerConfig');
+  static Logger get _logger =>
+      GlobalContainer.instance.read(loggerProvider('AsyncHandlerConfig'));
 
   // ==========================================================================
   // TIMEOUT CONFIGURATION

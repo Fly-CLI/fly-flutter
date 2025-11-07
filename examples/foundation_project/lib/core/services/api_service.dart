@@ -7,9 +7,13 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String baseUrl = 'https://api.example.com';
   final http.Client _client;
-  final AppLogger _logger = AppLogger('ApiService');
+  final Logger _logger;
 
-  ApiService({http.Client? client}) : _client = client ?? http.Client();
+  ApiService({
+    required Logger logger,
+    http.Client? client,
+  })  : _logger = logger,
+        _client = client ?? http.Client();
 
   /// Get all tasks (mock)
   Future<AppResult<List<Task>>> getTasks() async {

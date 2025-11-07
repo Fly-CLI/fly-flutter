@@ -26,9 +26,11 @@ class LoggingEventPlugin {
   AppEventEmitter? _emitter;
   StreamSubscription<AppEvent>? _screenSubscription;
   StreamSubscription<AppEvent>? _operationSubscription;
-  final AppLogger _logger = AppLogger('LoggingEventPlugin');
+  final Logger _logger;
   /// Whether logging is enabled
   bool enabled = true;
+
+  LoggingEventPlugin({required Logger logger}) : _logger = logger;
 
   /// Initialize the plugin and start listening to events
   void initialize() {
@@ -55,49 +57,49 @@ class LoggingEventPlugin {
 
   void _logScreenEvent(ScreenEvent event) {
     if (event is ScreenShownEvent) {
-      final customKeys = _convertMetadata(event.metadata);
-      _logger.log(
+      final fields = _convertMetadata(event.metadata);
+      _logger.info(
         'Screen shown: ${event.screenName}',
-        customKeys: customKeys,
+        fields: fields,
       );
     } else if (event is ScreenHiddenEvent) {
-      final customKeys = _convertMetadata(event.metadata);
-      _logger.log(
+      final fields = _convertMetadata(event.metadata);
+      _logger.info(
         'Screen hidden: ${event.screenName}',
-        customKeys: customKeys,
+        fields: fields,
       );
     }
   }
 
   void _logOperationEvent(FoundationOperationEvent event) {
     if (event is AsyncOperationStartedEvent) {
-      final customKeys = _convertMetadata(event.metadata);
-      _logger.log(
+      final fields = _convertMetadata(event.metadata);
+      _logger.info(
         'Operation started: ${event.operationName} (id: ${event.operationId})',
-        customKeys: customKeys,
+        fields: fields,
       );
     } else if (event is AsyncOperationCompletedEvent) {
-      final customKeys = _convertMetadata(event.metadata);
-      _logger.log(
+      final fields = _convertMetadata(event.metadata);
+      _logger.info(
         'Operation completed: ${event.operationName} '
         '(id: ${event.operationId}, duration: ${event.duration.inMilliseconds}ms, '
         'success: ${event.success})',
-        customKeys: customKeys,
+        fields: fields,
       );
     } else if (event is AsyncOperationFailedEvent) {
-      final customKeys = _convertMetadata(event.metadata);
-      _logger.logError(
+      final fields = _convertMetadata(event.metadata);
+      _logger.error(
         'Operation failed: ${event.operationName} '
         '(id: ${event.operationId}, duration: ${event.duration.inMilliseconds}ms, '
         'error: ${event.error})',
-        customKeys: customKeys,
+        fields: fields,
       );
     }
   }
 
-  Map<String, String> _convertMetadata(Map<String, dynamic> metadata) {
+  Map<String, Object?> _convertMetadata(Map<String, dynamic> metadata) {
     return metadata.map(
-      (key, value) => MapEntry(key, value.toString()),
+      (key, value) => MapEntry(key, value),
     );
   }
 

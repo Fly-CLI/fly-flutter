@@ -10,13 +10,14 @@ import 'package:foundation_project/core/services/device_condition_service.dart';
 /// for network operations, with real-time monitoring and connection state tracking
 class ConnectivityService {
   final DeviceConditionService _deviceConditionService;
-  final AppLogger _logger;
+  final Logger _logger;
 
   ConnectivityService({
     DeviceConditionService? deviceConditionService,
+    required Logger logger,
   })  : _deviceConditionService =
-            deviceConditionService ?? DeviceConditionService(),
-        _logger = AppLogger('ConnectivityService');
+            deviceConditionService ?? DeviceConditionService(logger: logger),
+        _logger = logger;
 
   /// Check if device has internet connection
   /// 
@@ -27,7 +28,7 @@ class ConnectivityService {
       _logger.debug('Internet connection check: $hasConnection');
       return hasConnection;
     } catch (e) {
-      _logger.warning('Failed to check internet connection: $e');
+      _logger.warn('Failed to check internet connection: $e');
       // Conservative: assume no connection on error
       return false;
     }
@@ -40,7 +41,7 @@ class ConnectivityService {
       _logger.debug('WiFi connection check: $isWifi');
       return isWifi;
     } catch (e) {
-      _logger.warning('Failed to check WiFi connection: $e');
+      _logger.warn('Failed to check WiFi connection: $e');
       return false;
     }
   }
@@ -54,7 +55,7 @@ class ConnectivityService {
       _logger.debug('Connectivity status: $status');
       return status;
     } catch (e) {
-      _logger.warning('Failed to get connectivity status: $e');
+      _logger.warn('Failed to get connectivity status: $e');
       return ConnectivityResult.none;
     }
   }
@@ -86,7 +87,7 @@ class ConnectivityService {
         requireCharging: requireCharging,
       );
     } catch (e) {
-      _logger.warning('Failed to check optimal conditions: $e');
+      _logger.warn('Failed to check optimal conditions: $e');
       return false;
     }
   }

@@ -7,9 +7,12 @@ import 'package:foundation_project/features/home/domain/models/task.dart';
 /// Pagination service for tasks
 class TaskPaginationService {
   final TaskRepository _taskRepository;
-  final AppLogger _logger = AppLogger('TaskPaginationService');
+  final Logger _logger;
 
-  TaskPaginationService(this._taskRepository);
+  TaskPaginationService(
+    this._taskRepository, {
+    required Logger logger,
+  }) : _logger = logger;
 
   /// Get paginated tasks
   Future<AppResult<PaginatedResult<Task>>> getPaginated({

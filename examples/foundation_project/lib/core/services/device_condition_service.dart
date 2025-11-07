@@ -1,6 +1,6 @@
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:foundation_project/core/foundation/foundation.dart';
+import 'package:foundation_project/core/foundation/utils/app_logger.dart';
 
 /// Service for checking device conditions for backups and other operations
 ///
@@ -10,13 +10,17 @@ import 'package:foundation_project/core/foundation/foundation.dart';
 /// - Charging status
 /// - Overall device readiness for resource-intensive operations
 class DeviceConditionService {
-  final AppLogger _logger = AppLogger('DeviceConditionService');
+  final Logger _logger;
   final Connectivity _connectivity;
   final Battery _battery;
 
-  DeviceConditionService({Connectivity? connectivity, Battery? battery})
-    : _connectivity = connectivity ?? Connectivity(),
-      _battery = battery ?? Battery();
+  DeviceConditionService({
+    required Logger logger,
+    Connectivity? connectivity,
+    Battery? battery,
+  })  : _logger = logger,
+        _connectivity = connectivity ?? Connectivity(),
+        _battery = battery ?? Battery();
 
   /// Check if device is connected to WiFi
   Future<bool> isConnectedToWifi() async {
@@ -24,7 +28,7 @@ class DeviceConditionService {
       final results = await _connectivity.checkConnectivity();
       return results.contains(ConnectivityResult.wifi);
     } catch (e) {
-      _logger.warning('Failed to check WiFi status: $e');
+      _logger.warn('Failed to check WiFi status: $e');
       return false;
     }
   }
@@ -36,7 +40,7 @@ class DeviceConditionService {
       return results.isNotEmpty &&
           !results.every((result) => result == ConnectivityResult.none);
     } catch (e) {
-      _logger.warning('Failed to check internet connection: $e');
+      _logger.warn('Failed to check internet connection: $e');
       return false;
     }
   }
@@ -50,7 +54,7 @@ class DeviceConditionService {
       final results = await _connectivity.checkConnectivity();
       return results.isNotEmpty ? results.first : ConnectivityResult.none;
     } catch (e) {
-      _logger.warning('Failed to get connectivity status: $e');
+      _logger.warn('Failed to get connectivity status: $e');
       return ConnectivityResult.none;
     }
   }
@@ -62,7 +66,7 @@ class DeviceConditionService {
     try {
       return await _battery.batteryLevel;
     } catch (e) {
-      _logger.warning('Failed to get battery level: $e');
+      _logger.warn('Failed to get battery level: $e');
       return 100; // Assume fully charged on error
     }
   }
@@ -75,7 +79,7 @@ class DeviceConditionService {
       final state = await _battery.batteryState;
       return state == BatteryState.charging || state == BatteryState.full;
     } catch (e) {
-      _logger.warning('Failed to check charging status: $e');
+      _logger.warn('Failed to check charging status: $e');
       return false;
     }
   }
@@ -131,7 +135,7 @@ class DeviceConditionService {
       _logger.debug('Device conditions optimal for backup');
       return true;
     } catch (e) {
-      _logger.warning('Failed to check device conditions: $e');
+      _logger.warn('Failed to check device conditions: $e');
       return false;
     }
   }

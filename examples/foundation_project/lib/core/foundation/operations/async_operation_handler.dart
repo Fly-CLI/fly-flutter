@@ -18,16 +18,18 @@ import 'package:uuid/uuid.dart';
 /// - Telemetry and logging
 /// - Event emission for observability
 class AsyncOperationHandler with EventEmitterMixin {
-  final AppLogger _logger = AppLogger('AsyncOperationHandler');
+  final Logger _logger;
   final ConnectivityService _connectivityService;
   final OfflineQueueManager? _offlineQueueManager;
   final Uuid _uuid = const Uuid();
 
   AsyncOperationHandler({
+    required Logger logger,
     ConnectivityService? connectivityService,
     OfflineQueueManager? offlineQueueManager,
-  })  : _connectivityService =
-            connectivityService ?? ConnectivityService(),
+  })  : _logger = logger,
+        _connectivityService =
+            connectivityService ?? ConnectivityService(logger: logger),
         _offlineQueueManager = offlineQueueManager;
 
   /// Execute an operation with basic error handling and timeout
@@ -72,7 +74,7 @@ class AsyncOperationHandler with EventEmitterMixin {
         final hasConnection =
             await _connectivityService.hasInternetConnection();
         if (!hasConnection) {
-          _logger.warning('No internet connection detected');
+          _logger.warn('No internet connection detected');
 
           final duration = DateTime.now().difference(startTime);
           final errorMessageText = errorMessage ?? 
@@ -128,7 +130,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       return Success(result);
     } on TimeoutException {
       final duration = DateTime.now().difference(startTime);
-      _logger.logError(
+      _logger.error(
         'Operation timed out after ${duration.inSeconds} seconds',
       );
 
@@ -152,7 +154,7 @@ class AsyncOperationHandler with EventEmitterMixin {
         error,
       );
     } on SocketException catch (e, stackTrace) {
-      _logger.logError('Socket exception: ${e.message}', stackTrace: stackTrace);
+      _logger.error('Socket exception: ${e.message}', stackTrace: stackTrace);
 
       final error = NetworkErrorClassifier.classifyError(e);
       final duration = DateTime.now().difference(startTime);
@@ -175,7 +177,7 @@ class AsyncOperationHandler with EventEmitterMixin {
         error,
       );
     } catch (e, stackTrace) {
-      _logger.logError('Operation failed: $e', stackTrace: stackTrace);
+      _logger.error('Operation failed: $e', stackTrace: stackTrace);
 
       // Classify error as network error if applicable
       final classifiedError = NetworkErrorClassifier.classifyError(
@@ -251,7 +253,7 @@ class AsyncOperationHandler with EventEmitterMixin {
 
       if (result.isSuccess) {
         final totalDuration = DateTime.now().difference(startTime);
-        _logger.log(
+        _logger.info(
           'Operation succeeded on attempt ${attempt + 1} '
           '(total time: ${totalDuration.inMilliseconds}ms)',
         );
@@ -265,19 +267,19 @@ class AsyncOperationHandler with EventEmitterMixin {
       }
 
       if (lastError != null && !config.isRetryable(lastError)) {
-        _logger.warning('Error is not retryable: ${lastError.runtimeType}');
+        _logger.warn('Error is not retryable: ${lastError.runtimeType}');
         break;
       }
 
       if (attempt == config.maxAttempts) {
-        _logger.warning('Max retry attempts reached');
+        _logger.warn('Max retry attempts reached');
         break;
       }
     }
 
     // All attempts failed
     final totalDuration = DateTime.now().difference(startTime);
-    _logger.logError(
+    _logger.error(
       'Operation failed after ${config.maxAttempts + 1} attempts '
       '(total time: ${totalDuration.inSeconds}s)',
     );
@@ -312,7 +314,7 @@ class AsyncOperationHandler with EventEmitterMixin {
     // Check connectivity first
     final hasConnection = await _connectivityService.hasInternetConnection();
     if (!hasConnection) {
-      _logger.warning('No internet connection for network operation');
+      _logger.warn('No internet connection for network operation');
 
       // Queue operation if requested and queue manager available
       if (effectiveQueueIfOffline && _offlineQueueManager != null) {
@@ -404,7 +406,7 @@ class AsyncOperationHandler with EventEmitterMixin {
         return result;
       }
     } catch (e, stackTrace) {
-      _logger.logError('Operation failed: $e', stackTrace: stackTrace);
+      _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
       // Format error message for user display
       final formattedError = errorMessage ?? ErrorMessageFormatter.format(e);
@@ -440,7 +442,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       return result;
     } catch (e, stackTrace) {
       onProgress(false);
-      _logger.logError('Operation failed: $e', stackTrace: stackTrace);
+      _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
       // Format error message for user display
       final formattedError = errorMessage ?? ErrorMessageFormatter.format(e);
@@ -455,7 +457,7 @@ class AsyncOperationHandler with EventEmitterMixin {
     String? errorMessage,
   ) async {
     if (_offlineQueueManager == null) {
-      _logger.warning('No queue manager available for offline operation');
+      _logger.warn('No queue manager available for offline operation');
       return;
     }
 
@@ -470,9 +472,9 @@ class AsyncOperationHandler with EventEmitterMixin {
 
     final queued = await _offlineQueueManager!.enqueue(queuedOp);
     if (queued) {
-      _logger.log('Operation queued: ${queuedOp.id}');
+      _logger.info('Operation queued: ${queuedOp.id}');
     } else {
-      _logger.warning('Failed to queue operation: ${queuedOp.id}');
+      _logger.warn('Failed to queue operation: ${queuedOp.id}');
     }
   }
 

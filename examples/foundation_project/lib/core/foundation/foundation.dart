@@ -13,9 +13,9 @@ export 'package:fly_feedback/fly_feedback.dart';
 export 'mvvm/screen/fly_screen.dart';
 export 'mvvm/view_model/fly_view_model.dart';
 // Navigation service exports
-export 'mvvm/services/navigation_service.dart';
-export 'mvvm/services/default_navigation_service.dart';
-export 'mvvm/services/navigation_service_provider.dart';
+export '../navigation/navigation_service.dart';
+export '../navigation/default_navigation_service.dart';
+export '../navigation/navigation_service_provider.dart';
 // Operations exports
 export 'operations/async_operation_handler.dart';
 export 'operations/async_operation_config.dart';
