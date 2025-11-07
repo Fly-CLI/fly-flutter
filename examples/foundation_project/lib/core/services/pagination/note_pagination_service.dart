@@ -7,11 +7,11 @@ import 'package:foundation_project/features/home/domain/models/note.dart';
 /// Pagination service for notes
 class NotePaginationService {
   final NoteRepository _noteRepository;
-  final Logger _logger;
+  final FlyLogger _logger;
 
   NotePaginationService(
     this._noteRepository, {
-    required Logger logger,
+    required FlyLogger logger,
   }) : _logger = logger;
 
   /// Get paginated notes

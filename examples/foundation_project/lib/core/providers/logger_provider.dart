@@ -15,7 +15,7 @@ import 'package:foundation_project/foundation/logger/fly_logger.dart';
 /// // In a static class
 /// final logger = GlobalContainer.instance.read(loggerProvider('MyService'));
 /// ```
-final loggerProvider = Provider.family<Logger, String>((ref, name) {
-  return FlyLogger(name);
+final loggerProvider = Provider.family<FlyLogger, String>((ref, name) {
+  return FlyLoggerImpl(name);
 });
 

@@ -115,7 +115,7 @@ typedef LogMessageBuilder = String Function();
 /// final requestLogger = logger.child({'requestId': requestId});
 /// requestLogger.debug('Processing request');
 /// ```
-abstract class Logger {
+abstract class FlyLogger {
   /// The name/identifier of this logger instance.
   String get name;
 
@@ -134,7 +134,7 @@ abstract class Logger {
   /// final child = parent.child({'requestId': '123'});
   /// // Both 'service' and 'requestId' will be included in child's logs
   /// ```
-  Logger child(LogFields fields);
+  FlyLogger child(LogFields fields);
 
   /// Creates a logger with additional fields for the next log call only.
   /// 
@@ -144,7 +144,7 @@ abstract class Logger {
   /// [fields] - Temporary fields to include in the next log entry
   /// 
   /// Returns a logger with temporary fields (may return `this`)
-  Logger withFields(LogFields fields);
+  FlyLogger withFields(LogFields fields);
 
   /// Logs a message at the specified level.
   /// 
@@ -332,7 +332,7 @@ abstract class Logger {
   bool isEnabled(LogLevel level);
 }
 
-/// Concrete implementation of [Logger] using `logging` package, `dart:developer`,
+/// Concrete implementation of [FlyLogger] using `logging` package, `dart:developer`,
 /// and Firebase Crashlytics.
 /// 
 /// This implementation provides:
@@ -348,13 +348,13 @@ abstract class Logger {
 /// final childLogger = logger.child({'requestId': '123'});
 /// childLogger.info('Request started');
 /// ```
-class FlyLogger implements Logger {
-  /// Creates an [FlyLogger] instance with the specified name.
+class FlyLoggerImpl implements FlyLogger {
+  /// Creates an [FlyLoggerImpl] instance with the specified name.
   /// 
   /// [name] - The logger name (typically the class or module name)
   /// [minLevel] - Minimum log level (defaults to [LogLevel.debug] in debug mode, [LogLevel.info] in release)
   /// [contextFields] - Initial context fields to include in all log entries
-  FlyLogger(
+  FlyLoggerImpl(
     this.name, {
     LogLevel? minLevel,
     LogFields? contextFields,
@@ -373,8 +373,8 @@ class FlyLogger implements Logger {
   bool isEnabled(LogLevel level) => level.isAtLeast(_minLevel);
 
   @override
-  Logger child(LogFields fields) {
-    return FlyLogger(
+  FlyLogger child(LogFields fields) {
+    return FlyLoggerImpl(
       name,
       minLevel: _minLevel,
       contextFields: {..._contextFields, ...fields},
@@ -382,7 +382,7 @@ class FlyLogger implements Logger {
   }
 
   @override
-  Logger withFields(LogFields fields) {
+  FlyLogger withFields(LogFields fields) {
     // For simplicity, we'll merge fields in the log method
     // A more sophisticated implementation could return a wrapper
     return _LoggerWithFields(this, fields);
@@ -586,22 +586,22 @@ class FlyLogger implements Logger {
 }
 
 /// Internal wrapper logger that adds temporary fields to the next log call.
-class _LoggerWithFields implements Logger {
+class _LoggerWithFields implements FlyLogger {
   _LoggerWithFields(this._delegate, this._tempFields);
 
-  final Logger _delegate;
+  final FlyLogger _delegate;
   final LogFields _tempFields;
 
   @override
   String get name => _delegate.name;
 
   @override
-  Logger child(LogFields fields) {
+  FlyLogger child(LogFields fields) {
     return _delegate.child({..._tempFields, ...fields});
   }
 
   @override
-  Logger withFields(LogFields fields) {
+  FlyLogger withFields(LogFields fields) {
     return _LoggerWithFields(_delegate, {..._tempFields, ...fields});
   }
 

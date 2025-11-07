@@ -7,10 +7,10 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String baseUrl = 'https://api.example.com';
   final http.Client _client;
-  final Logger _logger;
+  final FlyLogger _logger;
 
   ApiService({
-    required Logger logger,
+    required FlyLogger logger,
     http.Client? client,
   })  : _logger = logger,
         _client = client ?? http.Client();

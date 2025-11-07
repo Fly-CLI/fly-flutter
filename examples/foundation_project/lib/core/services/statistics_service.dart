@@ -8,12 +8,12 @@ import 'package:foundation_project/features/home/data/models/statistics_entity.d
 class StatisticsService {
   final TaskRepository _taskRepository;
   final CacheService _cacheService;
-  final Logger _logger;
+  final FlyLogger _logger;
 
   StatisticsService({
     required TaskRepository taskRepository,
     required CacheService cacheService,
-    required Logger logger,
+    required FlyLogger logger,
   })  : _taskRepository = taskRepository,
         _cacheService = cacheService,
         _logger = logger;

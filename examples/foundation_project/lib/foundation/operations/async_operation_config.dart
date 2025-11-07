@@ -15,7 +15,7 @@ class AsyncOperationConfig {
   AsyncOperationConfig._();
 
   /// Logger instance for configuration-related logging
-  static Logger get _logger =>
+  static FlyLogger get _logger =>
       GlobalContainer.instance.read(loggerProvider('AsyncHandlerConfig'));
 
   // ==========================================================================

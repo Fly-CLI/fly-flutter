@@ -13,14 +13,14 @@ class SyncService {
   final NoteRepository _noteRepository;
   final ApiService _apiService;
   final SyncDataManager _syncDataManager;
-  final Logger _logger;
+  final FlyLogger _logger;
 
   SyncService({
     required TaskRepository taskRepository,
     required NoteRepository noteRepository,
     required ApiService apiService,
     required SyncDataManager syncDataManager,
-    required Logger logger,
+    required FlyLogger logger,
   })  : _taskRepository = taskRepository,
         _noteRepository = noteRepository,
         _apiService = apiService,

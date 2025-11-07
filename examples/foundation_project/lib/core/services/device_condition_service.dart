@@ -10,12 +10,12 @@ import 'package:foundation_project/foundation/logger/fly_logger.dart';
 /// - Charging status
 /// - Overall device readiness for resource-intensive operations
 class DeviceConditionService {
-  final Logger _logger;
+  final FlyLogger _logger;
   final Connectivity _connectivity;
   final Battery _battery;
 
   DeviceConditionService({
-    required Logger logger,
+    required FlyLogger logger,
     Connectivity? connectivity,
     Battery? battery,
   })  : _logger = logger,

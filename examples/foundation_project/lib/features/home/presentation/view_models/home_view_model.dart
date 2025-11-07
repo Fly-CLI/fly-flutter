@@ -84,9 +84,9 @@ class HomeViewModelState
 /// All async operations use runAsyncOperation to ensure consistent error handling,
 /// loading state management, and network awareness.
 class HomeViewModel extends FlyViewModel<HomeViewModelState> {
-  final Logger _logger;
+  final FlyLogger _logger;
 
-  HomeViewModel({required Logger logger}) : _logger = logger;
+  HomeViewModel({required FlyLogger logger}) : _logger = logger;
 
   StatisticsService get _statisticsService => ref.read(statisticsServiceProvider);
   SyncService get _syncService => ref.read(syncServiceProvider);

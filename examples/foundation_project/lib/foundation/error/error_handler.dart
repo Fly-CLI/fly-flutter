@@ -5,7 +5,7 @@ import 'package:foundation_project/core/providers/logger_provider.dart';
 
 /// Centralized error handling system for the application
 class ErrorHandler {
-  static Logger get _logger =>
+  static FlyLogger get _logger =>
       GlobalContainer.instance.read(loggerProvider('ErrorHandler'));
 
   /// Handles errors with proper logging and user-friendly messages

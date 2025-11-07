@@ -20,14 +20,14 @@ import 'package:uuid/uuid.dart';
 /// - Telemetry and logging
 /// - Event emission for observability
 class AsyncOperationHandler with EventEmitterMixin {
-  final Logger _logger;
+  final FlyLogger _logger;
   final ConnectivityService _connectivityService;
   final OfflineQueueManager? _offlineQueueManager;
   final FoundationLocalizationProvider _localizations;
   final Uuid _uuid = const Uuid();
 
   AsyncOperationHandler({
-    required Logger logger,
+    required FlyLogger logger,
     ConnectivityService? connectivityService,
     OfflineQueueManager? offlineQueueManager,
     FoundationLocalizationProvider? localizations,

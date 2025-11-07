@@ -10,11 +10,11 @@ import 'package:foundation_project/core/services/device_condition_service.dart';
 /// for network operations, with real-time monitoring and connection state tracking
 class ConnectivityService {
   final DeviceConditionService _deviceConditionService;
-  final Logger _logger;
+  final FlyLogger _logger;
 
   ConnectivityService({
     DeviceConditionService? deviceConditionService,
-    required Logger logger,
+    required FlyLogger logger,
   })  : _deviceConditionService =
             deviceConditionService ?? DeviceConditionService(logger: logger),
         _logger = logger;

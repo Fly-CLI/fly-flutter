@@ -26,11 +26,11 @@ class LoggingEventPlugin {
   AppEventEmitter? _emitter;
   StreamSubscription<AppEvent>? _screenSubscription;
   StreamSubscription<AppEvent>? _operationSubscription;
-  final Logger _logger;
+  final FlyLogger _logger;
   /// Whether logging is enabled
   bool enabled = true;
 
-  LoggingEventPlugin({required Logger logger}) : _logger = logger;
+  LoggingEventPlugin({required FlyLogger logger}) : _logger = logger;
 
   /// Initialize the plugin and start listening to events
   void initialize() {

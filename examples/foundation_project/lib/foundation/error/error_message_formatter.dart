@@ -80,7 +80,7 @@ import 'package:foundation_project/foundation/foundation.dart';
 /// See also:
 /// - [AppException] - Base class for custom exceptions
 class ErrorMessageFormatter {
-  static final FlyLogger _logger = FlyLogger('ErrorMessageFormatter');
+  static final FlyLoggerImpl _logger = FlyLoggerImpl('ErrorMessageFormatter');
 
   /// Registry of known AppException types and their formatters
   /// 
