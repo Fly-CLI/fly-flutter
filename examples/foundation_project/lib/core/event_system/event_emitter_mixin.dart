@@ -1,24 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/event_providers.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
-import 'package:foundation_project/shared/localization/localizations.dart';
 
-/// Mixin to add lifecycle event emission capability to any class
+/// Mixin to add app event emission capability to any class
 ///
 /// **Thread Safety:** This mixin is designed for single-threaded Flutter
 /// main isolate usage. Stream operations should only be called
 /// from the main isolate.
 ///
-/// **Lifecycle:** This mixin provides access to the lifecycle emitter
-/// via GlobalContainer. No disposal is needed as the emitter is managed
-/// by the provider system.
+/// **Lifecycle:** This mixin provides access to the event emitter
+/// via GlobalContainer. The emitter is managed by the provider system
+/// and handles its own lifecycle, so no disposal is needed from the mixin.
 ///
 /// Example:
 /// ```dart
-/// class MyService with LifecycleEmitterMixin {
+/// class MyService with EventEmitterMixin {
 ///   Future<void> doWork() async {
 ///     emit(NavigationStartedEvent(feature: Feature.home));
 ///     // ... work ...
@@ -26,26 +25,19 @@ import 'package:foundation_project/shared/localization/localizations.dart';
 ///   }
 /// }
 /// ```
-mixin LifecycleEmitterMixin {
-  AppLifecycleEmitter? _cachedEmitter;
-  bool _isDisposed = false;
+mixin EventEmitterMixin {
+  AppEventEmitter? _cachedEmitter;
 
-  /// Get the lifecycle emitter instance
+  /// Get the event emitter instance
   ///
   /// Uses lazy initialization and caching for performance.
   /// Accesses the emitter via GlobalContainer.
-  AppLifecycleEmitter get _emitter {
-    if (_isDisposed) {
-      debugPrint('⚠️ Warning: Accessing lifecycle emitter after disposal');
-      throw StateError(localizations.lifecycleEmitterMixinDisposed);
-    }
-
+  AppEventEmitter get _emitter {
     if (_cachedEmitter == null) {
       try {
-        _cachedEmitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
+        _cachedEmitter = GlobalContainer.instance.read(eventEmitterProvider);
       } catch (e) {
-        final errorMessage = localizations.lifecycleEmitterAccessError(e.toString());
-        debugPrint('❌ $errorMessage');
+        debugPrint('❌ Error accessing event emitter: $e');
         rethrow;
       }
     }
@@ -53,23 +45,15 @@ mixin LifecycleEmitterMixin {
     return _cachedEmitter!;
   }
 
-  /// Check if mixin is disposed
-  bool get isDisposed => _isDisposed;
-
-  /// Emit a lifecycle event (generic API)
+  /// Emit an app event (generic API)
   ///
   /// Emits the event to all registered controllers that handle the event type.
   /// Returns true if the event was emitted, false if ignored.
-  bool emit(LifecycleEvent event) {
-    if (_isDisposed) {
-      debugPrint('⚠️ Warning: Attempted to emit event after disposal');
-      return false;
-    }
-
+  bool emit(AppEvent event) {
     try {
       return _emitter.emit(event);
     } catch (e) {
-      debugPrint('❌ Error emitting lifecycle event: $e');
+      debugPrint('❌ Error emitting app event: $e');
       return false;
     }
   }
@@ -126,16 +110,5 @@ mixin LifecycleEmitterMixin {
         metadata: metadata,
       ),
     );
-  }
-
-  /// Dispose lifecycle emitter mixin
-  ///
-  /// Clears the cached emitter reference.
-  /// Should be called when the object is disposed.
-  void disposeLifecycleEmitter() {
-    if (_isDisposed) return;
-
-    _isDisposed = true;
-    _cachedEmitter = null;
   }
 }

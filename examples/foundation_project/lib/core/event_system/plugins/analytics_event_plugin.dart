@@ -1,36 +1,35 @@
 import 'dart:async';
 import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/event_providers.dart';
 
-/// Analytics plugin that listens to screen lifecycle events
+/// Analytics plugin that listens to screen events
 ///
 /// This plugin demonstrates how to build completely decoupled components
-/// that react to foundation lifecycle events without knowing about the
+/// that react to foundation events without knowing about the
 /// foundation system directly.
 ///
 /// **Usage:**
 /// ```dart
-/// final plugin = AnalyticsLifecyclePlugin();
+/// final plugin = AnalyticsEventPlugin();
 /// plugin.initialize();
 ///
 /// // Later, when disposing:
 /// plugin.dispose();
 /// ```
-class AnalyticsLifecyclePlugin {
-  AppLifecycleEmitter? _emitter;
+class AnalyticsEventPlugin {
+  AppEventEmitter? _emitter;
   StreamSubscription<ScreenEvent>? _screenSubscription;
   final Map<String, DateTime> _screenViewTimes = {};
   final List<String> _screenViews = [];
 
   /// Initialize the plugin and start listening to events
   void initialize() {
-    _emitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
+    _emitter = GlobalContainer.instance.read(eventEmitterProvider);
 
     // Listen to screen events
-    _screenSubscription = _emitter!.getScreenStream().listen((event) {
+    _screenSubscription = _emitter!.getStreamFor<ScreenEvent>().listen((event) {
       if (event is ScreenShownEvent) {
         _onScreenShown(event);
       } else if (event is ScreenHiddenEvent) {

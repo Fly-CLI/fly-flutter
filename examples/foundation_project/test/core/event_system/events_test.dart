@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 
 void main() {
-  group('LifecycleEvent', () {
+  group('AppEvent', () {
     test('should generate unique IDs', () {
       final event1 = NavigationStartedEvent(feature: FeatureScreenType.home);
       final event2 = NavigationStartedEvent(feature: FeatureScreenType.home);
@@ -68,7 +68,7 @@ void main() {
 
       expect(event.feature, FeatureScreenType.home);
       expect(event, isA<NavigationEvent>());
-      expect(event, isA<LifecycleEvent>());
+      expect(event, isA<AppEvent>());
     });
 
     test('should support JSON serialization', () {
@@ -130,7 +130,7 @@ void main() {
 
       expect(event.screenName, 'home');
       expect(event, isA<ScreenEvent>());
-      expect(event, isA<LifecycleEvent>());
+      expect(event, isA<AppEvent>());
     });
 
     test('should support JSON serialization', () {

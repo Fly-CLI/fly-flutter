@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:foundation_project/core/storage/managers/app_data_manager.dart';
 import 'package:foundation_project/core/storage/models/storage_key.dart';
@@ -19,15 +19,15 @@ class _Config {
 /// Service for tracking recently accessed features
 ///
 /// Handles automatic tracking with debouncing, exclusion, and error handling.
-/// This service listens to lifecycle events emitted by navigation components.
+/// This service listens to app events emitted by navigation components.
 class RecentlyAccessedTrackingService {
   final AppDataManager _dataManager;
-  final AppLifecycleEmitter _lifecycleEmitter;
+  final AppEventEmitter _lifecycleEmitter;
   final AppLogger _logger = AppLogger('RecentlyAccessedTrackingService');
 
   Timer? _debounceTimer;
   FeatureScreenType? _pendingFeature;
-  StreamSubscription<LifecycleEvent>? _navigationSubscription;
+  StreamSubscription<AppEvent>? _navigationSubscription;
 
   RecentlyAccessedTrackingService(
     this._dataManager,
@@ -36,18 +36,10 @@ class RecentlyAccessedTrackingService {
     _initialize();
   }
 
-  /// Initialize the service by subscribing to lifecycle events
+  /// Initialize the service by subscribing to app events
   void _initialize() {
-    // Get navigation stream using generic API
-    final navigationStream = _lifecycleEmitter.getStream('navigation');
-    if (navigationStream == null) {
-      _logger.error(
-        'Navigation stream not found. Make sure navigation controller is registered.',
-        stackTrace: StackTrace.current,
-      );
-      return;
-    }
-
+    // Get navigation stream using type-safe API
+    final navigationStream = _lifecycleEmitter.getStreamFor<NavigationEvent>();
     _navigationSubscription = navigationStream.listen(
       (event) {
         if (event is NavigationStartedEvent) {

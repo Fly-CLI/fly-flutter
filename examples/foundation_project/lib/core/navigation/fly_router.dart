@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/event_providers.dart';
 import 'package:foundation_project/core/navigation/app.dart';
 import 'package:foundation_project/core/foundation/mvvm/services/navigation_service.dart';
 
@@ -50,7 +50,7 @@ enum FeatureScreenType {
 /// Enhanced navigation service implementing NavigationService with Feature enum
 ///
 /// This service implements NavigationService with Feature enum as the route type,
-/// providing type-safe navigation with automatic lifecycle event emission.
+/// providing type-safe navigation with automatic event emission.
 ///
 /// Example usage:
 /// ```dart
@@ -74,14 +74,14 @@ class FlyRouter implements NavigationService<FeatureScreenType> {
   /// The NavigatorKey to use for navigation
   final GlobalKey<NavigatorState> navigatorKey = App.navigatorKey;
 
-  /// Get the lifecycle emitter instance
+  /// Get the event emitter instance
   ///
   /// Accesses the emitter via GlobalContainer.
   /// Returns null if GlobalContainer is not initialized.
-  AppLifecycleEmitter? get _emitter {
+  AppEventEmitter? get _emitter {
     try {
       if (!GlobalContainer.isInitialized) return null;
-      return GlobalContainer.instance.read(lifecycleEmitterProvider);
+      return GlobalContainer.instance.read(eventEmitterProvider);
     } catch (e) {
       // Silently fail - emitter access is not critical for navigation
       return null;
@@ -91,7 +91,7 @@ class FlyRouter implements NavigationService<FeatureScreenType> {
   /// Emit navigation started event
   ///
   /// Silently fails if emitter is not available to ensure navigation
-  /// is never blocked by lifecycle events.
+  /// is never blocked by events.
   void _emitNavigationStarted(FeatureScreenType feature) {
     try {
       _emitter?.emit(
@@ -107,7 +107,7 @@ class FlyRouter implements NavigationService<FeatureScreenType> {
   /// Emit navigation completed event
   ///
   /// Silently fails if emitter is not available to ensure navigation
-  /// is never blocked by lifecycle events.
+  /// is never blocked by events.
   void _emitNavigationCompleted(FeatureScreenType feature, {dynamic result}) {
     try {
       _emitter?.emit(
@@ -235,7 +235,7 @@ class FlyRouter implements NavigationService<FeatureScreenType> {
 
   /// Navigate to a feature and clear until a specific feature
   ///
-  /// This method automatically emits lifecycle events for navigation tracking.
+  /// This method automatically emits events for navigation tracking.
   /// This is an additional method beyond the NavigationService interface.
   Future<T?> navigateToAndClearUntil<T>(
     FeatureScreenType feature,

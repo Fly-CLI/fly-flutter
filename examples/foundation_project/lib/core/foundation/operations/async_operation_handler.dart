@@ -16,8 +16,8 @@ import 'package:uuid/uuid.dart';
 /// - Timeout configuration per operation
 /// - Progress callbacks for long operations
 /// - Telemetry and logging
-/// - Lifecycle event emission for observability
-class AsyncOperationHandler with LifecycleEmitterMixin {
+/// - Event emission for observability
+class AsyncOperationHandler with EventEmitterMixin {
   final AppLogger _logger = AppLogger('AsyncOperationHandler');
   final ConnectivityService _connectivityService;
   final OfflineQueueManager? _offlineQueueManager;
@@ -37,7 +37,7 @@ class AsyncOperationHandler with LifecycleEmitterMixin {
   /// [timeout] - Maximum time to wait for operation (defaults to AsyncHandlerConfig.standardTimeout)
   /// [checkConnectivity] - Whether to verify internet connection first
   /// [queueIfOffline] - Whether to queue operation if offline
-  /// [operationName] - Optional name for the operation (for lifecycle events, defaults to 'execute')
+  /// [operationName] - Optional name for the operation (for events, defaults to 'execute')
   Future<AppResult<T>> execute<T>(
     Future<T> Function() operation, {
     String? errorMessage,

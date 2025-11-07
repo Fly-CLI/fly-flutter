@@ -1,19 +1,18 @@
-import 'package:flutter/foundation.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 import 'package:json_annotation/json_annotation.dart';
 // Import here so we can use FeedbackEvent in the wrapper
 import 'package:fly_feedback/fly_feedback.dart' as feedback;
 
-part 'lifecycle_events.g.dart';
+part 'events.g.dart';
 
 // Feedback events originate from the fly_feedback package and are wrapped
-// inside lifecycle events to participate in the shared AppLifecycleEmitter.
+// inside app events to participate in the shared AppEventEmitter.
 
-/// Base lifecycle event - pure data, no logic
+/// Base app event - pure data, no logic
 ///
-/// All lifecycle events extend this sealed class and provide
-/// information about component lifecycle events in the application.
-sealed class LifecycleEvent {
+/// All app events extend this sealed class and provide
+/// information about component events in the application.
+sealed class AppEvent {
   /// Unique identifier for this event
   final String id;
 
@@ -23,7 +22,7 @@ sealed class LifecycleEvent {
   /// Additional metadata for the event
   final Map<String, dynamic> metadata;
 
-  LifecycleEvent({
+  AppEvent({
     String? id,
     DateTime? timestamp,
     this.metadata = const {},
@@ -32,7 +31,7 @@ sealed class LifecycleEvent {
 
   /// Generate a unique ID for the event
   static String generateId() {
-    return 'lifecycle_${DateTime.now().millisecondsSinceEpoch}_${_idCounter++}';
+    return 'app_event_${DateTime.now().millisecondsSinceEpoch}_${_idCounter++}';
   }
 
   static int _idCounter = 0;
@@ -40,7 +39,7 @@ sealed class LifecycleEvent {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is LifecycleEvent && other.id == id;
+    return other is AppEvent && other.id == id;
   }
 
   @override
@@ -48,7 +47,7 @@ sealed class LifecycleEvent {
 }
 
 /// Base class for navigation events
-sealed class NavigationEvent extends LifecycleEvent {
+sealed class NavigationEvent extends AppEvent {
   @JsonKey(fromJson: _featureFromJson, toJson: _featureToJson)
   final FeatureScreenType feature;
 
@@ -97,7 +96,7 @@ class NavigationCompletedEvent extends NavigationEvent {
 }
 
 /// Base class for screen events
-sealed class ScreenEvent extends LifecycleEvent {
+sealed class ScreenEvent extends AppEvent {
   final String screenName;
 
   ScreenEvent({
@@ -141,7 +140,7 @@ class ScreenHiddenEvent extends ScreenEvent {
 }
 
 /// Base class for foundation operation events
-sealed class FoundationOperationEvent extends LifecycleEvent {
+sealed class FoundationOperationEvent extends AppEvent {
   final String operationId;
   final String operationName;
 
@@ -237,12 +236,12 @@ int _durationToJson(Duration duration) => duration.inMilliseconds;
 /// Convert JSON (milliseconds) to Duration
 Duration _durationFromJson(int json) => Duration(milliseconds: json);
 
-/// Lifecycle event that wraps a Fly feedback payload.
+/// App event that wraps a Fly feedback payload.
 ///
-/// Allows feedback events to move through the shared application lifecycle
-/// emitter so that listeners can handle them alongside other lifecycle signals.
-class FeedbackLifecycleEvent extends LifecycleEvent {
-  FeedbackLifecycleEvent({
+/// Allows feedback events to move through the shared application event
+/// emitter so that listeners can handle them alongside other app events.
+class FeedbackAppEvent extends AppEvent {
+  FeedbackAppEvent({
     required this.scope,
     required this.payload,
     super.id,

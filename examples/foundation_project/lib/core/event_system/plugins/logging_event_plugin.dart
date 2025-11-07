@@ -1,20 +1,19 @@
 import 'dart:async';
 import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/foundation/utils/app_logger.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/event_providers.dart';
 
-/// Logging plugin that logs all lifecycle events
+/// Logging plugin that logs all app events
 ///
 /// This plugin demonstrates how to create a logging system that
-/// listens to all foundation lifecycle events for debugging and
+/// listens to all foundation events for debugging and
 /// observability purposes.
 ///
 /// **Usage:**
 /// ```dart
-/// final plugin = LoggingLifecyclePlugin();
+/// final plugin = LoggingEventPlugin();
 /// plugin.initialize();
 ///
 /// // Enable/disable logging:
@@ -23,20 +22,20 @@ import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 /// // Later, when disposing:
 /// plugin.dispose();
 /// ```
-class LoggingLifecyclePlugin {
-  AppLifecycleEmitter? _emitter;
-  StreamSubscription<LifecycleEvent>? _screenSubscription;
-  StreamSubscription<LifecycleEvent>? _operationSubscription;
-  final AppLogger _logger = AppLogger('LoggingLifecyclePlugin');
+class LoggingEventPlugin {
+  AppEventEmitter? _emitter;
+  StreamSubscription<AppEvent>? _screenSubscription;
+  StreamSubscription<AppEvent>? _operationSubscription;
+  final AppLogger _logger = AppLogger('LoggingEventPlugin');
   /// Whether logging is enabled
   bool enabled = true;
 
   /// Initialize the plugin and start listening to events
   void initialize() {
-    _emitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
+    _emitter = GlobalContainer.instance.read(eventEmitterProvider);
 
     // Listen to screen events
-    _screenSubscription = _emitter!.getScreenStream().listen(
+    _screenSubscription = _emitter!.getStreamFor<ScreenEvent>().listen(
       (event) {
         if (enabled) {
           _logScreenEvent(event);
@@ -45,7 +44,7 @@ class LoggingLifecyclePlugin {
     );
 
     // Listen to foundation operation events
-    _operationSubscription = _emitter!.getFoundationOperationStream().listen(
+    _operationSubscription = _emitter!.getStreamFor<FoundationOperationEvent>().listen(
       (event) {
         if (enabled) {
           _logOperationEvent(event);

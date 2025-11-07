@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
+import 'package:foundation_project/core/event_system/events.dart';
 
 /// Interface for managing event streams
 ///
@@ -11,7 +11,7 @@ import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
 ///
 /// Managers own the StreamController and handle all stream operations.
 /// Emitter delegates to managers - no embedded controllers.
-abstract class IEventStreamManager<T extends LifecycleEvent> {
+abstract class IEventStreamManager<T extends AppEvent> {
   /// Stream of events
   Stream<T> get stream;
 
@@ -36,10 +36,23 @@ abstract class IEventStreamManager<T extends LifecycleEvent> {
 /// - Graceful error handling
 ///
 /// **Thread Safety:** Designed for single-threaded Flutter main isolate usage.
-abstract class EventStreamManager<T extends LifecycleEvent>
+abstract class EventStreamManager<T extends AppEvent>
     implements IEventStreamManager<T> {
   StreamController<T>? _controller; // Manager owns this
   bool _isDisposed = false;
+
+  /// Static factory method to create an event stream manager for a specific event type
+  ///
+  /// This eliminates the need for empty manager classes that just extend
+  /// EventStreamManager. Use this static method instead of creating empty subclasses.
+  ///
+  /// Example:
+  /// ```dart
+  /// final manager = EventStreamManager.create<NavigationEvent>();
+  /// ```
+  static EventStreamManager<T> create<T extends AppEvent>() {
+    return _EventStreamManagerImpl<T>();
+  }
 
   @override
   Stream<T> get stream {
@@ -89,5 +102,11 @@ abstract class EventStreamManager<T extends LifecycleEvent>
     _controller?.close();
     _controller = null;
   }
+}
+
+/// Internal implementation class for factory-created managers
+class _EventStreamManagerImpl<T extends AppEvent>
+    extends EventStreamManager<T> {
+  // All functionality inherited from EventStreamManager base class
 }
 

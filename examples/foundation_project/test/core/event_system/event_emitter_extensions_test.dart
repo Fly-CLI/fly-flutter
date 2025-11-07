@@ -1,19 +1,18 @@
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/managers/feedback_stream_manager.dart';
-import 'package:foundation_project/core/lifecycle/managers/navigation_stream_manager.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/event_emitter_extensions.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  group('LifecycleEmitterExtensions', () {
-    late AppLifecycleEmitter emitter;
+  group('EventEmitterExtensions', () {
+    late AppEventEmitter emitter;
 
     setUp(() {
-      emitter = AppLifecycleEmitter();
+      emitter = AppEventEmitter();
     });
 
     tearDown(() {
@@ -24,7 +23,7 @@ void main() {
       test('should return type-safe navigation stream', () async {
         emitter.register<NavigationEvent>(
           key: 'navigation',
-          manager: NavigationStreamManager(),
+          manager: EventStreamManager.create<NavigationEvent>(),
         );
 
         final events = <NavigationEvent>[];
@@ -51,17 +50,17 @@ void main() {
 
     group('FeedbackStreamExtension', () {
       test('should return type-safe feedback stream', () async {
-        emitter.register<FeedbackLifecycleEvent>(
+        emitter.register<FeedbackAppEvent>(
           key: 'feedback',
-          manager: FeedbackStreamManager(),
+          manager: EventStreamManager.create<FeedbackAppEvent>(),
         );
 
-        final events = <FeedbackLifecycleEvent>[];
+        final events = <FeedbackAppEvent>[];
         final subscription = emitter.getFeedbackStream().listen(events.add);
 
         final feedback = SuccessFeedback('Hello');
         emitter.emit(
-          FeedbackLifecycleEvent(
+          FeedbackAppEvent(
             scope: 'TestScope',
             payload: feedback,
           ),
@@ -87,7 +86,7 @@ void main() {
       test('should filter events by type', () async {
         emitter.register<NavigationEvent>(
           key: 'navigation',
-          manager: NavigationStreamManager(),
+          manager: EventStreamManager.create<NavigationEvent>(),
         );
 
         final startedEvents = <NavigationStartedEvent>[];

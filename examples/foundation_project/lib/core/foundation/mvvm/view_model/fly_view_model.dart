@@ -264,7 +264,6 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
   /// Called when the screen is being permanently disposed
   /// Override this to cleanup resources that need to be released
   void onDispose() {
-    _feedbackCoordinator.disposeLifecycleEmitter();
     // Default implementation - can be overridden by subclasses
   }
 

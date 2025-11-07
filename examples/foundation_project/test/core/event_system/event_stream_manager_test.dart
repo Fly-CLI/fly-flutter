@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/managers/navigation_stream_manager.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
 import 'package:foundation_project/core/navigation/fly_router.dart';
 
 void main() {
   group('EventStreamManager', () {
-    late NavigationStreamManager manager;
+    late EventStreamManager<NavigationEvent> manager;
 
     setUp(() {
-      manager = NavigationStreamManager();
+      manager = EventStreamManager.create<NavigationEvent>();
     });
 
     tearDown(() {

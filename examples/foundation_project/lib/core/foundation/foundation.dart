@@ -26,6 +26,6 @@ export 'operations/retry_config.dart';
 export 'state/state_notifier.dart';
 // Utils exports
 export 'utils/app_logger.dart';
-// Lifecycle integration exports
-export '../lifecycle/lifecycle_events.dart';
-export '../lifecycle/lifecycle_emitter_mixin.dart';
+// Event system integration exports
+export '../event_system/events.dart';
+export '../event_system/event_emitter_mixin.dart';

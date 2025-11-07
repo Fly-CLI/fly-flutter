@@ -4,19 +4,19 @@ import 'package:flutter/foundation.dart';
 import 'package:foundation_project/core/foundation/foundation.dart';
 
 typedef FeedbackAction = void Function();
-typedef LifecycleEventEmitter = bool Function(LifecycleEvent event);
+typedef EventEmitter = bool Function(AppEvent event);
 
-class ViewModelFeedbackCoordinator with LifecycleEmitterMixin {
+class ViewModelFeedbackCoordinator with EventEmitterMixin {
   final String scope;
 
   ViewModelFeedbackCoordinator({
     required this.scope,
   });
 
-  /// Emit a feedback event through the lifecycle emitter.
+  /// Emit a feedback event through the event emitter.
   ///
-  /// Packages the feedback event inside a [FeedbackLifecycleEvent] so that
-  /// listeners can leverage the shared lifecycle infrastructure.
+  /// Packages the feedback event inside a [FeedbackAppEvent] so that
+  /// listeners can leverage the shared event infrastructure.
   bool _emitFeedback(
     FeedbackEvent event, {
     Map<String, dynamic> metadata = const {},
@@ -27,7 +27,7 @@ class ViewModelFeedbackCoordinator with LifecycleEmitterMixin {
     };
 
     return emit(
-      FeedbackLifecycleEvent(
+      FeedbackAppEvent(
         scope: scope,
         payload: event,
         metadata: combinedMetadata,

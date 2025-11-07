@@ -5,11 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_feedback/fly_feedback.dart';
 import 'package:foundation_project/core/foundation/mvvm/view_model/fly_view_model.dart';
 import 'package:foundation_project/core/foundation/mvvm/view_model/view_model_state.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_mixin.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/event_emitter_mixin.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/event_providers.dart';
 
 /// Abstract base screen class for handling common UI logic
 /// Provides standard patterns for loading, error, and content management
@@ -174,7 +173,7 @@ typedef FeedbackServiceFactory = FeedbackService<FeedbackEvent> Function(
 typedef FeedbackEventTransformer = FeedbackEvent? Function(
   BuildContext context,
   WidgetRef ref,
-  FeedbackLifecycleEvent lifecycleEvent,
+  FeedbackAppEvent lifecycleEvent,
 );
 
 /// Declarative configuration for the FlyScreen feedback binding.
@@ -225,7 +224,7 @@ class FeedbackBindingConfig {
   final FeedbackServiceFactory? serviceFactory;
 
   /// Filter lifecycle events prior to handling.
-  final bool Function(FeedbackLifecycleEvent event)? eventFilter;
+  final bool Function(FeedbackAppEvent event)? eventFilter;
 
   /// Transform a lifecycle event into a feedback payload.
   ///
@@ -235,7 +234,7 @@ class FeedbackBindingConfig {
   /// Callback invoked before the payload is displayed.
   final void Function(
     BuildContext context,
-    FeedbackLifecycleEvent event,
+    FeedbackAppEvent event,
   )? onEvent;
 
   /// Returns a copy with selective overrides.
@@ -246,9 +245,9 @@ class FeedbackBindingConfig {
     HapticConfig? hapticConfig,
     FeedbackService<FeedbackEvent>? service,
     FeedbackServiceFactory? serviceFactory,
-    bool Function(FeedbackLifecycleEvent event)? eventFilter,
+    bool Function(FeedbackAppEvent event)? eventFilter,
     FeedbackEventTransformer? eventTransformer,
-    void Function(BuildContext context, FeedbackLifecycleEvent event)? onEvent,
+    void Function(BuildContext context, FeedbackAppEvent event)? onEvent,
   }) {
     return FeedbackBindingConfig(
       enabled: enabled ?? this.enabled,
@@ -271,7 +270,7 @@ class _FlyScreenState<
     V extends FlyViewModel<S>,
     S extends FlyViewModelState<S>>
     extends ConsumerState<FlyScreen<V, S>>
-    with LifecycleEmitterMixin {
+    with EventEmitterMixin {
   bool _hasInitialized = false;
   late final _FeedbackBindingController<V, S> _feedbackBindingController;
 
@@ -280,7 +279,7 @@ class _FlyScreenState<
     super.initState();
     _feedbackBindingController = _FeedbackBindingController<V, S>(
       ref: ref,
-      emitter: ref.read(lifecycleEmitterProvider),
+      emitter: ref.read(eventEmitterProvider),
     );
     // Schedule lifecycle callbacks for after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -330,8 +329,6 @@ class _FlyScreenState<
       // This can happen during widget disposal in certain scenarios
     }
     _feedbackBindingController.dispose();
-    // Dispose lifecycle emitter
-    disposeLifecycleEmitter();
     super.dispose();
   }
 
@@ -412,7 +409,7 @@ class _FeedbackBindingController<
     V extends FlyViewModel<S>, S extends FlyViewModelState<S>> {
   _FeedbackBindingController({
     required this.ref,
-    required AppLifecycleEmitter emitter,
+    required AppEventEmitter emitter,
   }) : _coordinator = _FeedbackCoordinator(emitter: emitter);
 
   final WidgetRef ref;
@@ -494,7 +491,7 @@ class _FeedbackBindingController<
     );
   }
 
-  void _handleEvent(FeedbackLifecycleEvent lifecycleEvent) {
+  void _handleEvent(FeedbackAppEvent lifecycleEvent) {
     final config = _config;
     final context = _context;
     final screen = _screen;
@@ -562,17 +559,17 @@ class _FeedbackBindingController<
 /// Lightweight wrapper around the app lifecycle emitter that manages the
 /// active feedback subscription for a screen.
 class _FeedbackCoordinator {
-  _FeedbackCoordinator({required AppLifecycleEmitter emitter}) : _emitter = emitter;
+  _FeedbackCoordinator({required AppEventEmitter emitter}) : _emitter = emitter;
 
-  final AppLifecycleEmitter _emitter;
-  StreamSubscription<FeedbackLifecycleEvent>? _subscription;
+  final AppEventEmitter _emitter;
+  StreamSubscription<FeedbackAppEvent>? _subscription;
   bool _isDisposed = false;
 
   void bind({
     required Set<String> scopes,
-    required void Function(FeedbackLifecycleEvent event) onEvent,
+    required void Function(FeedbackAppEvent event) onEvent,
     required void Function(Object error, StackTrace stackTrace) onError,
-    bool Function(FeedbackLifecycleEvent event)? filter,
+    bool Function(FeedbackAppEvent event)? filter,
   }) {
     if (_isDisposed) {
       throw StateError('Feedback coordinator has been disposed');
@@ -585,7 +582,7 @@ class _FeedbackCoordinator {
 
     try {
       final scopeSet = scopes.toSet();
-      final stream = _emitter.getFeedbackStream().where((event) {
+      final stream = _emitter.getStreamFor<FeedbackAppEvent>().where((event) {
         if (!scopeSet.contains(event.scope)) {
           return false;
         }

@@ -1,5 +1,5 @@
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/managers/event_stream_manager.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
 import 'package:foundation_project/shared/localization/localizations.dart';
 
 /// Registry entry for a controller
@@ -11,10 +11,10 @@ class ControllerRegistryEntry {
   final Type eventType;
 
   /// The manager instance for this controller
-  final IEventStreamManager<LifecycleEvent> manager;
+  final IEventStreamManager<AppEvent> manager;
 
   /// Type matcher function that checks if an event matches this entry's type
-  final bool Function(LifecycleEvent) typeMatcher;
+  final bool Function(AppEvent) typeMatcher;
 
   ControllerRegistryEntry({
     required this.key,
@@ -24,14 +24,14 @@ class ControllerRegistryEntry {
   });
 }
 
-/// Generic lifecycle event emitter
+/// Generic app event emitter
 ///
 /// Manages a dynamic registry of controllers.
-/// All APIs work with LifecycleEvent base class.
+/// All APIs work with AppEvent base class.
 /// No concrete event types in this class.
 ///
 /// **Key Principles:**
-/// - Generic APIs only - work with LifecycleEvent base class
+/// - Generic APIs only - work with AppEvent base class
 /// - Dynamic registry - controllers added/removed at runtime
 /// - No hardcoded event types
 /// - Type-safe registration with generic type parameter
@@ -41,10 +41,10 @@ class ControllerRegistryEntry {
 ///
 /// Example:
 /// ```dart
-/// final emitter = AppLifecycleEmitter();
+/// final emitter = AppEventEmitter();
 /// emitter.register<NavigationEvent>(
 ///   key: 'navigation',
-///   manager: NavigationStreamManager(),
+///   manager: EventStreamManager.create<NavigationEvent>(),
 /// );
 ///
 /// emitter.getStream('navigation')?.listen((event) {
@@ -55,18 +55,19 @@ class ControllerRegistryEntry {
 ///
 /// emitter.emit(NavigationStartedEvent(feature: Feature.home));
 /// ```
-class AppLifecycleEmitter {
+class AppEventEmitter {
   final List<ControllerRegistryEntry> _controllers = [];
+  final Map<Type, ControllerRegistryEntry> _typeRegistry = {};
   bool _isDisposed = false;
 
-  /// Register a controller for a specific event type
+  /// Register a controller for a specific event type using a string key
   ///
   /// [T] - The event type (NavigationEvent, ScreenEvent, etc.)
   /// [key] - Unique identifier for this controller
   /// [manager] - The stream manager for this event type
   ///
   /// Throws [StateError] if a controller with the same key already exists.
-  void register<T extends LifecycleEvent>({
+  void register<T extends AppEvent>({
     required String key,
     required IEventStreamManager<T> manager,
   }) {
@@ -79,12 +80,58 @@ class AppLifecycleEmitter {
       throw StateError(localizations.lifecycleControllerAlreadyRegistered(key));
     }
 
-    _controllers.add(ControllerRegistryEntry(
+    final entry = ControllerRegistryEntry(
       key: key,
       eventType: T,
-      manager: manager as IEventStreamManager<LifecycleEvent>,
+      manager: manager as IEventStreamManager<AppEvent>,
       typeMatcher: (event) => event is T,
-    ),);
+    );
+
+    _controllers.add(entry);
+    _typeRegistry[T] = entry;
+  }
+
+  /// Register a controller for a specific event type using the type itself as the key
+  ///
+  /// This is a type-safe alternative to `register<T>(key: ...)` that eliminates
+  /// the need for magic strings. The event type `T` is used as the implicit key.
+  ///
+  /// [T] - The event type (NavigationEvent, ScreenEvent, etc.)
+  /// [manager] - Optional manager instance. If not provided, a default manager is created.
+  ///
+  /// Throws [StateError] if a controller for this type is already registered.
+  ///
+  /// Example:
+  /// ```dart
+  /// emitter.registerType<NavigationEvent>();
+  /// // Equivalent to: emitter.register<NavigationEvent>(key: 'NavigationEvent', manager: ...)
+  /// ```
+  void registerType<T extends AppEvent>({
+    IEventStreamManager<T>? manager,
+  }) {
+    if (_isDisposed) {
+      throw StateError(localizations.lifecycleEmitterDisposed);
+    }
+
+    // Check if type already registered
+    if (_typeRegistry.containsKey(T)) {
+      throw StateError(
+        localizations.lifecycleControllerAlreadyRegistered(T.toString()),
+      );
+    }
+
+    final effectiveManager = manager ?? EventStreamManager.create<T>();
+    final key = T.toString();
+
+    final entry = ControllerRegistryEntry(
+      key: key,
+      eventType: T,
+      manager: effectiveManager as IEventStreamManager<AppEvent>,
+      typeMatcher: (event) => event is T,
+    );
+
+    _controllers.add(entry);
+    _typeRegistry[T] = entry;
   }
 
   /// Unregister a controller by key
@@ -99,38 +146,51 @@ class AppLifecycleEmitter {
 
     final entry = _controllers[index];
     entry.manager.dispose();
+    _typeRegistry.remove(entry.eventType);
     _controllers.removeAt(index);
+    return true;
+  }
+
+  /// Unregister a controller by type
+  ///
+  /// Returns true if the controller was found and removed, false otherwise.
+  /// The controller is disposed before removal.
+  bool unregisterType<T extends AppEvent>() {
+    final entry = _typeRegistry.remove(T);
+    if (entry == null) {
+      return false;
+    }
+
+    entry.manager.dispose();
+    _controllers.remove(entry);
     return true;
   }
 
   /// Get stream by key
   ///
   /// Returns the stream for the given key, or null if not found.
-  /// The stream returns LifecycleEvent (base type), use type checking/casting for specific types.
+  /// The stream returns AppEvent (base type), use type checking/casting for specific types.
   ///
-  /// **Type Safety Note:** This method returns `Stream<LifecycleEvent>?` (base type).
-  /// For type-safe access to specific event types, use the extension methods:
-  /// - `getNavigationStream()` for NavigationEvent
-  /// - `getScreenStream()` for ScreenEvent
-  /// - `getEventsOfType<T>(key)` for custom event types
+  /// **Type Safety Note:** This method returns `Stream<AppEvent>?` (base type).
+  /// For type-safe access to specific event types, use `getStreamFor<T>()` instead.
   ///
   /// Example:
   /// ```dart
   /// // Type-safe (recommended)
-  /// emitter.getNavigationStream().listen((event) {
+  /// emitter.getStreamFor<NavigationEvent>().listen((event) {
   ///   if (event is NavigationStartedEvent) {
   ///     // Handle navigation started
   ///   }
   /// });
   ///
-  /// // Generic (less type-safe)
+  /// // Generic (less type-safe, backward compatible)
   /// emitter.getStream('navigation')?.listen((event) {
   ///   if (event is NavigationStartedEvent) {
   ///     // Handle navigation started
   ///   }
   /// });
   /// ```
-  Stream<LifecycleEvent>? getStream(String key) {
+  Stream<AppEvent>? getStream(String key) {
     if (_isDisposed) {
       return null;
     }
@@ -140,8 +200,41 @@ class AppLifecycleEmitter {
       orElse: () => throw StateError(localizations.lifecycleNoControllerRegistered(key)),
     );
 
-    // Return as base type - use extensions for type-safe access
+    // Return as base type - use getStreamFor<T>() for type-safe access
     return entry.manager.stream;
+  }
+
+  /// Get type-safe stream for a specific event type
+  ///
+  /// Returns a strongly-typed stream for the given event type `T`.
+  /// Returns an empty stream if the type is not registered.
+  ///
+  /// This is the recommended way to access event streams as it provides
+  /// compile-time type safety and eliminates the need for magic strings.
+  ///
+  /// [T] - The event type to get the stream for
+  ///
+  /// Example:
+  /// ```dart
+  /// final stream = emitter.getStreamFor<NavigationEvent>();
+  /// stream.listen((event) {
+  ///   // event is NavigationEvent, not AppEvent
+  ///   if (event is NavigationStartedEvent) {
+  ///     // Handle navigation started
+  ///   }
+  /// });
+  /// ```
+  Stream<T> getStreamFor<T extends AppEvent>() {
+    if (_isDisposed) {
+      return Stream<T>.empty();
+    }
+
+    final entry = _typeRegistry[T];
+    if (entry == null) {
+      return Stream<T>.empty();
+    }
+
+    return entry.manager.stream.cast<T>();
   }
 
   /// Get all registered keys
@@ -154,13 +247,18 @@ class AppLifecycleEmitter {
     return _controllers.any((entry) => entry.key == key);
   }
 
+  /// Check if a type is registered
+  bool isTypeRegistered<T extends AppEvent>() {
+    return _typeRegistry.containsKey(T);
+  }
+
   /// Emit event to all matching controllers
   ///
   /// Emits the event to all controllers that handle the event's type.
   /// Returns true if the event was emitted to at least one controller, false otherwise.
   ///
-  /// [event] - The lifecycle event to emit
-  bool emit(LifecycleEvent event) {
+  /// [event] - The app event to emit
+  bool emit(AppEvent event) {
     if (_isDisposed) {
       return false;
     }
@@ -198,5 +296,6 @@ class AppLifecycleEmitter {
     }
 
     _controllers.clear();
+    _typeRegistry.clear();
   }
 }

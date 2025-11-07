@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_emitter_extensions.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_events.dart';
-import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
+import 'package:foundation_project/core/event_system/event_emitter.dart';
+import 'package:foundation_project/core/event_system/events.dart';
+import 'package:foundation_project/core/event_system/event_providers.dart';
 
 /// Performance monitoring plugin that tracks async operation metrics
 ///
@@ -12,7 +11,7 @@ import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 ///
 /// **Usage:**
 /// ```dart
-/// final plugin = PerformanceLifecyclePlugin();
+/// final plugin = PerformanceEventPlugin();
 /// plugin.initialize();
 ///
 /// // Later, when disposing:
@@ -21,8 +20,8 @@ import 'package:foundation_project/core/lifecycle/lifecycle_providers.dart';
 /// // Get performance metrics:
 /// final metrics = plugin.getMetrics();
 /// ```
-class PerformanceLifecyclePlugin {
-  AppLifecycleEmitter? _emitter;
+class PerformanceEventPlugin {
+  AppEventEmitter? _emitter;
   StreamSubscription<FoundationOperationEvent>? _operationSubscription;
   final Map<String, DateTime> _operationStartTimes = {};
   final List<OperationMetric> _completedOperations = [];
@@ -30,10 +29,10 @@ class PerformanceLifecyclePlugin {
 
   /// Initialize the plugin and start listening to events
   void initialize() {
-    _emitter = GlobalContainer.instance.read(lifecycleEmitterProvider);
+    _emitter = GlobalContainer.instance.read(eventEmitterProvider);
 
     // Listen to foundation operation events
-    _operationSubscription = _emitter!.getFoundationOperationStream().listen(
+    _operationSubscription = _emitter!.getStreamFor<FoundationOperationEvent>().listen(
       (event) {
         if (event is AsyncOperationStartedEvent) {
           _onOperationStarted(event);
