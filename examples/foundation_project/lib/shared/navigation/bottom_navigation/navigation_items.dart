@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/core/navigation/fly_router.dart';
+import 'package:foundation_project/core/foundation/navigation/fly_router.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
 
 /// Navigation item configuration for bottom navigation

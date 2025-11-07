@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/foundation/mvvm/view_model/fly_view_model.dart';
 import 'package:foundation_project/core/foundation/mvvm/view_model/view_model_state.dart';
-import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
 import 'package:foundation_project/core/di/global_container.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';

@@ -1,5 +1,5 @@
 import 'package:foundation_project/core/foundation/operations/result.dart';
-import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
 import 'package:foundation_project/core/repositories/task_repository.dart';
 import 'package:foundation_project/core/services/cache_service.dart';
 import 'package:foundation_project/features/home/data/models/statistics_entity.dart';

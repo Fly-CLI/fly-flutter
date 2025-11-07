@@ -1,6 +1,6 @@
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
 
 /// Service for checking device conditions for backups and other operations
 ///

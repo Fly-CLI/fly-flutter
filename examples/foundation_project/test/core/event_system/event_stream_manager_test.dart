@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:foundation_project/core/event_system/managers/event_stream_manager.dart';
-import 'package:foundation_project/core/navigation/fly_router.dart';
+import 'package:foundation_project/core/foundation/navigation/fly_router.dart';
 
 void main() {
   group('EventStreamManager', () {

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:foundation_project/core/foundation/utils/app_logger.dart';
+import 'package:foundation_project/core/foundation/logger/fly_logger.dart';
 import 'package:foundation_project/core/services/device_condition_service.dart';
 
 /// Network-specific connectivity service for async operations

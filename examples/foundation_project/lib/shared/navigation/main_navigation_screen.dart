@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:foundation_project/core/navigation/fly_router.dart';
+import 'package:foundation_project/core/foundation/navigation/fly_router.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/app_bottom_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/bottom_navigation_provider.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
