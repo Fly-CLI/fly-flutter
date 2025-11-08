@@ -4,8 +4,8 @@ import 'package:fly_core/fly_core.dart';
 import 'package:fly_events/fly_events.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:fly_navigation/fly_navigation.dart';
-import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:foundation_project/shared/navigation/app_router.dart';
+import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 /// Application-specific navigation service implementing NavigationService with Feature enum
 ///
@@ -51,10 +51,6 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     }
   }
 
-  /// Emit navigation started event
-  ///
-  /// Silently fails if emitter is not available to ensure navigation
-  /// is never blocked by events.
   void _emitNavigationStarted(FeatureScreenType feature) {
     try {
       _emitter?.emit(
@@ -67,10 +63,6 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     }
   }
 
-  /// Emit navigation completed event
-  ///
-  /// Silently fails if emitter is not available to ensure navigation
-  /// is never blocked by events.
   void _emitNavigationCompleted(FeatureScreenType feature, {dynamic result}) {
     try {
       _emitter?.emit(
@@ -84,34 +76,24 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     }
   }
 
-  // ============================================================================
-  // NavigationService<FeatureScreenType> Interface Implementation
-  // ============================================================================
-
   @override
   Future<T?> navigateTo<T>(FeatureScreenType route, {Object? arguments}) {
     _emitNavigationStarted(route);
 
     try {
-      // Check if this is a shell route (bottom navigation tab) or a detail/form route
+      final resolvedPath = _resolveRoutePath(route, arguments);
       final isShellRoute = route == FeatureScreenType.home ||
           route == FeatureScreenType.tasks ||
           route == FeatureScreenType.notes ||
           route == FeatureScreenType.settings;
 
       if (isShellRoute) {
-        // Use go() for shell routes to switch tabs
-        _router.go(route.route, extra: arguments);
+        _router.go(resolvedPath, extra: arguments);
       } else {
-        // Use push() for detail/form routes to add to stack
-        _router.push(route.route, extra: arguments);
+        _router.push(resolvedPath, extra: arguments);
       }
-      
-      // Emit completion event immediately since GoRouter doesn't return a Future
-      // In practice, results are handled through route builders or state management
+
       _emitNavigationCompleted(route);
-      
-      // Return a completed future since GoRouter's navigation is synchronous
       return Future<T?>.value(null);
     } catch (error) {
       _emitNavigationCompleted(route);
@@ -131,12 +113,9 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     _emitNavigationStarted(route);
 
     try {
-      // Use GoRouter's go to replace current route
-      _router.go(route.route, extra: arguments);
-      
-      // Emit completion event immediately
+      final resolvedPath = _resolveRoutePath(route, arguments);
+      _router.go(resolvedPath, extra: arguments);
       _emitNavigationCompleted(route);
-      
       return Future<T?>.value(null);
     } catch (error) {
       _emitNavigationCompleted(route);
@@ -145,16 +124,14 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   }
 
   @override
-  Future<T?> navigateClearStack<T>(FeatureScreenType route, {Object? arguments}) {
+  Future<T?> navigateClearStack<T>(FeatureScreenType route,
+      {Object? arguments}) {
     _emitNavigationStarted(route);
 
     try {
-      // Use GoRouter's go to clear stack and navigate to route
-      _router.go(route.route, extra: arguments);
-      
-      // Emit completion event immediately
+      final resolvedPath = _resolveRoutePath(route, arguments);
+      _router.go(resolvedPath, extra: arguments);
       _emitNavigationCompleted(route);
-      
       return Future<T?>.value(null);
     } catch (error) {
       _emitNavigationCompleted(route);
@@ -167,18 +144,6 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     return _router.canPop();
   }
 
-  // ============================================================================
-  // Convenience Methods (Additional Features)
-  // ============================================================================
-
-  /// Navigate to a feature and clear until a specific feature
-  ///
-  /// This method automatically emits events for navigation tracking.
-  /// This is an additional method beyond the NavigationService interface.
-  ///
-  /// Note: GoRouter handles route management differently. This method
-  /// navigates to the target feature, but the "until" behavior is
-  /// handled by GoRouter's route configuration.
   Future<T?> navigateToAndClearUntil<T>(
     FeatureScreenType feature,
     FeatureScreenType untilFeature, {
@@ -187,19 +152,74 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     _emitNavigationStarted(feature);
 
     try {
-      // GoRouter doesn't have direct equivalent of pushNamedAndRemoveUntil
-      // We navigate to the target route - the route configuration handles
-      // the navigation stack structure
-      _router.go(feature.route, extra: arguments);
-      
-      // Emit completion event immediately
+      final resolvedPath = _resolveRoutePath(feature, arguments);
+      _router.go(resolvedPath, extra: arguments);
       _emitNavigationCompleted(feature);
-      
       return Future<T?>.value(null);
     } catch (error) {
       _emitNavigationCompleted(feature);
       return Future<T?>.value(null);
     }
   }
-}
 
+  String _resolveRoutePath(FeatureScreenType route, Object? arguments) {
+    var path = route.route;
+    if (path.contains(':')) {
+      final id = _extractIdentifier(arguments);
+      if (id != null && id.isNotEmpty) {
+        path = path.replaceAll(':id', id);
+      }
+    }
+    return path;
+  }
+
+  String? _extractIdentifier(Object? arguments) {
+    if (arguments == null) return null;
+    if (arguments is String) return arguments;
+
+    if (arguments is Map) {
+      final idValue = arguments['id'];
+      if (idValue is String) {
+        return idValue;
+      }
+      final taskValue = arguments['task'];
+      final taskId = _tryReadId(taskValue);
+      if (taskId != null) {
+        return taskId;
+      }
+    }
+
+    final directId = _tryReadId(arguments);
+    if (directId != null) {
+      return directId;
+    }
+
+    return null;
+  }
+
+  String? _tryReadId(Object? value) {
+    try {
+      final dynamic dynamicValue = value;
+      if (dynamicValue == null) return null;
+      final taskId = dynamicValue.taskId;
+      if (taskId is String && taskId.isNotEmpty) {
+        return taskId;
+      }
+    } catch (_) {
+      // ignore
+    }
+
+    try {
+      final dynamic dynamicValue = value;
+      if (dynamicValue == null) return null;
+      final id = dynamicValue.id;
+      if (id is String && id.isNotEmpty) {
+        return id;
+      }
+    } catch (_) {
+      // ignore
+    }
+
+    return null;
+  }
+}

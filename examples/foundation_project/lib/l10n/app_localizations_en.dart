@@ -425,4 +425,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String lifecycleEmitterAccessError(String error) {
     return 'Error accessing lifecycle emitter: $error. Make sure lifecycle_providers.dart is exported and GlobalContainer is initialized.';
   }
+
+  @override
+  String get taskListFiltersTitle => 'Filters';
+
+  @override
+  String get searchTasks => 'Search tasks';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get filterByStatus => 'Filter by status';
+
+  @override
+  String get filterAllStatuses => 'All statuses';
+
+  @override
+  String get taskStatusActive => 'Active';
+
+  @override
+  String get taskStatusCompleted => 'Completed';
+
+  @override
+  String get taskStatusOverdue => 'Overdue';
+
+  @override
+  String get taskPriorityLow => 'Low';
+
+  @override
+  String get taskPriorityMedium => 'Medium';
+
+  @override
+  String get taskPriorityHigh => 'High';
+
+  @override
+  String get untitledTask => 'Untitled Task';
+
+  @override
+  String get markTaskActive => 'Mark as active';
+
+  @override
+  String get markTaskCompleted => 'Mark as completed';
+
+  @override
+  String get deleteTask => 'Delete task';
+
+  @override
+  String get deleteTaskTitle => 'Delete Task';
+
+  @override
+  String deleteTaskConfirmation(String value) {
+    return 'Are you sure you want to delete \"$value\"?';
+  }
+
+  @override
+  String get noTasksTitle => 'No tasks yet';
+
+  @override
+  String get noTasksDescription => 'Create your first task to get started.';
+
+  @override
+  String get createFirstTask => 'Create task';
+
+  @override
+  String selectedTaskCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get deleteSelected => 'Delete selected';
+
+  @override
+  String taskDueDateOverdue(String date) {
+    return 'Overdue since $date';
+  }
+
+  @override
+  String get taskDueDateToday => 'Due today';
+
+  @override
+  String taskDueDateOn(String date) {
+    return 'Due on $date';
+  }
+
+  @override
+  String updatedAtLabel(String date) {
+    return 'Updated $date';
+  }
+
+  @override
+  String get taskDescriptionLabel => 'Description';
+
+  @override
+  String get taskDescriptionHint => 'Add more details about this task';
+
+  @override
+  String get taskMetadataLabel => 'Details';
+
+  @override
+  String get taskDueDate => 'Due date';
+
+  @override
+  String taskDueDateHelper(String date) {
+    return 'Selected date: $date';
+  }
+
+  @override
+  String get selectDueDate => 'Select due date';
+
+  @override
+  String get clearDueDate => 'Clear due date';
+
+  @override
+  String get noDueDate => 'No due date';
+
+  @override
+  String get createdAt => 'Created';
+
+  @override
+  String get updatedAt => 'Updated';
+
+  @override
+  String get taskPriorityLabel => 'Priority';
+
+  @override
+  String get taskStatusLabel => 'Status';
+
+  @override
+  String get taskTitleLabel => 'Title';
+
+  @override
+  String get taskTitleHint => 'Enter a task title';
+
+  @override
+  String get taskTitleRequired => 'Title is required';
+
+  @override
+  String get taskDueDateInPast => 'Due date cannot be in the past';
+
+  @override
+  String get editTask => 'Edit task';
 }

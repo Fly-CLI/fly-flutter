@@ -173,6 +173,91 @@
         "type": "String"
       }
     }
-  }
+  },
+  "taskListFiltersTitle": "Filters",
+  "searchTasks": "Search tasks",
+  "clearSearch": "Clear search",
+  "filterByStatus": "Filter by status",
+  "filterAllStatuses": "All statuses",
+  "taskStatusActive": "Active",
+  "taskStatusCompleted": "Completed",
+  "taskStatusOverdue": "Overdue",
+  "taskPriorityLow": "Low",
+  "taskPriorityMedium": "Medium",
+  "taskPriorityHigh": "High",
+  "untitledTask": "Untitled Task",
+  "markTaskActive": "Mark as active",
+  "markTaskCompleted": "Mark as completed",
+  "deleteTask": "Delete task",
+  "deleteTaskTitle": "Delete Task",
+  "deleteTaskConfirmation": "Are you sure you want to delete \"{value}\"?",
+  "@deleteTaskConfirmation": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "noTasksTitle": "No tasks yet",
+  "noTasksDescription": "Create your first task to get started.",
+  "createFirstTask": "Create task",
+  "selectedTaskCount": "{count} selected",
+  "@selectedTaskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearSelection": "Clear selection",
+  "deleteSelected": "Delete selected",
+  "taskDueDateOverdue": "Overdue since {date}",
+  "@taskDueDateOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taskDueDateToday": "Due today",
+  "taskDueDateOn": "Due on {date}",
+  "@taskDueDateOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "updatedAtLabel": "Updated {date}",
+  "@updatedAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taskDescriptionLabel": "Description",
+  "taskDescriptionHint": "Add more details about this task",
+  "taskMetadataLabel": "Details",
+  "taskDueDate": "Due date",
+  "taskDueDateHelper": "Selected date: {date}",
+  "@taskDueDateHelper": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "selectDueDate": "Select due date",
+  "clearDueDate": "Clear due date",
+  "noDueDate": "No due date",
+  "createdAt": "Created",
+  "updatedAt": "Updated",
+  "taskPriorityLabel": "Priority",
+  "taskStatusLabel": "Status",
+  "taskTitleLabel": "Title",
+  "taskTitleHint": "Enter a task title",
+  "taskTitleRequired": "Title is required",
+  "taskDueDateInPast": "Due date cannot be in the past",
+  "editTask": "Edit task"
 }
-

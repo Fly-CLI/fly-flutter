@@ -855,6 +855,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error accessing lifecycle emitter: {error}. Make sure lifecycle_providers.dart is exported and GlobalContainer is initialized.'**
   String lifecycleEmitterAccessError(String error);
+
+  /// No description provided for @taskListFiltersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get taskListFiltersTitle;
+
+  /// No description provided for @searchTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tasks'**
+  String get searchTasks;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @filterByStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by status'**
+  String get filterByStatus;
+
+  /// No description provided for @filterAllStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get filterAllStatuses;
+
+  /// No description provided for @taskStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get taskStatusActive;
+
+  /// No description provided for @taskStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get taskStatusCompleted;
+
+  /// No description provided for @taskStatusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get taskStatusOverdue;
+
+  /// No description provided for @taskPriorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get taskPriorityLow;
+
+  /// No description provided for @taskPriorityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get taskPriorityMedium;
+
+  /// No description provided for @taskPriorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get taskPriorityHigh;
+
+  /// No description provided for @untitledTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Task'**
+  String get untitledTask;
+
+  /// No description provided for @markTaskActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as active'**
+  String get markTaskActive;
+
+  /// No description provided for @markTaskCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as completed'**
+  String get markTaskCompleted;
+
+  /// No description provided for @deleteTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete task'**
+  String get deleteTask;
+
+  /// No description provided for @deleteTaskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Task'**
+  String get deleteTaskTitle;
+
+  /// No description provided for @deleteTaskConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{value}\"?'**
+  String deleteTaskConfirmation(String value);
+
+  /// No description provided for @noTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks yet'**
+  String get noTasksTitle;
+
+  /// No description provided for @noTasksDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first task to get started.'**
+  String get noTasksDescription;
+
+  /// No description provided for @createFirstTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Create task'**
+  String get createFirstTask;
+
+  /// No description provided for @selectedTaskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedTaskCount(int count);
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @deleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get deleteSelected;
+
+  /// No description provided for @taskDueDateOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue since {date}'**
+  String taskDueDateOverdue(String date);
+
+  /// No description provided for @taskDueDateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get taskDueDateToday;
+
+  /// No description provided for @taskDueDateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on {date}'**
+  String taskDueDateOn(String date);
+
+  /// No description provided for @updatedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {date}'**
+  String updatedAtLabel(String date);
+
+  /// No description provided for @taskDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get taskDescriptionLabel;
+
+  /// No description provided for @taskDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more details about this task'**
+  String get taskDescriptionHint;
+
+  /// No description provided for @taskMetadataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get taskMetadataLabel;
+
+  /// No description provided for @taskDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get taskDueDate;
+
+  /// No description provided for @taskDueDateHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected date: {date}'**
+  String taskDueDateHelper(String date);
+
+  /// No description provided for @selectDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select due date'**
+  String get selectDueDate;
+
+  /// No description provided for @clearDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear due date'**
+  String get clearDueDate;
+
+  /// No description provided for @noDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get noDueDate;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get createdAt;
+
+  /// No description provided for @updatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get updatedAt;
+
+  /// No description provided for @taskPriorityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get taskPriorityLabel;
+
+  /// No description provided for @taskStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get taskStatusLabel;
+
+  /// No description provided for @taskTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get taskTitleLabel;
+
+  /// No description provided for @taskTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a task title'**
+  String get taskTitleHint;
+
+  /// No description provided for @taskTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get taskTitleRequired;
+
+  /// No description provided for @taskDueDateInPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date cannot be in the past'**
+  String get taskDueDateInPast;
+
+  /// No description provided for @editTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit task'**
+  String get editTask;
 }
 
 class _AppLocalizationsDelegate
