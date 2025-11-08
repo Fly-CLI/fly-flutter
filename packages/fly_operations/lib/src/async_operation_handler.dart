@@ -6,12 +6,11 @@ import 'package:fly_errors/fly_errors.dart';
 import 'package:fly_events/fly_events.dart';
 import 'package:fly_localization/fly_localization.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:uuid/uuid.dart';
-
 import 'package:fly_operations/src/async_operation_config.dart';
 import 'package:fly_operations/src/offline_queue.dart';
 import 'package:fly_operations/src/result.dart';
 import 'package:fly_operations/src/retry_config.dart';
+import 'package:uuid/uuid.dart';
 
 /// Enhanced async operation handler with network awareness
 /// 
@@ -31,6 +30,8 @@ class AsyncOperationHandler with EventEmitterMixin {
   final FoundationLocalizationProvider _localizations;
   final ErrorMessageFormatter _errorMessageFormatter;
   final Uuid _uuid = const Uuid();
+
+  static const String _defaultOperationName = 'execute';
 
   AsyncOperationHandler({
     required FlyLogger logger,
@@ -68,176 +69,58 @@ class AsyncOperationHandler with EventEmitterMixin {
     bool? queueIfOffline,
     String? operationName,
   }) async {
-    final effectiveTimeout = timeout ?? AsyncOperationConfig.standardTimeout;
-    final effectiveCheckConnectivity = 
-        checkConnectivity ?? AsyncOperationConfig.checkConnectivityByDefault;
-    final effectiveQueueIfOffline = 
-        queueIfOffline ?? AsyncOperationConfig.queueIfOfflineByDefault;
-    final effectiveOperationName = operationName ?? 'execute';
-    final operationId = _uuid.v4();
+    final options = _buildExecuteOptions(
+      timeout: timeout,
+      checkConnectivity: checkConnectivity,
+      queueIfOffline: queueIfOffline,
+      errorMessage: errorMessage,
+      operationName: operationName,
+    );
     final startTime = DateTime.now();
+    final operationId = _uuid.v4();
 
-    // Emit operation started event
-    emit(AsyncOperationStartedEvent(
-      operationId: operationId,
-      operationName: effectiveOperationName,
-      metadata: {
-        'timeout': effectiveTimeout.inMilliseconds,
-        'checkConnectivity': effectiveCheckConnectivity,
-        'queueIfOffline': effectiveQueueIfOffline,
-      },
-    ),);
+    _emitStartEvent(operationId, options);
 
     try {
-      // Check connectivity if requested
-      if (effectiveCheckConnectivity) {
-        final connectivityService = _connectivityService;
-        if (connectivityService == null) {
-          _logger.warn(
-            'Connectivity check requested but no connectivity service available; skipping check',
-          );
-        } else {
-          final hasConnection = await connectivityService.hasInternetConnection();
-          if (!hasConnection) {
-            _logger.warn('No internet connection detected');
-
-            final duration = DateTime.now().difference(startTime);
-            final errorMessageText = errorMessage ?? 
-                (effectiveQueueIfOffline 
-                    ? _localizations.noInternetConnectionQueuedShort
-                    : _localizations.networkNoInternet);
-
-            // Emit operation failed event
-            emit(AsyncOperationFailedEvent(
-              operationId: operationId,
-              operationName: effectiveOperationName,
-              error: errorMessageText,
-              duration: duration,
-              metadata: {
-                'errorType': 'NoInternetError',
-                'queued': effectiveQueueIfOffline && _offlineQueue != null,
-              },
-            ),);
-
-            // Queue operation if requested
-            if (effectiveQueueIfOffline && _offlineQueue != null) {
-              await _queueOperation(operation, errorMessage);
-              return Failure(
-                errorMessageText,
-                NoInternetError(localizations: _localizations),
-              );
-            }
-
-            return Failure(
-              errorMessageText,
-              NoInternetError(localizations: _localizations),
-            );
-          }
-        }
+      final connectivityFailure = await _ensureConnectivityIfNeeded<T>(
+        operation: operation,
+        operationId: operationId,
+        options: options,
+        startTime: startTime,
+      );
+      if (connectivityFailure != null) {
+        return connectivityFailure;
       }
 
-      // Execute operation with timeout
-      final result = await operation().timeout(effectiveTimeout);
-
+      final result = await operation().timeout(options.timeout);
       final duration = DateTime.now().difference(startTime);
-      _logger.debug('Operation completed in ${duration.inMilliseconds}ms');
 
-      // Emit operation completed event
-      emit(AsyncOperationCompletedEvent(
-        operationId: operationId,
-        operationName: effectiveOperationName,
-        success: true,
-        duration: duration,
-        metadata: {
-          'timeout': effectiveTimeout.inMilliseconds,
-        },
-      ),);
+      _logger.debug('Operation completed in ${duration.inMilliseconds}ms');
+      _emitCompletionEvent(operationId, options, duration);
 
       return Success(result);
     } on TimeoutException {
-      final duration = DateTime.now().difference(startTime);
-      _logger.error(
-        'Operation timed out after ${duration.inSeconds} seconds',
-      );
-
-      final errorMessageText = errorMessage ?? _localizations.networkTimeout;
-      final error = TimeoutError(
-        timeout: effectiveTimeout,
-        localizations: _localizations,
-      );
-      
-      // Emit operation failed event
-      emit(AsyncOperationFailedEvent(
+      return _handleTimeoutFailure<T>(
+        startTime: startTime,
+        options: options,
         operationId: operationId,
-        operationName: effectiveOperationName,
-        error: errorMessageText,
-        duration: duration,
-        metadata: {
-          'errorType': 'TimeoutException',
-          'timeout': effectiveTimeout.inMilliseconds,
-        },
-      ),);
-
-      return Failure(
-        errorMessageText,
-        error,
       );
     } on SocketException catch (e, stackTrace) {
-      _logger.error('Socket exception: ${e.message}', stackTrace: stackTrace);
-
-      final error = NetworkErrorClassifier.classifyError(
-        e,
-        localizations: _localizations,
-      );
-      final duration = DateTime.now().difference(startTime);
-      final errorMessageText = errorMessage ?? (error as AppException).message;
-
-      // Emit operation failed event
-      emit(AsyncOperationFailedEvent(
+      return _handleSocketFailure<T>(
+        startTime: startTime,
+        socketException: e,
+        stackTrace: stackTrace,
+        options: options,
         operationId: operationId,
-        operationName: effectiveOperationName,
-        error: errorMessageText,
-        duration: duration,
-        metadata: {
-          'errorType': 'SocketException',
-          'originalError': e.toString(),
-        },
-      ),);
-
-      return Failure(
-        errorMessageText,
-        error,
       );
     } catch (e, stackTrace) {
-      _logger.error('Operation failed: $e', stackTrace: stackTrace);
-
-      // Classify error as network error if applicable
-      final classifiedError = NetworkErrorClassifier.classifyError(
-        e,
-        timeout: effectiveTimeout,
-        localizations: _localizations,
-      );
-
-      // Format error message for user display
-      final formattedError = errorMessage ?? _errorMessageFormatter.format(
-        e,
-        localizations: _localizations,
-      );
-      final duration = DateTime.now().difference(startTime);
-
-      // Emit operation failed event
-      emit(AsyncOperationFailedEvent(
+      return _handleGenericFailure<T>(
+        error: e,
+        stackTrace: stackTrace,
+        startTime: startTime,
+        options: options,
         operationId: operationId,
-        operationName: effectiveOperationName,
-        error: formattedError,
-        duration: duration,
-        metadata: {
-          'errorType': e.runtimeType.toString(),
-          'originalError': e.toString(),
-        },
-      ),);
-
-      return Failure(formattedError, classifiedError);
+      );
     }
   }
 
@@ -264,40 +147,36 @@ class AsyncOperationHandler with EventEmitterMixin {
 
     _logger.debug('Starting operation with retry config: $config');
 
-    // Initial attempt + retries
-    for (int attempt = 0; attempt <= config.maxAttempts; attempt++) {
-      final isRetry = attempt > 0;
+    for (var attempt = 0; attempt <= config.maxAttempts; attempt++) {
+      final isRetryAttempt = attempt > 0;
 
-      if (isRetry) {
+      if (isRetryAttempt) {
         final delay = config.calculateDelay(attempt - 1);
         delays.add(delay);
-        _logger.debug('Retry attempt $attempt/${config.maxAttempts} '
-            'after ${delay.inMilliseconds}ms delay');
+        _logger.debug(
+          'Retry attempt $attempt/${config.maxAttempts} after ${delay.inMilliseconds}ms delay',
+        );
         await Future<void>.delayed(delay);
       } else {
         _logger.debug('Initial attempt');
       }
 
-      // Execute operation
       final result = await execute(
         operation,
         errorMessage: errorMessage,
         timeout: timeout,
-        checkConnectivity: (checkConnectivity ?? true) && !isRetry, // Only check on first attempt
-        queueIfOffline: false, // Don't queue during retries
+        checkConnectivity: (checkConnectivity ?? true) && !isRetryAttempt,
+        queueIfOffline: false,
       );
 
       if (result.isSuccess) {
         final totalDuration = DateTime.now().difference(startTime);
         _logger.info(
-          'Operation succeeded on attempt ${attempt + 1} '
-          '(total time: ${totalDuration.inMilliseconds}ms)',
+          'Operation succeeded on attempt ${attempt + 1} (total time: ${totalDuration.inMilliseconds}ms)',
         );
-
         return result;
       }
 
-      // Operation failed, check if we should retry
       if (result is Failure<T>) {
         lastError = result.originalError;
       }
@@ -313,7 +192,6 @@ class AsyncOperationHandler with EventEmitterMixin {
       }
     }
 
-    // All attempts failed
     final totalDuration = DateTime.now().difference(startTime);
     _logger.error(
       'Operation failed after ${config.maxAttempts + 1} attempts '
@@ -453,7 +331,6 @@ class AsyncOperationHandler with EventEmitterMixin {
     } catch (e, stackTrace) {
       _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
-      // Format error message for user display
       final formattedError = errorMessage ?? _errorMessageFormatter.format(
         e,
         localizations: _localizations,
@@ -475,24 +352,23 @@ class AsyncOperationHandler with EventEmitterMixin {
   /// Execute operation with progress callbacks (simple version without retry)
   Future<AppResult<T>> executeWithProgress<T>(
     Future<T> Function() operation,
-    void Function(bool isLoading) onProgress, {
+    void Function({bool isLoading}) onProgress, {
     String? errorMessage,
     Duration? timeout,
   }) async {
-    onProgress(true);
+    onProgress(isLoading: true);
     try {
       final result = await execute(
         operation,
         errorMessage: errorMessage,
         timeout: timeout,
       );
-      onProgress(false);
+      onProgress(isLoading: false);
       return result;
     } catch (e, stackTrace) {
-      onProgress(false);
+      onProgress(isLoading: false);
       _logger.error('Operation failed: $e', stackTrace: stackTrace);
       
-      // Format error message for user display
       final formattedError = errorMessage ?? _errorMessageFormatter.format(
         e,
         localizations: _localizations,
@@ -528,7 +404,6 @@ class AsyncOperationHandler with EventEmitterMixin {
     }
   }
 
-  /// Helper method to handle error states consistently
   void _handleError(
     String error,
     void Function({required bool isLoading})? onLoadingChanged,
@@ -539,7 +414,243 @@ class AsyncOperationHandler with EventEmitterMixin {
     // Error is already formatted, use it directly
     onLoadingChanged?.call(isLoading: false);
     onErrorChanged?.call(error);
-    if (notifyChange) onNotify?.call();
+    if (notifyChange) {
+      onNotify?.call();
+    }
   }
+
+  _ExecuteOptions _buildExecuteOptions({
+    Duration? timeout,
+    bool? checkConnectivity,
+    bool? queueIfOffline,
+    String? errorMessage,
+    String? operationName,
+  }) {
+    return _ExecuteOptions(
+      timeout: timeout ?? AsyncOperationConfig.standardTimeout,
+      checkConnectivity:
+          checkConnectivity ?? AsyncOperationConfig.checkConnectivityByDefault,
+      queueIfOffline:
+          queueIfOffline ?? AsyncOperationConfig.queueIfOfflineByDefault,
+      userFacingErrorMessage: errorMessage,
+      operationName: operationName ?? _defaultOperationName,
+    );
+  }
+
+  Future<AppResult<T>?> _ensureConnectivityIfNeeded<T>({
+    required Future<T> Function() operation,
+    required String operationId,
+    required _ExecuteOptions options,
+    required DateTime startTime,
+  }) async {
+    if (!options.checkConnectivity) {
+      return null;
+    }
+
+    final connectivityService = _connectivityService;
+    if (connectivityService == null) {
+      _logger.warn(
+        'Connectivity check requested but no connectivity service available; skipping check',
+      );
+      return null;
+    }
+
+    final hasConnection = await connectivityService.hasInternetConnection();
+    if (hasConnection) {
+      return null;
+    }
+
+    _logger.warn('No internet connection detected');
+
+    final duration = DateTime.now().difference(startTime);
+    final message = options.userFacingErrorMessage ??
+        (options.queueIfOffline
+            ? _localizations.noInternetConnectionQueuedShort
+            : _localizations.networkNoInternet);
+
+    _emitFailureEvent(
+      operationId: operationId,
+      operationName: options.operationName,
+      duration: duration,
+      error: message,
+      metadata: <String, Object?>{
+        'errorType': 'NoInternetError',
+        'queued': options.queueIfOffline && _offlineQueue != null,
+      },
+    );
+
+    if (options.queueIfOffline && _offlineQueue != null) {
+      await _queueOperation(operation, options.userFacingErrorMessage);
+    }
+
+    return Failure(
+      message,
+      NoInternetError(localizations: _localizations),
+    );
+  }
+
+  Failure<T> _handleTimeoutFailure<T>({
+    required DateTime startTime,
+    required _ExecuteOptions options,
+    required String operationId,
+  }) {
+    final duration = DateTime.now().difference(startTime);
+    _logger.error('Operation timed out after ${duration.inSeconds} seconds');
+
+    final message =
+        options.userFacingErrorMessage ?? _localizations.networkTimeout;
+    final timeoutError = TimeoutError(
+      timeout: options.timeout,
+      localizations: _localizations,
+    );
+
+    _emitFailureEvent(
+      operationId: operationId,
+      operationName: options.operationName,
+      duration: duration,
+      error: message,
+      metadata: <String, Object?>{
+        'errorType': 'TimeoutException',
+        'timeout': options.timeout.inMilliseconds,
+      },
+    );
+
+    return Failure(message, timeoutError);
+  }
+
+  Failure<T> _handleSocketFailure<T>({
+    required DateTime startTime,
+    required SocketException socketException,
+    required StackTrace stackTrace,
+    required _ExecuteOptions options,
+    required String operationId,
+  }) {
+    _logger.error(
+      'Socket exception: ${socketException.message}',
+      stackTrace: stackTrace,
+    );
+
+    final duration = DateTime.now().difference(startTime);
+    final classifiedError = NetworkErrorClassifier.classifyError(
+      socketException,
+      localizations: _localizations,
+    );
+    final message = options.userFacingErrorMessage ??
+        (classifiedError.message);
+
+    _emitFailureEvent(
+      operationId: operationId,
+      operationName: options.operationName,
+      duration: duration,
+      error: message,
+      metadata: <String, Object?>{
+        'errorType': 'SocketException',
+        'originalError': socketException.toString(),
+      },
+    );
+
+    return Failure(message, classifiedError);
+  }
+
+  Failure<T> _handleGenericFailure<T>({
+    required Object error,
+    required StackTrace stackTrace,
+    required DateTime startTime,
+    required _ExecuteOptions options,
+    required String operationId,
+  }) {
+    _logger.error('Operation failed: $error', stackTrace: stackTrace);
+
+    final classifiedError = NetworkErrorClassifier.classifyError(
+      error,
+      timeout: options.timeout,
+      localizations: _localizations,
+    );
+    final message = options.userFacingErrorMessage ??
+        _errorMessageFormatter.format(
+          error,
+          localizations: _localizations,
+        );
+    final duration = DateTime.now().difference(startTime);
+
+    _emitFailureEvent(
+      operationId: operationId,
+      operationName: options.operationName,
+      duration: duration,
+      error: message,
+      metadata: <String, Object?>{
+        'errorType': error.runtimeType.toString(),
+        'originalError': error.toString(),
+      },
+    );
+
+    return Failure(message, classifiedError);
+  }
+
+  void _emitStartEvent(String operationId, _ExecuteOptions options) {
+    emit(
+      AsyncOperationStartedEvent(
+        operationId: operationId,
+        operationName: options.operationName,
+        metadata: <String, Object?>{
+          'timeout': options.timeout.inMilliseconds,
+          'checkConnectivity': options.checkConnectivity,
+          'queueIfOffline': options.queueIfOffline,
+        },
+      ),
+    );
+  }
+
+  void _emitCompletionEvent(
+    String operationId,
+    _ExecuteOptions options,
+    Duration duration,
+  ) {
+    emit(
+      AsyncOperationCompletedEvent(
+        operationId: operationId,
+        operationName: options.operationName,
+        success: true,
+        duration: duration,
+        metadata: <String, Object?>{
+          'timeout': options.timeout.inMilliseconds,
+        },
+      ),
+    );
+  }
+
+  void _emitFailureEvent({
+    required String operationId,
+    required String operationName,
+    required Duration duration,
+    required String error,
+    required Map<String, Object?> metadata,
+  }) {
+    emit(
+      AsyncOperationFailedEvent(
+        operationId: operationId,
+        operationName: operationName,
+        error: error,
+        duration: duration,
+        metadata: metadata,
+      ),
+    );
+  }
+}
+
+class _ExecuteOptions {
+  _ExecuteOptions({
+    required this.timeout,
+    required this.checkConnectivity,
+    required this.queueIfOffline,
+    required this.userFacingErrorMessage,
+    required this.operationName,
+  });
+
+  final Duration timeout;
+  final bool checkConnectivity;
+  final bool queueIfOffline;
+  final String? userFacingErrorMessage;
+  final String operationName;
 }
 
