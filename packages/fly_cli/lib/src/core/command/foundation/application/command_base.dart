@@ -20,7 +20,7 @@ import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/domain/middleware_pipeline.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/middleware_factory.dart';
 import 'package:fly_cli/src/core/progress/infrastructure/progress_factory.dart';
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import 'package:fly_core/src/validation/validation.dart';
 import 'package:fly_mcp/fly_mcp.dart' hide Logger;
 import 'package:mason_logger/mason_logger.dart';

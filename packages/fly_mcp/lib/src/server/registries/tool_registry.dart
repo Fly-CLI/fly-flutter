@@ -1,5 +1,5 @@
 import 'package:dart_mcp/server.dart';
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 
 import '../progress.dart';
 

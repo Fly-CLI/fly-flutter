@@ -139,7 +139,7 @@ class HomeViewModel extends BaseViewModel<HomeViewModelState> {
         state = state.copyWith(syncStatus: serviceResult.data);
       },
       errorMessage: 'Failed to load sync status',
-      loadingHandler: (_) {}, // Don't show loading for background sync status checks
+      loadingHandler: ({required bool isLoading}) {},
     );
   }
 
@@ -149,7 +149,7 @@ class HomeViewModel extends BaseViewModel<HomeViewModelState> {
   Future<void> refresh() async {
     await runAsyncOperation(
       loadData,
-      loadingHandler: (isLoading) {
+      loadingHandler: ({required bool isLoading}) {
         state = state.copyWith(isRefreshing: isLoading);
       },
     );

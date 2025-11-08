@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:fly_core/fly_core.dart' hide CacheStats;
+import 'package:fly_core/fly_core_dart.dart' hide CacheStats;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 

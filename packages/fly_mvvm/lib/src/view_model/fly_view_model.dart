@@ -94,13 +94,13 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
     bool resetError = true,
     void Function()? onFinally,
     void Function(String errorMessage)? onError,
-    void Function(bool)? loadingHandler,
+    void Function({required bool isLoading})? loadingHandler,
     // Feedback parameters
     String? successMessage,
     bool canShowSuccess = true,
     bool canShowError = true,
   }) async {
-    final void Function(bool) effectiveLoadingHandler =
+    final void Function({required bool isLoading}) effectiveLoadingHandler =
         loadingHandler ?? setLoading;
     void errorStateHandler(String? value) {
       if (value != null) {
@@ -240,8 +240,8 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
   }
 
   /// Set loading state
-  void setLoading(bool loading) {
-    state = state.withLoading(loading);
+  void setLoading({required bool isLoading}) {
+    state = state.withLoading(isLoading);
   }
 
   /// Set error state

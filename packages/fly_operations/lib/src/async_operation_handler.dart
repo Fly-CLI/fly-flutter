@@ -383,7 +383,7 @@ class AsyncOperationHandler with EventEmitterMixin {
     String? errorMessage,
     Duration? timeout,
     RetryConfig? retryConfig,
-    void Function(bool isLoading)? onLoadingChanged,
+    void Function({required bool isLoading})? onLoadingChanged,
     void Function(String? error)? onErrorChanged,
     void Function()? onNotify,
     bool resetError = true,
@@ -396,7 +396,7 @@ class AsyncOperationHandler with EventEmitterMixin {
     if (resetError) {
       onErrorChanged?.call(null);
     }
-    onLoadingChanged?.call(true);
+    onLoadingChanged?.call(isLoading: true);
     if (notifyChange) onNotify?.call();
 
     try {
@@ -423,7 +423,7 @@ class AsyncOperationHandler with EventEmitterMixin {
 
       // Handle result
       if (result.isSuccess) {
-        onLoadingChanged?.call(false);
+        onLoadingChanged?.call(isLoading: false);
         onErrorChanged?.call(null);
         if (notifyChange) onNotify?.call();
         return result;
@@ -519,13 +519,13 @@ class AsyncOperationHandler with EventEmitterMixin {
   /// Helper method to handle error states consistently
   void _handleError(
     String error,
-    void Function(bool isLoading)? onLoadingChanged,
+    void Function({required bool isLoading})? onLoadingChanged,
     void Function(String? error)? onErrorChanged,
     void Function()? onNotify,
     bool notifyChange,
   ) {
     // Error is already formatted, use it directly
-    onLoadingChanged?.call(false);
+    onLoadingChanged?.call(isLoading: false);
     onErrorChanged?.call(error);
     if (notifyChange) onNotify?.call();
   }

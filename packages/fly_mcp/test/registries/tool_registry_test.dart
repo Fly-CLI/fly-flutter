@@ -1,4 +1,4 @@
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:test/test.dart';
 

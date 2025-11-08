@@ -47,7 +47,7 @@ class ViewModelAsyncCoordinator {
     Duration? timeout,
     bool resetError = true,
     void Function()? onFinally,
-    void Function(bool isLoading)? onLoadingChanged,
+    void Function({required bool isLoading})? onLoadingChanged,
     void Function(String? errorMessage)? onErrorChanged,
     String? successMessage,
     bool canShowSuccess = true,

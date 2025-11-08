@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:dart_mcp/server.dart';
 import 'package:dart_mcp/stdio.dart';
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import 'config/server_config.dart';
 import 'config/size_limits_config.dart';
 import 'errors/server_errors.dart';

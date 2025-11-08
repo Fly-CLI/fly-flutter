@@ -1,4 +1,4 @@
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import 'server_errors.dart';
 
 /// JSON-RPC error codes (standard and MCP-specific)

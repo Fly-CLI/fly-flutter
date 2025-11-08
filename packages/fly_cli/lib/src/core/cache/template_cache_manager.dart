@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import 'package:fly_core/src/file_operations/file_operations.dart';
 import 'package:path/path.dart' as path;
 

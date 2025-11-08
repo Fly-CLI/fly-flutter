@@ -1,5 +1,5 @@
 import 'package:fly_cli/src/core/progress/domain/progress_indicator.dart';
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
 /// Execution phase of a command

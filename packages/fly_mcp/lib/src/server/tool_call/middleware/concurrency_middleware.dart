@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dart_mcp/server.dart';
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 import '../tool_call_context.dart';
 import '../tool_call_middleware.dart';
 

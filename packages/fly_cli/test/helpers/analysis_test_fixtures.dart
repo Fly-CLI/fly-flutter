@@ -402,7 +402,7 @@ class MyApp extends ConsumerWidget {
   static const String flyMainContent = '''
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fly_core/fly_core.dart';
+import 'package:fly_core/fly_core_dart.dart';
 
 void main() {
   runApp(const ProviderScope(child: FlyApp()));
