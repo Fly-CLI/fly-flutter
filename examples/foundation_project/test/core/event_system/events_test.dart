@@ -69,7 +69,7 @@ void main() {
 
       expect(event.feature, FeatureScreenType.home);
       expect(event, isA<NavigationEvent>());
-      expect(event, isA<AppEvent>());
+      expect(event, isA<Event>());
     });
 
     test('should support JSON serialization', () {
@@ -131,7 +131,7 @@ void main() {
 
       expect(event.screenName, 'home');
       expect(event, isA<ScreenEvent>());
-      expect(event, isA<AppEvent>());
+      expect(event, isA<Event>());
     });
 
     test('should support JSON serialization', () {

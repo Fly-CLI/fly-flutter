@@ -5,7 +5,7 @@ import 'package:fly_events/fly_events.dart';
 import 'package:fly_feedback/fly_feedback.dart';
 
 typedef FeedbackAction = void Function();
-typedef EventEmitter = bool Function(AppEvent event);
+typedef EventEmitter = bool Function(Event event);
 
 class ViewModelFeedbackCoordinator with EventEmitterMixin {
   final String scope;

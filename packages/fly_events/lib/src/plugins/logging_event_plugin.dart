@@ -24,8 +24,8 @@ import '../event_providers.dart';
 /// ```
 class LoggingEventPlugin {
   AppEventEmitter? _emitter;
-  StreamSubscription<AppEvent>? _screenSubscription;
-  StreamSubscription<AppEvent>? _operationSubscription;
+  StreamSubscription<Event>? _screenSubscription;
+  StreamSubscription<Event>? _operationSubscription;
   final FlyLogger _logger;
   /// Whether logging is enabled
   bool enabled = true;

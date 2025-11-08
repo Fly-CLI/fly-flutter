@@ -8,7 +8,7 @@ part 'events.g.dart';
 ///
 /// This is an example-specific event type that uses FeatureScreenType.
 /// For generic navigation events, extend AppEvent directly in your application.
-sealed class NavigationEvent extends AppEvent {
+sealed class NavigationEvent extends Event {
   @JsonKey(fromJson: _featureFromJson, toJson: _featureToJson)
   final FeatureScreenType feature;
 

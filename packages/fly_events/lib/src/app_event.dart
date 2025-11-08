@@ -11,7 +11,7 @@ part 'app_event.g.dart';
 ///
 /// All app events extend this abstract class and provide
 /// information about component events in the application.
-abstract class AppEvent {
+abstract class Event {
   /// Unique identifier for this event
   final String id;
 
@@ -21,7 +21,7 @@ abstract class AppEvent {
   /// Additional metadata for the event
   final Map<String, dynamic> metadata;
 
-  AppEvent({
+  Event({
     String? id,
     DateTime? timestamp,
     this.metadata = const {},
@@ -38,7 +38,7 @@ abstract class AppEvent {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is AppEvent && other.id == id;
+    return other is Event && other.id == id;
   }
 
   @override
@@ -46,7 +46,7 @@ abstract class AppEvent {
 }
 
 /// Base class for screen events
-abstract class ScreenEvent extends AppEvent {
+abstract class ScreenEvent extends Event {
   final String screenName;
 
   ScreenEvent({
@@ -90,7 +90,7 @@ class ScreenHiddenEvent extends ScreenEvent {
 }
 
 /// Base class for foundation operation events
-abstract class FoundationOperationEvent extends AppEvent {
+abstract class FoundationOperationEvent extends Event {
   final String operationId;
   final String operationName;
 
@@ -176,7 +176,7 @@ Duration _durationFromJson(int json) => Duration(milliseconds: json);
 ///
 /// Allows feedback events to move through the shared application event
 /// emitter so that listeners can handle them alongside other app events.
-class FeedbackAppEvent extends AppEvent {
+class FeedbackAppEvent extends Event {
   FeedbackAppEvent({
     required this.scope,
     required this.payload,

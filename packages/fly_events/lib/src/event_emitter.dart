@@ -10,10 +10,10 @@ class ControllerRegistryEntry {
   final Type eventType;
 
   /// The manager instance for this controller
-  final IEventStreamManager<AppEvent> manager;
+  final IEventStreamManager<Event> manager;
 
   /// Type matcher function that checks if an event matches this entry's type
-  final bool Function(AppEvent) typeMatcher;
+  final bool Function(Event) typeMatcher;
 
   ControllerRegistryEntry({
     required this.key,
@@ -66,7 +66,7 @@ class AppEventEmitter {
   /// [manager] - The stream manager for this event type
   ///
   /// Throws [StateError] if a controller with the same key already exists.
-  void register<T extends AppEvent>({
+  void register<T extends Event>({
     required String key,
     required IEventStreamManager<T> manager,
   }) {
@@ -82,7 +82,7 @@ class AppEventEmitter {
     final entry = ControllerRegistryEntry(
       key: key,
       eventType: T,
-      manager: manager as IEventStreamManager<AppEvent>,
+      manager: manager as IEventStreamManager<Event>,
       typeMatcher: (event) => event is T,
     );
 
@@ -105,7 +105,7 @@ class AppEventEmitter {
   /// emitter.registerType<NavigationEvent>();
   /// // Equivalent to: emitter.register<NavigationEvent>(key: 'NavigationEvent', manager: ...)
   /// ```
-  void registerType<T extends AppEvent>({
+  void registerType<T extends Event>({
     IEventStreamManager<T>? manager,
   }) {
     if (_isDisposed) {
@@ -125,7 +125,7 @@ class AppEventEmitter {
     final entry = ControllerRegistryEntry(
       key: key,
       eventType: T,
-      manager: effectiveManager as IEventStreamManager<AppEvent>,
+      manager: effectiveManager as IEventStreamManager<Event>,
       typeMatcher: (event) => event is T,
     );
 
@@ -154,7 +154,7 @@ class AppEventEmitter {
   ///
   /// Returns true if the controller was found and removed, false otherwise.
   /// The controller is disposed before removal.
-  bool unregisterType<T extends AppEvent>() {
+  bool unregisterType<T extends Event>() {
     final entry = _typeRegistry.remove(T);
     if (entry == null) {
       return false;
@@ -189,7 +189,7 @@ class AppEventEmitter {
   ///   }
   /// });
   /// ```
-  Stream<AppEvent>? getStream(String key) {
+  Stream<Event>? getStream(String key) {
     if (_isDisposed) {
       return null;
     }
@@ -223,7 +223,7 @@ class AppEventEmitter {
   ///   }
   /// });
   /// ```
-  Stream<T> getStreamFor<T extends AppEvent>() {
+  Stream<T> getStreamFor<T extends Event>() {
     if (_isDisposed) {
       return Stream<T>.empty();
     }
@@ -247,7 +247,7 @@ class AppEventEmitter {
   }
 
   /// Check if a type is registered
-  bool isTypeRegistered<T extends AppEvent>() {
+  bool isTypeRegistered<T extends Event>() {
     return _typeRegistry.containsKey(T);
   }
 
@@ -257,7 +257,7 @@ class AppEventEmitter {
   /// Returns true if the event was emitted to at least one controller, false otherwise.
   ///
   /// [event] - The app event to emit
-  bool emit(AppEvent event) {
+  bool emit(Event event) {
     if (_isDisposed) {
       return false;
     }

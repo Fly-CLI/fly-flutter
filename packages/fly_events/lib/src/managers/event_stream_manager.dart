@@ -11,7 +11,7 @@ import '../app_event.dart';
 ///
 /// Managers own the StreamController and handle all stream operations.
 /// Emitter delegates to managers - no embedded controllers.
-abstract class IEventStreamManager<T extends AppEvent> {
+abstract class IEventStreamManager<T extends Event> {
   /// Stream of events
   Stream<T> get stream;
 
@@ -36,7 +36,7 @@ abstract class IEventStreamManager<T extends AppEvent> {
 /// - Graceful error handling
 ///
 /// **Thread Safety:** Designed for single-threaded Flutter main isolate usage.
-abstract class EventStreamManager<T extends AppEvent>
+abstract class EventStreamManager<T extends Event>
     implements IEventStreamManager<T> {
   StreamController<T>? _controller; // Manager owns this
   bool _isDisposed = false;
@@ -50,7 +50,7 @@ abstract class EventStreamManager<T extends AppEvent>
   /// ```dart
   /// final manager = EventStreamManager.create<NavigationEvent>();
   /// ```
-  static EventStreamManager<T> create<T extends AppEvent>() {
+  static EventStreamManager<T> create<T extends Event>() {
     return _EventStreamManagerImpl<T>();
   }
 
@@ -105,7 +105,7 @@ abstract class EventStreamManager<T extends AppEvent>
 }
 
 /// Internal implementation class for factory-created managers
-class _EventStreamManagerImpl<T extends AppEvent>
+class _EventStreamManagerImpl<T extends Event>
     extends EventStreamManager<T> {
   // All functionality inherited from EventStreamManager base class
 }

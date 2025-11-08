@@ -27,7 +27,7 @@ class RecentlyAccessedTrackingService {
 
   Timer? _debounceTimer;
   FeatureScreenType? _pendingFeature;
-  StreamSubscription<AppEvent>? _navigationSubscription;
+  StreamSubscription<Event>? _navigationSubscription;
 
   RecentlyAccessedTrackingService(
     this._dataManager,

@@ -193,7 +193,7 @@ void main() {
           manager: manager,
         );
 
-        final events = <AppEvent>[];
+        final events = <Event>[];
         final subscription = emitter.getStream('navigation')?.listen(events.add);
 
         final event = NavigationStartedEvent(feature: FeatureScreenType.home);
@@ -235,7 +235,7 @@ void main() {
           manager: manager,
         );
 
-        final events = <AppEvent>[];
+        final events = <Event>[];
         final subscription = emitter.getStream('navigation')?.listen(events.add);
 
         // Emit concrete event (NavigationStartedEvent)
@@ -264,8 +264,8 @@ void main() {
           manager: screenManager,
         );
 
-        final navEvents = <AppEvent>[];
-        final screenEvents = <AppEvent>[];
+        final navEvents = <Event>[];
+        final screenEvents = <Event>[];
 
         final navSubscription =
             emitter.getStream('navigation')?.listen(navEvents.add);

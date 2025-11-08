@@ -48,7 +48,7 @@ mixin EventEmitterMixin {
   ///
   /// Emits the event to all registered controllers that handle the event type.
   /// Returns true if the event was emitted, false if ignored.
-  bool emit(AppEvent event) {
+  bool emit(Event event) {
     try {
       return _emitter.emit(event);
     } catch (e) {

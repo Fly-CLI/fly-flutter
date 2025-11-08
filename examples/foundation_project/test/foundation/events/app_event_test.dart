@@ -67,7 +67,7 @@ void main() {
       final event = ScreenShownEvent(screenName: 'TestScreen');
       expect(event.screenName, equals('TestScreen'));
       expect(event, isA<ScreenEvent>());
-      expect(event, isA<AppEvent>());
+      expect(event, isA<Event>());
     });
   });
 
@@ -76,7 +76,7 @@ void main() {
       final event = ScreenHiddenEvent(screenName: 'TestScreen');
       expect(event.screenName, equals('TestScreen'));
       expect(event, isA<ScreenEvent>());
-      expect(event, isA<AppEvent>());
+      expect(event, isA<Event>());
     });
   });
 }
