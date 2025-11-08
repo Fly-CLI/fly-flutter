@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fly_core/fly_core.dart';
 import 'package:fly_events/fly_events.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:fly_navigation/fly_navigation.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
+import 'package:foundation_project/shared/navigation/app_router.dart';
 
 /// Application-specific navigation service implementing NavigationService with Feature enum
 ///
@@ -31,6 +33,9 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   /// The NavigatorKey to use for navigation
   final GlobalKey<NavigatorState> navigatorKey = App.navigatorKey;
+
+  /// Get the GoRouter instance
+  GoRouter get _router => AppRouter.router;
 
   /// Get the event emitter instance
   ///
@@ -87,39 +92,37 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   Future<T?> navigateTo<T>(FeatureScreenType route, {Object? arguments}) {
     _emitNavigationStarted(route);
 
-    final state = navigatorKey.currentState;
-    if (state == null) {
-      throw StateError(
-        'Navigator not initialized. Ensure navigatorKey is attached to a Navigator widget.',
-      );
-    }
+    try {
+      // Check if this is a shell route (bottom navigation tab) or a detail/form route
+      final isShellRoute = route == FeatureScreenType.home ||
+          route == FeatureScreenType.tasks ||
+          route == FeatureScreenType.notes ||
+          route == FeatureScreenType.settings;
 
-    final future = state.pushNamed<T>(
-      route.route,
-      arguments: arguments,
-    );
-
-    // Emit completion event when navigation completes
-    future.then((result) {
-      _emitNavigationCompleted(route, result: result);
-    }).catchError((error) {
-      // Still emit completion even on error
+      if (isShellRoute) {
+        // Use go() for shell routes to switch tabs
+        _router.go(route.route, extra: arguments);
+      } else {
+        // Use push() for detail/form routes to add to stack
+        _router.push(route.route, extra: arguments);
+      }
+      
+      // Emit completion event immediately since GoRouter doesn't return a Future
+      // In practice, results are handled through route builders or state management
       _emitNavigationCompleted(route);
-    });
-
-    return future;
+      
+      // Return a completed future since GoRouter's navigation is synchronous
+      return Future<T?>.value(null);
+    } catch (error) {
+      _emitNavigationCompleted(route);
+      return Future<T?>.value(null);
+    }
   }
 
   @override
   void navigateBack<T>([T? result]) {
-    final state = navigatorKey.currentState;
-    if (state == null) {
-      throw StateError(
-        'Navigator not initialized. Ensure navigatorKey is attached to a Navigator widget.',
-      );
-    }
-    if (state.canPop()) {
-      state.pop<T>(result);
+    if (_router.canPop()) {
+      _router.pop(result);
     }
   }
 
@@ -127,64 +130,41 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   Future<T?> navigateReplace<T>(FeatureScreenType route, {Object? arguments}) {
     _emitNavigationStarted(route);
 
-    final state = navigatorKey.currentState;
-    if (state == null) {
-      throw StateError(
-        'Navigator not initialized. Ensure navigatorKey is attached to a Navigator widget.',
-      );
-    }
-
-    final future = state.pushReplacementNamed<T, void>(
-      route.route,
-      arguments: arguments,
-    );
-
-    // Emit completion event when navigation completes
-    future.then((result) {
-      _emitNavigationCompleted(route, result: result);
-    }).catchError((error) {
-      // Still emit completion even on error
+    try {
+      // Use GoRouter's go to replace current route
+      _router.go(route.route, extra: arguments);
+      
+      // Emit completion event immediately
       _emitNavigationCompleted(route);
-    });
-
-    return future;
+      
+      return Future<T?>.value(null);
+    } catch (error) {
+      _emitNavigationCompleted(route);
+      return Future<T?>.value(null);
+    }
   }
 
   @override
   Future<T?> navigateClearStack<T>(FeatureScreenType route, {Object? arguments}) {
     _emitNavigationStarted(route);
 
-    final state = navigatorKey.currentState;
-    if (state == null) {
-      throw StateError(
-        'Navigator not initialized. Ensure navigatorKey is attached to a Navigator widget.',
-      );
-    }
-
-    final future = state.pushNamedAndRemoveUntil<T>(
-      route.route,
-      (route) => false,
-      arguments: arguments,
-    );
-
-    // Emit completion event when navigation completes
-    future.then((result) {
-      _emitNavigationCompleted(route, result: result);
-    }).catchError((error) {
-      // Still emit completion even on error
+    try {
+      // Use GoRouter's go to clear stack and navigate to route
+      _router.go(route.route, extra: arguments);
+      
+      // Emit completion event immediately
       _emitNavigationCompleted(route);
-    });
-
-    return future;
+      
+      return Future<T?>.value(null);
+    } catch (error) {
+      _emitNavigationCompleted(route);
+      return Future<T?>.value(null);
+    }
   }
 
   @override
   bool canGoBack() {
-    final state = navigatorKey.currentState;
-    if (state == null) {
-      return false;
-    }
-    return state.canPop();
+    return _router.canPop();
   }
 
   // ============================================================================
@@ -195,6 +175,10 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   ///
   /// This method automatically emits events for navigation tracking.
   /// This is an additional method beyond the NavigationService interface.
+  ///
+  /// Note: GoRouter handles route management differently. This method
+  /// navigates to the target feature, but the "until" behavior is
+  /// handled by GoRouter's route configuration.
   Future<T?> navigateToAndClearUntil<T>(
     FeatureScreenType feature,
     FeatureScreenType untilFeature, {
@@ -202,28 +186,20 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   }) {
     _emitNavigationStarted(feature);
 
-    final state = navigatorKey.currentState;
-    if (state == null) {
-      throw StateError(
-        'Navigator not initialized. Ensure navigatorKey is attached to a Navigator widget.',
-      );
-    }
-
-    final future = state.pushNamedAndRemoveUntil<T>(
-      feature.route,
-      (route) => route.settings.name == untilFeature.route,
-      arguments: arguments,
-    );
-
-    // Emit completion event when navigation completes
-    future.then((result) {
-      _emitNavigationCompleted(feature, result: result);
-    }).catchError((error) {
-      // Still emit completion even on error
+    try {
+      // GoRouter doesn't have direct equivalent of pushNamedAndRemoveUntil
+      // We navigate to the target route - the route configuration handles
+      // the navigation stack structure
+      _router.go(feature.route, extra: arguments);
+      
+      // Emit completion event immediately
       _emitNavigationCompleted(feature);
-    });
-
-    return future;
+      
+      return Future<T?>.value(null);
+    } catch (error) {
+      _emitNavigationCompleted(feature);
+      return Future<T?>.value(null);
+    }
   }
 }
 

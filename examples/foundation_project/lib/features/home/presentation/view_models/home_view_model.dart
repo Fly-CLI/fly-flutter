@@ -85,7 +85,10 @@ class HomeViewModelState
 class HomeViewModel extends FlyViewModel<HomeViewModelState> {
   final FlyLogger _logger;
 
-  HomeViewModel({required FlyLogger logger}) : _logger = logger;
+  HomeViewModel({
+    required FlyLogger logger,
+    super.connectivityChecker,
+  }) : _logger = logger;
 
   StatisticsService get _statisticsService => ref.read(statisticsServiceProvider);
   SyncService get _syncService => ref.read(syncServiceProvider);
@@ -179,7 +182,11 @@ final homeViewModelProvider = NotifierProvider<HomeViewModel, HomeViewModelState
     // Note: In a real app, you'd get logger from GlobalContainer or ref
     // For now, we'll use GlobalContainer since this is a NotifierProvider
     final logger = GlobalContainer.instance.read(loggerProvider('HomeViewModel'));
-    return HomeViewModel(logger: logger);
+    final connectivityChecker = GlobalContainer.instance.read(connectivityCheckerProvider);
+    return HomeViewModel(
+      logger: logger,
+      connectivityChecker: connectivityChecker,
+    );
   },
 );
 

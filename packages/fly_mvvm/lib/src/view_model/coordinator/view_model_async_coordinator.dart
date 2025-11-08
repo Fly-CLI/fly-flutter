@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fly_logger/fly_logger.dart';
 import 'package:fly_operations/fly_operations.dart';
 import 'package:fly_localization/fly_localization.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
 
 typedef SuccessFeedbackHandler = void Function(String message);
 typedef ErrorFeedbackHandler = void Function(
@@ -30,10 +31,14 @@ class ViewModelAsyncCoordinator {
     AsyncOperationHandler? asyncHandler,
     FlyLogger? logger,
     FoundationLocalizationProvider? localizations,
+    ConnectivityService? connectivityService,
+    ConnectivityChecker? connectivityChecker,
   })  : _asyncHandler = asyncHandler ??
             AsyncOperationHandler(
               logger: logger ?? FlyLoggerImpl('AsyncOperationHandler'),
               localizations: localizations,
+              connectivityService: connectivityService,
+              connectivityChecker: connectivityChecker,
             );
 
   Future<AppResult<R>> execute<R>(

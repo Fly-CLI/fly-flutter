@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
+import 'package:fly_feedback/fly_feedback.dart';
+import 'package:fly_localization/fly_localization.dart';
 import 'package:fly_logger/fly_logger.dart';
 import 'package:fly_operations/fly_operations.dart';
-import 'package:fly_events/fly_events.dart';
-import 'package:fly_errors/fly_errors.dart';
-import 'package:fly_feedback/fly_feedback.dart';
-import '../view_model/view_model_state.dart';
+
 import '../view_model/coordinator/view_model_async_coordinator.dart';
 import '../view_model/coordinator/view_model_feedback_coordinator.dart';
+import '../view_model/view_model_state.dart';
 
 /// Base class for Riverpod-based ViewModels
 /// Provides common state management functionality using Riverpod
@@ -19,7 +20,17 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
   FlyViewModel({
     ViewModelAsyncCoordinator? asyncCoordinator,
     ViewModelFeedbackCoordinator? feedbackCoordinator,
-  })  : _asyncCoordinator = asyncCoordinator ?? ViewModelAsyncCoordinator() {
+    FlyLogger? logger,
+    FoundationLocalizationProvider? localizations,
+    ConnectivityService? connectivityService,
+    ConnectivityChecker? connectivityChecker,
+  }) : _asyncCoordinator = asyncCoordinator ??
+            ViewModelAsyncCoordinator(
+              logger: logger,
+              localizations: localizations,
+              connectivityService: connectivityService,
+              connectivityChecker: connectivityChecker,
+            ) {
     _feedbackCoordinator = feedbackCoordinator ??
         ViewModelFeedbackCoordinator(
           scope: feedbackScope,

@@ -34,7 +34,12 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateNavigationIndex();
+    // Delay provider modification until after build phase completes
+    Future(() {
+      if (mounted) {
+        _updateNavigationIndex();
+      }
+    });
   }
 
   void _updateNavigationIndex() {

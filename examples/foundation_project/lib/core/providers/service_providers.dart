@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
 import 'package:foundation_project/core/services/api_service.dart';
 import 'package:foundation_project/core/services/cache_service.dart';
+import 'package:foundation_project/core/services/default_connectivity_checker.dart';
 import 'package:foundation_project/core/services/pagination/note_pagination_service.dart';
 import 'package:foundation_project/core/services/pagination/task_pagination_service.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
@@ -8,6 +10,21 @@ import 'package:foundation_project/core/services/sync_service.dart';
 import 'package:foundation_project/core/providers/repository_providers.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';
+
+/// Provider for connectivity checker
+final connectivityCheckerProvider = Provider<ConnectivityChecker>((ref) {
+  return DefaultConnectivityChecker(
+    logger: ref.watch(loggerProvider('ConnectivityChecker')),
+  );
+});
+
+/// Provider for connectivity service
+final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
+  return ConnectivityService(
+    checker: ref.watch(connectivityCheckerProvider),
+    logger: ref.watch(loggerProvider('ConnectivityService')),
+  );
+});
 
 /// Provider for cache service
 final cacheServiceProvider = Provider<CacheService>((ref) {
