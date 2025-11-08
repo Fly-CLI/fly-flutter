@@ -26,7 +26,7 @@ import 'package:fly_operations/src/retry_config.dart';
 /// - Event emission for observability
 class AsyncOperationHandler with EventEmitterMixin {
   final FlyLogger _logger;
-  final ConnectivityService _connectivityService;
+  final ConnectivityService? _connectivityService;
   final OfflineQueue? _offlineQueue;
   final FoundationLocalizationProvider _localizations;
   final ErrorMessageFormatter _errorMessageFormatter;
@@ -43,8 +43,7 @@ class AsyncOperationHandler with EventEmitterMixin {
         _connectivityService = connectivityService ??
             (connectivityChecker != null
                 ? ConnectivityService(checker: connectivityChecker, logger: logger)
-                : throw ArgumentError(
-                    'Either connectivityService or connectivityChecker must be provided')),
+                : null),
         _offlineQueue = offlineQueue,
         _localizations = localizations ?? DefaultFoundationLocalizationProvider(),
         _errorMessageFormatter = errorMessageFormatter ??
@@ -92,42 +91,48 @@ class AsyncOperationHandler with EventEmitterMixin {
     try {
       // Check connectivity if requested
       if (effectiveCheckConnectivity) {
-        final hasConnection =
-            await _connectivityService.hasInternetConnection();
-        if (!hasConnection) {
-          _logger.warn('No internet connection detected');
+        final connectivityService = _connectivityService;
+        if (connectivityService == null) {
+          _logger.warn(
+            'Connectivity check requested but no connectivity service available; skipping check',
+          );
+        } else {
+          final hasConnection = await connectivityService.hasInternetConnection();
+          if (!hasConnection) {
+            _logger.warn('No internet connection detected');
 
-          final duration = DateTime.now().difference(startTime);
-          final errorMessageText = errorMessage ?? 
-              (effectiveQueueIfOffline 
-                  ? _localizations.noInternetConnectionQueuedShort
-                  : _localizations.networkNoInternet);
+            final duration = DateTime.now().difference(startTime);
+            final errorMessageText = errorMessage ?? 
+                (effectiveQueueIfOffline 
+                    ? _localizations.noInternetConnectionQueuedShort
+                    : _localizations.networkNoInternet);
 
-          // Emit operation failed event
-          emit(AsyncOperationFailedEvent(
-            operationId: operationId,
-            operationName: effectiveOperationName,
-            error: errorMessageText,
-            duration: duration,
-            metadata: {
-              'errorType': 'NoInternetError',
-              'queued': effectiveQueueIfOffline && _offlineQueue != null,
-            },
-          ),);
+            // Emit operation failed event
+            emit(AsyncOperationFailedEvent(
+              operationId: operationId,
+              operationName: effectiveOperationName,
+              error: errorMessageText,
+              duration: duration,
+              metadata: {
+                'errorType': 'NoInternetError',
+                'queued': effectiveQueueIfOffline && _offlineQueue != null,
+              },
+            ),);
 
-          // Queue operation if requested
-          if (effectiveQueueIfOffline && _offlineQueue != null) {
-            await _queueOperation(operation, errorMessage);
+            // Queue operation if requested
+            if (effectiveQueueIfOffline && _offlineQueue != null) {
+              await _queueOperation(operation, errorMessage);
+              return Failure(
+                errorMessageText,
+                NoInternetError(localizations: _localizations),
+              );
+            }
+
             return Failure(
               errorMessageText,
               NoInternetError(localizations: _localizations),
             );
           }
-
-          return Failure(
-            errorMessageText,
-            NoInternetError(localizations: _localizations),
-          );
         }
       }
 
@@ -346,22 +351,29 @@ class AsyncOperationHandler with EventEmitterMixin {
   }) async {
     final effectiveQueueIfOffline = queueIfOffline ?? true; // Network operations should queue by default
     // Check connectivity first
-    final hasConnection = await _connectivityService.hasInternetConnection();
-    if (!hasConnection) {
-      _logger.warn('No internet connection for network operation');
+    final connectivityService = _connectivityService;
+    if (connectivityService != null) {
+      final hasConnection = await connectivityService.hasInternetConnection();
+      if (!hasConnection) {
+        _logger.warn('No internet connection for network operation');
 
-      // Queue operation if requested and queue available
-      if (effectiveQueueIfOffline && _offlineQueue != null) {
-        await _queueOperation(operation, errorMessage);
+        // Queue operation if requested and queue available
+        if (effectiveQueueIfOffline && _offlineQueue != null) {
+          await _queueOperation(operation, errorMessage);
+          return Failure(
+            errorMessage ?? _localizations.noInternetConnectionQueuedLong,
+            NoInternetError(localizations: _localizations),
+          );
+        }
+
         return Failure(
-          errorMessage ?? _localizations.noInternetConnectionQueuedLong,
+          errorMessage ?? _localizations.networkNoInternet,
           NoInternetError(localizations: _localizations),
         );
       }
-
-      return Failure(
-        errorMessage ?? _localizations.networkNoInternet,
-        NoInternetError(localizations: _localizations),
+    } else {
+      _logger.warn(
+        'Connectivity service not configured; running network operation without connectivity checks',
       );
     }
 
@@ -371,7 +383,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       retryConfig: retryConfig ?? AsyncOperationConfig.defaultRetryConfig,
       errorMessage: errorMessage,
       timeout: timeout,
-      checkConnectivity: false, // Already checked above
+      checkConnectivity: false, // Already checked above when available
     );
   }
 
