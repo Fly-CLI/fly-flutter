@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_core/fly_core.dart';
-import 'package:foundation_project/foundation/foundation.dart'; // Barrel file re-exports packages
 import 'package:foundation_project/core/providers/providers.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
+import 'package:foundation_project/shared/navigation/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +36,7 @@ class FoundationProjectApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: AppLocalizations.of(context).appTitle,
+      title: 'Task & Notes Manager',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -44,6 +44,7 @@ class FoundationProjectApp extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: AppRouter.router,
     );
   }
 }
