@@ -1,4 +1,4 @@
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 import 'package:foundation_project/core/database/models/base_entity.dart';
 
 /// Base repository interface for all data operations

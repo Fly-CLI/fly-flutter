@@ -40,7 +40,7 @@ This foundation project serves as a playground for Flutter development and can b
   - `FlyViewModelState`: Base state interface
 
 - **Operations** (`operations/`):
-  - `AsyncOperationHandler`: Async operation handler with retry logic
+  - `FlowGuard`: Async operation handler with retry logic
   - `ConnectivityService`: Network connectivity checking
   - `Result`: Result pattern for operation outcomes
   - `RetryConfig`: Retry configuration
@@ -228,7 +228,7 @@ class MyScreen extends FlyScreen<MyFlyViewModel, MyFlyViewModelState> {
 2. **Error Handling**: Always use the error handling system for consistent error display
 3. **Lifecycle**: Override lifecycle methods when needed for proper resource management
 4. **Feedback**: Use the feedback system for user notifications
-5. **Async Operations**: Use AsyncOperationHandler for all async operations with proper error handling
+5. **Async Operations**: Use FlowGuard for all async operations with proper error handling
 
 ## Converting to Template
 

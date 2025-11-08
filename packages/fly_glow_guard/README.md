@@ -1,6 +1,6 @@
-# fly_operations
+# fly_glow_guard
 
-Async operation handling with retry logic, network awareness, and offline queuing for Flutter applications.
+Flow Guard delivers network-aware async execution with retry logic, offline queuing, and rich telemetry for Flutter applications.
 
 ## Features
 
@@ -14,7 +14,7 @@ Async operation handling with retry logic, network awareness, and offline queuin
 ## Usage
 
 ```dart
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 import 'package:fly_logger/fly_logger.dart';
 import 'package:fly_connectivity/fly_connectivity.dart';
 
@@ -24,25 +24,25 @@ final connectivityService = ConnectivityService(
   checker: myChecker,
   logger: logger,
 );
-final handler = AsyncOperationHandler(
+final guard = FlowGuard(
   logger: logger,
   connectivityService: connectivityService,
 );
 
 // Execute operation
-final result = await handler.execute(() => apiService.fetchData());
+final result = await guard.execute(() => apiService.fetchData());
 if (result.isSuccess) {
   final data = result.data;
 }
 
 // Execute with retry
-final result = await handler.executeWithRetry(
+final result = await guard.executeWithRetry(
   () => apiService.fetchData(),
   retryConfig: RetryConfig.standard(),
 );
 
 // Execute network operation
-final result = await handler.executeNetworkOperation(
+final result = await guard.executeNetworkOperation(
   () => apiService.postData(data),
   queueIfOffline: true,
 );

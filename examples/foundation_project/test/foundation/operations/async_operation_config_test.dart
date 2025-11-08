@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {
@@ -212,7 +212,7 @@ void main() {
         final logger = MockFlyLogger();
         AsyncOperationConfig.printConfigSummary(logger);
         expect(logger.logMessages.length, greaterThan(0));
-        expect(logger.logMessages.any((msg) => msg.contains('AsyncHandlerConfig')), isTrue);
+        expect(logger.logMessages.any((msg) => msg.contains('FlowGuardConfig')), isTrue);
       });
     });
   });

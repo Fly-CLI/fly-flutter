@@ -1,8 +1,8 @@
 import 'package:fly_logger/fly_logger.dart';
 
-import 'package:fly_operations/src/retry_config.dart';
+import 'package:fly_glow_guard/src/retry_config.dart';
 
-/// Central configuration for AsyncOperationHandler default values
+/// Central configuration for FlowGuard default values
 /// 
 /// This class serves as the single source of truth for all default
 /// timeout values, retry configurations, and behavior settings used
@@ -353,7 +353,7 @@ class AsyncOperationConfig {
     final summary = getConfigSummary();
     final buffer = StringBuffer();
     
-    buffer.writeln('AsyncHandlerConfig Summary:');
+    buffer.writeln('FlowGuardConfig Summary:');
     buffer.writeln('================================');
     summary.forEach((category, values) {
       buffer.writeln('$category:');

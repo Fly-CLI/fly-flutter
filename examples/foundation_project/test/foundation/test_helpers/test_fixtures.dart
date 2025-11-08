@@ -1,5 +1,5 @@
 import 'package:fly_errors/fly_errors.dart';
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 
 /// Test fixtures and helper data for foundation tests
 class TestFixtures {

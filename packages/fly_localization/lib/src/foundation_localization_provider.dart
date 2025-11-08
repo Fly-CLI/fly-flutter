@@ -1,3 +1,5 @@
+import 'package:fly_localization/fly_localization.dart';
+
 /// Abstract interface for localization strings used by foundation components
 ///
 /// This interface provides a clean abstraction over localization, allowing
@@ -33,7 +35,7 @@
 /// final provider = appLocalizationProvider ?? DefaultFoundationLocalizationProvider();
 ///
 /// // Use in foundation components
-/// final handler = AsyncOperationHandler(
+/// final guard = FlowGuard(
 ///   logger: logger,
 ///   localizations: provider,
 /// );

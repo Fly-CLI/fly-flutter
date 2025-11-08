@@ -1,5 +1,5 @@
-name: fly_operations
-description: Async operation handling with retry logic, network awareness, and offline queuing for Flutter applications
+name: fly_glow_guard
+description: Flow Guard is a network-aware async execution with retry logic, offline queuing, and telemetry for Flutter apps
 version: 0.1.0
 homepage: https://github.com/fly-cli/fly
 repository: https://github.com/fly-cli/fly.git

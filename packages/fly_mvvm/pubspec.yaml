@@ -28,8 +28,8 @@ dependencies:
     path: ../fly_localization
   fly_logger:
     path: ../fly_logger
-  fly_operations:
-    path: ../fly_operations
+  fly_glow_guard:
+    path: ../fly_glow_guard
 
 dev_dependencies:
   flutter_test:

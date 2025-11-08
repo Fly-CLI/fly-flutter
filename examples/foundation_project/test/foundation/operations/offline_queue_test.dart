@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {

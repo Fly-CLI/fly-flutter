@@ -6,13 +6,15 @@ import 'package:fly_errors/fly_errors.dart' hide TimeoutException;
 import 'package:fly_events/fly_events.dart';
 import 'package:fly_localization/fly_localization.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_operations/src/async_operation_config.dart';
-import 'package:fly_operations/src/offline_queue.dart';
-import 'package:fly_operations/src/result.dart';
-import 'package:fly_operations/src/retry_config.dart';
+import 'package:fly_glow_guard/src/async_operation_config.dart';
+import 'package:fly_glow_guard/src/offline_queue.dart';
+import 'package:fly_glow_guard/src/result.dart';
+import 'package:fly_glow_guard/src/retry_config.dart';
 import 'package:uuid/uuid.dart';
 
-/// Enhanced async operation handler with network awareness
+part 'flow_guard_builder.dart';
+
+/// Flow Guard: enhanced async operation handler with network awareness
 /// 
 /// Features:
 /// - Connectivity checking before operations
@@ -23,23 +25,25 @@ import 'package:uuid/uuid.dart';
 /// - Progress callbacks for long operations
 /// - Telemetry and logging
 /// - Event emission for observability
-class AsyncOperationHandler with EventEmitterMixin {
+class FlowGuard with EventEmitterMixin {
   final FlyLogger _logger;
   final ConnectivityService? _connectivityService;
   final OfflineQueue? _offlineQueue;
   final FoundationLocalizationProvider _localizations;
   final ErrorMessageFormatter _errorMessageFormatter;
+  final FlowGuardDefaults _defaults;
   final Uuid _uuid = const Uuid();
 
   static const String _defaultOperationName = 'execute';
 
-  AsyncOperationHandler({
+  FlowGuard({
     required FlyLogger logger,
     ConnectivityService? connectivityService,
     ConnectivityChecker? connectivityChecker,
     OfflineQueue? offlineQueue,
     FoundationLocalizationProvider? localizations,
     ErrorMessageFormatter? errorMessageFormatter,
+    FlowGuardDefaults? defaults,
   })  : _logger = logger,
         _connectivityService = connectivityService ??
             (connectivityChecker != null
@@ -51,13 +55,14 @@ class AsyncOperationHandler with EventEmitterMixin {
             ErrorMessageFormatter(
               logger: logger,
               defaultLocalizations: localizations ?? DefaultFoundationLocalizationProvider(),
-            );
+            ),
+        _defaults = defaults ?? const FlowGuardDefaults();
 
   /// Execute an operation with basic error handling and timeout
   /// 
   /// [operation] - The async operation to execute
   /// [errorMessage] - Custom error message for failures
-  /// [timeout] - Maximum time to wait for operation (defaults to AsyncHandlerConfig.standardTimeout)
+  /// [timeout] - Maximum time to wait for operation (defaults to AsyncOperationConfig.standardTimeout)
   /// [checkConnectivity] - Whether to verify internet connection first
   /// [queueIfOffline] - Whether to queue operation if offline
   /// [operationName] - Optional name for the operation (for events, defaults to 'execute')
@@ -78,14 +83,14 @@ class AsyncOperationHandler with EventEmitterMixin {
     );
     final operationId = _uuid.v4();
 
-    final lifecycle = _OperationLifecycle(
+    final lifecycle = _FlowLifecycle(
       operationId: operationId,
       operationName: options.operationName,
       options: options,
       emit: emit,
     );
 
-    final failureTranslator = _FailureTranslator(
+    final failureTranslator = _FlowFailureTranslator(
       logger: _logger,
       localizations: _localizations,
       errorMessageFormatter: _errorMessageFormatter,
@@ -93,7 +98,7 @@ class AsyncOperationHandler with EventEmitterMixin {
       lifecycle: lifecycle,
     );
 
-    final connectivityGuard = _ConnectivityGuard(
+    final connectivityGuard = _FlowConnectivityGuard(
       logger: _logger,
       connectivityService: _connectivityService,
       offlineQueue: _offlineQueue,
@@ -141,9 +146,9 @@ class AsyncOperationHandler with EventEmitterMixin {
   /// Execute an operation with retry logic and exponential backoff
   /// 
   /// [operation] - The async operation to execute
-  /// [retryConfig] - Configuration for retry behavior (defaults to AsyncHandlerConfig.defaultRetryConfig)
+  /// [retryConfig] - Configuration for retry behavior (defaults to AsyncOperationConfig.defaultRetryConfig)
   /// [errorMessage] - Custom error message for failures
-  /// [timeout] - Maximum time to wait per attempt (defaults to AsyncHandlerConfig.standardTimeout)
+  /// [timeout] - Maximum time to wait per attempt (defaults to AsyncOperationConfig.standardTimeout)
   /// [checkConnectivity] - Whether to verify internet connection
   /// [queueIfOffline] - Whether to enqueue the operation when offline (first attempt only)
   Future<AppResult<T>> executeWithRetry<T>(
@@ -154,7 +159,8 @@ class AsyncOperationHandler with EventEmitterMixin {
     bool? checkConnectivity,
     bool? queueIfOffline,
   }) async {
-    final config = retryConfig ?? 
+    final config = retryConfig ??
+        _defaults.retryConfig ??
         AsyncOperationConfig.defaultRetryConfig ??
         RetryConfig.noRetry();
     final startTime = DateTime.now();
@@ -232,10 +238,10 @@ class AsyncOperationHandler with EventEmitterMixin {
   /// comprehensive network error handling with optional queuing
   /// 
   /// [operation] - The network operation to execute
-  /// [retryConfig] - Configuration for retry behavior (defaults to AsyncHandlerConfig.standardRetryConfig)
+  /// [retryConfig] - Configuration for retry behavior (defaults to AsyncOperationConfig.standardRetryConfig)
   /// [errorMessage] - Custom error message for failures
-  /// [timeout] - Maximum time to wait per attempt (defaults to AsyncHandlerConfig.standardTimeout)
-  /// [queueIfOffline] - Whether to queue operation if offline (defaults to AsyncHandlerConfig.queueIfOfflineByDefault)
+  /// [timeout] - Maximum time to wait per attempt (defaults to AsyncOperationConfig.standardTimeout)
+  /// [queueIfOffline] - Whether to queue operation if offline (defaults to AsyncOperationConfig.queueIfOfflineByDefault)
   Future<AppResult<T>> executeNetworkOperation<T>(
     Future<T> Function() operation, {
     RetryConfig? retryConfig,
@@ -411,27 +417,33 @@ class AsyncOperationHandler with EventEmitterMixin {
     }
   }
 
-  _ExecuteOptions _buildExecuteOptions({
+  _FlowGuardOptions _buildExecuteOptions({
     Duration? timeout,
     bool? checkConnectivity,
     bool? queueIfOffline,
     String? errorMessage,
     String? operationName,
   }) {
-    return _ExecuteOptions(
-      timeout: timeout ?? AsyncOperationConfig.standardTimeout,
-      checkConnectivity:
-          checkConnectivity ?? AsyncOperationConfig.checkConnectivityByDefault,
-      queueIfOffline:
-          queueIfOffline ?? AsyncOperationConfig.queueIfOfflineByDefault,
+    return _FlowGuardOptions(
+      timeout:
+          timeout ?? _defaults.timeout ?? AsyncOperationConfig.standardTimeout,
+      checkConnectivity: checkConnectivity ??
+          _defaults.checkConnectivity ??
+          AsyncOperationConfig.checkConnectivityByDefault,
+      queueIfOffline: queueIfOffline ??
+          _defaults.queueIfOffline ??
+          AsyncOperationConfig.queueIfOfflineByDefault,
       userFacingErrorMessage: errorMessage,
-      operationName: operationName ?? _defaultOperationName,
+      operationName:
+          operationName ?? _defaults.operationName ?? _defaultOperationName,
     );
   }
+
+  static FlowGuardBuilder builder() => FlowGuardBuilder();
 }
 
-class _ExecuteOptions {
-  _ExecuteOptions({
+class _FlowGuardOptions {
+  _FlowGuardOptions({
     required this.timeout,
     required this.checkConnectivity,
     required this.queueIfOffline,
@@ -446,8 +458,8 @@ class _ExecuteOptions {
   final String operationName;
 }
 
-class _ConnectivityGuard {
-  _ConnectivityGuard({
+class _FlowConnectivityGuard {
+  _FlowConnectivityGuard({
     required FlyLogger logger,
     required ConnectivityService? connectivityService,
     required OfflineQueue? offlineQueue,
@@ -463,8 +475,8 @@ class _ConnectivityGuard {
   final FoundationLocalizationProvider _localizations;
 
   Future<AppResult<T>?> ensureConnectivity<T>({
-    required _ExecuteOptions options,
-    required _FailureTranslator failureTranslator,
+    required _FlowGuardOptions options,
+    required _FlowFailureTranslator failureTranslator,
     Future<void> Function()? queueOperation,
   }) async {
     if (!options.checkConnectivity) {
@@ -484,7 +496,7 @@ class _ConnectivityGuard {
       return null;
     }
 
-    _logger.warn('No internet connection detected');
+    _logger.warn(_localizations.networkNoInternet);
 
     if (queueOperation != null) {
       await queueOperation();
@@ -496,13 +508,13 @@ class _ConnectivityGuard {
   }
 }
 
-class _FailureTranslator {
-  _FailureTranslator({
+class _FlowFailureTranslator {
+  _FlowFailureTranslator({
     required FlyLogger logger,
     required FoundationLocalizationProvider localizations,
     required ErrorMessageFormatter errorMessageFormatter,
-    required _ExecuteOptions options,
-    required _OperationLifecycle lifecycle,
+    required _FlowGuardOptions options,
+    required _FlowLifecycle lifecycle,
   })  : _logger = logger,
         _localizations = localizations,
         _errorMessageFormatter = errorMessageFormatter,
@@ -512,8 +524,8 @@ class _FailureTranslator {
   final FlyLogger _logger;
   final FoundationLocalizationProvider _localizations;
   final ErrorMessageFormatter _errorMessageFormatter;
-  final _ExecuteOptions _options;
-  final _OperationLifecycle _lifecycle;
+  final _FlowGuardOptions _options;
+  final _FlowLifecycle _lifecycle;
 
   Failure<T> connectivityFailure<T>({required bool queued}) {
     final message = _options.userFacingErrorMessage ??
@@ -570,10 +582,10 @@ class _FailureTranslator {
       socketException,
       localizations: _localizations,
     );
+    final fallbackMessage = socketException.message;
+    final classifiedMessage = classifiedError.message;
     final message = _options.userFacingErrorMessage ??
-        (classifiedError is AppException
-            ? classifiedError.message
-            : socketException.message);
+        (classifiedMessage.isNotEmpty ? classifiedMessage : fallbackMessage);
 
     _lifecycle.fail(
       error: message,
@@ -615,22 +627,22 @@ class _FailureTranslator {
   }
 }
 
-typedef _EmitEvent = void Function(Event event);
+typedef _FlowEmitEvent = void Function(Event event);
 
-class _OperationLifecycle {
-  _OperationLifecycle({
+class _FlowLifecycle {
+  _FlowLifecycle({
     required this.operationId,
     required this.operationName,
-    required _ExecuteOptions options,
-    required _EmitEvent emit,
+    required _FlowGuardOptions options,
+    required _FlowEmitEvent emit,
   })  : _options = options,
         _emit = emit,
         _startTime = DateTime.now();
 
   final String operationId;
   final String operationName;
-  final _ExecuteOptions _options;
-  final _EmitEvent _emit;
+  final _FlowGuardOptions _options;
+  final _FlowEmitEvent _emit;
   final DateTime _startTime;
 
   Duration get elapsed => DateTime.now().difference(_startTime);

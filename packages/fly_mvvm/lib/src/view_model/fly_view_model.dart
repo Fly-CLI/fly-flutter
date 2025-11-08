@@ -1,10 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fly_connectivity/fly_connectivity.dart';
 import 'package:fly_feedback/fly_feedback.dart';
-import 'package:fly_localization/fly_localization.dart';
-import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 
 import '../view_model/coordinator/view_model_async_coordinator.dart';
 import '../view_model/coordinator/view_model_feedback_coordinator.dart';
@@ -14,14 +11,14 @@ import '../view_model/view_model_state.dart';
 /// Provides common state management functionality using Riverpod
 abstract class FlyViewModel<T extends FlyViewModelState<T>>
     extends Notifier<T> {
-  final ViewModelAsyncCoordinator _asyncCoordinator;
+  final ViewModelFlowGuardCoordinator _asyncCoordinator;
   late final ViewModelFeedbackCoordinator _feedbackCoordinator;
 
   FlyViewModel({
-    ViewModelAsyncCoordinator? asyncCoordinator,
+    ViewModelFlowGuardCoordinator? asyncCoordinator,
     ViewModelFeedbackCoordinator? feedbackCoordinator,
   }) : _asyncCoordinator = asyncCoordinator ??
-            ViewModelAsyncCoordinator() {
+            ViewModelFlowGuardCoordinator() {
     _feedbackCoordinator = feedbackCoordinator ??
         ViewModelFeedbackCoordinator(
           scope: feedbackScope,
@@ -40,7 +37,7 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
   /// Convenient runAsyncOperation method that integrates with state management
   ///
   /// This method automatically handles loading states, error states, and optional
-  /// feedback emission. It uses [AsyncOperationHandler] internally for network-aware async
+  /// feedback emission. It uses [FlowGuard] internally for network-aware async
   /// operation handling with retry logic, connectivity checking, and timeout management.
   ///
   /// **Important**: Always use this method for async operations in ViewModels to ensure
@@ -74,7 +71,7 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
   /// // With custom timeout
   /// await runAsyncOperation(
   ///   () => repository.uploadLargeFile(file),
-  ///   timeout: AsyncHandlerConfig.veryLongTimeout,
+  ///   timeout: AsyncOperationConfig.veryLongTimeout,
   ///   errorMessage: 'Upload failed',
   /// );
   /// ```

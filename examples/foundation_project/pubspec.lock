@@ -480,6 +480,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  fly_glow_guard:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_glow_guard"
+      relative: true
+    source: path
+    version: "0.1.0"
   fly_localization:
     dependency: "direct main"
     description:
@@ -512,13 +519,6 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/fly_networking"
-      relative: true
-    source: path
-    version: "0.1.0"
-  fly_operations:
-    dependency: "direct main"
-    description:
-      path: "../../packages/fly_operations"
       relative: true
     source: path
     version: "0.1.0"

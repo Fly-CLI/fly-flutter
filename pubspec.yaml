@@ -16,7 +16,7 @@ workspace:
   - packages/fly_errors
   - packages/fly_events
   - packages/fly_navigation
-  - packages/fly_operations
+  - packages/fly_glow_guard
   - packages/fly_mvvm
 
 dependencies:

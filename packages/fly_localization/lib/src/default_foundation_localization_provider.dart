@@ -12,7 +12,7 @@ import 'package:fly_localization/src/foundation_localization_provider.dart';
 /// final provider = appLocalizationProvider ?? DefaultFoundationLocalizationProvider();
 ///
 /// // Use in tests
-/// final handler = AsyncOperationHandler(
+/// final guard = FlowGuard(
 ///   logger: logger,
 ///   localizations: DefaultFoundationLocalizationProvider(),
 /// );

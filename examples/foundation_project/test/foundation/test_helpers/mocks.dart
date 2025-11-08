@@ -1,7 +1,7 @@
 import 'package:fly_connectivity/fly_connectivity.dart';
 import 'package:fly_logger/fly_logger.dart';
 import 'package:fly_localization/fly_localization.dart';
-import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_glow_guard/fly_glow_guard.dart';
 import 'dart:async';
 
 /// Mock implementation of FlyLogger for testing
