@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/navigation/navigation_service.dart';
-import 'package:foundation_project/foundation/navigation/default_navigation_service.dart';
+import 'package:fly_navigation/fly_navigation.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

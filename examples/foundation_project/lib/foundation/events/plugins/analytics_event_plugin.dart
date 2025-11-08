@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:foundation_project/foundation/di/dependency_container.dart';
-import 'package:foundation_project/foundation/events/event_emitter.dart';
-import 'package:foundation_project/foundation/events/app_event.dart';
-import 'package:foundation_project/foundation/events/event_providers.dart';
+import 'package:fly_di/fly_di.dart';
+import 'package:fly_events/fly_events.dart';
 
 /// Analytics plugin that listens to screen events
 ///

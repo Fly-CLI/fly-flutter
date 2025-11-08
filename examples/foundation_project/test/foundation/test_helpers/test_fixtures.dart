@@ -1,7 +1,5 @@
-import 'package:foundation_project/foundation/error/app_exception.dart';
-import 'package:foundation_project/foundation/error/network_errors.dart';
-import 'package:foundation_project/foundation/operations/result.dart';
-import 'package:foundation_project/foundation/operations/retry_config.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_operations/fly_operations.dart';
 
 /// Test fixtures and helper data for foundation tests
 class TestFixtures {

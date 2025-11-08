@@ -1,7 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/foundation/connectivity/connectivity_checker.dart';
-import 'package:foundation_project/foundation/connectivity/connectivity_type.dart';
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
 
 /// Default implementation of [ConnectivityChecker] using `connectivity_plus` package.
 /// 

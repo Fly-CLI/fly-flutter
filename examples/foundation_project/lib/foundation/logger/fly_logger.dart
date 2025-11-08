@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:logging/logging.dart' as logging;
-import 'package:foundation_project/foundation/logger/error_reporter.dart';
+import 'package:fly_logger/fly_logger.dart';
 
 /// Standard log levels following industry conventions (RFC 5424).
 /// 

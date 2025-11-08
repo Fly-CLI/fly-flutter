@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/foundation.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/coordinator/view_model_async_coordinator.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/coordinator/view_model_feedback_coordinator.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/view_model_state.dart';
+import 'package:fly_mvvm/fly_mvvm.dart';
+import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_feedback/fly_feedback.dart';
 
 /// Base class for Riverpod-based ViewModels
 /// Provides common state management functionality using Riverpod

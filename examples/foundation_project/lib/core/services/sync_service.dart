@@ -1,5 +1,5 @@
-import 'package:foundation_project/foundation/operations/result.dart';
-import 'package:foundation_project/foundation/logger/fly_logger.dart';
+import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_logger/fly_logger.dart';
 import 'package:foundation_project/core/models/sync_status.dart' as core_sync;
 import 'package:foundation_project/core/repositories/note_repository.dart';
 import 'package:foundation_project/core/repositories/task_repository.dart';

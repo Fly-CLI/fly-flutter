@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/error/app_exception.dart';
-import 'package:foundation_project/foundation/error/error_handler.dart';
-import 'package:foundation_project/foundation/error/error_message_formatter.dart';
+import 'package:fly_errors/fly_errors.dart';
 
 import '../test_helpers/mocks.dart';
 

@@ -1,9 +1,7 @@
-import 'package:foundation_project/foundation/connectivity/connectivity_checker.dart';
-import 'package:foundation_project/foundation/connectivity/connectivity_type.dart';
-import 'package:foundation_project/foundation/logger/error_reporter.dart';
-import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
-import 'package:foundation_project/foundation/operations/offline_queue.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_localization/fly_localization.dart';
+import 'package:fly_operations/fly_operations.dart';
 import 'dart:async';
 
 /// Mock implementation of FlyLogger for testing

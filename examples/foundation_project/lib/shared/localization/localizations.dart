@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/foundation/foundation.dart';
-import 'package:foundation_project/foundation/di/global_container.dart';
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_di/fly_di.dart';
+import 'package:fly_navigation/fly_navigation.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
 import 'package:foundation_project/l10n/app_localizations_en.dart';
-import 'package:foundation_project/foundation/navigation/app.dart';
 
 /// Get localizations from the current app context
 ///

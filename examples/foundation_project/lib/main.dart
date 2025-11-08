@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/di/global_container.dart';
-import 'package:foundation_project/foundation/foundation.dart';
+import 'package:fly_di/fly_di.dart';
+import 'package:foundation_project/foundation/foundation.dart'; // Barrel file re-exports packages
 import 'package:foundation_project/core/providers/providers.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';

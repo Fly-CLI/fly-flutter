@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:foundation_project/foundation/di/global_container.dart';
-import 'package:foundation_project/foundation/events/event_emitter.dart';
+import 'package:fly_di/fly_di.dart';
+import 'package:fly_events/fly_events.dart';
 import 'package:foundation_project/core/event_system/events.dart';
-import 'package:foundation_project/foundation/events/event_providers.dart';
-import 'package:foundation_project/foundation/navigation/app.dart';
-import 'package:foundation_project/foundation/navigation/navigation_service.dart';
+import 'package:fly_navigation/fly_navigation.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 /// Application-specific navigation service implementing NavigationService with Feature enum

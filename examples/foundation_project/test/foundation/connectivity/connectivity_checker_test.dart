@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/connectivity/connectivity_checker.dart';
-import 'package:foundation_project/foundation/connectivity/connectivity_type.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {

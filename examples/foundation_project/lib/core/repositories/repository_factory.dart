@@ -1,5 +1,5 @@
 import 'package:foundation_project/core/database/app_database.dart';
-import 'package:foundation_project/foundation/logger/fly_logger.dart';
+import 'package:fly_logger/fly_logger.dart';
 import 'package:foundation_project/core/repositories/note_repository.dart';
 import 'package:foundation_project/core/repositories/task_repository.dart';
 

@@ -1,5 +1,5 @@
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
-import 'package:foundation_project/foundation/events/app_event.dart';
+import 'package:fly_events/fly_events.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'events.g.dart';

@@ -3,12 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_feedback/fly_feedback.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/fly_view_model.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/view_model_state.dart';
-import 'package:foundation_project/foundation/events/event_emitter.dart';
-import 'package:foundation_project/foundation/events/event_emitter_mixin.dart';
-import 'package:foundation_project/foundation/events/app_event.dart';
-import 'package:foundation_project/foundation/events/event_providers.dart';
+import 'package:fly_mvvm/fly_mvvm.dart';
+import 'package:fly_events/fly_events.dart';
 
 /// Abstract base screen class for handling common UI logic
 /// Provides standard patterns for loading, error, and content management

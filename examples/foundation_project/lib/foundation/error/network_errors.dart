@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:foundation_project/foundation/error/app_exception.dart';
-import 'package:foundation_project/foundation/localization/default_foundation_localization_provider.dart';
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_localization/fly_localization.dart';
 
 /// Base class for all network-related errors
 /// Extends AppException to integrate with existing error handling infrastructure

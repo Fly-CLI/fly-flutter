@@ -1,4 +1,4 @@
-import 'package:foundation_project/foundation/foundation.dart';
+import 'package:fly_errors/src/app_exception.dart';
 
 /// Network-related exceptions
 class NetworkException extends AppException {
@@ -29,3 +29,4 @@ class PermissionException extends AppException {
 class TimeoutException extends AppException {
   TimeoutException(super.message, {super.code, super.details});
 }
+

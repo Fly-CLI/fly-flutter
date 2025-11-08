@@ -1,6 +1,8 @@
 import 'dart:io';
 
-import 'package:foundation_project/foundation/foundation.dart';
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_localization/fly_localization.dart';
+import 'package:fly_errors/fly_errors.dart';
 
 /// Formats technical errors into user-friendly localized messages
 ///

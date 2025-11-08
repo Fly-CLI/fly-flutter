@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/error/error_message_formatter.dart';
-import 'package:foundation_project/foundation/foundation.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_logger/fly_logger.dart';
 
 /// Provider for ErrorMessageFormatter
 ///

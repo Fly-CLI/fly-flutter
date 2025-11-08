@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/error/network_errors.dart';
-import 'package:foundation_project/foundation/operations/retry_config.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_operations/fly_operations.dart';
 
 void main() {
   group('RetryConfig', () {

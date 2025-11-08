@@ -1,5 +1,4 @@
-import 'package:foundation_project/foundation/events/app_event.dart';
-import 'package:foundation_project/foundation/events/managers/event_stream_manager.dart';
+import 'package:fly_events/fly_events.dart';
 
 /// Registry entry for a controller
 class ControllerRegistryEntry {

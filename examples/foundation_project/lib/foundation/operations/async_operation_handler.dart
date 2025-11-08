@@ -1,7 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:foundation_project/foundation/foundation.dart';
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_localization/fly_localization.dart';
+import 'package:fly_operations/fly_operations.dart';
+import 'package:fly_events/fly_events.dart';
 import 'package:uuid/uuid.dart';
 
 /// Enhanced async operation handler with network awareness

@@ -1,45 +1,22 @@
-// Barrel file for foundation
+// Barrel file for foundation - re-exports from packages
 
 // Error exports
-export 'error/app_exception.dart';
-export 'error/error_handler.dart';
-export 'error/error_message_formatter.dart';
-export 'error/error_message_formatter_provider.dart';
-export 'error/network_errors.dart';
+export 'package:fly_errors/fly_errors.dart';
 // Feedback exports (from fly_feedback package)
 export 'package:fly_feedback/fly_feedback.dart';
 // Localization exports
-export 'localization/foundation_localization_provider.dart';
-export 'localization/default_foundation_localization_provider.dart';
+export 'package:fly_localization/fly_localization.dart';
 // MVVM exports
-export 'mvvm/screen/fly_screen.dart';
-export 'mvvm/view_model/fly_view_model.dart';
+export 'package:fly_mvvm/fly_mvvm.dart';
 // Navigation service exports
-export '../foundation/navigation/navigation_service.dart';
-export '../foundation/navigation/default_navigation_service.dart';
+export 'package:fly_navigation/fly_navigation.dart';
 // Operations exports
-export 'operations/async_operation_handler.dart';
-export 'operations/async_operation_config.dart';
-export 'operations/offline_queue.dart';
-export 'operations/result.dart';
-export 'operations/retry_config.dart';
+export 'package:fly_operations/fly_operations.dart';
 // Connectivity exports
-export 'connectivity/connectivity_service.dart';
-export 'connectivity/connectivity_checker.dart';
-export 'connectivity/connectivity_type.dart';
+export 'package:fly_connectivity/fly_connectivity.dart';
 // Logger exports
-export 'logger/fly_logger.dart';
-export 'logger/error_reporter.dart';
+export 'package:fly_logger/fly_logger.dart';
 // Dependency Injection exports
-export 'di/global_container.dart';
-export 'di/dependency_container.dart';
-export 'di/riverpod_dependency_container.dart';
+export 'package:fly_di/fly_di.dart';
 // Event system exports
-export 'events/app_event.dart';
-export 'events/event_emitter.dart';
-export 'events/event_emitter_mixin.dart';
-export 'events/event_providers.dart';
-export 'events/managers/event_stream_manager.dart';
-export 'events/plugins/analytics_event_plugin.dart';
-export 'events/plugins/logging_event_plugin.dart';
-export 'events/plugins/performance_event_plugin.dart';
+export 'package:fly_events/fly_events.dart';

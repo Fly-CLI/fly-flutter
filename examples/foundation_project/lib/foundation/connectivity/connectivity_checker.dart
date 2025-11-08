@@ -1,4 +1,4 @@
-import 'package:foundation_project/foundation/connectivity/connectivity_type.dart';
+import 'package:fly_connectivity/fly_connectivity.dart';
 
 /// Abstract interface for connectivity checking services.
 /// 

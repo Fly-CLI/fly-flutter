@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:foundation_project/foundation/navigation/app.dart';
+import 'package:fly_navigation/fly_navigation.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:foundation_project/features/home/presentation/screens/home_screen.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/tasks_screen.dart';

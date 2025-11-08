@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/fly_view_model.dart';
+import 'package:fly_mvvm/src/view_model/fly_view_model.dart';
 
 /// Abstract interface for ViewModel state
 /// All ViewModel states must implement this interface to ensure
@@ -117,3 +117,4 @@ extension ViewModelStateExtensions<T extends FlyViewModelState<T>> on T {
   /// Check if the ViewModel is ready (initialized and not loading)
   bool get isReady => !isLoading && !hasError;
 }
+

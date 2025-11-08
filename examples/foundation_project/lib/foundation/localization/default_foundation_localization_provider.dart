@@ -1,4 +1,4 @@
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
+import 'package:fly_localization/fly_localization.dart';
 
 /// Default implementation of FoundationLocalizationProvider with English messages
 ///

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:foundation_project/foundation/events/app_event.dart';
+import 'package:fly_events/fly_events.dart';
 
 /// Interface for managing event streams
 ///

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/events/app_event.dart';
+import 'package:fly_events/fly_events.dart';
 
 void main() {
   group('AppEvent', () {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
+import 'package:fly_localization/fly_localization.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {

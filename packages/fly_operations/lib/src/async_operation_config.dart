@@ -1,5 +1,6 @@
-import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/foundation/operations/retry_config.dart';
+import 'package:fly_logger/fly_logger.dart';
+
+import 'package:fly_operations/src/retry_config.dart';
 
 /// Central configuration for AsyncOperationHandler default values
 /// 

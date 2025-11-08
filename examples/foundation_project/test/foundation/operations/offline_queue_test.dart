@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/operations/offline_queue.dart';
+import 'package:fly_operations/fly_operations.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {

@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/navigation/app.dart';
-import 'package:foundation_project/foundation/navigation/navigation_service.dart';
-import 'package:foundation_project/foundation/navigation/default_navigation_service.dart';
+import 'package:fly_navigation/fly_navigation.dart';
 
 /// Provider for NavigationService
 ///

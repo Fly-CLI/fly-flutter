@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/operations/result.dart';
+import 'package:fly_operations/fly_operations.dart';
 
 void main() {
   group('AppResult', () {

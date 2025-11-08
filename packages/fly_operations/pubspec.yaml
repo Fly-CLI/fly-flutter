@@ -1,0 +1,36 @@
+name: fly_operations
+description: Async operation handling with retry logic, network awareness, and offline queuing for Flutter applications
+version: 0.1.0
+homepage: https://github.com/fly-cli/fly
+repository: https://github.com/fly-cli/fly.git
+issue_tracker: https://github.com/fly-cli/fly/issues
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  uuid: ^4.2.1
+  fly_logger:
+    path: ../fly_logger
+  fly_connectivity:
+    path: ../fly_connectivity
+  fly_errors:
+    path: ../fly_errors
+  fly_localization:
+    path: ../fly_localization
+  fly_events:
+    path: ../fly_events
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+

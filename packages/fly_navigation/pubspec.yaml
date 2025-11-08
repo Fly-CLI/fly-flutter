@@ -1,0 +1,26 @@
+name: fly_navigation
+description: Router-agnostic navigation service with generic route type support for Flutter applications
+version: 0.1.0
+homepage: https://github.com/fly-cli/fly
+repository: https://github.com/fly-cli/fly.git
+issue_tracker: https://github.com/fly-cli/fly/issues
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.3
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+

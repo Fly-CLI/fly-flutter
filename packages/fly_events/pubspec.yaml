@@ -1,0 +1,36 @@
+name: fly_events
+description: Event system with plugin architecture for analytics, logging, and performance
+version: 0.1.0
+publish_to: none
+homepage: https://github.com/fly-cli/fly
+repository: https://github.com/fly-cli/fly.git
+issue_tracker: https://github.com/fly-cli/fly/issues
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.3
+  json_annotation: ^4.9.0
+  fly_logger:
+    path: ../fly_logger
+  fly_di:
+    path: ../fly_di
+  fly_feedback:
+    path: ../fly_feedback
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.7.1
+  json_serializable: ^6.11.1
+
+flutter:
+  uses-material-design: true
+

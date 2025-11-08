@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/error/app_exception.dart';
+import 'package:fly_errors/fly_errors.dart';
 
 void main() {
   group('AppException', () {

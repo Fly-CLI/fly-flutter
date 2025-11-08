@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
+import 'package:fly_localization/fly_localization.dart';
 import 'package:foundation_project/shared/localization/foundation_localization_provider_impl.dart';
 import 'package:foundation_project/shared/localization/localizations.dart';
 

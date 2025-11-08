@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/mvvm/screen/fly_screen.dart';
+import 'package:fly_mvvm/fly_mvvm.dart';
 import 'package:foundation_project/shared/navigation/app_navigation.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:foundation_project/features/home/presentation/view_models/home_view_model.dart';

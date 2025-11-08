@@ -445,10 +445,38 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fly_connectivity:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_connectivity"
+      relative: true
+    source: path
+    version: "0.1.0"
   fly_core:
     dependency: "direct main"
     description:
       path: "../../packages/fly_core"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_di:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_di"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_errors:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_errors"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_events:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_events"
       relative: true
     source: path
     version: "0.1.0"
@@ -459,10 +487,45 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  fly_localization:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_localization"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_logger:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_logger"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_mvvm:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_mvvm"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_navigation:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_navigation"
+      relative: true
+    source: path
+    version: "0.1.0"
   fly_networking:
     dependency: "direct main"
     description:
       path: "../../packages/fly_networking"
+      relative: true
+    source: path
+    version: "0.1.0"
+  fly_operations:
+    dependency: "direct main"
+    description:
+      path: "../../packages/fly_operations"
       relative: true
     source: path
     version: "0.1.0"

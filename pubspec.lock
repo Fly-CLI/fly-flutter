@@ -347,6 +347,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fly_feedback:
+    dependency: transitive
+    description:
+      path: "packages/fly_feedback"
+      relative: true
+    source: path
+    version: "0.1.0"
   fly_mcp:
     dependency: transitive
     description:

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/logger/error_reporter.dart';
+import 'package:fly_logger/fly_logger.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {

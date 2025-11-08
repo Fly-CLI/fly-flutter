@@ -1,4 +1,4 @@
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
+import 'package:fly_localization/fly_localization.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
 
 /// Implementation of FoundationLocalizationProvider that wraps AppLocalizations

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foundation_project/foundation/error/network_errors.dart';
-import 'package:foundation_project/foundation/localization/foundation_localization_provider.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_localization/fly_localization.dart';
 import '../test_helpers/mocks.dart';
 
 void main() {
@@ -211,7 +211,7 @@ void main() {
     });
 
     test('should classify TimeoutException', () {
-      final error = TimeoutException('Operation timed out', const Duration(seconds: 30));
+      final error = TimeoutException('Operation timed out');
       final classified = NetworkErrorClassifier.classifyError(
         error,
         timeout: const Duration(seconds: 30),

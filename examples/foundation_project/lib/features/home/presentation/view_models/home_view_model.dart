@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/fly_view_model.dart';
-import 'package:foundation_project/foundation/mvvm/view_model/view_model_state.dart';
-import 'package:foundation_project/foundation/logger/fly_logger.dart';
-import 'package:foundation_project/foundation/di/global_container.dart';
+import 'package:fly_mvvm/fly_mvvm.dart';
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_di/fly_di.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';

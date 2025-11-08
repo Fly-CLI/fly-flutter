@@ -60,6 +60,24 @@ dependencies:
     path: ../../packages/fly_networking
   fly_feedback:
     path: ../../packages/fly_feedback
+  fly_logger:
+    path: ../../packages/fly_logger
+  fly_connectivity:
+    path: ../../packages/fly_connectivity
+  fly_localization:
+    path: ../../packages/fly_localization
+  fly_di:
+    path: ../../packages/fly_di
+  fly_errors:
+    path: ../../packages/fly_errors
+  fly_events:
+    path: ../../packages/fly_events
+  fly_navigation:
+    path: ../../packages/fly_navigation
+  fly_operations:
+    path: ../../packages/fly_operations
+  fly_mvvm:
+    path: ../../packages/fly_mvvm
 
 dev_dependencies:
   flutter_test:
