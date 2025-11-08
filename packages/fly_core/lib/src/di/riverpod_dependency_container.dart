@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fly_di/src/dependency_container.dart';
-import 'package:fly_di/src/global_container.dart';
+import 'package:fly_core/src/di/dependency_container.dart';
+import 'package:fly_core/src/di/global_container.dart';
 
 /// Riverpod-based implementation of [DependencyContainer].
 ///
@@ -28,7 +28,8 @@ import 'package:fly_di/src/global_container.dart';
 ///     final testContainer = ProviderContainer(
 ///       overrides: [myProvider.overrideWith((ref) => MockService())],
 ///     );
-///     final container = RiverpodDependencyContainer.withContainer(testContainer);
+///     final container =
+///         RiverpodDependencyContainer.withContainer(testContainer);
 ///     DependencyContainer.setInstance(container);
 ///     container.initialize();
 ///
@@ -39,9 +40,6 @@ import 'package:fly_di/src/global_container.dart';
 /// }
 /// ```
 class RiverpodDependencyContainer implements DependencyContainer {
-  ProviderContainer? _container;
-  final ProviderContainer? _preInitializedContainer;
-
   /// Creates a new [RiverpodDependencyContainer].
   ///
   /// The container will be initialized when [initialize] is called.
@@ -56,6 +54,9 @@ class RiverpodDependencyContainer implements DependencyContainer {
   RiverpodDependencyContainer.withContainer(ProviderContainer container)
       : _preInitializedContainer = container,
         _container = null;
+
+  ProviderContainer? _container;
+  final ProviderContainer? _preInitializedContainer;
 
   @override
   void initialize() {
@@ -80,9 +81,10 @@ class RiverpodDependencyContainer implements DependencyContainer {
     }
 
     try {
-      // ProviderContainer.read accepts ProviderListenable<T>
-      // We cast to dynamic to avoid type checking issues since ProviderBase
-      // might not be exported from flutter_riverpod
+      // ProviderContainer.read accepts ProviderListenable<T>, but this type
+      // is not publicly exported from flutter_riverpod. We use dynamic cast
+      // with ignore comment since the runtime type is correct.
+      // ignore: argument_type_not_assignable
       return container.read<T>(provider as dynamic);
     } catch (e) {
       throw ArgumentError(
@@ -113,4 +115,3 @@ class RiverpodDependencyContainer implements DependencyContainer {
   ProviderContainer? get providerContainer =>
       _preInitializedContainer ?? _container;
 }
-

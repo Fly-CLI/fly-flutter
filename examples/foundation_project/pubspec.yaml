@@ -66,8 +66,6 @@ dependencies:
     path: ../../packages/fly_connectivity
   fly_localization:
     path: ../../packages/fly_localization
-  fly_di:
-    path: ../../packages/fly_di
   fly_errors:
     path: ../../packages/fly_errors
   fly_events:

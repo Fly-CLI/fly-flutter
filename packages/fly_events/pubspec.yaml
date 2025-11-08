@@ -19,8 +19,8 @@ dependencies:
   json_annotation: ^4.9.0
   fly_logger:
     path: ../fly_logger
-  fly_di:
-    path: ../fly_di
+  fly_core:
+    path: ../fly_core
   fly_feedback:
     path: ../fly_feedback
 

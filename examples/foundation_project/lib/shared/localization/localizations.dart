@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_di/fly_di.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_navigation/fly_navigation.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';

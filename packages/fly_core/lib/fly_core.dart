@@ -36,3 +36,7 @@ export 'src/viewmodels/base_viewmodel.dart';
 export 'src/widgets/error_widget.dart';
 // Widgets
 export 'src/widgets/loading_widget.dart';
+// Dependency Injection
+export 'src/di/dependency_container.dart';
+export 'src/di/global_container.dart';
+export 'src/di/riverpod_dependency_container.dart';

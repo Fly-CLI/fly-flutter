@@ -4,14 +4,51 @@ Reusable foundation components for Flutter applications following MVVM architect
 
 ## Overview
 
-The foundation directory contains core, reusable components that provide:
-- **Error Handling** - Centralized error management and user-friendly message formatting
-- **Logging** - Structured logging infrastructure
-- **MVVM** - Base classes for ViewModels and Screens
-- **Navigation** - Router-agnostic navigation service
-- **Operations** - Async operation handling with retry logic and network awareness
-- **Connectivity** - Network connectivity checking
-- **Localization** - Abstract localization interface
+The foundation components have been separated into individual packages for better modularity and reusability. This directory now contains only a barrel file (`foundation.dart`) that re-exports all foundation packages for convenience.
+
+## Package Structure
+
+Foundation components are organized into the following packages:
+
+- **[fly_logger](../../../../packages/fly_logger)** - Structured logging infrastructure with error reporting
+- **[fly_localization](../../../../packages/fly_localization)** - Localization interface abstraction
+- **[fly_core](../../../../packages/fly_core)** - Core foundation package (includes dependency injection)
+- **[fly_connectivity](../../../../packages/fly_connectivity)** - Network connectivity checking
+- **[fly_errors](../../../../packages/fly_errors)** - Error handling and formatting
+- **[fly_events](../../../../packages/fly_events)** - Event system with plugin architecture
+- **[fly_navigation](../../../../packages/fly_navigation)** - Navigation service abstraction
+- **[fly_operations](../../../../packages/fly_operations)** - Async operation handling with retry logic
+- **[fly_mvvm](../../../../packages/fly_mvvm)** - MVVM base classes for ViewModels and Screens
+
+## Usage
+
+### Option 1: Use the Barrel File (Recommended)
+
+Import everything from the barrel file:
+
+```dart
+import 'package:foundation_project/foundation/foundation.dart';
+```
+
+This re-exports all foundation packages, providing convenient access to all components.
+
+### Option 2: Use Individual Packages
+
+Import packages individually for better tree-shaking:
+
+```dart
+import 'package:fly_logger/fly_logger.dart';
+import 'package:fly_errors/fly_errors.dart';
+import 'package:fly_operations/fly_operations.dart';
+```
+
+### Option 3: Use the Meta-Package
+
+Alternatively, use the `fly_foundation` meta-package:
+
+```dart
+import 'package:fly_foundation/fly_foundation.dart';
+```
 
 ## Architecture Principles
 
@@ -29,7 +66,7 @@ Foundation uses strong typing throughout, avoiding `any` types and providing com
 
 ## Components
 
-### Error Handling (`error/`)
+### Error Handling (`fly_errors`)
 
 Provides centralized error handling and user-friendly error message formatting.
 
@@ -38,10 +75,11 @@ Provides centralized error handling and user-friendly error message formatting.
 - `ErrorMessageFormatter` - Formats technical errors into user-friendly messages
 - `ErrorHandler` - Centralized error handling
 - `NetworkError` - Network-specific error types
-- `CustomErrorHandler` - Flutter error handling override
 
 **Usage:**
 ```dart
+import 'package:fly_errors/fly_errors.dart';
+
 // Get formatter from provider (Riverpod)
 final formatter = ref.read(errorMessageFormatterProvider);
 
@@ -59,22 +97,25 @@ ErrorHandler.handleError(
 );
 ```
 
-### Logging (`logger/`)
+### Logging (`fly_logger`)
 
 Structured logging infrastructure with multiple backends.
 
 **Key Components:**
-- `Logger` - Abstract logging interface
-- `FlyLogger` - Concrete implementation with console, structured logging, and Crashlytics
+- `FlyLogger` - Logging interface
+- `ErrorReporter` - Error reporting interface
+- `LogLevel` - Log level enumeration
 
 **Usage:**
 ```dart
+import 'package:fly_logger/fly_logger.dart';
+
 final logger = FlyLogger('MyService');
 logger.info('Operation started', fields: {'userId': '123'});
 logger.error('Operation failed', error: exception, stackTrace: stackTrace);
 ```
 
-### MVVM (`mvvm/`)
+### MVVM (`fly_mvvm`)
 
 Base classes for MVVM architecture pattern.
 
@@ -86,6 +127,8 @@ Base classes for MVVM architecture pattern.
 
 **Usage:**
 ```dart
+import 'package:fly_mvvm/fly_mvvm.dart';
+
 class MyScreen extends FlyScreen<MyViewModel, MyState> {
   @override
   NotifierProvider<MyViewModel, MyState> getViewModelProvider() => myViewModelProvider;
@@ -97,28 +140,23 @@ class MyScreen extends FlyScreen<MyViewModel, MyState> {
 }
 ```
 
-### Navigation (`navigation/`)
+### Navigation (`fly_navigation`)
 
 Router-agnostic navigation service with generic route type support.
 
 **Key Components:**
 - `NavigationService<R>` - Abstract interface
 - `DefaultNavigationService` - String-based implementation
-- `FlyRouter` - Feature enum-based implementation (uses application's FeatureScreenType)
 
 **Usage:**
 ```dart
-// String-based
+import 'package:fly_navigation/fly_navigation.dart';
+
 final service = ref.read(navigationServiceProvider);
 await service.navigateTo('/home');
-
-// Feature enum-based (FeatureScreenType defined in application layer)
-await FlyRouter.instance.navigateTo(FeatureScreenType.home);
 ```
 
-**Important:** Feature enums (like `FeatureScreenType`) should be defined in the application layer, not in foundation. See `navigation/README.md` for details.
-
-### Operations (`operations/`)
+### Operations (`fly_operations`)
 
 Async operation handling with retry logic, network awareness, and offline queuing.
 
@@ -130,6 +168,8 @@ Async operation handling with retry logic, network awareness, and offline queuin
 
 **Usage:**
 ```dart
+import 'package:fly_operations/fly_operations.dart';
+
 final handler = AsyncOperationHandler(
   logger: logger,
   localizations: localizationProvider, // Optional
@@ -147,43 +187,35 @@ if (result.isSuccess) {
 }
 ```
 
-### Connectivity (`connectivity/`)
+### Connectivity (`fly_connectivity`)
 
 Network connectivity checking and monitoring.
 
 **Key Components:**
-- `ConnectivityService` - Wraps device condition service for connectivity checking
+- `ConnectivityService` - Connectivity checking service
+- `ConnectivityChecker` - Abstract interface for connectivity checking
+- `ConnectivityType` - Connectivity type enumeration
 
 **Usage:**
 ```dart
+import 'package:fly_connectivity/fly_connectivity.dart';
+
 final service = ConnectivityService(logger: logger);
 final hasConnection = await service.hasInternetConnection();
 ```
 
-### Localization (`localization/`)
+### Localization (`fly_localization`)
 
 Abstract interface for localization strings used by foundation components.
 
 **Key Components:**
 - `FoundationLocalizationProvider` - Abstract interface
+- `DefaultFoundationLocalizationProvider` - Default implementation with English fallbacks
 
 **Usage:**
-See [Localization Provider Pattern](#localization-provider-pattern) below.
-
-## Localization Provider Pattern
-
-Foundation components use an abstract `FoundationLocalizationProvider` interface to avoid hardcoded dependencies on application-specific localization systems.
-
-### Why This Pattern?
-
-- **Reusability** - Foundation can work with any localization system
-- **Testability** - Easy to mock for testing
-- **Flexibility** - Applications can use Flutter gen-l10n, i18n, or custom systems
-
-### Implementation
-
-1. **Create Implementation:**
 ```dart
+import 'package:fly_localization/fly_localization.dart';
+
 class AppLocalizationProvider implements FoundationLocalizationProvider {
   final AppLocalizations _localizations;
   
@@ -197,40 +229,62 @@ class AppLocalizationProvider implements FoundationLocalizationProvider {
 }
 ```
 
-2. **Register Provider:**
+### Events (`fly_events`)
+
+Event system with plugin architecture for analytics, logging, and performance.
+
+**Key Components:**
+- `AppEvent` - Base event class
+- `EventEmitter` - Event emission interface
+- `EventEmitterMixin` - Mixin for easy event emission
+
+**Usage:**
 ```dart
-final foundationLocalizationProvider = Provider<FoundationLocalizationProvider?>((ref) {
-  try {
-    final appLocalizations = localizations; // Your app's localization
-    return AppLocalizationProvider(appLocalizations);
-  } catch (e) {
-    return null; // Foundation will use fallback messages
+import 'package:fly_events/fly_events.dart';
+
+class MyService with EventEmitterMixin {
+  void doSomething() {
+    emit(AppEvent.action('button_clicked', data: {'button': 'submit'}));
   }
-});
+}
 ```
 
-3. **Use in Foundation Components:**
+### Dependency Injection (`fly_core`)
+
+Dependency injection container abstraction (part of fly_core).
+
+**Key Components:**
+- `DependencyContainer` - Abstract interface
+- `GlobalContainer` - Riverpod-based global container
+- `RiverpodDependencyContainer` - Riverpod implementation
+
+**Usage:**
 ```dart
-final handler = AsyncOperationHandler(
-  logger: logger,
-  localizations: ref.read(foundationLocalizationProvider),
-);
+import 'package:fly_core/fly_core.dart';
+
+void main() {
+  GlobalContainer.initialize();
+  final logger = GlobalContainer.instance.read(loggerProvider);
+}
 ```
 
-### Fallback Behavior
+## Package Dependencies
 
-If `FoundationLocalizationProvider` is not provided (null), foundation components use sensible English fallback messages. This ensures foundation works even without localization setup.
+The packages follow a dependency hierarchy:
 
-## External Dependencies
+```
+fly_logger (no foundation deps)
+fly_localization (no foundation deps)
+fly_core (no foundation deps, optional flutter_riverpod)
 
-Foundation components may require external dependencies. See [DEPENDENCIES.md](./DEPENDENCIES.md) for a complete list.
+fly_connectivity → fly_logger
+fly_errors → fly_logger, fly_localization
+fly_events → fly_logger, fly_core
+fly_navigation → (flutter only)
 
-**Key Dependencies:**
-- `DeviceConditionService` - For connectivity checking (optional, has default)
-- `FoundationLocalizationProvider` - For localized messages (optional, uses fallbacks)
-- `OfflineQueueManager` - For offline operation queuing (optional)
-
-All dependencies are **optional** - foundation works without them using fallback behavior.
+fly_operations → fly_logger, fly_connectivity, fly_errors, fly_localization, fly_events
+fly_mvvm → fly_logger, fly_operations, fly_events, fly_errors
+```
 
 ## Testing
 
@@ -251,109 +305,30 @@ final handler = AsyncOperationHandler(
 final handler = AsyncOperationHandler(logger: mockLogger);
 ```
 
-## Usage Examples
+## Migration from Local Foundation Directory
 
-### Basic ViewModel with Async Operations
+If you're migrating from the old local foundation directory structure:
 
-```dart
-class MyViewModel extends FlyViewModel<MyState> {
-  @override
-  MyState build() => MyState.initial();
-  
-  Future<void> loadData() async {
-    final result = await runAsyncOperation(
-      () => repository.fetchData(),
-      errorMessage: 'Failed to load data',
-    );
-    
-    if (result.isSuccess && result.data != null) {
-      state = state.copyWith(data: result.data);
-    }
-  }
-}
-```
+1. **Update imports**: Change from `package:foundation_project/foundation/...` to either:
+   - `package:foundation_project/foundation/foundation.dart` (barrel file)
+   - Individual package imports like `package:fly_logger/fly_logger.dart`
 
-### Error Handling
+2. **Package dependencies**: Add the foundation packages to your `pubspec.yaml` (already done in foundation_project)
 
-```dart
-// Get formatter from provider (Riverpod)
-final formatter = ref.read(errorMessageFormatterProvider);
-
-try {
-  await someOperation();
-} catch (e, stackTrace) {
-  final userMessage = formatter.format(
-    e,
-    localizations: localizationProvider,
-  );
-  showError(userMessage);
-}
-```
-
-### Navigation
-
-```dart
-// In a screen
-class MyScreen extends FlyScreen<MyViewModel, MyState> {
-  void navigateToDetails(WidgetRef ref) {
-    // String-based
-    ref.read(navigationServiceProvider).navigateTo('/details');
-    
-    // Or feature enum-based
-    FlyRouter.instance.navigateTo(FeatureScreenType.details);
-  }
-}
-```
-
-## Project Structure
-
-```
-foundation/
-├── connectivity/          # Network connectivity checking
-├── error/                # Error handling and formatting
-├── localization/          # Localization interface
-├── logger/               # Logging infrastructure
-├── mvvm/                 # MVVM base classes
-│   ├── screen/           # FlyScreen base class
-│   └── view_model/       # FlyViewModel and coordinators
-├── navigation/           # Navigation service
-├── operations/           # Async operation handling
-├── DEPENDENCIES.md       # External dependencies documentation
-└── README.md            # This file
-```
-
-## Migration Guide
-
-If migrating from an older version:
-
-1. **FeatureScreenType Enum** - Now in application layer (`shared/navigation/feature_screen_type.dart`)
-2. **Localization** - Use `FoundationLocalizationProvider` interface instead of direct imports
-3. **AsyncOperationHandler** - Now accepts optional `localizations` parameter
-
-See individual component documentation for detailed migration guides.
-
-## Best Practices
-
-1. **Always use foundation components** for common operations (error handling, logging, async operations)
-2. **Provide localization provider** for better user experience
-3. **Keep application-specific code** out of foundation
-4. **Use dependency injection** for testability
-5. **Follow MVVM pattern** using foundation's base classes
+3. **No code changes needed**: The API remains the same, only import paths change
 
 ## Related Documentation
 
-- [Navigation Service](./navigation/README.md) - Navigation service details
-- [Async Operations](./operations/ASYNC_OPERATIONS.md) - Async operation handling guide
-- [Dependencies](./DEPENDENCIES.md) - External dependencies documentation
-- [Foundation Review Report](./FOUNDATION_REVIEW_REPORT.md) - Architecture review
+- [fly_foundation Meta-Package](../../../../packages/fly_foundation/README.md) - Convenience package that re-exports all foundation packages
+- Individual package READMEs in `/packages/fly_*/README.md` for detailed documentation
 
 ## Contributing
 
 When adding new foundation components:
 
-1. **Keep it generic** - No application-specific code
-2. **Use dependency injection** - Accept dependencies via constructor
-3. **Provide fallbacks** - Work without external dependencies when possible
-4. **Document dependencies** - Update DEPENDENCIES.md
-5. **Add tests** - Ensure components are testable in isolation
-
+1. **Create a new package** in `/packages/fly_*/` following the existing package structure
+2. **Keep it generic** - No application-specific code
+3. **Use dependency injection** - Accept dependencies via constructor
+4. **Provide fallbacks** - Work without external dependencies when possible
+5. **Update this README** - Add the new package to the components list
+6. **Update fly_foundation** - Add the package to the meta-package if appropriate

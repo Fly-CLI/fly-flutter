@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_di/fly_di.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:foundation_project/core/providers/logger_provider.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fly_di/fly_di.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_events/fly_events.dart';
 import 'package:foundation_project/core/event_system/events.dart';
 import 'package:fly_navigation/fly_navigation.dart';

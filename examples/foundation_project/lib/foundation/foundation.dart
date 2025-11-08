@@ -16,7 +16,5 @@ export 'package:fly_operations/fly_operations.dart';
 export 'package:fly_connectivity/fly_connectivity.dart';
 // Logger exports
 export 'package:fly_logger/fly_logger.dart';
-// Dependency Injection exports
-export 'package:fly_di/fly_di.dart';
 // Event system exports
 export 'package:fly_events/fly_events.dart';

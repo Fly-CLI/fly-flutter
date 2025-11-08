@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fly_di/fly_di.dart';
+import 'package:fly_core/fly_core.dart';
 
 void main() {
   group('GlobalContainer', () {

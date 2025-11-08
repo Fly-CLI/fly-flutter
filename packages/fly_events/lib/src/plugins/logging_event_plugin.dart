@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:fly_di/fly_di.dart';
+import 'package:fly_core/fly_core.dart';
 import 'package:fly_logger/fly_logger.dart';
 import '../event_emitter.dart';
 import '../app_event.dart';

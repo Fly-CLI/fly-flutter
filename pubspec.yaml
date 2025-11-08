@@ -13,7 +13,6 @@ workspace:
   - packages/fly_logger
   - packages/fly_connectivity
   - packages/fly_localization
-  - packages/fly_di
   - packages/fly_errors
   - packages/fly_events
   - packages/fly_navigation

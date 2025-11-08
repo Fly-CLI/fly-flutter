@@ -1,8 +1,10 @@
 # Foundation Architecture Review Report
 
+> **⚠️ Historical Reference**: This report was created before the foundation components were migrated to individual packages. The components described in this report have been separated into packages (`fly_logger`, `fly_connectivity`, `fly_errors`, etc.) located in `/packages/`. This document is kept for historical reference only. For current documentation, see the individual package READMEs and the [foundation README](./README.md).
+
 **Review Date**: December 2024  
 **Reviewer**: Architecture Review Team  
-**Foundation Path**: `examples/foundation_project/lib/foundation/`
+**Foundation Path**: `examples/foundation_project/lib/foundation/` (historical - components now in packages)
 
 ---
 
