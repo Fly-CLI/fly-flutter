@@ -20,17 +20,8 @@ abstract class FlyViewModel<T extends FlyViewModelState<T>>
   FlyViewModel({
     ViewModelAsyncCoordinator? asyncCoordinator,
     ViewModelFeedbackCoordinator? feedbackCoordinator,
-    FlyLogger? logger,
-    FoundationLocalizationProvider? localizations,
-    ConnectivityService? connectivityService,
-    ConnectivityChecker? connectivityChecker,
   }) : _asyncCoordinator = asyncCoordinator ??
-            ViewModelAsyncCoordinator(
-              logger: logger,
-              localizations: localizations,
-              connectivityService: connectivityService,
-              connectivityChecker: connectivityChecker,
-            ) {
+            ViewModelAsyncCoordinator() {
     _feedbackCoordinator = feedbackCoordinator ??
         ViewModelFeedbackCoordinator(
           scope: feedbackScope,

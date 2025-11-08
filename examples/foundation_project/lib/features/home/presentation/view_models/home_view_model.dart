@@ -81,10 +81,6 @@ class HomeViewModelState
 /// All async operations use runAsyncOperation to ensure consistent error handling,
 /// loading state management, and network awareness.
 class HomeViewModel extends BaseViewModel<HomeViewModelState> {
-  HomeViewModel({
-    super.logger,
-    super.connectivityChecker,
-  }) : super();
 
   StatisticsService get _statisticsService => ref.read(statisticsServiceProvider);
   SyncService get _syncService => ref.read(syncServiceProvider);
