@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fly_mvvm/fly_mvvm.dart';
+import 'package:foundation_project/core/foundation/base_screen.dart';
 import 'package:foundation_project/shared/navigation/app_navigation.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:foundation_project/features/home/presentation/view_models/home_view_model.dart';
@@ -10,7 +10,7 @@ import 'package:foundation_project/features/home/presentation/widgets/sync_statu
 import 'package:foundation_project/l10n/app_localizations.dart';
 
 /// Home screen
-class HomeScreen extends FlyScreen<HomeViewModel, HomeViewModelState> {
+class HomeScreen extends BaseScreen<HomeViewModel, HomeViewModelState> {
   const HomeScreen({super.key});
 
   @override

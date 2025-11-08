@@ -32,16 +32,10 @@ V extends FlyViewModel<S>,
 S extends FlyViewModelState<S>
 >
     extends ConsumerStatefulWidget {
-  final bool shouldRefresh;
-  final String screenTitle;
-  final bool showRefreshIndicator;
   final bool enableFeedback; // Opt-in automatic feedback handling
 
   const FlyScreen({
     super.key,
-    this.shouldRefresh = false,
-    this.screenTitle = '',
-    this.showRefreshIndicator = false,
     this.enableFeedback = true, // Enabled by default
   });
 
@@ -343,22 +337,12 @@ class _FlyScreenState<
     // Get the ViewModel instance
     final viewModel = ref.read(provider.notifier);
 
-    Widget content = widget.buildContent(
+    return widget.buildContent(
       context,
       viewModel,
       viewModelState,
       ref,
     );
-
-    // Wrap with RefreshIndicator if needed
-    if (widget.showRefreshIndicator) {
-      content = RefreshIndicator(
-        onRefresh: () => widget.onRefresh(viewModel),
-        child: content,
-      );
-    }
-
-    return content;
   }
 
   void _handleInitialize() {

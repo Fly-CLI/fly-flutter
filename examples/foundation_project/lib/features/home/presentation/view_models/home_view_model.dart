@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
-import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_core/fly_core.dart';
-import 'package:foundation_project/core/providers/logger_provider.dart';
+import 'package:foundation_project/core/foundation/base_view_model.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
 import 'package:foundation_project/core/services/sync_service.dart';
@@ -82,13 +80,11 @@ class HomeViewModelState
 /// Example ViewModel demonstrating proper use of runAsyncOperation for async operations.
 /// All async operations use runAsyncOperation to ensure consistent error handling,
 /// loading state management, and network awareness.
-class HomeViewModel extends FlyViewModel<HomeViewModelState> {
-  final FlyLogger _logger;
-
+class HomeViewModel extends BaseViewModel<HomeViewModelState> {
   HomeViewModel({
-    required FlyLogger logger,
+    super.logger,
     super.connectivityChecker,
-  }) : _logger = logger;
+  }) : super();
 
   StatisticsService get _statisticsService => ref.read(statisticsServiceProvider);
   SyncService get _syncService => ref.read(syncServiceProvider);
@@ -179,14 +175,7 @@ class HomeViewModel extends FlyViewModel<HomeViewModelState> {
 /// Home ViewModel provider
 final homeViewModelProvider = NotifierProvider<HomeViewModel, HomeViewModelState>(
   () {
-    // Note: In a real app, you'd get logger from GlobalContainer or ref
-    // For now, we'll use GlobalContainer since this is a NotifierProvider
-    final logger = GlobalContainer.instance.read(loggerProvider('HomeViewModel'));
-    final connectivityChecker = GlobalContainer.instance.read(connectivityCheckerProvider);
-    return HomeViewModel(
-      logger: logger,
-      connectivityChecker: connectivityChecker,
-    );
+    return HomeViewModel();
   },
 );
 
