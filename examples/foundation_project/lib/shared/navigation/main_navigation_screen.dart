@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:foundation_project/features/home/presentation/screens/home_screen.dart';
+import 'package:foundation_project/features/notes/presentation/screens/notes_screen.dart';
+import 'package:foundation_project/features/settings/presentation/screens/settings_screen.dart';
+import 'package:foundation_project/features/tasks/presentation/screens/list/tasks_screen.dart';
 import 'package:foundation_project/shared/navigation/app_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/app_bottom_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/bottom_navigation_provider.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
-/// Main navigation screen that wraps bottom navigation
+/// Main navigation shell that decorates feature screens with bottom navigation.
 class MainNavigationScreen extends ConsumerStatefulWidget {
-  final Widget child;
-
   const MainNavigationScreen({
     super.key,
     required this.child,
+    required this.feature,
   });
+
+  final Widget child;
+  final FeatureScreenType feature;
 
   @override
   ConsumerState<MainNavigationScreen> createState() =>
@@ -22,82 +27,104 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
+  final Map<FeatureScreenType, Widget> _overrideScreens = {};
+  late final Map<FeatureScreenType, Widget> _defaultScreens;
+
+  final PageStorageBucket _pageStorageBucket = PageStorageBucket();
+
   @override
   void initState() {
     super.initState();
-    // Initialize navigation index based on current route
+    _defaultScreens = {
+      FeatureScreenType.home:
+          _wrapWithTabKey(const HomeScreen(), FeatureScreenType.home),
+      FeatureScreenType.tasks:
+          _wrapWithTabKey(const TasksScreen(), FeatureScreenType.tasks),
+      FeatureScreenType.notes:
+          _wrapWithTabKey(const NotesScreen(), FeatureScreenType.notes),
+      FeatureScreenType.settings:
+          _wrapWithTabKey(const SettingsScreen(), FeatureScreenType.settings),
+    };
+
+    _overrideScreens[widget.feature] =
+        _wrapWithTabKey(widget.child, widget.feature);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateNavigationIndex();
+      if (mounted) {
+        _syncNavigationIndex(widget.feature);
+      }
     });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Delay provider modification until after build phase completes
-    Future(() {
-      if (mounted) {
-        _updateNavigationIndex();
-      }
-    });
-  }
+  void didUpdateWidget(MainNavigationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _overrideScreens[widget.feature] =
+        _wrapWithTabKey(widget.child, widget.feature);
 
-  void _updateNavigationIndex() {
-    final router = GoRouter.of(context);
-    final currentLocation = router.routerDelegate.currentConfiguration.uri.path;
-
-    // Find matching feature
-    final feature = FeatureScreenType.values.firstWhere(
-      (f) => _matchesRoute(f.route, currentLocation),
-      orElse: () => FeatureScreenType.home,
-    );
-
-    // Update navigation index
-    final index = NavigationItemsHelper.getIndexByFeature(feature, context);
-    if (index != -1) {
-      ref.read(bottomNavigationProvider.notifier).setIndex(index, context);
+    if (oldWidget.feature != widget.feature) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _syncNavigationIndex(widget.feature);
+        }
+      });
     }
   }
 
-  bool _matchesRoute(String routePattern, String currentPath) {
-    // Simple route matching - can be enhanced
-    if (routePattern == currentPath) return true;
-    if (routePattern.contains(':id') && currentPath.contains('/')) {
-      final patternParts = routePattern.split('/');
-      final pathParts = currentPath.split('/');
-      if (patternParts.length == pathParts.length) {
-        return true; // Simplified matching
-      }
-    }
-    return false;
+  void _syncNavigationIndex(FeatureScreenType feature) {
+    ref.read(bottomNavigationProvider.notifier).navigateToFeature(
+          feature,
+          context,
+        );
   }
 
   void _onNavigationTap(int index) {
     final items = getBottomNavigationItems(context);
-    if (index >= 0 && index < items.length) {
-      final feature = items[index].feature;
-      AppNavigation.instance.navigateTo(feature);
+    if (index < 0 || index >= items.length) {
+      return;
     }
+
+    final targetFeature = items[index].feature;
+    final currentFeature = _currentFeature(items);
+
+    if (targetFeature == currentFeature) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    ref.read(bottomNavigationProvider.notifier).setIndex(index, context);
   }
 
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(bottomNavigationProvider);
     final items = getBottomNavigationItems(context);
-    final shouldShowFAB = items[currentIndex].showFAB;
+    if (items.isEmpty) {
+      return Scaffold(body: widget.child);
+    }
+    final clampedIndex = currentIndex.clamp(0, items.length - 1).toInt();
+    final currentItem = items[clampedIndex];
 
     return Scaffold(
-      body: widget.child,
+      body: PageStorage(
+        bucket: _pageStorageBucket,
+        child: IndexedStack(
+          index: clampedIndex,
+          children: [
+            for (final item in items) _screenForFeature(item.feature),
+          ],
+        ),
+      ),
       bottomNavigationBar: AppBottomNavigation(
-        currentIndex: currentIndex,
+        currentIndex: clampedIndex,
         onTap: _onNavigationTap,
       ),
-      floatingActionButton: shouldShowFAB
+      floatingActionButton: currentItem.showFAB
           ? FloatingActionButton(
               onPressed: () {
-                final feature = items[currentIndex].feature;
+                final feature = currentItem.feature;
                 if (feature == FeatureScreenType.tasks) {
-                  AppNavigation.instance.navigateTo(FeatureScreenType.taskForm);
+                  AppNavigation.instance.navigateToTaskForm();
                 } else if (feature == FeatureScreenType.notes) {
                   AppNavigation.instance.navigateTo(FeatureScreenType.noteForm);
                 }
@@ -107,5 +134,32 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           : null,
     );
   }
-}
 
+  Widget _screenForFeature(FeatureScreenType feature) {
+    return _overrideScreens[feature] ??
+        _defaultScreens[feature] ??
+        _wrapWithTabKey(
+          const SizedBox.shrink(),
+          feature,
+        );
+  }
+
+  FeatureScreenType? _currentFeature(List<NavigationItem> items) {
+    final currentIndex = ref.read(bottomNavigationProvider);
+    if (currentIndex < 0 || currentIndex >= items.length) {
+      return null;
+    }
+    return items[currentIndex].feature;
+  }
+
+  Widget _wrapWithTabKey(Widget child, FeatureScreenType feature) {
+    final key = PageStorageKey<String>('main-nav-${feature.name}');
+    if (child.key == key) {
+      return child;
+    }
+    return KeyedSubtree(
+      key: key,
+      child: child,
+    );
+  }
+}

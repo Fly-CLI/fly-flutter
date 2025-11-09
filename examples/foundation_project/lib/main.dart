@@ -4,6 +4,7 @@ import 'package:fly_core/fly_core.dart';
 import 'package:foundation_project/core/providers/providers.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
+import 'package:foundation_project/shared/navigation/app_navigation.dart';
 import 'package:foundation_project/shared/navigation/app_router.dart';
 
 void main() async {
@@ -35,7 +36,7 @@ class FoundationProjectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return MaterialApp(
       title: 'Task & Notes Manager',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -44,7 +45,11 @@ class FoundationProjectApp extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: AppRouter.router,
+      navigatorKey: AppNavigation.instance.navigatorKey,
+      initialRoute: AppRouteConfig.initialRoute,
+      onGenerateRoute: AppRouteConfig.onGenerateRoute,
+      onUnknownRoute: AppRouteConfig.onUnknownRoute,
+      navigatorObservers: [AppNavigationObserver()],
     );
   }
 }

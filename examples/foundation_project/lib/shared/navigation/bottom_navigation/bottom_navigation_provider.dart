@@ -16,7 +16,9 @@ class BottomNavigationProvider extends Notifier<int> {
   void setIndex(int index, BuildContext context) {
     final items = getBottomNavigationItems(context);
     if (index >= 0 && index < items.length) {
-      state = index;
+      if (state != index) {
+        state = index;
+      }
     }
   }
 
