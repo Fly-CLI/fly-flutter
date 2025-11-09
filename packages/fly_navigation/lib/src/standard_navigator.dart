@@ -13,11 +13,11 @@ import 'package:fly_navigation/src/navigation_service.dart';
 /// );
 /// await service.navigateTo('/home');
 /// ```
-class StandardNavigationService implements NavigationService<String> {
+class StandardNavigator implements NavigationService<String> {
   /// Creates a DefaultNavigationService
   ///
   /// [navigatorKey] - The global NavigatorKey to use for navigation
-  StandardNavigationService({required this.navigatorKey});
+  StandardNavigator({required this.navigatorKey});
 
   /// The NavigatorKey to use for navigation
   final GlobalKey<NavigatorState> navigatorKey;

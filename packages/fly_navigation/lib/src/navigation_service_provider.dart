@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fly_navigation/src/app.dart';
-import 'package:fly_navigation/src/standard_navigation_service.dart';
+import 'package:fly_navigation/src/app_navigation.dart';
 import 'package:fly_navigation/src/navigation_service.dart';
+import 'package:fly_navigation/src/standard_navigator.dart';
 
 /// Provider for NavigationService
 ///
@@ -39,7 +39,7 @@ import 'package:fly_navigation/src/navigation_service.dart';
 /// });
 /// ```
 final navigationServiceProvider = Provider<NavigationService<String>>((ref) {
-  return StandardNavigationService(
-    navigatorKey: App.navigatorKey,
+  return StandardNavigator(
+    navigatorKey: AppNavigation.globalKey,
   );
 });

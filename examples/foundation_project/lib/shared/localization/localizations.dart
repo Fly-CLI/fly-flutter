@@ -12,7 +12,7 @@ import 'package:foundation_project/l10n/app_localizations_en.dart';
 /// It will throw a meaningful error if the context is not available.
 AppLocalizations get localizations {
   try {
-    final context = App.navigatorKey.currentContext;
+    final context = AppNavigation.globalKey.currentContext;
     final defaultLocalizations = AppLocalizationsEn();
     if (context == null) return defaultLocalizations;
 

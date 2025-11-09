@@ -300,11 +300,12 @@ class UnifiedDirectoryAnalyzer {
     if (fileName == 'main.dart') return 'main';
 
     // App configuration
-    if (fileName == 'app.dart') return 'app';
+    if (fileName == 'app_navigation.dart') return 'navigation';
 
     // Routing
-    if (fileName.contains('router') || fileName.contains('route'))
+    if (fileName.contains('router') || fileName.contains('route')) {
       return 'routing';
+    }
 
     // Screens
     if (fileName.contains('_screen.dart') || fileName.contains('_page.dart')) {

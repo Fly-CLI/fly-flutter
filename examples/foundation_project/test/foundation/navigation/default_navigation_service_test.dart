@@ -6,13 +6,13 @@ void main() {
   group('DefaultNavigationService', () {
     test('should implement NavigationService<String>', () {
       final navigatorKey = GlobalKey<NavigatorState>();
-      final service = StandardNavigationService(navigatorKey: navigatorKey);
+      final service = StandardNavigator(navigatorKey: navigatorKey);
       expect(service, isA<NavigationService<String>>());
     });
 
     test('should store navigator key', () {
       final navigatorKey = GlobalKey<NavigatorState>();
-      final service = StandardNavigationService(navigatorKey: navigatorKey);
+      final service = StandardNavigator(navigatorKey: navigatorKey);
       expect(service.navigatorKey, equals(navigatorKey));
     });
   });

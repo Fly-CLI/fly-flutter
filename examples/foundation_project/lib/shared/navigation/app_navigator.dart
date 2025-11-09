@@ -22,7 +22,7 @@ class AppNavigator implements NavigationService<FeatureScreen> {
   factory AppNavigator() => _instance;
 
   /// Global navigator key shared with `MaterialApp`.
-  final GlobalKey<NavigatorState> navigatorKey = App.navigatorKey;
+  final GlobalKey<NavigatorState> navigatorKey = AppNavigation.globalKey;
 
   AppEventEmitter? get _emitter {
     try {

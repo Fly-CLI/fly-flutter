@@ -1181,7 +1181,7 @@ Actions:
   6. Format code with dart format
 
 Estimated time: ~15 seconds
-Files to be created: lib/main.dart, lib/app.dart, ... (39 more)
+Files to be created: lib/main.dart, lib/app_navigation.dart, ... (39 more)
 
 Execute? (y/n) or use --yes flag to auto-confirm
 ```

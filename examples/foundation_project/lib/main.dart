@@ -6,6 +6,7 @@ import 'package:foundation_project/core/storage/storage_providers.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
 import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/app_router.dart';
+import 'package:fly_navigation/fly_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,16 @@ class FoundationProjectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Centralised navigation manager lets Fly CLI templates plug in custom navigation.
+    final navigationManager = NavigationManager.from(
+      initialRoute: AppRouteConfig.initialRoute,
+      onGenerateRoute: AppRouteConfig.onGenerateRoute,
+      onUnknownRoute: AppRouteConfig.onUnknownRoute,
+      navigatorObserversFactory: () => <NavigatorObserver>[
+        AppNavigationObserver(),
+      ],
+    );
+
     return MaterialApp(
       title: 'Task & Notes Manager',
       debugShowCheckedModeBanner: false,
@@ -45,11 +56,11 @@ class FoundationProjectApp extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      navigatorKey: AppNavigator().navigatorKey,
-      initialRoute: AppRouteConfig.initialRoute,
-      onGenerateRoute: AppRouteConfig.onGenerateRoute,
-      onUnknownRoute: AppRouteConfig.onUnknownRoute,
-      navigatorObservers: [AppNavigationObserver()],
+      navigatorKey: navigationManager.navigatorKey,
+      initialRoute: navigationManager.initialRoute,
+      onGenerateRoute: navigationManager.onGenerateRoute,
+      onUnknownRoute: navigationManager.onUnknownRoute,
+      navigatorObservers: navigationManager.navigatorObservers,
     );
   }
 }
