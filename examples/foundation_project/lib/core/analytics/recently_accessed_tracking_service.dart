@@ -26,7 +26,7 @@ class RecentlyAccessedTrackingService {
   final FlyLogger _logger;
 
   Timer? _debounceTimer;
-  FeatureScreenType? _pendingFeature;
+  FeatureScreen? _pendingFeature;
   StreamSubscription<Event>? _navigationSubscription;
 
   RecentlyAccessedTrackingService(
@@ -65,7 +65,7 @@ class RecentlyAccessedTrackingService {
   ///
   /// If the same feature is accessed repeatedly within debounce window,
   /// only the last access is tracked.
-  void trackFeatureAccess(FeatureScreenType feature) {
+  void trackFeatureAccess(FeatureScreen feature) {
     // Cancel existing timer
     _debounceTimer?.cancel();
 
@@ -79,7 +79,7 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Perform the actual tracking
-  Future<void> _performTracking(FeatureScreenType feature) async {
+  Future<void> _performTracking(FeatureScreen feature) async {
     try {
       // Get current recently accessed features
       final recentFeaturesJson =
@@ -114,7 +114,7 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Get recently accessed features
-  Future<List<FeatureScreenType>> getRecentlyAccessed({int limit = _Config.maxItems}) async {
+  Future<List<FeatureScreen>> getRecentlyAccessed({int limit = _Config.maxItems}) async {
     try {
       final recentFeaturesJson =
           await _dataManager.getJson(StorageKey.recentlyAccessedFeatures);
@@ -137,15 +137,15 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Parse features list from JSON
-  List<FeatureScreenType> _parseFeaturesList(Map<String, dynamic>? json) {
+  List<FeatureScreen> _parseFeaturesList(Map<String, dynamic>? json) {
     if (json == null || json['features'] == null) return [];
 
     try {
       final featuresList = json['features'] as List<dynamic>;
       return featuresList
-          .map((f) => FeatureScreenType.values.firstWhere(
+          .map((f) => FeatureScreen.values.firstWhere(
                 (feature) => feature.name == f,
-                orElse: () => FeatureScreenType.home,
+                orElse: () => FeatureScreen.home,
               ),)
           .toList();
     } catch (e) {
@@ -155,7 +155,7 @@ class RecentlyAccessedTrackingService {
   }
 
   /// Convert features list to JSON
-  Map<String, dynamic> _featuresToJson(List<FeatureScreenType> features) {
+  Map<String, dynamic> _featuresToJson(List<FeatureScreen> features) {
     return {
       'features': features.map((f) => f.name).toList(),
     };

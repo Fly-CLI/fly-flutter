@@ -7,7 +7,7 @@ class NavigationItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  final FeatureScreenType feature;
+  final FeatureScreen feature;
   final bool showFAB;
 
   const NavigationItem({
@@ -44,27 +44,27 @@ List<NavigationItem> getBottomNavigationItems(BuildContext context) {
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
       label: l10n.home,
-      feature: FeatureScreenType.home,
+      feature: FeatureScreen.home,
     ),
     NavigationItem(
       icon: Icons.task_outlined,
       activeIcon: Icons.task,
       label: l10n.tasks,
-      feature: FeatureScreenType.tasks,
+      feature: FeatureScreen.tasks,
       showFAB: true,
     ),
     NavigationItem(
       icon: Icons.note_outlined,
       activeIcon: Icons.note,
       label: l10n.notes,
-      feature: FeatureScreenType.notes,
+      feature: FeatureScreen.notes,
       showFAB: true,
     ),
     NavigationItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: l10n.settings,
-      feature: FeatureScreenType.settings,
+      feature: FeatureScreen.settings,
     ),
   ];
 }
@@ -73,7 +73,7 @@ List<NavigationItem> getBottomNavigationItems(BuildContext context) {
 class NavigationItemsHelper {
   /// Get navigation item by feature
   static NavigationItem? getItemByFeature(
-    FeatureScreenType feature,
+    FeatureScreen feature,
     BuildContext context,
   ) {
     try {
@@ -86,7 +86,7 @@ class NavigationItemsHelper {
   }
 
   /// Get index by feature
-  static int getIndexByFeature(FeatureScreenType feature, BuildContext context) {
+  static int getIndexByFeature(FeatureScreen feature, BuildContext context) {
     final items = getBottomNavigationItems(context);
     for (int i = 0; i < items.length; i++) {
       if (items[i].feature == feature) {
@@ -97,7 +97,7 @@ class NavigationItemsHelper {
   }
 
   /// Get feature by index
-  static FeatureScreenType? getFeatureByIndex(int index, BuildContext context) {
+  static FeatureScreen? getFeatureByIndex(int index, BuildContext context) {
     final items = getBottomNavigationItems(context);
     if (index >= 0 && index < items.length) {
       return items[index].feature;
@@ -106,7 +106,7 @@ class NavigationItemsHelper {
   }
 
   /// Check if feature should show FAB
-  static bool shouldShowFAB(FeatureScreenType feature, BuildContext context) {
+  static bool shouldShowFAB(FeatureScreen feature, BuildContext context) {
     final item = getItemByFeature(feature, context);
     return item?.showFAB ?? false;
   }

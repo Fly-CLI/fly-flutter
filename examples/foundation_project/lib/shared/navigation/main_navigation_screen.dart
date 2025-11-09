@@ -4,7 +4,7 @@ import 'package:foundation_project/features/home/presentation/screens/home_scree
 import 'package:foundation_project/features/notes/presentation/screens/notes_screen.dart';
 import 'package:foundation_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/list/tasks_screen.dart';
-import 'package:foundation_project/shared/navigation/app_navigation.dart';
+import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/app_bottom_navigation.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/bottom_navigation_provider.dart';
 import 'package:foundation_project/shared/navigation/bottom_navigation/navigation_items.dart';
@@ -19,7 +19,7 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
   });
 
   final Widget child;
-  final FeatureScreenType feature;
+  final FeatureScreen feature;
 
   @override
   ConsumerState<MainNavigationScreen> createState() =>
@@ -27,8 +27,8 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
-  final Map<FeatureScreenType, Widget> _overrideScreens = {};
-  late final Map<FeatureScreenType, Widget> _defaultScreens;
+  final Map<FeatureScreen, Widget> _overrideScreens = {};
+  late final Map<FeatureScreen, Widget> _defaultScreens;
 
   final PageStorageBucket _pageStorageBucket = PageStorageBucket();
 
@@ -36,14 +36,14 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   void initState() {
     super.initState();
     _defaultScreens = {
-      FeatureScreenType.home:
-          _wrapWithTabKey(const HomeScreen(), FeatureScreenType.home),
-      FeatureScreenType.tasks:
-          _wrapWithTabKey(const TasksScreen(), FeatureScreenType.tasks),
-      FeatureScreenType.notes:
-          _wrapWithTabKey(const NotesScreen(), FeatureScreenType.notes),
-      FeatureScreenType.settings:
-          _wrapWithTabKey(const SettingsScreen(), FeatureScreenType.settings),
+      FeatureScreen.home:
+          _wrapWithTabKey(const HomeScreen(), FeatureScreen.home),
+      FeatureScreen.tasks:
+          _wrapWithTabKey(const TasksScreen(), FeatureScreen.tasks),
+      FeatureScreen.notes:
+          _wrapWithTabKey(const NotesScreen(), FeatureScreen.notes),
+      FeatureScreen.settings:
+          _wrapWithTabKey(const SettingsScreen(), FeatureScreen.settings),
     };
 
     _overrideScreens[widget.feature] =
@@ -71,7 +71,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     }
   }
 
-  void _syncNavigationIndex(FeatureScreenType feature) {
+  void _syncNavigationIndex(FeatureScreen feature) {
     ref.read(bottomNavigationProvider.notifier).navigateToFeature(
           feature,
           context,
@@ -123,10 +123,10 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           ? FloatingActionButton(
               onPressed: () {
                 final feature = currentItem.feature;
-                if (feature == FeatureScreenType.tasks) {
-                  AppNavigation.instance.navigateToTaskForm();
-                } else if (feature == FeatureScreenType.notes) {
-                  AppNavigation.instance.navigateTo(FeatureScreenType.noteForm);
+                if (feature == FeatureScreen.tasks) {
+                  AppNavigator.instance.navigateToTaskForm();
+                } else if (feature == FeatureScreen.notes) {
+                  AppNavigator.instance.navigateTo(FeatureScreen.noteForm);
                 }
               },
               child: const Icon(Icons.add),
@@ -135,7 +135,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     );
   }
 
-  Widget _screenForFeature(FeatureScreenType feature) {
+  Widget _screenForFeature(FeatureScreen feature) {
     return _overrideScreens[feature] ??
         _defaultScreens[feature] ??
         _wrapWithTabKey(
@@ -144,7 +144,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         );
   }
 
-  FeatureScreenType? _currentFeature(List<NavigationItem> items) {
+  FeatureScreen? _currentFeature(List<NavigationItem> items) {
     final currentIndex = ref.read(bottomNavigationProvider);
     if (currentIndex < 0 || currentIndex >= items.length) {
       return null;
@@ -152,7 +152,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     return items[currentIndex].feature;
   }
 
-  Widget _wrapWithTabKey(Widget child, FeatureScreenType feature) {
+  Widget _wrapWithTabKey(Widget child, FeatureScreen feature) {
     final key = PageStorageKey<String>('main-nav-${feature.name}');
     if (child.key == key) {
       return child;

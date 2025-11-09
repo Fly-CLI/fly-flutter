@@ -23,7 +23,7 @@ class BottomNavigationProvider extends Notifier<int> {
   }
 
   /// Navigate to specific feature
-  void navigateToFeature(FeatureScreenType feature, BuildContext context) {
+  void navigateToFeature(FeatureScreen feature, BuildContext context) {
     final index = NavigationItemsHelper.getIndexByFeature(feature, context);
     if (index != -1) {
       setIndex(index, context);
@@ -31,7 +31,7 @@ class BottomNavigationProvider extends Notifier<int> {
   }
 
   /// Get current feature
-  FeatureScreenType getCurrentFeature(BuildContext context) {
+  FeatureScreen getCurrentFeature(BuildContext context) {
     final items = getBottomNavigationItems(context);
     return items[state].feature;
   }
@@ -64,7 +64,7 @@ class BottomNavigationProvider extends Notifier<int> {
 
   /// Reset to home
   void resetToHome(BuildContext context) {
-    navigateToFeature(FeatureScreenType.home, context);
+    navigateToFeature(FeatureScreen.home, context);
   }
 
   /// Get navigation history (for future enhancement)

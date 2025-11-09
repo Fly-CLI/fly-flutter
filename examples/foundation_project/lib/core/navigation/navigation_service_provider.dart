@@ -33,7 +33,7 @@ import 'package:fly_navigation/fly_navigation.dart';
 /// });
 /// ```
 final navigationServiceProvider = Provider<NavigationService<String>>((ref) {
-  return DefaultNavigationService(
+  return StandardNavigationService(
     navigatorKey: App.navigatorKey,
   );
 });

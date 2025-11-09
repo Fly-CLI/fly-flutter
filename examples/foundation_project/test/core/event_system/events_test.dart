@@ -6,15 +6,15 @@ import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 void main() {
   group('AppEvent', () {
     test('should generate unique IDs', () {
-      final event1 = NavigationStartedEvent(feature: FeatureScreenType.home);
-      final event2 = NavigationStartedEvent(feature: FeatureScreenType.home);
+      final event1 = NavigationStartedEvent(feature: FeatureScreen.home);
+      final event2 = NavigationStartedEvent(feature: FeatureScreen.home);
 
       expect(event1.id, isNot(equals(event2.id)));
     });
 
     test('should set timestamp to current time', () {
       final before = DateTime.now();
-      final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+      final event = NavigationStartedEvent(feature: FeatureScreen.home);
       final after = DateTime.now();
 
       expect(
@@ -30,7 +30,7 @@ void main() {
     test('should allow custom timestamp', () {
       final customTimestamp = DateTime(2024, 1, 1);
       final event = NavigationStartedEvent(
-        feature: FeatureScreenType.home,
+        feature: FeatureScreen.home,
         timestamp: customTimestamp,
       );
 
@@ -40,7 +40,7 @@ void main() {
     test('should allow custom metadata', () {
       final metadata = {'key': 'value'};
       final event = NavigationStartedEvent(
-        feature: FeatureScreenType.home,
+        feature: FeatureScreen.home,
         metadata: metadata,
       );
 
@@ -50,11 +50,11 @@ void main() {
     test('should be equal based on ID', () {
       const id = 'test-id';
       final event1 = NavigationStartedEvent(
-        feature: FeatureScreenType.home,
+        feature: FeatureScreen.home,
         id: id,
       );
       final event2 = NavigationStartedEvent(
-        feature: FeatureScreenType.tasks,
+        feature: FeatureScreen.tasks,
         id: id,
       );
 
@@ -65,16 +65,16 @@ void main() {
 
   group('NavigationStartedEvent', () {
     test('should create with feature', () {
-      final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+      final event = NavigationStartedEvent(feature: FeatureScreen.home);
 
-      expect(event.feature, FeatureScreenType.home);
+      expect(event.feature, FeatureScreen.home);
       expect(event, isA<NavigationEvent>());
       expect(event, isA<Event>());
     });
 
     test('should support JSON serialization', () {
       final event = NavigationStartedEvent(
-        feature: FeatureScreenType.tasks,
+        feature: FeatureScreen.tasks,
         metadata: {'key': 'value'},
       );
 
@@ -89,14 +89,14 @@ void main() {
 
     test('should deserialize from JSON', () {
       final original = NavigationStartedEvent(
-        feature: FeatureScreenType.notes,
+        feature: FeatureScreen.notes,
         metadata: {'key': 'value'},
       );
 
       final json = original.toJson();
       final deserialized = NavigationStartedEvent.fromJson(json);
 
-      expect(deserialized.feature, FeatureScreenType.notes);
+      expect(deserialized.feature, FeatureScreen.notes);
       expect(deserialized.metadata, equals(original.metadata));
     });
   });
@@ -104,17 +104,17 @@ void main() {
   group('NavigationCompletedEvent', () {
     test('should create with feature and optional result', () {
       final event = NavigationCompletedEvent(
-        feature: FeatureScreenType.home,
+        feature: FeatureScreen.home,
         result: 'test-result',
       );
 
-      expect(event.feature, FeatureScreenType.home);
+      expect(event.feature, FeatureScreen.home);
       expect(event.result, 'test-result');
     });
 
     test('should support JSON serialization', () {
       final event = NavigationCompletedEvent(
-        feature: FeatureScreenType.tasks,
+        feature: FeatureScreen.tasks,
         result: 'result',
       );
 

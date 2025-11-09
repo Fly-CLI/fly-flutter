@@ -30,7 +30,7 @@ void main() {
         final subscription1 = manager.stream.listen(events1.add);
         final subscription2 = manager.stream.listen(events2.add);
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         manager.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -57,7 +57,7 @@ void main() {
         final events = <NavigationEvent>[];
         manager.stream.listen(events.add).cancel();
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = manager.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -68,7 +68,7 @@ void main() {
       });
 
       test('should return false when no listeners', () {
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = manager.emit(event);
 
         // No listeners, so should return false
@@ -78,7 +78,7 @@ void main() {
       test('should return false when disposed', () {
         manager.dispose();
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = manager.emit(event);
 
         expect(result, isFalse);
@@ -94,7 +94,7 @@ void main() {
         ).cancel();
 
         // Emit valid event
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         manager.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -126,14 +126,14 @@ void main() {
         final events = <NavigationEvent>[];
         final subscription = manager.stream.listen(events.add);
 
-        final event1 = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event1 = NavigationStartedEvent(feature: FeatureScreen.home);
         manager.emit(event1);
 
         await Future.delayed(const Duration(milliseconds: 10));
 
         manager.dispose();
 
-        final event2 = NavigationStartedEvent(feature: FeatureScreenType.tasks);
+        final event2 = NavigationStartedEvent(feature: FeatureScreen.tasks);
         manager.emit(event2);
 
         await Future.delayed(const Duration(milliseconds: 10));

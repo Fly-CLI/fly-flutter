@@ -17,22 +17,22 @@ typedef RouteHandler = Widget Function(
   Map<String, dynamic>? arguments,
 );
 
-/// Central registry mapping [FeatureScreenType] to route handlers.
+/// Central registry mapping [FeatureScreen] to route handlers.
 class RouteHandlerRegistry {
-  static RouteHandler? getHandler(FeatureScreenType feature) {
+  static RouteHandler? getHandler(FeatureScreen feature) {
     switch (feature) {
-      case FeatureScreenType.home:
+      case FeatureScreen.home:
         return (context, args) => const MainNavigationScreen(
-          feature: FeatureScreenType.notes,
+          feature: FeatureScreen.notes,
           child: HomeScreen(),
         );
-      case FeatureScreenType.tasks:
+      case FeatureScreen.tasks:
         return (context, args) => const TasksScreen();
-      case FeatureScreenType.notes:
+      case FeatureScreen.notes:
         return (context, args) => const NotesScreen();
-      case FeatureScreenType.settings:
+      case FeatureScreen.settings:
         return (context, args) => const SettingsScreen();
-      case FeatureScreenType.taskDetail:
+      case FeatureScreen.taskDetail:
         return (context, args) {
           final l10n = AppLocalizations.of(context);
           final data = args ?? <String, dynamic>{};
@@ -79,7 +79,7 @@ class RouteHandlerRegistry {
             initialTask: initialTask,
           );
         };
-      case FeatureScreenType.noteDetail:
+      case FeatureScreen.noteDetail:
         return (context, args) {
           final l10n = AppLocalizations.of(context);
           final data = args ?? <String, dynamic>{};
@@ -89,7 +89,7 @@ class RouteHandlerRegistry {
             body: Center(child: Text(l10n.noteDetailComingSoon)),
           );
         };
-      case FeatureScreenType.taskForm:
+      case FeatureScreen.taskForm:
         return (context, args) {
           final data = args ?? <String, dynamic>{};
           Task? initialTask;
@@ -111,7 +111,7 @@ class RouteHandlerRegistry {
 
           return TaskFormScreen(initialTask: initialTask);
         };
-      case FeatureScreenType.noteForm:
+      case FeatureScreen.noteForm:
         return (context, args) {
           final l10n = AppLocalizations.of(context);
           return Scaffold(
@@ -122,12 +122,12 @@ class RouteHandlerRegistry {
     }
   }
 
-  static bool hasHandler(FeatureScreenType feature) {
+  static bool hasHandler(FeatureScreen feature) {
     return getHandler(feature) != null;
   }
 
-  static Set<FeatureScreenType> get registeredFeatures =>
-      FeatureScreenType.values.toSet();
+  static Set<FeatureScreen> get registeredFeatures =>
+      FeatureScreen.values.toSet();
 
   static String? _readIdFromArgs(Map<String, dynamic> args) {
     final idValue = args['taskId'] ?? args['id'];
@@ -194,14 +194,14 @@ class AppRouteConfig {
     );
   }
 
-  static FeatureScreenType? _getFeatureFromRoute(String route) {
-    for (final feature in FeatureScreenType.values) {
+  static FeatureScreen? _getFeatureFromRoute(String route) {
+    for (final feature in FeatureScreen.values) {
       if (!feature.route.contains(':') && route == feature.route) {
         return feature;
       }
     }
 
-    for (final feature in FeatureScreenType.values) {
+    for (final feature in FeatureScreen.values) {
       if (feature.route.contains(':') &&
           _routeMatchesPattern(route, feature.route)) {
         return feature;

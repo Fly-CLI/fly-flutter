@@ -7,7 +7,7 @@ import 'package:foundation_project/features/tasks/presentation/navigation/task_r
 import 'package:foundation_project/features/tasks/presentation/widgets/task_list_filters.dart';
 import 'package:foundation_project/features/tasks/presentation/widgets/task_list_item.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
-import 'package:foundation_project/shared/navigation/app_navigation.dart';
+import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
 class TasksScreen extends BaseScreen<TasksViewModel, TasksViewModelState> {
@@ -40,7 +40,7 @@ class TasksScreen extends BaseScreen<TasksViewModel, TasksViewModelState> {
           IconButton(
             tooltip: l10n.addTask,
             onPressed: () {
-              AppNavigation.instance.navigateTo(FeatureScreenType.taskForm);
+              AppNavigator.instance.navigateTo(FeatureScreen.taskForm);
             },
             icon: const Icon(Icons.add_task),
           ),
@@ -77,8 +77,8 @@ class TasksScreen extends BaseScreen<TasksViewModel, TasksViewModelState> {
                   hasMore: viewModelState.pagination.hasMore,
                   onLoadMore: viewModel.loadMore,
                   onOpenTask: (task) {
-                    AppNavigation.instance.navigateTo(
-                      FeatureScreenType.taskDetail,
+                    AppNavigator.instance.navigateTo(
+                      FeatureScreen.taskDetail,
                       arguments: TaskDetailScreenArgs(
                         taskId: task.id,
                         initialTask: task,
@@ -133,7 +133,7 @@ class _TaskListView extends StatelessWidget {
     if (tasks.isEmpty) {
       return _EmptyState(
         onCreateTask: () {
-          AppNavigation.instance.navigateTo(FeatureScreenType.taskForm);
+          AppNavigator.instance.navigateTo(FeatureScreen.taskForm);
         },
       );
     }

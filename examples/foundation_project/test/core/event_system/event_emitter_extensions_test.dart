@@ -27,7 +27,7 @@ void main() {
         final events = <NavigationEvent>[];
         final subscription = emitter.getStreamFor<NavigationEvent>().listen(events.add);
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         emitter.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -83,9 +83,9 @@ void main() {
             .cast<NavigationStartedEvent>()
             .listen(startedEvents.add);
 
-        emitter.emit(NavigationStartedEvent(feature: FeatureScreenType.home));
-        emitter.emit(NavigationCompletedEvent(feature: FeatureScreenType.tasks));
-        emitter.emit(NavigationStartedEvent(feature: FeatureScreenType.notes));
+        emitter.emit(NavigationStartedEvent(feature: FeatureScreen.home));
+        emitter.emit(NavigationCompletedEvent(feature: FeatureScreen.tasks));
+        emitter.emit(NavigationStartedEvent(feature: FeatureScreen.notes));
 
         await Future.delayed(const Duration(milliseconds: 10));
 

@@ -8,11 +8,11 @@ void main() {
   group('NavigationService', () {
     group('DefaultNavigationService', () {
       late GlobalKey<NavigatorState> navigatorKey;
-      late DefaultNavigationService service;
+      late StandardNavigationService service;
 
       setUp(() {
         navigatorKey = GlobalKey<NavigatorState>();
-        service = DefaultNavigationService(navigatorKey: navigatorKey);
+        service = StandardNavigationService(navigatorKey: navigatorKey);
       });
 
       test('should create service with navigator key', () {

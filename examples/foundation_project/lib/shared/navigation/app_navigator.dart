@@ -7,17 +7,17 @@ import 'package:foundation_project/features/home/domain/models/task.dart';
 import 'package:foundation_project/features/tasks/presentation/navigation/task_route_args.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 
-/// Navigation service providing type-safe navigation using [FeatureScreenType].
+/// Navigation service providing type-safe navigation using [FeatureScreen].
 ///
 /// This implementation mirrors the StockAI navigation design by exposing
 /// navigator-key based helpers while retaining the Fly event emission hooks.
-class AppNavigation implements NavigationService<FeatureScreenType> {
-  AppNavigation._internal();
+class AppNavigator implements NavigationService<FeatureScreen> {
+  AppNavigator._internal();
 
-  static final AppNavigation _instance = AppNavigation._internal();
+  static final AppNavigator _instance = AppNavigator._internal();
 
   /// Singleton accessor used across the app and tests.
-  static AppNavigation get instance => _instance;
+  static AppNavigator get instance => _instance;
 
   /// Global navigator key shared with `MaterialApp`.
   final GlobalKey<NavigatorState> navigatorKey = App.navigatorKey;
@@ -31,14 +31,14 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     }
   }
 
-  void _emitNavigationStarted(FeatureScreenType feature) {
+  void _emitNavigationStarted(FeatureScreen feature) {
     try {
       _emitter?.emit(NavigationStartedEvent(feature: feature));
     } catch (_) {}
   }
 
   void _emitNavigationCompleted(
-    FeatureScreenType feature, {
+    FeatureScreen feature, {
     Object? result,
   }) {
     try {
@@ -53,7 +53,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   @override
   Future<T?> navigateTo<T>(
-    FeatureScreenType feature, {
+    FeatureScreen feature, {
     Object? arguments,
   }) async {
     _emitNavigationStarted(feature);
@@ -80,7 +80,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   @override
   Future<T?> navigateReplace<T>(
-    FeatureScreenType feature, {
+    FeatureScreen feature, {
     Object? arguments,
   }) async {
     _emitNavigationStarted(feature);
@@ -107,7 +107,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   @override
   Future<T?> navigateClearStack<T>(
-    FeatureScreenType feature, {
+    FeatureScreen feature, {
     Object? arguments,
   }) async {
     _emitNavigationStarted(feature);
@@ -134,8 +134,8 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   }
 
   Future<T?> navigateToAndClearUntil<T>(
-    FeatureScreenType feature,
-    FeatureScreenType untilFeature, {
+    FeatureScreen feature,
+    FeatureScreen untilFeature, {
     Object? arguments,
   }) async {
     _emitNavigationStarted(feature);
@@ -185,7 +185,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   /// Convenience helper mirroring StockAI's feature helpers.
   Future<T?> navigateToFeature<T>(
-    FeatureScreenType feature, {
+    FeatureScreen feature, {
     Map<String, dynamic>? params,
   }) {
     return navigateTo<T>(feature, arguments: params);
@@ -193,23 +193,23 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   /// Navigate directly to the home screen.
   Future<T?> navigateToHome<T>() {
-    return navigateToFeature<T>(FeatureScreenType.home);
+    return navigateToFeature<T>(FeatureScreen.home);
   }
 
   /// Navigate to tasks list.
   Future<T?> navigateToTasks<T>() {
-    return navigateToFeature<T>(FeatureScreenType.tasks);
+    return navigateToFeature<T>(FeatureScreen.tasks);
   }
 
   /// Navigate to notes list.
   Future<T?> navigateToNotes<T>() {
-    return navigateToFeature<T>(FeatureScreenType.notes);
+    return navigateToFeature<T>(FeatureScreen.notes);
   }
 
   /// Navigate to task form with optional initial task.
   Future<T?> navigateToTaskForm<T>({Task? initialTask}) {
     return navigateTo<T>(
-      FeatureScreenType.taskForm,
+      FeatureScreen.taskForm,
       arguments: TaskFormScreenArgs(initialTask: initialTask),
     );
   }
@@ -220,7 +220,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
     Task? initialTask,
   }) {
     return navigateTo<T>(
-      FeatureScreenType.taskDetail,
+      FeatureScreen.taskDetail,
       arguments: TaskDetailScreenArgs(
         taskId: taskId,
         initialTask: initialTask,
@@ -230,7 +230,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
 
   /// Navigate to note form (placeholder for future implementation).
   Future<T?> navigateToNoteForm<T>() {
-    return navigateToFeature<T>(FeatureScreenType.noteForm);
+    return navigateToFeature<T>(FeatureScreen.noteForm);
   }
 
   /// Retrieve the current route name if available.
@@ -277,7 +277,7 @@ class AppNavigation implements NavigationService<FeatureScreenType> {
   }
 
   Map<String, dynamic>? _prepareArguments(
-    FeatureScreenType feature,
+    FeatureScreen feature,
     Object? arguments,
   ) {
     if (arguments == null) {

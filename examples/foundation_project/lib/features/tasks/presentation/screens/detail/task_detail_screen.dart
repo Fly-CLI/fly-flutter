@@ -5,7 +5,7 @@ import 'package:foundation_project/features/home/domain/models/task.dart';
 import 'package:foundation_project/features/tasks/presentation/navigation/task_route_args.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/detail/task_detail_view_model.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
-import 'package:foundation_project/shared/navigation/app_navigation.dart';
+import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:intl/intl.dart';
 
@@ -77,8 +77,8 @@ class TaskDetailScreen
               tooltip: l10n.editTask,
               onPressed: () async {
                 final args = TaskFormScreenArgs(initialTask: task);
-                await AppNavigation.instance.navigateTo(
-                  FeatureScreenType.taskForm,
+                await AppNavigator.instance.navigateTo(
+                  FeatureScreen.taskForm,
                   arguments: args,
                 );
               },
@@ -265,8 +265,8 @@ class TaskDetailScreen
               ? null
               : () async {
                   final args = TaskFormScreenArgs(initialTask: task);
-                  await AppNavigation.instance.navigateTo(
-                    FeatureScreenType.taskForm,
+                  await AppNavigator.instance.navigateTo(
+                    FeatureScreen.taskForm,
                     arguments: args,
                   );
                 },

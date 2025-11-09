@@ -196,7 +196,7 @@ void main() {
         final events = <Event>[];
         final subscription = emitter.getStream('navigation')?.listen(events.add);
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = emitter.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -204,7 +204,7 @@ void main() {
         expect(result, isTrue);
         expect(events.length, 1);
         expect(events[0], isA<NavigationStartedEvent>());
-        expect((events[0] as NavigationStartedEvent).feature, FeatureScreenType.home);
+        expect((events[0] as NavigationStartedEvent).feature, FeatureScreen.home);
 
         subscription?.cancel();
       });
@@ -215,7 +215,7 @@ void main() {
         final events = <NavigationEvent>[];
         final subscription = emitter.getStreamFor<NavigationEvent>().listen(events.add);
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = emitter.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -223,7 +223,7 @@ void main() {
         expect(result, isTrue);
         expect(events.length, 1);
         expect(events[0], isA<NavigationStartedEvent>());
-        expect(events[0].feature, FeatureScreenType.home);
+        expect(events[0].feature, FeatureScreen.home);
 
         subscription.cancel();
       });
@@ -240,7 +240,7 @@ void main() {
 
         // Emit concrete event (NavigationStartedEvent)
         // Should match base sealed class (NavigationEvent)
-        final event = NavigationStartedEvent(feature: FeatureScreenType.tasks);
+        final event = NavigationStartedEvent(feature: FeatureScreen.tasks);
         emitter.emit(event);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -271,7 +271,7 @@ void main() {
             emitter.getStream('navigation')?.listen(navEvents.add);
         final screenSubscription = emitter.getStream('screen')?.listen(screenEvents.add);
 
-        final navEvent = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final navEvent = NavigationStartedEvent(feature: FeatureScreen.home);
         emitter.emit(navEvent);
 
         await Future.delayed(const Duration(milliseconds: 10));
@@ -313,7 +313,7 @@ void main() {
       });
 
       test('should return false when no matching controller', () {
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = emitter.emit(event);
 
         expect(result, isFalse);
@@ -328,7 +328,7 @@ void main() {
 
         emitter.dispose();
 
-        final event = NavigationStartedEvent(feature: FeatureScreenType.home);
+        final event = NavigationStartedEvent(feature: FeatureScreen.home);
         final result = emitter.emit(event);
 
         expect(result, isFalse);

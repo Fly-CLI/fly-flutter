@@ -4,7 +4,7 @@ import 'package:fly_core/fly_core.dart';
 import 'package:foundation_project/core/providers/providers.dart';
 import 'package:foundation_project/core/storage/storage_providers.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';
-import 'package:foundation_project/shared/navigation/app_navigation.dart';
+import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/app_router.dart';
 
 void main() async {
@@ -45,7 +45,7 @@ class FoundationProjectApp extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      navigatorKey: AppNavigation.instance.navigatorKey,
+      navigatorKey: AppNavigator.instance.navigatorKey,
       initialRoute: AppRouteConfig.initialRoute,
       onGenerateRoute: AppRouteConfig.onGenerateRoute,
       onUnknownRoute: AppRouteConfig.onUnknownRoute,

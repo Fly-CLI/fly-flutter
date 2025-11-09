@@ -6,11 +6,11 @@ part 'events.g.dart';
 
 /// Base class for navigation events
 ///
-/// This is an example-specific event type that uses FeatureScreenType.
+/// This is an example-specific event type that uses [FeatureScreen].
 /// For generic navigation events, extend AppEvent directly in your application.
 sealed class NavigationEvent extends Event {
   @JsonKey(fromJson: _featureFromJson, toJson: _featureToJson)
-  final FeatureScreenType feature;
+  final FeatureScreen feature;
 
   NavigationEvent({
     required this.feature,
@@ -59,13 +59,13 @@ class NavigationCompletedEvent extends NavigationEvent {
 // Helper functions for JSON serialization
 
 /// Convert Feature enum to JSON string
-String _featureToJson(FeatureScreenType feature) => feature.name;
+String _featureToJson(FeatureScreen feature) => feature.name;
 
 /// Convert JSON string to Feature enum
-FeatureScreenType _featureFromJson(String json) {
+FeatureScreen _featureFromJson(String json) {
   try {
-    return FeatureScreenType.values.firstWhere((f) => f.name == json);
+    return FeatureScreen.values.firstWhere((f) => f.name == json);
   } catch (e) {
-    return FeatureScreenType.home; // Default fallback
+    return FeatureScreen.home; // Default fallback
   }
 }
