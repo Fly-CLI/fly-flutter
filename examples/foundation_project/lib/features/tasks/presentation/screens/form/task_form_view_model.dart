@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
-import 'package:foundation_project/core/foundation/base_view_model.dart';
+import 'package:foundation_project/core/foundation/screen/base_view_model.dart';
 import 'package:foundation_project/core/providers/repository_providers.dart';
 import 'package:foundation_project/core/repositories/task_repository.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';

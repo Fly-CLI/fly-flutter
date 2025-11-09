@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/base_screen.dart';
+import 'package:foundation_project/core/foundation/screen/base_screen.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/list/tasks_view_model.dart';
 import 'package:foundation_project/features/tasks/presentation/navigation/task_route_args.dart';
@@ -40,7 +40,7 @@ class TasksScreen extends BaseScreen<TasksViewModel, TasksViewModelState> {
           IconButton(
             tooltip: l10n.addTask,
             onPressed: () {
-              AppNavigator.instance.navigateTo(FeatureScreen.taskForm);
+              AppNavigator().navigateTo(FeatureScreen.taskForm);
             },
             icon: const Icon(Icons.add_task),
           ),
@@ -77,7 +77,7 @@ class TasksScreen extends BaseScreen<TasksViewModel, TasksViewModelState> {
                   hasMore: viewModelState.pagination.hasMore,
                   onLoadMore: viewModel.loadMore,
                   onOpenTask: (task) {
-                    AppNavigator.instance.navigateTo(
+                    AppNavigator().navigateTo(
                       FeatureScreen.taskDetail,
                       arguments: TaskDetailScreenArgs(
                         taskId: task.id,
@@ -133,7 +133,7 @@ class _TaskListView extends StatelessWidget {
     if (tasks.isEmpty) {
       return _EmptyState(
         onCreateTask: () {
-          AppNavigator.instance.navigateTo(FeatureScreen.taskForm);
+          AppNavigator().navigateTo(FeatureScreen.taskForm);
         },
       );
     }

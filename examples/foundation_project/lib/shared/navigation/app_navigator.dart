@@ -19,6 +19,8 @@ class AppNavigator implements NavigationService<FeatureScreen> {
   /// Singleton accessor used across the app and tests.
   static AppNavigator get instance => _instance;
 
+  factory AppNavigator() => _instance;
+
   /// Global navigator key shared with `MaterialApp`.
   final GlobalKey<NavigatorState> navigatorKey = App.navigatorKey;
 

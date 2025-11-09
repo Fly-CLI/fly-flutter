@@ -45,7 +45,7 @@ class FoundationProjectApp extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      navigatorKey: AppNavigator.instance.navigatorKey,
+      navigatorKey: AppNavigator().navigatorKey,
       initialRoute: AppRouteConfig.initialRoute,
       onGenerateRoute: AppRouteConfig.onGenerateRoute,
       onUnknownRoute: AppRouteConfig.onUnknownRoute,

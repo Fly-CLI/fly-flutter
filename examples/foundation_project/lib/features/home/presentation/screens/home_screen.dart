@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/base_screen.dart';
+import 'package:foundation_project/core/foundation/screen/base_screen.dart';
 import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
 import 'package:foundation_project/features/home/presentation/view_models/home_view_model.dart';
@@ -126,14 +126,14 @@ class HomeScreen extends BaseScreen<HomeViewModel, HomeViewModelState> {
           label: l10n.addTask,
           icon: Icons.add_task,
           onPressed: () {
-            AppNavigator.instance.navigateTo(FeatureScreen.taskForm);
+            AppNavigator().navigateTo(FeatureScreen.taskForm);
           },
         ),
         QuickActionButton(
           label: l10n.addNote,
           icon: Icons.note_add,
           onPressed: () {
-            AppNavigator.instance.navigateTo(FeatureScreen.noteForm);
+            AppNavigator().navigateTo(FeatureScreen.noteForm);
           },
         ),
         QuickActionButton(

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
-import 'package:foundation_project/core/foundation/base_view_model.dart';
+import 'package:foundation_project/core/foundation/screen/base_view_model.dart';
 import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:foundation_project/core/services/statistics_service.dart';
 import 'package:foundation_project/core/services/sync_service.dart';

@@ -124,9 +124,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               onPressed: () {
                 final feature = currentItem.feature;
                 if (feature == FeatureScreen.tasks) {
-                  AppNavigator.instance.navigateToTaskForm();
+                  AppNavigator().navigateToTaskForm();
                 } else if (feature == FeatureScreen.notes) {
-                  AppNavigator.instance.navigateTo(FeatureScreen.noteForm);
+                  AppNavigator().navigateTo(FeatureScreen.noteForm);
                 }
               },
               child: const Icon(Icons.add),

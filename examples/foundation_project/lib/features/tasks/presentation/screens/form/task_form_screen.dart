@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/base_screen.dart';
+import 'package:foundation_project/core/foundation/screen/base_screen.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/form/task_form_view_model.dart';
 import 'package:foundation_project/l10n/app_localizations.dart';

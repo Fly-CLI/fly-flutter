@@ -1,6 +1,3 @@
-import 'package:foundation_project/core/di/global_container.dart';
-import 'package:foundation_project/core/providers/logger_provider.dart';
-import 'package:foundation_project/core/providers/service_providers.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
 
 /// Base view model class for all view models in the foundation project.

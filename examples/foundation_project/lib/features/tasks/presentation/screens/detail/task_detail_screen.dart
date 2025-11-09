@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/core/foundation/base_screen.dart';
+import 'package:foundation_project/core/foundation/screen/base_screen.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';
 import 'package:foundation_project/features/tasks/presentation/navigation/task_route_args.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/detail/task_detail_view_model.dart';
@@ -77,7 +77,7 @@ class TaskDetailScreen
               tooltip: l10n.editTask,
               onPressed: () async {
                 final args = TaskFormScreenArgs(initialTask: task);
-                await AppNavigator.instance.navigateTo(
+                await AppNavigator().navigateTo(
                   FeatureScreen.taskForm,
                   arguments: args,
                 );
@@ -265,7 +265,7 @@ class TaskDetailScreen
               ? null
               : () async {
                   final args = TaskFormScreenArgs(initialTask: task);
-                  await AppNavigator.instance.navigateTo(
+                  await AppNavigator().navigateTo(
                     FeatureScreen.taskForm,
                     arguments: args,
                   );
