@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foundation_project/features/home/presentation/screens/home_screen.dart';
+import 'package:foundation_project/features/home/presentation/screens/home/home_screen.dart';
 import 'package:foundation_project/features/notes/presentation/screens/notes_screen.dart';
 import 'package:foundation_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/list/tasks_screen.dart';

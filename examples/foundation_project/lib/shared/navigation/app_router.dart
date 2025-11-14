@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';
-import 'package:foundation_project/features/home/presentation/screens/home_screen.dart';
+import 'package:foundation_project/features/home/presentation/screens/home/home_screen.dart';
 import 'package:foundation_project/features/notes/presentation/screens/notes_screen.dart';
 import 'package:foundation_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:foundation_project/features/tasks/presentation/navigation/task_route_args.dart';

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation_project/core/foundation/screen/base_screen.dart';
 import 'package:foundation_project/shared/navigation/app_navigator.dart';
 import 'package:foundation_project/shared/navigation/feature_screen_type.dart';
-import 'package:foundation_project/features/home/presentation/view_models/home_view_model.dart';
+import 'package:foundation_project/features/home/presentation/screens/home/home_view_model.dart';
 import 'package:foundation_project/features/home/presentation/widgets/quick_action_button.dart';
 import 'package:foundation_project/features/home/presentation/widgets/statistics_card.dart';
 import 'package:foundation_project/features/home/presentation/widgets/sync_status_widget.dart';
@@ -163,8 +163,5 @@ class HomeScreen extends BaseScreen<HomeViewModel, HomeViewModelState> {
       },
     );
   }
-
-  @override
-  bool get showRefreshIndicator => true;
 }
 
