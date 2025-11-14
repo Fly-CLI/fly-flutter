@@ -72,8 +72,8 @@ dependencies:
     path: ../../packages/fly_events
   fly_navigation:
     path: ../../packages/fly_navigation
-  fly_glow_guard:
-    path: ../../packages/fly_glow_guard
+  fly_flow_guard:
+    path: ../../packages/fly_flow_guard
   fly_mvvm:
     path: ../../packages/fly_mvvm
 

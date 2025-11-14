@@ -1,4 +1,4 @@
-// Barrel file for fly_glow_guard package
+// Barrel file for fly_flow_guard package
 
 export 'src/async_operation_config.dart';
 export 'src/flow_guard.dart';

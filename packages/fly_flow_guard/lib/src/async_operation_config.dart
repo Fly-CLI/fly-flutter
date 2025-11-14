@@ -1,6 +1,6 @@
 import 'package:fly_logger/fly_logger.dart';
 
-import 'package:fly_glow_guard/src/retry_config.dart';
+import 'package:fly_flow_guard/src/retry_config.dart';
 
 /// Central configuration for FlowGuard default values
 /// 

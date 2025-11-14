@@ -1,4 +1,4 @@
-# fly_glow_guard
+# fly_flow_guard
 
 Flow Guard delivers network-aware async execution with retry logic, offline queuing, and rich telemetry for Flutter applications.
 
@@ -14,7 +14,7 @@ Flow Guard delivers network-aware async execution with retry logic, offline queu
 ## Usage
 
 ```dart
-import 'package:fly_glow_guard/fly_glow_guard.dart';
+import 'package:fly_flow_guard/fly_flow_guard.dart';
 import 'package:fly_logger/fly_logger.dart';
 import 'package:fly_connectivity/fly_connectivity.dart';
 

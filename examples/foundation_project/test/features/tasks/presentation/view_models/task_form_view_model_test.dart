@@ -5,7 +5,7 @@ import 'package:foundation_project/core/repositories/task_repository.dart';
 import 'package:foundation_project/features/home/domain/models/task.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/form/task_form_view_model.dart';
 import 'package:foundation_project/features/tasks/presentation/screens/list/tasks_view_model.dart';
-import 'package:fly_glow_guard/fly_glow_guard.dart';
+import 'package:fly_flow_guard/fly_flow_guard.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockTaskRepository extends Mock implements TaskRepository {}

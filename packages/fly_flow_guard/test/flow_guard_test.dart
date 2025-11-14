@@ -5,8 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fly_connectivity/fly_connectivity.dart';
 import 'package:fly_errors/fly_errors.dart';
 import 'package:fly_events/fly_events.dart';
+import 'package:fly_flow_guard/fly_flow_guard.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_glow_guard/fly_glow_guard.dart';
 
 void main() {
   group('FlowGuard', () {

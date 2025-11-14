@@ -480,10 +480,10 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
-  fly_glow_guard:
+  fly_flow_guard:
     dependency: "direct main"
     description:
-      path: "../../packages/fly_glow_guard"
+      path: "../../packages/fly_flow_guard"
       relative: true
     source: path
     version: "0.1.0"

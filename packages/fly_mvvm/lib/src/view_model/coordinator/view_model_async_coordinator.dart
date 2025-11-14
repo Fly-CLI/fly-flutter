@@ -2,7 +2,7 @@ import 'dart:async' show unawaited;
 
 import 'package:flutter/foundation.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_glow_guard/fly_glow_guard.dart';
+import 'package:fly_flow_guard/fly_flow_guard.dart';
 import 'package:fly_localization/fly_localization.dart';
 import 'package:fly_connectivity/fly_connectivity.dart';
 

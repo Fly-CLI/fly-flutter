@@ -6,10 +6,10 @@ import 'package:fly_errors/fly_errors.dart' hide TimeoutException;
 import 'package:fly_events/fly_events.dart';
 import 'package:fly_localization/fly_localization.dart';
 import 'package:fly_logger/fly_logger.dart';
-import 'package:fly_glow_guard/src/async_operation_config.dart';
-import 'package:fly_glow_guard/src/offline_queue.dart';
-import 'package:fly_glow_guard/src/result.dart';
-import 'package:fly_glow_guard/src/retry_config.dart';
+import 'package:fly_flow_guard/src/async_operation_config.dart';
+import 'package:fly_flow_guard/src/offline_queue.dart';
+import 'package:fly_flow_guard/src/result.dart';
+import 'package:fly_flow_guard/src/retry_config.dart';
 import 'package:uuid/uuid.dart';
 
 part 'flow_guard_builder.dart';

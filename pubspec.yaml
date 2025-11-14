@@ -16,8 +16,9 @@ workspace:
   - packages/fly_errors
   - packages/fly_events
   - packages/fly_navigation
-  - packages/fly_glow_guard
+  - packages/fly_flow_guard
   - packages/fly_mvvm
+  - packages/fly_state
 
 dependencies:
   yaml: ^3.1.2

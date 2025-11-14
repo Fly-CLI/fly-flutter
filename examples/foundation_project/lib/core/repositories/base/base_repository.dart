@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart' show protected, nonVirtual;
-import 'package:fly_glow_guard/fly_glow_guard.dart';
+import 'package:fly_flow_guard/fly_flow_guard.dart';
 import 'package:foundation_project/core/database/models/base_entity.dart';
 import 'package:foundation_project/core/models/sync_status.dart';
 import 'package:foundation_project/core/repositories/interfaces/i_base_repository.dart';

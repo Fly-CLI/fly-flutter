@@ -1,5 +1,5 @@
-name: fly_mvvm
-description: MVVM base classes for ViewModels and Screens for Flutter applications
+name: fly_flow_guard
+description: Flow Guard is a network-aware async execution with retry logic, offline queuing, and telemetry for Flutter apps
 version: 0.1.0
 homepage: https://github.com/fly-cli/fly
 repository: https://github.com/fly-cli/fly.git
@@ -15,21 +15,17 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^3.0.3
+  uuid: ^4.2.1
+  fly_logger:
+    path: ../fly_logger
   fly_connectivity:
     path: ../fly_connectivity
   fly_errors:
     path: ../fly_errors
-  fly_events:
-    path: ../fly_events
-  fly_feedback:
-    path: ../fly_feedback
   fly_localization:
     path: ../fly_localization
-  fly_logger:
-    path: ../fly_logger
-  fly_flow_guard:
-    path: ../fly_flow_guard
+  fly_events:
+    path: ../fly_events
 
 dev_dependencies:
   flutter_test:

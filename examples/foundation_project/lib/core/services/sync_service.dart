@@ -1,4 +1,4 @@
-import 'package:fly_glow_guard/fly_glow_guard.dart';
+import 'package:fly_flow_guard/fly_flow_guard.dart';
 import 'package:fly_logger/fly_logger.dart';
 import 'package:foundation_project/core/models/sync_status.dart' as core_sync;
 import 'package:foundation_project/core/repositories/note_repository.dart';
