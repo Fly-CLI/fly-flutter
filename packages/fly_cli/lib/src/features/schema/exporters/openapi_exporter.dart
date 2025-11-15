@@ -47,7 +47,7 @@ class OpenApiExporter extends SchemaExporter {
     if (globalOptions.isNotEmpty) {
       for (final flag in globalOptions) {
         openApi['components']['parameters']['Global${flag.name}'] =
-            _buildParameterSchema(flag, true);
+            _buildParameterSchema(flag);
       }
     }
 
@@ -130,7 +130,7 @@ class OpenApiExporter extends SchemaExporter {
 
     // Add command-specific options
     for (final flag in command.options) {
-      parameters.add(_buildParameterSchema(flag, false));
+      parameters.add(_buildParameterSchema(flag));
     }
 
     // Add global options if enabled
@@ -147,33 +147,30 @@ class OpenApiExporter extends SchemaExporter {
   }
 
   /// Build parameter schema for an option
-  Map<String, dynamic> _buildParameterSchema(CliFlag flag, bool isGlobal) {
-    final option = OptionDefinition.fromJson(
-      flag.toJson(isGlobalOverride: isGlobal),
-    );
-    final schema = <String, dynamic>{
-      'name': '--${option.name}',
+  Map<String, dynamic> _buildParameterSchema(CliFlag flag) {
+    final schema = _buildFlagSchema(flag);
+    var parameterName = '--${flag.name}';
+    var description = flag.description;
+
+    if (flag.abbreviation != null) {
+      parameterName = '-${flag.abbreviation}';
+      description = '${flag.description} (long: --${flag.name})';
+    }
+
+    if (flag.allowedValues != null && flag.allowedValues!.isNotEmpty) {
+      schema['enum'] = flag.allowedValues;
+    }
+
+    if (flag.defaultValue != null) {
+      schema['default'] = flag.defaultValue;
+    }
+
+    return {
+      'name': parameterName,
       'in': 'query',
-      'description': option.description,
-      'schema': <String, dynamic>{
-        'type': _getOpenApiType(option.type),
-      },
+      'description': description,
+      'schema': schema,
     };
-
-    if (option.allowedValues != null && option.allowedValues!.isNotEmpty) {
-      schema['schema']['enum'] = option.allowedValues;
-    }
-
-    if (option.defaultValue != null) {
-      schema['schema']['default'] = option.defaultValue.toString();
-    }
-
-    if (option.short != null) {
-      schema['name'] = '-${option.short}';
-      schema['description'] = '${option.description} (short: --${option.name})';
-    }
-
-    return schema;
   }
 
   /// Build request body for command arguments
@@ -217,15 +214,17 @@ class OpenApiExporter extends SchemaExporter {
     };
   }
 
-  /// Convert OptionType to OpenAPI type
-  String _getOpenApiType(OptionType type) {
-    switch (type) {
-      case OptionType.flag:
-        return 'boolean';
-      case OptionType.value:
-        return 'string';
-      case OptionType.multiple:
-        return 'array';
+  Map<String, dynamic> _buildFlagSchema(CliFlag flag) {
+    switch (flag.type) {
+      case FlagType.boolean:
+        return {'type': 'boolean'};
+      case FlagType.singleValue:
+        return {'type': 'string'};
+      case FlagType.multiValue:
+        return {
+          'type': 'array',
+          'items': {'type': 'string'},
+        };
     }
   }
 

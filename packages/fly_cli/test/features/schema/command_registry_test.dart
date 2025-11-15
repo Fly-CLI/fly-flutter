@@ -141,9 +141,9 @@ void main() {
       });
 
       test('getCommand returns correct command', () {
-        final createCommand = registry.getCommand('create');
-        expect(createCommand, isNotNull);
-        expect(createCommand!.name, equals('create'));
+        final projectCommand = registry.getCommand('create');
+        expect(projectCommand, isNotNull);
+        expect(projectCommand!.name, equals('project'));
 
         final doctorCommand = registry.getCommand('doctor');
         expect(doctorCommand, isNotNull);
@@ -158,13 +158,19 @@ void main() {
       test('getAllCommands returns all commands', () {
         final allCommands = registry.getAllCommands();
         expect(allCommands, isNotEmpty);
-        expect(allCommands.keys, containsAll(['create', 'doctor', 'version']));
+        expect(
+          allCommands.keys,
+          containsAll(['version', 'doctor', 'completion', 'generate', 'ai', 'mcp']),
+        );
       });
 
       test('getCommandNames returns all command names', () {
         final commandNames = registry.getCommandNames();
         expect(commandNames, isNotEmpty);
-        expect(commandNames, containsAll(['create', 'doctor', 'version']));
+        expect(
+          commandNames,
+          containsAll(['version', 'doctor', 'completion', 'generate', 'ai', 'mcp']),
+        );
       });
 
       test('hasCommand returns correct values', () {
@@ -174,11 +180,13 @@ void main() {
         expect(registry.hasCommand('non-existent'), isFalse);
       });
 
-      test('getSubcommands returns subcommands for add command', () {
-        final subcommands = registry.getSubcommands('add');
-        expect(subcommands, hasLength(2));
+      test('getSubcommands returns subcommands for generate group', () {
+        final subcommands = registry.getSubcommands('generate');
+        expect(subcommands, hasLength(3));
         expect(
-            subcommands.map((s) => s.name), containsAll(['screen', 'service']));
+          subcommands.map((s) => s.name),
+          containsAll(['project', 'screen', 'service']),
+        );
       });
 
       test('getSubcommands returns empty list for command without subcommands',
@@ -245,10 +253,10 @@ void main() {
         expect(json.containsKey('global_options'), isTrue);
 
         final commands = json['commands'] as Map<String, dynamic>;
-        expect(commands.containsKey('create'), isTrue);
+        expect(commands.containsKey('version'), isTrue);
 
-        final createCommand = commands['create'] as Map<String, dynamic>;
-        expect(createCommand['name'], equals('create'));
+        final versionCommand = commands['version'] as Map<String, dynamic>;
+        expect(versionCommand['name'], equals('version'));
 
         final globalOptions = json['global_options'] as List<dynamic>;
         expect(globalOptions.length, greaterThanOrEqualTo(3));
@@ -256,7 +264,7 @@ void main() {
         final verboseOption = globalOptions
             .firstWhere((o) => o['name'] == 'verbose') as Map<String, dynamic>;
         expect(verboseOption['name'], equals('verbose'));
-        expect(verboseOption['short'], equals('v'));
+        expect(verboseOption['abbreviation'], equals('v'));
       });
     });
 

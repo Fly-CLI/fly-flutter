@@ -116,11 +116,13 @@ void main() {
       expect(optJson['name'], equals('format'));
       expect(optJson['description'],
           equals('Output format (human, json, or ai)'));
-      expect(optJson['short'], equals('f'));
+      expect(optJson['abbreviation'], equals('f'));
+      expect(optJson['category'], equals('output'));
       expect(optJson['type'], equals('value'));
       expect(optJson['default_value'], equals('human'));
       expect(optJson['allowed_values'], equals(['human', 'json', 'ai']));
       expect(optJson['is_global'], isTrue);
+      expect(optJson['is_negatable'], isFalse);
       expect(optJson['is_required'], isFalse);
     });
 
@@ -253,31 +255,41 @@ void main() {
     });
   });
 
-  group('CliFlagMetadataExtensions', () {
-    test('converts flag to OptionDefinition', () {
+  group('CliFlag serialization', () {
+    test('serializes flag metadata map correctly', () {
       final flag = GlobalFormatFlag();
 
-      final option = OptionDefinition.fromJson(flag.toJson());
+      final json = flag.toJson();
 
-      expect(option.name, equals('format'));
-      expect(option.description,
+      expect(json['name'], equals('format'));
+      expect(json['description'],
           equals('Output format (human, json, or ai)'));
-      expect(option.short, equals('f'));
-      expect(option.type, equals(OptionType.value));
-      expect(option.allowedValues, equals(['human', 'json', 'ai']));
-      expect(option.defaultValue, equals('human'));
-      expect(option.isGlobal, isTrue);
-      expect(option.isRequired, isFalse);
+      expect(json['abbreviation'], equals('f'));
+      expect(json['category'], equals('output'));
+      expect(json['type'], equals('value'));
+      expect(json['allowed_values'], equals(['human', 'json', 'ai']));
+      expect(json['default_value'], equals('human'));
+      expect(json['is_global'], isTrue);
+      expect(json['is_negatable'], isFalse);
+      expect(json['is_required'], isFalse);
     });
 
-    test('applies isGlobalOverride when provided', () {
-      const flag = CreateOrganizationFlag();
+    test('round-trips flag from JSON metadata', () {
+      final flag = GlobalFormatFlag();
 
-      final option = OptionDefinition.fromJson(
+      final restored = CliFlag.fromJson(
         flag.toJson(isGlobalOverride: true),
       );
 
-      expect(option.isGlobal, isTrue);
+      expect(restored.name, equals(flag.name));
+      expect(restored.description, equals(flag.description));
+      expect(restored.abbreviation, equals(flag.abbreviation));
+      expect(restored.isGlobal, isTrue);
+      expect(restored.category, equals(flag.category));
+      expect(restored.type, equals(flag.type));
+      expect(restored.allowedValues, equals(flag.allowedValues));
+      expect(restored.defaultValue, equals(flag.defaultValue));
+      expect(restored.isNegatable, equals(flag.isNegatable));
     });
   });
 
@@ -289,7 +301,7 @@ void main() {
       );
 
       expect(subcommand.name, equals('screen'));
-      expect(subcommand.description, equals('Add a screen'));
+      expect(subcommand.description, equals('Generate a screen'));
       expect(subcommand.isHidden, isFalse);
     });
 
@@ -301,7 +313,7 @@ void main() {
       );
 
       expect(subcommand.name, equals('service'));
-      expect(subcommand.description, equals('Add a service'));
+      expect(subcommand.description, equals('Generate a service'));
       expect(subcommand.isHidden, isTrue);
     });
 
@@ -315,7 +327,7 @@ void main() {
       final json = subcommand.toJson();
 
       expect(json['name'], equals('screen'));
-      expect(json['description'], equals('Add a screen'));
+      expect(json['description'], equals('Generate a screen'));
       expect(json['is_hidden'], isTrue);
     });
 
@@ -388,18 +400,4 @@ void main() {
     });
   });
 
-  group('OptionType', () {
-    test('has correct values', () {
-      expect(OptionType.values, hasLength(3));
-      expect(OptionType.values, contains(OptionType.flag));
-      expect(OptionType.values, contains(OptionType.value));
-      expect(OptionType.values, contains(OptionType.multiple));
-    });
-
-    test('has correct names', () {
-      expect(OptionType.flag.name, equals('flag'));
-      expect(OptionType.value.name, equals('value'));
-      expect(OptionType.multiple.name, equals('multiple'));
-    });
-  });
 }

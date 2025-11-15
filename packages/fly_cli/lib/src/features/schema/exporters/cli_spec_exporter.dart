@@ -116,26 +116,23 @@ class CliSpecExporter extends SchemaExporter {
 
   /// Build option specification
   Map<String, dynamic> _buildOptionSpec(CliFlag flag, {bool isGlobal = false}) {
-    final option = OptionDefinition.fromJson(
-      flag.toJson(isGlobalOverride: isGlobal),
-    );
     final spec = <String, dynamic>{
-      'name': option.name,
-      'description': option.description,
-      'type': option.type.name,
-      'global': option.isGlobal,
+      'name': flag.name,
+      'description': flag.description,
+      'type': _mapFlagType(flag.type),
+      'global': isGlobal || flag.isGlobal,
     };
 
-    if (option.short != null) {
-      spec['short'] = option.short;
+    if (flag.abbreviation != null) {
+      spec['abbreviation'] = flag.abbreviation;
     }
 
-    if (option.allowedValues != null && option.allowedValues!.isNotEmpty) {
-      spec['allowedValues'] = option.allowedValues;
+    if (flag.allowedValues != null && flag.allowedValues!.isNotEmpty) {
+      spec['allowedValues'] = flag.allowedValues;
     }
 
-    if (option.defaultValue != null) {
-      spec['defaultValue'] = option.defaultValue;
+    if (flag.defaultValue != null) {
+      spec['defaultValue'] = flag.defaultValue;
     }
 
     return spec;
@@ -174,7 +171,7 @@ class CliSpecExporter extends SchemaExporter {
             (flag) => {
               'name': flag.name,
               'type': _mapFlagType(flag.type),
-              if (flag.abbreviation != null) 'short': flag.abbreviation,
+              if (flag.abbreviation != null) 'abbreviation': flag.abbreviation,
               if (flag.allowedValues != null) 'values': flag.allowedValues,
             },
           )

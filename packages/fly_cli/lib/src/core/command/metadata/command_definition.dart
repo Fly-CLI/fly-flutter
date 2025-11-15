@@ -20,13 +20,6 @@ class CommandDefinition {
           .toList(growable: false);
     }
 
-    final optionMaps = (json['options'] as List<dynamic>? ?? [])
-        .map((e) => OptionDefinition.fromJson(e as Map<String, dynamic>))
-        .toList();
-    final globalOptionMaps = (json['global_options'] as List<dynamic>? ?? [])
-        .map((e) => OptionDefinition.fromJson(e as Map<String, dynamic>))
-        .toList();
-
     return CommandDefinition(
       name: json['name'] as String,
       description: json['description'] as String,
@@ -34,8 +27,10 @@ class CommandDefinition {
         json['arguments'] as List<dynamic>?,
         ArgumentDefinition.fromJson,
       ),
-      options:
-          optionMaps.map(_cliFlagFromOptionDefinition).toList(growable: false),
+      options: _readList(
+        json['options'] as List<dynamic>?,
+        CliFlag.fromJson,
+      ),
       subcommands: _readList(
         json['subcommands'] as List<dynamic>?,
         SubcommandDefinition.fromJson,
@@ -44,10 +39,10 @@ class CommandDefinition {
         json['examples'] as List<dynamic>?,
         CommandExample.fromJson,
       ),
-      globalOptions: globalOptionMaps
-          .map(_cliFlagFromOptionDefinition)
-          .map((flag) => _MetadataCliFlag(flag, isGlobal: true))
-          .toList(growable: false),
+      globalOptions: _readList(
+        json['global_options'] as List<dynamic>?,
+        CliFlag.fromJson,
+      ),
       isHidden: json['is_hidden'] as bool? ?? false,
     );
   }
@@ -199,90 +194,6 @@ class ArgumentDefinition {
   String toString() => 'ArgumentDefinition(name: $name, required: $required)';
 }
 
-/// Option/flag metadata
-@JsonSerializable(explicitToJson: true, includeIfNull: false)
-class OptionDefinition {
-  /// Create OptionDefinition from JSON
-  factory OptionDefinition.fromJson(Map<String, dynamic> json) =>
-      _$OptionDefinitionFromJson(json);
-
-  const OptionDefinition({
-    required this.name,
-    required this.description,
-    this.short,
-    this.type = OptionType.flag,
-    this.defaultValue,
-    this.allowedValues,
-    this.isGlobal = false,
-    this.isRequired = false,
-  });
-
-  /// Option name (without -- prefix)
-  final String name;
-
-  /// Human-readable description
-  final String description;
-
-  /// Short flag (e.g., 'v' for --verbose)
-  final String? short;
-
-  /// Option type (flag, string, multiple, etc.)
-  final OptionType type;
-
-  /// Default value
-  @JsonKey(name: 'default_value')
-  final dynamic defaultValue;
-
-  /// Allowed values (e.g., ['human', 'json'])
-  @JsonKey(name: 'allowed_values')
-  final List<String>? allowedValues;
-
-  /// Whether this is a global option
-  @JsonKey(name: 'is_global')
-  final bool isGlobal;
-
-  /// Whether the option is required
-  @JsonKey(name: 'is_required')
-  final bool isRequired;
-
-  /// Convert to JSON
-  Map<String, dynamic> toJson() => _$OptionDefinitionToJson(this);
-
-  /// Get display name (--name or -short)
-  String getDisplayName() => short != null ? '-$short/--$name' : '--$name';
-
-  /// Validate metadata
-  bool isValid() {
-    if (name.isEmpty) return false;
-    if (description.isEmpty) return false;
-
-    // Validate type constraints
-    if (type == OptionType.flag &&
-        defaultValue != null &&
-        defaultValue is bool == false) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @override
-  String toString() => 'OptionDefinition(name: $name, type: ${type.name})';
-}
-
-/// Option type enumeration
-@JsonEnum()
-enum OptionType {
-  /// Boolean flag (--flag)
-  flag,
-
-  /// Single value (--option value)
-  value,
-
-  /// Multiple values (--option val1 --option val2)
-  multiple,
-}
-
 /// Subcommand metadata
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class SubcommandDefinition {
@@ -343,54 +254,4 @@ class CommandExample {
 
   @override
   String toString() => 'CommandExample(command: $command)';
-}
-
-/// Helper to convert a [CliFlag] into a serializable metadata representation.
-CliFlag _cliFlagFromOptionDefinition(OptionDefinition option) {
-  final flagType = switch (option.type) {
-    OptionType.flag => FlagType.boolean,
-    OptionType.value => FlagType.singleValue,
-    OptionType.multiple => FlagType.multiValue,
-  };
-
-  return _SerializableCliFlag(
-    name: option.name,
-    abbreviation: option.short,
-    description: option.description,
-    isGlobal: option.isGlobal,
-    type: flagType,
-    allowedValues: option.allowedValues,
-    defaultValue: option.defaultValue,
-  );
-}
-
-class _SerializableCliFlag extends CliFlag {
-  _SerializableCliFlag({
-    required super.name,
-    super.abbreviation,
-    required super.description,
-    required super.isGlobal,
-    super.category = CliFlagCategory.execution,
-    required super.type,
-    bool isNegatable = false,
-    super.allowedValues,
-    super.defaultValue,
-  }) : super(isNegatable: isNegatable);
-}
-
-class _MetadataCliFlag extends CliFlag {
-  _MetadataCliFlag(
-    CliFlag source, {
-    bool? isGlobal,
-  }) : super(
-          name: source.name,
-          abbreviation: source.abbreviation,
-          description: source.description,
-          isGlobal: isGlobal ?? source.isGlobal,
-          category: source.category,
-          type: source.type,
-          isNegatable: source.isNegatable,
-          allowedValues: source.allowedValues,
-          defaultValue: source.defaultValue,
-        );
 }

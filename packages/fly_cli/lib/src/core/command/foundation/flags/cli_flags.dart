@@ -78,13 +78,15 @@ abstract class CliFlag {
     final map = <String, dynamic>{
       'name': name,
       'description': description,
+      'category': category.name,
       'type': _flagTypeToJsonType(type),
       'is_global': isGlobalOverride ?? isGlobal,
+      'is_negatable': isNegatable,
       'is_required': false,
     };
 
     if (abbreviation != null) {
-      map['short'] = abbreviation;
+      map['abbreviation'] = abbreviation;
     }
 
     if (defaultValue != null) {
@@ -97,6 +99,26 @@ abstract class CliFlag {
 
     return map;
   }
+
+  /// Deserialize a [CliFlag] from serialized metadata.
+  factory CliFlag.fromJson(Map<String, dynamic> json) {
+    List<String>? _readStrings(dynamic source) {
+      if (source == null) return null;
+      return (source as List<dynamic>).map((e) => e.toString()).toList();
+    }
+
+    return _JsonCliFlag(
+      name: json['name'] as String,
+      abbreviation: (json['abbreviation']) as String?,
+      description: json['description'] as String? ?? '',
+      isGlobal: json['is_global'] as bool? ?? false,
+      category: _categoryFromJson(json['category'] as String?),
+      type: _flagTypeFromJson(json['type'] as String?),
+      isNegatable: json['is_negatable'] as bool? ?? false,
+      allowedValues: _readStrings(json['allowed_values']),
+      defaultValue: json['default_value'],
+    );
+  }
 }
 
 String _flagTypeToJsonType(FlagType type) => switch (type) {
@@ -104,3 +126,33 @@ String _flagTypeToJsonType(FlagType type) => switch (type) {
       FlagType.singleValue => 'value',
       FlagType.multiValue => 'multiple',
     };
+
+FlagType _flagTypeFromJson(String? raw) {
+  return switch (raw) {
+    'value' || 'singleValue' || 'single' => FlagType.singleValue,
+    'multiple' || 'multiValue' || 'multi' => FlagType.multiValue,
+    _ => FlagType.boolean,
+  };
+}
+
+CliFlagCategory _categoryFromJson(String? raw) {
+  if (raw == null) return CliFlagCategory.execution;
+  return CliFlagCategory.values.firstWhere(
+    (category) => category.name == raw,
+    orElse: () => CliFlagCategory.execution,
+  );
+}
+
+class _JsonCliFlag extends CliFlag {
+  const _JsonCliFlag({
+    required super.name,
+    super.abbreviation,
+    required super.description,
+    required super.isGlobal,
+    required super.category,
+    required super.type,
+    super.isNegatable,
+    super.allowedValues,
+    super.defaultValue,
+  });
+}

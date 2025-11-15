@@ -31,8 +31,7 @@ class JsonSchemaExporter extends SchemaExporter {
 
     // Add global options as a reusable definition
     if (globalOptions.isNotEmpty) {
-      schema['definitions']['GlobalOptions'] =
-          _buildOptionsSchema(globalOptions, isGlobal: true);
+      schema['definitions']['GlobalOptions'] = _buildOptionsSchema(globalOptions);
     }
 
     // Add each command as a property
@@ -135,50 +134,44 @@ class JsonSchemaExporter extends SchemaExporter {
   }
 
   /// Build JSON Schema for options
-  Map<String, dynamic> _buildOptionsSchema(
-    List<CliFlag> options, {
-    bool isGlobal = false,
-  }) {
+  Map<String, dynamic> _buildOptionsSchema(List<CliFlag> options) {
     final schema = <String, dynamic>{
       'properties': <String, dynamic>{},
     };
 
     for (final flag in options) {
-      final option = OptionDefinition.fromJson(
-        flag.toJson(isGlobalOverride: isGlobal),
-      );
       final optionSchema = <String, dynamic>{
-        'type': _getJsonSchemaType(option.type),
-        'description': option.description,
+        'type': _getJsonSchemaType(flag.type),
+        'description': flag.description,
       };
 
-      if (option.allowedValues != null && option.allowedValues!.isNotEmpty) {
-        optionSchema['enum'] = option.allowedValues;
+      if (flag.allowedValues != null && flag.allowedValues!.isNotEmpty) {
+        optionSchema['enum'] = flag.allowedValues;
       }
 
-      if (option.defaultValue != null) {
-        optionSchema['default'] = option.defaultValue;
+      if (flag.defaultValue != null) {
+        optionSchema['default'] = flag.defaultValue;
       }
 
       // Add short option as alternative
-      if (option.short != null) {
-        optionSchema['aliases'] = ['-${option.short}'];
+      if (flag.abbreviation != null) {
+        optionSchema['aliases'] = ['-${flag.abbreviation}'];
       }
 
-      schema['properties']['--${option.name}'] = optionSchema;
+      schema['properties']['--${flag.name}'] = optionSchema;
     }
 
     return schema;
   }
 
-  /// Convert OptionType to JSON Schema type
-  String _getJsonSchemaType(OptionType type) {
+  /// Convert FlagType to JSON Schema type
+  String _getJsonSchemaType(FlagType type) {
     switch (type) {
-      case OptionType.flag:
+      case FlagType.boolean:
         return 'boolean';
-      case OptionType.value:
+      case FlagType.singleValue:
         return 'string';
-      case OptionType.multiple:
+      case FlagType.multiValue:
         return 'array';
     }
   }
