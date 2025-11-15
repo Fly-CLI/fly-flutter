@@ -219,8 +219,8 @@ extension FlyCommandTypeExtension on FlyCommandType {
         return ContextCommand.create(context);
       case FlyCommandType.completion:
         return CompletionCommand.create(context);
-      case FlyCommandType.screen:
-        return GenerateScreenCommand.create(context);
+      case FlyCommandType.feature:
+        return GenerateFeatureCommand.create(context);
       case FlyCommandType.service:
         return GenerateServiceCommand.create(context);
     }

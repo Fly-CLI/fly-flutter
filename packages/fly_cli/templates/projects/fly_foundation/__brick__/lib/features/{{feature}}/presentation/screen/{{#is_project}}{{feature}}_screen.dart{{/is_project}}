@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../core/foundation/screen/base_screen.dart';
-import '../view_models/{{feature}}_view_model.dart';
+import '../../../../../core/foundation/screen/base_screen.dart';
+import '{{feature}}_view_model.dart';
 
 class {{feature.pascalCase()}}Screen extends BaseScreen<{{feature.pascalCase()}}ViewModel, {{feature.pascalCase()}}ViewModelState> {
   const {{feature.pascalCase()}}Screen({super.key});

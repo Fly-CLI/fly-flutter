@@ -2,24 +2,24 @@ import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/core/definitions/categories.dart';
-import 'package:fly_cli/src/features/generate/screen/generate_screen_command.dart';
+import 'package:fly_cli/src/features/generate/feature/generate_feature_command.dart';
 
-/// Strategy for screen command
-class ScreenCommandStrategy extends FlyCommandStrategy {
+/// Strategy for feature command
+class FeatureCommandStrategy extends FlyCommandStrategy {
   @override
-  String get name => 'screen';
+  String get name => 'feature';
 
   @override
   String get description =>
-      'Generate a new screen component to the current project';
+      'Generate a new feature (screen) component for the current project';
 
   @override
   List<String> get aliases => [
-        'generate-screen',
-        'add-screen',
-        'new-screen',
-        'make-screen',
-        'generateScreen',
+        'generate-feature',
+        'add-feature',
+        'new-feature',
+        'make-feature',
+        'generateFeature',
       ];
 
   @override
@@ -33,6 +33,6 @@ class ScreenCommandStrategy extends FlyCommandStrategy {
 
   @override
   Command<int> createInstance(CommandContext context) {
-    return GenerateScreenCommand.create(context);
+    return GenerateFeatureCommand.create(context);
   }
 }

@@ -24,6 +24,25 @@ FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
   --output-dir=/tmp/fly/fly_foundation_default
 ```
 
+### 1a. Verify Generated Structure
+
+From `/tmp/fly/fly_foundation_default` confirm:
+
+- Root files: `.gitignore`, `analysis_options.yaml`, `build.yaml` (only when `code_generation=true`), `l10n.yaml`, `main.dart`, `pubspec.yaml`, `README.md`.
+- Hidden assets: `.ai/project_context.md` exists only when `ai_integration=true`; delete when the flag is false (see Scenario 4).
+- Assets + localization: `assets/.gitkeep`, `lib/l10n/app_en.arb`.
+- Core layer: `lib/core/foundation/screen/{base_screen.dart,base_view_model.dart}`.
+- Feature scaffolding (per feature name):
+  - `lib/features/<feature>/presentation/models/`
+  - `lib/features/<feature>/presentation/screen/{<feature>_screen.dart,<feature>_view_model.dart}`
+  - `lib/features/<feature>/presentation/widgets/`
+- Shared layers:
+  - `lib/shared/navigation/{app_navigator.dart,app_router.dart,feature_screen_type.dart}`
+  - `lib/shared/themes/app_theme.dart`
+- Testing: `test/<feature>_screen_test.dart` present only when `with_tests=true`.
+
+Spot check contents (imports, class names, Riverpod providers) to ensure they match the current brick files under `__brick__`.
+
 ## 2. Multi-Feature Project via Fly CLI
 
 ```bash
@@ -37,7 +56,19 @@ FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
   --output-dir=/tmp/fly/fly_foundation_features
 ```
 
-## 2a. Mason Scenario: Multi-Feature Project (Alternative)
+### 2a. Structure Expectations
+
+Confirm each feature folder (`home`, `profile`, `settings`) contains:
+
+- `presentation/models/` (empty folder retained)
+- `presentation/screen/{feature}_screen.dart`
+- `presentation/screen/{feature}_view_model.dart`
+- `presentation/widgets/`
+- `test/{feature}_screen_test.dart` for every feature when `with_tests=true`.
+
+Validate shared layers (`lib/core`, `lib/shared`, `.ai/`, `assets/.gitkeep`) remain singletons reused by all features.
+
+## 2b. Mason Scenario: Multi-Feature Project (Alternative)
 
 ```bash
 cat <<'JSON' > /tmp/fly/mason_fly_features.json
@@ -85,8 +116,10 @@ script -q /dev/null mason make fly_foundation \
   --config-path /tmp/fly/mason_fly_features.json
 ```
 
+After generation confirm `build.yaml` is absent and no `targets` section is emitted. Run `flutter analyze` to ensure the missing file does not break linting.
+
 ## 3. Mason Scenario: Code Generation Disabled
-``
+
 ```bash
 cat <<'JSON' > /tmp/fly/mason_fly_nocodegen.json
 {
@@ -132,6 +165,8 @@ script -q /dev/null mason make fly_foundation \
   --on-conflict overwrite \
   --config-path /tmp/fly/mason_fly_nocodegen.json
 ```
+
+Post-check: `build.yaml` should NOT be generated, while other gated files (analysis options, l10n, `.gitignore`, `.ai/project_context.md`) should remain.
 
 ## 4. Mason Scenario: AI Integration Disabled
 
@@ -181,6 +216,8 @@ script -q /dev/null mason make fly_foundation \
   --config-path /tmp/fly/mason_fly_noai.json
 ```
 
+Validate `.ai/` directory and `fly_mcp` dependency are omitted from the project when `ai_integration=false`.
+
 ## 5. Mason Scenario: Tests Disabled
 
 ```bash
@@ -229,6 +266,8 @@ script -q /dev/null mason make fly_foundation \
   --config-path /tmp/fly/mason_fly_notests.json
 ```
 
+Ensure `test/<feature>_screen_test.dart` is not emitted and no empty `test/` directory remains when `with_tests=false`.
+
 ## 6. Mason Scenario: Desktop Platforms + Docs Disabled
 
 ```bash
@@ -276,6 +315,8 @@ script -q /dev/null mason make fly_foundation \
   --on-conflict overwrite \
   --config-path /tmp/fly/mason_fly_docsoff.json
 ```
+
+Verify documentation artifacts (e.g., README content) remain but no extra docs directory is generated, and desktop platforms are included in the `platforms` list within `README.md` and `pubspec.yaml`.
 
 ## 7. Post-Generation Verification
 

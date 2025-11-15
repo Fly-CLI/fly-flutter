@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
-import 'package:fly_cli/src/features/generate/screen/generate_screen_command.dart';
+import 'package:fly_cli/src/features/generate/feature/generate_feature_command.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -11,8 +11,8 @@ import '../../helpers/mock_logger.dart';
 import '../../helpers/test_fixtures.dart';
 
 void main() {
-  group('GenerateScreenCommand', () {
-    late GenerateScreenCommand command;
+  group('GenerateFeatureCommand', () {
+    late GenerateFeatureCommand command;
     late MockLogger mockLogger;
     late Directory tempDir;
     late Directory projectDir;
@@ -22,7 +22,7 @@ void main() {
       final mockContext = CommandTestHelper.createMockCommandContext(
         logger: mockLogger,
       );
-      command = GenerateScreenCommand(mockContext);
+      command = GenerateFeatureCommand(mockContext);
       tempDir = CommandTestHelper.createTempDir();
 
       // Create a mock Flutter project
@@ -41,12 +41,16 @@ void main() {
 
     group('Basic Properties', () {
       test('should have correct name', () {
-        expect(command.name, equals('screen'));
+        expect(command.name, equals('feature'));
       });
 
       test('should have correct description', () {
-        expect(command.description,
-            equals('Generate a new screen component to the current project'));
+        expect(
+          command.description,
+          equals(
+            'Generate a new feature (screen) component for the current project',
+          ),
+        );
       });
 
       test('should have required arguments', () {

@@ -11,20 +11,20 @@ import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
-/// GenerateScreenCommand using new architecture
-class GenerateScreenCommand extends FlyCommand {
-  GenerateScreenCommand(CommandContext context) : super(context);
+/// GenerateFeatureCommand using new architecture
+class GenerateFeatureCommand extends FlyCommand {
+  GenerateFeatureCommand(CommandContext context) : super(context);
 
   /// Factory constructor for enum-based command creation
-  factory GenerateScreenCommand.create(CommandContext context) =>
-      GenerateScreenCommand(context);
+  factory GenerateFeatureCommand.create(CommandContext context) =>
+      GenerateFeatureCommand(context);
 
   @override
-  String get name => 'screen';
+  String get name => 'feature';
 
   @override
   String get description =>
-      'Generate a new screen component to the current project';
+      'Generate a new feature (screen) component for the current project';
 
   // @override
   // CommandDefinition? get metadata => null;
@@ -70,7 +70,7 @@ class GenerateScreenCommand extends FlyCommand {
     try {
       final prompter = context.interactivePrompt;
 
-      logger.info('🎬 Generating a new screen');
+      logger.info('🎬 Generating a new feature component');
       logger.info('');
 
       // 1. Screen name
@@ -121,7 +121,7 @@ class GenerateScreenCommand extends FlyCommand {
 
       // 7. Confirmation
       logger.info('');
-      logger.info('Screen Configuration:');
+      logger.info('Feature Generation Configuration:');
       logger.info('  Name: $screenName');
       logger.info('  Feature: $feature');
       logger.info('  Type: $screenType');
@@ -133,12 +133,12 @@ class GenerateScreenCommand extends FlyCommand {
       logger.info('  With Navigation: $withNavigation');
 
       final confirmed = await prompter.promptConfirm(
-        prompt: '\nCreate screen with this configuration?',
+        prompt: '\nCreate feature component with this configuration?',
       );
 
       if (!confirmed) {
         return CommandResult.error(
-          message: 'Screen creation cancelled',
+          message: 'Feature component creation cancelled',
           suggestion: 'Run the command again to start over',
         );
       }
@@ -157,7 +157,7 @@ class GenerateScreenCommand extends FlyCommand {
           suggestion: 'Specify a valid --output-dir or run from a project root',
           errorCode: ErrorCode.fileSystemError,
           context: ErrorContext.forCommand(
-            'generate screen',
+            'generate feature',
             arguments: argResults?.arguments,
           ),
         );
@@ -165,8 +165,8 @@ class GenerateScreenCommand extends FlyCommand {
 
       final targetDir = resolvedOutputDir.path!.absolute;
 
-      // Generate screen using Mason brick
-      return await _generateScreenWithMason(
+      // Generate feature using Mason brick
+      return await _generateFeatureWithMason(
         screenName: screenName,
         feature: feature,
         screenType: screenType,
@@ -224,14 +224,14 @@ class GenerateScreenCommand extends FlyCommand {
         suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
         errorCode: ErrorCode.fileSystemError,
         context: ErrorContext.forCommand(
-          'generate screen',
+          'generate feature',
           arguments: argResults?.arguments,
         ),
       );
     }
     final targetProjectDir = outputDirResult.path!.absolute;
 
-    return _generateScreenWithMason(
+    return _generateFeatureWithMason(
       screenName: screenName,
       feature: feature,
       screenType: screenType,
@@ -243,8 +243,8 @@ class GenerateScreenCommand extends FlyCommand {
     );
   }
 
-  /// Generate screen using Mason brick
-  Future<CommandResult> _generateScreenWithMason({
+  /// Generate feature component using Mason brick
+  Future<CommandResult> _generateFeatureWithMason({
     required String screenName,
     required String feature,
     required String screenType,
@@ -257,7 +257,7 @@ class GenerateScreenCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Generating screen: $screenName');
+      logger.info('Generating feature component: $screenName');
       logger.info('Feature: $feature');
       logger.info('Type: $screenType');
       logger.info('With viewmodel: $withViewModel');
@@ -286,7 +286,7 @@ class GenerateScreenCommand extends FlyCommand {
         'with_navigation': withNavigation,
       };
 
-      // Generate screen using TemplateManager
+      // Generate feature component using TemplateManager
       final result = await templateManager.generateComponent(
         componentName: screenName,
         componentType: BrickType.screen,
@@ -298,8 +298,8 @@ class GenerateScreenCommand extends FlyCommand {
 
       if (result is TemplateGenerationFailure) {
         return CommandResult.error(
-          message: 'Failed to generate screen: ${result.error}',
-          suggestion: 'Check screen brick availability and try again',
+          message: 'Failed to generate feature component: ${result.error}',
+          suggestion: 'Check feature brick availability and try again',
         );
       }
 
@@ -314,8 +314,8 @@ class GenerateScreenCommand extends FlyCommand {
       var filesGenerated = result.filesGenerated;
 
       return CommandResult.success(
-        command: 'generate screen',
-        message: 'Screen generated successfully',
+        command: 'generate feature',
+        message: 'Feature component generated successfully',
         data: {
           'screen_name': screenName,
           'feature': feature,
@@ -336,7 +336,7 @@ class GenerateScreenCommand extends FlyCommand {
       );
     } catch (e) {
       return CommandResult.error(
-        message: 'Failed to generate screen: $e',
+        message: 'Failed to generate feature component: $e',
         suggestion: 'Check your project structure and try again',
       );
     }
@@ -345,21 +345,21 @@ class GenerateScreenCommand extends FlyCommand {
   // Lifecycle hooks implementation
   @override
   Future<void> onBeforeExecute(CommandContext context) async {
-    logger.info('🔧 Preparing to generate screen...');
+    logger.info('🔧 Preparing to generate feature component...');
   }
 
   @override
   Future<void> onAfterExecute(
       CommandContext context, CommandResult result) async {
     if (result.success) {
-      logger.info('🎉 Screen generated successfully!');
+      logger.info('🎉 Feature component generated successfully!');
     }
   }
 
   @override
   Future<void> onError(
       CommandContext context, Object error, StackTrace stackTrace) async {
-    logger.err('💥 Screen generation failed: $error');
+    logger.err('💥 Feature generation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');
     }

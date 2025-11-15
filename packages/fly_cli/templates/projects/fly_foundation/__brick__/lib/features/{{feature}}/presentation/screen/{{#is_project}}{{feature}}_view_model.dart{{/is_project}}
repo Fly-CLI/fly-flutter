@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
 
-import '../../../core/foundation/screen/base_view_model.dart';
+import '../../../../../core/foundation/screen/base_view_model.dart';
 
 class {{feature.pascalCase()}}ViewModelState implements FlyViewModelState<{{feature.pascalCase()}}ViewModelState> {
   const {{feature.pascalCase()}}ViewModelState({

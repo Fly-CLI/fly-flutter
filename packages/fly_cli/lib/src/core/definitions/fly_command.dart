@@ -3,12 +3,12 @@ import 'package:fly_cli/src/core/command/foundation/application/fly_command_regi
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/core/definitions/categories.dart';
-import 'package:fly_cli/src/features/generate/project/project_command_strategy.dart';
-import 'package:fly_cli/src/features/generate/screen/screen_command_strategy.dart';
-import 'package:fly_cli/src/features/generate/service/service_command_strategy.dart';
 import 'package:fly_cli/src/features/completion/completion_command_strategy.dart';
 import 'package:fly_cli/src/features/context/context_command_strategy.dart';
 import 'package:fly_cli/src/features/doctor/doctor_command_strategy.dart';
+import 'package:fly_cli/src/features/generate/feature/feature_command_strategy.dart';
+import 'package:fly_cli/src/features/generate/project/project_command_strategy.dart';
+import 'package:fly_cli/src/features/generate/service/service_command_strategy.dart';
 import 'package:fly_cli/src/features/schema/schema_command_strategy.dart';
 import 'package:fly_cli/src/features/version/version_command_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_doctor_command_strategy.dart';
@@ -24,7 +24,7 @@ import 'package:fly_cli/src/integrations/mcp/mcp_serve_command_strategy.dart';
 enum FlyCommand {
   // Generation commands
   generateProject,
-  generateScreen,
+  generateFeature,
   generateService,
 
   // Information commands
@@ -61,7 +61,7 @@ extension FlyCommandExtension on FlyCommand {
         FlyCommand.version => VersionCommandStrategy.new,
         FlyCommand.context => ContextCommandStrategy.new,
         FlyCommand.completion => CompletionCommandStrategy.new,
-        FlyCommand.generateScreen => ScreenCommandStrategy.new,
+        FlyCommand.generateFeature => FeatureCommandStrategy.new,
         FlyCommand.generateService => ServiceCommandStrategy.new,
         FlyCommand.mcpServe => McpServeCommandStrategy.new,
         FlyCommand.mcpDoctor => McpDoctorCommandStrategy.new,

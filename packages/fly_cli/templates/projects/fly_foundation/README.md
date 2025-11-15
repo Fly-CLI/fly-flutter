@@ -5,7 +5,7 @@ experience. A single template generates full projects and standalone components 
 providers) with MVVM architecture, Riverpod 3 state management, AI-ready documentation, and
 WCAG-compliant UX baked in.
 
-- **Generation modes:** `project`, `screen`, `service`, `provider`
+- **Generation modes:** `project`, `feature`, `service`, `provider`
 - **Target compliance:** ≥95 % Flutter/Dart code-generation, ≥90 % documentation, ≥85 %
   accessibility
 - **Reference implementation:** `/examples/foundation_project`
@@ -75,7 +75,7 @@ flutter doctor
 | Mode       | CLI usage example                                                                | Generates                                                                                             |
 |------------|----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | `project`  | `fly create my_app --template=fly_foundation --generation-mode=project`          | Full Flutter app with MVVM base classes, navigation, localization, theming, tests, build/config files |
-| `screen`   | `fly generate screen dashboard --feature=home --template=fly_foundation`         | `BaseScreen` subclass, optional ViewModel + provider, accessibility wrappers, optional widget tests   |
+| `feature`  | `fly generate feature dashboard --feature=home --template=fly_foundation`        | `BaseScreen` subclass, optional ViewModel + provider, accessibility wrappers, optional widget tests   |
 | `service`  | `fly generate service auth --feature=auth --template=fly_foundation`             | Service class returning `AppResult<T>`, provider wiring, optional retry/caching, unit tests           |
 | `provider` | `fly generate provider session --provider-type=future --template=fly_foundation` | `@riverpod` provider boilerplate with optional explicit state class                                   |
 
@@ -90,21 +90,31 @@ directly into generated projects.
 
 ```
 {{project_name}}/
+├── .gitignore
+├── README.md
 ├── analysis_options.yaml
-├── build.yaml
 ├── l10n.yaml
+├── main.dart
 ├── pubspec.yaml
-├── lib/
-│   ├── main.dart
-│   ├── core/foundation/screen/{base_screen.dart, base_view_model.dart}
-│   ├── features/{feature}/presentation/{feature}_screen.dart
-│   ├── features/{feature}/view_models/{feature}_view_model.dart
-│   ├── shared/navigation/{app_router.dart, app_navigator.dart, feature_screen_type.dart}
-│   ├── shared/themes/app_theme.dart
-│   └── l10n/app_en.arb
+├── build.yaml (only when code_generation=true)
 ├── assets/
-├── test/{{feature}}_screen_test.dart
-└── .ai/, .mcp/, .cursor/ (optional AI/MCP scaffolding)
+│   └── .gitkeep
+├── lib/
+│   ├── core/
+│   │   └── foundation/screen/{base_screen.dart, base_view_model.dart}
+│   ├── features/
+│   │   └── {{feature}}/
+│   │       └── presentation/
+│   │           ├── models/
+│   │           ├── screen/{{feature}}_screen.dart
+│   │           ├── screen/{{feature}}_view_model.dart
+│   │           └── widgets/
+│   ├── l10n/app_en.arb
+│   └── shared/
+│       ├── navigation/{app_navigator.dart, app_router.dart, feature_screen_type.dart}
+│       └── themes/app_theme.dart
+├── test/{{feature}}_screen_test.dart (only when with_tests=true)
+└── .ai/project_context.md (only when ai_integration=true)
 ```
 
 ### Default Capabilities
@@ -127,7 +137,7 @@ directly into generated projects.
 
 ## Component Modes
 
-### Screen Mode
+### Feature Mode
 
 - Generates a `BaseScreen<ViewModel, State>` subclass with Semantics, refresh handling, and Riverpod
   provider wiring.
@@ -136,7 +146,7 @@ directly into generated projects.
 - Optional widget test verifying localization, navigation, and accessibility semantics.
 - Recommended workflow:
   ```bash
-  fly generate screen dashboard \
+  fly generate feature dashboard \
     --feature=home \
     --with-viewmodel=true \
     --with-tests=true
@@ -214,14 +224,16 @@ Select packages via the `fly_packages` variable to slim down dependencies when n
 
 ## Template Structure & Files
 
+- `.gitignore` filters Flutter build outputs, generated code, coverage, and IDE metadata.
 - `analysis_options.yaml` excludes generated files (`*.g.dart`, `*.freezed.dart`, `*.mocks.dart`)
   and enforces curated lints.
-- `build.yaml` preconfigures Riverpod/Drift/AutoMappr/JSON builders plus a sample incremental
-  runner.
-- `l10n.yaml` (conditionally generated) sets up Flutter localization with ARB inputs.
-- `.ai/`, `.mcp/`, `.cursor/` directories describe the project for AI coding assistants and
-  MCP-compatible workflows.
-- `assets/` ships starter localization/test assets (extend per project requirements).
+- `build.yaml` (controlled by `code_generation`) preconfigures Riverpod/Drift/AutoMappr/JSON
+  builders plus the incremental runner.
+- `l10n.yaml` sets up Flutter localization with ARB inputs, paired with `lib/l10n/app_en.arb`.
+- `.ai/project_context.md` is produced only when `ai_integration=true` to describe architecture for
+  AI assistants.
+- `assets/.gitkeep` keeps the assets directory tracked until real files exist.
+- `test/{{feature}}_screen_test.dart` is emitted when `with_tests=true` and matches the feature list.
 
 ---
 
@@ -244,7 +256,7 @@ Select packages via the `fly_packages` variable to slim down dependencies when n
 
 | Variable          | Type   | Default                        | Description / Validation                             |
 |-------------------|--------|--------------------------------|------------------------------------------------------|
-| `generation_mode` | enum   | `project`                      | `project`, `screen`, `service`, `provider`           |
+| `generation_mode` | enum   | `project`                      | `project`, `feature`, `service`, `provider`          |
 | `project_name`    | string | —                              | Snake_case package name; required for project mode   |
 | `organization`    | string | `com.example`                  | Reverse-DNS identifier; required for project mode    |
 | `platforms`       | list   | `[ios, android]`               | Choose from ios/android/web/macos/windows/linux      |
@@ -255,7 +267,7 @@ Select packages via the `fly_packages` variable to slim down dependencies when n
 | `min_dart_sdk`    | string | `3.0.0`                        | Lower bound in `pubspec.yaml`                        |
 | `fly_packages`    | list   | see table above                | Controls which Fly packages are added to the pubspec |
 | `code_generation` | bool   | `true`                         | Toggles `build.yaml` + generator dependencies        |
-| `ai_integration`  | bool   | `true`                         | Adds `.ai/` + `.cursor/` scaffolding                 |
+| `ai_integration`  | bool   | `true`                         | Adds `.ai/project_context.md` scaffolding            |
 | `with_docs`       | bool   | `true`                         | Includes README + documentation helpers              |
 
 ### Project-Only Flags
@@ -266,7 +278,7 @@ Select packages via the `fly_packages` variable to slim down dependencies when n
 | `with_tests` | bool | `true`          | Adds starter widget tests                      |
 | `platforms`  | list | `[ios,android]` | Configures platform folders in Flutter tooling |
 
-### Screen Mode
+### Feature Mode
 
 | Variable          | Type   | Default | Notes                                              |
 |-------------------|--------|---------|----------------------------------------------------|
@@ -315,16 +327,13 @@ Select packages via the `fly_packages` variable to slim down dependencies when n
 
 ## MCP & AI Integration
 
-When `ai_integration` or `with_mcp` are true, the template adds:
+When `ai_integration=true`, the template adds `.ai/project_context.md`, which summarizes the
+generated architecture for AI copilots (Cursor, MCP, etc.). Pair it with:
 
-- `.ai/project_context.md` summarizing architecture for AI copilots.
-- `.cursor/project_context.md` for Cursor’s AI context ingestion.
-- `.mcp/config.yaml` seeds `fly mcp serve` to expose CLI commands as MCP tools.
-- Recommended workflow:
-  ```bash
-  fly context export --format markdown
-  fly mcp serve --project .
-  ```
+```bash
+fly context export --format markdown
+fly mcp serve --project .
+```
 
 ---
 
@@ -336,8 +345,8 @@ When `ai_integration` or `with_mcp` are true, the template adds:
 2. **Production stack**\
    `fly create ops_app --template=fly_foundation --features=home,auth,settings --fly-packages=fly_core,fly_mvvm,fly_state,fly_navigation,fly_flow_guard,fly_logger,fly_events,fly_networking`
 
-3. **Screen component**\
-   `fly generate screen profile_overview --feature=profile --screen-type=detail`
+3. **Feature component**\
+   `fly generate feature profile_overview --feature=profile --screen-type=detail`
 
 4. **Service component**\
    `fly generate service payments --feature=billing --api-base-url=https://billing.example.com --with-retry-logic --with-caching`
