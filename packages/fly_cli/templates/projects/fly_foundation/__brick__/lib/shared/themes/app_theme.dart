@@ -1,3 +1,4 @@
+{{#is_project}}
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -53,3 +54,4 @@ class AppTheme {
     );
   }
 }
+{{/is_project}}

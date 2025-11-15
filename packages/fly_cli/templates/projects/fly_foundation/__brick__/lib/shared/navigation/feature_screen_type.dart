@@ -1,9 +1,13 @@
+{{#is_project}}
 enum FeatureScreen {
-  home(
-    path: '/home',
+{{#features}}
+  {{feature}}(
+    path: '/{{feature}}',
     isProtected: false,
-    semanticsLabel: 'Home screen',
-  );
+    semanticsLabel: '{{feature.pascalCase()}} screen',
+  ),
+{{/features}}
+  ;
 
   const FeatureScreen({
     required this.path,
@@ -15,3 +19,4 @@ enum FeatureScreen {
   final bool isProtected;
   final String semanticsLabel;
 }
+{{/is_project}}

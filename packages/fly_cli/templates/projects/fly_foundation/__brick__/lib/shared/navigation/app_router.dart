@@ -1,17 +1,22 @@
+{{#is_project}}
 import 'package:flutter/material.dart';
-import '../../features/home/presentation/home_screen.dart';
+{{#features}}
+import '../../features/{{feature}}/presentation/{{feature}}_screen.dart';
+{{/features}}
 import 'feature_screen_type.dart';
 
 class AppRouteConfig {
-  static const String initialRoute = '/home';
+  static const String initialRoute = '/{{features.0}}';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case '/home':
+    {{#features}}
+      case '/{{feature}}':
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const HomeScreen(),
+          builder: (_) => const {{feature.pascalCase()}}Screen(),
         );
+    {{/features}}
       default:
         return onUnknownRoute(settings);
     }
@@ -20,7 +25,8 @@ class AppRouteConfig {
   static Route<dynamic> onUnknownRoute(RouteSettings settings) {
     return MaterialPageRoute(
       settings: settings,
-      builder: (_) => const HomeScreen(),
+      builder: (_) => const {{features.0.pascalCase()}}Screen(),
     );
   }
 }
+{{/is_project}}

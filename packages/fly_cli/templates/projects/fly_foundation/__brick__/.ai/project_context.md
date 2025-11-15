@@ -1,3 +1,4 @@
+{{#is_project}}
 {{#ai_integration}}
 # Project Context
 
@@ -9,3 +10,4 @@
 
 This file is generated to help AI-assisted workflows (Cursor, MCP) understand the core architecture, dependencies, and coding patterns used throughout the Fly ecosystem.
 {{/ai_integration}}
+{{/is_project}}

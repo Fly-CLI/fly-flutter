@@ -1,3 +1,4 @@
+{{#is_project}}
 # fly_foundation Template
 
 Welcome to `fly_foundation`, the unified Fly CLI template that bootstraps a production-ready Flutter codebase with MVVM, navigation, accessibility, localization, and AI integrations out of the box.
@@ -74,3 +75,4 @@ dart run build_runner watch --delete-conflicting-outputs
 - Add analytics/services/providers as the unified template modes roll out
 
 Happy building! 🚀
+{{/is_project}}

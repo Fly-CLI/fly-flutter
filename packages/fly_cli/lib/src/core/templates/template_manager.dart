@@ -974,10 +974,15 @@ class TemplateVariables {
         'organization': organization,
         'platforms': platforms,
         'description': description,
-        'features': features,
+        'features': features.isEmpty ? ['home'] : features,
         'project_name_snake': projectName.toLowerCase().replaceAll(' ', '_'),
         'project_name_camel': _toCamelCase(projectName),
         'project_name_pascal': _toPascalCase(projectName),
+        // Helper boolean flags for Mason conditionals
+        'is_project': true,
+        'is_screen': false,
+        'is_service': false,
+        'is_provider': false,
       };
 
   String _toCamelCase(String input) {

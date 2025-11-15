@@ -1,3 +1,4 @@
+{{#is_project}}
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fly_mvvm/fly_mvvm.dart';
@@ -44,3 +45,4 @@ abstract class BaseScreen<V extends FlyViewModel<S>, S extends FlyViewModelState
     WidgetRef ref,
   );
 }
+{{/is_project}}

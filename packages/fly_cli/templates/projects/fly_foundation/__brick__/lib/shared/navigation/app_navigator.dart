@@ -1,3 +1,4 @@
+{{#is_project}}
 import 'package:flutter/material.dart';
 import 'package:fly_navigation/fly_navigation.dart';
 
@@ -22,7 +23,8 @@ class AppNavigator extends NavigationService<FeatureScreen> {
   FeatureScreen? resolveFeature(String route) {
     return FeatureScreen.values.firstWhere(
       (feature) => feature.path == route,
-      orElse: () => FeatureScreen.home,
+      orElse: () => FeatureScreen.{{features.0}},
     );
   }
 }
+{{/is_project}}

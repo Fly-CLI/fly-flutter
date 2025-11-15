@@ -1,3 +1,4 @@
+{{#is_project}}
 # Flutter
 .dart_tool/
 .packages
@@ -16,3 +17,4 @@ coverage/
 .idea/
 .vscode/
 .DS_Store
+{{/is_project}}

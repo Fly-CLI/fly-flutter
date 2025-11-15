@@ -1,3 +1,4 @@
+{{#is_project}}
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
@@ -14,3 +15,4 @@ linter:
     - prefer_const_constructors
     - sort_constructors_first
     - directives_ordering
+{{/is_project}}
