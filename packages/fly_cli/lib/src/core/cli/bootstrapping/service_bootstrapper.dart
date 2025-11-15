@@ -96,7 +96,8 @@ class ServiceBootstrapper {
         isDevelopment: config.isDevelopment,
       ))
       ..registerSingleton<TemplateManager>(TemplateManager(
-        templatesDirectory: config.templatesDirectory ?? '',
+        templatesDirectory: config.templatesDirectory ??
+            TemplateManager.findTemplatesDirectory(),
         logger: structuredLogger,
       ))
       ..registerSingleton<SystemChecker>(

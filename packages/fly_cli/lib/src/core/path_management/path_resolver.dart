@@ -365,7 +365,17 @@ class PathResolver {
 
   /// Resolve development templates path
   String _resolveDevTemplatesPath() {
+    final envTemplatesDir = Platform.environment['FLY_TEMPLATES_DIR'];
+    if (envTemplatesDir != null && envTemplatesDir.isNotEmpty) {
+      return path.normalize(envTemplatesDir);
+    }
+
     final currentDir = Directory.current.path;
+    final localTemplatesPath = path.join(currentDir, 'templates');
+    if (Directory(localTemplatesPath).existsSync()) {
+      return path.normalize(localTemplatesPath);
+    }
+
     final devTemplatesPath =
         path.join(currentDir, 'packages', 'fly_cli', 'templates');
     return path.normalize(devTemplatesPath);

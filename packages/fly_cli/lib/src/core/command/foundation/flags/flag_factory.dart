@@ -8,31 +8,49 @@ class FlagFactory {
   static void addFlagToParser(ArgParser parser, CliFlag flag) {
     switch (flag.type) {
       case FlagType.boolean:
-        parser.addFlag(
-          flag.name,
-          abbr: flag.abbreviation,
-          help: flag.description,
-          negatable: flag.isNegatable,
-          defaultsTo: flag.defaultValue as bool? ?? false,
-        );
+        _safeAdd(() {
+          parser.addFlag(
+            flag.name,
+            abbr: flag.abbreviation,
+            help: flag.description,
+            negatable: flag.isNegatable,
+            defaultsTo: flag.defaultValue as bool? ?? false,
+          );
+        });
 
       case FlagType.singleValue:
-        parser.addOption(
-          flag.name,
-          abbr: flag.abbreviation,
-          help: flag.description,
-          allowed: flag.allowedValues,
-          defaultsTo: flag.defaultValue as String?,
-        );
+        _safeAdd(() {
+          parser.addOption(
+            flag.name,
+            abbr: flag.abbreviation,
+            help: flag.description,
+            allowed: flag.allowedValues,
+            defaultsTo: flag.defaultValue as String?,
+          );
+        });
 
       case FlagType.multiValue:
-        parser.addMultiOption(
-          flag.name,
-          abbr: flag.abbreviation,
-          help: flag.description,
-          allowed: flag.allowedValues,
-          defaultsTo: flag.defaultValue as List<String>? ?? [],
-        );
+        _safeAdd(() {
+          parser.addMultiOption(
+            flag.name,
+            abbr: flag.abbreviation,
+            help: flag.description,
+            allowed: flag.allowedValues,
+            defaultsTo: flag.defaultValue as List<String>? ?? [],
+          );
+        });
+    }
+  }
+
+  static void _safeAdd(void Function() addOperation) {
+    try {
+      addOperation();
+    } on ArgumentError catch (e) {
+      final message = e.message?.toString() ?? '';
+      if (message.contains('Duplicate option or alias')) {
+        return;
+      }
+      rethrow;
     }
   }
 

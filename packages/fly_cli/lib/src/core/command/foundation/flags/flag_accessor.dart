@@ -10,7 +10,15 @@ class FlagAccessor {
   static T? getValue<T>(ArgResults? args, CliFlag flag) {
     if (args == null) return null;
 
-    if (!args.wasParsed(flag.name)) {
+    if (!_hasOption(args, flag.name)) {
+      return null;
+    }
+
+    try {
+      if (!args.wasParsed(flag.name)) {
+        return null;
+      }
+    } on ArgumentError {
       return null;
     }
 
@@ -29,7 +37,13 @@ class FlagAccessor {
   /// Returns true if the flag was explicitly provided in the command line
   static bool isSet(ArgResults? args, CliFlag flag) {
     if (args == null) return false;
-    return args.wasParsed(flag.name);
+    if (!_hasOption(args, flag.name)) return false;
+
+    try {
+      return args.wasParsed(flag.name);
+    } on ArgumentError {
+      return false;
+    }
   }
 
   /// Get a flag value with a default fallback
@@ -85,6 +99,15 @@ class FlagAccessor {
   /// Returns the list of values or empty list if not set
   static List<String> getStringList(ArgResults? args, CliFlag flag) {
     return getValue<List<String>>(args, flag) ?? [];
+  }
+
+  static bool _hasOption(ArgResults args, String flagName) {
+    try {
+      args[flagName];
+      return true;
+    } on ArgumentError {
+      return false;
+    }
   }
 }
 

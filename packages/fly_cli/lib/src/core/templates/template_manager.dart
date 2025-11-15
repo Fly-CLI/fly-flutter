@@ -45,7 +45,18 @@ class TemplateManager {
   static String findTemplatesDirectory() {
     // Try development path: packages/fly_cli/templates
     // This works when running from the monorepo
+    final envTemplatesDir = Platform.environment['FLY_TEMPLATES_DIR'];
+    if (envTemplatesDir != null && envTemplatesDir.isNotEmpty) {
+      return path.normalize(envTemplatesDir);
+    }
+
     final currentDir = Directory.current.path;
+
+    final localTemplatesPath = path.join(currentDir, 'templates');
+    if (Directory(localTemplatesPath).existsSync()) {
+      return path.normalize(localTemplatesPath);
+    }
+
     final devTemplatesPath =
         path.join(currentDir, 'packages', 'fly_cli', 'templates');
     final devTemplatesDir = Directory(devTemplatesPath);

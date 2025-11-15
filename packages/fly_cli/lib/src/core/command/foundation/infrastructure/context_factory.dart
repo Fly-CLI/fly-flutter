@@ -5,6 +5,7 @@ import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command/foundation/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
@@ -65,7 +66,7 @@ class ContextFactory implements IContextFactory {
   /// **Note**: This context should NOT be used for command execution.
   /// Use [createExecutionContext] instead for execution contexts.
   CommandContext createRegistrationContext() {
-    final emptyArgs = ArgParser().parse([]);
+    final emptyArgs = GlobalFlagsRegistry.createGlobalParser().parse([]);
     return _createContext(emptyArgs);
   }
 

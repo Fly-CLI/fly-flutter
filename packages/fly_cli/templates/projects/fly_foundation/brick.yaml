@@ -18,8 +18,6 @@ vars:
     type: string
     description: Name of the Flutter project
     prompt: What is your project name?
-    validators:
-      - must_be_project_name
 
   organization:
     type: string
@@ -61,17 +59,17 @@ vars:
     default: 3.0.0
 
   with_mcp:
-    type: bool
+    type: boolean
     description: Include MCP integration scaffolding
     default: true
 
   with_tests:
-    type: bool
+    type: boolean
     description: Generate starter tests
     default: true
 
   with_docs:
-    type: bool
+    type: boolean
     description: Generate documentation helpers
     default: true
 
@@ -81,12 +79,12 @@ vars:
     default: [ fly_core, fly_mvvm, fly_state, fly_navigation, fly_flow_guard, fly_logger ]
 
   code_generation:
-    type: bool
+    type: boolean
     description: Enable build_runner configuration
     default: true
 
   ai_integration:
-    type: bool
+    type: boolean
     description: Include AI context scaffolding
     default: true
 
@@ -112,17 +110,17 @@ vars:
       - settings
 
   with_viewmodel:
-    type: bool
+    type: boolean
     description: Include ViewModel when generating a screen
     default: true
 
   with_validation:
-    type: bool
+    type: boolean
     description: Include form validation helpers
     default: false
 
   with_navigation:
-    type: bool
+    type: boolean
     description: Include navigation integration for screens
     default: true
 
@@ -132,12 +130,12 @@ vars:
     default: https://api.example.com
 
   with_retry_logic:
-    type: bool
+    type: boolean
     description: Include retry logic in services
     default: true
 
   with_caching:
-    type: bool
+    type: boolean
     description: Include caching layer for services
     default: false
 
@@ -152,6 +150,6 @@ vars:
       - state
 
   with_state_class:
-    type: bool
+    type: boolean
     description: Generate explicit state class for provider templates
     default: false
