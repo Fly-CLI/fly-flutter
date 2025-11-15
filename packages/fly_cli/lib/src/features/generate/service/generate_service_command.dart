@@ -1,11 +1,9 @@
-import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
@@ -29,20 +27,16 @@ class GenerateServiceCommand extends FlyCommand {
       'Generate a new service component to the current project';
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const GenerateServiceFeatureFlag(),
-      const GenerateServiceTypeFlag(),
-      const GenerateServiceWithTestsFlag(),
-      const GenerateServiceWithMocksFlag(),
-      const InteractiveFlag(),
-      const GenerateServiceWithInterceptorsFlag(),
-      const GenerateServiceBaseUrlFlag(),
-      const OutputDirFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [
+        const GenerateServiceFeatureFlag(),
+        const GenerateServiceTypeFlag(),
+        const GenerateServiceWithTestsFlag(),
+        const GenerateServiceWithMocksFlag(),
+        const InteractiveFlag(),
+        const GenerateServiceWithInterceptorsFlag(),
+        const GenerateServiceBaseUrlFlag(),
+        const OutputDirFlag(),
+      ];
 
   @override
   List<CommandValidator> get validators => [

@@ -12,6 +12,7 @@ import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
@@ -51,6 +52,9 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   /// List of validators to run before execution
   List<CommandValidator> get validators => [];
 
+  /// Command-specific flags that should be added to both parser and metadata.
+  List<CliFlag> get flags => const [];
+
   /// Command metadata definition (optional)
   CommandDefinition? get metadata => null;
 
@@ -78,7 +82,11 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
 
   @override
   ArgParser get argParser {
-    return GlobalFlagsRegistry.createBaseCommandParser();
+    final parser = GlobalFlagsRegistry.createBaseCommandParser();
+    if (flags.isNotEmpty) {
+      FlagFactory.applyFlagsToParser(parser, flags);
+    }
+    return parser;
   }
 
   /// Execute the command logic - must be implemented by subclasses

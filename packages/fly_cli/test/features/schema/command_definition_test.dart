@@ -1,3 +1,5 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:test/test.dart';
 
@@ -25,13 +27,8 @@ void main() {
         description: 'Name of the project',
       );
 
-      const option = OptionDefinition(
-        name: 'template',
-        description: 'Project template',
-        short: 't',
-        type: OptionType.value,
-        allowedValues: ['fly_foundation'],
-      );
+      final option = GlobalFormatFlag();
+      const globalOption = GlobalDebugFlag();
 
       const subcommand = SubcommandDefinition(
         name: 'screen',
@@ -43,14 +40,14 @@ void main() {
         description: 'Create a fly_foundation project',
       );
 
-      const command = CommandDefinition(
+      final command = CommandDefinition(
         name: 'create',
         description: 'Create a new project',
         arguments: [argument],
         options: [option],
         subcommands: [subcommand],
         examples: [example],
-        globalOptions: [option],
+        globalOptions: [globalOption],
         isHidden: true,
       );
 
@@ -90,15 +87,9 @@ void main() {
         defaultValue: 'value1',
       );
 
-      const option = OptionDefinition(
-        name: 'option',
-        description: 'Option description',
-        short: 'o',
-        defaultValue: true,
-        isGlobal: true,
-      );
+      final option = GlobalFormatFlag();
 
-      const command = CommandDefinition(
+      final command = CommandDefinition(
         name: 'test',
         description: 'Test command',
         arguments: [argument],
@@ -123,11 +114,13 @@ void main() {
       expect(argJson['default_value'], equals('value1'));
 
       final optJson = json['options'][0];
-      expect(optJson['name'], equals('option'));
-      expect(optJson['description'], equals('Option description'));
-      expect(optJson['short'], equals('o'));
-      expect(optJson['type'], equals('flag'));
-      expect(optJson['default_value'], isTrue);
+      expect(optJson['name'], equals('format'));
+      expect(optJson['description'],
+          equals('Output format (human, json, or ai)'));
+      expect(optJson['short'], equals('f'));
+      expect(optJson['type'], equals('value'));
+      expect(optJson['default_value'], equals('human'));
+      expect(optJson['allowed_values'], equals(['human', 'json', 'ai']));
       expect(optJson['is_global'], isTrue);
       expect(optJson['is_required'], isFalse);
     });
@@ -261,137 +254,29 @@ void main() {
     });
   });
 
-  group('OptionDefinition', () {
-    test('creates with required fields', () {
-      const option = OptionDefinition(
-        name: 'verbose',
-        description: 'Enable verbose output',
-      );
+  group('CliFlagMetadataExtensions', () {
+    test('converts flag to OptionDefinition', () {
+      final flag = GlobalFormatFlag();
 
-      expect(option.name, equals('verbose'));
-      expect(option.description, equals('Enable verbose output'));
-      expect(option.short, isNull);
-      expect(option.type, equals(OptionType.flag));
-      expect(option.defaultValue, isNull);
-      expect(option.allowedValues, isNull);
-      expect(option.isGlobal, isFalse);
+      final option = flag.toOptionDefinition();
+
+      expect(option.name, equals('format'));
+      expect(option.description,
+          equals('Output format (human, json, or ai)'));
+      expect(option.short, equals('f'));
+      expect(option.type, equals(OptionType.value));
+      expect(option.allowedValues, equals(['human', 'json', 'ai']));
+      expect(option.defaultValue, equals('human'));
+      expect(option.isGlobal, isTrue);
       expect(option.isRequired, isFalse);
     });
 
-    test('creates with all fields', () {
-      const option = OptionDefinition(
-        name: 'output',
-        description: 'Output format',
-        short: 'o',
-        type: OptionType.value,
-        defaultValue: 'human',
-        allowedValues: ['human', 'json'],
-        isGlobal: true,
-        isRequired: true,
-      );
+    test('applies isGlobalOverride when provided', () {
+      const flag = CreateOrganizationFlag();
 
-      expect(option.name, equals('output'));
-      expect(option.description, equals('Output format'));
-      expect(option.short, equals('o'));
-      expect(option.type, equals(OptionType.value));
-      expect(option.defaultValue, equals('human'));
-      expect(option.allowedValues, equals(['human', 'json']));
+      final option = flag.toOptionDefinition(isGlobalOverride: true);
+
       expect(option.isGlobal, isTrue);
-      expect(option.isRequired, isTrue);
-    });
-
-    test('getDisplayName returns correct format', () {
-      const withShort = OptionDefinition(
-        name: 'verbose',
-        description: 'Verbose output',
-        short: 'v',
-      );
-
-      const withoutShort = OptionDefinition(
-        name: 'output',
-        description: 'Output format',
-      );
-
-      expect(withShort.getDisplayName(), equals('-v/--verbose'));
-      expect(withoutShort.getDisplayName(), equals('--output'));
-    });
-
-    test('toJson serializes correctly', () {
-      const option = OptionDefinition(
-        name: 'output',
-        description: 'Output format',
-        short: 'o',
-        type: OptionType.value,
-        defaultValue: 'human',
-        allowedValues: ['human', 'json'],
-        isGlobal: true,
-        isRequired: true,
-      );
-
-      final json = option.toJson();
-
-      expect(json['name'], equals('output'));
-      expect(json['description'], equals('Output format'));
-      expect(json['short'], equals('o'));
-      expect(json['type'], equals('value'));
-      expect(json['default_value'], equals('human'));
-      expect(json['allowed_values'], equals(['human', 'json']));
-      expect(json['is_global'], isTrue);
-      expect(json['is_required'], isTrue);
-    });
-
-    test('toJson omits null values', () {
-      const option = OptionDefinition(
-        name: 'verbose',
-        description: 'Verbose output',
-      );
-
-      final json = option.toJson();
-
-      expect(json.containsKey('short'), isFalse);
-      expect(json.containsKey('default_value'), isFalse);
-      expect(json.containsKey('allowed_values'), isFalse);
-    });
-
-    test('isValid returns true for valid option', () {
-      const option = OptionDefinition(
-        name: 'verbose',
-        description: 'Valid option',
-      );
-
-      expect(option.isValid(), isTrue);
-    });
-
-    test('isValid returns false for invalid option', () {
-      const invalidName = OptionDefinition(
-        name: '',
-        description: 'Invalid name',
-      );
-
-      const invalidDescription = OptionDefinition(
-        name: 'name',
-        description: '',
-      );
-
-      const invalidFlagDefault = OptionDefinition(
-        name: 'flag',
-        description: 'Flag option',
-        defaultValue: 'not-a-bool',
-      );
-
-      expect(invalidName.isValid(), isFalse);
-      expect(invalidDescription.isValid(), isFalse);
-      expect(invalidFlagDefault.isValid(), isFalse);
-    });
-
-    test('toString returns readable representation', () {
-      const option = OptionDefinition(
-        name: 'verbose',
-        description: 'Verbose output',
-      );
-
-      expect(option.toString(),
-          equals('OptionDefinition(name: verbose, type: flag)'));
     });
   });
 

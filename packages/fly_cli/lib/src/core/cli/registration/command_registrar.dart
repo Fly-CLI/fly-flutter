@@ -1,6 +1,6 @@
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_registry.dart';
 import 'package:fly_cli/src/core/command/metadata/command_wrappers.dart';
 import 'package:fly_cli/src/core/definitions/fly_command.dart';
@@ -23,10 +23,10 @@ class CommandRegistrar {
   /// using the command metadata registry.
   ///
   /// [commandRunner] - The command runner to register commands with
-  /// [globalOptionsParser] - The parser for global options
+  /// [globalFlags] - List of available global flags
   void registerCommands(
     CommandRunner<int> commandRunner,
-    ArgParser globalOptionsParser,
+    List<CliFlag> globalFlags,
   ) {
     // Create a registration context with empty args for command setup
     // This context is used only during registration, not for execution
@@ -36,7 +36,7 @@ class CommandRegistrar {
     final registrationData =
         CommandMetadataRegistry.instance.createAndInitialize(
       context: context,
-      globalOptionsParser: globalOptionsParser,
+      globalFlags: globalFlags,
     );
 
     // Register top-level commands

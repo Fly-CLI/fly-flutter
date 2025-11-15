@@ -1,5 +1,8 @@
-import 'package:args/args.dart' hide OptionType;
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/definitions/fly_command.dart';
@@ -60,20 +63,11 @@ void main() {
       registry = CommandMetadataRegistry.instance..clear();
 
       // Setup test registry with instances-based initialization
-      final globalParser = ArgParser()
-        ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
-        ..addOption(
-          'output',
-          abbr: 'o',
-          help: 'Output format',
-          allowed: ['human', 'json'],
-        );
-
       final instances = _createCommandInstances();
       registry.initializeFromInstances(
         commandInstances: instances.commandInstances,
         commandGroups: instances.commandGroups,
-        globalOptionsParser: globalParser,
+        globalFlags: GlobalFlagsRegistry.globalFlags,
       );
     });
 
@@ -146,12 +140,12 @@ void main() {
 
       test('generateOptionsCompletion returns option names', () {
         final options = [
-          const OptionDefinition(name: 'verbose', description: 'Verbose'),
-          const OptionDefinition(name: 'output', description: 'Output'),
+          const GlobalVerboseFlag(),
+          const GlobalPlanFlag(),
         ];
         expect(
           generator.generateOptionsCompletion(options),
-          equals('--verbose --output'),
+          equals('--verbose --plan'),
         );
       });
 
@@ -167,24 +161,17 @@ void main() {
       });
 
       test('generateOptionValuesCompletion returns allowed values', () {
-        const option = OptionDefinition(
-          name: 'template',
-          description: 'Template',
-          allowedValues: ['fly_foundation'],
-        );
+        final option = GlobalFormatFlag();
         expect(
           generator.generateOptionValuesCompletion(option),
-          equals('fly_foundation fly_foundation'),
+          equals('human json ai'),
         );
       });
 
       test(
         'generateOptionValuesCompletion returns empty for no allowed values',
         () {
-          const option = OptionDefinition(
-            name: 'verbose',
-            description: 'Verbose',
-          );
+          const option = GlobalDebugFlag();
           expect(generator.generateOptionValuesCompletion(option), equals(''));
         },
       );
@@ -399,15 +386,7 @@ void main() {
               name: 'test',
               description: 'Test command',
               options: [
-                OptionDefinition(
-                  name: 'option',
-                  description: 'Option with special values',
-                  allowedValues: [
-                    'value with spaces',
-                    'value-with-dashes',
-                    'value.with.dots',
-                  ],
-                ),
+                CompletionShellFlag(),
               ],
             ),
           )
@@ -416,7 +395,7 @@ void main() {
         const generator = BashCompletionGenerator();
         final script = generator.generate(specialRegistry);
 
-        expect(script, contains('--option'));
+        expect(script, contains('--shell'));
         expect(script, isNotEmpty);
       });
     });
@@ -426,14 +405,14 @@ void main() {
 /// Test implementation of CommandMetadataRegistry for testing
 class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   final Map<String, CommandDefinition> _commands = {};
-  final List<OptionDefinition> _globalOptions = [];
+  final List<CliFlag> _globalOptions = [];
   bool _initialized = false;
 
   void addCommand(String name, CommandDefinition command) {
     _commands[name] = command;
   }
 
-  void addGlobalOptions(List<OptionDefinition> options) {
+  void addGlobalOptions(List<CliFlag> options) {
     _globalOptions.addAll(options);
   }
 
@@ -447,7 +426,7 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   @override
   CommandRegistrationData createAndInitialize({
     required CommandContext context,
-    required ArgParser globalOptionsParser,
+    required List<CliFlag> globalFlags,
   }) {
     if (_initialized) {
       return CommandRegistrationData(
@@ -466,7 +445,7 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   void initializeFromInstances({
     required Map<FlyCommand, Command<int>> commandInstances,
     required Map<String, Command<int>> commandGroups,
-    required ArgParser globalOptionsParser,
+    required List<CliFlag> globalFlags,
   }) {
     if (_initialized) {
       return;
@@ -494,13 +473,14 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   }
 
   @override
-  List<OptionDefinition> getGlobalOptions() =>
+  List<CliFlag> getGlobalOptions() =>
       List.unmodifiable(_globalOptions);
 
   @override
   Map<String, dynamic> toJson() => {
         'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
-        'global_options': _globalOptions.map((o) => o.toJson()).toList(),
+        'global_options':
+            _globalOptions.map((o) => o.toOptionDefinition().toJson()).toList(),
       };
 
   @override
@@ -526,45 +506,6 @@ class _TestCommand extends Command<int> {
 
   @override
   ArgParser get argParser => ArgParser();
-
-  @override
-  Future<int> run() async => 0;
-}
-
-class _TestCommandWithOptions extends Command<int> {
-  _TestCommandWithOptions(this._name, this._description, this._options);
-
-  final String _name;
-  final String _description;
-  final List<OptionDefinition> _options;
-
-  @override
-  String get name => _name;
-
-  @override
-  String get description => _description;
-
-  @override
-  ArgParser get argParser {
-    final parser = ArgParser();
-    for (final option in _options) {
-      if (option.type == OptionType.flag) {
-        parser.addFlag(
-          option.name,
-          abbr: option.short,
-          help: option.description,
-        );
-      } else {
-        parser.addOption(
-          option.name,
-          abbr: option.short,
-          help: option.description,
-          allowed: option.allowedValues,
-        );
-      }
-    }
-    return parser;
-  }
 
   @override
   Future<int> run() async => 0;

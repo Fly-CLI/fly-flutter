@@ -1,6 +1,7 @@
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_definition.dart';
 import 'package:fly_cli/src/core/command/metadata/command_wrappers.dart';
 import 'package:fly_cli/src/core/command/metadata/metadata_extractor.dart';
@@ -34,7 +35,7 @@ class CommandMetadataRegistry {
 
   final Map<FlyCommand, Command<int>> _commandInstances = {};
   final Map<String, Command<int>> _commandGroups = {};
-  ArgParser? _globalOptionsParser;
+  List<CliFlag> _globalFlags = const [];
   final MetadataExtractor _extractor = const MetadataExtractor();
 
   /// Create all commands and initialize registry
@@ -44,13 +45,13 @@ class CommandMetadataRegistry {
   /// data for CommandRunner to register.
   ///
   /// [context] - CommandContext for creating command instances
-  /// [globalOptionsParser] - ArgParser containing global options
+  /// [globalFlags] - CLI flags available globally
   ///
   /// Returns [CommandRegistrationData] containing all commands and groups
   /// that need to be registered with CommandRunner.
   CommandRegistrationData createAndInitialize({
     required CommandContext context,
-    required ArgParser globalOptionsParser,
+    required List<CliFlag> globalFlags,
   }) {
     // Create all command instances from unified registry
     // This ensures we only process commands that have factories registered
@@ -65,7 +66,7 @@ class CommandMetadataRegistry {
     // Store internally for metadata access
     _commandInstances.addAll(commandInstances);
     _commandGroups.addAll(commandGroups);
-    _globalOptionsParser = globalOptionsParser;
+    _globalFlags = List.unmodifiable(globalFlags);
 
     // Return top-level commands for registration
     // Commands with subcommands should only be registered as groups, not as top-level commands
@@ -137,15 +138,15 @@ class CommandMetadataRegistry {
   ///
   /// [commandInstances] - Map of command types to their pre-created instances
   /// [commandGroups] - Map of group names to their pre-created group command instances
-  /// [globalOptionsParser] - ArgParser containing global options
+  /// [globalFlags] - CLI flags available globally
   void initializeFromInstances({
     required Map<FlyCommand, Command<int>> commandInstances,
     required Map<String, Command<int>> commandGroups,
-    required ArgParser globalOptionsParser,
+    required List<CliFlag> globalFlags,
   }) {
     _commandInstances.addAll(commandInstances);
     _commandGroups.addAll(commandGroups);
-    _globalOptionsParser = globalOptionsParser;
+    _globalFlags = List.unmodifiable(globalFlags);
   }
 
   /// Find command instance by name
@@ -175,11 +176,8 @@ class CommandMetadataRegistry {
   }
 
   /// Extract global options on-demand from parser
-  List<OptionDefinition> _extractGlobalOptions() {
-    if (_globalOptionsParser == null) {
-      return [];
-    }
-    return _extractor.extractGlobalOptions(_globalOptionsParser!);
+  List<CliFlag> _extractGlobalOptions() {
+    return _globalFlags;
   }
 
   /// Get metadata for a specific command
@@ -225,7 +223,7 @@ class CommandMetadataRegistry {
   }
 
   /// Get global options
-  List<OptionDefinition> getGlobalOptions() {
+  List<CliFlag> getGlobalOptions() {
     return List.unmodifiable(_extractGlobalOptions());
   }
 
@@ -272,7 +270,8 @@ class CommandMetadataRegistry {
     return {
       'commands':
           allCommands.map((key, value) => MapEntry(key, value.toJson())),
-      'global_options': globalOptions.map((o) => o.toJson()).toList(),
+      'global_options':
+          globalOptions.map((o) => o.toOptionDefinition().toJson()).toList(),
     };
   }
 
@@ -280,7 +279,6 @@ class CommandMetadataRegistry {
   void clear() {
     _commandInstances.clear();
     _commandGroups.clear();
-    _globalOptionsParser = null;
   }
 
   /// Check if the registry has been initialized

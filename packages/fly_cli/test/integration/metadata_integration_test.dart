@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/command_runner.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/generators/fish_generator.dart';
@@ -151,7 +152,6 @@ void main() {
           (opt) => opt.name == 'template',
         );
         expect(templateOption.allowedValues, contains('fly_foundation'));
-        expect(templateOption.allowedValues, contains('fly_foundation'));
 
         // Check examples
         expect(createCommand.examples, isNotEmpty);
@@ -167,7 +167,7 @@ void main() {
         final fixOption = doctorCommand.options.firstWhere(
           (opt) => opt.name == 'fix',
         );
-        expect(fixOption.type, equals(OptionType.flag));
+        expect(fixOption.type, equals(FlagType.boolean));
       });
 
       test('version command has metadata', () {
@@ -178,7 +178,7 @@ void main() {
         final checkUpdatesOption = versionCommand.options.firstWhere(
           (opt) => opt.name == 'check-updates',
         );
-        expect(checkUpdatesOption.type, equals(OptionType.flag));
+        expect(checkUpdatesOption.type, equals(FlagType.boolean));
       });
     });
 
@@ -191,7 +191,7 @@ void main() {
           (opt) => opt.name == 'verbose',
         );
         expect(verboseOption.isGlobal, isTrue);
-        expect(verboseOption.type, equals(OptionType.flag));
+        expect(verboseOption.type, equals(FlagType.boolean));
       });
     });
 

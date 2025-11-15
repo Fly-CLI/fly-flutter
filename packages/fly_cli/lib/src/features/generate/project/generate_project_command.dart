@@ -1,11 +1,9 @@
-import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
@@ -39,49 +37,7 @@ class GenerateProjectCommand extends FlyCommand {
             description: 'Name of the Flutter project to create',
           ),
         ],
-        options: [
-          const OptionDefinition(
-            name: 'template',
-            description: 'Project template to use',
-            type: OptionType.value,
-            short: 't',
-            allowedValues: ['fly_foundation'],
-            defaultValue: 'fly_foundation',
-          ),
-          const OptionDefinition(
-            name: 'organization',
-            description: 'Organization identifier (e.g., com.example)',
-            type: OptionType.value,
-            short: 'o',
-            defaultValue: 'com.example',
-          ),
-          const OptionDefinition(
-            name: 'platforms',
-            description: 'Target platforms for the project',
-            type: OptionType.value,
-            allowedValues: [
-              'ios',
-              'android',
-              'web',
-              'macos',
-              'windows',
-              'linux'
-            ],
-            defaultValue: 'ios,android',
-          ),
-          const OptionDefinition(
-            name: 'features',
-            description: 'Initial feature modules to scaffold (comma-separated)',
-            type: OptionType.value,
-            defaultValue: 'home',
-          ),
-          const OptionDefinition(
-            name: 'interactive',
-            description:
-                'Run in interactive mode to configure project settings',
-            short: 'i',
-          ),
-        ],
+        options: flags,
         examples: [
           const CommandExample(
             command:
@@ -97,19 +53,15 @@ class GenerateProjectCommand extends FlyCommand {
       );
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const CreateTemplateFlag(),
-      const CreateOrganizationFlag(),
-      CreatePlatformsFlag(),
-      CreateFeaturesFlag(),
-      const InteractiveFlag(),
-      const CreateFromManifestFlag(),
-      const OutputDirFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [
+        const CreateTemplateFlag(),
+        const CreateOrganizationFlag(),
+        CreatePlatformsFlag(),
+        CreateFeaturesFlag(),
+        const InteractiveFlag(),
+        const CreateFromManifestFlag(),
+        const OutputDirFlag(),
+      ];
 
   @override
   List<CommandValidator> get validators => [

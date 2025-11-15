@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/completion_generator.dart';
 
@@ -30,8 +31,8 @@ class FishCompletionGenerator extends CompletionGenerator {
     // Generate global options
     final globalOptions = registry.getGlobalOptions();
     for (final option in globalOptions) {
-      final flags = option.short != null
-          ? '-s ${option.short} -l ${option.name}'
+      final flags = option.abbreviation != null
+          ? '-s ${option.abbreviation} -l ${option.name}'
           : '-l ${option.name}';
       buffer.writeln('complete -c fly $flags -d "${option.description}"');
 
@@ -59,8 +60,8 @@ class FishCompletionGenerator extends CompletionGenerator {
 
     // Add command options
     for (final option in command.options) {
-      final flags = option.short != null
-          ? '-n "$condition" -s ${option.short} -l ${option.name}'
+      final flags = option.abbreviation != null
+          ? '-n "$condition" -s ${option.abbreviation} -l ${option.name}'
           : '-n "$condition" -l ${option.name}';
       buffer.writeln('complete -c fly $flags -d "${option.description}"');
 
@@ -93,7 +94,7 @@ class FishCompletionGenerator extends CompletionGenerator {
   String generateCommandCompletion(CommandDefinition command) => command.name;
 
   @override
-  String generateOptionsCompletion(List<OptionDefinition> options) =>
+  String generateOptionsCompletion(List<CliFlag> options) =>
       options.map((o) => '--${o.name}').join(' ');
 
   @override
@@ -103,7 +104,7 @@ class FishCompletionGenerator extends CompletionGenerator {
       subcommands.map((s) => s.name).join(' ');
 
   @override
-  String generateOptionValuesCompletion(OptionDefinition option) {
+  String generateOptionValuesCompletion(CliFlag option) {
     if (option.allowedValues != null && option.allowedValues!.isNotEmpty) {
       return option.allowedValues!.join(' ');
     }

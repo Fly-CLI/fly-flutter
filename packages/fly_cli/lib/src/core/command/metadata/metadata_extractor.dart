@@ -1,6 +1,6 @@
-import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_definition.dart';
 
 /// Extracts command metadata from Command instances and ArgParser
@@ -11,14 +11,13 @@ class MetadataExtractor {
   /// Extract metadata from a command instance
   CommandDefinition extractMetadata(
     Command<int> command, [
-    List<OptionDefinition> globalOptions = const [],
+    List<CliFlag> globalOptions = const [],
   ]) {
     // Extract basic info
     final name = command.name;
     final description = command.description;
 
-    // Extract options from ArgParser
-    final options = _extractOptions(command.argParser);
+    final options = _extractFlags(command);
 
     // Extract subcommands
     final subcommands = _extractSubcommands(command);
@@ -28,8 +27,8 @@ class MetadataExtractor {
       final manualMetadata = command.metadata;
       if (manualMetadata != null && manualMetadata.isValid()) {
         return manualMetadata.copyWith(
-          options: [...manualMetadata.options, ...options],
-          globalOptions: [...globalOptions, ...options],
+          options: _mergeFlags(manualMetadata.options, options),
+          globalOptions: _mergeFlags(manualMetadata.globalOptions, globalOptions),
         );
       }
     }
@@ -44,28 +43,11 @@ class MetadataExtractor {
     );
   }
 
-  /// Extract options from an ArgParser
-  List<OptionDefinition> _extractOptions(
-    ArgParser parser, {
-    bool isGlobal = false,
-  }) {
-    final options = <OptionDefinition>[];
-
-    for (final option in parser.options.values) {
-      options.add(
-        OptionDefinition(
-          name: option.name,
-          description: option.help ?? '',
-          short: option.abbr,
-          type: option.isFlag ? OptionType.flag : OptionType.value,
-          allowedValues: option.allowed?.toList(),
-          defaultValue: option.defaultsTo,
-          isGlobal: isGlobal,
-        ),
-      );
+  List<CliFlag> _extractFlags(Command<int> command) {
+    if (command is FlyCommand) {
+      return command.flags;
     }
-
-    return options;
+    return const [];
   }
 
   /// Extract subcommands from a command
@@ -85,7 +67,25 @@ class MetadataExtractor {
     return subcommands;
   }
 
-  /// Extract global options from ArgParser
-  List<OptionDefinition> extractGlobalOptions(ArgParser parser) =>
-      _extractOptions(parser, isGlobal: true);
+  List<CliFlag> _mergeFlags(List<CliFlag> base, List<CliFlag> additional) {
+    if (additional.isEmpty) {
+      return List<CliFlag>.unmodifiable(base);
+    }
+
+    final seen = <String>{};
+    final merged = <CliFlag>[];
+
+    for (final flag in base) {
+      merged.add(flag);
+      seen.add(flag.name);
+    }
+
+    for (final flag in additional) {
+      if (seen.add(flag.name)) {
+        merged.add(flag);
+      }
+    }
+
+    return List<CliFlag>.unmodifiable(merged);
+  }
 }

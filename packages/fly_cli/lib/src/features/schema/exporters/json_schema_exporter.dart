@@ -1,3 +1,5 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
 
@@ -31,7 +33,7 @@ class JsonSchemaExporter extends SchemaExporter {
     // Add global options as a reusable definition
     if (globalOptions.isNotEmpty) {
       schema['definitions']['GlobalOptions'] =
-          _buildOptionsSchema(globalOptions);
+          _buildOptionsSchema(globalOptions, isGlobal: true);
     }
 
     // Add each command as a property
@@ -134,12 +136,16 @@ class JsonSchemaExporter extends SchemaExporter {
   }
 
   /// Build JSON Schema for options
-  Map<String, dynamic> _buildOptionsSchema(List<OptionDefinition> options) {
+  Map<String, dynamic> _buildOptionsSchema(
+    List<CliFlag> options, {
+    bool isGlobal = false,
+  }) {
     final schema = <String, dynamic>{
       'properties': <String, dynamic>{},
     };
 
-    for (final option in options) {
+    for (final flag in options) {
+      final option = flag.toOptionDefinition(isGlobalOverride: isGlobal);
       final optionSchema = <String, dynamic>{
         'type': _getJsonSchemaType(option.type),
         'description': option.description,

@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:fly_cli/src/features/context/context_generator.dart';
@@ -29,19 +27,15 @@ class ContextCommand extends FlyCommand {
   String get description => 'Export project context for AI integration';
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const OutputFileFlag(),
-      const ContextIncludeCodeFlag(),
-      const ContextIncludeDependenciesFlag(),
-      const ContextIncludeArchitectureFlag(),
-      const ContextIncludeSuggestionsFlag(),
-      const ContextMaxFilesFlag(),
-      const ContextMaxFileSizeFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [
+        const OutputFileFlag(),
+        const ContextIncludeCodeFlag(),
+        const ContextIncludeDependenciesFlag(),
+        const ContextIncludeArchitectureFlag(),
+        const ContextIncludeSuggestionsFlag(),
+        const ContextMaxFilesFlag(),
+        const ContextMaxFileSizeFlag(),
+      ];
 
   @override
   List<CommandValidator> get validators => [

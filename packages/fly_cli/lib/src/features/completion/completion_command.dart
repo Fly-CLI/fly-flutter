@@ -1,13 +1,11 @@
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
@@ -32,16 +30,12 @@ class CompletionCommand extends FlyCommand {
   String get description => 'Generate shell completion scripts';
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const CompletionShellFlag(),
-      const OutputFileFlag(),
-      const CompletionInstallFlag(),
-      const CompletionUninstallFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [
+        const CompletionShellFlag(),
+        const OutputFileFlag(),
+        const CompletionInstallFlag(),
+        const CompletionUninstallFlag(),
+      ];
 
   @override
   List<CommandValidator> get validators => [EnvironmentValidator()];

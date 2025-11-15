@@ -1,12 +1,10 @@
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/definitions/mcp_tool.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/integrations/mcp/prompt_strategy_registry_provider.dart';
@@ -34,16 +32,12 @@ class McpServeCommand extends FlyCommand {
   String get description => 'Start the MCP server (stdio)';
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const McpServeStdioFlag(),
-      const McpServeMaxMessageMbFlag(),
-      const McpServeDefaultTimeoutSecondsFlag(),
-      const McpServeMaxConcurrencyFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [
+        const McpServeStdioFlag(),
+        const McpServeMaxMessageMbFlag(),
+        const McpServeDefaultTimeoutSecondsFlag(),
+        const McpServeMaxConcurrencyFlag(),
+      ];
 
   @override
   List<CommandMiddleware> get middleware => [

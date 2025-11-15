@@ -1,17 +1,14 @@
 /// Command metadata definitions for Fly CLI
 library command_definition;
 
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'command_definition.g.dart';
 
 /// Complete command specification with all metadata
-@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class CommandDefinition {
-  /// Create CommandDefinition from JSON
-  factory CommandDefinition.fromJson(Map<String, dynamic> json) =>
-      _$CommandDefinitionFromJson(json);
-
   const CommandDefinition({
     required this.name,
     required this.description,
@@ -32,8 +29,8 @@ class CommandDefinition {
   /// Positional arguments
   final List<ArgumentDefinition> arguments;
 
-  /// Command-specific options
-  final List<OptionDefinition> options;
+  /// Command-specific options/flags
+  final List<CliFlag> options;
 
   /// Nested subcommands
   final List<SubcommandDefinition> subcommands;
@@ -43,7 +40,7 @@ class CommandDefinition {
 
   /// Global options available to this command
   @JsonKey(name: 'global_options')
-  final List<OptionDefinition> globalOptions;
+  final List<CliFlag> globalOptions;
 
   /// Whether the command is hidden from help
   @JsonKey(name: 'is_hidden')
@@ -54,10 +51,10 @@ class CommandDefinition {
     String? name,
     String? description,
     List<ArgumentDefinition>? arguments,
-    List<OptionDefinition>? options,
+    List<CliFlag>? options,
     List<SubcommandDefinition>? subcommands,
     List<CommandExample>? examples,
-    List<OptionDefinition>? globalOptions,
+    List<CliFlag>? globalOptions,
     bool? isHidden,
   }) =>
       CommandDefinition(
@@ -72,7 +69,20 @@ class CommandDefinition {
       );
 
   /// Convert to JSON for schema export
-  Map<String, dynamic> toJson() => _$CommandDefinitionToJson(this);
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'arguments': arguments.map((e) => e.toJson()).toList(),
+        'options': options
+            .map((flag) => flag.toOptionDefinition().toJson())
+            .toList(),
+        'subcommands': subcommands.map((e) => e.toJson()).toList(),
+        'examples': examples.map((e) => e.toJson()).toList(),
+        'global_options': globalOptions
+            .map((flag) => flag.toOptionDefinition(isGlobalOverride: true).toJson())
+            .toList(),
+        'is_hidden': isHidden,
+      };
 
   /// Validate metadata integrity
   bool isValid() {
@@ -86,7 +96,8 @@ class CommandDefinition {
 
     // Validate all options
     for (final option in options) {
-      if (!option.isValid()) return false;
+      if (option.name.isEmpty) return false;
+      if (option.description.isEmpty) return false;
     }
 
     // Validate all subcommands

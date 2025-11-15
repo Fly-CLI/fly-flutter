@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/completion/completion_generator.dart';
 
@@ -112,7 +113,7 @@ class BashCompletionGenerator extends CompletionGenerator {
   String generateCommandCompletion(CommandDefinition command) => command.name;
 
   @override
-  String generateOptionsCompletion(List<OptionDefinition> options) =>
+  String generateOptionsCompletion(List<CliFlag> options) =>
       options.map((o) => '--${o.name}').join(' ');
 
   @override
@@ -122,7 +123,7 @@ class BashCompletionGenerator extends CompletionGenerator {
       subcommands.map((s) => s.name).join(' ');
 
   @override
-  String generateOptionValuesCompletion(OptionDefinition option) {
+  String generateOptionValuesCompletion(CliFlag option) {
     if (option.allowedValues != null && option.allowedValues!.isNotEmpty) {
       return option.allowedValues!.join(' ');
     }

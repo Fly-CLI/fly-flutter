@@ -100,7 +100,7 @@ class FlyCommandRunner extends CommandRunner<int> {
   /// Register all commands using enum-based architecture
   void _registerCommands() {
     final registrar = CommandRegistrar(_bootstrapper.contextFactory);
-    registrar.registerCommands(this, argParser);
+    registrar.registerCommands(this, GlobalFlagsRegistry.globalFlags);
   }
 
   @override

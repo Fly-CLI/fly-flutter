@@ -1,3 +1,5 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
 
@@ -44,9 +46,9 @@ class OpenApiExporter extends SchemaExporter {
 
     // Add global options as reusable parameters
     if (globalOptions.isNotEmpty) {
-      for (final option in globalOptions) {
-        openApi['components']['parameters']['Global${option.name}'] =
-            _buildParameterSchema(option, true);
+      for (final flag in globalOptions) {
+        openApi['components']['parameters']['Global${flag.name}'] =
+            _buildParameterSchema(flag, true);
       }
     }
 
@@ -128,8 +130,8 @@ class OpenApiExporter extends SchemaExporter {
     final parameters = <Map<String, dynamic>>[];
 
     // Add command-specific options
-    for (final option in command.options) {
-      parameters.add(_buildParameterSchema(option, false));
+    for (final flag in command.options) {
+      parameters.add(_buildParameterSchema(flag, false));
     }
 
     // Add global options if enabled
@@ -146,8 +148,8 @@ class OpenApiExporter extends SchemaExporter {
   }
 
   /// Build parameter schema for an option
-  Map<String, dynamic> _buildParameterSchema(
-      OptionDefinition option, bool isGlobal) {
+  Map<String, dynamic> _buildParameterSchema(CliFlag flag, bool isGlobal) {
+    final option = flag.toOptionDefinition(isGlobalOverride: isGlobal);
     final schema = <String, dynamic>{
       'name': '--${option.name}',
       'in': 'query',

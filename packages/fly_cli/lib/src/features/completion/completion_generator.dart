@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 
 /// Abstract base class for shell-specific completion generators
@@ -20,13 +21,13 @@ abstract class CompletionGenerator {
   String generateCommandCompletion(CommandDefinition command);
 
   /// Generate completions for options
-  String generateOptionsCompletion(List<OptionDefinition> options);
+  String generateOptionsCompletion(List<CliFlag> options);
 
   /// Generate completions for subcommands
   String generateSubcommandsCompletion(List<SubcommandDefinition> subcommands);
 
   /// Generate completions for option values
-  String generateOptionValuesCompletion(OptionDefinition option);
+  String generateOptionValuesCompletion(CliFlag option);
 }
 
 /// Helper utilities for completion generation

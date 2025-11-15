@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
 
@@ -85,7 +86,7 @@ class SchemaExportUtils {
   }
 
   /// Get global options if enabled in config
-  static List<OptionDefinition> getGlobalOptions(
+  static List<CliFlag> getGlobalOptions(
     CommandMetadataRegistry registry,
     ExportConfig config,
   ) {

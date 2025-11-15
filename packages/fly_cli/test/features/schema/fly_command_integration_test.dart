@@ -1,5 +1,7 @@
-import 'package:args/args.dart' hide OptionType;
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart'
     as base show FlyCommand;
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
@@ -91,14 +93,19 @@ void main() {
 
     group('metadata extraction integration', () {
       test('extracts metadata from FlyCommand without manual metadata', () {
-        final command = _TestFlyCommand('create', 'Create a new project');
+        final command = _TestFlyCommand(
+          'create',
+          'Create a new project',
+          flags: const [CreateTemplateFlag()],
+        );
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new project'));
-        expect(metadata.options,
-            hasLength(4)); // output, debug, verbose, plan from base class
+        expect(metadata.options, hasLength(1));
+        expect(metadata.options.first.name, equals('template'));
+        expect(metadata.globalOptions, isNotEmpty);
         expect(metadata.subcommands, isEmpty);
       });
 
@@ -113,34 +120,28 @@ void main() {
             ),
           ],
           options: [
-            OptionDefinition(
-              name: 'template',
-              description: 'Project template',
-              type: OptionType.value,
-              allowedValues: ['fly_foundation'],
-            ),
+            CreateTemplateFlag(),
           ],
         );
 
         final command = _TestFlyCommandWithMetadata(
-            'create', 'Create command', manualMetadata);
+          'create',
+          'Create command',
+          manualMetadata,
+          flags: const [CreateOrganizationFlag()],
+        );
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
-        expect(metadata.options,
-            hasLength(5)); // template + output + debug + verbose + plan
-        expect(metadata.options.first.name, equals('template'));
+        expect(metadata.options, hasLength(2));
+        expect(metadata.options.any((o) => o.name == 'template'), isTrue);
+        expect(metadata.options.any((o) => o.name == 'organization'), isTrue);
       });
 
-      test('merges manual metadata with auto-discovered options', () {
-        final parser = ArgParser();
-        parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output');
-        parser.addOption('output',
-            help: 'Output format', allowed: ['human', 'json']);
-
+      test('merges manual metadata with command flags', () {
         const manualMetadata = CommandDefinition(
           name: 'create',
           description: 'Create a new Flutter project',
@@ -153,30 +154,34 @@ void main() {
         );
 
         final command = _TestFlyCommandWithMetadata(
-            'create', 'Create command', manualMetadata,
-            parser: parser);
+          'create',
+          'Create command',
+          manualMetadata,
+          flags: const [
+            CreateTemplateFlag(),
+            CreateOrganizationFlag(),
+          ],
+        );
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('create'));
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
-        expect(metadata.options,
-            hasLength(4)); // output + debug + verbose + plan from base class
-        expect(metadata.options.any((o) => o.name == 'verbose'), isTrue);
-        expect(metadata.options.any((o) => o.name == 'output'), isTrue);
+        expect(metadata.options, hasLength(2));
+        expect(metadata.options.where((o) => o.name == 'template'), hasLength(1));
+        expect(metadata.options.any((o) => o.name == 'organization'), isTrue);
       });
     });
 
     group('registry integration', () {
       test('registers FlyCommand in registry', () {
-        final globalParser = ArgParser();
         final instances = _createCommandInstances();
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: GlobalFlagsRegistry.globalFlags,
         );
 
         expect(registry.hasCommand('create'), isTrue);
@@ -190,13 +195,12 @@ void main() {
       });
 
       test('registers FlyCommand with manual metadata', () {
-        final globalParser = ArgParser();
         final instances = _createCommandInstances();
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: GlobalFlagsRegistry.globalFlags,
         );
 
         // Create command has manual metadata defined
@@ -208,13 +212,12 @@ void main() {
       });
 
       test('handles commands from enum correctly', () {
-        final globalParser = ArgParser();
         final instances = _createCommandInstances();
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: GlobalFlagsRegistry.globalFlags,
         );
 
         expect(registry.hasCommand('create'), isTrue);
@@ -246,13 +249,12 @@ void main() {
       });
 
       test('registers subcommands in registry', () {
-        final globalParser = ArgParser();
         final instances = _createCommandInstances();
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: GlobalFlagsRegistry.globalFlags,
         );
 
         // 'add' command should have subcommands
@@ -276,13 +278,12 @@ void main() {
       });
 
       test('commands can opt into metadata gradually', () {
-        final globalParser = ArgParser();
         final instances = _createCommandInstances();
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: GlobalFlagsRegistry.globalFlags,
         );
 
         // Commands from enum should have metadata
@@ -341,13 +342,16 @@ void main() {
 
 /// Test FlyCommand implementation
 class _TestFlyCommand extends base.FlyCommand {
-  _TestFlyCommand(this._name, this._description, {ArgParser? parser})
-      : _parser = parser,
+  _TestFlyCommand(
+    this._name,
+    this._description, {
+    List<CliFlag>? flags,
+  })  : _flags = flags ?? const [],
         super(CommandTestHelper.createMockCommandContext());
 
   final String _name;
   final String _description;
-  final ArgParser? _parser;
+  final List<CliFlag> _flags;
 
   @override
   String get name => _name;
@@ -356,34 +360,7 @@ class _TestFlyCommand extends base.FlyCommand {
   String get description => _description;
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    if (_parser != null) {
-      // Copy options from the provided parser, but avoid duplicates
-      for (final option in _parser.options.values) {
-        if (!parser.options.containsKey(option.name)) {
-          if (option.isFlag) {
-            parser.addFlag(
-              option.name,
-              abbr: option.abbr,
-              help: option.help,
-              defaultsTo: option.defaultsTo as bool?,
-              negatable: option.negatable ?? false,
-            );
-          } else {
-            parser.addOption(
-              option.name,
-              abbr: option.abbr,
-              help: option.help,
-              defaultsTo: option.defaultsTo as String?,
-              allowed: option.allowed,
-            );
-          }
-        }
-      }
-    }
-    return parser;
-  }
+  List<CliFlag> get flags => _flags;
 
   @override
   Future<CommandResult> execute() async => CommandResult.success(
@@ -400,8 +377,12 @@ class _TestFlyCommand extends base.FlyCommand {
 
 /// Test FlyCommand with manual metadata
 class _TestFlyCommandWithMetadata extends _TestFlyCommand {
-  _TestFlyCommandWithMetadata(super.name, super.description, this._metadata,
-      {super.parser});
+  _TestFlyCommandWithMetadata(
+    super.name,
+    super.description,
+    this._metadata, {
+    super.flags,
+  });
 
   final CommandDefinition _metadata;
 

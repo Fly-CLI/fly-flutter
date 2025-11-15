@@ -1,13 +1,11 @@
-import 'package:args/args.dart' hide OptionType;
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_factory.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart'
-    show CommandDefinition, CommandExample, OptionDefinition;
+    show CommandDefinition, CommandExample;
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
@@ -34,12 +32,7 @@ class DoctorCommand extends FlyCommand {
   CommandDefinition? get metadata => CommandDefinition(
         name: name,
         description: description,
-        options: [
-          const OptionDefinition(
-            name: 'fix',
-            description: 'Attempt to fix common issues automatically',
-          ),
-        ],
+        options: flags,
         examples: [
           const CommandExample(
             command: 'fly doctor',
@@ -53,13 +46,7 @@ class DoctorCommand extends FlyCommand {
       );
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const DoctorFixFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [const DoctorFixFlag()];
 
   @override
   List<CommandValidator> get validators => [

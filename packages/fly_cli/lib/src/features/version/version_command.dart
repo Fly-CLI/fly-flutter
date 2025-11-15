@@ -1,4 +1,3 @@
-import 'package:args/args.dart';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
@@ -22,13 +21,7 @@ class VersionCommand extends FlyCommand {
   String get description => 'Show version information';
 
   @override
-  ArgParser get argParser {
-    final parser = super.argParser;
-    FlagFactory.applyFlagsToParser(parser, [
-      const VersionCheckUpdatesFlag(),
-    ]);
-    return parser;
-  }
+  List<CliFlag> get flags => [const VersionCheckUpdatesFlag()];
 
   @override
   List<CommandMiddleware> get middleware => [

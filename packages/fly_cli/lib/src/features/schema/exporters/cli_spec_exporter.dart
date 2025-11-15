@@ -1,3 +1,5 @@
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
 
@@ -22,7 +24,8 @@ class CliSpecExporter extends SchemaExporter {
       'version': '1.0.0',
       'name': 'fly',
       'description': 'Fly CLI - Flutter development tool',
-      'globalOptions': globalOptions.map(_buildOptionSpec).toList(),
+      'globalOptions':
+          globalOptions.map((flag) => _buildOptionSpec(flag, isGlobal: true)).toList(),
       'commands': <String, dynamic>{},
     };
 
@@ -112,7 +115,8 @@ class CliSpecExporter extends SchemaExporter {
   }
 
   /// Build option specification
-  Map<String, dynamic> _buildOptionSpec(OptionDefinition option) {
+  Map<String, dynamic> _buildOptionSpec(CliFlag flag, {bool isGlobal = false}) {
+    final option = flag.toOptionDefinition(isGlobalOverride: isGlobal);
     final spec = <String, dynamic>{
       'name': option.name,
       'description': option.description,
@@ -165,11 +169,11 @@ class CliSpecExporter extends SchemaExporter {
     if (command.options.isNotEmpty) {
       completion['options'] = command.options
           .map(
-            (o) => {
-              'name': o.name,
-              'type': o.type.name,
-              if (o.short != null) 'short': o.short,
-              if (o.allowedValues != null) 'values': o.allowedValues,
+            (flag) => {
+              'name': flag.name,
+              'type': _mapFlagType(flag.type),
+              if (flag.abbreviation != null) 'short': flag.abbreviation,
+              if (flag.allowedValues != null) 'values': flag.allowedValues,
             },
           )
           .toList();
@@ -183,4 +187,10 @@ class CliSpecExporter extends SchemaExporter {
 
     return completion;
   }
+
+  String _mapFlagType(FlagType type) => switch (type) {
+        FlagType.boolean => 'flag',
+        FlagType.singleValue => 'value',
+        FlagType.multiValue => 'multiple',
+      };
 }
