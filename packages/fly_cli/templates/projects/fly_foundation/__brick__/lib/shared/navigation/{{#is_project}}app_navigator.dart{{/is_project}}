@@ -1,4 +1,3 @@
-{{#is_project}}
 import 'package:flutter/material.dart';
 import 'package:fly_navigation/fly_navigation.dart';
 
@@ -27,4 +26,4 @@ class AppNavigator extends NavigationService<FeatureScreen> {
     );
   }
 }
-{{/is_project}}
+

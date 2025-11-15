@@ -1,4 +1,3 @@
-{{#is_project}}
 {{#features}}
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,5 +60,4 @@ class {{feature.pascalCase()}}Screen extends BaseScreen<{{feature.pascalCase()}}
   }
 }
 {{/features}}
-{{/is_project}}
 

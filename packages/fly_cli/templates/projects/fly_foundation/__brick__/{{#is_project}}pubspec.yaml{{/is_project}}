@@ -1,4 +1,3 @@
-{{#is_project}}
 name: {{project_name.snakeCase()}}
 description: {{description}}
 publish_to: 'none'
@@ -54,5 +53,4 @@ flutter:
 
 assets:
   - assets/
-{{/is_project}}
 

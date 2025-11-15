@@ -1,4 +1,3 @@
-{{#is_project}}
 enum FeatureScreen {
 {{#features}}
   {{feature}}(
@@ -19,4 +18,4 @@ enum FeatureScreen {
   final bool isProtected;
   final String semanticsLabel;
 }
-{{/is_project}}
+

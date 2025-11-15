@@ -1,4 +1,3 @@
-{{#is_project}}
 import 'package:flutter/material.dart';
 {{#features}}
 import '../../features/{{feature}}/presentation/{{feature}}_screen.dart';
@@ -29,4 +28,4 @@ class AppRouteConfig {
     );
   }
 }
-{{/is_project}}
+

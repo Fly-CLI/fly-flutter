@@ -1,4 +1,3 @@
-{{#is_project}}
 {{#with_tests}}
 {{#features}}
 import 'package:flutter/material.dart';
@@ -27,4 +26,4 @@ void main() {
 }
 {{/features}}
 {{/with_tests}}
-{{/is_project}}
+
