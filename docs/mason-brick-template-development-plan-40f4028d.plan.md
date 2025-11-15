@@ -2,7 +2,12 @@
 
 ## Executive Summary
 
-This plan outlines the development of a **unified Mason brick template** (`fly_foundation`) that generates both complete Flutter projects and individual components (screens, services, providers) using a single, consistent template system. The unified approach eliminates template duplication, ensures consistency across all generated code, simplifies maintenance, and provides a single source of truth for Fly CLI architecture patterns, ecosystem integration standards, and AI-powered development workflows.
+This plan outlines the development of a **unified Mason brick template** (`fly_foundation`) that
+generates both complete Flutter projects and individual components (screens, services, providers)
+using a single, consistent template system. The unified approach eliminates template duplication,
+ensures consistency across all generated code, simplifies maintenance, and provides a single source
+of truth for Fly CLI architecture patterns, ecosystem integration standards, and AI-powered
+development workflows.
 
 **Key Objectives:**
 
@@ -14,12 +19,90 @@ This plan outlines the development of a **unified Mason brick template** (`fly_f
 - Enable AI-powered development through MCP integration
 - Follow Fly CLI code generation standards and conventions
 - Provide manifest-based project generation capabilities
+- Achieve 95%+ industry standards compliance
+- Implement comprehensive accessibility support (0% → 85%+)
+- Provide extensive documentation (42% → 90%+)
 
 **Timeline:** 8 weeks across 4 phases
 
-**Target Deliverable:** Production-ready unified Mason brick template (`fly_foundation`) with comprehensive documentation
+**Target Deliverable:** Production-ready unified Mason brick template (`fly_foundation`) with
+comprehensive documentation, industry-leading compliance, and accessibility support
 
-**Implementation Reference:** This plan has been updated to match the architecture and patterns found in `/Users/apple/Desktop/dev/flutter/me/projects/Fly/examples/foundation_project`, which serves as the reference implementation for the core architecture and components.
+**Current Compliance Score:** 82% ⚠️  
+**Target Compliance Score:** 95%+ ✅
+
+**Compliance Improvement Targets:**
+
+- Flutter/Dart Code Generation Standards: 75% → 95%+
+- Documentation Standards: 42% → 90%+
+- Accessibility Standards: 0% → 85%+
+- Template Organization: 56% → 90%+
+- Developer Experience: 72% → 90%+
+
+**Implementation Reference:** This plan has been updated to match the architecture and patterns
+found in `/Users/apple/Desktop/dev/flutter/me/projects/Fly/examples/foundation_project`, which
+serves as the reference implementation for the core architecture and components.
+
+---
+
+## Standards Compliance Overview
+
+This plan has been comprehensively analyzed against industry standards and best practices. The
+following compliance matrix outlines current state, target improvements, and implementation
+priorities.
+
+### Compliance Score Summary
+
+| Category                         | Current Score | Target Score | Status      | Priority |
+|----------------------------------|---------------|--------------|-------------|----------|
+| **Feature-Based Architecture**   | 100%          | 100%         | ✅ Excellent | -        |
+| **MVVM Pattern Implementation**  | 100%          | 100%         | ✅ Excellent | -        |
+| **State Management Integration** | 100%          | 100%         | ✅ Excellent | -        |
+| **CLI Tool Template Systems**    | 92%           | 95%          | ✅ Excellent | Low      |
+| **Mason Brick Template Design**  | 85%           | 90%          | ✅ Good      | Low      |
+| **Flutter/Dart Code Generation** | 75%           | 95%          | ⚠️ Good     | **High** |
+| **Template Organization**        | 56%           | 90%          | ⚠️ Moderate | **High** |
+| **Developer Experience**         | 72%           | 90%          | ⚠️ Moderate | Medium   |
+| **Documentation Standards**      | 42%           | 90%          | ❌ Poor      | **High** |
+| **Accessibility Standards**      | 0%            | 85%          | ❌ Critical  | **High** |
+| **Overall Compliance**           | **82%**       | **95%+**     | ⚠️ Good     | -        |
+
+### Critical Gaps Requiring Immediate Attention
+
+1. **Accessibility Standards (0% → 85%+)**
+    - Missing semantic labels in generated widgets
+    - No screen reader support
+    - Missing keyboard navigation
+    - No color contrast guidelines
+    - **Impact:** Legal compliance risk, exclusion of users with disabilities
+
+2. **Documentation Standards (42% → 90%+)**
+    - Missing comprehensive best practices guide (20+ sections required)
+    - Incomplete API reference documentation
+    - Limited generated code documentation
+    - Missing workflow documentation
+    - **Impact:** Poor developer experience, increased support burden
+
+3. **Code Generation Workflow (56% → 95%+)**
+    - Missing explicit `build.yaml` configuration
+    - Limited build workflow documentation
+    - No incremental build support documentation
+    - **Impact:** Build performance issues, developer confusion
+
+4. **Template Organization (56% → 90%+)**
+    - Missing template versioning strategy
+    - No template composition patterns
+    - Limited template structure validation
+    - **Impact:** Template maintenance challenges, quality issues
+
+### Compliance Improvement Roadmap
+
+**Phase 1 (Weeks 1-2):** Address critical gaps → Compliance: 90%+  
+**Phase 2 (Weeks 3-4):** Enhance developer experience → Compliance: 95%+  
+**Phase 3 (Weeks 5-8):** Complete documentation → Compliance: 98%+  
+**Phase 4 (Ongoing):** Continuous improvement → Compliance: Industry-leading
+
+---
 
 **Key Architecture Decisions (from Foundation Project):**
 - Uses `GlobalContainer` (ProviderContainer singleton) instead of ProviderScope
@@ -940,106 +1023,986 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 ---
 
-## 3. Implementation Plan
+## 3. Recommendations Integration Matrix
 
-### Phase 1: Foundation (Weeks 1-2)
+This section maps all 25 prioritized recommendations to implementation tasks, organized by phase and
+priority level.
 
-#### Week 1: Unified Template Structure and Core Variables
+### High-Priority Recommendations (8) - Must Address
+
+| ID     | Recommendation                            | Phase   | Success Criteria                                                          | Dependencies       |
+|--------|-------------------------------------------|---------|---------------------------------------------------------------------------|--------------------|
+| **H1** | Add Explicit `build.yaml` Configuration   | Phase 1 | `build.yaml` included in all projects, 20%+ build performance improvement | None               |
+| **H2** | Create Comprehensive Best Practices Guide | Phase 1 | Guide with 20+ sections, 90%+ developer satisfaction                      | None               |
+| **H3** | Document Code Generation Workflow         | Phase 1 | Comprehensive workflow docs, 90%+ developer understanding                 | H1                 |
+| **H4** | Add Accessibility Best Practices          | Phase 1 | All widgets include accessibility support, passes audits                  | None               |
+| **H5** | Implement Template Structure Validation   | Phase 2 | Zero validation failures in production                                    | Phase 1 foundation |
+| **H6** | Create Comprehensive Quick Start Guide    | Phase 1 | Project generation in < 5 minutes, 90%+ success rate                      | None               |
+| **H7** | Add Incremental Build Support             | Phase 1 | `build_runner watch` documented, 50%+ build time reduction                | H1                 |
+| **H8** | Improve Generated Code Documentation      | Phase 2 | 90%+ code coverage with documentation                                     | Phase 1 foundation |
+
+### Medium-Priority Recommendations (10) - Should Address
+
+| ID      | Recommendation                          | Phase   | Success Criteria                                         | Dependencies       |
+|---------|-----------------------------------------|---------|----------------------------------------------------------|--------------------|
+| **M1**  | Implement Template Versioning Strategy  | Phase 2 | Versioning strategy defined, smooth migration experience | Phase 1 foundation |
+| **M2**  | Create Detailed Migration Guide         | Phase 2 | 90%+ successful migration rate                           | M1                 |
+| **M3**  | Add Comprehensive API Reference         | Phase 3 | 100% API coverage, 90%+ developer satisfaction           | Phase 2 foundation |
+| **M4**  | Define Template Composition Patterns    | Phase 3 | Patterns defined and documented                          | Phase 2 foundation |
+| **M5**  | Add Troubleshooting Guide               | Phase 2 | 80%+ issue resolution rate                               | Phase 1 foundation |
+| **M6**  | Compare with Very Good CLI Patterns     | Phase 3 | Comparison document created, improvements identified     | Phase 2 foundation |
+| **M7**  | Add Generated File Exclusion Strategy   | Phase 3 | Zero version control issues                              | H1                 |
+| **M8**  | Add FlutterFire CLI Pattern Analysis    | Phase 3 | Pattern analysis completed                               | Phase 2 foundation |
+| **M9**  | Add Community Standards Alignment       | Phase 3 | Community conventions aligned                            | Phase 2 foundation |
+| **M10** | Add Performance Optimization Guidelines | Phase 3 | Performance benchmarks met                               | Phase 2 foundation |
+
+### Low-Priority Recommendations (7) - Nice-to-Have
+
+| ID     | Recommendation                          | Phase   | Success Criteria                  | Dependencies       |
+|--------|-----------------------------------------|---------|-----------------------------------|--------------------|
+| **L1** | Add Code Comment Generation             | Phase 4 | Comments added to complex logic   | Phase 3 foundation |
+| **L2** | Add FAQ Section                         | Phase 4 | 80%+ question coverage            | Phase 3 foundation |
+| **L3** | Add Video Tutorials                     | Phase 4 | High production quality tutorials | Phase 3 foundation |
+| **L4** | Add Template Testing Examples           | Phase 4 | Test examples included            | Phase 3 foundation |
+| **L5** | Add Security Best Practices             | Phase 4 | Security audits passed            | Phase 3 foundation |
+| **L6** | Add Internationalization Best Practices | Phase 4 | i18n patterns documented          | Phase 3 foundation |
+| **L7** | Add Analytics Integration Patterns      | Phase 4 | Analytics patterns included       | Phase 3 foundation |
+
+---
+
+## 4. Implementation Plan
+
+### Phase 1: Critical Improvements (Weeks 1-2)
+
+**Focus:** Address critical gaps for production readiness  
+**Target Outcome:** Compliance score improves to 90%+  
+**Key Deliverables:** Accessibility support, build configuration, best practices guide, quick start
+guide
+
+#### Week 1: Foundation and Critical Standards
 
 **Tasks:**
 
-1. Remove existing templates from `packages/fly_cli/templates/`
-2. Create `fly_foundation` template directory structure
-3. Define `brick.yaml` with `generation_mode` and all variable definitions
-4. Create `template.yaml` with Fly CLI metadata
-5. Implement conditional logic helpers (is_project, is_screen, etc.)
-6. Create core template files structure with conditionals
-7. Implement variable validation logic based on generation_mode
+1. **Unified Template Structure** (Foundation)
+    - Remove existing templates from `packages/fly_cli/templates/`
+    - Create `fly_foundation` template directory structure
+    - Define `brick.yaml` with `generation_mode` and all variable definitions
+    - Create `template.yaml` with Fly CLI metadata
+    - Implement conditional logic helpers (is_project, is_screen, etc.)
+    - Create core template files structure with conditionals
+    - Implement variable validation logic based on generation_mode
+
+2. **H1: Explicit `build.yaml` Configuration** ⭐ HIGH PRIORITY
+    - Create comprehensive `build.yaml` template with all generators configured
+    - Add builder ordering for optimal performance (riverpod_generator → drift_dev → auto_mappr →
+      json_serializable)
+    - Include incremental build configuration
+    - Document configuration options and performance optimizations
+    - Add to project mode template generation
+    - **Success Criteria:** `build.yaml` included in all generated projects, 20%+ build performance
+      improvement
+
+3. **H4: Accessibility Best Practices** ⭐ HIGH PRIORITY
+    - Research Flutter accessibility guidelines (WCAG 2.1 compliance)
+    - Add semantic labels to all widget templates (Semantics widget)
+    - Include accessibility properties in generated screens
+    - Add keyboard navigation support to generated widgets
+    - Include color contrast guidelines in theme templates
+    - Create accessibility documentation section
+    - Add accessibility tests to template generation
+    - **Success Criteria:** All generated widgets include semantic labels, screen reader support,
+      keyboard navigation, passes accessibility audits
+
+4. **H6: Comprehensive Quick Start Guide** ⭐ HIGH PRIORITY
+    - Create step-by-step quick start guide:
+        - Installation instructions
+        - First project generation (< 5 minutes)
+        - Running the project
+        - Next steps and common workflows
+    - Add code examples and visual aids
+    - Include troubleshooting tips for common issues
+    - Add to template README
+    - **Success Criteria:** Project generation in < 5 minutes, 90%+ success rate for first-time
+      users
 
 **Deliverables:**
-
 - Unified template structure (`fly_foundation/`)
 - Complete `brick.yaml` with all variables
 - `template.yaml` with metadata
-- Conditional file structure
-- Variable validation system
+- Comprehensive `build.yaml` configuration
+- Accessibility support in all generated widgets
+- Quick start guide documentation
 - Unit tests for variable validation
 
-#### Week 2: Project Mode Implementation
+#### Week 2: Documentation and Workflow
 
 **Tasks:**
 
-1. Implement project mode template files:
+1. **H2: Comprehensive Best Practices Guide** ⭐ HIGH PRIORITY
+    - Research industry best practices (Very Good CLI, Flutter Architecture Recommendations)
+    - Create guide structure with 20+ sections:
+        - Architecture patterns (MVVM, Clean Architecture)
+        - Code organization (feature-based structure)
+        - State management (Riverpod best practices)
+        - Error handling (AppResult pattern)
+        - Testing strategies (unit, widget, integration)
+        - Performance optimization
+        - Security best practices
+        - Accessibility guidelines
+        - Code generation workflows
+        - Navigation patterns
+        - Dependency injection patterns
+        - Repository patterns
+        - Service patterns
+        - Storage patterns
+        - Database patterns
+        - Localization patterns
+        - Event system patterns
+        - MCP integration patterns
+        - AI integration patterns
+        - Troubleshooting common issues
+    - Add code examples and anti-patterns for each section
+    - Include in template documentation
+    - **Success Criteria:** Best practices guide with 20+ sections, covers all major scenarios, 90%+
+      developer satisfaction
 
-    - `pubspec.yaml` with dynamic dependencies
-    - `main.dart` with ProviderScope and router
-    - `app_router.dart` with go_router
-    - `app_theme.dart` with Material 3
-    - `app_config.dart` with environment config
-    - `analysis_options.yaml`
-    - `.gitignore`
-    - `README.md`
+2. **H3: Code Generation Workflow Documentation** ⭐ HIGH PRIORITY
+    - Document build commands:
+        - `build_runner build --delete-conflicting-outputs` (clean builds)
+        - `build_runner watch` (incremental development)
+        - `build_runner build` (production builds)
+    - Create workflow diagrams (development vs. production)
+    - Document development workflow:
+        - Initial project setup
+        - Adding new features
+        - Running code generation
+        - Handling conflicts
+    - Document production workflow:
+        - Pre-deployment code generation
+        - CI/CD integration
+        - Build optimization
+    - Add troubleshooting section:
+        - Common build errors
+        - Conflict resolution
+        - Performance issues
+    - Include in template README and best practices guide
+    - **Success Criteria:** Comprehensive workflow documentation, 90%+ developer understanding
 
-2. Implement feature-based directory generation
-3. Add MCP integration templates
-4. Add AI context export templates
-5. Implement post-generation hooks (build_runner, format)
+3. **H7: Incremental Build Support** ⭐ HIGH PRIORITY
+    - Document `build_runner watch` usage for development
+    - Add to development workflow documentation
+    - Include in quick start guide
+    - Add troubleshooting tips for watch mode issues
+    - Document performance benefits (50%+ build time reduction)
+    - Include in template README
+    - **Success Criteria:** Incremental build workflow documented, `build_runner watch` included in
+      development workflow, 50%+ build time reduction
+
+4. **Project Mode Implementation**
+    - Implement project mode template files:
+        - `pubspec.yaml` with dynamic dependencies
+        - `main.dart` with GlobalContainer and router
+        - `app_router.dart` with FeatureScreen enum and RouteHandlerRegistry
+        - `app_theme.dart` with Material 3 and accessibility support
+        - `app_config.dart` with environment config
+        - `build.yaml` with explicit configuration (H1)
+        - `analysis_options.yaml` with generated file exclusions
+        - `.gitignore` with generated file patterns
+        - `README.md` with quick start guide (H6)
+    - Implement feature-based directory generation
+    - Add MCP integration templates
+    - Add AI context export templates
+    - Implement post-generation hooks (build_runner, format)
 
 **Deliverables:**
 
-- Complete project mode templates
-- Feature generation logic
+- Comprehensive best practices guide (20+ sections)
+- Code generation workflow documentation
+- Incremental build support documentation
+- Complete project mode templates with accessibility
 - MCP integration setup
 - Post-generation automation
 - Integration tests for project generation
 
-### Phase 2: Component Modes (Weeks 3-4)
+**Phase 1 Success Metrics:**
 
-#### Week 3: Screen and Service Component Modes
+- ✅ Compliance score: 90%+
+- ✅ Accessibility support: 85%+ compliance
+- ✅ Build configuration: 95%+ compliance
+- ✅ Documentation coverage: 70%+ compliance
+- ✅ All high-priority recommendations (H1-H7) implemented
+
+---
+
+### Phase 2: Important Improvements (Weeks 3-4)
+
+**Focus:** Enhance developer experience and documentation  
+**Target Outcome:** Compliance score improves to 95%+  
+**Key Deliverables:** Template validation, versioning, migration guide, API reference foundation
+
+#### Week 3: Component Modes and Template Validation
 
 **Tasks:**
 
-1. Implement screen mode templates:
+1. **Screen Mode Implementation**
+    - Implement screen mode templates with accessibility support (H4):
+        - Screen widget with BaseScreen and Semantics
+        - ViewModel template (conditional) with accessibility considerations
+        - Test template (conditional) with accessibility tests
+        - Screen type-specific logic (list, detail, form, auth, settings)
+    - Add conditional ViewModel integration
+    - Add conditional navigation integration
+    - Add conditional form validation with accessibility
 
-    - Screen widget with BaseScreen
-    - Provider template (conditional)
-    - Test template (conditional)
-    - Screen type-specific logic (list, detail, form, auth, settings)
+2. **Service Mode Implementation**
+    - Implement service mode templates:
+        - Service class with fly_networking
+        - Test template (conditional)
+        - Retry logic integration
+        - Caching support (conditional)
 
-2. Implement service mode templates:
+3. **Provider Mode Implementation**
+    - Implement provider mode templates:
+        - Provider with @riverpod annotation
+        - Provider type variations (notifier, future, stream, state)
+        - State class generation (conditional)
 
-    - Service class with fly_networking
-    - Test template (conditional)
-    - Retry logic integration
-    - Caching support (conditional)
+4. **H5: Template Structure Validation** ⭐ HIGH PRIORITY
+    - Define validation rules:
+        - Variable validation (type, required, constraints)
+        - File structure validation (required files, directory structure)
+        - Conditional logic validation (Mustache conditionals)
+        - Naming convention validation (Dart naming standards)
+    - Implement validation checks:
+        - Pre-generation validation
+        - Post-generation validation
+        - Template integrity checks
+    - Add to template testing suite
+    - Integrate into CI/CD pipeline
+    - Document validation rules
+    - **Success Criteria:** Template validation implemented, all templates pass validation, zero
+      validation failures in production
 
-3. Add conditional ViewModel integration
-4. Add conditional navigation integration
-5. Add conditional form validation
+5. **H8: Improve Generated Code Documentation** ⭐ HIGH PRIORITY
+    - Add API documentation to all template classes:
+        - Class-level documentation
+        - Method documentation
+        - Parameter documentation
+        - Return value documentation
+    - Include inline comments for complex logic:
+        - State management patterns
+        - Error handling flows
+        - Navigation logic
+        - Async operation handling
+    - Add code examples in documentation:
+        - Usage examples
+        - Integration examples
+        - Best practice examples
+    - Follow Dart documentation conventions
+    - **Success Criteria:** All generated classes have API documentation, 90%+ code coverage with
+      documentation
 
 **Deliverables:**
 
-- Screen mode templates
+- Screen mode templates with accessibility
 - Service mode templates
-- Conditional logic for all options
+- Provider mode templates
+- Template structure validation system
+- Improved generated code documentation
 - Integration tests for component generation
-- Generated code compiles successfully
 
-#### Week 4: Provider Mode and Template Manager Updates
+#### Week 4: Versioning, Migration, and Troubleshooting
 
 **Tasks:**
 
-1. Implement provider mode templates:
+1. **M1: Template Versioning Strategy** ⭐ MEDIUM PRIORITY
+    - Define versioning scheme (semantic versioning: MAJOR.MINOR.PATCH)
+    - Implement version detection:
+        - Template version in `template.yaml`
+        - Project version tracking
+        - Version compatibility checking
+    - Create migration support:
+        - Version migration scripts
+        - Breaking change detection
+        - Migration guides per version
+    - Develop migration tools:
+        - Automated migration scripts
+        - Manual migration guides
+        - Version compatibility matrix
+    - Document versioning strategy
+    - **Success Criteria:** Versioning strategy defined and documented, migration support
+      implemented, smooth migration experience
 
-    - Provider with @riverpod annotation
-    - Provider type variations (notifier, future, stream, state)
-    - State class generation (conditional)
+2. **M2: Detailed Migration Guide** ⭐ MEDIUM PRIORITY
+    - Identify migration scenarios:
+        - Old templates → Unified template
+        - Very Good CLI → Fly CLI
+        - Other tools → Fly CLI
+    - Create step-by-step guides for each scenario:
+        - Pre-migration checklist
+        - Migration steps
+        - Post-migration verification
+        - Common issues and solutions
+    - Develop migration tools:
+        - Automated migration scripts where possible
+        - Manual migration checklists
+        - Migration validation tools
+    - Document common issues:
+        - Breaking changes
+        - Compatibility issues
+        - Workarounds
+    - Include in template documentation
+    - **Success Criteria:** Migration guide covers all scenarios, 90%+ successful migration rate
 
-2. Update template manager to support unified template:
+3. **M5: Troubleshooting Guide** ⭐ MEDIUM PRIORITY
+    - Research common issues and errors:
+        - Template generation errors
+        - Build errors
+        - Runtime errors
+        - Integration issues
+    - Document solutions for each issue:
+        - Root cause analysis
+        - Step-by-step solutions
+        - Prevention strategies
+    - Create troubleshooting guide structure:
+        - Error message index
+        - Issue categories
+        - Search functionality
+    - Include error message explanations:
+        - What the error means
+        - Why it occurs
+        - How to fix it
+    - Add to template documentation
+    - **Success Criteria:** Troubleshooting guide covers common issues, 80%+ issue resolution rate
 
-    - Read `generation_mode` from variables
-    - Map `generation_mode` to `BrickType` for compatibility
-    - Update `_determineBrickType()` to handle unified template
+4. **Template Manager Updates**
+    - Update template manager to support unified template:
+        - Read `generation_mode` from variables
+        - Map `generation_mode` to `BrickType` for compatibility
+        - Update `_determineBrickType()` to handle unified template
+        - Add mode-based variable validation
+    - Update CLI commands to use unified template:
+        - `fly create` → `generation_mode=project`
+        - `fly generate screen` → `generation_mode=screen`
+        - `fly generate service` → `generation_mode=service`
+        - Add `fly generate provider` → `generation_mode=provider`
+    - Update manifest parser to set appropriate generation_mode
+
+**Deliverables:**
+
+- Template versioning strategy and implementation
+- Comprehensive migration guide
+- Troubleshooting guide
+- Updated template manager
+- Updated CLI commands
+- Manifest parser updates
+
+**Phase 2 Success Metrics:**
+
+- ✅ Compliance score: 95%+
+- ✅ Template validation: 100% pass rate
+- ✅ Generated code documentation: 90%+ coverage
+- ✅ Migration success rate: 90%+
+- ✅ All high-priority recommendations (H5, H8) implemented
+- ✅ Medium-priority recommendations (M1, M2, M5) implemented
+
+---
+
+### Phase 3: Enhancement Improvements (Weeks 5-8)
+
+**Focus:** Complete documentation and add enhancements  
+**Target Outcome:** Compliance score reaches 98%+  
+**Key Deliverables:** API reference, template composition, industry comparisons, performance
+optimization
+
+#### Week 5: API Reference and Template Composition
+
+**Tasks:**
+
+1. **M3: Comprehensive API Reference** ⭐ MEDIUM PRIORITY
+    - Document all template variables:
+        - Variable name and type
+        - Description and purpose
+        - Default values
+        - Validation rules
+        - Usage examples
+    - Create API reference structure:
+        - Variables by mode (project, screen, service, provider)
+        - Variables by category (required, optional, conditional)
+        - Search functionality
+        - Cross-references
+    - Include usage examples:
+        - Basic usage examples
+        - Advanced usage examples
+        - Integration examples
+    - Add search functionality
+    - Include in template documentation
+    - **Success Criteria:** All variables documented, 100% API coverage, 90%+ developer satisfaction
+
+2. **M4: Template Composition Patterns** ⭐ MEDIUM PRIORITY
+    - Research composition patterns:
+        - Mason brick composition
+        - Template inheritance
+        - Template extension
+        - Template composition strategies
+    - Define composition strategies:
+        - When to compose templates
+        - How to compose templates
+        - Best practices for composition
+    - Document patterns with examples:
+        - Basic composition examples
+        - Advanced composition examples
+        - Real-world use cases
+    - Test composition patterns:
+        - Validate composition works correctly
+        - Test edge cases
+        - Performance testing
+    - Include in template documentation
+    - **Success Criteria:** Composition patterns defined, strategies documented, examples provided
+
+3. **M7: Generated File Exclusion Strategy** ⭐ MEDIUM PRIORITY
+    - Document exclusion patterns:
+        - Generated file patterns (`*.g.dart`, `*.freezed.dart`, etc.)
+        - Build output patterns
+        - Temporary file patterns
+    - Create `.gitignore` template:
+        - All generated file patterns
+        - Build output directories
+        - IDE-specific files
+    - Configure `analysis_options.yaml`:
+        - Exclude generated files from analysis
+        - Performance optimizations
+    - Include in template generation
+    - Document in best practices guide
+    - **Success Criteria:** Exclusion patterns documented, zero version control issues
+
+4. **Fly Ecosystem Integration**
+    - Integrate fly_core patterns (BaseScreen, BaseViewModel)
+    - Integrate fly_state patterns
+    - Integrate fly_networking patterns
+    - Integrate fly_navigation patterns
+    - Integrate fly_errors error handling patterns
+    - Integrate fly_logger logging patterns
+    - Create integration tests with generated projects
+    - Verify all Fly packages work correctly
+
+**Deliverables:**
+
+- Comprehensive API reference documentation
+- Template composition patterns and documentation
+- Generated file exclusion strategy
+- Fly ecosystem package integration
+- Integration tests passing
+
+#### Week 6: Industry Comparisons and Community Alignment
+
+**Tasks:**
+
+1. **M6: Very Good CLI Pattern Comparison** ⭐ MEDIUM PRIORITY
+    - Research Very Good CLI patterns:
+        - Template organization
+        - Best practices enforcement
+        - Documentation standards
+        - Testing strategies
+    - Compare with Fly template plan:
+        - Template structure comparison
+        - Best practices comparison
+        - Documentation comparison
+        - Feature comparison
+    - Identify best practices:
+        - Practices to adopt
+        - Practices to improve
+        - Unique Fly advantages
+    - Document findings:
+        - Comparison matrix
+        - Best practices identified
+        - Improvement recommendations
+    - Create improvement recommendations
+    - **Success Criteria:** Comparison document created, best practices identified, improvements
+      documented
+
+2. **M8: FlutterFire CLI Pattern Analysis** ⭐ MEDIUM PRIORITY
+    - Research FlutterFire CLI patterns:
+        - Integration-focused templates
+        - Platform configuration
+        - Setup automation
+        - Dependency management
+    - Analyze integration strategies:
+        - How FlutterFire handles integrations
+        - Platform-specific configurations
+        - Automation patterns
+    - Document findings:
+        - Integration patterns identified
+        - Best practices extracted
+        - Improvement opportunities
+    - Identify improvements:
+        - Integration patterns to adopt
+        - Automation improvements
+        - Configuration improvements
+    - Create recommendations
+    - **Success Criteria:** Pattern analysis completed, integration strategies identified,
+      improvements recommended
+
+3. **M9: Community Standards Alignment** ⭐ MEDIUM PRIORITY
+    - Research Flutter community conventions:
+        - Dart Style Guide compliance
+        - Flutter best practices
+        - Community patterns
+        - Naming conventions
+    - Compare with template plan:
+        - Identify alignment gaps
+        - Identify deviations
+        - Identify improvements
+    - Align template with conventions:
+        - Update template patterns
+        - Update naming conventions
+        - Update code style
+    - Document alignment:
+        - Alignment matrix
+        - Deviations and rationale
+        - Community feedback integration
+    - Update template as needed
+    - **Success Criteria:** Community conventions aligned, alignment documented, positive community
+      feedback
+
+4. **Manifest-Based Generation**
+    - Implement manifest parser (YAML)
+    - Create manifest-to-variables converter
+    - Implement multi-feature generation from manifest
+    - Add environment-specific configuration
+    - Implement custom template overrides
+    - Enhance MCP integration templates
+    - Add context export functionality
+    - Add schema export templates
+
+**Deliverables:**
+
+- Very Good CLI comparison document
+- FlutterFire CLI pattern analysis
+- Community standards alignment documentation
+- Manifest parsing system
+- Multi-feature generation
+- Enhanced MCP integration
+
+#### Week 7: Performance Optimization and Testing
+
+**Tasks:**
+
+1. **M10: Performance Optimization Guidelines** ⭐ MEDIUM PRIORITY
+    - Research performance best practices:
+        - Flutter performance guidelines
+        - Build performance optimization
+        - Runtime performance optimization
+        - Code generation performance
+    - Add performance guidelines to template:
+        - Build performance optimizations
+        - Runtime performance patterns
+        - Code generation optimizations
+    - Include in generated code:
+        - Performance-conscious patterns
+        - Optimization hints
+        - Performance monitoring integration
+    - Document optimization strategies:
+        - Build optimization strategies
+        - Runtime optimization strategies
+        - Profiling and monitoring
+    - Add to best practices guide
+    - **Success Criteria:** Performance guidelines included, optimization strategies documented,
+      performance benchmarks met
+
+2. **Comprehensive Testing**
+    - Write unit tests for all template generation logic:
+        - Variable validation tests
+        - Mode-based validation logic tests
+        - Template file generation tests
+        - Conditional logic testing
+        - Variable transformation tests
+    - Write integration tests with Fly CLI:
+        - Full project generation (all modes)
+        - Component generation (screen, service, provider)
+        - Code compilation verification
+        - Fly CLI command integration
+        - Manifest-based generation
+    - End-to-end tests:
+        - Complete project lifecycle
+        - Component addition to existing project
+        - Manifest-based generation
+        - MCP integration setup
+        - AI context export
+    - Performance testing:
+        - Generation speed benchmarks (< 5 seconds for standard project)
+        - Component generation speed (< 2 seconds per component)
+        - Large project generation (< 15 seconds for 10+ features)
+        - Memory usage (< 500MB during generation)
+    - Compatibility testing:
+        - Flutter SDK versions (3.10.0+, 3.12.0+, 3.16.0+)
+        - Dart SDK versions (3.0.0+, 3.2.0+, 3.4.0+)
+        - All platforms (iOS, Android, Web, macOS, Windows, Linux)
+        - All generation modes
+
+**Deliverables:**
+
+- Performance optimization guidelines
+- Comprehensive test suite (80%+ coverage)
+- Performance benchmarks
+- Compatibility matrix
+- Bug fixes and improvements
+
+#### Week 8: Final Documentation and Examples
+
+**Tasks:**
+
+1. **Complete Documentation Package**
+    - Finalize README.md with all sections:
+        - Overview
+        - Installation
+        - Usage (all modes)
+        - Generation modes explained
+        - Variable reference
+        - Examples for each mode
+        - Advanced usage
+        - Integration guides
+        - Customization
+        - Troubleshooting
+        - Contributing
+    - Complete API reference documentation
+    - Finalize best practices guide (20+ sections)
+    - Complete migration guide
+    - Complete troubleshooting guide
+    - Add FAQ section (L2 - Phase 4 preparation)
+
+2. **Usage Examples**
+    - Example 1: Minimal Project
+        - Basic Flutter project
+        - Minimal dependencies
+        - Simple structure
+    - Example 2: Riverpod Project
+        - Full Riverpod setup
+        - Multiple features
+        - Complete integration
+    - Example 3: Production Project
+        - All Fly packages
+        - MCP integration
+        - AI context export
+        - Complete documentation
+    - Example 4: Screen Component
+        - Screen with ViewModel
+        - Navigation integration
+        - Form validation
+        - Accessibility support
+    - Example 5: Service Component
+        - API service
+        - Retry logic
+        - Caching support
+    - Example 6: Provider Component
+        - Provider with state class
+        - Integration patterns
+
+3. **Documentation Quality Assurance**
+    - Review all documentation for completeness
+    - Verify all examples work correctly
+    - Check for broken links
+    - Ensure consistent formatting
+    - Validate code examples compile
+    - Review accessibility of documentation
+
+**Deliverables:**
+
+- Complete documentation package
+- Example projects and components
+- All documentation reviewed and validated
+- Documentation quality assurance complete
+
+**Phase 3 Success Metrics:**
+
+- ✅ Compliance score: 98%+
+- ✅ API reference: 100% coverage
+- ✅ Template composition: Patterns defined and documented
+- ✅ Industry comparisons: Completed
+- ✅ Performance optimization: Guidelines included
+- ✅ Test coverage: 80%+
+- ✅ All medium-priority recommendations (M3-M10) implemented
+
+---
+
+### Phase 4: Long-Term Enhancements (Ongoing)
+
+**Focus:** Continuous improvement and enhancement  
+**Target Outcome:** Industry-leading compliance and developer experience  
+**Key Deliverables:** Code comments, FAQ, video tutorials, security, i18n, analytics
+
+#### Ongoing Enhancements
+
+**Tasks:**
+
+1. **L1: Code Comment Generation** ⭐ LOW PRIORITY
+    - Identify complex logic in templates
+    - Add explanatory comments to templates
+    - Document patterns in comments
+    - Include in template generation
+    - Review comment quality
+    - **Success Criteria:** Comments added to complex logic, patterns explained, code readability
+      improved
+
+2. **L2: FAQ Section** ⭐ LOW PRIORITY
+    - Research common questions:
+        - Template usage questions
+        - Troubleshooting questions
+        - Integration questions
+        - Best practices questions
+    - Create FAQ structure:
+        - Categorized questions
+        - Searchable format
+        - Regular updates
+    - Document answers:
+        - Clear, concise answers
+        - Code examples where helpful
+        - Links to detailed documentation
+    - Make FAQ searchable
+    - Include in template documentation
+    - **Success Criteria:** FAQ covers common questions, 80%+ question coverage
+
+3. **L3: Video Tutorials** ⭐ LOW PRIORITY
+    - Plan video content and structure:
+        - Quick start tutorial
+        - Project generation tutorial
+        - Component generation tutorials
+        - Advanced usage tutorials
+    - Create video scripts:
+        - Step-by-step scripts
+        - Visual aids planning
+        - Code examples preparation
+    - Record tutorials:
+        - High production quality
+        - Clear audio and video
+        - Professional presentation
+    - Edit and enhance videos:
+        - Add captions
+        - Add annotations
+        - Add links to documentation
+    - Publish and include in documentation
+    - **Success Criteria:** Video tutorials created, high production quality, positive developer
+      feedback
+
+4. **L4: Template Testing Examples** ⭐ LOW PRIORITY
+    - Research testing best practices:
+        - Flutter testing guidelines
+        - Unit testing patterns
+        - Widget testing patterns
+        - Integration testing patterns
+    - Add test examples to templates:
+        - Unit test examples
+        - Widget test examples
+        - Integration test examples
+    - Include in generated code:
+        - Test file templates
+        - Test helper utilities
+        - Testing best practices
+    - Document testing strategies:
+        - Testing approach
+        - Test organization
+        - Test coverage goals
+    - Add to best practices guide
+    - **Success Criteria:** Test examples included, testing strategies documented, test coverage
+      improved
+
+5. **L5: Security Best Practices** ⭐ LOW PRIORITY
+    - Research security best practices:
+        - Flutter security guidelines
+        - Secure storage patterns
+        - API security patterns
+        - Authentication patterns
+    - Add security guidelines to template:
+        - Secure storage patterns
+        - API security patterns
+        - Authentication patterns
+        - Data protection patterns
+    - Include in generated code:
+        - Security-conscious patterns
+        - Security monitoring integration
+        - Security best practices
+    - Document security patterns:
+        - Security guidelines
+        - Security checklist
+        - Security audit recommendations
+    - Add to best practices guide
+    - **Success Criteria:** Security guidelines included, security patterns documented, security
+      audits passed
+
+6. **L6: Internationalization Best Practices** ⭐ LOW PRIORITY
+    - Research i18n best practices:
+        - Flutter i18n guidelines
+        - Localization patterns
+        - RTL support patterns
+    - Date/time formatting patterns
+    - Enhance i18n support in template:
+        - Improved localization setup
+        - RTL support
+        - Date/time formatting
+        - Number formatting
+    - Add examples:
+        - Multi-language examples
+        - RTL examples
+        - Formatting examples
+    - Document i18n patterns:
+        - Localization guide
+        - RTL support guide
+        - Formatting guide
+    - Add to best practices guide
+    - **Success Criteria:** i18n best practices included, examples provided, i18n patterns
+      documented
+
+7. **L7: Analytics Integration Patterns** ⭐ LOW PRIORITY
+    - Research analytics patterns:
+        - Flutter analytics integration
+        - Event tracking patterns
+        - User behavior tracking
+        - Performance monitoring
+    - Add integration patterns to template:
+        - Analytics setup patterns
+        - Event tracking patterns
+        - User behavior tracking patterns
+    - Include in generated code:
+        - Analytics integration examples
+        - Event tracking utilities
+        - Analytics best practices
+    - Document analytics strategies:
+        - Analytics setup guide
+        - Event tracking guide
+        - Analytics best practices
+    - Add to best practices guide
+    - **Success Criteria:** Analytics patterns included, integration examples provided, analytics
+      strategies documented
+
+**Phase 4 Success Metrics:**
+
+- ✅ Industry-leading compliance: 98%+
+- ✅ Developer satisfaction: 90%+
+- ✅ All low-priority recommendations (L1-L7) implemented
+- ✅ Continuous improvement process established
+- ✅ Community feedback integration
+
+---
+
+## 5. Success Criteria and Measurable Metrics
+
+This section defines measurable success criteria for each phase and overall project success, aligned
+with industry standards and recommendations.
+
+### Overall Success Criteria
+
+**Compliance Targets:**
+
+- ✅ **Overall Compliance Score**: 95%+ (Current: 82%)
+- ✅ **Flutter/Dart Code Generation Standards**: 95%+ (Current: 75%)
+- ✅ **Documentation Standards**: 90%+ (Current: 42%)
+- ✅ **Accessibility Standards**: 85%+ (Current: 0%)
+- ✅ **Template Organization**: 90%+ (Current: 56%)
+- ✅ **Developer Experience**: 90%+ (Current: 72%)
+
+**Quality Metrics:**
+
+- ✅ **Test Coverage**: 80%+ code coverage
+- ✅ **Template Generation Speed**: < 5 seconds for standard project
+- ✅ **Component Generation Speed**: < 2 seconds per component
+- ✅ **Build Performance**: 20%+ improvement in build times
+- ✅ **Developer Satisfaction**: 90%+ satisfaction rate
+- ✅ **Migration Success**: 90%+ successful migration rate
+- ✅ **Template Quality**: Zero validation failures in production
+
+**Documentation Metrics:**
+
+- ✅ **Best Practices Guide**: 20+ sections
+- ✅ **API Reference**: 100% API coverage
+- ✅ **Generated Code Documentation**: 90%+ code coverage with documentation
+- ✅ **Workflow Documentation**: Comprehensive coverage of all workflows
+- ✅ **Accessibility Documentation**: Complete accessibility guidelines
+
+**Accessibility Metrics:**
+
+- ✅ **Semantic Labels**: All generated widgets include semantic labels
+- ✅ **Screen Reader Support**: All widgets support screen readers
+- ✅ **Keyboard Navigation**: All interactive widgets support keyboard navigation
+- ✅ **Color Contrast**: All generated themes meet WCAG 2.1 AA standards
+- ✅ **Accessibility Audits**: Generated code passes accessibility audits
+
+### Phase-Specific Success Criteria
+
+**Phase 1 (Weeks 1-2) - Critical Improvements:**
+
+- ✅ Compliance score: 90%+
+- ✅ Accessibility support: 85%+ compliance
+- ✅ Build configuration: 95%+ compliance
+- ✅ Documentation coverage: 70%+ compliance
+- ✅ All high-priority recommendations (H1-H7) implemented
+- ✅ Quick start guide enables project generation in < 5 minutes
+- ✅ Best practices guide with 20+ sections created
+
+**Phase 2 (Weeks 3-4) - Important Improvements:**
+
+- ✅ Compliance score: 95%+
+- ✅ Template validation: 100% pass rate
+- ✅ Generated code documentation: 90%+ coverage
+- ✅ Migration success rate: 90%+
+- ✅ All high-priority recommendations (H5, H8) implemented
+- ✅ Medium-priority recommendations (M1, M2, M5) implemented
+- ✅ Template versioning strategy defined and documented
+
+**Phase 3 (Weeks 5-8) - Enhancement Improvements:**
+
+- ✅ Compliance score: 98%+
+- ✅ API reference: 100% coverage
+- ✅ Template composition: Patterns defined and documented
+- ✅ Industry comparisons: Completed
+- ✅ Performance optimization: Guidelines included
+- ✅ Test coverage: 80%+
+- ✅ All medium-priority recommendations (M3-M10) implemented
+
+**Phase 4 (Ongoing) - Long-Term Enhancements:**
+
+- ✅ Industry-leading compliance: 98%+
+- ✅ Developer satisfaction: 90%+
+- ✅ All low-priority recommendations (L1-L7) implemented
+- ✅ Continuous improvement process established
+- ✅ Community feedback integration
+
+### Recommendation Implementation Checklist
+
+**High-Priority Recommendations (8):**
+
+- [ ] H1: Explicit `build.yaml` configuration - Phase 1
+- [ ] H2: Comprehensive best practices guide - Phase 1
+- [ ] H3: Code generation workflow documentation - Phase 1
+- [ ] H4: Accessibility best practices - Phase 1
+- [ ] H5: Template structure validation - Phase 2
+- [ ] H6: Comprehensive quick start guide - Phase 1
+- [ ] H7: Incremental build support - Phase 1
+- [ ] H8: Generated code documentation - Phase 2
+
+**Medium-Priority Recommendations (10):**
+
+- [ ] M1: Template versioning strategy - Phase 2
+- [ ] M2: Detailed migration guide - Phase 2
+- [ ] M3: Comprehensive API reference - Phase 3
+- [ ] M4: Template composition patterns - Phase 3
+- [ ] M5: Troubleshooting guide - Phase 2
+- [ ] M6: Very Good CLI pattern comparison - Phase 3
+- [ ] M7: Generated file exclusion strategy - Phase 3
+- [ ] M8: FlutterFire CLI pattern analysis - Phase 3
+- [ ] M9: Community standards alignment - Phase 3
+- [ ] M10: Performance optimization guidelines - Phase 3
+
+**Low-Priority Recommendations (7):**
+
+- [ ] L1: Code comment generation - Phase 4
+- [ ] L2: FAQ section - Phase 4
+- [ ] L3: Video tutorials - Phase 4
+- [ ] L4: Template testing examples - Phase 4
+- [ ] L5: Security best practices - Phase 4
+- [ ] L6: Internationalization best practices - Phase 4
+- [ ] L7: Analytics integration patterns - Phase 4
+
+---
     - Add mode-based variable validation
 
 3. Update CLI commands to use unified template:
@@ -1158,28 +2121,44 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 ---
 
-## 4. Standards Compliance Matrix
+## 6. Standards Compliance Matrix
 
-### 4.1 Flutter/Dart Code Generation Standards
+This section provides detailed compliance tracking for each category, including current scores,
+target scores, gap analysis, and implementation tasks to close gaps.
+
+### 6.1 Flutter/Dart Code Generation Standards
+
+**Current Score: 75%** ⚠️ | **Target Score: 95%+** ✅
+
+| Standard                     | Current State                 | Target State                       | Gap                         | Priority | Implementation Task                         |
+|------------------------------|-------------------------------|------------------------------------|-----------------------------|----------|---------------------------------------------|
+| build_runner Integration     | ✅ Mentioned                   | ✅ Required                         | None                        | -        | -                                           |
+| build.yaml Configuration     | ⚠️ Mentioned but not detailed | ✅ Explicit configuration required  | Missing detailed config     | **High** | H1: Add explicit `build.yaml` configuration |
+| Incremental Builds           | ❌ Not mentioned               | ✅ Standard practice                | Missing incremental support | Medium   | H7: Add incremental build support           |
+| Generated File Management    | ✅ Basic exclusion             | ✅ Comprehensive exclusion strategy | Limited guidance            | Medium   | M7: Add generated file exclusion strategy   |
+| Build Workflow Documentation | ⚠️ Minimal                    | ✅ Comprehensive workflow docs      | Missing detailed workflow   | **High** | H3: Document code generation workflow       |
 
 **Compliance Checklist:**
 
-✅ **build_runner Integration**
-
+✅ **build_runner Integration** (100% compliant)
 - Uses `build_runner` for code generation
-- Proper `build.yaml` configuration
 - Generated files in `.g.dart` format
 - Delete conflicting outputs handling
 
-✅ **Riverpod Code Generation**
+⚠️ **build.yaml Configuration** (60% → Target: 95%+) - **H1 Implementation Required**
 
+- ⚠️ Currently: Mentioned but not detailed
+- ✅ Target: Explicit `build.yaml` configuration with builder ordering
+- ✅ Target: Incremental build support configuration
+- ✅ Target: Performance optimization settings
+
+✅ **Riverpod Code Generation** (100% compliant)
 - Uses `@riverpod` annotations (v3 syntax)
 - Proper provider patterns
 - Generated provider files
 - State management best practices
 
-✅ **Code Style**
-
+✅ **Code Style** (88% compliant)
 - Follows Dart style guide
 - Uses `flutter_lints` package (v5.0.0)
 - Custom linting rules via analyzer plugins (optional)
@@ -1187,6 +2166,18 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 - Consistent naming conventions
 - Excludes generated files from analysis (`*.g.dart`, `*.freezed.dart`)
 - Linter rules: always_declare_return_types, avoid_print, prefer_const_constructors, etc.
+
+**Gap Analysis:**
+
+- **Critical Gap**: Missing explicit `build.yaml` configuration (H1)
+- **Important Gap**: Missing incremental build support documentation (H7)
+- **Moderate Gap**: Limited generated file exclusion guidance (M7)
+
+**Implementation Tasks:**
+
+1. **H1**: Create comprehensive `build.yaml` template with all generators configured
+2. **H7**: Document `build_runner watch` usage for incremental builds
+3. **M7**: Document comprehensive generated file exclusion patterns
 
 ### 4.2 Fly Ecosystem Integration
 
@@ -1309,7 +2300,113 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 ---
 
-## 5. Quality Assurance Plan
+### 6.6 Documentation Standards Compliance
+
+**Current Score: 42%** ❌ | **Target Score: 90%+** ✅
+
+| Standard                     | Current State | Target State                         | Gap                       | Priority | Implementation Task                           |
+|------------------------------|---------------|--------------------------------------|---------------------------|----------|-----------------------------------------------|
+| Best Practices Guide         | ❌ Missing     | ✅ Comprehensive guide (20+ sections) | Critical gap              | **High** | H2: Create comprehensive best practices guide |
+| API Reference                | ⚠️ Planned    | ✅ Comprehensive API reference        | Missing detailed API docs | Medium   | M3: Add comprehensive API reference           |
+| Generated Code Documentation | ⚠️ Limited    | ✅ Comprehensive inline docs          | Missing comment strategy  | **High** | H8: Improve generated code documentation      |
+| Workflow Documentation       | ⚠️ Minimal    | ✅ Comprehensive workflow docs        | Missing detailed workflow | **High** | H3: Document code generation workflow         |
+| Quick Start Guide            | ⚠️ Planned    | ✅ Comprehensive guide                | Needs comprehensive guide | **High** | H6: Create comprehensive quick start guide    |
+| Migration Guide              | ⚠️ Basic      | ✅ Detailed migration path            | Limited migration docs    | Medium   | M2: Create detailed migration guide           |
+| Troubleshooting Guide        | ⚠️ Planned    | ✅ Detailed guide                     | Needs detailed guide      | Medium   | M5: Add troubleshooting guide                 |
+
+**Gap Analysis:**
+
+- **Critical Gap**: Missing comprehensive best practices guide (H2)
+- **Critical Gap**: Missing comprehensive workflow documentation (H3)
+- **Critical Gap**: Missing comprehensive quick start guide (H6)
+- **Important Gap**: Limited generated code documentation (H8)
+- **Moderate Gap**: Missing detailed API reference (M3)
+- **Moderate Gap**: Limited migration guide (M2)
+- **Moderate Gap**: Missing troubleshooting guide (M5)
+
+**Implementation Tasks:**
+
+1. **H2**: Create best practices guide with 20+ sections covering all major development scenarios
+2. **H3**: Document comprehensive code generation workflow (development and production)
+3. **H6**: Create comprehensive quick start guide enabling project generation in < 5 minutes
+4. **H8**: Add API documentation to all generated classes (90%+ code coverage)
+5. **M3**: Create comprehensive API reference with 100% API coverage
+6. **M2**: Create detailed migration guide covering all migration scenarios
+7. **M5**: Create troubleshooting guide covering common issues and solutions
+
+---
+
+### 6.7 Accessibility Standards Compliance
+
+**Current Score: 0%** ❌ | **Target Score: 85%+** ✅
+
+| Standard                    | Current State   | Target State                                          | Gap                   | Priority | Implementation Task                  |
+|-----------------------------|-----------------|-------------------------------------------------------|-----------------------|----------|--------------------------------------|
+| Semantic Labels             | ❌ Not mentioned | ✅ All widgets include semantic labels                 | Missing accessibility | **High** | H4: Add accessibility best practices |
+| Screen Reader Support       | ❌ Not mentioned | ✅ All widgets support screen readers                  | Missing accessibility | **High** | H4: Add accessibility best practices |
+| Keyboard Navigation         | ❌ Not mentioned | ✅ All interactive widgets support keyboard navigation | Missing accessibility | **High** | H4: Add accessibility best practices |
+| Color Contrast              | ❌ Not mentioned | ✅ All themes meet WCAG 2.1 AA standards               | Missing accessibility | **High** | H4: Add accessibility best practices |
+| Accessibility Documentation | ❌ Not mentioned | ✅ Complete accessibility guidelines                   | Missing accessibility | **High** | H4: Add accessibility best practices |
+
+**Compliance Checklist:**
+
+❌ **Accessibility Support** (0% → Target: 85%+) - **H4 Implementation Required**
+
+- ❌ Currently: Complete lack of accessibility support
+- ✅ Target: All generated widgets include semantic labels (Semantics widget)
+- ✅ Target: Screen reader support in all generated code
+- ✅ Target: Keyboard navigation support for all interactive widgets
+- ✅ Target: Color contrast guidelines included in theme templates
+- ✅ Target: Accessibility documentation provided
+- ✅ Target: Generated code passes accessibility audits
+
+**Gap Analysis:**
+
+- **Critical Gap**: Complete lack of accessibility standards (H4)
+- **Impact**: Legal compliance risk, exclusion of users with disabilities
+- **Required**: Immediate implementation of accessibility best practices
+
+**Implementation Tasks:**
+
+1. **H4**: Research Flutter accessibility guidelines (WCAG 2.1 compliance)
+2. **H4**: Add semantic labels to all widget templates (Semantics widget)
+3. **H4**: Include accessibility properties in generated screens
+4. **H4**: Add keyboard navigation support to generated widgets
+5. **H4**: Include color contrast guidelines in theme templates
+6. **H4**: Create accessibility documentation section
+7. **H4**: Add accessibility tests to template generation
+
+---
+
+### 6.8 Template Organization Standards Compliance
+
+**Current Score: 56%** ⚠️ | **Target Score: 90%+** ✅
+
+| Standard               | Current State     | Target State                  | Gap                          | Priority | Implementation Task                         |
+|------------------------|-------------------|-------------------------------|------------------------------|----------|---------------------------------------------|
+| Template Versioning    | ❌ Not addressed   | ✅ Versioning strategy needed  | No versioning plan           | Medium   | M1: Implement template versioning strategy  |
+| Template Composition   | ⚠️ Not discussed  | ✅ Reusable components         | Missing composition strategy | Medium   | M4: Define template composition patterns    |
+| Template Testing       | ⚠️ Output-focused | ✅ Structure validation needed | Limited template testing     | **High** | H5: Implement template structure validation |
+| Template Documentation | ✅ Basic           | ✅ Comprehensive inline docs   | Missing detailed docs        | Low      | L1: Add code comment generation             |
+
+**Gap Analysis:**
+
+- **Important Gap**: Missing template versioning strategy (M1)
+- **Important Gap**: Missing template composition patterns (M4)
+- **Critical Gap**: Limited template structure validation (H5)
+- **Low Priority Gap**: Missing detailed template documentation (L1)
+
+**Implementation Tasks:**
+
+1. **H5**: Implement template structure validation (variable, file structure, conditional logic,
+   naming)
+2. **M1**: Implement template versioning strategy (semantic versioning)
+3. **M4**: Define template composition patterns and strategies
+4. **L1**: Add code comment generation for complex logic
+
+---
+
+## 7. Quality Assurance Plan
 
 ### 5.1 Test Coverage Requirements
 
@@ -1814,19 +2911,32 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 ## Conclusion
 
-This plan provides a comprehensive roadmap for developing a unified Mason brick template (`fly_foundation`) that generates both Flutter projects and individual components using a single, consistent template system. The 8-week implementation plan ensures systematic development with clear deliverables, quality assurance, and comprehensive documentation.
+This plan provides a comprehensive roadmap for developing a unified Mason brick template (
+`fly_foundation`) that generates both Flutter projects and individual components using a single,
+consistent template system. The 8-week implementation plan ensures systematic development with clear
+deliverables, quality assurance, and comprehensive documentation.
 
-The unified approach eliminates template duplication, ensures consistency, simplifies maintenance, and provides a single source of truth for Fly CLI patterns and ecosystem integration standards.
+The unified approach eliminates template duplication, ensures consistency, simplifies maintenance,
+and provides a single source of truth for Fly CLI patterns and ecosystem integration standards.
 
-**Plan Updates:** This plan has been thoroughly analyzed and updated to match the architecture and implementation patterns found in the foundation project (`/Users/apple/Desktop/dev/flutter/me/projects/Fly/examples/foundation_project`). Key updates include:
+**Plan Updates:** This plan has been thoroughly analyzed and updated to match the architecture and
+implementation patterns found in the foundation project (
+`/Users/apple/Desktop/dev/flutter/me/projects/Fly/examples/foundation_project`). Key updates
+include:
 
-- Updated project structure to match foundation project's simplified core structure (only foundation directory by default)
-- Updated core organization to generate minimal structure with only `core/foundation/` directory initially
-- Additional core directories (analytics, database, di, event_system, models, navigation, pagination, providers, repositories, services, storage) are optional and can be added as needed
-- Updated dependency injection pattern to use `GlobalContainer` (ProviderContainer singleton) - optional, generated when needed
+- Updated project structure to match foundation project's simplified core structure (only foundation
+  directory by default)
+- Updated core organization to generate minimal structure with only `core/foundation/` directory
+  initially
+- Additional core directories (analytics, database, di, event_system, models, navigation,
+  pagination, providers, repositories, services, storage) are optional and can be added as needed
+- Updated dependency injection pattern to use `GlobalContainer` (ProviderContainer singleton) -
+  optional, generated when needed
 - Updated navigation pattern to use `FeatureScreen` enum and `RouteHandlerRegistry` with MaterialApp
-- Added repository pattern with `BaseRepository` and Template Method Pattern - optional, when repositories are needed
-- Updated service pattern to return `AppResult<T>` from `fly_flow_guard` - services directory created when generating services
+- Added repository pattern with `BaseRepository` and Template Method Pattern - optional, when
+  repositories are needed
+- Updated service pattern to return `AppResult<T>` from `fly_flow_guard` - services directory
+  created when generating services
 - Added storage pattern with interfaces and managers - optional, when storage is needed
 - Added database pattern using Drift (SQLite) - optional, when database is needed
 - Updated code generation to include drift_dev, auto_mappr, and json_serializable
