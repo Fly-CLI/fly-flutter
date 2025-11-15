@@ -337,6 +337,9 @@ fly generate service user_api --feature=core --type=api \
 # Create a complete integrated ecosystem
 fly create my_app --template=fly_foundation
 
+# Create with multiple features
+fly generate project my_app --features=home,profile,settings
+
 # Create from manifest (AI can understand and modify)
 fly create --from-manifest=fly_project.yaml
 

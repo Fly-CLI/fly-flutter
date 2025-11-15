@@ -44,6 +44,18 @@ class CreatePlatformsFlag extends CliFlag {
       );
 }
 
+/// Create features flag (multi-value)
+class CreateFeaturesFlag extends CliFlag {
+  CreateFeaturesFlag() : super(
+        name: 'features',
+        description: 'Initial feature modules to scaffold',
+        isGlobal: false,
+        category: CliFlagCategory.execution,
+        type: FlagType.multiValue,
+        defaultValue: const ['home'],
+      );
+}
+
 /// Create from manifest flag
 class CreateFromManifestFlag extends CliFlag {
   const CreateFromManifestFlag() : super(

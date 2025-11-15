@@ -70,6 +70,12 @@ class GenerateProjectCommand extends FlyCommand {
             defaultValue: 'ios,android',
           ),
           const OptionDefinition(
+            name: 'features',
+            description: 'Initial feature modules to scaffold (comma-separated)',
+            type: OptionType.value,
+            defaultValue: 'home',
+          ),
+          const OptionDefinition(
             name: 'interactive',
             description:
                 'Run in interactive mode to configure project settings',
@@ -82,6 +88,11 @@ class GenerateProjectCommand extends FlyCommand {
                 'fly generate project my_app --template=fly_foundation --platforms=ios,android,web',
             description: 'Create a Fly foundation project',
           ),
+          const CommandExample(
+            command:
+                'fly generate project my_app --features=home,profile,settings',
+            description: 'Create a project with multiple features',
+          ),
         ],
       );
 
@@ -92,6 +103,7 @@ class GenerateProjectCommand extends FlyCommand {
       const CreateTemplateFlag(),
       const CreateOrganizationFlag(),
       CreatePlatformsFlag(),
+      CreateFeaturesFlag(),
       const InteractiveFlag(),
       const CreateFromManifestFlag(),
       const OutputDirFlag(),
@@ -131,6 +143,10 @@ class GenerateProjectCommand extends FlyCommand {
       argResults,
       CreatePlatformsFlag(),
     );
+    final features = FlagAccessor.getStringList(
+      argResults,
+      CreateFeaturesFlag(),
+    );
     final interactive = FlagAccessor.getBool(
       argResults,
       const InteractiveFlag(),
@@ -165,6 +181,7 @@ class GenerateProjectCommand extends FlyCommand {
         template,
         organization,
         platforms,
+        features,
         projectPath.absolute,
       );
     }
@@ -174,6 +191,7 @@ class GenerateProjectCommand extends FlyCommand {
       template,
       organization,
       platforms,
+      features,
       projectPath.absolute,
     );
   }
@@ -184,6 +202,7 @@ class GenerateProjectCommand extends FlyCommand {
     String template,
     String organization,
     List<String> platforms,
+    List<String> features,
     String projectPath,
   ) async {
     logger
@@ -223,15 +242,23 @@ class GenerateProjectCommand extends FlyCommand {
         defaultChoices: platforms,
       );
 
-      // 5. Display summary
+      // 5. Features
+      final finalFeatures = await prompter.promptMultiChoice(
+        prompt: 'Select initial features to scaffold',
+        choices: ['home', 'auth', 'profile', 'settings', 'catalog', 'cart'],
+        defaultChoices: features,
+      );
+
+      // 6. Display summary
       logger
         ..info('\n📋 Project Configuration:')
         ..info('  Name: $finalProjectName')
         ..info('  Template: $finalTemplate')
         ..info('  Organization: $finalOrganization')
-        ..info('  Platforms: ${finalPlatforms.join(', ')}');
+        ..info('  Platforms: ${finalPlatforms.join(', ')}')
+        ..info('  Features: ${finalFeatures.join(', ')}');
 
-      // 6. Confirmation
+      // 7. Confirmation
       final confirmed = await prompter.promptConfirm(
         prompt: '\nCreate project with this configuration?',
       );
@@ -256,6 +283,7 @@ class GenerateProjectCommand extends FlyCommand {
         finalTemplate,
         finalOrganization,
         finalPlatforms,
+        finalFeatures,
         projectPath,
       );
     } catch (e) {
@@ -278,6 +306,7 @@ class GenerateProjectCommand extends FlyCommand {
     String template,
     String organization,
     List<String> platforms,
+    List<String> features,
     String projectPath,
   ) async {
     try {
@@ -287,7 +316,8 @@ class GenerateProjectCommand extends FlyCommand {
         ..info('Creating Flutter project...')
         ..info('Template: $template')
         ..info('Organization: $organization')
-        ..info('Platforms: ${platforms.join(', ')}');
+        ..info('Platforms: ${platforms.join(', ')}')
+        ..info('Features: ${features.join(', ')}');
 
       // Use injected template manager
       final templateManager = context.templateManager;
@@ -297,6 +327,7 @@ class GenerateProjectCommand extends FlyCommand {
         projectName: projectName,
         organization: organization,
         platforms: platforms,
+        features: features,
       );
 
       // Generate project using template manager
@@ -344,6 +375,7 @@ class GenerateProjectCommand extends FlyCommand {
           'template': template,
           'organization': organization,
           'platforms': platforms,
+          'features': features,
           'files_generated': generationResult.filesGenerated,
           'duration_ms': stopwatch.elapsedMilliseconds,
           'target_directory': generationResult.targetDirectory,

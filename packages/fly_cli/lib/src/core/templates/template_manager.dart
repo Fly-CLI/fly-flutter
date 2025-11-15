@@ -483,7 +483,79 @@ class TemplateManager {
       final target = DirectoryGeneratorTarget(targetDir);
       logger.detail('Target created: $outputDirectory');
 
-      // Generate using Mason API
+      // Handle feature iteration for project bricks
+      // Mason doesn't automatically iterate over list variables in directory names
+      if (brick.type == BrickType.project && variables.containsKey('features')) {
+        final features = variables['features'] as List<dynamic>?;
+        if (features != null && features.isNotEmpty) {
+          // Convert features to strings and remove duplicates
+          final uniqueFeatures = features.map((f) => f.toString()).toSet().toList();
+          
+          // First, generate base project structure with first feature
+          // This ensures base files are generated
+          final baseVariables = Map<String, dynamic>.from(variables);
+          baseVariables['feature'] = uniqueFeatures.first;
+          
+          logger.info('Generating base project structure with feature: ${uniqueFeatures.first}...');
+          final baseFiles = await generator.generate(
+            target,
+            vars: baseVariables,
+            logger: logger,
+            fileConflictResolution: FileConflictResolution.overwrite,
+          );
+          
+          var totalFiles = baseFiles.length;
+          logger.info('✓ Base structure generated ($totalFiles files)');
+
+          // Then generate each additional feature separately
+          // Each generation will create the {{feature}}/ directory for that feature
+          if (uniqueFeatures.length > 1) {
+            logger.info('Generating ${uniqueFeatures.length - 1} additional feature(s)...');
+            for (int i = 1; i < uniqueFeatures.length; i++) {
+              final featureName = uniqueFeatures[i];
+              logger.detail('Generating feature: $featureName');
+              
+              final featureVariables = Map<String, dynamic>.from(variables);
+              featureVariables['feature'] = featureName;
+              
+              // Generate with this feature - Mason will create {{feature}}/ directory
+              final featureFiles = await generator.generate(
+                target,
+                vars: featureVariables,
+                logger: logger,
+                fileConflictResolution: FileConflictResolution.overwrite,
+              );
+              
+              // Count only new feature-specific files (approximate)
+              // Note: This will include base files being regenerated, but that's okay
+              totalFiles += featureFiles.length;
+              logger.detail('✓ Feature "$featureName" generated (${featureFiles.length} files)');
+            }
+          }
+
+          logger.info('✓ Generation successful ($totalFiles total files generated)');
+          logger.info('Generated features: ${uniqueFeatures.join(', ')}');
+
+          // Debug: Log generated files
+          if (logger.level == Level.verbose) {
+            logger.detail('All generated files logged above');
+          }
+
+          final endTime = DateTime.now();
+          final duration = endTime.difference(startTime);
+
+          logger.info('Generation completed in ${duration.inMilliseconds}ms');
+
+          return TemplateGenerationResult.success(
+            template: _brickToTemplateInfo(brick),
+            targetDirectory: outputDirectory,
+            filesGenerated: totalFiles,
+            duration: duration,
+          );
+        }
+      }
+
+      // Standard generation for non-project bricks or projects without features
       final generatedFiles = await generator.generate(
         target,
         vars: variables,

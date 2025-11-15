@@ -43,6 +43,7 @@ void main() {
         expect(parser.options.containsKey('template'), isTrue);
         expect(parser.options.containsKey('organization'), isTrue);
         expect(parser.options.containsKey('platforms'), isTrue);
+        expect(parser.options.containsKey('features'), isTrue);
         expect(parser.options.containsKey('interactive'), isTrue);
         expect(parser.options.containsKey('from-manifest'), isTrue);
         expect(parser.options.containsKey('plan'), isTrue);
@@ -57,6 +58,7 @@ void main() {
             parser.options['organization']!.defaultsTo, equals('com.example'));
         expect(parser.options['platforms']!.defaultsTo,
             equals(['ios', 'android']));
+        expect(parser.options['features']!.defaultsTo, equals(['home']));
         expect(parser.options['interactive']!.defaultsTo, equals(false));
       });
     });
@@ -169,6 +171,40 @@ void main() {
       });
     });
 
+    group('Features Selection', () {
+      test('should default to home feature', () {
+        final parser = command.argParser;
+        expect(parser.options['features']!.defaultsTo, equals(['home']));
+      });
+
+      test('should accept multiple features', () {
+        final parser = command.argParser;
+        final result = parser.parse([
+          'test_app',
+          '--features=home,profile,settings',
+        ]);
+
+        expect(result['features'], equals(['home', 'profile', 'settings']));
+      });
+
+      test('should accept single feature', () {
+        final parser = command.argParser;
+        final result = parser.parse([
+          'test_app',
+          '--features=auth',
+        ]);
+
+        expect(result['features'], equals(['auth']));
+      });
+
+      test('should handle empty features list', () {
+        final parser = command.argParser;
+        final result = parser.parse(['test_app']);
+
+        expect(result['features'], equals(['home'])); // default
+      });
+    });
+
     group('Interactive Mode', () {
       test('should have interactive flag', () {
         final parser = command.argParser;
@@ -260,6 +296,7 @@ void main() {
           '--template=fly_foundation',
           '--organization=com.test',
           '--platforms=ios,android,web',
+          '--features=home,profile',
           '--interactive',
           '--format=json',
         ]);
@@ -268,6 +305,7 @@ void main() {
         expect(result['template'], equals('fly_foundation'));
         expect(result['organization'], equals('com.test'));
         expect(result['platforms'], equals(['ios', 'android', 'web']));
+        expect(result['features'], equals(['home', 'profile']));
         expect(result['interactive'], equals(true));
         expect(result['output'], equals('json'));
       });
@@ -336,9 +374,10 @@ void main() {
         expect(result['template'], equals('fly_foundation'));
         expect(result['organization'], equals('com.fly_foundation'));
         expect(result['platforms'], equals(['ios', 'android'])); // defaults
+        expect(result['features'], equals(['home'])); // defaults
       });
 
-      test('should handle fly_foundation project creation', () {
+      test('should handle fly_foundation project creation with platforms', () {
         final parser = command.argParser;
         final result = parser.parse([
           'fly_foundation_app',
@@ -351,6 +390,20 @@ void main() {
         expect(result['template'], equals('fly_foundation'));
         expect(result['organization'], equals('com.fly_foundation'));
         expect(result['platforms'], equals(['ios', 'android', 'web']));
+        expect(result['features'], equals(['home'])); // defaults
+      });
+
+      test('should handle multi-feature project creation', () {
+        final parser = command.argParser;
+        final result = parser.parse([
+          'multi_feature_app',
+          '--template=fly_foundation',
+          '--features=home,profile,settings',
+        ]);
+
+        expect(result.rest, equals(['multi_feature_app']));
+        expect(result['template'], equals('fly_foundation'));
+        expect(result['features'], equals(['home', 'profile', 'settings']));
       });
 
       test('should handle cross-platform project creation', () {
@@ -426,6 +479,7 @@ void main() {
         expect(result['template'], equals('fly_foundation')); // default
         expect(result['organization'], equals('com.example')); // default
         expect(result['platforms'], equals(['ios', 'android'])); // default
+        expect(result['features'], equals(['home'])); // default
       });
 
       test('should handle only project name', () {
@@ -436,6 +490,7 @@ void main() {
         expect(result['template'], equals('fly_foundation')); // default
         expect(result['organization'], equals('com.example')); // default
         expect(result['platforms'], equals(['ios', 'android'])); // default
+        expect(result['features'], equals(['home'])); // default
       });
 
       test('should handle multiple project names', () {

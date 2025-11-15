@@ -24,7 +24,20 @@ FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
   --output-dir=/tmp/fly/fly_foundation_default
 ```
 
-## 2. Mason Scenario: Multi-Feature Project
+## 2. Multi-Feature Project via Fly CLI
+
+```bash
+rm -rf /tmp/fly/fly_foundation_features
+FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
+  dart run packages/fly_cli/bin/fly.dart generate project fly_features \
+  --template=fly_foundation \
+  --organization=com.example.features \
+  --platforms=ios,android \
+  --features=home,profile,settings \
+  --output-dir=/tmp/fly/fly_foundation_features
+```
+
+## 2a. Mason Scenario: Multi-Feature Project (Alternative)
 
 ```bash
 cat <<'JSON' > /tmp/fly/mason_fly_features.json
@@ -73,7 +86,7 @@ script -q /dev/null mason make fly_foundation \
 ```
 
 ## 3. Mason Scenario: Code Generation Disabled
-
+``
 ```bash
 cat <<'JSON' > /tmp/fly/mason_fly_nocodegen.json
 {
