@@ -148,9 +148,8 @@ class OpenApiExporter extends SchemaExporter {
 
   /// Build parameter schema for an option
   Map<String, dynamic> _buildParameterSchema(CliFlag flag, bool isGlobal) {
-    final option = optionDefinitionFromFlag(
-      flag,
-      isGlobalOverride: isGlobal,
+    final option = OptionDefinition.fromJson(
+      flag.toJson(isGlobalOverride: isGlobal),
     );
     final schema = <String, dynamic>{
       'name': '--${option.name}',

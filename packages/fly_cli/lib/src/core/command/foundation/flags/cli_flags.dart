@@ -72,4 +72,35 @@ abstract class CliFlag {
     this.allowedValues,
     this.defaultValue,
   });
+
+  /// Serialize the flag into the option metadata schema used by CommandDefinition.
+  Map<String, dynamic> toJson({bool? isGlobalOverride}) {
+    final map = <String, dynamic>{
+      'name': name,
+      'description': description,
+      'type': _flagTypeToJsonType(type),
+      'is_global': isGlobalOverride ?? isGlobal,
+      'is_required': false,
+    };
+
+    if (abbreviation != null) {
+      map['short'] = abbreviation;
+    }
+
+    if (defaultValue != null) {
+      map['default_value'] = defaultValue;
+    }
+
+    if (allowedValues != null) {
+      map['allowed_values'] = allowedValues;
+    }
+
+    return map;
+  }
 }
+
+String _flagTypeToJsonType(FlagType type) => switch (type) {
+      FlagType.boolean => 'flag',
+      FlagType.singleValue => 'value',
+      FlagType.multiValue => 'multiple',
+    };

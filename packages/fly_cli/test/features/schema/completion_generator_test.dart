@@ -478,9 +478,8 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   @override
   Map<String, dynamic> toJson() => {
         'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
-        'global_options': _globalOptions
-            .map((o) => optionDefinitionFromFlag(o, isGlobalOverride: true).toJson())
-            .toList(),
+        'global_options':
+            _globalOptions.map((o) => o.toJson(isGlobalOverride: true)).toList(),
       };
 
   @override

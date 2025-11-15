@@ -269,9 +269,8 @@ class CommandMetadataRegistry {
     return {
       'commands':
           allCommands.map((key, value) => MapEntry(key, value.toJson())),
-      'global_options': globalOptions
-          .map((o) => optionDefinitionFromFlag(o, isGlobalOverride: true).toJson())
-          .toList(),
+      'global_options':
+          globalOptions.map((o) => o.toJson(isGlobalOverride: true)).toList(),
     };
   }
 

@@ -116,7 +116,9 @@ class CliSpecExporter extends SchemaExporter {
 
   /// Build option specification
   Map<String, dynamic> _buildOptionSpec(CliFlag flag, {bool isGlobal = false}) {
-    final option = optionDefinitionFromFlag(flag, isGlobalOverride: isGlobal);
+    final option = OptionDefinition.fromJson(
+      flag.toJson(isGlobalOverride: isGlobal),
+    );
     final spec = <String, dynamic>{
       'name': option.name,
       'description': option.description,

@@ -257,7 +257,7 @@ void main() {
     test('converts flag to OptionDefinition', () {
       final flag = GlobalFormatFlag();
 
-      final option = optionDefinitionFromFlag(flag);
+      final option = OptionDefinition.fromJson(flag.toJson());
 
       expect(option.name, equals('format'));
       expect(option.description,
@@ -273,7 +273,9 @@ void main() {
     test('applies isGlobalOverride when provided', () {
       const flag = CreateOrganizationFlag();
 
-      final option = optionDefinitionFromFlag(flag, isGlobalOverride: true);
+      final option = OptionDefinition.fromJson(
+        flag.toJson(isGlobalOverride: true),
+      );
 
       expect(option.isGlobal, isTrue);
     });

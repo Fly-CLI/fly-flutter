@@ -116,18 +116,11 @@ class CommandDefinition {
         'name': name,
         'description': description,
         'arguments': arguments.map((e) => e.toJson()).toList(),
-        'options':
-            options.map((flag) => optionDefinitionFromFlag(flag).toJson()).toList(),
+        'options': options.map((flag) => flag.toJson()).toList(),
         'subcommands': subcommands.map((e) => e.toJson()).toList(),
         'examples': examples.map((e) => e.toJson()).toList(),
-        'global_options': globalOptions
-            .map(
-              (flag) => optionDefinitionFromFlag(
-                flag,
-                isGlobalOverride: true,
-              ).toJson(),
-            )
-            .toList(),
+        'global_options':
+            globalOptions.map((flag) => flag.toJson(isGlobalOverride: true)).toList(),
         'is_hidden': isHidden,
       };
 
@@ -353,25 +346,6 @@ class CommandExample {
 }
 
 /// Helper to convert a [CliFlag] into a serializable metadata representation.
-OptionDefinition optionDefinitionFromFlag(
-  CliFlag flag, {
-  bool? isGlobalOverride,
-}) {
-  return OptionDefinition(
-    name: flag.name,
-    description: flag.description,
-    short: flag.abbreviation,
-    type: switch (flag.type) {
-      FlagType.boolean => OptionType.flag,
-      FlagType.singleValue => OptionType.value,
-      FlagType.multiValue => OptionType.multiple,
-    },
-    defaultValue: flag.defaultValue,
-    allowedValues: flag.allowedValues,
-    isGlobal: isGlobalOverride ?? flag.isGlobal,
-  );
-}
-
 CliFlag _cliFlagFromOptionDefinition(OptionDefinition option) {
   final flagType = switch (option.type) {
     OptionType.flag => FlagType.boolean,

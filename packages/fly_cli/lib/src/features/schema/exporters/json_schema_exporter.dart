@@ -144,9 +144,8 @@ class JsonSchemaExporter extends SchemaExporter {
     };
 
     for (final flag in options) {
-      final option = optionDefinitionFromFlag(
-        flag,
-        isGlobalOverride: isGlobal,
+      final option = OptionDefinition.fromJson(
+        flag.toJson(isGlobalOverride: isGlobal),
       );
       final optionSchema = <String, dynamic>{
         'type': _getJsonSchemaType(option.type),
