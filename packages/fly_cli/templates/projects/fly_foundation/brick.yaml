@@ -1,0 +1,157 @@
+name: fly_foundation
+description: Unified Fly CLI foundation template for projects and components
+version: 1.0.0
+
+vars:
+  generation_mode:
+    type: enum
+    description: Controls what type of code to generate
+    default: project
+    values:
+      - project
+      - screen
+      - service
+      - provider
+    prompt: What would you like to generate?
+
+  project_name:
+    type: string
+    description: Name of the Flutter project
+    prompt: What is your project name?
+    validators:
+      - must_be_project_name
+
+  organization:
+    type: string
+    description: Reverse-domain organization identifier
+    default: com.example
+    prompt: What is your organization?
+
+  platforms:
+    type: list
+    description: Target platforms
+    default: [ ios, android ]
+    prompt: Which platforms do you want to support?
+
+  description:
+    type: string
+    description: Project description
+    default: A new Fly foundation project
+
+  template:
+    type: enum
+    description: Template style (reserved for future modes)
+    default: foundation
+    values:
+      - foundation
+
+  features:
+    type: list
+    description: Initial feature modules to scaffold
+    default: [ home ]
+
+  min_flutter_sdk:
+    type: string
+    description: Minimum Flutter SDK version
+    default: 3.10.0
+
+  min_dart_sdk:
+    type: string
+    description: Minimum Dart SDK version
+    default: 3.0.0
+
+  with_mcp:
+    type: bool
+    description: Include MCP integration scaffolding
+    default: true
+
+  with_tests:
+    type: bool
+    description: Generate starter tests
+    default: true
+
+  with_docs:
+    type: bool
+    description: Generate documentation helpers
+    default: true
+
+  fly_packages:
+    type: list
+    description: Fly ecosystem packages to add
+    default: [ fly_core, fly_mvvm, fly_state, fly_navigation, fly_flow_guard, fly_logger ]
+
+  code_generation:
+    type: bool
+    description: Enable build_runner configuration
+    default: true
+
+  ai_integration:
+    type: bool
+    description: Include AI context scaffolding
+    default: true
+
+  component_name:
+    type: string
+    description: Name of the component to generate
+    prompt: What is the component name?
+
+  feature:
+    type: string
+    description: Feature module for the component
+    default: home
+
+  screen_type:
+    type: enum
+    description: Screen archetype
+    default: list
+    values:
+      - list
+      - detail
+      - form
+      - auth
+      - settings
+
+  with_viewmodel:
+    type: bool
+    description: Include ViewModel when generating a screen
+    default: true
+
+  with_validation:
+    type: bool
+    description: Include form validation helpers
+    default: false
+
+  with_navigation:
+    type: bool
+    description: Include navigation integration for screens
+    default: true
+
+  api_base_url:
+    type: string
+    description: Base URL for generated services
+    default: https://api.example.com
+
+  with_retry_logic:
+    type: bool
+    description: Include retry logic in services
+    default: true
+
+  with_caching:
+    type: bool
+    description: Include caching layer for services
+    default: false
+
+  provider_type:
+    type: enum
+    description: Provider archetype when generation_mode=provider
+    default: notifier
+    values:
+      - notifier
+      - future
+      - stream
+      - state
+
+  with_state_class:
+    type: bool
+    description: Generate explicit state class for provider templates
+    default: false

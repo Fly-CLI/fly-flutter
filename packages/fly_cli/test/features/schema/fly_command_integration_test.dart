@@ -108,8 +108,8 @@ void main() {
           description: 'Create a new Flutter project',
           examples: [
             CommandExample(
-              command: 'fly create my_app --template=minimal',
-              description: 'Create a minimal project',
+              command: 'fly create my_app --template=fly_foundation',
+              description: 'Create a fly_foundation project',
             ),
           ],
           options: [
@@ -117,7 +117,7 @@ void main() {
               name: 'template',
               description: 'Project template',
               type: OptionType.value,
-              allowedValues: ['minimal', 'riverpod'],
+              allowedValues: ['fly_foundation'],
             ),
           ],
         );

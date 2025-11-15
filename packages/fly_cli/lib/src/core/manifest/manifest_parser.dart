@@ -307,9 +307,10 @@ class ProjectManifest {
 
     // Parse template
     final template = yaml['template'] as String;
-    if (!['minimal', 'riverpod'].contains(template)) {
+    if (template != 'fly_foundation') {
       throw ManifestException(
-          'Invalid template: $template. Must be "minimal" or "riverpod"');
+        'Invalid template: $template. Must be "fly_foundation"',
+      );
     }
 
     // Parse organization

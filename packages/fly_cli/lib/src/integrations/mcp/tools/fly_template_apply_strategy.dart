@@ -25,7 +25,7 @@ class FlyTemplateApplyStrategy
         properties: {
           'templateId': Schema.string(
             description:
-                'The identifier of the template to apply (e.g., "riverpod", "minimal"). '
+                'The identifier of the template to apply (e.g., "fly_foundation"). '
                 'Use fly.template.list to see available templates.',
           ),
           'outputDirectory': Schema.string(

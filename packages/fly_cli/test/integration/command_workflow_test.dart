@@ -47,7 +47,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--organization=com.test',
           '--platforms=ios,android',
           '--output-dir=${tempDir.path}',
@@ -125,17 +125,17 @@ void main() {
             isTrue);
       }, timeout: Timeout(Duration(minutes: 2)));
 
-      test('create minimal project → generate multiple screens → generate services',
+      test('create fly_foundation project → generate multiple screens → generate services',
           () async {
         final projectName = TestFixtures.createTestProjectName();
         final projectDir = Directory(path.join(tempDir.path, projectName));
 
-        // Create minimal project
+        // Create fly_foundation project
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
-          '--organization=com.minimal',
+          '--template=fly_foundation',
+          '--organization=com.fly_foundation',
           '--output-dir=${tempDir.path}',
         ]);
 
@@ -214,7 +214,7 @@ void main() {
         final result = await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--format=json',
           '--output-dir=${tempDir.path}',
         ]);
@@ -238,7 +238,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}'
         ]);
 
@@ -270,7 +270,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}'
         ]);
 
@@ -333,7 +333,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}'
         ]);
 
@@ -392,7 +392,7 @@ void main() {
         final planResult = await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--plan',
           '--output-dir=${tempDir.path}',
         ]);
@@ -407,7 +407,7 @@ void main() {
         final createResult = await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}',
         ]);
 
@@ -424,7 +424,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}'
         ]);
 
@@ -476,7 +476,7 @@ void main() {
         final createResult = await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}',
         ]);
         expect(createResult.success, isTrue);
@@ -522,7 +522,7 @@ void main() {
           await CommandTestHelper.runCommand([
             'create',
             projectName,
-            '--template=minimal',
+            '--template=fly_foundation',
             '--output-dir=${tempDir.path}',
           ]);
         }
@@ -545,7 +545,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}'
         ]);
 
@@ -588,7 +588,7 @@ void main() {
         await CommandTestHelper.runCommand([
           'create',
           projectName,
-          '--template=minimal',
+          '--template=fly_foundation',
           '--output-dir=${tempDir.path}',
         ]);
 

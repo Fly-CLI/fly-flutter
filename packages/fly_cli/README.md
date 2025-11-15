@@ -192,7 +192,7 @@ Define your entire project structure declaratively, and let Fly (and AI) handle 
 ```yaml
 # fly_project.yaml
 name: my_app
-template: riverpod
+template: fly_foundation
 organization: com.example
 platforms: [ios, android, web]
 
@@ -233,7 +233,7 @@ fly --help
 
 ```bash
 # Generate a complete Flutter project with all integrated components
-fly create my_app --template=riverpod --platforms=ios,android,web
+fly create my_app --template=fly_foundation --platforms=ios,android,web
 
 # This creates:
 # - Architecture foundation (fly_core, fly_mvvm)
@@ -335,13 +335,13 @@ fly generate service user_api --feature=core --type=api \
 
 ```bash
 # Create a complete integrated ecosystem
-fly create my_app --template=riverpod
+fly create my_app --template=fly_foundation
 
 # Create from manifest (AI can understand and modify)
 fly create --from-manifest=fly_project.yaml
 
 # Preview before creating
-fly create my_app --template=riverpod --plan
+fly create my_app --template=fly_foundation --plan
 ```
 
 ### Component Generation
@@ -516,9 +516,8 @@ together.**
 
 ### Project Templates
 
-- **minimal** – Clean structure with integrated components
-- **riverpod** – Production-ready ecosystem with Riverpod, networking, state, navigation, and all
-  Fly packages working together
+- **fly_foundation** – Unified Fly architecture with MVVM, navigation, accessibility, AI scaffolding,
+  and build configuration baked in
 
 ### Declarative Manifests
 
@@ -526,7 +525,7 @@ Define your complete integrated ecosystem:
 
 ```yaml
 name: my_app
-template: riverpod
+template: fly_foundation
 organization: com.example
 platforms: [ios, android, web]
 
@@ -611,7 +610,7 @@ fly create --from-manifest=fly_project.yaml
 ## 🚀 Getting Started
 
 1. **Install Fly CLI** – `dart pub global activate fly_cli`
-2. **Create Your Ecosystem** – `fly create my_app --template=riverpod`
+2. **Create Your Ecosystem** – `fly create my_app --template=fly_foundation`
 3. **Enable AI Integration** – `fly mcp serve`
 4. **Generate Components** – Let Fly (and AI) handle the integration
 5. **Build with Confidence** – Everything works together

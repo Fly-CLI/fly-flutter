@@ -70,29 +70,25 @@ class TestFixtures {
 
   /// Available templates
   static const List<String> availableTemplates = [
-    'minimal',
-    'riverpod',
+    'fly_foundation',
   ];
 
   /// Sample template configurations
   static const Map<String, Map<String, dynamic>> templateConfigs = {
-    'minimal': {
-      'name': 'minimal',
+    'fly_foundation': {
+      'name': 'fly_foundation',
       'version': '1.0.0',
-      'description': 'Minimal Flutter project template',
-      'minFlutterSdk': '3.0.0',
+      'description':
+          'Unified Fly foundation template with MVVM, navigation, and accessibility',
+      'minFlutterSdk': '3.10.0',
       'minDartSdk': '3.0.0',
-      'features': ['minimal'],
-      'packages': ['flutter'],
-    },
-    'riverpod': {
-      'name': 'riverpod',
-      'version': '1.0.0',
-      'description': 'Flutter project with Riverpod state management',
-      'minFlutterSdk': '3.0.0',
-      'minDartSdk': '3.0.0',
-      'features': ['riverpod', 'state_management'],
-      'packages': ['flutter', 'flutter_riverpod', 'riverpod'],
+      'features': ['mvvm', 'navigation', 'accessibility'],
+      'packages': [
+        'fly_core',
+        'fly_mvvm',
+        'fly_navigation',
+        'flutter_riverpod',
+      ],
     },
   };
 
@@ -183,7 +179,7 @@ class TestFixtures {
     'message': 'Project created successfully',
     'data': {
       'project_name': 'test_app',
-      'template': 'riverpod',
+      'template': 'fly_foundation',
       'organization': 'com.example',
       'platforms': ['ios', 'android'],
       'files_generated': 25,
@@ -217,11 +213,10 @@ class TestFixtures {
 
   /// Sample command arguments for testing
   static const Map<String, List<String>> sampleCommandArgs = {
-    'create_minimal': ['create', 'test_app', '--template=minimal'],
-    'create_riverpod': [
+    'create_fly_foundation': [
       'create',
       'test_app',
-      '--template=riverpod',
+      '--template=fly_foundation',
       '--organization=com.test'
     ],
     'create_with_platforms': [
@@ -242,7 +237,7 @@ class TestFixtures {
   /// Sample manifest content
   static const String sampleManifestContent = '''
 name: test_app
-template: riverpod
+template: fly_foundation
 organization: com.example
 platforms:
   - ios

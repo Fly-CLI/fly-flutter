@@ -108,8 +108,8 @@ cd "$TEST_WORKSPACE/projects"
 
 # Create test project if needed
 if [ ! -d "test_flutter_project" ]; then
-  fly create test_flutter_project --template=minimal || \
-  fly generate project test_flutter_project --template=minimal || true
+  fly create test_flutter_project --template=fly_foundation || \
+  fly generate project test_flutter_project --template=fly_foundation || true
 fi
 
 if [ -d "test_flutter_project" ]; then

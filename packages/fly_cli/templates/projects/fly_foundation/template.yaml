@@ -1,0 +1,132 @@
+name: fly_foundation
+version: 1.0.0
+description: Unified Fly foundation template with MVVM, navigation, accessibility, and AI scaffolding
+min_flutter_sdk: "{{min_flutter_sdk}}"
+min_dart_sdk: "{{min_dart_sdk}}"
+
+variables:
+  generation_mode:
+    type: string
+    required: true
+    default: project
+    description: Controls what type of code to generate (project, screen, service, provider)
+  project_name:
+    type: string
+    required: true
+    description: Name of the Flutter project
+  organization:
+    type: string
+    required: true
+    default: com.example
+    description: Reverse-domain organization identifier
+  platforms:
+    type: list
+    required: true
+    default: [ ios, android ]
+    choices: [ ios, android, web, macos, windows, linux ]
+    description: Target platforms
+  description:
+    type: string
+    default: A new Fly foundation project
+    description: Project description
+  template:
+    type: string
+    default: foundation
+    choices: [ foundation ]
+    description: Template style (reserved for future use)
+  features:
+    type: list
+    default: [ home ]
+    description: Initial feature modules
+  with_mcp:
+    type: bool
+    default: true
+    description: Include MCP integration scaffolding
+  with_tests:
+    type: bool
+    default: true
+    description: Generate tests
+  with_docs:
+    type: bool
+    default: true
+    description: Generate documentation helpers
+  fly_packages:
+    type: list
+    default: [ fly_core, fly_mvvm, fly_state, fly_navigation, fly_flow_guard, fly_logger ]
+    description: Fly ecosystem packages to add
+  code_generation:
+    type: bool
+    default: true
+    description: Enable build_runner configuration
+  ai_integration:
+    type: bool
+    default: true
+    description: Include AI context scaffolding
+  component_name:
+    type: string
+    description: Component name when generation_mode != project
+  feature:
+    type: string
+    default: home
+    description: Feature module name for components
+  screen_type:
+    type: string
+    default: list
+    choices: [ list, detail, form, auth, settings ]
+    description: Screen archetype
+  with_viewmodel:
+    type: bool
+    default: true
+    description: Include ViewModel for screens
+  with_validation:
+    type: bool
+    default: false
+    description: Include validation scaffolding
+  with_navigation:
+    type: bool
+    default: true
+    description: Include navigation integration
+  api_base_url:
+    type: string
+    default: https://api.example.com
+    description: Service base URL
+  with_retry_logic:
+    type: bool
+    default: true
+    description: Include retry logic in services
+  with_caching:
+    type: bool
+    default: false
+    description: Include caching helpers
+  provider_type:
+    type: string
+    default: notifier
+    choices: [ notifier, future, stream, state ]
+    description: Provider archetype
+  with_state_class:
+    type: bool
+    default: false
+    description: Include explicit state class for provider templates
+
+features:
+  - mvvm
+  - navigation
+  - localization
+  - accessibility
+  - ai_integration
+  - documentation
+
+packages:
+  - fly_core
+  - fly_mvvm
+  - fly_state
+  - fly_navigation
+  - fly_flow_guard
+  - fly_logger
+  - fly_events
+  - fly_networking
+  - flutter_riverpod
+  - riverpod_annotation
+  - auto_mappr
+  - drift
+  - json_serializable

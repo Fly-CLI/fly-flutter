@@ -52,7 +52,7 @@ void main() {
       test('should have correct default values', () {
         final parser = command.argParser;
 
-        expect(parser.options['template']!.defaultsTo, equals('riverpod'));
+        expect(parser.options['template']!.defaultsTo, equals('fly_foundation'));
         expect(
             parser.options['organization']!.defaultsTo, equals('com.example'));
         expect(parser.options['platforms']!.defaultsTo,
@@ -114,21 +114,21 @@ void main() {
     });
 
     group('Template Selection', () {
-      test('should default to riverpod template', () {
+      test('should default to fly_foundation template', () {
         final parser = command.argParser;
-        expect(parser.options['template']!.defaultsTo, equals('riverpod'));
+        expect(parser.options['template']!.defaultsTo, equals('fly_foundation'));
       });
 
-      test('should accept minimal template', () {
+      test('should accept fly_foundation template', () {
         final parser = command.argParser;
         final allowed = parser.options['template']!.allowed;
-        expect(allowed, contains('minimal'));
+        expect(allowed, contains('fly_foundation'));
       });
 
-      test('should accept riverpod template', () {
+      test('should accept fly_foundation template', () {
         final parser = command.argParser;
         final allowed = parser.options['template']!.allowed;
-        expect(allowed, contains('riverpod'));
+        expect(allowed, contains('fly_foundation'));
       });
 
       test('should reject invalid templates', () {
@@ -257,7 +257,7 @@ void main() {
         final parser = command.argParser;
         final result = parser.parse([
           'test_app',
-          '--template=minimal',
+          '--template=fly_foundation',
           '--organization=com.test',
           '--platforms=ios,android,web',
           '--interactive',
@@ -265,7 +265,7 @@ void main() {
         ]);
 
         expect(result.rest, equals(['test_app']));
-        expect(result['template'], equals('minimal'));
+        expect(result['template'], equals('fly_foundation'));
         expect(result['organization'], equals('com.test'));
         expect(result['platforms'], equals(['ios', 'android', 'web']));
         expect(result['interactive'], equals(true));
@@ -277,12 +277,12 @@ void main() {
         final result = parser.parse([
           'test_app',
           '-t',
-          'minimal',
+          'fly_foundation',
           '-o',
           'com.test',
         ]);
 
-        expect(result['template'], equals('minimal'));
+        expect(result['template'], equals('fly_foundation'));
         expect(result['organization'], equals('com.test'));
       });
     });
@@ -324,32 +324,32 @@ void main() {
     });
 
     group('Integration Scenarios', () {
-      test('should handle minimal project creation', () {
+      test('should handle fly_foundation project creation', () {
         final parser = command.argParser;
         final result = parser.parse([
-          'minimal_app',
-          '--template=minimal',
-          '--organization=com.minimal',
+          'fly_foundation_app',
+          '--template=fly_foundation',
+          '--organization=com.fly_foundation',
         ]);
 
-        expect(result.rest, equals(['minimal_app']));
-        expect(result['template'], equals('minimal'));
-        expect(result['organization'], equals('com.minimal'));
+        expect(result.rest, equals(['fly_foundation_app']));
+        expect(result['template'], equals('fly_foundation'));
+        expect(result['organization'], equals('com.fly_foundation'));
         expect(result['platforms'], equals(['ios', 'android'])); // defaults
       });
 
-      test('should handle riverpod project creation', () {
+      test('should handle fly_foundation project creation', () {
         final parser = command.argParser;
         final result = parser.parse([
-          'riverpod_app',
-          '--template=riverpod',
-          '--organization=com.riverpod',
+          'fly_foundation_app',
+          '--template=fly_foundation',
+          '--organization=com.fly_foundation',
           '--platforms=ios,android,web',
         ]);
 
-        expect(result.rest, equals(['riverpod_app']));
-        expect(result['template'], equals('riverpod'));
-        expect(result['organization'], equals('com.riverpod'));
+        expect(result.rest, equals(['fly_foundation_app']));
+        expect(result['template'], equals('fly_foundation'));
+        expect(result['organization'], equals('com.fly_foundation'));
         expect(result['platforms'], equals(['ios', 'android', 'web']));
       });
 
@@ -423,7 +423,7 @@ void main() {
         final result = parser.parse([]);
 
         expect(result.rest, isEmpty);
-        expect(result['template'], equals('riverpod')); // default
+        expect(result['template'], equals('fly_foundation')); // default
         expect(result['organization'], equals('com.example')); // default
         expect(result['platforms'], equals(['ios', 'android'])); // default
       });
@@ -433,7 +433,7 @@ void main() {
         final result = parser.parse(['simple_app']);
 
         expect(result.rest, equals(['simple_app']));
-        expect(result['template'], equals('riverpod')); // default
+        expect(result['template'], equals('fly_foundation')); // default
         expect(result['organization'], equals('com.example')); // default
         expect(result['platforms'], equals(['ios', 'android'])); // default
       });
@@ -494,7 +494,7 @@ void main() {
 
       test('should handle repeated parsing efficiently', () {
         final parser = command.argParser;
-        final args = ['test_app', '--template=minimal'];
+        final args = ['test_app', '--template=fly_foundation'];
 
         // Parse multiple times
         for (var i = 0; i < 100; i++) {

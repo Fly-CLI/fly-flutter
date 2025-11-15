@@ -30,7 +30,7 @@ void main() {
         description: 'Project template',
         short: 't',
         type: OptionType.value,
-        allowedValues: ['minimal', 'riverpod'],
+        allowedValues: ['fly_foundation'],
       );
 
       const subcommand = SubcommandDefinition(
@@ -39,8 +39,8 @@ void main() {
       );
 
       const example = CommandExample(
-        command: 'fly create my_app --template=minimal',
-        description: 'Create a minimal project',
+        command: 'fly create my_app --template=fly_foundation',
+        description: 'Create a fly_foundation project',
       );
 
       const command = CommandDefinition(
@@ -186,15 +186,15 @@ void main() {
         name: 'template',
         description: 'Project template',
         required: false,
-        allowedValues: ['minimal', 'riverpod'],
-        defaultValue: 'minimal',
+        allowedValues: ['fly_foundation'],
+        defaultValue: 'fly_foundation',
       );
 
       expect(argument.name, equals('template'));
       expect(argument.description, equals('Project template'));
       expect(argument.required, isFalse);
-      expect(argument.allowedValues, equals(['minimal', 'riverpod']));
-      expect(argument.defaultValue, equals('minimal'));
+      expect(argument.allowedValues, equals(['fly_foundation']));
+      expect(argument.defaultValue, equals('fly_foundation'));
     });
 
     test('toJson serializes correctly', () {
@@ -481,14 +481,14 @@ void main() {
 
     test('toJson serializes correctly', () {
       const example = CommandExample(
-        command: 'fly create my_app --template=minimal',
-        description: 'Create a minimal app',
+        command: 'fly create my_app --template=fly_foundation',
+        description: 'Create a fly_foundation app',
       );
 
       final json = example.toJson();
 
-      expect(json['command'], equals('fly create my_app --template=minimal'));
-      expect(json['description'], equals('Create a minimal app'));
+      expect(json['command'], equals('fly create my_app --template=fly_foundation'));
+      expect(json['description'], equals('Create a fly_foundation app'));
     });
 
     test('toString returns readable representation', () {

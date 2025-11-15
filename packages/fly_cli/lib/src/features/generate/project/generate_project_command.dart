@@ -45,8 +45,8 @@ class GenerateProjectCommand extends FlyCommand {
             description: 'Project template to use',
             type: OptionType.value,
             short: 't',
-            allowedValues: ['minimal', 'riverpod'],
-            defaultValue: 'riverpod',
+            allowedValues: ['fly_foundation'],
+            defaultValue: 'fly_foundation',
           ),
           const OptionDefinition(
             name: 'organization',
@@ -78,13 +78,9 @@ class GenerateProjectCommand extends FlyCommand {
         ],
         examples: [
           const CommandExample(
-            command: 'fly generate project my_app --template=minimal',
-            description: 'Create a minimal Flutter project',
-          ),
-          const CommandExample(
-            command: 'fly generate project my_app --template=riverpod '
-                '--platforms=ios,android,web',
-            description: 'Create a Riverpod project with multiple platforms',
+            command:
+                'fly generate project my_app --template=fly_foundation --platforms=ios,android,web',
+            description: 'Create a Fly foundation project',
           ),
         ],
       );
@@ -124,7 +120,7 @@ class GenerateProjectCommand extends FlyCommand {
     final template = FlagAccessor.getStringOrDefault(
       argResults,
       const CreateTemplateFlag(),
-      'riverpod',
+      'fly_foundation',
     );
     final organization = FlagAccessor.getStringOrDefault(
       argResults,
@@ -210,7 +206,7 @@ class GenerateProjectCommand extends FlyCommand {
       // 2. Template selection
       final finalTemplate = await prompter.promptChoice(
         prompt: 'Select template',
-        choices: ['minimal', 'riverpod'],
+        choices: ['fly_foundation'],
         defaultChoice: template,
       );
 

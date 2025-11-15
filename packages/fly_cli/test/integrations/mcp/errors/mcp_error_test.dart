@@ -25,7 +25,7 @@ void main() {
         error: 'Template not found',
         variables: {'projectName': 'test'},
         context: {
-          'available_templates': ['riverpod', 'minimal'],
+          'available_templates': ['fly_foundation'],
         },
       );
 

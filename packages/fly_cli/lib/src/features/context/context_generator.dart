@@ -502,7 +502,7 @@ class ContextGenerator {
     // Suggest commands based on available functionality
     if (allCommands.containsKey('create')) {
       suggestions.add(
-        'Create new projects with: fly create <name> --template=riverpod',
+        'Create new projects with: fly create <name> --template=fly_foundation',
       );
     }
 

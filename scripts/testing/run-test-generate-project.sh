@@ -87,10 +87,10 @@ run_test "Default riverpod template" \
   "fly create test_app_default" 0
 
 run_test "Minimal template" \
-  "fly create test_app_minimal --template=minimal" 0
+  "fly create test_app_minimal --template=fly_foundation" 0
 
 run_test "Explicit platforms" \
-  "fly create test_app_platforms --template=riverpod --platforms=ios,android" 0
+  "fly create test_app_platforms --template=fly_foundation --platforms=ios,android" 0
 
 run_test "Custom organization" \
   "fly create test_app_org --organization=com.test.app" 0

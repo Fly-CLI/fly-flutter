@@ -81,11 +81,11 @@ cd "$TEST_WORKSPACE/projects"
 if [ ! -d "test_flutter_project" ]; then
   echo "Creating test Flutter project..."
   # Use fly create (alias for generate project)
-  fly create test_flutter_project --template=minimal || {
+  fly create test_flutter_project --template=fly_foundation || {
     echo -e "${YELLOW}Warning: Could not create test project. Some tests may fail.${NC}"
     echo "You may need to create the project manually:"
     echo "  cd ${TEST_WORKSPACE}/projects"
-    echo "  fly create test_flutter_project --template=minimal"
+    echo "  fly create test_flutter_project --template=fly_foundation"
   }
 fi
 

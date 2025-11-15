@@ -274,7 +274,7 @@ dev_dependencies:
 
   static const String flyManifestContent = '''
 name: fly_test
-template: riverpod
+template: fly_foundation
 organization: test_org
 description: A Fly test project
 platforms:

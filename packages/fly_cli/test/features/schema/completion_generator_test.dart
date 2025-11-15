@@ -170,11 +170,11 @@ void main() {
         const option = OptionDefinition(
           name: 'template',
           description: 'Template',
-          allowedValues: ['minimal', 'riverpod'],
+          allowedValues: ['fly_foundation'],
         );
         expect(
           generator.generateOptionValuesCompletion(option),
-          equals('minimal riverpod'),
+          equals('fly_foundation fly_foundation'),
         );
       });
 

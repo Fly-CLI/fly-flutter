@@ -1,5 +1,5 @@
 # Minimal Project Manifest
 name: simple_app
-template: minimal
+template: fly_foundation
 organization: com.simple
 platforms: [ ios, android ]

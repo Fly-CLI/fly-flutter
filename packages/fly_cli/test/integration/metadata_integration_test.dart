@@ -150,8 +150,8 @@ void main() {
         final templateOption = createCommand.options.firstWhere(
           (opt) => opt.name == 'template',
         );
-        expect(templateOption.allowedValues, contains('minimal'));
-        expect(templateOption.allowedValues, contains('riverpod'));
+        expect(templateOption.allowedValues, contains('fly_foundation'));
+        expect(templateOption.allowedValues, contains('fly_foundation'));
 
         // Check examples
         expect(createCommand.examples, isNotEmpty);

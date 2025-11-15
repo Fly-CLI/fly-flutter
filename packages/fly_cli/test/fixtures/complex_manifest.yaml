@@ -1,6 +1,6 @@
-# Riverpod Project with Full Features
+# Fly Foundation Project with Full Features
 name: production_app
-template: riverpod
+template: fly_foundation
 organization: com.company
 platforms: [ ios, android, web ]
 description: "Production-ready Flutter app"

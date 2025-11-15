@@ -13,6 +13,7 @@ import 'brick_registry.dart';
 import 'compatibility_checker.dart';
 import 'compatibility_result.dart';
 import 'generation_preview.dart';
+import 'generation_variable_validator.dart';
 import 'template_info.dart';
 import 'template_variable.dart';
 import 'version_parser.dart';
@@ -435,6 +436,8 @@ class TemplateManager {
         }
       }
     }
+
+    errors.addAll(GenerationVariableValidator.validate(variables));
 
     return errors;
   }
@@ -966,6 +969,7 @@ class TemplateVariables {
   final List<String> features;
 
   Map<String, dynamic> toMasonVars() => {
+        'generation_mode': 'project',
         'project_name': projectName,
         'organization': organization,
         'platforms': platforms,

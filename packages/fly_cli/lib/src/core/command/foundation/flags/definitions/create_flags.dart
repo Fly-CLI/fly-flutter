@@ -13,8 +13,8 @@ class CreateTemplateFlag extends CliFlag {
         isGlobal: false,
         category: CliFlagCategory.execution,
         type: FlagType.singleValue,
-        allowedValues: const ['minimal', 'riverpod'],
-        defaultValue: 'riverpod',
+        allowedValues: const ['fly_foundation'],
+        defaultValue: 'fly_foundation',
       );
 }
 

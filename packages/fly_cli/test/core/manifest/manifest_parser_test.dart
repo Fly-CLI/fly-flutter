@@ -6,16 +6,16 @@ import 'package:test/test.dart';
 void main() {
   group('ProjectManifest', () {
     group('fromYaml', () {
-      test('should parse minimal manifest', () {
+      test('should parse fly_foundation manifest', () {
         final yaml = {
           'name': 'test_app',
-          'template': 'minimal',
+          'template': 'fly_foundation',
         };
 
         final manifest = ProjectManifest.fromYaml(yaml);
 
         expect(manifest.name, equals('test_app'));
-        expect(manifest.template, equals('minimal'));
+        expect(manifest.template, equals('fly_foundation'));
         expect(manifest.organization, equals('com.example'));
         expect(manifest.platforms, equals(['ios', 'android']));
         expect(manifest.screens, isEmpty);
@@ -26,7 +26,7 @@ void main() {
       test('should parse complete manifest', () {
         final yaml = {
           'name': 'production_app',
-          'template': 'riverpod',
+          'template': 'fly_foundation',
           'organization': 'com.company',
           'description': 'Production-ready Flutter app',
           'platforms': ['ios', 'android', 'web'],
@@ -69,7 +69,7 @@ void main() {
         final manifest = ProjectManifest.fromYaml(yaml);
 
         expect(manifest.name, equals('production_app'));
-        expect(manifest.template, equals('riverpod'));
+        expect(manifest.template, equals('fly_foundation'));
         expect(manifest.organization, equals('com.company'));
         expect(manifest.description, equals('Production-ready Flutter app'));
         expect(manifest.platforms, equals(['ios', 'android', 'web']));
@@ -102,7 +102,7 @@ void main() {
 
       test('should throw exception for missing name', () {
         final yaml = {
-          'template': 'minimal',
+          'template': 'fly_foundation',
         };
 
         expect(
@@ -125,7 +125,7 @@ void main() {
       test('should throw exception for invalid project name', () {
         final yaml = {
           'name': 'Invalid-Name',
-          'template': 'minimal',
+          'template': 'fly_foundation',
         };
 
         expect(
@@ -149,7 +149,7 @@ void main() {
       test('should throw exception for invalid platform', () {
         final yaml = {
           'name': 'test_app',
-          'template': 'minimal',
+          'template': 'fly_foundation',
           'platforms': ['ios', 'invalid_platform'],
         };
 
@@ -164,7 +164,7 @@ void main() {
       test('should convert to TemplateVariables', () {
         final manifest = ProjectManifest(
           name: 'test_app',
-          template: 'riverpod',
+          template: 'fly_foundation',
           organization: 'com.test',
           description: 'Test app',
           platforms: ['ios', 'android', 'web'],
@@ -211,7 +211,7 @@ void main() {
       test('should parse manifest from file', () async {
         await manifestFile.writeAsString('''
 name: test_app
-template: minimal
+template: fly_foundation
 organization: com.test
 platforms: [ios, android]
 ''');
@@ -219,7 +219,7 @@ platforms: [ios, android]
         final manifest = await ProjectManifest.fromFile(manifestFile.path);
 
         expect(manifest.name, equals('test_app'));
-        expect(manifest.template, equals('minimal'));
+        expect(manifest.template, equals('fly_foundation'));
         expect(manifest.organization, equals('com.test'));
       });
 
@@ -256,7 +256,7 @@ platforms: [ios, android]
       expect(screen.features, equals(['validation', 'biometric_auth']));
     });
 
-    test('should parse screen config with minimal fields', () {
+    test('should parse screen config with fly_foundation fields', () {
       final yaml = {
         'name': 'home',
       };
@@ -308,7 +308,7 @@ platforms: [ios, android]
       expect(service.features, equals(['token_refresh', 'offline_support']));
     });
 
-    test('should parse service config with minimal fields', () {
+    test('should parse service config with fly_foundation fields', () {
       final yaml = {
         'name': 'local_service',
       };
