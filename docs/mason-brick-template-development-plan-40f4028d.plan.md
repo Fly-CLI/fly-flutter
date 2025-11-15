@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-This plan outlines the development of a **unified Mason brick template** (`fly_unified`) that generates both complete Flutter projects and individual components (screens, services, providers) using a single, consistent template system. The unified approach eliminates template duplication, ensures consistency across all generated code, simplifies maintenance, and provides a single source of truth for Fly CLI architecture patterns, ecosystem integration standards, and AI-powered development workflows.
+This plan outlines the development of a **unified Mason brick template** (`fly_foundation`) that generates both complete Flutter projects and individual components (screens, services, providers) using a single, consistent template system. The unified approach eliminates template duplication, ensures consistency across all generated code, simplifies maintenance, and provides a single source of truth for Fly CLI architecture patterns, ecosystem integration standards, and AI-powered development workflows.
 
 **Key Objectives:**
 
-- Single unified template (`fly_unified`) for both project and component generation
+- Single unified template (`fly_foundation`) for both project and component generation
 - Mode-based generation controlled by `generation_mode` variable (project, screen, service, provider)
 - Generate Flutter projects that integrate seamlessly with Fly CLI commands
 - Generate individual components with consistent patterns matching project structure
@@ -17,7 +17,7 @@ This plan outlines the development of a **unified Mason brick template** (`fly_u
 
 **Timeline:** 8 weeks across 4 phases
 
-**Target Deliverable:** Production-ready unified Mason brick template (`fly_unified`) with comprehensive documentation
+**Target Deliverable:** Production-ready unified Mason brick template (`fly_foundation`) with comprehensive documentation
 
 **Implementation Reference:** This plan has been updated to match the architecture and patterns found in `/Users/apple/Desktop/dev/flutter/me/projects/Fly/examples/foundation_project`, which serves as the reference implementation for the core architecture and components.
 
@@ -86,21 +86,13 @@ This plan outlines the development of a **unified Mason brick template** (`fly_u
 4. **Core Organization**:
    ```
    core/
-   ├── analytics/           # Analytics providers and services
-   ├── database/           # Drift database (app_database.dart, DAOs, tables)
-   ├── di/                 # Dependency injection (GlobalContainer)
-   ├── event_system/       # Event definitions and handlers
-   ├── foundation/         # Base classes (BaseScreen, BaseViewModel)
-   ├── models/             # Core domain models
-   ├── navigation/         # Navigation service providers
-   ├── offline/            # Offline queue management
-   ├── pagination/         # Pagination utilities
-   ├── providers/          # Core providers (service, repository, storage)
-   ├── repositories/       # Repository pattern with BaseRepository
-   ├── services/           # Business logic services
-   ├── storage/            # Storage services and managers
-   └── view_models/        # Shared view models
+   └── foundation/         # Base classes (BaseScreen, BaseViewModel)
+       └── screen/
+           ├── base_screen.dart
+           └── base_view_model.dart
    ```
+   
+   **Note:** Additional core directories (analytics, database, di, event_system, models, navigation, pagination, providers, repositories, services, storage) can be added as needed for specific project requirements. The foundation project includes these, but the template generates a minimal structure with only foundation by default.
 
 5. **Navigation Pattern**:
    - Uses `FeatureScreen` enum for type-safe navigation
@@ -146,10 +138,10 @@ This plan outlines the development of a **unified Mason brick template** (`fly_u
     - `l10n.yaml` configuration
     - `AppLocalizations` generated class
 
-12. **Event System**:
+12. **Event System** (Optional):
     - Uses `fly_events` package
-    - `AppEventEmitter` from GlobalContainer
-    - Event definitions in `core/event_system/`
+    - `AppEventEmitter` from GlobalContainer (when DI is enabled)
+    - Event definitions can be added to `core/event_system/` when needed
     - Navigation events: `NavigationStartedEvent`, `NavigationCompletedEvent`
 
 #### Integration Points
@@ -194,7 +186,7 @@ This plan outlines the development of a **unified Mason brick template** (`fly_u
 
 ```
 templates/
-└── fly_unified/
+└── fly_foundation/
     ├── __brick__/
     │   ├── {{#is_project}}[project files]{{/is_project}}
     │   ├── {{#is_screen}}[screen files]{{/is_screen}}
@@ -304,45 +296,16 @@ templates/
 **Directory Layout:**
 
 ```
-fly_unified/
+fly_foundation/
 ├── __brick__/
 │   ├── {{#is_project}}
 │   │   ├── lib/
 │   │   │   ├── main.dart
 │   │   │   ├── core/
-│   │   │   │   ├── analytics/
-│   │   │   │   ├── database/
-│   │   │   │   │   ├── app_database.dart
-│   │   │   │   │   ├── daos/
-│   │   │   │   │   ├── tables/
-│   │   │   │   │   └── models/
-│   │   │   │   ├── di/
-│   │   │   │   │   └── global_container.dart
-│   │   │   │   ├── event_system/
-│   │   │   │   ├── foundation/
-│   │   │   │   │   └── screen/
-│   │   │   │   │       ├── base_screen.dart
-│   │   │   │   │       └── base_view_model.dart
-│   │   │   │   ├── models/
-│   │   │   │   ├── navigation/
-│   │   │   │   ├── offline/
-│   │   │   │   ├── pagination/
-│   │   │   │   ├── providers/
-│   │   │   │   │   ├── providers.dart
-│   │   │   │   │   ├── service_providers.dart
-│   │   │   │   │   ├── repository_providers.dart
-│   │   │   │   │   └── logger_provider.dart
-│   │   │   │   ├── repositories/
-│   │   │   │   │   ├── base/
-│   │   │   │   │   │   └── base_repository.dart
-│   │   │   │   │   └── interfaces/
-│   │   │   │   ├── services/
-│   │   │   │   ├── storage/
-│   │   │   │   │   ├── implementations/
-│   │   │   │   │   ├── interfaces/
-│   │   │   │   │   ├── managers/
-│   │   │   │   │   └── storage_providers.dart
-│   │   │   │   └── view_models/
+│   │   │   │   └── foundation/
+│   │   │   │       └── screen/
+│   │   │   │           ├── base_screen.dart
+│   │   │   │           └── base_view_model.dart
 │   │   │   ├── features/
 │   │   │   │   {{#features}}
 │   │   │   │   └── {{feature}}/
@@ -413,6 +376,7 @@ fly_unified/
 │   │                   └── {{component_name}}_service_test.dart
 │   │       {{/with_tests}}
 │   │   {{/is_service}}
+│   │   Note: Services are generated in core/services/ directory which is created when needed
 │   │
 │   └── {{#is_provider}}
 │       └── lib/
@@ -420,6 +384,7 @@ fly_unified/
 │               └── providers/
 │                   └── {{component_name}}_provider.dart
 │       {{/is_provider}}
+│       Note: Providers are generated in core/providers/ directory which is created when needed
 │
 ├── brick.yaml
 └── template.yaml
@@ -630,10 +595,10 @@ fly_unified/
 
 **main.dart**
 
-- `GlobalContainer.initialize()` before `runApp()`
-- `UncontrolledProviderScope` with `GlobalContainer.instance`
-- Storage services initialization (regularStorage, secureStorage)
-- App data manager initialization
+- `GlobalContainer.initialize()` before `runApp()` (when DI is enabled)
+- `UncontrolledProviderScope` with `GlobalContainer.instance` (when DI is enabled)
+- Storage services initialization (regularStorage, secureStorage) - optional, when storage is needed
+- App data manager initialization - optional, when storage managers are needed
 - MaterialApp with NavigationManager from `fly_navigation`
 - Theme configuration
 - Localization setup
@@ -654,18 +619,21 @@ fly_unified/
 - Light/dark theme support
 - Custom color schemes
 
-**app_config.dart** (core/storage/managers/app_config_data_manager.dart)
+**Note on Additional Core Directories:**
 
-- Environment configuration via storage managers
-- API endpoints configuration
-- Feature flags via storage
+The foundation project includes additional core directories (analytics, database, di, event_system, models, navigation, pagination, providers, repositories, services, storage) that can be added as needed. The template generates a minimal structure with only the foundation directory by default. Additional directories can be added:
 
-**global_container.dart** (core/di/global_container.dart)
+- When specific features are enabled (e.g., database when `with_database=true`)
+- When generating components that require them (e.g., services directory when generating a service)
+- Manually as the project grows
+
+**global_container.dart** (core/di/global_container.dart) - Optional
 
 - ProviderContainer singleton
 - `initialize()` method for app startup
 - `overrideForTesting()` for test support
 - `reset()` for test cleanup
+- Generated when dependency injection is needed
 
 **base_screen.dart** (core/foundation/screen/base_screen.dart)
 
@@ -981,7 +949,7 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 **Tasks:**
 
 1. Remove existing templates from `packages/fly_cli/templates/`
-2. Create `fly_unified` template directory structure
+2. Create `fly_foundation` template directory structure
 3. Define `brick.yaml` with `generation_mode` and all variable definitions
 4. Create `template.yaml` with Fly CLI metadata
 5. Implement conditional logic helpers (is_project, is_screen, etc.)
@@ -990,7 +958,7 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 **Deliverables:**
 
-- Unified template structure (`fly_unified/`)
+- Unified template structure (`fly_foundation/`)
 - Complete `brick.yaml` with all variables
 - `template.yaml` with metadata
 - Conditional file structure
@@ -1504,7 +1472,7 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 1. **Overview**
 
-    - What is fly_unified
+    - What is fly_foundation
     - Unified template approach benefits
     - Key features
     - Quick start
@@ -1846,22 +1814,24 @@ final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}Vi
 
 ## Conclusion
 
-This plan provides a comprehensive roadmap for developing a unified Mason brick template (`fly_unified`) that generates both Flutter projects and individual components using a single, consistent template system. The 8-week implementation plan ensures systematic development with clear deliverables, quality assurance, and comprehensive documentation.
+This plan provides a comprehensive roadmap for developing a unified Mason brick template (`fly_foundation`) that generates both Flutter projects and individual components using a single, consistent template system. The 8-week implementation plan ensures systematic development with clear deliverables, quality assurance, and comprehensive documentation.
 
 The unified approach eliminates template duplication, ensures consistency, simplifies maintenance, and provides a single source of truth for Fly CLI patterns and ecosystem integration standards.
 
 **Plan Updates:** This plan has been thoroughly analyzed and updated to match the architecture and implementation patterns found in the foundation project (`/Users/apple/Desktop/dev/flutter/me/projects/Fly/examples/foundation_project`). Key updates include:
 
-- Updated project structure to match foundation project's feature-based architecture with data/domain/presentation layers
-- Updated dependency injection pattern to use `GlobalContainer` (ProviderContainer singleton)
+- Updated project structure to match foundation project's simplified core structure (only foundation directory by default)
+- Updated core organization to generate minimal structure with only `core/foundation/` directory initially
+- Additional core directories (analytics, database, di, event_system, models, navigation, pagination, providers, repositories, services, storage) are optional and can be added as needed
+- Updated dependency injection pattern to use `GlobalContainer` (ProviderContainer singleton) - optional, generated when needed
 - Updated navigation pattern to use `FeatureScreen` enum and `RouteHandlerRegistry` with MaterialApp
-- Added repository pattern with `BaseRepository` and Template Method Pattern
-- Updated service pattern to return `AppResult<T>` from `fly_flow_guard`
-- Added storage pattern with interfaces and managers
-- Added database pattern using Drift (SQLite)
+- Added repository pattern with `BaseRepository` and Template Method Pattern - optional, when repositories are needed
+- Updated service pattern to return `AppResult<T>` from `fly_flow_guard` - services directory created when generating services
+- Added storage pattern with interfaces and managers - optional, when storage is needed
+- Added database pattern using Drift (SQLite) - optional, when database is needed
 - Updated code generation to include drift_dev, auto_mappr, and json_serializable
 - Updated localization pattern to use Flutter gen-l10n with `.arb` files
-- Added event system integration via `fly_events` package
+- Added event system integration via `fly_events` package - optional, when events are needed
 - Updated base classes to extend `BaseScreen` and `BaseViewModel` from foundation project
 - Updated dependencies to match foundation project versions
 
