@@ -1,4 +1,3 @@
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:test/test.dart';
@@ -258,7 +257,7 @@ void main() {
     test('converts flag to OptionDefinition', () {
       final flag = GlobalFormatFlag();
 
-      final option = flag.toOptionDefinition();
+      final option = optionDefinitionFromFlag(flag);
 
       expect(option.name, equals('format'));
       expect(option.description,
@@ -274,7 +273,7 @@ void main() {
     test('applies isGlobalOverride when provided', () {
       const flag = CreateOrganizationFlag();
 
-      final option = flag.toOptionDefinition(isGlobalOverride: true);
+      final option = optionDefinitionFromFlag(flag, isGlobalOverride: true);
 
       expect(option.isGlobal, isTrue);
     });

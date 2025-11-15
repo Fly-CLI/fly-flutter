@@ -1,4 +1,3 @@
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
@@ -24,8 +23,9 @@ class CliSpecExporter extends SchemaExporter {
       'version': '1.0.0',
       'name': 'fly',
       'description': 'Fly CLI - Flutter development tool',
-      'globalOptions':
-          globalOptions.map((flag) => _buildOptionSpec(flag, isGlobal: true)).toList(),
+      'globalOptions': globalOptions
+          .map((flag) => _buildOptionSpec(flag, isGlobal: true))
+          .toList(),
       'commands': <String, dynamic>{},
     };
 
@@ -116,7 +116,7 @@ class CliSpecExporter extends SchemaExporter {
 
   /// Build option specification
   Map<String, dynamic> _buildOptionSpec(CliFlag flag, {bool isGlobal = false}) {
-    final option = flag.toOptionDefinition(isGlobalOverride: isGlobal);
+    final option = optionDefinitionFromFlag(flag, isGlobalOverride: isGlobal);
     final spec = <String, dynamic>{
       'name': option.name,
       'description': option.description,

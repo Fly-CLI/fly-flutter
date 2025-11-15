@@ -1,7 +1,6 @@
 /// Command metadata definitions for Fly CLI
-library command_definition;
+library;
 
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -9,6 +8,50 @@ part 'command_definition.g.dart';
 
 /// Complete command specification with all metadata
 class CommandDefinition {
+  /// Create CommandDefinition from JSON metadata
+  factory CommandDefinition.fromJson(Map<String, dynamic> json) {
+    List<T> _readList<T>(
+      List<dynamic>? source,
+      T Function(Map<String, dynamic> map) convert,
+    ) {
+      if (source == null) return const [];
+      return source
+          .map((e) => convert(e as Map<String, dynamic>))
+          .toList(growable: false);
+    }
+
+    final optionMaps = (json['options'] as List<dynamic>? ?? [])
+        .map((e) => OptionDefinition.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final globalOptionMaps = (json['global_options'] as List<dynamic>? ?? [])
+        .map((e) => OptionDefinition.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    return CommandDefinition(
+      name: json['name'] as String,
+      description: json['description'] as String,
+      arguments: _readList(
+        json['arguments'] as List<dynamic>?,
+        ArgumentDefinition.fromJson,
+      ),
+      options:
+          optionMaps.map(_cliFlagFromOptionDefinition).toList(growable: false),
+      subcommands: _readList(
+        json['subcommands'] as List<dynamic>?,
+        SubcommandDefinition.fromJson,
+      ),
+      examples: _readList(
+        json['examples'] as List<dynamic>?,
+        CommandExample.fromJson,
+      ),
+      globalOptions: globalOptionMaps
+          .map(_cliFlagFromOptionDefinition)
+          .map((flag) => _MetadataCliFlag(flag, isGlobal: true))
+          .toList(growable: false),
+      isHidden: json['is_hidden'] as bool? ?? false,
+    );
+  }
+
   const CommandDefinition({
     required this.name,
     required this.description,
@@ -73,13 +116,17 @@ class CommandDefinition {
         'name': name,
         'description': description,
         'arguments': arguments.map((e) => e.toJson()).toList(),
-        'options': options
-            .map((flag) => flag.toOptionDefinition().toJson())
-            .toList(),
+        'options':
+            options.map((flag) => optionDefinitionFromFlag(flag).toJson()).toList(),
         'subcommands': subcommands.map((e) => e.toJson()).toList(),
         'examples': examples.map((e) => e.toJson()).toList(),
         'global_options': globalOptions
-            .map((flag) => flag.toOptionDefinition(isGlobalOverride: true).toJson())
+            .map(
+              (flag) => optionDefinitionFromFlag(
+                flag,
+                isGlobalOverride: true,
+              ).toJson(),
+            )
             .toList(),
         'is_hidden': isHidden,
       };
@@ -303,4 +350,73 @@ class CommandExample {
 
   @override
   String toString() => 'CommandExample(command: $command)';
+}
+
+/// Helper to convert a [CliFlag] into a serializable metadata representation.
+OptionDefinition optionDefinitionFromFlag(
+  CliFlag flag, {
+  bool? isGlobalOverride,
+}) {
+  return OptionDefinition(
+    name: flag.name,
+    description: flag.description,
+    short: flag.abbreviation,
+    type: switch (flag.type) {
+      FlagType.boolean => OptionType.flag,
+      FlagType.singleValue => OptionType.value,
+      FlagType.multiValue => OptionType.multiple,
+    },
+    defaultValue: flag.defaultValue,
+    allowedValues: flag.allowedValues,
+    isGlobal: isGlobalOverride ?? flag.isGlobal,
+  );
+}
+
+CliFlag _cliFlagFromOptionDefinition(OptionDefinition option) {
+  final flagType = switch (option.type) {
+    OptionType.flag => FlagType.boolean,
+    OptionType.value => FlagType.singleValue,
+    OptionType.multiple => FlagType.multiValue,
+  };
+
+  return _SerializableCliFlag(
+    name: option.name,
+    abbreviation: option.short,
+    description: option.description,
+    isGlobal: option.isGlobal,
+    type: flagType,
+    allowedValues: option.allowedValues,
+    defaultValue: option.defaultValue,
+  );
+}
+
+class _SerializableCliFlag extends CliFlag {
+  _SerializableCliFlag({
+    required super.name,
+    super.abbreviation,
+    required super.description,
+    required super.isGlobal,
+    super.category = CliFlagCategory.execution,
+    required super.type,
+    bool isNegatable = false,
+    super.allowedValues,
+    super.defaultValue,
+  }) : super(isNegatable: isNegatable);
+}
+
+class _MetadataCliFlag extends CliFlag {
+  _MetadataCliFlag(
+    CliFlag source, {
+    bool? isGlobal,
+  }) : super(
+          name: source.name,
+          abbreviation: source.abbreviation,
+          description: source.description,
+          isGlobal: isGlobal ?? source.isGlobal,
+          category: source.category,
+          type: source.type,
+          isNegatable: source.isNegatable,
+          allowedValues: source.allowedValues,
+          defaultValue: source.defaultValue,
+        );
 }

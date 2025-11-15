@@ -1,4 +1,3 @@
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/features/schema/export_format.dart';
@@ -145,7 +144,10 @@ class JsonSchemaExporter extends SchemaExporter {
     };
 
     for (final flag in options) {
-      final option = flag.toOptionDefinition(isGlobalOverride: isGlobal);
+      final option = optionDefinitionFromFlag(
+        flag,
+        isGlobalOverride: isGlobal,
+      );
       final optionSchema = <String, dynamic>{
         'type': _getJsonSchemaType(option.type),
         'description': option.description,

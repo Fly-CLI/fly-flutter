@@ -1,6 +1,5 @@
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/metadata/command_definition.dart';
 import 'package:fly_cli/src/core/command/metadata/command_wrappers.dart';
@@ -270,8 +269,9 @@ class CommandMetadataRegistry {
     return {
       'commands':
           allCommands.map((key, value) => MapEntry(key, value.toJson())),
-      'global_options':
-          globalOptions.map((o) => o.toOptionDefinition().toJson()).toList(),
+      'global_options': globalOptions
+          .map((o) => optionDefinitionFromFlag(o, isGlobalOverride: true).toJson())
+          .toList(),
     };
   }
 
@@ -279,6 +279,7 @@ class CommandMetadataRegistry {
   void clear() {
     _commandInstances.clear();
     _commandGroups.clear();
+    _globalFlags = const [];
   }
 
   /// Check if the registry has been initialized

@@ -1,6 +1,5 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flag_extensions.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
@@ -479,8 +478,9 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   @override
   Map<String, dynamic> toJson() => {
         'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
-        'global_options':
-            _globalOptions.map((o) => o.toOptionDefinition().toJson()).toList(),
+        'global_options': _globalOptions
+            .map((o) => optionDefinitionFromFlag(o, isGlobalOverride: true).toJson())
+            .toList(),
       };
 
   @override

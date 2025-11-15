@@ -50,7 +50,7 @@ enum FlagType {
 }
 
 /// Base sealed class for all CLI flags following industry standards
-sealed class CliFlag {
+abstract class CliFlag {
   final String name;
   final String? abbreviation;
   final String description;

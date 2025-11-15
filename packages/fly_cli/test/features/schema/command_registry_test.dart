@@ -1,5 +1,6 @@
-import 'package:args/args.dart' hide OptionType;
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
+import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/definitions/fly_command.dart';
@@ -11,14 +12,7 @@ import '../../helpers/command_test_helper.dart';
 CommandContext _createTestContext() =>
     CommandTestHelper.createMockCommandContext();
 
-/// Helper to create a test global options parser
-ArgParser _createTestGlobalOptionsParser() {
-  final parser = ArgParser()
-    ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
-    ..addFlag('quiet', abbr: 'q', help: 'Suppress output')
-    ..addOption('output', help: 'Output format', allowed: ['human', 'json']);
-  return parser;
-}
+List<CliFlag> _testGlobalFlags() => GlobalFlagsRegistry.globalFlags;
 
 /// Helper to create command instances from enum for testing
 ({
@@ -89,13 +83,13 @@ void main() {
 
       test('initializes with instances-based approach', () {
         final context = _createTestContext();
-        final globalParser = _createTestGlobalOptionsParser();
+        final globalFlags = _testGlobalFlags();
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
 
         expect(registry.isInitialized, isTrue);
@@ -107,13 +101,13 @@ void main() {
 
       test('does not reinitialize if already initialized', () {
         final context = _createTestContext();
-        final globalParser = _createTestGlobalOptionsParser();
+        final globalFlags = _testGlobalFlags();
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
 
         expect(registry.isInitialized, isTrue);
@@ -123,7 +117,7 @@ void main() {
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
 
         // Should still have same commands
@@ -136,13 +130,13 @@ void main() {
     group('command queries', () {
       setUp(() {
         final context = _createTestContext();
-        final globalParser = _createTestGlobalOptionsParser();
+        final globalFlags = _testGlobalFlags();
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
       });
 
@@ -202,13 +196,13 @@ void main() {
     group('global options', () {
       setUp(() {
         final context = _createTestContext();
-        final globalParser = _createTestGlobalOptionsParser();
+        final globalFlags = _testGlobalFlags();
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
       });
 
@@ -218,14 +212,14 @@ void main() {
 
         final verboseOption =
             globalOptions.firstWhere((o) => o.name == 'verbose');
-        expect(verboseOption.type, equals(OptionType.flag));
-        expect(verboseOption.short, equals('v'));
+        expect(verboseOption.type, equals(FlagType.boolean));
+        expect(verboseOption.abbreviation, equals('v'));
         expect(verboseOption.isGlobal, isTrue);
 
         final outputOption =
-            globalOptions.firstWhere((o) => o.name == 'output');
-        expect(outputOption.type, equals(OptionType.value));
-        expect(outputOption.allowedValues, equals(['human', 'json']));
+            globalOptions.firstWhere((o) => o.name == 'format');
+        expect(outputOption.type, equals(FlagType.singleValue));
+        expect(outputOption.allowedValues, equals(['human', 'json', 'ai']));
         expect(outputOption.isGlobal, isTrue);
       });
     });
@@ -233,13 +227,13 @@ void main() {
     group('JSON export', () {
       setUp(() {
         final context = _createTestContext();
-        final globalParser = _createTestGlobalOptionsParser();
+        final globalFlags = _testGlobalFlags();
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
       });
 
@@ -269,13 +263,13 @@ void main() {
     group('clear', () {
       test('clears all metadata and resets initialization state', () {
         final context = _createTestContext();
-        final globalParser = _createTestGlobalOptionsParser();
+        final globalFlags = _testGlobalFlags();
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
 
         expect(registry.isInitialized, isTrue);
@@ -288,7 +282,7 @@ void main() {
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: globalParser,
+          globalFlags: globalFlags,
         );
         expect(registry.hasCommand('create'), isTrue);
         expect(registry.isInitialized, isTrue);
@@ -298,13 +292,13 @@ void main() {
     group('edge cases', () {
       test('handles initialization with minimal global options', () {
         final context = _createTestContext();
-        final minimalParser = ArgParser();
+        final minimalFlags = const [GlobalHelpFlag()];
         final instances = _createCommandInstances(context);
 
         registry.initializeFromInstances(
           commandInstances: instances.commandInstances,
           commandGroups: instances.commandGroups,
-          globalOptionsParser: minimalParser,
+          globalFlags: minimalFlags,
         );
 
         expect(registry.isInitialized, isTrue);

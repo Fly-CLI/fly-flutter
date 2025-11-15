@@ -41,22 +41,23 @@ void main() {
         expect(metadata.description, equals('Test command'));
         expect(metadata.options, hasLength(2));
 
-        final verboseOption =
-            metadata.options.firstWhere((o) => o.name == 'verbose');
-        expect(verboseOption.description, contains('Verbose'));
-        expect(verboseOption.short, equals('v'));
+        final verboseFlag =
+            metadata.options.firstWhere((flag) => flag.name == 'verbose');
+        expect(verboseFlag.description, contains('Verbose'));
+        expect(verboseFlag.abbreviation, equals('v'));
 
-        final outputOption =
-            metadata.options.firstWhere((o) => o.name == 'output');
-        expect(outputOption.description, contains('Output format'));
-        expect(outputOption.short, equals('f'));
-        expect(outputOption.allowedValues, equals(['human', 'json', 'ai']));
+        final formatFlag =
+            metadata.options.firstWhere((flag) => flag.name == 'format');
+        expect(formatFlag.description, contains('Output format'));
+        expect(formatFlag.abbreviation, equals('f'));
+        expect(formatFlag.allowedValues, equals(['human', 'json', 'ai']));
       });
 
       test('extracts command with subcommands', () {
         final command = _TestCommand('test', 'Test command');
-        command.addSubcommand(_TestCommand('sub1', 'First subcommand'));
-        command.addSubcommand(_TestCommand('sub2', 'Second subcommand'));
+        command
+          ..addSubcommand(_TestCommand('sub1', 'First subcommand'))
+          ..addSubcommand(_TestCommand('sub2', 'Second subcommand'));
 
         final metadata = extractor.extractMetadata(command);
 
@@ -99,20 +100,28 @@ void main() {
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('test'));
-        expect(metadata.description,
-            equals('Manual metadata')); // Manual metadata is used
+        expect(
+          metadata.description,
+          equals('Manual metadata'),
+        ); // Manual metadata is used
         expect(metadata.examples, hasLength(1));
-        expect(metadata.examples.first.command, equals('fly test --example'));
-        expect(metadata.globalOptions,
-            isEmpty); // Manual metadata doesn't have global options
+        expect(
+          metadata.examples.first.command,
+          equals('fly test --example'),
+        );
+        expect(
+          metadata.globalOptions,
+          isEmpty,
+        ); // Manual metadata doesn't have global options
       });
     });
 
     group('_extractSubcommands', () {
       test('extracts subcommands', () {
         final command = _TestCommand('parent', 'Parent command');
-        command.addSubcommand(_TestCommand('child1', 'First child'));
-        command.addSubcommand(_TestCommand('child2', 'Second child'));
+        command
+          ..addSubcommand(_TestCommand('child1', 'First child'))
+          ..addSubcommand(_TestCommand('child2', 'Second child'));
 
         final metadata = extractor.extractMetadata(command);
         final subcommands = metadata.subcommands;
