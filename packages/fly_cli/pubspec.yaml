@@ -21,7 +21,7 @@ dependencies:
   pub_semver: ^2.1.0
   pubspec_parse: ^1.2.0
   collection: ^1.17.2
-  meta: ^1.9.1
+  meta: ^1.17.0
   pub_cache: ^0.3.0
   archive: ^4.0.0
   crypto: ^3.0.3
