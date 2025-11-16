@@ -1,0 +1,15 @@
+{
+  "generation_mode": "project",
+  "is_project": true,
+  "project_name": "acme_app",
+  "organization": "com.example",
+  "platforms": ["ios", "android", "web"],
+  "features": ["home"],
+  "with_tests": true,
+  "with_docs": true,
+  "with_mcp": true,
+  "code_generation": true,
+  "ai_integration": true
+}
+
+

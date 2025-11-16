@@ -94,13 +94,13 @@ class _{{component_name.pascalCase()}}Body extends StatelessWidget {
                     icon: const Icon(Icons.refresh),
                     label: const Text('Refresh state'),
                   ),
-                  {{#screen_type_form}}
+                  {{#is_form_screen}}
                   const SizedBox(height: 24),
                   Text(
                     'Form ready state',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  {{/screen_type_form}}
+                  {{/is_form_screen}}
                   {{#with_navigation}}
                   const SizedBox(height: 24),
                   FilledButton(

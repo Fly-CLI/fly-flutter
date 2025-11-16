@@ -1,0 +1,48 @@
+import 'package:mason/mason.dart';
+
+import 'planner.dart';
+
+class ServiceModePlanner implements PlannerPlugin {
+  @override
+  bool canHandle(Vars vars) {
+    final isService = vars['is_service'] == true || vars['generation_mode'] == 'service';
+    return isService;
+  }
+
+  @override
+  Vars derive(Vars vars, Logger logger) {
+    final serviceType = (vars['service_type'] as String?)?.toLowerCase();
+    final withRetry = vars['with_retry_logic'] == true;
+    final withCaching = vars['with_caching'] == true;
+    final withInterceptors = vars['with_interceptors'] == true;
+    final withMocks = vars['with_mocks'] == true;
+
+    final isApiService = serviceType == 'api';
+    final isLocalService = serviceType == 'local';
+    final isCacheService = serviceType == 'cache';
+    final isAnalyticsService = serviceType == 'analytics';
+    final isStorageService = serviceType == 'storage';
+
+    // Validation example: analytics + caching not supported (adjust as needed)
+    if (isAnalyticsService && withCaching) {
+      throw const HookException(
+        'Invalid combination: service_type=analytics does not support with_caching=true.',
+      );
+    }
+
+    return <String, dynamic>{
+      'active_mode': 'service',
+      'is_api_service': isApiService,
+      'is_local_service': isLocalService,
+      'is_cache_service': isCacheService,
+      'is_analytics_service': isAnalyticsService,
+      'is_storage_service': isStorageService,
+      'supports_retry': withRetry && isApiService,
+      'supports_caching': withCaching && (isApiService || isLocalService || isCacheService),
+      'supports_interceptors': withInterceptors && isApiService,
+      'generate_mocks': withMocks,
+    };
+  }
+}
+
+

@@ -1,0 +1,15 @@
+{
+  "generation_mode": "project",
+  "is_project": true,
+  "project_name": "starter_app",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "features": ["home"],
+  "with_tests": false,
+  "with_docs": false,
+  "with_mcp": false,
+  "code_generation": true,
+  "ai_integration": false
+}
+
+

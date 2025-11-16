@@ -1,0 +1,14 @@
+{
+  "generation_mode": "feature",
+  "is_feature": true,
+  "feature": "home",
+  "component_name": "dashboard",
+  "screen_type": "list",
+  "with_viewmodel": true,
+  "with_validation": false,
+  "with_navigation": true,
+  "state_mgmt": "riverpod",
+  "with_tests": true
+}
+
+

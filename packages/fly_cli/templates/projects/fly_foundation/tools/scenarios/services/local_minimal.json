@@ -1,0 +1,14 @@
+{
+  "generation_mode": "service",
+  "is_service": true,
+  "feature": "home",
+  "component_name": "localdata",
+  "service_type": "local",
+  "with_retry_logic": false,
+  "with_caching": true,
+  "with_interceptors": false,
+  "with_mocks": true,
+  "with_tests": true
+}
+
+

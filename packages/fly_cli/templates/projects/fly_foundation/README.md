@@ -82,6 +82,16 @@ flutter doctor
 Each mode shares the same variable system, naming rules, and lint configuration so components slot
 directly into generated projects.
 
+### State Management
+
+Control the state management style via:
+
+```
+state_mgmt: riverpod|bloc|cubit  (default: riverpod)
+```
+
+Hooks derive `use_riverpod` / `use_bloc` / `use_cubit` so templates can remain declarative and switch wiring with minimal changes.
+
 ---
 
 ## Project Mode Details
@@ -401,7 +411,9 @@ fly mcp serve --project .
 
 1. Clone the Fly monorepo and run `melos bootstrap`.
 2. Modify template files under `packages/fly_cli/templates/projects/fly_foundation`.
-3. Regenerate snapshots/tests as needed (`melos run test:templates` if available).
+3. For template validation:
+   - Run scenarios: `tools/run_scenarios.sh`
+   - Count conditionals: `dart tools/metrics/count_conditionals.dart`
 4. Update this README when changing generation modes, variables, or workflows.
 5. Submit PRs with before/after screenshots, generated project diffs, and lint/test results.
 

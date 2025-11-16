@@ -1,0 +1,5 @@
+{{#supports_caching}}
+_cache['summary'] = result;
+{{/supports_caching}}
+
+

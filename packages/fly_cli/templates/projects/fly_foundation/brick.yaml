@@ -193,3 +193,15 @@ vars:
     type: boolean
     description: Generate mock implementations for services
     default: true
+
+  ## ---------------------------------------------------------------------------
+  ## State management (foundation-level; extensible)
+  ## ---------------------------------------------------------------------------
+  state_mgmt:
+    type: enum
+    description: Preferred state management for generated UI scaffolding
+    default: riverpod
+    values:
+      - riverpod
+      - bloc
+      - cubit

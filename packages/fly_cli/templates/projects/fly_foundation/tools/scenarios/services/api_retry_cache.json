@@ -1,0 +1,15 @@
+{
+  "generation_mode": "service",
+  "is_service": true,
+  "feature": "home",
+  "component_name": "summary",
+  "service_type": "api",
+  "api_base_url": "https://api.example.com",
+  "with_retry_logic": true,
+  "with_caching": true,
+  "with_interceptors": true,
+  "with_mocks": true,
+  "with_tests": true
+}
+
+

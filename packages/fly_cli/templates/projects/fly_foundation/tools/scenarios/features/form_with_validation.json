@@ -1,0 +1,14 @@
+{
+  "generation_mode": "feature",
+  "is_feature": true,
+  "feature": "auth",
+  "component_name": "signin",
+  "screen_type": "form",
+  "with_viewmodel": true,
+  "with_validation": true,
+  "with_navigation": true,
+  "state_mgmt": "riverpod",
+  "with_tests": true
+}
+
+
