@@ -20,8 +20,8 @@ class FeatureModePlanner implements PlannerPlugin {
     final withNavigation = base.featureNavigation;
     final stateMgmt = base.stateManagement;
 
-    final isFormScreen = screenType == ScreenType.form ||
-        screenType == ScreenType.auth;
+    final isFormScreen =
+        screenType == ScreenType.form || screenType == ScreenType.auth;
     final requiresValidation = withValidation || isFormScreen;
 
     return DerivedTemplateVariables(
@@ -41,5 +41,3 @@ class FeatureModePlanner implements PlannerPlugin {
     );
   }
 }
-
-

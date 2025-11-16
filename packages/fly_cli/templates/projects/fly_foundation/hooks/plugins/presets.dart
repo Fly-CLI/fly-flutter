@@ -1,4 +1,5 @@
 import 'package:mason/mason.dart';
+import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
 import 'foundation_model.dart';
 
@@ -93,12 +94,13 @@ enum FoundationPreset {
   }
 
   /// Returns all valid preset keys.
-  static List<String> get allKeys => FoundationPreset.values.map((e) => e.key).toList();
+  static List<String> get allKeys =>
+      FoundationPreset.values.map((e) => e.key).toList();
 
   /// Parses preset from vars and returns the corresponding enum.
   /// Defaults to starter if not specified.
   static FoundationPreset fromVars(Vars vars) {
-    final presetStr = (vars['preset'] as String?)?.toLowerCase();
+    final presetStr = vars.getVar<String>(MasonVarKey.preset)?.toLowerCase();
     if (presetStr == null || presetStr.isEmpty) {
       return FoundationPreset.starter; // Default
     }
@@ -145,4 +147,3 @@ enum FoundationPreset {
     );
   }
 }
-

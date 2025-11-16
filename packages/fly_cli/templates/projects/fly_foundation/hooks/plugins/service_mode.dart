@@ -46,12 +46,10 @@ class ServiceModePlanner implements PlannerPlugin {
       isAnalyticsService: isAnalyticsService,
       isStorageService: isStorageService,
       supportsRetry: withRetry && isApiService,
-      supportsCaching: withCaching &&
-          (isApiService || isLocalService || isCacheService),
+      supportsCaching:
+          withCaching && (isApiService || isLocalService || isCacheService),
       supportsInterceptors: withInterceptors && isApiService,
       generateMocks: withMocks,
     );
   }
 }
-
-

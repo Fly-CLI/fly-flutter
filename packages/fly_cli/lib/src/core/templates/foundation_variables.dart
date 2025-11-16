@@ -1,4 +1,5 @@
 import 'foundation_enums.dart';
+import 'mason_variable_keys.dart';
 
 /// Base template variables representing the core input variables for template generation.
 ///
@@ -121,13 +122,14 @@ class BaseTemplateVariables {
   /// Parses all fields from the map, using enum parsers for categorical values
   /// and providing sensible defaults for missing values.
   factory BaseTemplateVariables.fromMasonVars(Map<String, dynamic> vars) {
-    final name = (vars['name'] as String?) ?? 'unnamed';
+    final name = vars.getVar<String>(MasonVarKey.name) ?? 'unnamed';
     final organization =
-        (vars['organization'] as String?) ?? 'com.example';
+        vars.getVar<String>(MasonVarKey.organization) ?? 'com.example';
     final generationMode = GenerationMode.tryFromKey(
-      vars['generation_mode'] as String?,
+      vars.getVar<String>(MasonVarKey.generationMode),
     );
-    final platformsRaw = (vars['platforms'] as List?) ?? ['ios', 'android'];
+    final platformsRaw =
+        vars.getVar<List>(MasonVarKey.platforms) ?? ['ios', 'android'];
     final platforms = PlatformType.fromKeys(platformsRaw);
 
     return BaseTemplateVariables(
@@ -135,35 +137,38 @@ class BaseTemplateVariables {
       organization: organization,
       generationMode: generationMode,
       platforms: platforms,
-      description: (vars['description'] as String?) ??
+      description: vars.getVar<String>(MasonVarKey.description) ??
           'A new Fly foundation project',
-      templateVariant: (vars['template_variant'] as String?) ?? 'foundation',
-      minFlutterSdk: (vars['min_flutter_sdk'] as String?) ?? '3.10.0',
-      minDartSdk: (vars['min_dart_sdk'] as String?) ?? '3.0.0',
-      withTests: vars['with_tests'] as bool? ?? true,
-      withDocs: vars['with_docs'] as bool? ?? true,
-      withMcp: vars['with_mcp'] as bool? ?? true,
-      codeGeneration: vars['code_generation'] as bool? ?? true,
-      aiIntegration: vars['ai_integration'] as bool? ?? true,
-      flyPackages: (vars['fly_packages'] as List?)?.cast<String>() ??
+      templateVariant:
+          vars.getVar<String>(MasonVarKey.templateVariant) ?? 'foundation',
+      minFlutterSdk: vars.getVar<String>(MasonVarKey.minFlutterSdk) ?? '3.10.0',
+      minDartSdk: vars.getVar<String>(MasonVarKey.minDartSdk) ?? '3.0.0',
+      withTests: vars.getVar<bool>(MasonVarKey.withTests) ?? true,
+      withDocs: vars.getVar<bool>(MasonVarKey.withDocs) ?? true,
+      withMcp: vars.getVar<bool>(MasonVarKey.withMcp) ?? true,
+      codeGeneration: vars.getVar<bool>(MasonVarKey.codeGeneration) ?? true,
+      aiIntegration: vars.getVar<bool>(MasonVarKey.aiIntegration) ?? true,
+      flyPackages: vars.getVar<List>(MasonVarKey.flyPackages)?.cast<String>() ??
           defaultFlyPackages,
-      serviceRetry: vars['with_retry_logic'] as bool? ?? false,
-      serviceCaching: vars['with_caching'] as bool? ?? false,
-      serviceInterceptors: vars['with_interceptors'] as bool? ?? false,
-      serviceMocks: vars['with_mocks'] as bool? ?? false,
-      featureViewModel: vars['with_viewmodel'] as bool? ?? true,
-      featureValidation: vars['with_validation'] as bool? ?? false,
-      featureNavigation: vars['with_navigation'] as bool? ?? false,
+      serviceRetry: vars.getVar<bool>(MasonVarKey.withRetryLogic) ?? false,
+      serviceCaching: vars.getVar<bool>(MasonVarKey.withCaching) ?? false,
+      serviceInterceptors:
+          vars.getVar<bool>(MasonVarKey.withInterceptors) ?? false,
+      serviceMocks: vars.getVar<bool>(MasonVarKey.withMocks) ?? false,
+      featureViewModel: vars.getVar<bool>(MasonVarKey.withViewModel) ?? true,
+      featureValidation: vars.getVar<bool>(MasonVarKey.withValidation) ?? false,
+      featureNavigation: vars.getVar<bool>(MasonVarKey.withNavigation) ?? false,
       stateManagement: StateManagement.tryFromKey(
-        vars['state_mgmt'] as String?,
+        vars.getVar<String>(MasonVarKey.stateMgmt),
       ),
-      screenType: ScreenType.tryFromKey(vars['screen_type'] as String?),
+      screenType:
+          ScreenType.tryFromKey(vars.getVar<String>(MasonVarKey.screenType)),
       serviceType: ServiceType.tryFromKey(
-        vars['service_type'] as String?,
+        vars.getVar<String>(MasonVarKey.serviceType),
         defaultValue: ServiceType.api,
       ),
-      apiBaseUrl: vars['api_base_url'] as String?,
-      preset: vars['preset'] as String?,
+      apiBaseUrl: vars.getVar<String>(MasonVarKey.apiBaseUrl),
+      preset: vars.getVar<String>(MasonVarKey.preset),
     );
   }
 
@@ -172,32 +177,32 @@ class BaseTemplateVariables {
   /// Emits all fields using the canonical string keys expected by Mason templates.
   Map<String, dynamic> toMasonVars() {
     return {
-      'name': name,
-      'organization': organization,
-      'generation_mode': generationMode.key,
-      'platforms': platforms.map((p) => p.key).toList(),
-      'description': description,
-      'template_variant': templateVariant,
-      'min_flutter_sdk': minFlutterSdk,
-      'min_dart_sdk': minDartSdk,
-      'with_tests': withTests,
-      'with_docs': withDocs,
-      'with_mcp': withMcp,
-      'code_generation': codeGeneration,
-      'ai_integration': aiIntegration,
-      'fly_packages': flyPackages,
-      'with_retry_logic': serviceRetry,
-      'with_caching': serviceCaching,
-      'with_interceptors': serviceInterceptors,
-      'with_mocks': serviceMocks,
-      'with_viewmodel': featureViewModel,
-      'with_validation': featureValidation,
-      'with_navigation': featureNavigation,
-      'state_mgmt': stateManagement.key,
-      if (screenType != null) 'screen_type': screenType!.key,
-      if (serviceType != null) 'service_type': serviceType!.key,
-      if (apiBaseUrl != null) 'api_base_url': apiBaseUrl,
-      if (preset != null) 'preset': preset,
+      MasonVarKey.name.key: name,
+      MasonVarKey.organization.key: organization,
+      MasonVarKey.generationMode.key: generationMode.key,
+      MasonVarKey.platforms.key: platforms.map((p) => p.key).toList(),
+      MasonVarKey.description.key: description,
+      MasonVarKey.templateVariant.key: templateVariant,
+      MasonVarKey.minFlutterSdk.key: minFlutterSdk,
+      MasonVarKey.minDartSdk.key: minDartSdk,
+      MasonVarKey.withTests.key: withTests,
+      MasonVarKey.withDocs.key: withDocs,
+      MasonVarKey.withMcp.key: withMcp,
+      MasonVarKey.codeGeneration.key: codeGeneration,
+      MasonVarKey.aiIntegration.key: aiIntegration,
+      MasonVarKey.flyPackages.key: flyPackages,
+      MasonVarKey.withRetryLogic.key: serviceRetry,
+      MasonVarKey.withCaching.key: serviceCaching,
+      MasonVarKey.withInterceptors.key: serviceInterceptors,
+      MasonVarKey.withMocks.key: serviceMocks,
+      MasonVarKey.withViewModel.key: featureViewModel,
+      MasonVarKey.withValidation.key: featureValidation,
+      MasonVarKey.withNavigation.key: featureNavigation,
+      MasonVarKey.stateMgmt.key: stateManagement.key,
+      if (screenType != null) MasonVarKey.screenType.key: screenType!.key,
+      if (serviceType != null) MasonVarKey.serviceType.key: serviceType!.key,
+      if (apiBaseUrl != null) MasonVarKey.apiBaseUrl.key: apiBaseUrl,
+      if (preset != null) MasonVarKey.preset.key: preset,
     };
   }
 
@@ -493,70 +498,72 @@ class DerivedTemplateVariables {
     final result = <String, dynamic>{};
 
     // Mode flags
-    result['is_project'] = isProject;
-    result['is_feature'] = isFeature;
-    result['is_service'] = isService;
+    result[MasonVarKey.isProject.key] = isProject;
+    result[MasonVarKey.isFeature.key] = isFeature;
+    result[MasonVarKey.isService.key] = isService;
     if (activeMode != null) {
-      result['active_mode'] = activeMode!.key;
+      result[MasonVarKey.activeMode.key] = activeMode!.key;
     }
 
     // Platform flags
-    result['supports_ios'] = supportsIos;
-    result['supports_android'] = supportsAndroid;
-    result['supports_web'] = supportsWeb;
-    result['supports_macos'] = supportsMacos;
-    result['supports_windows'] = supportsWindows;
-    result['supports_linux'] = supportsLinux;
-    result['supports_desktop'] = supportsDesktop;
+    result[MasonVarKey.supportsIos.key] = supportsIos;
+    result[MasonVarKey.supportsAndroid.key] = supportsAndroid;
+    result[MasonVarKey.supportsWeb.key] = supportsWeb;
+    result[MasonVarKey.supportsMacos.key] = supportsMacos;
+    result[MasonVarKey.supportsWindows.key] = supportsWindows;
+    result[MasonVarKey.supportsLinux.key] = supportsLinux;
+    result[MasonVarKey.supportsDesktop.key] = supportsDesktop;
 
     // Feature flags
     if (screenType != null) {
-      result['screen_type'] = screenType!.key;
-      result['is_list_screen'] = isListScreen;
-      result['is_detail_screen'] = isDetailScreen;
-      result['is_form_screen'] = isFormScreen;
+      result[MasonVarKey.screenType.key] = screenType!.key;
+      result[MasonVarKey.isListScreen.key] = isListScreen;
+      result[MasonVarKey.isDetailScreen.key] = isDetailScreen;
+      result[MasonVarKey.isFormScreen.key] = isFormScreen;
     }
-    result['requires_validation'] = requiresValidation;
-    result['with_navigation'] = withNavigation;
-    result['use_riverpod'] = useRiverpod;
-    result['use_bloc'] = useBloc;
-    result['use_cubit'] = useCubit;
+    result[MasonVarKey.requiresValidation.key] = requiresValidation;
+    result[MasonVarKey.withNavigation.key] = withNavigation;
+    result[MasonVarKey.useRiverpod.key] = useRiverpod;
+    result[MasonVarKey.useBloc.key] = useBloc;
+    result[MasonVarKey.useCubit.key] = useCubit;
 
     // Service flags
     if (serviceType != null) {
-      result['service_type'] = serviceType!.key;
-      result['is_api_service'] = isApiService;
-      result['is_local_service'] = isLocalService;
-      result['is_cache_service'] = isCacheService;
-      result['is_analytics_service'] = isAnalyticsService;
-      result['is_storage_service'] = isStorageService;
+      result[MasonVarKey.serviceType.key] = serviceType!.key;
+      result[MasonVarKey.isApiService.key] = isApiService;
+      result[MasonVarKey.isLocalService.key] = isLocalService;
+      result[MasonVarKey.isCacheService.key] = isCacheService;
+      result[MasonVarKey.isAnalyticsService.key] = isAnalyticsService;
+      result[MasonVarKey.isStorageService.key] = isStorageService;
     }
-    result['supports_retry'] = supportsRetry;
-    result['supports_caching'] = supportsCaching;
-    result['supports_interceptors'] = supportsInterceptors;
-    result['generate_mocks'] = generateMocks;
+    result[MasonVarKey.supportsRetry.key] = supportsRetry;
+    result[MasonVarKey.supportsCaching.key] = supportsCaching;
+    result[MasonVarKey.supportsInterceptors.key] = supportsInterceptors;
+    result[MasonVarKey.generateMocks.key] = generateMocks;
 
     // Naming-derived values
-    if (projectName != null) result['project_name'] = projectName;
-    if (feature != null) result['feature'] = feature;
-    if (componentName != null) result['component_name'] = componentName;
+    if (projectName != null) result[MasonVarKey.projectName.key] = projectName;
+    if (feature != null) result[MasonVarKey.feature.key] = feature;
+    if (componentName != null)
+      result[MasonVarKey.componentName.key] = componentName;
     if (projectNameSnake != null) {
-      result['project_name_snake'] = projectNameSnake;
+      result[MasonVarKey.projectNameSnake.key] = projectNameSnake;
     }
     if (projectNameCamel != null) {
-      result['project_name_camel'] = projectNameCamel;
+      result[MasonVarKey.projectNameCamel.key] = projectNameCamel;
     }
     if (projectNamePascal != null) {
-      result['project_name_pascal'] = projectNamePascal;
+      result[MasonVarKey.projectNamePascal.key] = projectNamePascal;
     }
 
     // Template metadata
     if (templateVariant != null) {
-      result['template_variant'] = templateVariant;
+      result[MasonVarKey.templateVariant.key] = templateVariant;
     }
-    if (minFlutterSdk != null) result['min_flutter_sdk'] = minFlutterSdk;
-    if (minDartSdk != null) result['min_dart_sdk'] = minDartSdk;
-    if (flyPackages != null) result['fly_packages'] = flyPackages;
+    if (minFlutterSdk != null)
+      result[MasonVarKey.minFlutterSdk.key] = minFlutterSdk;
+    if (minDartSdk != null) result[MasonVarKey.minDartSdk.key] = minDartSdk;
+    if (flyPackages != null) result[MasonVarKey.flyPackages.key] = flyPackages;
 
     return result;
   }
@@ -648,4 +655,3 @@ class DerivedTemplateVariables {
     );
   }
 }
-

@@ -15,6 +15,7 @@ import 'compatibility_result.dart';
 import 'foundation_enums.dart';
 import 'generation_preview.dart';
 import 'generation_variable_validator.dart';
+import 'mason_variable_keys.dart';
 import 'template_info.dart';
 import 'template_variable.dart';
 import 'version_parser.dart';
@@ -441,7 +442,8 @@ class TemplateManager {
         // Check if value matches expected type
         if (brickVar.type == 'list' && value is! List) {
           errors.add('Variable "$variableName" should be a list');
-        } else if ((brickVar.type == 'bool' || brickVar.type == 'boolean') && value is! bool) {
+        } else if ((brickVar.type == 'bool' || brickVar.type == 'boolean') &&
+            value is! bool) {
           errors.add('Variable "$variableName" should be a boolean');
         } else if (brickVar.type == 'string' && value is! String) {
           errors.add('Variable "$variableName" should be a string');
@@ -494,39 +496,43 @@ class TemplateManager {
 
       // Handle feature iteration for project bricks
       // Mason doesn't automatically iterate over list variables in directory names
-      if (brick.type == BrickType.project && variables.containsKey('features')) {
-        final features = variables['features'] as List<dynamic>?;
+      if (brick.type == BrickType.project &&
+          variables.containsKey(MasonVarKey.features.key)) {
+        final features = variables.getVar<List>(MasonVarKey.features);
         if (features != null && features.isNotEmpty) {
           // Convert features to strings and remove duplicates
-          final uniqueFeatures = features.map((f) => f.toString()).toSet().toList();
-          
+          final uniqueFeatures =
+              features.map((f) => f.toString()).toSet().toList();
+
           // First, generate base project structure with first feature
           // This ensures base files are generated
           final baseVariables = Map<String, dynamic>.from(variables);
-          baseVariables['feature'] = uniqueFeatures.first;
-          
-          logger.info('Generating base project structure with feature: ${uniqueFeatures.first}...');
+          baseVariables[MasonVarKey.feature.key] = uniqueFeatures.first;
+
+          logger.info(
+              'Generating base project structure with feature: ${uniqueFeatures.first}...');
           final baseFiles = await generator.generate(
             target,
             vars: baseVariables,
             logger: logger,
             fileConflictResolution: FileConflictResolution.overwrite,
           );
-          
+
           var totalFiles = baseFiles.length;
           logger.info('✓ Base structure generated ($totalFiles files)');
 
           // Then generate each additional feature separately
           // Each generation will create the {{feature}}/ directory for that feature
           if (uniqueFeatures.length > 1) {
-            logger.info('Generating ${uniqueFeatures.length - 1} additional feature(s)...');
+            logger.info(
+                'Generating ${uniqueFeatures.length - 1} additional feature(s)...');
             for (int i = 1; i < uniqueFeatures.length; i++) {
               final featureName = uniqueFeatures[i];
               logger.detail('Generating feature: $featureName');
-              
+
               final featureVariables = Map<String, dynamic>.from(variables);
-              featureVariables['feature'] = featureName;
-              
+              featureVariables[MasonVarKey.feature.key] = featureName;
+
               // Generate with this feature - Mason will create {{feature}}/ directory
               final featureFiles = await generator.generate(
                 target,
@@ -534,15 +540,17 @@ class TemplateManager {
                 logger: logger,
                 fileConflictResolution: FileConflictResolution.overwrite,
               );
-              
+
               // Count only new feature-specific files (approximate)
               // Note: This will include base files being regenerated, but that's okay
               totalFiles += featureFiles.length;
-              logger.detail('✓ Feature "$featureName" generated (${featureFiles.length} files)');
+              logger.detail(
+                  '✓ Feature "$featureName" generated (${featureFiles.length} files)');
             }
           }
 
-          logger.info('✓ Generation successful ($totalFiles total files generated)');
+          logger.info(
+              '✓ Generation successful ($totalFiles total files generated)');
           logger.info('Generated features: ${uniqueFeatures.join(', ')}');
 
           // Debug: Log generated files
@@ -1037,41 +1045,49 @@ class TemplateManager {
     String? componentName,
   }) {
     final vars = Map<String, dynamic>.from(base);
-    vars['generation_mode'] = mode.key;
-    vars['is_project'] = mode == GenerationMode.project;
-    vars['is_feature'] = mode == GenerationMode.feature;
-    vars['is_service'] = mode == GenerationMode.service;
+    vars[MasonVarKey.generationMode.key] = mode.key;
+    vars[MasonVarKey.isProject.key] = mode == GenerationMode.project;
+    vars[MasonVarKey.isFeature.key] = mode == GenerationMode.feature;
+    vars[MasonVarKey.isService.key] = mode == GenerationMode.service;
 
     if (componentName != null && componentName.isNotEmpty) {
-      vars['component_name'] = componentName;
+      vars[MasonVarKey.componentName.key] = componentName;
     }
 
     if (mode != GenerationMode.project) {
-      final featureName = vars['feature'];
-      if (featureName == null ||
-          (featureName is String && featureName.trim().isEmpty)) {
-        vars['feature'] = 'core';
+      final featureName = vars.getVar<String>(MasonVarKey.feature);
+      if (featureName == null || featureName.trim().isEmpty) {
+        vars[MasonVarKey.feature.key] = 'core';
       }
     }
 
     if (mode == GenerationMode.feature) {
-      final screenTypeStr = (vars['screen_type'] as String?) ?? 'list';
-      final screenType = ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ?? ScreenType.list;
-      vars['screen_type'] = screenType.key;
-      vars['screen_type_list'] = screenType == ScreenType.list;
-      vars['screen_type_detail'] = screenType == ScreenType.detail;
-      vars['screen_type_form'] = screenType == ScreenType.form;
-      vars['screen_type_auth'] = screenType == ScreenType.auth;
-      vars['screen_type_settings'] = screenType == ScreenType.settings;
+      final screenTypeStr =
+          vars.getVar<String>(MasonVarKey.screenType) ?? 'list';
+      final screenType =
+          ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ??
+              ScreenType.list;
+      vars[MasonVarKey.screenType.key] = screenType.key;
+      vars[MasonVarKey.screenTypeList.key] = screenType == ScreenType.list;
+      vars[MasonVarKey.screenTypeDetail.key] = screenType == ScreenType.detail;
+      vars[MasonVarKey.screenTypeForm.key] = screenType == ScreenType.form;
+      vars[MasonVarKey.screenTypeAuth.key] = screenType == ScreenType.auth;
+      vars[MasonVarKey.screenTypeSettings.key] =
+          screenType == ScreenType.settings;
     } else if (mode == GenerationMode.service) {
-      final serviceTypeStr = (vars['service_type'] as String?) ?? 'api';
-      final serviceType = ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ?? ServiceType.api;
-      vars['service_type'] = serviceType.key;
-      vars['service_type_api'] = serviceType == ServiceType.api;
-      vars['service_type_local'] = serviceType == ServiceType.local;
-      vars['service_type_cache'] = serviceType == ServiceType.cache;
-      vars['service_type_analytics'] = serviceType == ServiceType.analytics;
-      vars['service_type_storage'] = serviceType == ServiceType.storage;
+      final serviceTypeStr =
+          vars.getVar<String>(MasonVarKey.serviceType) ?? 'api';
+      final serviceType = ServiceType.tryFromKey(serviceTypeStr,
+              defaultValue: ServiceType.api) ??
+          ServiceType.api;
+      vars[MasonVarKey.serviceType.key] = serviceType.key;
+      vars[MasonVarKey.serviceTypeApi.key] = serviceType == ServiceType.api;
+      vars[MasonVarKey.serviceTypeLocal.key] = serviceType == ServiceType.local;
+      vars[MasonVarKey.serviceTypeCache.key] = serviceType == ServiceType.cache;
+      vars[MasonVarKey.serviceTypeAnalytics.key] =
+          serviceType == ServiceType.analytics;
+      vars[MasonVarKey.serviceTypeStorage.key] =
+          serviceType == ServiceType.storage;
     }
 
     return vars;
@@ -1204,29 +1220,30 @@ class TemplateVariables {
   final List<String> flyPackages;
 
   Map<String, dynamic> toMasonVars() => {
-        'generation_mode': 'project',
-        'project_name': projectName,
-        'organization': organization,
-        'platforms': platforms,
-        'description': description,
-        'features': features.isEmpty ? ['home'] : features,
-        'template_variant': templateVariant,
-        'min_flutter_sdk': minFlutterSdk,
-        'min_dart_sdk': minDartSdk,
-        'with_tests': withTests,
-        'with_docs': withDocs,
-        'with_mcp': withMcp,
-        'code_generation': codeGeneration,
-        'ai_integration': aiIntegration,
-        'fly_packages': flyPackages,
-        'project_name_snake': projectName.toLowerCase().replaceAll(' ', '_'),
-        'project_name_camel': _toCamelCase(projectName),
-        'project_name_pascal': _toPascalCase(projectName),
+        MasonVarKey.generationMode.key: 'project',
+        MasonVarKey.projectName.key: projectName,
+        MasonVarKey.organization.key: organization,
+        MasonVarKey.platforms.key: platforms,
+        MasonVarKey.description.key: description,
+        MasonVarKey.features.key: features.isEmpty ? ['home'] : features,
+        MasonVarKey.templateVariant.key: templateVariant,
+        MasonVarKey.minFlutterSdk.key: minFlutterSdk,
+        MasonVarKey.minDartSdk.key: minDartSdk,
+        MasonVarKey.withTests.key: withTests,
+        MasonVarKey.withDocs.key: withDocs,
+        MasonVarKey.withMcp.key: withMcp,
+        MasonVarKey.codeGeneration.key: codeGeneration,
+        MasonVarKey.aiIntegration.key: aiIntegration,
+        MasonVarKey.flyPackages.key: flyPackages,
+        MasonVarKey.projectNameSnake.key:
+            projectName.toLowerCase().replaceAll(' ', '_'),
+        MasonVarKey.projectNameCamel.key: _toCamelCase(projectName),
+        MasonVarKey.projectNamePascal.key: _toPascalCase(projectName),
         // Helper boolean flags for Mason conditionals
-        'is_project': true,
-        'is_screen': false,
-        'is_service': false,
-        'is_provider': false,
+        MasonVarKey.isProject.key: true,
+        MasonVarKey.isScreen.key: false,
+        MasonVarKey.isService.key: false,
+        MasonVarKey.isProvider.key: false,
       };
 
   String _toCamelCase(String input) {

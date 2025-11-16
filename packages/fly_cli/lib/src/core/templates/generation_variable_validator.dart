@@ -1,17 +1,25 @@
 import 'package:fly_cli/src/core/templates/foundation_enums.dart';
+import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
 class GenerationVariableValidator {
-  static final _allowedModeKeys = GenerationMode.values.map((e) => e.key).toSet();
-  static final _allowedPlatformKeys = PlatformType.values.map((e) => e.key).toSet();
-  static final _allowedScreenTypeKeys = ScreenType.values.map((e) => e.key).toSet();
-  static final _allowedServiceTypeKeys = ServiceType.values.map((e) => e.key).toSet();
+  static final _allowedModeKeys =
+      GenerationMode.values.map((e) => e.key).toSet();
+  static final _allowedPlatformKeys =
+      PlatformType.values.map((e) => e.key).toSet();
+  static final _allowedScreenTypeKeys =
+      ScreenType.values.map((e) => e.key).toSet();
+  static final _allowedServiceTypeKeys =
+      ServiceType.values.map((e) => e.key).toSet();
 
-  static final _organizationPattern = RegExp(r'^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$');
+  static final _organizationPattern =
+      RegExp(r'^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$');
 
   static List<String> validate(Map<String, dynamic> variables) {
     final errors = <String>[];
-    final modeStr = (variables['generation_mode'] as String? ?? 'project').toLowerCase();
+    final modeStr =
+        (variables.getVar<String>(MasonVarKey.generationMode) ?? 'project')
+            .toLowerCase();
 
     GenerationMode? mode;
     try {
@@ -36,22 +44,25 @@ class GenerationVariableValidator {
     return errors;
   }
 
-  static List<String> _validateProjectVariables(Map<String, dynamic> variables) {
+  static List<String> _validateProjectVariables(
+      Map<String, dynamic> variables) {
     final errors = <String>[];
-    final projectName = variables['project_name'] as String?;
-    final organization = variables['organization'] as String?;
-    final platforms = variables['platforms'];
+    final projectName = variables.getVar<String>(MasonVarKey.projectName);
+    final organization = variables.getVar<String>(MasonVarKey.organization);
+    final platforms = variables.getVar(MasonVarKey.platforms);
 
     if (projectName == null || projectName.isEmpty) {
       errors.add('project_name is required for project generation');
     } else if (!NameValidationRule.isValidProjectName(projectName)) {
-      errors.add('project_name "$projectName" is not a valid Dart package name');
+      errors
+          .add('project_name "$projectName" is not a valid Dart package name');
     }
 
     if (organization == null || organization.isEmpty) {
       errors.add('organization is required for project generation');
     } else if (!_organizationPattern.hasMatch(organization)) {
-      errors.add('organization "$organization" must be reverse-domain (e.g. com.example.app)');
+      errors.add(
+          'organization "$organization" must be reverse-domain (e.g. com.example.app)');
     }
 
     if (platforms is! List || platforms.isEmpty) {
@@ -63,7 +74,8 @@ class GenerationVariableValidator {
         } else {
           final platformKey = platform.toLowerCase().trim();
           if (!_allowedPlatformKeys.contains(platformKey)) {
-            errors.add('platform "$platform" is not supported. Valid: ${_allowedPlatformKeys.join(', ')}');
+            errors.add(
+                'platform "$platform" is not supported. Valid: ${_allowedPlatformKeys.join(', ')}');
           }
         }
       }
@@ -72,11 +84,12 @@ class GenerationVariableValidator {
     return errors;
   }
 
-  static List<String> _validateFeatureVariables(Map<String, dynamic> variables) {
+  static List<String> _validateFeatureVariables(
+      Map<String, dynamic> variables) {
     final errors = <String>[];
-    final componentName = variables['component_name'] as String?;
-    final feature = variables['feature'] as String?;
-    final screenTypeStr = variables['screen_type'] as String?;
+    final componentName = variables.getVar<String>(MasonVarKey.componentName);
+    final feature = variables.getVar<String>(MasonVarKey.feature);
+    final screenTypeStr = variables.getVar<String>(MasonVarKey.screenType);
 
     if (componentName == null || componentName.isEmpty) {
       errors.add('component_name is required for feature generation');
@@ -107,11 +120,12 @@ class GenerationVariableValidator {
     return errors;
   }
 
-  static List<String> _validateServiceVariables(Map<String, dynamic> variables) {
+  static List<String> _validateServiceVariables(
+      Map<String, dynamic> variables) {
     final errors = <String>[];
-    final componentName = variables['component_name'] as String?;
-    final feature = variables['feature'] as String?;
-    final serviceTypeStr = variables['service_type'] as String?;
+    final componentName = variables.getVar<String>(MasonVarKey.componentName);
+    final feature = variables.getVar<String>(MasonVarKey.feature);
+    final serviceTypeStr = variables.getVar<String>(MasonVarKey.serviceType);
 
     if (componentName == null || componentName.isEmpty) {
       errors.add('component_name is required for service generation');
@@ -141,8 +155,8 @@ class GenerationVariableValidator {
     }
 
     if (serviceType == ServiceType.api) {
-      final baseUrl = variables['base_url'] as String? ??
-          variables['api_base_url'] as String?;
+      final baseUrl = variables.getVar<String>(MasonVarKey.baseUrl) ??
+          variables.getVar<String>(MasonVarKey.apiBaseUrl);
       if (baseUrl == null || baseUrl.isEmpty) {
         errors.add('api_base_url is required when service_type is "api"');
       }

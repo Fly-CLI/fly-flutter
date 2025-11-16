@@ -37,5 +37,3 @@ class ProjectModePlanner implements PlannerPlugin {
     );
   }
 }
-
-
