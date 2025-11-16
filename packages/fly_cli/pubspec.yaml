@@ -33,7 +33,7 @@ dependencies:
   term_glyph: ^1.2.1
   usage: ^4.1.0
   freezed_annotation: ^3.0.0
-  analyzer: ^7.6.0
+  analyzer: ^8.1.1
   json_annotation: ^4.9.0
   fly_core:
     path: ../fly_core
