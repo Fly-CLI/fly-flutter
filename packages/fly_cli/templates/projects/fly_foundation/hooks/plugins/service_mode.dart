@@ -2,6 +2,7 @@ import 'package:mason/mason.dart';
 
 import 'foundation_model.dart';
 import 'planner.dart';
+import 'hook_exception.dart';
 
 class ServiceModePlanner implements PlannerPlugin {
   @override

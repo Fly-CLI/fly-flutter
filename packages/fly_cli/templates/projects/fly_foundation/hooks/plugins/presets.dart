@@ -2,6 +2,7 @@ import 'package:mason/mason.dart';
 import 'mason_variable_keys.dart';
 
 import 'foundation_model.dart';
+import 'hook_exception.dart';
 
 /// Foundation preset enum with configuration for each preset.
 enum FoundationPreset {

@@ -1,5 +1,6 @@
 import 'package:mason/mason.dart';
 import 'mason_variable_keys.dart';
+import 'hook_exception.dart';
 
 /// Hook-local typedef for Mason variables map.
 typedef Vars = Map<String, dynamic>;

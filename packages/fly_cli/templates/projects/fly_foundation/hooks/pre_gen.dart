@@ -1,6 +1,6 @@
 import 'package:mason/mason.dart';
-import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
+import 'plugins/mason_variable_keys.dart';
 import 'plugins/foundation_model.dart';
 import 'plugins/planner.dart';
 import 'plugins/preset_mode.dart';
