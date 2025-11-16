@@ -67,11 +67,11 @@ class GenerateServiceCommand extends FlyCommand {
     try {
       final prompter = context.interactivePrompt;
 
-      logger.info('🔧 Generating a new service');
-      logger.info('');
+      logger..info('🔧 Generating a new service')
+      ..info('');
 
       // 1. Service name
-      final serviceName = await prompter.promptString(
+      final componentName = await prompter.promptString(
         prompt: 'Service name',
         validator: NameValidationRule.isValidServiceName,
         validationError:
@@ -119,16 +119,21 @@ class GenerateServiceCommand extends FlyCommand {
       }
 
       // 7. Confirmation
-      logger.info('');
-      logger.info('Service Configuration:');
-      logger.info('  Name: $serviceName');
-      logger.info('  Feature: $feature');
-      logger.info('  Type: $serviceType');
-      logger.info('  With Tests: $withTests');
-      logger.info('  With Mocks: $withMocks');
+      final withRetryLogic = serviceType == 'api';
+      final withCaching = serviceType == 'cache';
+
+      logger..info('')
+      ..info('Service Configuration:')
+      ..info('  Name: $componentName')
+      ..info('  Feature: $feature')
+      ..info('  Type: $serviceType')
+      ..info('  With Tests: $withTests')
+      ..info('  With Mocks: $withMocks')
+      ..info('  With Retry Logic: $withRetryLogic')
+      ..info('  With Caching: $withCaching');
       if (serviceType == 'api') {
-        logger.info('  With Interceptors: $withInterceptors');
-        logger.info('  Base URL: $baseUrl');
+        logger..info('  With Interceptors: $withInterceptors')
+        ..info('  Base URL: $baseUrl');
       }
 
       final confirmed = await prompter.promptConfirm(
@@ -166,12 +171,14 @@ class GenerateServiceCommand extends FlyCommand {
 
       // Generate service using Mason brick
       return await _generateServiceWithMason(
-        serviceName: serviceName,
+        serviceName: componentName,
         feature: feature,
         serviceType: serviceType,
         withTests: withTests,
         withMocks: withMocks,
         withInterceptors: withInterceptors,
+        withRetryLogic: withRetryLogic,
+        withCaching: withCaching,
         baseUrl: baseUrl,
         outputDir: targetDir,
       );
@@ -204,6 +211,9 @@ class GenerateServiceCommand extends FlyCommand {
       argResults,
       const GenerateServiceWithInterceptorsFlag(),
     );
+    final withRetryLogic = serviceType == 'api';
+    final withCaching = serviceType == 'cache';
+
     final baseUrl = FlagAccessor.getStringOrDefault(
       argResults,
       const GenerateServiceBaseUrlFlag(),
@@ -236,6 +246,8 @@ class GenerateServiceCommand extends FlyCommand {
       withTests: withTests,
       withMocks: withMocks,
       withInterceptors: withInterceptors,
+      withRetryLogic: withRetryLogic,
+      withCaching: withCaching,
       baseUrl: baseUrl,
       outputDir: targetProjectDir,
     );
@@ -249,20 +261,24 @@ class GenerateServiceCommand extends FlyCommand {
     required bool withTests,
     required bool withMocks,
     required bool withInterceptors,
+    required bool withRetryLogic,
+    required bool withCaching,
     required String baseUrl,
     required String outputDir,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Generating service: $serviceName');
-      logger.info('Feature: $feature');
-      logger.info('Type: $serviceType');
-      logger.info('With tests: $withTests');
-      logger.info('With mocks: $withMocks');
+      logger..info('Generating service: $serviceName')
+      ..info('Feature: $feature')
+      ..info('Type: $serviceType')
+      ..info('With tests: $withTests')
+      ..info('With mocks: $withMocks')
+      ..info('With retry logic: $withRetryLogic')
+      ..info('With caching: $withCaching');
       if (serviceType == 'api') {
-        logger.info('With interceptors: $withInterceptors');
-        logger.info('Base URL: $baseUrl');
+        logger..info('With interceptors: $withInterceptors')
+        ..info('Base URL: $baseUrl');
       }
 
       // Use injected template manager
@@ -270,12 +286,14 @@ class GenerateServiceCommand extends FlyCommand {
 
       // Create service configuration for Mason brick
       final serviceConfig = <String, dynamic>{
-        'service_name': serviceName,
+        'component_name': serviceName,
         'feature': feature,
         'service_type': serviceType,
         'with_tests': withTests,
         'with_mocks': withMocks,
         'with_interceptors': withInterceptors,
+        'with_retry_logic': withRetryLogic,
+        'with_caching': withCaching,
         'base_url': baseUrl,
       };
 
@@ -310,12 +328,14 @@ class GenerateServiceCommand extends FlyCommand {
         command: 'generate service',
         message: 'Service generated successfully',
         data: {
-          'service_name': serviceName,
+          'component_name': serviceName,
           'feature': feature,
           'service_type': serviceType,
           'with_tests': withTests,
           'with_mocks': withMocks,
           'with_interceptors': withInterceptors,
+          'with_retry_logic': withRetryLogic,
+          'with_caching': withCaching,
           'base_url': baseUrl,
           'files_generated': filesGenerated,
           'duration_ms': stopwatch.elapsedMilliseconds,

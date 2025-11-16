@@ -5,66 +5,89 @@ min_flutter_sdk: "{{min_flutter_sdk}}"
 min_dart_sdk: "{{min_dart_sdk}}"
 
 variables:
+  ## Generation mode + internal flags
   generation_mode:
     type: string
     required: true
     default: project
-    description: Controls what type of code to generate (project, screen, service, provider)
+    choices: [ project, feature, service ]
+    description: Controls which workflow is executed
+  is_project: &mode_flag
+    type: bool
+    required: true
+    default: true
+    description: Internal flag automatically set by Fly CLI (true for project runs)
+  is_feature:
+    <<: *mode_flag
+    default: false
+    description: Internal flag automatically set by Fly CLI (true for feature runs)
+  is_service:
+    <<: *mode_flag
+    default: false
+    description: Internal flag automatically set by Fly CLI (true for service runs)
+
+  ## Common metadata
   project_name:
     type: string
     required: true
-    description: Name of the Flutter project
+    description: Name of the Flutter project (required for project mode)
   organization:
     type: string
     required: true
     default: com.example
     description: Reverse-domain organization identifier
+  description:
+    type: string
+    default: A new Fly foundation project
+    description: Project description / README summary
+  template_variant:
+    type: string
+    default: foundation
+    choices: [ foundation ]
+    description: Template style (reserved for future use)
+  min_flutter_sdk:
+    type: string
+    default: 3.10.0
+    description: Minimum Flutter SDK (overrides allowed via CLI)
+  min_dart_sdk:
+    type: string
+    default: 3.0.0
+    description: Minimum Dart SDK (overrides allowed via CLI)
   platforms:
     type: list
     required: true
     default: [ ios, android ]
     choices: [ ios, android, web, macos, windows, linux ]
     description: Target platforms
-  description:
-    type: string
-    default: A new Fly foundation project
-    description: Project description
-  template:
-    type: string
-    default: foundation
-    choices: [ foundation ]
-    description: Template style (reserved for future use)
   features:
     type: list
     default: [ home ]
-    description: Initial feature modules
-  with_mcp:
-    type: bool
-    default: true
-    description: Include MCP integration scaffolding
-  with_tests:
-    type: bool
-    default: true
-    description: Generate tests
-  with_docs:
-    type: bool
-    default: true
-    description: Generate documentation helpers
+    description: Initial features scaffolded in project mode
   fly_packages:
     type: list
-    default: [ fly_core, fly_mvvm, fly_state, fly_navigation, fly_flow_guard, fly_logger ]
+    default: [ fly_core, fly_mvvm, fly_state, fly_navigation, fly_flow_guard, fly_logger, fly_events, fly_networking ]
     description: Fly ecosystem packages to add
-  code_generation:
+  with_tests: &toggle_flag
     type: bool
     default: true
+    description: Generate starter tests (applies to project + components)
+  with_docs:
+    <<: *toggle_flag
+    description: Generate documentation helpers / README
+  with_mcp:
+    <<: *toggle_flag
+    description: Include MCP integration scaffolding
+  code_generation:
+    <<: *toggle_flag
     description: Enable build_runner configuration
   ai_integration:
-    type: bool
-    default: true
+    <<: *toggle_flag
     description: Include AI context scaffolding
+
+  ## Feature mode inputs
   component_name:
     type: string
-    description: Component name when generation_mode != project
+    description: Component name for feature/service generation
   feature:
     type: string
     default: home
@@ -75,38 +98,39 @@ variables:
     choices: [ list, detail, form, auth, settings ]
     description: Screen archetype
   with_viewmodel:
-    type: bool
-    default: true
+    <<: *toggle_flag
     description: Include ViewModel for screens
   with_validation:
-    type: bool
+    <<: *toggle_flag
     default: false
     description: Include validation scaffolding
   with_navigation:
-    type: bool
-    default: true
+    <<: *toggle_flag
     description: Include navigation integration
+
+  ## Service mode inputs
+  service_type:
+    type: string
+    default: api
+    choices: [ api, local, cache, analytics, storage ]
+    description: Service archetype
   api_base_url:
     type: string
     default: https://api.example.com
     description: Service base URL
   with_retry_logic:
-    type: bool
-    default: true
+    <<: *toggle_flag
     description: Include retry logic in services
   with_caching:
-    type: bool
+    <<: *toggle_flag
     default: false
     description: Include caching helpers
-  provider_type:
-    type: string
-    default: notifier
-    choices: [ notifier, future, stream, state ]
-    description: Provider archetype
-  with_state_class:
-    type: bool
-    default: false
-    description: Include explicit state class for provider templates
+  with_interceptors:
+    <<: *toggle_flag
+    description: Include HTTP interceptors for API services
+  with_mocks:
+    <<: *toggle_flag
+    description: Include mock and test scaffolding for services
 
 features:
   - mvvm
@@ -130,3 +154,52 @@ packages:
   - auto_mappr
   - drift
   - json_serializable
+
+configurations:
+  common: &common_config
+    description: Shared configuration applied to all generation modes
+    variables:
+      - generation_mode
+      - is_project
+      - is_feature
+      - is_service
+      - project_name
+      - organization
+      - description
+      - template_variant
+      - min_flutter_sdk
+      - min_dart_sdk
+      - platforms
+      - with_tests
+      - with_docs
+      - with_mcp
+      - code_generation
+      - ai_integration
+  project:
+    <<: *common_config
+    description: Extends common configuration with project-only inputs
+    variables:
+      - features
+      - fly_packages
+  feature:
+    <<: *common_config
+    description: Feature component configuration
+    variables:
+      - component_name
+      - feature
+      - screen_type
+      - with_viewmodel
+      - with_validation
+      - with_navigation
+  service:
+    <<: *common_config
+    description: Service component configuration
+    variables:
+      - component_name
+      - feature
+      - service_type
+      - api_base_url
+      - with_retry_logic
+      - with_caching
+      - with_interceptors
+      - with_mocks

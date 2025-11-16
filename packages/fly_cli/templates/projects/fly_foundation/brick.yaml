@@ -1,52 +1,61 @@
 name: fly_foundation
-description: Unified Fly CLI foundation template for projects and components
+description: Unified Fly CLI foundation template for projects, features, and services
 version: 1.0.0
 
 vars:
+  ## ---------------------------------------------------------------------------
+  ## Generation mode + internal flags
+  ## ---------------------------------------------------------------------------
   generation_mode:
     type: enum
-    description: Controls what type of code to generate
+    description: Controls which workflow is executed
     default: project
     values:
       - project
-      - screen
+      - feature
       - service
-      - provider
     prompt: What would you like to generate?
 
+  is_project: &mode_flag
+    type: boolean
+    description: Internal flag automatically set by Fly CLI (true for project runs)
+    default: true
+
+  is_feature:
+    <<: *mode_flag
+    description: Internal flag automatically set by Fly CLI (true for feature runs)
+    default: false
+
+  is_service:
+    <<: *mode_flag
+    description: Internal flag automatically set by Fly CLI (true for service runs)
+    default: false
+
+  ## ---------------------------------------------------------------------------
+  ## Common metadata reused across modes
+  ## ---------------------------------------------------------------------------
   project_name:
     type: string
-    description: Name of the Flutter project
+    description: Name of the Flutter project (required for project generation)
     prompt: What is your project name?
 
   organization:
     type: string
-    description: Reverse-domain organization identifier
+    description: Reverse-DNS organization identifier
     default: com.example
     prompt: What is your organization?
 
-  platforms:
-    type: list
-    description: Target platforms
-    default: [ ios, android ]
-    prompt: Which platforms do you want to support?
-
   description:
     type: string
-    description: Project description
+    description: Human-friendly summary shown in README and pubspec
     default: A new Fly foundation project
 
-  template:
+  template_variant:
     type: enum
-    description: Template style (reserved for future modes)
+    description: Template style (reserved for future expansion)
     default: foundation
     values:
       - foundation
-
-  features:
-    type: list
-    description: Initial feature modules to scaffold
-    default: [ home ]
 
   min_flutter_sdk:
     type: string
@@ -58,49 +67,67 @@ vars:
     description: Minimum Dart SDK version
     default: 3.0.0
 
-  with_mcp:
-    type: boolean
-    description: Include MCP integration scaffolding
-    default: true
+  platforms:
+    type: list
+    description: Target platforms for Flutter tooling
+    default: [ ios, android ]
+    prompt: Which platforms do you want to support?
 
-  with_tests:
-    type: boolean
-    description: Generate starter tests
-    default: true
-
-  with_docs:
-    type: boolean
-    description: Generate documentation helpers
-    default: true
+  features:
+    type: list
+    description: Initial features to scaffold when generation_mode=project
+    default: [ home ]
 
   fly_packages:
     type: list
-    description: Fly ecosystem packages to add
-    default: [ fly_core, fly_mvvm, fly_state, fly_navigation, fly_flow_guard, fly_logger ]
+    description: Fly ecosystem packages to add to pubspec.yaml
+    default:
+      - fly_core
+      - fly_mvvm
+      - fly_state
+      - fly_navigation
+      - fly_flow_guard
+      - fly_logger
+      - fly_events
+      - fly_networking
+
+  with_tests: &toggle_flag
+    type: boolean
+    description: Generate starter tests for the selected mode
+    default: true
+
+  with_docs:
+    <<: *toggle_flag
+    description: Generate documentation helpers (README, context, guides)
+
+  with_mcp:
+    <<: *toggle_flag
+    description: Include MCP integration scaffolding
 
   code_generation:
-    type: boolean
-    description: Enable build_runner configuration
-    default: true
+    <<: *toggle_flag
+    description: Configure build_runner + generator dependencies
 
   ai_integration:
-    type: boolean
-    description: Include AI context scaffolding
-    default: true
+    <<: *toggle_flag
+    description: Include AI context scaffolding and .ai files
 
-  component_name:
+  ## ---------------------------------------------------------------------------
+  ## Feature generation inputs
+  ## ---------------------------------------------------------------------------
+  component_name: &component_identifier
     type: string
-    description: Name of the component to generate
+    description: Primary component name (screen/service identifier)
     prompt: What is the component name?
 
   feature:
     type: string
-    description: Feature module for the component
+    description: Feature module that contains the generated component
     default: home
 
   screen_type:
     type: enum
-    description: Screen archetype
+    description: Screen archetype used when generation_mode=feature
     default: list
     values:
       - list
@@ -110,46 +137,50 @@ vars:
       - settings
 
   with_viewmodel:
-    type: boolean
-    description: Include ViewModel when generating a screen
-    default: true
+    <<: *toggle_flag
+    description: Include ViewModel + provider scaffolding for screens
 
   with_validation:
-    type: boolean
-    description: Include form validation helpers
+    <<: *toggle_flag
+    description: Add form validation helpers (used for form/auth screens)
     default: false
 
   with_navigation:
-    type: boolean
-    description: Include navigation integration for screens
-    default: true
+    <<: *toggle_flag
+    description: Wire screens into navigation scaffolding
+
+  ## ---------------------------------------------------------------------------
+  ## Service generation inputs
+  ## ---------------------------------------------------------------------------
+  service_type:
+    type: enum
+    description: Service archetype when generation_mode=service
+    default: api
+    values:
+      - api
+      - local
+      - cache
+      - analytics
+      - storage
 
   api_base_url:
     type: string
-    description: Base URL for generated services
+    description: Base URL for API services
     default: https://api.example.com
 
   with_retry_logic:
-    type: boolean
-    description: Include retry logic in services
-    default: true
+    <<: *toggle_flag
+    description: Add retry helpers backed by fly_flow_guard
 
   with_caching:
-    type: boolean
-    description: Include caching layer for services
+    <<: *toggle_flag
+    description: Include caching layer and storage dependencies
     default: false
 
-  provider_type:
-    type: enum
-    description: Provider archetype when generation_mode=provider
-    default: notifier
-    values:
-      - notifier
-      - future
-      - stream
-      - state
+  with_interceptors:
+    <<: *toggle_flag
+    description: Generate HTTP interceptor pipeline for API services
 
-  with_state_class:
-    type: boolean
-    description: Generate explicit state class for provider templates
-    default: false
+  with_mocks:
+    <<: *toggle_flag
+    description: Generate mock implementations for services

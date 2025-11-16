@@ -382,6 +382,12 @@ class ProjectManifest {
         platforms: platforms,
         description: description ?? 'A new Flutter project',
         features: _extractFeatures(),
+        withTests: config.generateTests,
+        withDocs: config.generateDocs,
+        aiIntegration: config.generateContext,
+        flyPackages: packages.isEmpty
+            ? TemplateVariables.defaultFlyPackages
+            : packages,
       );
 
   /// Extract features from screens and services

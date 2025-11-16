@@ -1,0 +1,98 @@
+{{#is_service}}
+import 'package:fly_flow_guard/fly_flow_guard.dart';
+
+{{#with_interceptors}}
+typedef ServiceInterceptor<T> = Future<AppResult<T>> Function(
+  Future<AppResult<T>> Function(),
+);
+{{/with_interceptors}}
+
+class {{component_name.pascalCase()}}Service {
+  {{component_name.pascalCase()}}Service({
+    this.baseUrl = '{{api_base_url}}',
+{{#with_retry_logic}}
+    RetryConfig retryConfig = const RetryConfig.standard(),
+{{/with_retry_logic}}
+{{#with_interceptors}}
+    List<ServiceInterceptor<Map<String, dynamic>>> interceptors = const [],
+{{/with_interceptors}}
+  }){{#with_retry_logic}}
+      : _retryConfig = retryConfig{{#with_interceptors}},{{/with_interceptors}}{{/with_retry_logic}}{{#with_interceptors}}{{^with_retry_logic}}:{{/with_retry_logic}} _interceptors = interceptors{{/with_interceptors}};
+
+  final String baseUrl;
+{{#with_retry_logic}}
+  final RetryConfig _retryConfig;
+{{/with_retry_logic}}
+{{#with_interceptors}}
+  final List<ServiceInterceptor<Map<String, dynamic>>> _interceptors;
+{{/with_interceptors}}
+{{#with_caching}}
+  final Map<String, AppResult<Map<String, dynamic>>> _cache = {};
+{{/with_caching}}
+
+  /// Example endpoint demonstrating {{service_type}} service scaffolding.
+  Future<AppResult<Map<String, dynamic>>> fetchSummary() async {
+{{#with_caching}}
+    final cached = _cache['summary'];
+    if (cached != null) {
+      return cached;
+    }
+{{/with_caching}}
+
+    Future<AppResult<Map<String, dynamic>>> action() async {
+      try {
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        return AppResult.success({
+          'feature': '{{feature}}',
+          'service': '{{component_name}}',
+          'endpoint': '$baseUrl/{{component_name.snakeCase()}}/summary',
+        });
+      } catch (error) {
+        return AppResult.failure('Failed to fetch {{component_name}} summary', error);
+      }
+    }
+
+{{#with_interceptors}}
+    Future<AppResult<Map<String, dynamic>>> runInterceptors(int index) {
+      if (index >= _interceptors.length) {
+        return action();
+      }
+
+      final interceptor = _interceptors[index];
+      return interceptor(() => runInterceptors(index + 1));
+    }
+    final result = await _execute(action: () => runInterceptors(0));
+{{/with_interceptors}}
+{{^with_interceptors}}
+    final result = await _execute(action: action);
+{{/with_interceptors}}
+
+{{#with_caching}}
+    _cache['summary'] = result;
+{{/with_caching}}
+    return result;
+  }
+
+  Future<AppResult<Map<String, dynamic>>> _execute({
+    required Future<AppResult<Map<String, dynamic>>> Function() action,
+  }) async {
+{{#with_retry_logic}}
+    var attempt = 0;
+    while (true) {
+      final result = await action();
+      if (!result.isFailure || attempt >= _retryConfig.maxAttempts) {
+        return result;
+      }
+
+      final delay = _retryConfig.calculateDelay(attempt);
+      await Future<void>.delayed(delay);
+      attempt++;
+    }
+{{/with_retry_logic}}
+{{^with_retry_logic}}
+    return action();
+{{/with_retry_logic}}
+  }
+}
+{{/is_service}}
+

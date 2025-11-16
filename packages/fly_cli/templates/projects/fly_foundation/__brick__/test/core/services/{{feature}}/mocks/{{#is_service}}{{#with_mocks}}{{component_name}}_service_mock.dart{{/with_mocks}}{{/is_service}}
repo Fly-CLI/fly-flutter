@@ -1,0 +1,21 @@
+{{#is_service}}
+{{#with_mocks}}
+import 'package:fly_flow_guard/fly_flow_guard.dart';
+
+import '../../../../lib/core/services/{{feature}}/{{component_name}}_service.dart';
+
+class {{component_name.pascalCase()}}ServiceMock extends {{component_name.pascalCase()}}Service {
+  {{component_name.pascalCase()}}ServiceMock() : super(baseUrl: 'https://mock.local');
+
+  @override
+  Future<AppResult<Map<String, dynamic>>> fetchSummary() async {
+    return AppResult.success({
+      'feature': '{{feature}}',
+      'service': '{{component_name}}',
+      'mock': true,
+    });
+  }
+}
+{{/with_mocks}}
+{{/is_service}}
+

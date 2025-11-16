@@ -73,8 +73,8 @@ class GenerateFeatureCommand extends FlyCommand {
       logger.info('🎬 Generating a new feature component');
       logger.info('');
 
-      // 1. Screen name
-      final screenName = await prompter.promptString(
+      // 1. Screen/component name
+      final componentName = await prompter.promptString(
         prompt: 'Screen name',
         validator: NameValidationRule.isValidScreenName,
         validationError:
@@ -120,13 +120,13 @@ class GenerateFeatureCommand extends FlyCommand {
       );
 
       // 7. Confirmation
-      logger.info('');
-      logger.info('Feature Generation Configuration:');
-      logger.info('  Name: $screenName');
-      logger.info('  Feature: $feature');
-      logger.info('  Type: $screenType');
-      logger.info('  With ViewModel: $withViewModel');
-      logger.info('  With Tests: $withTests');
+      logger..info('')
+      ..info('Feature Generation Configuration:')
+      ..info('  Name: $componentName')
+      ..info('  Feature: $feature')
+      ..info('  Type: $screenType')
+      ..info('  With ViewModel: $withViewModel')
+      ..info('  With Tests: $withTests');
       if (screenType == 'form') {
         logger.info('  With Validation: $withValidation');
       }
@@ -167,7 +167,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
       // Generate feature using Mason brick
       return await _generateFeatureWithMason(
-        screenName: screenName,
+        componentName: componentName,
         feature: feature,
         screenType: screenType,
         withViewModel: withViewModel,
@@ -186,7 +186,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
   /// Run in non-interactive mode
   Future<CommandResult> _runNonInteractiveMode(String? outputDir) async {
-    final screenName = argResults!.rest.first;
+    final componentName = argResults!.rest.first;
     final feature = FlagAccessor.getStringOrDefault(
       argResults,
       const GenerateScreenFeatureFlag(),
@@ -232,7 +232,7 @@ class GenerateFeatureCommand extends FlyCommand {
     final targetProjectDir = outputDirResult.path!.absolute;
 
     return _generateFeatureWithMason(
-      screenName: screenName,
+      componentName: componentName,
       feature: feature,
       screenType: screenType,
       withViewModel: withViewModel,
@@ -245,7 +245,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
   /// Generate feature component using Mason brick
   Future<CommandResult> _generateFeatureWithMason({
-    required String screenName,
+    required String componentName,
     required String feature,
     required String screenType,
     required bool withViewModel,
@@ -257,7 +257,7 @@ class GenerateFeatureCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Generating feature component: $screenName');
+      logger.info('Generating feature component: $componentName');
       logger.info('Feature: $feature');
       logger.info('Type: $screenType');
       logger.info('With viewmodel: $withViewModel');
@@ -272,7 +272,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
       // Create screen configuration for Mason brick
       final screenConfig = <String, dynamic>{
-        'screen_name': screenName,
+        'component_name': componentName,
         'feature': feature,
         'screen_type': screenType,
         'screen_type_list': screenType == 'list',
@@ -288,7 +288,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
       // Generate feature component using TemplateManager
       final result = await templateManager.generateComponent(
-        componentName: screenName,
+        componentName: componentName,
         componentType: BrickType.screen,
         config: screenConfig,
         targetPath: outputDir,
@@ -317,7 +317,7 @@ class GenerateFeatureCommand extends FlyCommand {
         command: 'generate feature',
         message: 'Feature component generated successfully',
         data: {
-          'screen_name': screenName,
+          'component_name': componentName,
           'feature': feature,
           'screen_type': screenType,
           'with_viewmodel': withViewModel,

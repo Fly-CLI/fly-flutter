@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:{{project_name.snakeCase()}}/features/{{feature}}/presentation/{{feature}}_screen.dart';
+import 'package:{{project_name.snakeCase()}}/features/{{feature}}/presentation/screen/{{feature}}_screen.dart';
 
 void main() {
   testWidgets('{{feature.pascalCase()}}Screen emits accessible semantics', (tester) async {

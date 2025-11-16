@@ -35,6 +35,8 @@ class TemplateManager {
         _brickRegistry = BrickRegistry(logger: logger),
         _previewService = GenerationPreviewService(logger: logger);
 
+  static const String _defaultUnifiedTemplate = 'fly_foundation';
+
   /// Find templates directory using a single definitive path
   ///
   /// Calculates the templates directory relative to the package or executable location.
@@ -300,40 +302,39 @@ class TemplateManager {
     }
   }
 
-  /// Generate component (screen/service)
+  /// Generate component (feature/service) using the unified foundation template
   Future<TemplateGenerationResult> generateComponent({
     required String componentName,
     required BrickType componentType,
     required Map<String, dynamic> config,
     String? targetPath,
+    String? templateName,
   }) async {
     try {
-      // Determine brick name based on component type
-      String brickName;
-      switch (componentType) {
-        case BrickType.screen:
-          brickName = 'fly_screen';
+      final mode = _modeFromComponentType(componentType);
+      final outputDir = targetPath ?? Directory.current.path;
+      final brickName = templateName ?? _defaultUnifiedTemplate;
+      final variables = _buildModeVariables(
+        mode: mode,
+        base: config,
+        componentName: componentName,
+      );
 
-        case BrickType.service:
-          brickName = 'fly_service';
-
-        case BrickType.project:
-        case BrickType.component:
-        case BrickType.custom:
-          return TemplateGenerationResult.failure(
-            'Unsupported component type: ${componentType.name}',
-          );
+      final missing = _missingModeVariables(mode, variables);
+      if (missing.isNotEmpty) {
+        return TemplateGenerationResult.failure(
+          'Missing required ${mode.name} variable(s): ${missing.join(', ')}',
+        );
       }
 
-      // Get target path
-      final outputDir = targetPath ?? Directory.current.path;
+      final brick = await getBrick(brickName);
+      final brickType = brick?.type ?? BrickType.project;
 
-      // Generate using the appropriate brick
       return await generateFromBrick(
         brickName: brickName,
-        brickType: componentType,
+        brickType: brickType,
         outputDirectory: outputDir,
-        variables: config,
+        variables: variables,
       );
     } catch (e) {
       return TemplateGenerationResult.failure(
@@ -394,6 +395,13 @@ class TemplateManager {
 
       // Convert TemplateVariables to Map
       final variablesMap = variables.toMasonVars();
+      final missing =
+          _missingModeVariables(GenerationMode.project, variablesMap);
+      if (missing.isNotEmpty) {
+        return TemplateGenerationResult.failure(
+          'Missing required project variable(s): ${missing.join(', ')}',
+        );
+      }
 
       // Use the new generateFromBrick method
       return await generateFromBrick(
@@ -1021,16 +1029,138 @@ class TemplateManager {
   Future<void> clearTemplateCache() async {
     await _cacheManager.clearCache();
   }
+
+  Map<String, dynamic> _buildModeVariables({
+    required GenerationMode mode,
+    required Map<String, dynamic> base,
+    String? componentName,
+  }) {
+    final vars = Map<String, dynamic>.from(base);
+    vars['generation_mode'] = mode.name;
+    vars['is_project'] = mode == GenerationMode.project;
+    vars['is_feature'] = mode == GenerationMode.feature;
+    vars['is_service'] = mode == GenerationMode.service;
+
+    if (componentName != null && componentName.isNotEmpty) {
+      vars['component_name'] = componentName;
+    }
+
+    if (mode != GenerationMode.project) {
+      final featureName = vars['feature'];
+      if (featureName == null ||
+          (featureName is String && featureName.trim().isEmpty)) {
+        vars['feature'] = 'core';
+      }
+    }
+
+    if (mode == GenerationMode.feature) {
+      final screenType = (vars['screen_type'] as String?) ?? 'list';
+      vars['screen_type_list'] = screenType == 'list';
+      vars['screen_type_detail'] = screenType == 'detail';
+      vars['screen_type_form'] = screenType == 'form';
+      vars['screen_type_auth'] = screenType == 'auth';
+      vars['screen_type_settings'] = screenType == 'settings';
+    } else if (mode == GenerationMode.service) {
+      final serviceType = (vars['service_type'] as String?) ?? 'api';
+      vars['service_type_api'] = serviceType == 'api';
+      vars['service_type_local'] = serviceType == 'local';
+      vars['service_type_cache'] = serviceType == 'cache';
+      vars['service_type_analytics'] = serviceType == 'analytics';
+      vars['service_type_storage'] = serviceType == 'storage';
+    }
+
+    return vars;
+  }
+
+  List<String> _missingModeVariables(
+    GenerationMode mode,
+    Map<String, dynamic> variables,
+  ) {
+    bool _isMissing(String key) {
+      if (!variables.containsKey(key)) return true;
+      final value = variables[key];
+      if (value == null) return true;
+      if (value is String && value.trim().isEmpty) return true;
+      if (value is List && value.isEmpty) return true;
+      return false;
+    }
+
+    final missing = <String>[];
+
+    void require(String key) {
+      if (_isMissing(key)) {
+        missing.add(key);
+      }
+    }
+
+    switch (mode) {
+      case GenerationMode.project:
+        require('project_name');
+        require('organization');
+        require('platforms');
+        break;
+      case GenerationMode.feature:
+        require('component_name');
+        require('feature');
+        require('screen_type');
+        break;
+      case GenerationMode.service:
+        require('component_name');
+        require('feature');
+        require('service_type');
+        break;
+    }
+
+    return missing;
+  }
+
+  GenerationMode _modeFromComponentType(BrickType type) {
+    switch (type) {
+      case BrickType.project:
+        return GenerationMode.project;
+      case BrickType.screen:
+        return GenerationMode.feature;
+      case BrickType.service:
+        return GenerationMode.service;
+      case BrickType.component:
+      case BrickType.custom:
+        throw ArgumentError(
+          'Unsupported component brick type: ${type.name}',
+        );
+    }
+  }
 }
 
 /// Template variables container
+enum GenerationMode { project, feature, service }
+
 class TemplateVariables {
+  static const List<String> defaultFlyPackages = [
+    'fly_core',
+    'fly_mvvm',
+    'fly_state',
+    'fly_navigation',
+    'fly_flow_guard',
+    'fly_logger',
+    'fly_events',
+    'fly_networking',
+  ];
+
   const TemplateVariables({
     required this.projectName,
     required this.organization,
     required this.platforms,
     this.description = '',
     this.features = const [],
+    this.templateVariant = 'foundation',
+    this.minFlutterSdk = '3.10.0',
+    this.minDartSdk = '3.0.0',
+    this.withTests = true,
+    this.withDocs = true,
+    this.withMcp = true,
+    this.codeGeneration = true,
+    this.aiIntegration = true,
+    this.flyPackages = defaultFlyPackages,
   });
 
   /// Create TemplateVariables from JSON
@@ -1043,6 +1173,16 @@ class TemplateVariables {
         platforms: (json['platforms'] as List?)?.cast<String>() ?? const [],
         description: json['description'] as String? ?? '',
         features: (json['features'] as List?)?.cast<String>() ?? const [],
+        templateVariant: json['template_variant'] as String? ?? 'foundation',
+        minFlutterSdk: json['min_flutter_sdk'] as String? ?? '3.10.0',
+        minDartSdk: json['min_dart_sdk'] as String? ?? '3.0.0',
+        withTests: json['with_tests'] as bool? ?? true,
+        withDocs: json['with_docs'] as bool? ?? true,
+        withMcp: json['with_mcp'] as bool? ?? true,
+        codeGeneration: json['code_generation'] as bool? ?? true,
+        aiIntegration: json['ai_integration'] as bool? ?? true,
+        flyPackages: (json['fly_packages'] as List?)?.cast<String>() ??
+            defaultFlyPackages,
       );
 
   final String projectName;
@@ -1050,6 +1190,15 @@ class TemplateVariables {
   final List<String> platforms;
   final String description;
   final List<String> features;
+  final String templateVariant;
+  final String minFlutterSdk;
+  final String minDartSdk;
+  final bool withTests;
+  final bool withDocs;
+  final bool withMcp;
+  final bool codeGeneration;
+  final bool aiIntegration;
+  final List<String> flyPackages;
 
   Map<String, dynamic> toMasonVars() => {
         'generation_mode': 'project',
@@ -1058,6 +1207,15 @@ class TemplateVariables {
         'platforms': platforms,
         'description': description,
         'features': features.isEmpty ? ['home'] : features,
+        'template_variant': templateVariant,
+        'min_flutter_sdk': minFlutterSdk,
+        'min_dart_sdk': minDartSdk,
+        'with_tests': withTests,
+        'with_docs': withDocs,
+        'with_mcp': withMcp,
+        'code_generation': codeGeneration,
+        'ai_integration': aiIntegration,
+        'fly_packages': flyPackages,
         'project_name_snake': projectName.toLowerCase().replaceAll(' ', '_'),
         'project_name_camel': _toCamelCase(projectName),
         'project_name_pascal': _toPascalCase(projectName),

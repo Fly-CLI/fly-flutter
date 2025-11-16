@@ -1,0 +1,68 @@
+{{#is_feature}}
+{{#with_viewmodel}}
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fly_mvvm/fly_mvvm.dart';
+
+import '../../../../../core/foundation/screen/base_view_model.dart';
+
+class {{component_name.pascalCase()}}ViewModelState implements FlyViewModelState<{{component_name.pascalCase()}}ViewModelState> {
+  const {{component_name.pascalCase()}}ViewModelState({
+    this.isLoading = false,
+    this.error,
+    this.message = 'You are ready to build with Fly.',
+  });
+
+  @override
+  final bool isLoading;
+
+  @override
+  final String? error;
+
+  final String message;
+
+  @override
+  bool get hasError => error != null;
+
+  @override
+  {{component_name.pascalCase()}}ViewModelState copyWith({
+    bool? isLoading,
+    String? error,
+    bool updateError = false,
+    String? message,
+  }) {
+    return {{component_name.pascalCase()}}ViewModelState(
+      isLoading: isLoading ?? this.isLoading,
+      error: updateError ? error : this.error,
+      message: message ?? this.message,
+    );
+  }
+
+  @override
+  {{component_name.pascalCase()}}ViewModelState withError(String? error) => copyWith(error: error, updateError: true);
+
+  @override
+  {{component_name.pascalCase()}}ViewModelState withLoading(bool isLoading) => copyWith(isLoading: isLoading);
+
+  @override
+  {{component_name.pascalCase()}}ViewModelState clearError() => copyWith(error: null, updateError: true);
+
+  factory {{component_name.pascalCase()}}ViewModelState.initial() => const {{component_name.pascalCase()}}ViewModelState();
+}
+
+class {{component_name.pascalCase()}}ViewModel extends BaseViewModel<{{component_name.pascalCase()}}ViewModelState> {
+  @override
+  {{component_name.pascalCase()}}ViewModelState build() => {{component_name.pascalCase()}}ViewModelState.initial();
+
+  Future<void> refresh() async {
+    await runAsyncOperation(() async {
+      state = state.copyWith(message: 'Refreshed at ${DateTime.now().toIso8601String()}');
+    });
+  }
+}
+
+final {{component_name}}ViewModelProvider = NotifierProvider<{{component_name.pascalCase()}}ViewModel, {{component_name.pascalCase()}}ViewModelState>(
+  {{component_name.pascalCase()}}ViewModel.new,
+);
+{{/with_viewmodel}}
+{{/is_feature}}
+
