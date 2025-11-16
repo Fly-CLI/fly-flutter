@@ -1,5 +1,7 @@
 {{#features}}
+{{#use_riverpod}}
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+{{/use_riverpod}}
 import 'package:fly_mvvm/fly_mvvm.dart';
 
 import '../../../../../core/foundation/screen/base_view_model.dart';
@@ -59,8 +61,10 @@ class {{feature.pascalCase()}}ViewModel extends BaseViewModel<{{feature.pascalCa
   }
 }
 
+{{#use_riverpod}}
 final {{feature}}ViewModelProvider = NotifierProvider<{{feature.pascalCase()}}ViewModel, {{feature.pascalCase()}}ViewModelState>(
   {{feature.pascalCase()}}ViewModel.new,
 );
+{{/use_riverpod}}
 {{/features}}
 

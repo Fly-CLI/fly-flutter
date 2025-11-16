@@ -4,8 +4,8 @@ publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: '>=3.10.0'
+  sdk: '>={{min_dart_sdk}} <4.0.0'
+  flutter: '>={{min_flutter_sdk}}'
 
 dependencies:
   flutter:
@@ -16,14 +16,9 @@ dependencies:
   flutter_riverpod: ^3.0.3
   hooks_riverpod: ^3.0.0
   riverpod_annotation: ^3.0.0
-  fly_core: ^0.1.0
-  fly_mvvm: ^0.1.0
-  fly_state: ^0.1.0
-  fly_navigation: ^0.1.0
-  fly_flow_guard: ^0.1.0
-  fly_logger: ^0.1.0
-  fly_events: ^0.1.0
-  fly_networking: ^0.1.0
+{{#fly_packages}}
+  {{.}}: ^0.1.0
+{{/fly_packages}}
   intl: ^0.18.1
   auto_mappr_annotation: ^2.0.0
   drift: ^2.29.0

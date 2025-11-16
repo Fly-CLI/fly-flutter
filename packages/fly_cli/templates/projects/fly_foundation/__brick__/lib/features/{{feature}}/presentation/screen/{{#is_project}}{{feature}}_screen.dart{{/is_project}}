@@ -1,8 +1,11 @@
 {{#features}}
 import 'package:flutter/material.dart';
+{{#use_riverpod}}
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+{{/use_riverpod}}
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+{{#use_riverpod}}
 import '../../../../../core/foundation/screen/base_screen.dart';
 import '{{feature}}_view_model.dart';
 
@@ -59,5 +62,6 @@ class {{feature.pascalCase()}}Screen extends BaseScreen<{{feature.pascalCase()}}
     );
   }
 }
+{{/use_riverpod}}
 {{/features}}
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+{{#use_riverpod}}
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+{{/use_riverpod}}
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fly_core/fly_core.dart';
 import 'package:fly_navigation/fly_navigation.dart';
@@ -14,18 +16,23 @@ void main() async {
   GlobalContainer.initialize();
 
   runApp(
+{{#use_riverpod}}
     UncontrolledProviderScope(
       container: GlobalContainer.instance,
       child: const _FlyFoundationApp(),
     ),
+{{/use_riverpod}}
+{{^use_riverpod}}
+    const _FlyFoundationApp(),
+{{/use_riverpod}}
   );
 }
 
-class _FlyFoundationApp extends ConsumerWidget {
+class _FlyFoundationApp extends {{#use_riverpod}}ConsumerWidget{{/use_riverpod}}{{^use_riverpod}}StatelessWidget{{/use_riverpod}} {
   const _FlyFoundationApp();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context{{#use_riverpod}}, WidgetRef ref{{/use_riverpod}}) {
     final navigationManager = NavigationManager.from(
       initialRoute: AppRouteConfig.initialRoute,
       onGenerateRoute: AppRouteConfig.onGenerateRoute,

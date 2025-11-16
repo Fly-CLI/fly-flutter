@@ -1,14 +1,19 @@
 {{#is_feature}}
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+{{#use_riverpod}}
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+{{/use_riverpod}}
 
 {{#with_viewmodel}}
+{{#use_riverpod}}
 import '../../../../../core/foundation/screen/base_screen.dart';
 import '{{component_name}}_view_model.dart';
+{{/use_riverpod}}
 {{/with_viewmodel}}
 
 {{#with_viewmodel}}
+{{#use_riverpod}}
 class {{component_name.pascalCase()}}Screen extends BaseScreen<{{component_name.pascalCase()}}ViewModel, {{component_name.pascalCase()}}ViewModelState> {
   const {{component_name.pascalCase()}}Screen({super.key});
 
@@ -36,14 +41,15 @@ class {{component_name.pascalCase()}}Screen extends BaseScreen<{{component_name.
     );
   }
 }
+{{/use_riverpod}}
 {{/with_viewmodel}}
 
 {{^with_viewmodel}}
-class {{component_name.pascalCase()}}Screen extends ConsumerWidget {
+class {{component_name.pascalCase()}}Screen extends StatelessWidget {
   const {{component_name.pascalCase()}}Screen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final resolvedTitle =
         AppLocalizations.of(context)?.appTitle ?? '{{component_name.pascalCase()}}';
     return _{{component_name.pascalCase()}}Body(
@@ -100,7 +106,28 @@ class _{{component_name.pascalCase()}}Body extends StatelessWidget {
                     'Form ready state',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
+                  {{#requires_validation}}
+                  const SizedBox(height: 12),
+                  Text(
+                    'Validation enabled',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  {{/requires_validation}}
                   {{/is_form_screen}}
+                  {{#is_list_screen}}
+                  const SizedBox(height: 24),
+                  Text(
+                    'List view ready',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  {{/is_list_screen}}
+                  {{#is_detail_screen}}
+                  const SizedBox(height: 24),
+                  Text(
+                    'Detail view ready',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  {{/is_detail_screen}}
                   {{#with_navigation}}
                   const SizedBox(height: 24),
                   FilledButton(
