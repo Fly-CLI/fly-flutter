@@ -1,56 +1,56 @@
 import 'package:mason/mason.dart';
 
+import 'foundation_model.dart';
 import 'planner.dart';
-import 'presets.dart';
 
 class ServiceModePlanner implements PlannerPlugin {
   @override
-  bool canHandle(Vars vars) {
-    try {
-      return GenerationMode.fromVars(vars) == GenerationMode.service;
-    } catch (_) {
-      return false;
-    }
+  bool canHandle(BaseTemplateVariables base) {
+    return base.generationMode == GenerationMode.service;
   }
 
   @override
-  Vars derive(Vars vars, Logger logger) {
-    // These vars are now derived by PresetPlanner/CoreVarsPlanner
-    final serviceType = (vars['service_type'] as String?)?.toLowerCase() ?? 'api';
-    final withRetry = vars['with_retry_logic'] == true;
-    final withCaching = vars['with_caching'] == true;
-    final withInterceptors = vars['with_interceptors'] == true;
-    final withMocks = vars['with_mocks'] == true;
+  DerivedTemplateVariables derive(
+    BaseTemplateVariables base,
+    DerivedTemplateVariables acc,
+    Logger logger,
+  ) {
+    final serviceType = base.serviceType ?? ServiceType.api;
+    final withRetry = base.serviceRetry;
+    final withCaching = base.serviceCaching;
+    final withInterceptors = base.serviceInterceptors;
+    final withMocks = base.serviceMocks;
 
-    final isApiService = serviceType == 'api';
-    final isLocalService = serviceType == 'local';
-    final isCacheService = serviceType == 'cache';
-    final isAnalyticsService = serviceType == 'analytics';
-    final isStorageService = serviceType == 'storage';
+    final isApiService = serviceType == ServiceType.api;
+    final isLocalService = serviceType == ServiceType.local;
+    final isCacheService = serviceType == ServiceType.cache;
+    final isAnalyticsService = serviceType == ServiceType.analytics;
+    final isStorageService = serviceType == ServiceType.storage;
 
-    // Validation example: analytics + caching not supported (adjust as needed)
+    // Validation: analytics + caching not supported
     if (isAnalyticsService && withCaching) {
       throw const HookException(
         'Invalid combination: service_type=analytics does not support with_caching=true.',
       );
     }
 
-    // Note: is_project/is_feature/is_service are already set by CoreVarsPlanner
-    return <String, dynamic>{
-      'active_mode': 'service',
-      'is_project': vars['is_project'] ?? false,
-      'is_feature': vars['is_feature'] ?? false,
-      'is_service': vars['is_service'] ?? true,
-      'is_api_service': isApiService,
-      'is_local_service': isLocalService,
-      'is_cache_service': isCacheService,
-      'is_analytics_service': isAnalyticsService,
-      'is_storage_service': isStorageService,
-      'supports_retry': withRetry && isApiService,
-      'supports_caching': withCaching && (isApiService || isLocalService || isCacheService),
-      'supports_interceptors': withInterceptors && isApiService,
-      'generate_mocks': withMocks,
-    };
+    return DerivedTemplateVariables(
+      isProject: false,
+      isFeature: false,
+      isService: true,
+      activeMode: GenerationMode.service,
+      serviceType: serviceType,
+      isApiService: isApiService,
+      isLocalService: isLocalService,
+      isCacheService: isCacheService,
+      isAnalyticsService: isAnalyticsService,
+      isStorageService: isStorageService,
+      supportsRetry: withRetry && isApiService,
+      supportsCaching: withCaching &&
+          (isApiService || isLocalService || isCacheService),
+      supportsInterceptors: withInterceptors && isApiService,
+      generateMocks: withMocks,
+    );
   }
 }
 

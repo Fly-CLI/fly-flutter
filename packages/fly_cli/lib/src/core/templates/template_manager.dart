@@ -12,6 +12,7 @@ import 'brick_info.dart';
 import 'brick_registry.dart';
 import 'compatibility_checker.dart';
 import 'compatibility_result.dart';
+import 'foundation_enums.dart';
 import 'generation_preview.dart';
 import 'generation_variable_validator.dart';
 import 'template_info.dart';
@@ -1036,7 +1037,7 @@ class TemplateManager {
     String? componentName,
   }) {
     final vars = Map<String, dynamic>.from(base);
-    vars['generation_mode'] = mode.name;
+    vars['generation_mode'] = mode.key;
     vars['is_project'] = mode == GenerationMode.project;
     vars['is_feature'] = mode == GenerationMode.feature;
     vars['is_service'] = mode == GenerationMode.service;
@@ -1054,19 +1055,23 @@ class TemplateManager {
     }
 
     if (mode == GenerationMode.feature) {
-      final screenType = (vars['screen_type'] as String?) ?? 'list';
-      vars['screen_type_list'] = screenType == 'list';
-      vars['screen_type_detail'] = screenType == 'detail';
-      vars['screen_type_form'] = screenType == 'form';
-      vars['screen_type_auth'] = screenType == 'auth';
-      vars['screen_type_settings'] = screenType == 'settings';
+      final screenTypeStr = (vars['screen_type'] as String?) ?? 'list';
+      final screenType = ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ?? ScreenType.list;
+      vars['screen_type'] = screenType.key;
+      vars['screen_type_list'] = screenType == ScreenType.list;
+      vars['screen_type_detail'] = screenType == ScreenType.detail;
+      vars['screen_type_form'] = screenType == ScreenType.form;
+      vars['screen_type_auth'] = screenType == ScreenType.auth;
+      vars['screen_type_settings'] = screenType == ScreenType.settings;
     } else if (mode == GenerationMode.service) {
-      final serviceType = (vars['service_type'] as String?) ?? 'api';
-      vars['service_type_api'] = serviceType == 'api';
-      vars['service_type_local'] = serviceType == 'local';
-      vars['service_type_cache'] = serviceType == 'cache';
-      vars['service_type_analytics'] = serviceType == 'analytics';
-      vars['service_type_storage'] = serviceType == 'storage';
+      final serviceTypeStr = (vars['service_type'] as String?) ?? 'api';
+      final serviceType = ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ?? ServiceType.api;
+      vars['service_type'] = serviceType.key;
+      vars['service_type_api'] = serviceType == ServiceType.api;
+      vars['service_type_local'] = serviceType == ServiceType.local;
+      vars['service_type_cache'] = serviceType == ServiceType.cache;
+      vars['service_type_analytics'] = serviceType == ServiceType.analytics;
+      vars['service_type_storage'] = serviceType == ServiceType.storage;
     }
 
     return vars;
@@ -1132,8 +1137,6 @@ class TemplateManager {
 }
 
 /// Template variables container
-enum GenerationMode { project, feature, service }
-
 class TemplateVariables {
   static const List<String> defaultFlyPackages = [
     'fly_core',

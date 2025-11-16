@@ -1,38 +1,28 @@
 import 'package:mason/mason.dart';
 
+import 'foundation_model.dart';
 import 'planner.dart';
 import 'presets.dart';
 
 /// Planner that derives all internal flags from the preset enum.
+///
+/// Note: Presets are now applied in pre_gen.dart before planners run,
+/// so this planner returns empty derived vars. It's kept for compatibility.
 class PresetPlanner implements PlannerPlugin {
   @override
-  bool canHandle(Vars vars) {
+  bool canHandle(BaseTemplateVariables base) {
     // Presets are global, so this planner always handles
     return true;
   }
 
   @override
-  Vars derive(Vars vars, Logger logger) {
-    final preset = FoundationPreset.fromVars(vars);
-
-    // Derive cross-cutting flags from preset
-    return <String, dynamic>{
-      'with_tests': preset.withTests,
-      'with_docs': preset.withDocs,
-      'with_mcp': preset.withMcp,
-      'code_generation': preset.codeGeneration,
-      'ai_integration': preset.aiIntegration,
-      // Service-related flags
-      'with_retry_logic': preset.serviceRetry,
-      'with_caching': preset.serviceCaching,
-      'with_interceptors': preset.serviceInterceptors,
-      'with_mocks': preset.serviceMocks,
-      // Feature-related flags
-      'with_viewmodel': preset.featureViewModel,
-      'with_validation': preset.featureValidation,
-      'with_navigation': preset.featureNavigation,
-      'state_mgmt': preset.stateMgmt,
-    };
+  DerivedTemplateVariables derive(
+    BaseTemplateVariables base,
+    DerivedTemplateVariables acc,
+    Logger logger,
+  ) {
+    // Preset is already applied to base in pre_gen.dart, so return empty
+    return DerivedTemplateVariables.empty();
   }
 }
 
@@ -40,86 +30,89 @@ class PresetPlanner implements PlannerPlugin {
 /// Derives project_name, feature, component_name, and other mode-specific vars.
 class CoreVarsPlanner implements PlannerPlugin {
   @override
-  bool canHandle(Vars vars) {
+  bool canHandle(BaseTemplateVariables base) {
     // Core vars are global, so this planner always handles
     return true;
   }
 
   @override
-  Vars derive(Vars vars, Logger logger) {
-    final mode = GenerationMode.fromVars(vars);
-    final name = (vars['name'] as String?) ?? 'unnamed';
-    final organization = (vars['organization'] as String?) ?? 'com.example';
-    final description = (vars['description'] as String?) ?? 'A new Fly foundation project';
-    final platforms = (vars['platforms'] as List?)?.map((e) => '$e'.toLowerCase()).toList() ?? ['ios', 'android'];
+  DerivedTemplateVariables derive(
+    BaseTemplateVariables base,
+    DerivedTemplateVariables acc,
+    Logger logger,
+  ) {
+    final snakeName = _toSnakeCase(base.name);
+    final defaultFlyPackages = [
+      'fly_core',
+      'fly_mvvm',
+      'fly_state',
+      'fly_navigation',
+      'fly_flow_guard',
+      'fly_logger',
+      'fly_events',
+      'fly_networking',
+    ];
 
-    final derived = <String, dynamic>{
-      // Common defaults
-      'template_variant': 'foundation',
-      'min_flutter_sdk': '3.10.0',
-      'min_dart_sdk': '3.0.0',
-      'fly_packages': [
-        'fly_core',
-        'fly_mvvm',
-        'fly_state',
-        'fly_navigation',
-        'fly_flow_guard',
-        'fly_logger',
-        'fly_events',
-        'fly_networking',
-      ],
-    };
-
-    // Set mode flags early so they're available for file path conditionals
-    switch (mode) {
+    // Set mode flags and naming based on generation mode
+    switch (base.generationMode) {
       case GenerationMode.project:
-        derived['is_project'] = true;
-        derived['is_feature'] = false;
-        derived['is_service'] = false;
-        // In project mode, name is the project name
-        derived['project_name'] = name;
-        derived['features'] = ['home'];
-        derived['feature'] = 'home';
-        derived['component_name'] = 'home';
-        break;
+        return DerivedTemplateVariables(
+          isProject: true,
+          isFeature: false,
+          isService: false,
+          activeMode: GenerationMode.project,
+          projectName: base.name,
+          feature: 'home',
+          componentName: 'home',
+          templateVariant: base.templateVariant,
+          minFlutterSdk: base.minFlutterSdk,
+          minDartSdk: base.minDartSdk,
+          flyPackages: defaultFlyPackages,
+          projectNameSnake: _toSnakeCase(base.name),
+          projectNameCamel: _toCamelCase(base.name),
+          projectNamePascal: _toPascalCase(base.name),
+        );
 
       case GenerationMode.feature:
-        derived['is_project'] = false;
-        derived['is_feature'] = true;
-        derived['is_service'] = false;
-        // In feature mode, name is the feature/component name
-        // Convert to snake_case for consistency
-        final snakeName = _toSnakeCase(name);
-        derived['project_name'] = 'acme_app'; // Default for tests/context
-        derived['feature'] = snakeName;
-        derived['component_name'] = snakeName;
-        // Default screen_type to 'list' if not provided
-        derived['screen_type'] = vars['screen_type'] ?? 'list';
-        break;
+        final screenType = base.screenType ?? ScreenType.list;
+        return DerivedTemplateVariables(
+          isProject: false,
+          isFeature: true,
+          isService: false,
+          activeMode: GenerationMode.feature,
+          projectName: 'acme_app', // Default for tests/context
+          feature: snakeName,
+          componentName: snakeName,
+          screenType: screenType,
+          templateVariant: base.templateVariant,
+          minFlutterSdk: base.minFlutterSdk,
+          minDartSdk: base.minDartSdk,
+          flyPackages: defaultFlyPackages,
+        );
 
       case GenerationMode.service:
-        derived['is_project'] = false;
-        derived['is_feature'] = false;
-        derived['is_service'] = true;
-        // In service mode, name is the service/component name
-        final snakeName = _toSnakeCase(name);
-        derived['project_name'] = 'acme_app'; // Default for tests/context
-        derived['feature'] = snakeName;
-        derived['component_name'] = snakeName;
-        // Default service_type to 'api' if not provided
-        derived['service_type'] = vars['service_type'] ?? 'api';
-        derived['api_base_url'] = vars['api_base_url'] ?? 'https://api.example.com';
-        break;
+        final serviceType = base.serviceType ?? ServiceType.api;
+        return DerivedTemplateVariables(
+          isProject: false,
+          isFeature: false,
+          isService: true,
+          activeMode: GenerationMode.service,
+          projectName: 'acme_app', // Default for tests/context
+          feature: snakeName,
+          componentName: snakeName,
+          serviceType: serviceType,
+          templateVariant: base.templateVariant,
+          minFlutterSdk: base.minFlutterSdk,
+          minDartSdk: base.minDartSdk,
+          flyPackages: defaultFlyPackages,
+        );
     }
-
-    return derived;
   }
 
   /// Simple snake_case conversion helper.
-  /// Converts PascalCase or camelCase to snake_case.
   String _toSnakeCase(String input) {
     if (input.isEmpty) return input;
-    
+
     final buffer = StringBuffer();
     for (int i = 0; i < input.length; i++) {
       final char = input[i];
@@ -129,6 +122,33 @@ class CoreVarsPlanner implements PlannerPlugin {
       buffer.write(char.toLowerCase());
     }
     return buffer.toString();
+  }
+
+  /// Converts to camelCase.
+  String _toCamelCase(String input) {
+    final words =
+        input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return input.toLowerCase();
+
+    final firstWord = words.first.toLowerCase();
+    final otherWords = words.skip(1).map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    });
+
+    return '$firstWord${otherWords.join()}';
+  }
+
+  /// Converts to PascalCase.
+  String _toPascalCase(String input) {
+    final words =
+        input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return input;
+
+    return words.map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join();
   }
 }
 

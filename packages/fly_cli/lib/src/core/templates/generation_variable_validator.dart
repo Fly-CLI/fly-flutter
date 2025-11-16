@@ -1,35 +1,34 @@
+import 'package:fly_cli/src/core/templates/foundation_enums.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
 class GenerationVariableValidator {
-  static const _allowedModes = {'project', 'feature', 'service'};
-  static const _allowedPlatforms = {
-    'ios',
-    'android',
-    'web',
-    'macos',
-    'windows',
-    'linux',
-  };
+  static final _allowedModeKeys = GenerationMode.values.map((e) => e.key).toSet();
+  static final _allowedPlatformKeys = PlatformType.values.map((e) => e.key).toSet();
+  static final _allowedScreenTypeKeys = ScreenType.values.map((e) => e.key).toSet();
+  static final _allowedServiceTypeKeys = ServiceType.values.map((e) => e.key).toSet();
 
   static final _organizationPattern = RegExp(r'^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$');
 
   static List<String> validate(Map<String, dynamic> variables) {
     final errors = <String>[];
-    final mode = (variables['generation_mode'] as String? ?? 'project').toLowerCase();
+    final modeStr = (variables['generation_mode'] as String? ?? 'project').toLowerCase();
 
-    if (!_allowedModes.contains(mode)) {
-      errors.add('generation_mode "$mode" is not supported');
+    GenerationMode? mode;
+    try {
+      mode = GenerationMode.fromKey(modeStr);
+    } on FormatException catch (e) {
+      errors.add(e.message);
       return errors;
     }
 
     switch (mode) {
-      case 'project':
+      case GenerationMode.project:
         errors.addAll(_validateProjectVariables(variables));
         break;
-      case 'feature':
+      case GenerationMode.feature:
         errors.addAll(_validateFeatureVariables(variables));
         break;
-      case 'service':
+      case GenerationMode.service:
         errors.addAll(_validateServiceVariables(variables));
         break;
     }
@@ -59,8 +58,13 @@ class GenerationVariableValidator {
       errors.add('platforms must include at least one target platform');
     } else {
       for (final platform in platforms) {
-        if (platform is! String || !_allowedPlatforms.contains(platform)) {
-          errors.add('platform "$platform" is not supported. Valid: ${_allowedPlatforms.join(', ')}');
+        if (platform is! String) {
+          errors.add('platform "$platform" must be a string');
+        } else {
+          final platformKey = platform.toLowerCase().trim();
+          if (!_allowedPlatformKeys.contains(platformKey)) {
+            errors.add('platform "$platform" is not supported. Valid: ${_allowedPlatformKeys.join(', ')}');
+          }
         }
       }
     }
@@ -72,8 +76,7 @@ class GenerationVariableValidator {
     final errors = <String>[];
     final componentName = variables['component_name'] as String?;
     final feature = variables['feature'] as String?;
-    final screenType = variables['screen_type'] as String?;
-    const screenTypes = {'list', 'detail', 'form', 'auth', 'settings'};
+    final screenTypeStr = variables['screen_type'] as String?;
 
     if (componentName == null || componentName.isEmpty) {
       errors.add('component_name is required for feature generation');
@@ -91,12 +94,14 @@ class GenerationVariableValidator {
       );
     }
 
-    if (screenType == null || screenType.isEmpty) {
+    if (screenTypeStr == null || screenTypeStr.isEmpty) {
       errors.add('screen_type is required for feature generation');
-    } else if (!screenTypes.contains(screenType)) {
-      errors.add(
-        'screen_type "$screenType" is not supported. Valid: ${screenTypes.join(', ')}',
-      );
+    } else {
+      try {
+        ScreenType.fromKey(screenTypeStr);
+      } on FormatException catch (e) {
+        errors.add(e.message);
+      }
     }
 
     return errors;
@@ -106,8 +111,7 @@ class GenerationVariableValidator {
     final errors = <String>[];
     final componentName = variables['component_name'] as String?;
     final feature = variables['feature'] as String?;
-    final serviceType = variables['service_type'] as String?;
-    const serviceTypes = {'api', 'local', 'cache', 'analytics', 'storage'};
+    final serviceTypeStr = variables['service_type'] as String?;
 
     if (componentName == null || componentName.isEmpty) {
       errors.add('component_name is required for service generation');
@@ -125,15 +129,18 @@ class GenerationVariableValidator {
       );
     }
 
-    if (serviceType == null || serviceType.isEmpty) {
+    ServiceType? serviceType;
+    if (serviceTypeStr == null || serviceTypeStr.isEmpty) {
       errors.add('service_type is required for service generation');
-    } else if (!serviceTypes.contains(serviceType)) {
-      errors.add(
-        'service_type "$serviceType" is not supported. Valid: ${serviceTypes.join(', ')}',
-      );
+    } else {
+      try {
+        serviceType = ServiceType.fromKey(serviceTypeStr);
+      } on FormatException catch (e) {
+        errors.add(e.message);
+      }
     }
 
-    if (serviceType == 'api') {
+    if (serviceType == ServiceType.api) {
       final baseUrl = variables['base_url'] as String? ??
           variables['api_base_url'] as String?;
       if (baseUrl == null || baseUrl.isEmpty) {

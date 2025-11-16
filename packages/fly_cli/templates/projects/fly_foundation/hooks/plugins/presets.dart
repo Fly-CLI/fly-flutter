@@ -1,35 +1,6 @@
 import 'package:mason/mason.dart';
 
-import 'planner.dart';
-
-/// Generation mode enum representing the three main workflows.
-enum GenerationMode {
-  project,
-  feature,
-  service;
-
-  /// Parses generation_mode from vars and returns the corresponding enum.
-  /// Throws HookException if the value is invalid.
-  static GenerationMode fromVars(Vars vars) {
-    final modeStr = (vars['generation_mode'] as String?)?.toLowerCase();
-    if (modeStr == null || modeStr.isEmpty) {
-      return GenerationMode.project; // Default
-    }
-
-    switch (modeStr) {
-      case 'project':
-        return GenerationMode.project;
-      case 'feature':
-        return GenerationMode.feature;
-      case 'service':
-        return GenerationMode.service;
-      default:
-        throw HookException(
-          'Invalid generation_mode: "$modeStr". Must be one of: project, feature, service.',
-        );
-    }
-  }
-}
+import 'foundation_model.dart';
 
 /// Foundation preset enum with configuration for each preset.
 enum FoundationPreset {
@@ -46,7 +17,7 @@ enum FoundationPreset {
     featureViewModel: true,
     featureValidation: false,
     featureNavigation: true,
-    stateMgmt: 'riverpod',
+    stateMgmt: StateManagement.riverpod,
   ),
   batteriesIncluded(
     withTests: true,
@@ -61,7 +32,7 @@ enum FoundationPreset {
     featureViewModel: true,
     featureValidation: true,
     featureNavigation: true,
-    stateMgmt: 'riverpod',
+    stateMgmt: StateManagement.riverpod,
   ),
   minimal(
     withTests: false,
@@ -76,7 +47,7 @@ enum FoundationPreset {
     featureViewModel: true,
     featureValidation: false,
     featureNavigation: false,
-    stateMgmt: 'riverpod',
+    stateMgmt: StateManagement.riverpod,
   );
 
   const FoundationPreset({
@@ -107,7 +78,7 @@ enum FoundationPreset {
   final bool featureViewModel;
   final bool featureValidation;
   final bool featureNavigation;
-  final String stateMgmt;
+  final StateManagement stateMgmt;
 
   /// Returns the string key for this preset.
   String get key {
@@ -140,6 +111,37 @@ enum FoundationPreset {
 
     throw HookException(
       'Invalid preset: "$presetStr". Must be one of: ${allKeys.join(', ')}.',
+    );
+  }
+
+  /// Creates a BaseTemplateVariables with preset values applied.
+  BaseTemplateVariables applyTo(BaseTemplateVariables base) {
+    return BaseTemplateVariables(
+      name: base.name,
+      organization: base.organization,
+      generationMode: base.generationMode,
+      platforms: base.platforms,
+      description: base.description,
+      templateVariant: base.templateVariant,
+      minFlutterSdk: base.minFlutterSdk,
+      minDartSdk: base.minDartSdk,
+      withTests: withTests,
+      withDocs: withDocs,
+      withMcp: withMcp,
+      codeGeneration: codeGeneration,
+      aiIntegration: aiIntegration,
+      serviceRetry: serviceRetry,
+      serviceCaching: serviceCaching,
+      serviceInterceptors: serviceInterceptors,
+      serviceMocks: serviceMocks,
+      featureViewModel: featureViewModel,
+      featureValidation: featureValidation,
+      featureNavigation: featureNavigation,
+      stateManagement: stateMgmt,
+      screenType: base.screenType,
+      serviceType: base.serviceType,
+      apiBaseUrl: base.apiBaseUrl,
+      preset: key,
     );
   }
 }

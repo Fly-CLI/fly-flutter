@@ -8,6 +8,7 @@ import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
+import 'package:fly_cli/src/core/templates/foundation_enums.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -91,11 +92,12 @@ class GenerateFeatureCommand extends FlyCommand {
       );
 
       // 3. Screen type
-      final screenType = await prompter.promptChoice(
+      final screenTypeStr = await prompter.promptChoice(
         prompt: 'Screen type',
-        choices: ['list', 'detail', 'form', 'auth', 'settings'],
-        defaultChoice: 'list',
+        choices: ScreenType.values.map((e) => e.key).toList(),
+        defaultChoice: ScreenType.list.key,
       );
+      final screenType = ScreenType.fromKey(screenTypeStr);
 
       // 4. ViewModel
       final withViewModel = await prompter.promptConfirm(
@@ -109,7 +111,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
       // 6. Additional options based on screen type
       var withValidation = false;
-      if (screenType == 'form') {
+      if (screenType == ScreenType.form) {
         withValidation = await prompter.promptConfirm(
           prompt: 'Include form validation?',
         );
@@ -124,10 +126,10 @@ class GenerateFeatureCommand extends FlyCommand {
       ..info('Feature Generation Configuration:')
       ..info('  Name: $componentName')
       ..info('  Feature: $feature')
-      ..info('  Type: $screenType')
+      ..info('  Type: ${screenType.key}')
       ..info('  With ViewModel: $withViewModel')
       ..info('  With Tests: $withTests');
-      if (screenType == 'form') {
+      if (screenType == ScreenType.form) {
         logger.info('  With Validation: $withValidation');
       }
       logger.info('  With Navigation: $withNavigation');
@@ -192,11 +194,12 @@ class GenerateFeatureCommand extends FlyCommand {
       const GenerateScreenFeatureFlag(),
       'home',
     );
-    final screenType = FlagAccessor.getStringOrDefault(
+    final screenTypeStr = FlagAccessor.getStringOrDefault(
       argResults,
       const GenerateScreenTypeFlag(),
-      'list',
+      ScreenType.list.key,
     );
+    final screenType = ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ?? ScreenType.list;
     final withViewModel = FlagAccessor.getBool(
       argResults,
       const GenerateScreenWithViewModelFlag(),
@@ -247,7 +250,7 @@ class GenerateFeatureCommand extends FlyCommand {
   Future<CommandResult> _generateFeatureWithMason({
     required String componentName,
     required String feature,
-    required String screenType,
+    required ScreenType screenType,
     required bool withViewModel,
     required bool withTests,
     required bool withValidation,
@@ -259,10 +262,10 @@ class GenerateFeatureCommand extends FlyCommand {
 
       logger.info('Generating feature component: $componentName');
       logger.info('Feature: $feature');
-      logger.info('Type: $screenType');
+      logger.info('Type: ${screenType.key}');
       logger.info('With viewmodel: $withViewModel');
       logger.info('With tests: $withTests');
-      if (screenType == 'form') {
+      if (screenType == ScreenType.form) {
         logger.info('With validation: $withValidation');
       }
       logger.info('With navigation: $withNavigation');
@@ -274,12 +277,12 @@ class GenerateFeatureCommand extends FlyCommand {
       final screenConfig = <String, dynamic>{
         'component_name': componentName,
         'feature': feature,
-        'screen_type': screenType,
-        'screen_type_list': screenType == 'list',
-        'screen_type_detail': screenType == 'detail',
-        'screen_type_form': screenType == 'form',
-        'screen_type_auth': screenType == 'auth',
-        'screen_type_settings': screenType == 'settings',
+        'screen_type': screenType.key,
+        'screen_type_list': screenType == ScreenType.list,
+        'screen_type_detail': screenType == ScreenType.detail,
+        'screen_type_form': screenType == ScreenType.form,
+        'screen_type_auth': screenType == ScreenType.auth,
+        'screen_type_settings': screenType == ScreenType.settings,
         'with_viewmodel': withViewModel,
         'with_tests': withTests,
         'with_validation': withValidation,
@@ -319,7 +322,7 @@ class GenerateFeatureCommand extends FlyCommand {
         data: {
           'component_name': componentName,
           'feature': feature,
-          'screen_type': screenType,
+          'screen_type': screenType.key,
           'with_viewmodel': withViewModel,
           'with_tests': withTests,
           'with_validation': withValidation,

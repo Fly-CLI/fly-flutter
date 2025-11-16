@@ -8,6 +8,7 @@ import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
+import 'package:fly_cli/src/core/templates/foundation_enums.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -88,11 +89,12 @@ class GenerateServiceCommand extends FlyCommand {
       );
 
       // 3. Service type
-      final serviceType = await prompter.promptChoice(
+      final serviceTypeStr = await prompter.promptChoice(
         prompt: 'Service type',
-        choices: ['api', 'local', 'cache', 'analytics', 'storage'],
-        defaultChoice: 'api',
+        choices: ServiceType.values.map((e) => e.key).toList(),
+        defaultChoice: ServiceType.api.key,
       );
+      final serviceType = ServiceType.fromKey(serviceTypeStr);
 
       // 4. Tests
       final withTests = await prompter.promptConfirm(
@@ -107,7 +109,7 @@ class GenerateServiceCommand extends FlyCommand {
       // 6. Additional options based on service type
       var withInterceptors = false;
       var baseUrl = 'https://api.example.com';
-      if (serviceType == 'api') {
+      if (serviceType == ServiceType.api) {
         withInterceptors = await prompter.promptConfirm(
           prompt: 'Include HTTP interceptors?',
         );
@@ -119,19 +121,19 @@ class GenerateServiceCommand extends FlyCommand {
       }
 
       // 7. Confirmation
-      final withRetryLogic = serviceType == 'api';
-      final withCaching = serviceType == 'cache';
+      final withRetryLogic = serviceType == ServiceType.api;
+      final withCaching = serviceType == ServiceType.cache;
 
       logger..info('')
       ..info('Service Configuration:')
       ..info('  Name: $componentName')
       ..info('  Feature: $feature')
-      ..info('  Type: $serviceType')
+      ..info('  Type: ${serviceType.key}')
       ..info('  With Tests: $withTests')
       ..info('  With Mocks: $withMocks')
       ..info('  With Retry Logic: $withRetryLogic')
       ..info('  With Caching: $withCaching');
-      if (serviceType == 'api') {
+      if (serviceType == ServiceType.api) {
         logger..info('  With Interceptors: $withInterceptors')
         ..info('  Base URL: $baseUrl');
       }
@@ -198,11 +200,12 @@ class GenerateServiceCommand extends FlyCommand {
       const GenerateServiceFeatureFlag(),
       'core',
     );
-    final serviceType = FlagAccessor.getStringOrDefault(
+    final serviceTypeStr = FlagAccessor.getStringOrDefault(
       argResults,
       const GenerateServiceTypeFlag(),
-      'api',
+      ServiceType.api.key,
     );
+    final serviceType = ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ?? ServiceType.api;
     final withTests =
         FlagAccessor.getBool(argResults, const GenerateServiceWithTestsFlag());
     final withMocks =
@@ -211,8 +214,8 @@ class GenerateServiceCommand extends FlyCommand {
       argResults,
       const GenerateServiceWithInterceptorsFlag(),
     );
-    final withRetryLogic = serviceType == 'api';
-    final withCaching = serviceType == 'cache';
+    final withRetryLogic = serviceType == ServiceType.api;
+    final withCaching = serviceType == ServiceType.cache;
 
     final baseUrl = FlagAccessor.getStringOrDefault(
       argResults,
@@ -257,7 +260,7 @@ class GenerateServiceCommand extends FlyCommand {
   Future<CommandResult> _generateServiceWithMason({
     required String serviceName,
     required String feature,
-    required String serviceType,
+    required ServiceType serviceType,
     required bool withTests,
     required bool withMocks,
     required bool withInterceptors,
@@ -271,12 +274,12 @@ class GenerateServiceCommand extends FlyCommand {
 
       logger..info('Generating service: $serviceName')
       ..info('Feature: $feature')
-      ..info('Type: $serviceType')
+      ..info('Type: ${serviceType.key}')
       ..info('With tests: $withTests')
       ..info('With mocks: $withMocks')
       ..info('With retry logic: $withRetryLogic')
       ..info('With caching: $withCaching');
-      if (serviceType == 'api') {
+      if (serviceType == ServiceType.api) {
         logger..info('With interceptors: $withInterceptors')
         ..info('Base URL: $baseUrl');
       }
@@ -288,7 +291,7 @@ class GenerateServiceCommand extends FlyCommand {
       final serviceConfig = <String, dynamic>{
         'component_name': serviceName,
         'feature': feature,
-        'service_type': serviceType,
+        'service_type': serviceType.key,
         'with_tests': withTests,
         'with_mocks': withMocks,
         'with_interceptors': withInterceptors,
@@ -330,7 +333,7 @@ class GenerateServiceCommand extends FlyCommand {
         data: {
           'component_name': serviceName,
           'feature': feature,
-          'service_type': serviceType,
+          'service_type': serviceType.key,
           'with_tests': withTests,
           'with_mocks': withMocks,
           'with_interceptors': withInterceptors,
