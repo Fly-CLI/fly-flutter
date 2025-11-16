@@ -43,6 +43,81 @@ From `/tmp/fly/fly_foundation_default` confirm:
 
 Spot check contents (imports, class names, Riverpod providers) to ensure they match the current brick files under `__brick__`.
 
+## 1b. Baseline Feature Generation via Fly CLI (defaults)
+
+Generate a standalone feature component into an existing project:
+
+```bash
+# First create a base project
+rm -rf /tmp/fly/fly_foundation_feature_test
+FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
+  dart run packages/fly_cli/bin/fly.dart generate project fly_feature_test \
+  --template=fly_foundation \
+  --organization=com.example.features \
+  --platforms=ios,android \
+  --output-dir=/tmp/fly/fly_foundation_feature_test
+
+# Then generate a feature component into it
+FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
+  dart run packages/fly_cli/bin/fly.dart generate feature dashboard \
+  --feature=analytics \
+  --type=list \
+  --with-viewmodel \
+  --with-tests \
+  --with-navigation \
+  --output-dir=/tmp/fly/fly_foundation_feature_test/fly_feature_test
+```
+
+### 1b-1. Verify Generated Feature Structure
+
+From `/tmp/fly/fly_foundation_feature_test/fly_feature_test` confirm:
+
+- Feature screen: `lib/features/analytics/presentation/screen/dashboard_screen.dart`
+- Feature ViewModel: `lib/features/analytics/presentation/screen/dashboard_view_model.dart` (when `--with-viewmodel`)
+- Feature test: `test/features/analytics/dashboard_screen_test.dart` (when `--with-tests`)
+- Models/widgets folders: `lib/features/analytics/presentation/models/`, `lib/features/analytics/presentation/widgets/`
+
+Spot check that:
+- `dashboard_screen.dart` extends `BaseScreen` with proper Riverpod provider wiring
+- ViewModel contains `DashboardViewModelState` and `DashboardViewModel` classes
+- Test file imports and references the generated screen correctly
+- All class names use PascalCase (`DashboardScreen`, `DashboardViewModel`, etc.)
+
+## 1c. Baseline Service Generation via Fly CLI (defaults)
+
+Generate a standalone service component into an existing project:
+
+```bash
+# Use the same base project or create a new one
+cd /tmp/fly/fly_foundation_feature_test/fly_feature_test
+FLY_TEMPLATES_DIR=$FLY_TEMPLATES_DIR \
+  dart run packages/fly_cli/bin/fly.dart generate service auth \
+  --feature=auth \
+  --type=api \
+  --base-url=https://api.example.com \
+  --with-tests \
+  --with-mocks \
+  --with-interceptors \
+  --output-dir=/tmp/fly/fly_foundation_feature_test/fly_feature_test
+
+```
+
+### 1c-1. Verify Generated Service Structure
+
+From `/tmp/fly/fly_foundation_feature_test/fly_feature_test` confirm:
+
+- Service class: `lib/core/services/auth/auth_service.dart`
+- Service test: `test/core/services/auth/auth_service_test.dart` (when `--with-tests`)
+- Mock implementation: `test/core/services/auth/mocks/auth_service_mock.dart` (when `--with-mocks`)
+
+Spot check that:
+- `auth_service.dart` imports `AppResult` from `fly_flow_guard`
+- Service methods return `Future<AppResult<T>>` for type-safe error handling
+- Retry logic uses `RetryConfig` when `--with-retry-logic` is enabled
+- Interceptors are included when `--with-interceptors` is enabled
+- Mock class extends or implements the service interface when `--with-mocks` is enabled
+- Test file includes basic service test scaffolding
+
 ## 2. Multi-Feature Project via Fly CLI
 
 ```bash

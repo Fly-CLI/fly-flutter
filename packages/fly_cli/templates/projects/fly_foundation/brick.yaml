@@ -16,18 +16,18 @@ vars:
       - service
     prompt: What would you like to generate?
 
-  is_project: &mode_flag
-    type: bool
+  is_project:
+    type: boolean
     description: Internal flag automatically set by Fly CLI (true for project runs)
     default: true
 
   is_feature:
-    <<: *mode_flag
+    type: boolean
     description: Internal flag automatically set by Fly CLI (true for feature runs)
     default: false
 
   is_service:
-    <<: *mode_flag
+    type: boolean
     description: Internal flag automatically set by Fly CLI (true for service runs)
     default: false
 
@@ -91,31 +91,35 @@ vars:
       - fly_events
       - fly_networking
 
-  with_tests: &toggle_flag
-    type: bool
+  with_tests:
+    type: boolean
     description: Generate starter tests for the selected mode
     default: true
 
   with_docs:
-    <<: *toggle_flag
+    type: boolean
     description: Generate documentation helpers (README, context, guides)
+    default: true
 
   with_mcp:
-    <<: *toggle_flag
+    type: boolean
     description: Include MCP integration scaffolding
+    default: true
 
   code_generation:
-    <<: *toggle_flag
+    type: boolean
     description: Configure build_runner + generator dependencies
+    default: true
 
   ai_integration:
-    <<: *toggle_flag
+    type: boolean
     description: Include AI context scaffolding and .ai files
+    default: true
 
   ## ---------------------------------------------------------------------------
   ## Feature generation inputs
   ## ---------------------------------------------------------------------------
-  component_name: &component_identifier
+  component_name:
     type: string
     description: Primary component name (screen/service identifier)
     prompt: What is the component name?
@@ -137,17 +141,19 @@ vars:
       - settings
 
   with_viewmodel:
-    <<: *toggle_flag
+    type: boolean
     description: Include ViewModel + provider scaffolding for screens
+    default: true
 
   with_validation:
-    <<: *toggle_flag
+    type: boolean
     description: Add form validation helpers (used for form/auth screens)
     default: false
 
   with_navigation:
-    <<: *toggle_flag
+    type: boolean
     description: Wire screens into navigation scaffolding
+    default: true
 
   ## ---------------------------------------------------------------------------
   ## Service generation inputs
@@ -169,18 +175,21 @@ vars:
     default: https://api.example.com
 
   with_retry_logic:
-    <<: *toggle_flag
+    type: boolean
     description: Add retry helpers backed by fly_flow_guard
+    default: true
 
   with_caching:
-    <<: *toggle_flag
+    type: boolean
     description: Include caching layer and storage dependencies
     default: false
 
   with_interceptors:
-    <<: *toggle_flag
+    type: boolean
     description: Generate HTTP interceptor pipeline for API services
+    default: true
 
   with_mocks:
-    <<: *toggle_flag
+    type: boolean
     description: Generate mock implementations for services
+    default: true

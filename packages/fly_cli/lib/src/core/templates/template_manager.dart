@@ -440,7 +440,7 @@ class TemplateManager {
         // Check if value matches expected type
         if (brickVar.type == 'list' && value is! List) {
           errors.add('Variable "$variableName" should be a list');
-        } else if (brickVar.type == 'bool' && value is! bool) {
+        } else if ((brickVar.type == 'bool' || brickVar.type == 'boolean') && value is! bool) {
           errors.add('Variable "$variableName" should be a boolean');
         } else if (brickVar.type == 'string' && value is! String) {
           errors.add('Variable "$variableName" should be a string');
