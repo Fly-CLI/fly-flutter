@@ -21,11 +21,12 @@ class FeatureModePlanner implements PlannerPlugin {
     final withNavigation = vars['with_navigation'] == true;
     final sm = (vars['state_mgmt'] as String?)?.toLowerCase() ?? 'riverpod';
     
+    // Note: is_project/is_feature/is_service are already set by CoreVarsPlanner
     return <String, dynamic>{
       'active_mode': 'feature',
-      'is_project': false,
-      'is_feature': true,
-      'is_service': false,
+      'is_project': vars['is_project'] ?? false,
+      'is_feature': vars['is_feature'] ?? true,
+      'is_service': vars['is_service'] ?? false,
       'is_list_screen': screenType == 'list',
       'is_detail_screen': screenType == 'detail',
       'is_form_screen': screenType == 'form' || screenType == 'auth',

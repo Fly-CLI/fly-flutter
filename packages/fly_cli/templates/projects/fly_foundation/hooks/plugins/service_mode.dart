@@ -35,11 +35,12 @@ class ServiceModePlanner implements PlannerPlugin {
       );
     }
 
+    // Note: is_project/is_feature/is_service are already set by CoreVarsPlanner
     return <String, dynamic>{
       'active_mode': 'service',
-      'is_project': false,
-      'is_feature': false,
-      'is_service': true,
+      'is_project': vars['is_project'] ?? false,
+      'is_feature': vars['is_feature'] ?? false,
+      'is_service': vars['is_service'] ?? true,
       'is_api_service': isApiService,
       'is_local_service': isLocalService,
       'is_cache_service': isCacheService,

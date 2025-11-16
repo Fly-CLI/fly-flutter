@@ -70,8 +70,12 @@ class CoreVarsPlanner implements PlannerPlugin {
       ],
     };
 
+    // Set mode flags early so they're available for file path conditionals
     switch (mode) {
       case GenerationMode.project:
+        derived['is_project'] = true;
+        derived['is_feature'] = false;
+        derived['is_service'] = false;
         // In project mode, name is the project name
         derived['project_name'] = name;
         derived['features'] = ['home'];
@@ -80,6 +84,9 @@ class CoreVarsPlanner implements PlannerPlugin {
         break;
 
       case GenerationMode.feature:
+        derived['is_project'] = false;
+        derived['is_feature'] = true;
+        derived['is_service'] = false;
         // In feature mode, name is the feature/component name
         // Convert to snake_case for consistency
         final snakeName = _toSnakeCase(name);
@@ -91,6 +98,9 @@ class CoreVarsPlanner implements PlannerPlugin {
         break;
 
       case GenerationMode.service:
+        derived['is_project'] = false;
+        derived['is_feature'] = false;
+        derived['is_service'] = true;
         // In service mode, name is the service/component name
         final snakeName = _toSnakeCase(name);
         derived['project_name'] = 'acme_app'; // Default for tests/context
