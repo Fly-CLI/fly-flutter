@@ -13,7 +13,7 @@ run_scenario () {
   rm -rf "$output"
   mkdir -p "$output"
   pushd "$output" >/dev/null
-  mason make "$BRICK_DIR" -c "$scenario_path" --on-conflict overwrite
+  mason make fly_foundation -c "$scenario_path" --on-conflict overwrite
   popd >/dev/null
   if [ -d "$GOLDENS_DIR/$name" ]; then
     diff -ru "$GOLDENS_DIR/$name" "$output" || {
