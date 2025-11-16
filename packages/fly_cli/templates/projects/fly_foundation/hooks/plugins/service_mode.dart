@@ -1,17 +1,22 @@
 import 'package:mason/mason.dart';
 
 import 'planner.dart';
+import 'presets.dart';
 
 class ServiceModePlanner implements PlannerPlugin {
   @override
   bool canHandle(Vars vars) {
-    final isService = vars['is_service'] == true || vars['generation_mode'] == 'service';
-    return isService;
+    try {
+      return GenerationMode.fromVars(vars) == GenerationMode.service;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
   Vars derive(Vars vars, Logger logger) {
-    final serviceType = (vars['service_type'] as String?)?.toLowerCase();
+    // These vars are now derived by PresetPlanner/CoreVarsPlanner
+    final serviceType = (vars['service_type'] as String?)?.toLowerCase() ?? 'api';
     final withRetry = vars['with_retry_logic'] == true;
     final withCaching = vars['with_caching'] == true;
     final withInterceptors = vars['with_interceptors'] == true;
@@ -32,6 +37,9 @@ class ServiceModePlanner implements PlannerPlugin {
 
     return <String, dynamic>{
       'active_mode': 'service',
+      'is_project': false,
+      'is_feature': false,
+      'is_service': true,
       'is_api_service': isApiService,
       'is_local_service': isLocalService,
       'is_cache_service': isCacheService,

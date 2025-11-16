@@ -1,22 +1,31 @@
 import 'package:mason/mason.dart';
 
 import 'planner.dart';
+import 'presets.dart';
 
 class FeatureModePlanner implements PlannerPlugin {
   @override
   bool canHandle(Vars vars) {
-    final isFeature = vars['is_feature'] == true || vars['generation_mode'] == 'feature';
-    return isFeature;
+    try {
+      return GenerationMode.fromVars(vars) == GenerationMode.feature;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
   Vars derive(Vars vars, Logger logger) {
-    final screenType = (vars['screen_type'] as String?)?.toLowerCase();
+    // These vars are now derived by PresetPlanner/CoreVarsPlanner
+    final screenType = (vars['screen_type'] as String?)?.toLowerCase() ?? 'list';
     final withValidation = vars['with_validation'] == true;
     final withNavigation = vars['with_navigation'] == true;
     final sm = (vars['state_mgmt'] as String?)?.toLowerCase() ?? 'riverpod';
+    
     return <String, dynamic>{
       'active_mode': 'feature',
+      'is_project': false,
+      'is_feature': true,
+      'is_service': false,
       'is_list_screen': screenType == 'list',
       'is_detail_screen': screenType == 'detail',
       'is_form_screen': screenType == 'form' || screenType == 'auth',

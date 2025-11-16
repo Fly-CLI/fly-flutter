@@ -1,5 +1,5 @@
 {{#is_service}}
-{{#with_mocks}}
+{{#generate_mocks}}
 import 'package:fly_flow_guard/fly_flow_guard.dart';
 
 import '../../../../lib/core/services/{{feature}}/{{component_name}}_service.dart';
@@ -16,6 +16,6 @@ class {{component_name.pascalCase()}}ServiceMock extends {{component_name.pascal
     });
   }
 }
-{{/with_mocks}}
+{{/generate_mocks}}
 {{/is_service}}
 

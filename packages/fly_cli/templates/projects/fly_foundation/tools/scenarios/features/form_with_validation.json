@@ -1,38 +1,9 @@
 {
   "generation_mode": "feature",
-  "is_project": false,
-  "is_feature": true,
-  "is_service": false,
-  "project_name": "acme_app",
-  "organization": "com.example",
+  "name": "signin",
   "description": "Form with validation feature scenario",
-  "template_variant": "foundation",
-  "min_flutter_sdk": "3.10.0",
-  "min_dart_sdk": "3.0.0",
+  "organization": "com.example",
   "platforms": ["ios", "android"],
-  "features": ["auth"],
-  "fly_packages": [
-    "fly_core",
-    "fly_mvvm",
-    "fly_state",
-    "fly_navigation",
-    "fly_flow_guard",
-    "fly_logger",
-    "fly_events",
-    "fly_networking"
-  ],
-  "feature": "auth",
-  "component_name": "signin",
-  "screen_type": "form",
-  "with_viewmodel": true,
-  "with_validation": true,
-  "with_navigation": true,
-  "state_mgmt": "riverpod",
-  "with_tests": true,
-  "with_docs": true,
-  "with_mcp": true,
-  "code_generation": true,
-  "ai_integration": true
+  "preset": "batteries_included",
+  "screen_type": "form"
 }
-
-

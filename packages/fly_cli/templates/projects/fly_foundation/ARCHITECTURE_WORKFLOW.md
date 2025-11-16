@@ -44,25 +44,31 @@ brick.yaml  ──►  mason reads variables  ──►  hooks/pre_gen.dart (pla
 
 ## 2) Variable Resolution and Normalization
 
-1. The CLI (Fly CLI or Mason CLI) collects inputs defined in `brick.yaml`.
+1. The CLI (Fly CLI or Mason CLI) collects inputs defined in `brick.yaml` (minimal public schema:
+   `generation_mode`, `name`, `description`, `organization`, `platforms`, `preset`).
 2. Mason makes these inputs available as `context.vars` to hooks.
-3. `pre_gen.dart` resolves a canonical “view” of the inputs by:
-    - Choosing an `active_mode` (`project`, `feature`, or `service`) based on `generation_mode` and
-      `is_*` flags.
-    - Delegating to mode plugins to compute **derived flags** (simple booleans/strings/templates
-      consume).
-    - Validating impossible or unsupported combinations (fail fast with actionable messages).
-4. The hook merges derived flags back into `context.vars`. From this point on, templates reference
+3. `pre_gen.dart` resolves a canonical “view” of the inputs through a planner chain:
+    - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`,
+      `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles).
+    - **CoreVarsPlanner**: Bridges public schema to legacy internal names (`project_name`, `feature`,
+      `component_name`, `screen_type`, `service_type`, defaults for SDK versions, packages).
+    - **Mode-specific planners** (ProjectModePlanner, FeatureModePlanner, ServiceModePlanner):
+      Compute mode-specific derived flags based on `generation_mode` and derived vars.
+    - Validates impossible or unsupported combinations (fail fast with actionable messages).
+4. The hook merges all derived flags back into `context.vars`. From this point on, templates reference
    normalized flags; no complex logic remains in templates.
 
 Key normalization examples:
 
-- Feature mode: `screen_type` → `is_list_screen`, `is_detail_screen`, `is_form_screen`,
-  `requires_validation`.
-- Service mode: `service_type` + toggles → `is_api_service`, `supports_retry`, `supports_caching`,
-  `supports_interceptors`, `generate_mocks`.
+- Preset → internal flags: `preset=starter` → `with_tests=true`, `with_docs=true`, `with_mcp=true`,
+  `code_generation=true`, `ai_integration=true`, `with_retry_logic=false`, etc.
+- Feature mode: `screen_type` (from CoreVarsPlanner) → `is_list_screen`, `is_detail_screen`,
+  `is_form_screen`, `requires_validation`.
+- Service mode: `service_type` (from CoreVarsPlanner) + preset-derived toggles → `is_api_service`,
+  `supports_retry`, `supports_caching`, `supports_interceptors`, `generate_mocks`.
 - Project/platforms: `platforms` list → `supports_ios/android/web/macos/windows/linux/desktop`.
-- State management: `state_mgmt` → `use_riverpod`, `use_bloc`, `use_cubit`.
+- State management: `state_mgmt` (from PresetPlanner, default `riverpod`) → `use_riverpod`,
+  `use_bloc`, `use_cubit`.
 
 ---
 
@@ -75,9 +81,20 @@ The planner is pluggable (see `hooks/plugins/planner.dart`). Each plugin:
 
 Registered plugins (evaluated in order):
 
-- `ProjectModePlanner` – Normalizes platform flags and mode = project.
+- `PresetPlanner` – Maps `preset` enum to all internal boolean flags (tests, docs, MCP, codegen, AI,
+  service extras, feature toggles). Always handles (presets are global).
+- `CoreVarsPlanner` – Bridges public schema (`name`, `generation_mode`) to legacy internal names
+  (`project_name`, `feature`, `component_name`, `screen_type`, `service_type`, SDK defaults,
+  package lists). Always handles (core vars are global).
+- `ProjectModePlanner` – Normalizes platform flags and sets `is_project`/`is_feature`/`is_service`
+  flags; mode = project.
 - `FeatureModePlanner` – Normalizes screen and state management flags; mode = feature.
 - `ServiceModePlanner` – Normalizes service archetype flags and asserts constraints; mode = service.
+
+The planner chain ensures that:
+1. Presets drive all internal toggles (no user-facing boolean flags).
+2. Public schema (`name`, `generation_mode`) is mapped to internal names templates expect.
+3. Mode-specific logic runs after core derivation, consuming derived vars.
 
 Adding a new plugin (e.g., `ProviderModePlanner`) is frictionless and avoids stuffing every rule
 into a monolith.
@@ -202,21 +219,28 @@ Workflow: `.github/workflows/template-ci.yml`
 
 ### A) Project Creation (default foundation)
 
-Inputs (abbrev):
+Inputs (new minimal schema):
 
 ```
 generation_mode=project
-project_name=acme_app
+name=acme_app
+description=Default Fly foundation project
 organization=com.example
 platforms=[ios, android, web]
-with_tests=true, with_docs=true, with_mcp=true, code_generation=true, ai_integration=true
+preset=batteries_included
 ```
 
 Flow:
 
-1. Planner sets `active_mode=project`, computes `supports_ios/android/web`, etc.
-2. Templates for project files render with limited conditionals (tests/docs/ai).
-3. Output is a runnable Flutter project with configured analysis options, `pubspec.yaml`,
+1. `PresetPlanner` maps `preset=batteries_included` → all internal flags enabled
+   (`with_tests=true`, `with_docs=true`, `with_mcp=true`, `code_generation=true`,
+   `ai_integration=true`, etc.).
+2. `CoreVarsPlanner` derives `project_name=acme_app`, `feature=home`, `component_name=home`,
+   SDK defaults, package lists.
+3. `ProjectModePlanner` sets `active_mode=project`, `is_project=true`, computes
+   `supports_ios/android/web`, etc.
+4. Templates for project files render with conditionals (tests/docs/ai) based on preset-derived flags.
+5. Output is a runnable Flutter project with configured analysis options, `pubspec.yaml`,
    `main.dart`, navigation, l10n.
 
 ### B) Feature Screen (list + riverpod)
@@ -225,15 +249,23 @@ Inputs:
 
 ```
 generation_mode=feature
-feature=home, component_name=dashboard
-screen_type=list, with_viewmodel=true, with_navigation=true, state_mgmt=riverpod
+name=dashboard
+description=Feature list (riverpod) scenario
+organization=com.example
+platforms=[ios, android]
+preset=starter
 ```
 
 Flow:
 
-1. Planner sets `active_mode=feature`, `is_list_screen=true`, `use_riverpod=true`.
-2. Screen template includes base layout and wiring; form/validation flags remain off.
-3. Output is a `DashboardScreen` with Riverpod wiring and navigation hooks.
+1. `PresetPlanner` maps `preset=starter` → `with_viewmodel=true`, `with_navigation=true`,
+   `with_validation=false`, `state_mgmt=riverpod`.
+2. `CoreVarsPlanner` derives `project_name=acme_app`, `feature=dashboard`, `component_name=dashboard`,
+   `screen_type=list` (default).
+3. `FeatureModePlanner` sets `active_mode=feature`, `is_feature=true`, `is_list_screen=true`,
+   `use_riverpod=true`.
+4. Screen template includes base layout and wiring; form/validation flags remain off.
+5. Output is a `DashboardScreen` with Riverpod wiring and navigation hooks.
 
 ### C) Service (api + retry + caching + interceptors)
 
@@ -241,16 +273,23 @@ Inputs:
 
 ```
 generation_mode=service
-feature=home, component_name=summary
-service_type=api, with_retry_logic=true, with_caching=true, with_interceptors=true
+name=summary
+description=API service with retry and cache scenario
+organization=com.example
+platforms=[ios, android]
+preset=batteries_included
 ```
 
 Flow:
 
-1. Planner sets `active_mode=service`, `is_api_service=true`,
-   `supports_retry/caching/interceptors=true`.
-2. Service template includes partials for caching, retry, and interceptor chain.
-3. Output is a `SummaryService` with consistent `AppResult<T>` flow and optional layers enabled.
+1. `PresetPlanner` maps `preset=batteries_included` → `with_retry_logic=true`,
+   `with_caching=true`, `with_interceptors=true`, `with_mocks=true`.
+2. `CoreVarsPlanner` derives `project_name=acme_app`, `feature=summary`, `component_name=summary`,
+   `service_type=api` (default), `api_base_url=https://api.example.com` (default).
+3. `ServiceModePlanner` sets `active_mode=service`, `is_service=true`, `is_api_service=true`,
+   `supports_retry/caching/interceptors=true`, `generate_mocks=true`.
+4. Service template includes partials for caching, retry, and interceptor chain.
+5. Output is a `SummaryService` with consistent `AppResult<T>` flow and optional layers enabled.
 
 ---
 

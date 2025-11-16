@@ -46,20 +46,26 @@ Key paths you will work with:
 
 ### 3.1 User Variables (from `brick.yaml`)
 
-Examples (not exhaustive):
+The public schema is minimal and consists of:
 
-- Core: `generation_mode`, `project_name`, `organization`, `platforms`, `features`, `with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration`.
-- Feature: `component_name`, `feature`, `screen_type`, `with_viewmodel`, `with_validation`, `with_navigation`.
-- Service: `service_type`, `api_base_url`, `with_retry_logic`, `with_caching`, `with_interceptors`, `with_mocks`.
-- State management: `state_mgmt` (values: `riverpod`, `bloc`, `cubit`; default: `riverpod`).
+- **Core**: `generation_mode` (enum: `project`, `feature`, `service`), `name` (string), `description` (string), `organization` (string), `platforms` (list), `preset` (enum: `starter`, `batteries_included`, `minimal`).
+
+All other variables (e.g., `project_name`, `feature`, `component_name`, `with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration`, `screen_type`, `service_type`, `with_retry_logic`, `with_caching`, `with_interceptors`, `with_mocks`, `state_mgmt`, etc.) are **derived internally** by planner plugins and are not user-facing.
 
 Always prefer adding new variables to `brick.yaml` if they are user‑configurable. If not user‑facing, derive in hooks.
 
 ### 3.2 Derived Flags (from hooks)
 
-The planner computes easy‑to‑consume flags so templates don’t need to embed complex logic. Examples:
+The planner chain computes easy‑to‑consume flags so templates don't need to embed complex logic. The planner chain consists of:
 
-- Mode: `active_mode` (one of `project`, `feature`, `service`)
+1. **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles, `state_mgmt`).
+2. **CoreVarsPlanner**: Bridges public schema to legacy internal names (`project_name`, `feature`, `component_name`, `screen_type`, `service_type`, SDK defaults, package lists).
+3. **Mode-specific planners**: Compute mode-specific derived flags.
+
+Examples of derived flags:
+
+- Mode: `active_mode` (one of `project`, `feature`, `service`), `is_project`, `is_feature`, `is_service`
+- Cross-cutting: `with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration` (from preset)
 - Feature: `is_form_screen`, `requires_validation`, `with_navigation`, `use_riverpod`, `use_bloc`, `use_cubit`
 - Service: `is_api_service`, `supports_retry`, `supports_caching`, `supports_interceptors`, `generate_mocks`
 - Project/platforms: `supports_ios`, `supports_android`, `supports_web`, `supports_macos`, `supports_windows`, `supports_linux`, `supports_desktop`
@@ -96,11 +102,12 @@ abstract class PlannerPlugin {
 
 A `CompositePlanner` runs the applicable plugins and merges their outputs. New cross‑cutting plugins (e.g., platforms, analytics rules) can be added over time.
 
-### 4.3 Mode Plugins
+### 4.3 Planner Plugins
 
-- `project_mode.dart`: Normalizes platform flags.
-- `feature_mode.dart`: Converts `screen_type`, `with_validation`, and `state_mgmt` into derived flags for templates.
-- `service_mode.dart`: Maps `service_type` and related toggles into service flags and enforces key constraints (e.g., disallow specific invalid combos).
+- `preset_mode.dart`: Contains `PresetPlanner` (maps preset enum to internal flags) and `CoreVarsPlanner` (bridges public schema to internal names).
+- `project_mode.dart`: Normalizes platform flags and sets mode flags.
+- `feature_mode.dart`: Converts `screen_type` (from CoreVarsPlanner), `with_validation` (from PresetPlanner), and `state_mgmt` (from PresetPlanner) into derived flags for templates.
+- `service_mode.dart`: Maps `service_type` (from CoreVarsPlanner) and related toggles (from PresetPlanner) into service flags and enforces key constraints (e.g., disallow specific invalid combos).
 
 ---
 

@@ -184,7 +184,7 @@ Example: `with_analytics` affects project, feature, and service outputs.
 
 ### 3.1 Add Flag (If User‑Facing)
 
-In `brick.yaml`:
+**Option A**: Add to `brick.yaml` if it should be user-configurable:
 
 ```yaml
 with_analytics:
@@ -193,17 +193,22 @@ with_analytics:
   default: false
 ```
 
+**Option B**: Add to preset enum configuration if it should be driven by presets:
+
+In `hooks/plugins/presets.dart`, extend `FoundationPreset` enum with an `analytics` field and set it per preset (e.g., `starter.analytics=false`, `batteriesIncluded.analytics=true`, `minimal.analytics=false`).
+
 ### 3.2 Extend Relevant Plugins
 
 Decide which plugins should handle analytics:
 
+- `PresetPlanner` – If driven by preset, map preset's `analytics` field to `with_analytics` flag.
 - `ProjectModePlanner` – e.g., add `include_analytics_package`.
 - `FeatureModePlanner` – e.g., `track_screen_view`.
 - `ServiceModePlanner` – e.g., `track_service_call`.
 
 Add simple flags that templates can use like:
 
-- `analytics_enabled`
+- `analytics_enabled` (or `with_analytics` if using preset)
 - `feature_tracks_analytics`
 - `service_tracks_analytics`
 
