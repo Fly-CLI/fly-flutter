@@ -68,7 +68,7 @@ void main() {
       final screenBricks = await templateManager.getScreenBricks();
       if (screenBricks.isNotEmpty) {
         expect(
-          screenBricks.every((brick) => brick.type == BrickType.screen),
+          screenBricks.every((brick) => brick.type == BrickType.feature),
           isTrue,
         );
       }
@@ -153,7 +153,7 @@ void main() {
       final brickName = screenBricks.first.name;
       final preview = await templateManager.generatePreview(
         brickName: brickName,
-        brickType: BrickType.screen,
+        brickType: BrickType.feature,
         outputDirectory: '/tmp/test',
         variables: {
           'screen_name': 'test_screen',
@@ -167,7 +167,7 @@ void main() {
       );
 
       expect(preview.brickName, equals(brickName));
-      expect(preview.brickType, equals(BrickType.screen));
+      expect(preview.brickType, equals(BrickType.feature));
       expect(preview.variables['screen_name'], equals('test_screen'));
     });
 
@@ -257,7 +257,7 @@ void main() {
 
       final result = await templateManager.generateComponent(
         componentName: 'test_screen',
-        componentType: BrickType.screen,
+        componentType: BrickType.feature,
         config: {
           'screen_name': 'test_screen',
           'feature': 'home',

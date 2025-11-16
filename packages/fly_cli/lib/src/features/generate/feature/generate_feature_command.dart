@@ -289,7 +289,7 @@ class GenerateFeatureCommand extends FlyCommand {
       // Generate feature component using TemplateManager
       final result = await templateManager.generateComponent(
         componentName: componentName,
-        componentType: BrickType.screen,
+        componentType: BrickType.feature,
         config: screenConfig,
         targetPath: outputDir,
       );

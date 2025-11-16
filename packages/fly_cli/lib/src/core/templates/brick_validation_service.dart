@@ -79,7 +79,7 @@ class BrickValidationService {
         case BrickType.project:
           await _validateProjectBrickStructure(brick, errors, warnings);
           break;
-        case BrickType.screen:
+        case BrickType.feature:
           await _validateScreenBrickStructure(brick, errors, warnings);
           break;
         case BrickType.service:

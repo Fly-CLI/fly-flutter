@@ -10,7 +10,7 @@ import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_screen_res
 import 'package:fly_mcp/fly_mcp.dart';
 
 /// Strategy for fly.generate.screen tool
-class FlyGenerateScreenStrategy
+class FlyGenerateFeatureStrategy
     extends McpToolStrategy<FlyGenerateScreenParams, FlyGenerateScreenResult> {
   @override
   String get name => 'fly.generate.screen';
@@ -192,7 +192,7 @@ class FlyGenerateScreenStrategy
       // Generate screen using TemplateManager
       final result = await templateManager.generateComponent(
         componentName: params.screenName,
-        componentType: BrickType.screen,
+        componentType: BrickType.feature,
         config: screenConfig,
         targetPath: Directory.current.path,
       );

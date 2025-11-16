@@ -22,7 +22,7 @@ enum McpTool {
   templateApply,
 
   // Generation tools
-  generateScreen,
+  generateFeature,
   generateService,
 
   // Export tools
@@ -85,7 +85,7 @@ extension McpToolExtension on McpTool {
       case McpTool.templateList:
       case McpTool.templateApply:
         return ToolCategory.template;
-      case McpTool.generateScreen:
+      case McpTool.generateFeature:
       case McpTool.generateService:
         return ToolCategory.generation;
       case McpTool.contextExport:

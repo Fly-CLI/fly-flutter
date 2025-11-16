@@ -308,7 +308,7 @@ class GenerationPreviewService {
           return brickPath;
         }
         return null;
-      case BrickType.screen:
+      case BrickType.feature:
       case BrickType.service:
       case BrickType.component:
         final brickPath =

@@ -204,7 +204,7 @@ class BrickRegistry {
       switch (componentDir) {
         case 'screen':
           logger.detail('Detected as screen brick');
-          return BrickType.screen;
+          return BrickType.feature;
         case 'service':
           logger.detail('Detected as service brick');
           return BrickType.service;
@@ -259,7 +259,7 @@ class BrickRegistry {
 
   /// Get all screen bricks
   Future<List<BrickInfo>> getScreenBricks() async {
-    return getBricksByType(BrickType.screen);
+    return getBricksByType(BrickType.feature);
   }
 
   /// Get all service bricks

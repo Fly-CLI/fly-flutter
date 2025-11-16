@@ -181,7 +181,7 @@ class BrickMetadata {
       case 'project':
         return BrickType.project;
       case 'screen':
-        return BrickType.screen;
+        return BrickType.feature;
       case 'service':
         return BrickType.service;
       case 'widget':
@@ -249,7 +249,7 @@ class BrickMetadata {
         }
         break;
       case BrickCategory.component:
-        if (![BrickType.screen, BrickType.service, BrickType.widget]
+        if (![BrickType.feature, BrickType.service, BrickType.widget]
             .contains(type)) {
           errors.add(
               'Component category must have screen, service, or widget type');

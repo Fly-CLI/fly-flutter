@@ -17,7 +17,7 @@ vars:
     prompt: What would you like to generate?
 
   is_project: &mode_flag
-    type: boolean
+    type: bool
     description: Internal flag automatically set by Fly CLI (true for project runs)
     default: true
 
@@ -92,7 +92,7 @@ vars:
       - fly_networking
 
   with_tests: &toggle_flag
-    type: boolean
+    type: bool
     description: Generate starter tests for the selected mode
     default: true
 

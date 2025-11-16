@@ -35,8 +35,8 @@ class McpToolStrategyRegistry {
         return FlyTemplateListStrategy();
       case McpTool.templateApply:
         return FlyTemplateApplyStrategy();
-      case McpTool.generateScreen:
-        return FlyGenerateScreenStrategy();
+      case McpTool.generateFeature:
+        return FlyGenerateFeatureStrategy();
       case McpTool.generateService:
         return FlyGenerateServiceStrategy();
       case McpTool.contextExport:

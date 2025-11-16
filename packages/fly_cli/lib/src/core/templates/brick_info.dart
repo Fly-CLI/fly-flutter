@@ -5,7 +5,7 @@ part 'brick_info.g.dart';
 /// Enum representing different types of Mason bricks
 enum BrickType {
   project,
-  screen,
+  feature,
   service,
   component,
   custom,

@@ -1118,7 +1118,7 @@ class TemplateManager {
     switch (type) {
       case BrickType.project:
         return GenerationMode.project;
-      case BrickType.screen:
+      case BrickType.feature:
         return GenerationMode.feature;
       case BrickType.service:
         return GenerationMode.service;
