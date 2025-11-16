@@ -4,204 +4,61 @@ version: 1.0.0
 
 vars:
   ## ---------------------------------------------------------------------------
-  ## Generation mode + internal flags
+  ## Core generation mode (single required choice)
+  ##
+  ## This is the primary user-facing switch that decides which workflow runs.
+  ## All internal wiring and flags are now implicit; only this enum is exposed.
   ## ---------------------------------------------------------------------------
   generation_mode:
     type: enum
-    description: Controls which workflow is executed
+    description: What do you want to generate?
     default: project
     values:
       - project
       - feature
       - service
-    prompt: What would you like to generate?
-
-  is_project:
-    type: boolean
-    description: Internal flag automatically set by Fly CLI (true for project runs)
-    default: true
-
-  is_feature:
-    type: boolean
-    description: Internal flag automatically set by Fly CLI (true for feature runs)
-    default: false
-
-  is_service:
-    type: boolean
-    description: Internal flag automatically set by Fly CLI (true for service runs)
-    default: false
+    prompt: What would you like to generate? (project / feature / service)
 
   ## ---------------------------------------------------------------------------
-  ## Common metadata reused across modes
+  ## Common metadata used across all modes
+  ##
+  ## The same fields are reused for project, feature, and service generation.
   ## ---------------------------------------------------------------------------
-  project_name:
+  name:
     type: string
-    description: Name of the Flutter project (required for project generation)
-    prompt: What is your project name?
+    description: Name of the thing you are generating (project, feature, or service)
+    prompt: What is the name? (project / feature / service)
+
+  description:
+    type: string
+    description: Short description used in README and metadata
+    default: A new Fly foundation project
 
   organization:
     type: string
     description: Reverse-DNS organization identifier
     default: com.example
-    prompt: What is your organization?
+    prompt: What is your organization (e.g. com.example)?
 
-  description:
-    type: string
-    description: Human-friendly summary shown in README and pubspec
-    default: A new Fly foundation project
-
-  template_variant:
-    type: enum
-    description: Template style (reserved for future expansion)
-    default: foundation
-    values:
-      - foundation
-
-  min_flutter_sdk:
-    type: string
-    description: Minimum Flutter SDK version
-    default: 3.10.0
-
-  min_dart_sdk:
-    type: string
-    description: Minimum Dart SDK version
-    default: 3.0.0
-
+  ## ---------------------------------------------------------------------------
+  ## High-impact options
+  ##
+  ## These are the only knobs exposed for shaping the generated stack. Everything
+  ## else (tests, docs, AI, services, etc.) is configured via internal defaults
+  ## and presets, not individual flags.
+  ## ---------------------------------------------------------------------------
   platforms:
     type: list
     description: Target platforms for Flutter tooling
     default: [ ios, android ]
-    prompt: Which platforms do you want to support?
+    prompt: Which platforms do you want to support? (comma-separated, e.g. ios, android)
 
-  features:
-    type: list
-    description: Initial features to scaffold when generation_mode=project
-    default: [ home ]
-
-  fly_packages:
-    type: list
-    description: Fly ecosystem packages to add to pubspec.yaml
-    default:
-      - fly_core
-      - fly_mvvm
-      - fly_state
-      - fly_navigation
-      - fly_flow_guard
-      - fly_logger
-      - fly_events
-      - fly_networking
-
-  with_tests:
-    type: boolean
-    description: Generate starter tests for the selected mode
-    default: true
-
-  with_docs:
-    type: boolean
-    description: Generate documentation helpers (README, context, guides)
-    default: true
-
-  with_mcp:
-    type: boolean
-    description: Include MCP integration scaffolding
-    default: true
-
-  code_generation:
-    type: boolean
-    description: Configure build_runner + generator dependencies
-    default: true
-
-  ai_integration:
-    type: boolean
-    description: Include AI context scaffolding and .ai files
-    default: true
-
-  ## ---------------------------------------------------------------------------
-  ## Feature generation inputs
-  ## ---------------------------------------------------------------------------
-  component_name:
-    type: string
-    description: Primary component name (screen/service identifier)
-    prompt: What is the component name?
-
-  feature:
-    type: string
-    description: Feature module that contains the generated component
-    default: home
-
-  screen_type:
+  preset:
     type: enum
-    description: Screen archetype used when generation_mode=feature
-    default: list
+    description: Opinionated stack preset (controls tests, docs, AI, services, etc.)
+    default: starter
     values:
-      - list
-      - detail
-      - form
-      - auth
-      - settings
-
-  with_viewmodel:
-    type: boolean
-    description: Include ViewModel + provider scaffolding for screens
-    default: true
-
-  with_validation:
-    type: boolean
-    description: Add form validation helpers (used for form/auth screens)
-    default: false
-
-  with_navigation:
-    type: boolean
-    description: Wire screens into navigation scaffolding
-    default: true
-
-  ## ---------------------------------------------------------------------------
-  ## Service generation inputs
-  ## ---------------------------------------------------------------------------
-  service_type:
-    type: enum
-    description: Service archetype when generation_mode=service
-    default: api
-    values:
-      - api
-      - local
-      - cache
-      - analytics
-      - storage
-
-  api_base_url:
-    type: string
-    description: Base URL for API services
-    default: https://api.example.com
-
-  with_retry_logic:
-    type: boolean
-    description: Add retry helpers backed by fly_flow_guard
-    default: true
-
-  with_caching:
-    type: boolean
-    description: Include caching layer and storage dependencies
-    default: false
-
-  with_interceptors:
-    type: boolean
-    description: Generate HTTP interceptor pipeline for API services
-    default: true
-
-  with_mocks:
-    type: boolean
-    description: Generate mock implementations for services
-    default: true
-
-  ## ---------------------------------------------------------------------------
-  ## State management (foundation-level; extensible)
-  ## ---------------------------------------------------------------------------
-  state_mgmt:
-    type: enum
-    description: Preferred state management for generated UI scaffolding
-    default: riverpod
-    values:
-      - riverpod
-      - bloc
-      - cubit
+      - starter           # Balanced defaults for most apps
+      - batteries_included  # Everything turned on; great for exploration
+      - minimal           # As little as possible; you add things as you go
+    prompt: Which preset do you want? (starter / batteries_included / minimal)
