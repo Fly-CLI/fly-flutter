@@ -1,5 +1,5 @@
 import 'package:mason/mason.dart';
-import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
+import 'mason_variable_keys.dart';
 
 /// Hook-local typedef for Mason variables map.
 typedef Vars = Map<String, dynamic>;
