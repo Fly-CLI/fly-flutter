@@ -1,6 +1,26 @@
 {
   "generation_mode": "service",
+  "is_project": false,
   "is_service": true,
+  "is_feature": false,
+  "project_name": "acme_app",
+  "organization": "com.example",
+  "description": "Minimal API service scenario",
+  "template_variant": "foundation",
+  "min_flutter_sdk": "3.10.0",
+  "min_dart_sdk": "3.0.0",
+  "platforms": ["ios", "android"],
+  "features": ["home"],
+  "fly_packages": [
+    "fly_core",
+    "fly_mvvm",
+    "fly_state",
+    "fly_navigation",
+    "fly_flow_guard",
+    "fly_logger",
+    "fly_events",
+    "fly_networking"
+  ],
   "feature": "home",
   "component_name": "summary",
   "service_type": "api",
@@ -9,7 +29,12 @@
   "with_caching": false,
   "with_interceptors": false,
   "with_mocks": false,
-  "with_tests": true
+  "with_tests": true,
+  "with_docs": true,
+  "with_mcp": true,
+  "code_generation": true,
+  "ai_integration": true,
+  "state_mgmt": "riverpod"
 }
 
 

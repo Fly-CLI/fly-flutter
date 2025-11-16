@@ -1,15 +1,32 @@
 {
   "generation_mode": "project",
   "is_project": true,
+  "is_feature": false,
+  "is_service": false,
   "project_name": "acme_app",
   "organization": "com.example",
+  "description": "Default Fly foundation project",
+  "template_variant": "foundation",
+  "min_flutter_sdk": "3.10.0",
+  "min_dart_sdk": "3.0.0",
   "platforms": ["ios", "android", "web"],
   "features": ["home"],
+  "fly_packages": [
+    "fly_core",
+    "fly_mvvm",
+    "fly_state",
+    "fly_navigation",
+    "fly_flow_guard",
+    "fly_logger",
+    "fly_events",
+    "fly_networking"
+  ],
   "with_tests": true,
   "with_docs": true,
   "with_mcp": true,
   "code_generation": true,
-  "ai_integration": true
+  "ai_integration": true,
+  "state_mgmt": "riverpod"
 }
 
 

@@ -1,15 +1,32 @@
 {
   "generation_mode": "project",
   "is_project": true,
+  "is_feature": false,
+  "is_service": false,
   "project_name": "starter_app",
   "organization": "com.example",
+  "description": "Minimal Fly foundation project without tests",
+  "template_variant": "foundation",
+  "min_flutter_sdk": "3.10.0",
+  "min_dart_sdk": "3.0.0",
   "platforms": ["ios", "android"],
   "features": ["home"],
+  "fly_packages": [
+    "fly_core",
+    "fly_mvvm",
+    "fly_state",
+    "fly_navigation",
+    "fly_flow_guard",
+    "fly_logger",
+    "fly_events",
+    "fly_networking"
+  ],
   "with_tests": false,
   "with_docs": false,
   "with_mcp": false,
   "code_generation": true,
-  "ai_integration": false
+  "ai_integration": false,
+  "state_mgmt": "riverpod"
 }
 
 
