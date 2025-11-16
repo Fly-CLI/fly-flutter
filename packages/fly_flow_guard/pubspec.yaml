@@ -15,7 +15,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  uuid: ^4.2.1
+  uuid: ^4.5.2
   fly_logger:
     path: ../fly_logger
   fly_connectivity:
