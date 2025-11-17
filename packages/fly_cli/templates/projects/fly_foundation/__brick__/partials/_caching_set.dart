@@ -2,4 +2,3 @@
 _cache['summary'] = result;
 {{/supports_caching}}
 
-

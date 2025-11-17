@@ -14,4 +14,3 @@ Future<AppResult<Map<String, dynamic>>> runInterceptors(
 }
 {{/supports_interceptors}}
 
-

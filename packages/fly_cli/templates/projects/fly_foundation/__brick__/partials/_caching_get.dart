@@ -5,4 +5,3 @@ if (cached != null) {
 }
 {{/supports_caching}}
 
-

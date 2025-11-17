@@ -4,4 +4,3 @@ typedef ServiceInterceptor<T> = Future<AppResult<T>> Function(
 );
 {{/supports_interceptors}}
 
-
