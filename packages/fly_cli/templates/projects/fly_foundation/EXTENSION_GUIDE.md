@@ -123,7 +123,7 @@ Start with a minimal, focused set of templates. For example:
 
 - `__brick__/lib/providers/{{#is_provider}}{{component_name}}_provider.dart{{/is_provider}}`  
   (or a future `__brick__/modes/provider/...` subtree).
-- Shared partials under `__brick__/common/providers/`:
+- Shared partials under `__brick__/modes/provider/common/providers/`:
     - `provider_notifier.dart`
     - `provider_future.dart`
     - `provider_state_class.dart`
@@ -132,11 +132,11 @@ Use derived flags from the plugin:
 
 ```mustache
 {{#is_notifier_provider}}
-{{> common/providers/provider_notifier.dart }}
+{{> modes/provider/common/providers/provider_notifier.dart }}
 {{/is_notifier_provider}}
 
 {{#generate_state_class}}
-{{> common/providers/provider_state_class.dart }}
+{{> modes/provider/common/providers/provider_state_class.dart }}
 {{/generate_state_class}}
 ```
 
@@ -216,8 +216,8 @@ Add simple flags that templates can use like:
 
 Add partials for analytics wiring:
 
-- `common/analytics/event_helpers.dart`
-- `common/analytics/project_config.dart`
+- `modes/analytics/common/event_helpers.dart`
+- `modes/analytics/common/project_config.dart`
 
 Then conditionally include them where needed:
 

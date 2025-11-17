@@ -3,15 +3,15 @@
 ## Architecture Overview
 
 - `hooks/pre_gen.dart`: Central planner that validates variables, derives flags, and exposes a simple interface to templates (`active_mode`, `supports_*`, `is_*`).
-- `__brick__/common/`: Shared partials (e.g., services, screens). Keep reusable fragments here.
-- `__brick__/modes/`: (Future) Mode-scoped templates for `project`, `feature`, `service`, etc.
-- `__brick__/...`: Existing structure remains; progressively migrate into `common/` + `modes/`.
+- `__brick__/modes/service/common/services/`: Service partials used by service templates.
+- `__brick__/modes/`: Mode-scoped templates for `project`, `feature`, `service`, etc.
+- `__brick__/...`: Templates organized by mode in the `modes/` structure.
 
 ## Adding a New Flag or Mode
 
 1. Update `brick.yaml` if user-configurable; otherwise, derive inside `pre_gen.dart`.
 2. Add or update validation in `pre_gen.dart` to enforce constraints.
-3. Prefer adding shared fragments under `__brick__/common/` and include via partials.
+3. For service templates, add shared fragments under `__brick__/modes/service/common/services/` and include via partials.
 4. If mode-specific, place files under `__brick__/modes/<mode>/...` (and wire conditions in paths or templates).
 5. Add at least one scenario JSON under `tools/scenarios/<mode>/` and a matching golden under `test/goldens/<mode>/`.
 

@@ -96,7 +96,27 @@ void run(HookContext context) {
     context.logger.warn('Could not remove modes directory: $e');
   }
 
+  // Clean up any common/ directories that were copied to output
+  // These are template partials, not output files
+  _removeCommonDirectories(outputDir, context.logger);
+
   context.logger.info('✅ File reorganization complete. Active modules: ${activeModuleNames.join(", ")}');
+}
+
+/// Remove common/ directories from output (these are template partials, not output files)
+void _removeCommonDirectories(Directory root, Logger logger) {
+  if (!root.existsSync()) return;
+
+  try {
+    for (final entity in root.listSync(recursive: true)) {
+      if (entity is Directory && path.basename(entity.path) == 'common') {
+        logger.detail('Removing common directory: ${entity.path}');
+        entity.deleteSync(recursive: true);
+      }
+    }
+  } catch (e) {
+    logger.warn('Error removing common directories: $e');
+  }
 }
 
 /// Move all contents from source to destination root

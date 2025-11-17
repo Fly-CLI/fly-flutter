@@ -106,15 +106,15 @@ into a monolith.
 Templates live under `__brick__/`. The system follows **thin templates**:
 
 - Most branching is expressed with one‑liner `{{#flag}} ... {{/flag}}` using hook‑derived flags.
-- Reusable fragments live under `__brick__/common/` and are included via Mustache partials.
+- Service partials live under `__brick__/modes/service/common/services/` and are included via Mustache partials.
 
 Service partials example:
 
-- `common/services/interceptors_types.dart` – Typedef for interceptors.
-- `common/services/interceptors_run.dart` – Generic interceptor chain runner.
-- `common/services/caching_field.dart` – Cache field gated by `supports_caching`.
-- `common/services/caching_get.dart` / `caching_set.dart` – Cache access around the operation.
-- `common/services/retry_execute.dart` – Retry loop gated by `supports_retry`.
+- `modes/service/common/services/interceptors_types.dart` – Typedef for interceptors.
+- `modes/service/common/services/interceptors_run.dart` – Generic interceptor chain runner.
+- `modes/service/common/services/caching_field.dart` – Cache field gated by `supports_caching`.
+- `modes/service/common/services/caching_get.dart` / `caching_set.dart` – Cache access around the operation.
+- `modes/service/common/services/retry_execute.dart` – Retry loop gated by `supports_retry`.
 
 This approach **reduces duplication** and keeps conditionals shallow and local.
 
@@ -209,7 +209,7 @@ Workflow: `.github/workflows/template-ci.yml`
 - Add variables: `brick.yaml` (user‑facing) or compute them in a plugin (derived).
 - Add plugins: create `hooks/plugins/<something>_mode.dart` and register it in the composite
   planner.
-- Add partials: place under `__brick__/common/…` and include with `{{> common/... }}`.
+- Add service partials: place under `__brick__/modes/service/common/services/…` and include with `{{> modes/service/common/services/... }}`.
 - Add scenarios: put JSONs under `tools/scenarios/<mode>/` and add to `tools/run_scenarios.sh`.
 - Add goldens: copy `.scenario_out/<name>` into `test/goldens/<name>` after verifying correctness.
 

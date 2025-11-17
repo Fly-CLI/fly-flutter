@@ -115,14 +115,16 @@ __brick__/
 │           └── shared/
 │               └── providers/
 │
-└── common/                        # Shared partials (used by all modes)
-    └── services/
-        ├── caching_field.dart
-        ├── caching_get.dart
-        ├── caching_set.dart
-        ├── interceptors_run.dart
-        ├── interceptors_types.dart
-        └── retry_execute.dart
+└── modes/
+    └── service/
+        └── common/
+            └── services/          # Service partials (used by service templates)
+                ├── caching_field.dart
+                ├── caching_get.dart
+                ├── caching_set.dart
+                ├── interceptors_run.dart
+                ├── interceptors_types.dart
+                └── retry_execute.dart
 ```
 
 ### 2. Composition System
@@ -330,9 +332,7 @@ void resolveModuleFiles(HookContext context) {
     filesToInclude.addAll(moduleFiles);
   }
 
-  // Always include common partials
-  final commonFiles = _scanModuleDirectory('$basePath/common/');
-  filesToInclude.addAll(commonFiles);
+  // Service partials are included within the service module
 
   // Store resolved file list for template rendering
   context.vars['resolved_files'] = filesToInclude.toList();
@@ -345,7 +345,7 @@ Modify Mason's file resolution to:
 
 1. Scan `modes/{active_mode}/` for mode-specific files
 2. Merge paths, with mode-specific files taking precedence
-3. Include `common/` partials as needed
+3. Service partials are included within the service module structure
 4. Remove path-level conditionals entirely
 
 ### 4. Composition Workflows
@@ -358,7 +358,6 @@ generation_mode=project
     → modes/project/lib/core/foundation/  (base classes)
     → modes/project/lib/shared/           (navigation, themes)
     → modes/project/                      (root files: main.dart, pubspec.yaml, etc.)
-    → common/                             (shared partials)
 ```
 
 **Generated Structure:**
@@ -386,7 +385,6 @@ generation_mode=project
 generation_mode=feature
   → FeatureModule
     → modes/feature/lib/features/{{feature}}/
-    → common/                             (shared partials)
     → Assumes: existing project with base classes
 ```
 
@@ -409,7 +407,7 @@ lib/
 generation_mode=service
   → ServiceModule
     → modes/service/lib/core/services/{{feature}}/
-    → common/                             (shared partials)
+    → modes/service/common/services/      (service partials)
     → Assumes: existing project with base classes
 ```
 

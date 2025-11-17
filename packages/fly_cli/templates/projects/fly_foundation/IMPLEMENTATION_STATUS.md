@@ -54,8 +54,12 @@ __brick__/
 │   │   ├── test/
 │   │   └── docs/
 │   └── provider/         # Standalone provider generation
-└── common/               # Shared partials (used by all modes)
-    └── services/
+    └── service/
+        ├── lib/core/services/
+        ├── common/
+        │   └── services/  # Service partials (used by service templates)
+        ├── test/
+        └── docs/
 ```
 
 ### Composition System

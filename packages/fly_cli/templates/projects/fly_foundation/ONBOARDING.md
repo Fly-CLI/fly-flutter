@@ -12,7 +12,7 @@ The template follows a “thin templates, smart hooks” approach:
 
 - `brick.yaml` defines the user‑facing variables (with types, defaults, prompts).
 - `hooks/pre_gen.dart` derives additional flags and enforces constraints. It delegates to a small, pluggable planner system under `hooks/plugins/`.
-- Templates under `__brick__/` remain mostly declarative, using simple derived flags and small reusable partials under `__brick__/common/`.
+- Templates under `__brick__/` remain mostly declarative, using simple derived flags and small reusable partials within their respective modules.
 - A scenario harness in `tools/` generates output for representative configurations and compares against committed goldens in `test/goldens/`. A CI workflow runs these checks on pull requests.
 - A small metrics script counts inline conditional density to keep complexity in check.
 
@@ -26,7 +26,7 @@ Key paths you will work with:
 
 - `brick.yaml`: Variable schema, defaults, prompts.
 - `__brick__/`: Mustache templates for files written to disk.
-  - `common/`: Shared partials used across multiple templates (e.g., common service snippets).
+  - `modes/service/common/`: Service partials used by service templates (e.g., service snippets).
   - Existing mode folders/files will progressively move under a `modes/` tree as the template evolves (not required to contribute now).
 - `hooks/`: Hook scripts executed by Mason.
   - `pre_gen.dart`: Main planner that computes derived flags and validates combinations.
@@ -115,20 +115,20 @@ A `CompositePlanner` runs the applicable plugins and merges their outputs. New c
 
 ### 5.1 Location and Conventions
 
-- Place reusable snippets under `__brick__/common/` and include them in templates via Mustache partial includes:
+- Service partials are located under `__brick__/modes/service/common/services/` and included in service templates via Mustache partial includes:
   - Example partials for services:
-    - `common/services/interceptors_types.dart`
-    - `common/services/interceptors_run.dart`
-    - `common/services/caching_field.dart`
-    - `common/services/caching_get.dart`
-    - `common/services/caching_set.dart`
-    - `common/services/retry_execute.dart`
+    - `modes/service/common/services/interceptors_types.dart`
+    - `modes/service/common/services/interceptors_run.dart`
+    - `modes/service/common/services/caching_field.dart`
+    - `modes/service/common/services/caching_get.dart`
+    - `modes/service/common/services/caching_set.dart`
+    - `modes/service/common/services/retry_execute.dart`
 
 ### 5.2 Example: Service Template Using Partials
 
 File: `__brick__/lib/core/services/{{feature}}/{{#is_service}}{{component_name}}_service.dart{{/is_service}}`
 
-- Imports shared types/logic with `{{> common/... }}`.
+- Service templates import shared types/logic with `{{> modes/service/common/services/... }}`.
 - Uses derived flags like `{{#supports_retry}}` and `{{#supports_interceptors}}` to toggle sections.
 - Caching logic is injected via `caching_field`, `caching_get`, and `caching_set` partials.
 
@@ -228,7 +228,7 @@ Use this to monitor complexity trends after large changes. Aim to reduce density
 1. Add support in `brick.yaml` (`generation_mode` values or auxiliary flags).
 2. Create a new planner plugin under `hooks/plugins/` (e.g., `provider_mode.dart`) and register it in `pre_gen.dart`.
 3. Start with a minimal set of templates for the new mode. Prefer:
-   - Shared partials in `__brick__/common/...`
+   - Service partials in `__brick__/modes/service/common/services/...`
    - Mode‑scoped templates under `__brick__/modes/<mode>/...` (as the repository evolves)
 4. Add scenarios and goldens for the new mode.
 5. Iterate: keep mode logic inside the plugin, and keep templates declarative.
@@ -240,7 +240,7 @@ Use this to monitor complexity trends after large changes. Aim to reduce density
 - Favor derived flags: `is_form_screen`, `supports_retry`, `use_riverpod`.
 - Keep partials small; avoid deeply nested blocks inside partials.
 - Prefer explicit names over abbreviations (e.g., `supports_interceptors`).
-- Do not duplicate logic across templates; extract into `common/` partials.
+- Do not duplicate logic across templates; extract into module-specific partials (e.g., `modes/service/common/services/` for service partials).
 - Keep comments concise in templates; reserve detailed rationale for this document or inline in hooks.
 
 ---
@@ -248,7 +248,7 @@ Use this to monitor complexity trends after large changes. Aim to reduce density
 ## 11. Common Pitfalls and Anti‑Patterns
 
 - Excessive inline conditionals (`{{#...}}` everywhere): Move logic into hooks and expose a simple flag.
-- Copy‑pasted mode templates: Extract shared parts into `common/` and keep mode files small.
+- Copy‑pasted mode templates: Extract shared parts into module-specific partials (e.g., `modes/service/common/services/`) and keep mode files small.
 - Unvalidated flags: Add constraints in the relevant plugin so invalid combos fail fast with good error messages.
 - Large, unreviewed changes to template outputs: Update scenarios/goldens and include a brief explanation in the PR.
 
@@ -277,7 +277,7 @@ A: Use the scenario files: `tools/run_scenarios.sh` runs `mason make` with the p
 - [ ] Variable added to `brick.yaml` (if user‑facing)
 - [ ] Derived flags added to a plugin (or new plugin created)
 - [ ] Constraints validated in plugin
-- [ ] Partials created/updated in `__brick__/common/`
+- [ ] Partials created/updated in appropriate module directories (e.g., `__brick__/modes/service/common/services/`)
 - [ ] Template uses derived flags, minimal inline conditionals
 - [ ] Scenario(s) added; goldens updated
 - [ ] Metrics reviewed
@@ -298,7 +298,7 @@ A: Use the scenario files: `tools/run_scenarios.sh` runs `mason make` with the p
 
 - As complexity grows, we can:
   - Add additional plugins for state management or platform packs.
-  - Adopt a `modes/` structure more fully with thin mode‑specific templates and rich `common/` partial libraries.
+  - Adopt a `modes/` structure more fully with thin mode‑specific templates and module-specific partial libraries.
   - Introduce a declarative constraints file (e.g., `template.yaml`) for advanced validation rules consumed by plugins.
 
 This onboarding guide should equip you to confidently navigate, test, and extend the Fly Foundation template while keeping complexity manageable and the developer experience strong.
