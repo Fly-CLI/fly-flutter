@@ -14,11 +14,11 @@ understanding.
 Core pieces involved in generation:
 
 - `brick.yaml` – Declares user‑facing variables with types, defaults, and prompts.
-- `hooks/pre_gen.dart` – Orchestrates planning via lightweight plugins and writes derived flags to
+- `hooks/pre_gen.dart` – Orchestrates planning via the planner system and writes derived variables to
   `context.vars`.
-- `hooks/plugins/*.dart` – Per‑mode derivation logic (project/feature/service) and validation rules.
+- `hooks/plugins/planners/*.dart` – Planner system with mode-specific and cross-cutting planners.
+- `hooks/plugins/variables/*.dart` – Variable classes (SharedDerivedVariables, ModeSpecificVariables, ComposedDerivedVariables).
 - `hooks/plugins/composition.dart` – Defines composable template modules (ProjectModule, FeatureModule, ServiceModule).
-- `hooks/plugins/composition_planner.dart` – Unified planner that composes modules based on generation_mode.
 - `hooks/post_gen.dart` – Reorganizes generated files based on active modules.
 - `__brick__/modes/` – Module-specific templates organized by mode (project, feature, service).
 - `__brick__/{{~ *.dart }}` – Mason partials at root level for reusable template fragments.
@@ -50,16 +50,19 @@ brick.yaml  ──►  mason reads variables  ──►  hooks/pre_gen.dart (pla
 1. The CLI (Fly CLI or Mason CLI) collects inputs defined in `brick.yaml` (minimal public schema:
    `generation_mode`, `name`, `description`, `organization`, `platforms`, `preset`).
 2. Mason makes these inputs available as `context.vars` to hooks.
-3. `pre_gen.dart` resolves a canonical "view" of the inputs through a planner chain:
-    - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`,
-      `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles).
-    - **CoreVarsPlanner**: Bridges public schema to legacy internal names (`project_name`, `feature`,
-      `component_name`, `screen_type`, `service_type`, defaults for SDK versions, packages).
-    - **CompositionPlanner**: Unified planner that determines which modules to activate based on
-      `generation_mode` and composes them together. Replaces mode-specific planners.
+3. `pre_gen.dart` resolves a canonical "view" of the inputs through the planner system:
+    - **Cross-cutting planners** (run first, in sequence):
+      - **NamingPlanner**: Derives naming variants (project name in snake_case, camelCase, PascalCase).
+      - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`,
+        `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles) and fly packages.
+      - **PlatformPlanner**: Computes platform support flags from the platforms list.
+    - **Mode-specific planner** (selected based on `generation_mode`):
+      - **ProjectPlanner**: Derives project-specific variables (platform flags, project structure).
+      - **FeaturePlanner**: Derives feature-specific variables (screen types, state management, validation).
+      - **ServicePlanner**: Derives service-specific variables (service types, capabilities, mocks).
+    - The system composes `SharedDerivedVariables` (from cross-cutting planners) with `ModeSpecificVariables` (from mode-specific planner) into `ComposedDerivedVariables`.
     - Validates impossible or unsupported combinations (fail fast with actionable messages).
-4. The hook merges all derived flags back into `context.vars`. From this point on, templates reference
-   normalized flags; no complex logic remains in templates.
+4. The hook converts `ComposedDerivedVariables` to Mason variables and merges them into `context.vars`. From this point on, templates reference normalized flags; no complex logic remains in templates.
 5. `post_gen.dart` reorganizes generated files:
     - Moves files from `modes/project/` to output root (for project mode)
     - Merges files from `modes/feature/` and `modes/service/` into existing structure
@@ -80,31 +83,54 @@ Key normalization examples:
 
 ---
 
-## 3) Planner Plugins (Hooks)
+## 3) Planner System Architecture
 
-The planner is pluggable (see `hooks/plugins/planner.dart`). Each plugin:
+The planner system uses a composition-based architecture with clear separation between cross-cutting and mode-specific concerns.
 
-- Decides applicability via `canHandle(vars)`.
-- Produces a `Map<String, dynamic>` of derived flags via `derive(vars, logger)`.
+### 3.1 Planner Interfaces
 
-Registered plugins (evaluated in order):
+**CrossCuttingPlanner** (see `hooks/plugins/planners/cross_cutting_planner.dart`):
+- Handles variables shared across all modes (naming, metadata, platform flags).
+- Implements `canHandle(BaseTemplateVariables)` and `derive(BaseTemplateVariables, SharedDerivedVariables, Logger)`.
+- Planners are applied sequentially, with each receiving the accumulated `SharedDerivedVariables`.
 
-- `PresetPlanner` – Maps `preset` enum to all internal boolean flags (tests, docs, MCP, codegen, AI,
-  service extras, feature toggles). Always handles (presets are global).
-- `CoreVarsPlanner` – Bridges public schema (`name`, `generation_mode`) to legacy internal names
-  (`project_name`, `feature`, `component_name`, `screen_type`, `service_type`, SDK defaults,
-  package lists). Always handles (core vars are global).
-- `CompositionPlanner` – Unified planner that determines active modules based on `generation_mode` and
-  composes them together. Maintains backward compatibility with `is_project`/`is_feature`/`is_service`
-  flags while enabling composition-based architecture.
+**ModeSpecificPlanner** (see `hooks/plugins/planners/mode_specific_planner.dart`):
+- Handles variables specific to a single generation mode (project, feature, or service).
+- Implements `supportedMode` getter and `derive(BaseTemplateVariables, Logger)`.
+- Returns one of `ProjectVariables`, `FeatureVariables`, or `ServiceVariables`.
 
-The planner chain ensures that:
-1. Presets drive all internal toggles (no user-facing boolean flags).
-2. Public schema (`name`, `generation_mode`) is mapped to internal names templates expect.
-3. Mode-specific logic runs after core derivation, consuming derived vars.
+### 3.2 Planner Factory
 
-Adding a new plugin (e.g., `ProviderModePlanner`) is frictionless and avoids stuffing every rule
-into a monolith.
+**PlannerFactory** (see `hooks/plugins/planners/planner_factory.dart`):
+- Maintains registries of mode-specific and cross-cutting planners.
+- Provides factory methods to retrieve appropriate planners.
+- Default factory includes all standard planners.
+
+### 3.3 Registered Planners
+
+**Cross-cutting planners** (run in sequence):
+- `NamingPlanner` – Derives naming variants (project name in different cases) and template metadata.
+- `PresetPlanner` – Maps `preset` enum to internal boolean flags and fly packages.
+- `PlatformPlanner` – Computes platform support flags from the platforms list.
+
+**Mode-specific planners** (one selected per generation):
+- `ProjectPlanner` – Derives project-specific variables (platform flags, project structure).
+- `FeaturePlanner` – Derives feature-specific variables (screen types, state management, validation).
+- `ServicePlanner` – Derives service-specific variables (service types, capabilities, mocks).
+
+### 3.4 Composite Planner
+
+**CompositePlanner** (see `hooks/plugins/planner.dart`):
+- Orchestrates planner execution:
+  1. Runs all applicable cross-cutting planners to build `SharedDerivedVariables`.
+  2. Selects and runs the appropriate mode-specific planner.
+  3. Composes results into `ComposedDerivedVariables`.
+- Ensures that:
+  1. Cross-cutting concerns are handled first (naming, presets, platforms).
+  2. Mode-specific logic runs after shared derivation.
+  3. Variables are properly composed and type-safe.
+
+Adding a new planner is straightforward: implement the appropriate interface and register it in `PlannerFactory`.
 
 ---
 
@@ -160,7 +186,7 @@ Partials are included using `{{~ partial_name }}` syntax (not generated as separ
 
 The composition architecture uses module-based file resolution instead of path conditionals:
 
-1. **Module Selection**: `CompositionPlanner` determines which modules are active based on `generation_mode`
+1. **Module Selection**: `pre_gen.dart` determines which modules are active based on `generation_mode` and `ComposedDerivedVariables`
 2. **Template Rendering**: Mason generates files from all active module directories
 3. **Post-Generation Reorganization**: `post_gen.dart` hook reorganizes files:
    - **Project mode**: Moves `modes/project/` files to output root
@@ -271,13 +297,12 @@ preset=batteries_included
 
 Flow:
 
-1. `PresetPlanner` maps `preset=batteries_included` → all internal flags enabled
-   (`with_tests=true`, `with_docs=true`, `with_mcp=true`, `code_generation=true`,
-   `ai_integration=true`, etc.).
-2. `CoreVarsPlanner` derives `project_name=acme_app`, `feature=home`, `component_name=home`,
-   SDK defaults, package lists.
-3. `ProjectModePlanner` sets `active_mode=project`, `is_project=true`, computes
-   `supports_ios/android/web`, etc.
+1. Cross-cutting planners run:
+   - `NamingPlanner` derives `project_name=acme_app`, `project_name_snake=acme_app`, `project_name_camel=acmeApp`, `project_name_pascal=AcmeApp`, and template metadata.
+   - `PresetPlanner` maps `preset=batteries_included` → all internal flags enabled (`with_tests=true`, `with_docs=true`, `with_mcp=true`, `code_generation=true`, `ai_integration=true`, etc.) and fly packages.
+   - `PlatformPlanner` computes `supports_ios/android/web` flags from the platforms list.
+2. `ProjectPlanner` (mode-specific) sets `is_project=true` and platform support flags.
+3. Results are composed into `ComposedDerivedVariables` (shared + mode-specific).
 4. Templates for project files render with conditionals (tests/docs/ai) based on preset-derived flags.
 5. Output is a runnable Flutter project with configured analysis options, `pubspec.yaml`,
    `main.dart`, navigation, l10n.
@@ -297,12 +322,14 @@ preset=starter
 
 Flow:
 
-1. `PresetPlanner` maps `preset=starter` → `with_viewmodel=true`, `with_navigation=true`,
-   `with_validation=false`, `state_mgmt=riverpod`.
-2. `CoreVarsPlanner` derives `project_name=acme_app`, `feature=dashboard`, `component_name=dashboard`,
-   `screen_type=list` (default).
-3. `FeatureModePlanner` sets `active_mode=feature`, `is_feature=true`, `is_list_screen=true`,
-   `use_riverpod=true`.
+1. Cross-cutting planners run:
+   - `NamingPlanner` derives naming variants and template metadata.
+   - `PresetPlanner` maps `preset=starter` → `with_viewmodel=true`, `with_navigation=true`,
+     `with_validation=false`, `state_mgmt=riverpod`, and fly packages.
+   - `PlatformPlanner` computes platform support flags.
+2. `FeaturePlanner` (mode-specific) sets `is_feature=true`, `screen_type=list`, `is_list_screen=true`,
+   `use_riverpod=true`, `feature=dashboard`, `component_name=dashboard`.
+3. Results are composed into `ComposedDerivedVariables`.
 4. Screen template includes base layout and wiring; form/validation flags remain off.
 5. Output is a `DashboardScreen` with Riverpod wiring and navigation hooks.
 
@@ -321,12 +348,14 @@ preset=batteries_included
 
 Flow:
 
-1. `PresetPlanner` maps `preset=batteries_included` → `with_retry_logic=true`,
-   `with_caching=true`, `with_interceptors=true`, `with_mocks=true`.
-2. `CoreVarsPlanner` derives `project_name=acme_app`, `feature=summary`, `component_name=summary`,
-   `service_type=api` (default), `api_base_url=https://api.example.com` (default).
-3. `ServiceModePlanner` sets `active_mode=service`, `is_service=true`, `is_api_service=true`,
-   `supports_retry/caching/interceptors=true`, `generate_mocks=true`.
+1. Cross-cutting planners run:
+   - `NamingPlanner` derives naming variants and template metadata.
+   - `PresetPlanner` maps `preset=batteries_included` → `with_retry_logic=true`,
+     `with_caching=true`, `with_interceptors=true`, `with_mocks=true`, and fly packages.
+   - `PlatformPlanner` computes platform support flags.
+2. `ServicePlanner` (mode-specific) sets `is_service=true`, `service_type=api`, `is_api_service=true`,
+   `supports_retry/caching/interceptors=true`, `generate_mocks=true`, `feature=summary`, `component_name=summary`.
+3. Results are composed into `ComposedDerivedVariables`.
 4. Service template includes partials for caching, retry, and interceptor chain.
 5. Output is a `SummaryService` with consistent `AppResult<T>` flow and optional layers enabled.
 
@@ -351,7 +380,11 @@ To keep the template maintainable as it grows:
 - **Partial**: A reusable template snippet included in multiple templates.
 - **Scenario**: A fixed set of answers used to generate outputs non‑interactively for testing.
 - **Golden**: Committed expected output for a given scenario.
-- **Planner plugin**: A small class that derives flags/validations for a mode or concern.
+- **Cross-cutting planner**: A planner that derives variables shared across all modes (e.g., naming, presets, platforms).
+- **Mode-specific planner**: A planner that derives variables for a specific generation mode (project, feature, or service).
+- **SharedDerivedVariables**: Class containing variables common to all modes (naming, metadata, platform flags).
+- **ModeSpecificVariables**: Abstract class with implementations for each mode (ProjectVariables, FeatureVariables, ServiceVariables).
+- **ComposedDerivedVariables**: Class that composes shared and mode-specific variables into a unified result.
 
 ---
 

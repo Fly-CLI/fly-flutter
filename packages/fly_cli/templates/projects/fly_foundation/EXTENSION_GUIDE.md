@@ -81,43 +81,88 @@ with_state_class:
 
 Keep descriptions clear and future‑proof.
 
-### 2.3 Add a Planner Plugin
+### 2.3 Create Mode-Specific Variable Class
 
-Create `hooks/plugins/provider_mode.dart`:
+Create `hooks/plugins/variables/provider_variables.dart`:
 
 ```dart
-import 'package:mason/mason.dart';
+import 'mode_specific_variables.dart';
+import '../foundation_model.dart';
+import '../mason_variable_keys.dart';
 
-import 'planner.dart';
+final class ProviderVariables extends ModeSpecificVariables {
+  const ProviderVariables({
+    this.isProvider = true,
+    this.providerType,
+    this.isNotifierProvider = false,
+    this.isFutureProvider = false,
+    this.isStreamProvider = false,
+    this.isStateProvider = false,
+    this.generateStateClass = false,
+    this.componentName,
+  });
 
-class ProviderModePlanner implements PlannerPlugin {
+  final bool isProvider;
+  final String? providerType;
+  final bool isNotifierProvider;
+  final bool isFutureProvider;
+  final bool isStreamProvider;
+  final bool isStateProvider;
+  final bool generateStateClass;
+  final String? componentName;
+
   @override
-  bool canHandle(Map<String, dynamic> vars) {
-    return vars['generation_mode'] == 'provider';
-  }
+  GenerationMode get mode => GenerationMode.provider;
 
   @override
-  Map<String, dynamic> derive(Map<String, dynamic> vars, Logger logger) {
-    final providerType = (vars['provider_type'] as String?)?.toLowerCase() ?? 'notifier';
-    final withStateClass = vars['with_state_class'] == true;
-
-    return <String, dynamic>{
-      'active_mode': 'provider',
-      'is_notifier_provider': providerType == 'notifier',
-      'is_future_provider': providerType == 'future',
-      'is_stream_provider': providerType == 'stream',
-      'is_state_provider': providerType == 'state',
-      'generate_state_class': withStateClass,
-    };
+  Map<String, dynamic> toMasonVars() {
+    // Implementation
   }
 }
 ```
 
-Then register it in `hooks/pre_gen.dart` by adding it to the `CompositePlanner` list.
+### 2.4 Add a Mode-Specific Planner
+
+Create `hooks/plugins/planners/provider_planner.dart`:
+
+```dart
+import 'package:mason/mason.dart';
+import '../foundation_model.dart';
+import '../variables/mode_specific_variables.dart';
+import '../variables/provider_variables.dart';
+import 'mode_specific_planner.dart';
+
+class ProviderPlanner implements ModeSpecificPlanner {
+  @override
+  GenerationMode get supportedMode => GenerationMode.provider;
+
+  @override
+  ProviderVariables derive(
+    BaseTemplateVariables base,
+    Logger logger,
+  ) {
+    final providerType = base.providerType ?? 'notifier';
+    final withStateClass = base.withStateClass;
+
+    return ProviderVariables(
+      isProvider: true,
+      providerType: providerType,
+      isNotifierProvider: providerType == 'notifier',
+      isFutureProvider: providerType == 'future',
+      isStreamProvider: providerType == 'stream',
+      isStateProvider: providerType == 'state',
+      generateStateClass: withStateClass,
+      componentName: base.name,
+    );
+  }
+}
+```
+
+Then register it in `hooks/plugins/planners/planner_factory.dart` by adding it to the `_modePlanners` map.
 
 Optionally, add validation (e.g., certain provider types may require additional flags).
 
-### 2.4 Create Templates and Partials
+### 2.5 Create Templates and Partials
 
 Start with a minimal, focused set of templates. For example:
 
@@ -142,7 +187,7 @@ Use derived flags from the plugin:
 
 Avoid duplicating whole provider templates for each type; prefer partials.
 
-### 2.5 Add Scenarios and Goldens
+### 2.6 Add Scenarios and Goldens
 
 1. Add scenario JSON files under `tools/scenarios/provider/`, e.g.:
 
@@ -170,7 +215,7 @@ cp -R .scenario_out/provider/notifier_with_state test/goldens/provider/notifier_
 
 Commit goldens and ensure CI passes.
 
-### 2.6 Update Documentation
+### 2.7 Update Documentation
 
 - `README.md`: Add the new mode to the generation modes table and usage examples.
 - `ONBOARDING.md`: Mention the new mode and any special considerations.
@@ -197,20 +242,20 @@ with_analytics:
 
 In `hooks/plugins/presets.dart`, extend `FoundationPreset` enum with an `analytics` field and set it per preset (e.g., `starter.analytics=false`, `batteriesIncluded.analytics=true`, `minimal.analytics=false`).
 
-### 3.2 Extend Relevant Plugins
+### 3.2 Extend Relevant Planners
 
-Decide which plugins should handle analytics:
+Decide which planners should handle analytics:
 
-- `PresetPlanner` – If driven by preset, map preset's `analytics` field to `with_analytics` flag.
-- `ProjectModePlanner` – e.g., add `include_analytics_package`.
-- `FeatureModePlanner` – e.g., `track_screen_view`.
-- `ServiceModePlanner` – e.g., `track_service_call`.
+- `PresetPlanner` (cross-cutting) – If driven by preset, map preset's `analytics` field to `with_analytics` flag in `SharedDerivedVariables`.
+- `ProjectPlanner` (mode-specific) – e.g., add `include_analytics_package` to `ProjectVariables`.
+- `FeaturePlanner` (mode-specific) – e.g., add `track_screen_view` to `FeatureVariables`.
+- `ServicePlanner` (mode-specific) – e.g., add `track_service_call` to `ServiceVariables`.
 
 Add simple flags that templates can use like:
 
-- `analytics_enabled` (or `with_analytics` if using preset)
-- `feature_tracks_analytics`
-- `service_tracks_analytics`
+- `analytics_enabled` (or `with_analytics` if using preset) - in `SharedDerivedVariables`
+- `feature_tracks_analytics` - in `FeatureVariables`
+- `service_tracks_analytics` - in `ServiceVariables`
 
 ### 3.3 Add/Update Partials and Templates
 
@@ -241,8 +286,9 @@ Feature flags are lighter‑weight than full capabilities or modes but follow th
 Example: `with_retry_for_feature_calls`.
 
 1. Add to `brick.yaml` if user‑facing.
-2. Extend appropriate plugin (e.g., `FeatureModePlanner`) to normalize into
-   `feature_supports_retry`.
+2. Extend appropriate planner:
+   - If cross-cutting: Add to `SharedDerivedVariables` and update a cross-cutting planner (e.g., `PresetPlanner`).
+   - If mode-specific: Add to the appropriate mode-specific variable class (e.g., `FeatureVariables`) and update the mode-specific planner (e.g., `FeaturePlanner`).
 3. Update templates to use the derived flag instead of raw variables.
 4. Add scenarios/goldens for both true/false cases.
 
@@ -266,7 +312,9 @@ When adding any extension:
 For reviewers evaluating a new extension:
 
 - [ ] Variables in `brick.yaml` are clearly named and documented.
-- [ ] Planner plugin logic is concise, with validations where needed.
+- [ ] Mode-specific variable class created (if adding new mode) or existing class extended.
+- [ ] Planner logic is concise, with validations where needed.
+- [ ] Planner registered in `PlannerFactory` (if adding new mode-specific planner).
 - [ ] Templates use derived flags and partials; no complex logic inline.
 - [ ] New scenarios exist and cover new branches.
 - [ ] Goldens reflect expected changes only.

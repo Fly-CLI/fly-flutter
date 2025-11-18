@@ -29,10 +29,20 @@ Key paths you will work with:
   - `modes/service/common/`: Service partials used by service templates (e.g., service snippets).
   - Existing mode folders/files will progressively move under a `modes/` tree as the template evolves (not required to contribute now).
 - `hooks/`: Hook scripts executed by Mason.
-  - `pre_gen.dart`: Main planner that computes derived flags and validates combinations.
-  - `plugins/`: Lightweight plugin abstraction for mode‑specific derivations:
-    - `planner.dart`: Plugin interface and composite runner.
-    - `service_mode.dart`, `feature_mode.dart`, `project_mode.dart`: Per‑mode derivation code.
+  - `pre_gen.dart`: Main planner that computes derived variables and validates combinations.
+  - `plugins/`: Planner system and variable classes:
+    - `planner.dart`: Composite planner that orchestrates planner execution.
+    - `planners/`: Planner implementations:
+      - `mode_specific_planner.dart`: Interface for mode-specific planners.
+      - `cross_cutting_planner.dart`: Interface for cross-cutting planners.
+      - `planner_factory.dart`: Factory for creating and managing planners.
+      - `project_planner.dart`, `feature_planner.dart`, `service_planner.dart`: Mode-specific planners.
+      - `naming_planner.dart`, `preset_planner.dart`, `platform_planner.dart`: Cross-cutting planners.
+    - `variables/`: Variable classes:
+      - `shared_derived_variables.dart`: Common variables across all modes.
+      - `mode_specific_variables.dart`: Abstract class for mode-specific variables.
+      - `project_variables.dart`, `feature_variables.dart`, `service_variables.dart`: Mode-specific implementations.
+      - `composed_derived_variables.dart`: Composed result of shared + mode-specific variables.
 - `tools/`: Local developer utilities.
   - `run_scenarios.sh`: Scenario/golden runner (non‑interactive).
   - `scenarios/`: JSON answers for sample runs (services, features, project).
@@ -56,11 +66,17 @@ Always prefer adding new variables to `brick.yaml` if they are user‑configurab
 
 ### 3.2 Derived Flags (from hooks)
 
-The planner chain computes easy‑to‑consume flags so templates don't need to embed complex logic. The planner chain consists of:
+The planner system computes easy‑to‑consume flags so templates don't need to embed complex logic. The system consists of:
 
-1. **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles, `state_mgmt`).
-2. **CoreVarsPlanner**: Bridges public schema to legacy internal names (`project_name`, `feature`, `component_name`, `screen_type`, `service_type`, SDK defaults, package lists).
-3. **Mode-specific planners**: Compute mode-specific derived flags.
+1. **Cross-cutting planners** (run first, in sequence):
+   - **NamingPlanner**: Derives naming variants (project name in snake_case, camelCase, PascalCase) and template metadata.
+   - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles, `state_mgmt`) and fly packages.
+   - **PlatformPlanner**: Computes platform support flags from the platforms list.
+2. **Mode-specific planner** (selected based on `generation_mode`):
+   - **ProjectPlanner**: Derives project-specific variables (platform flags, project structure).
+   - **FeaturePlanner**: Derives feature-specific variables (screen types, state management, validation, naming).
+   - **ServicePlanner**: Derives service-specific variables (service types, capabilities, mocks, naming).
+3. **Composition**: Results are composed into `ComposedDerivedVariables` (shared + mode-specific).
 
 Examples of derived flags:
 
@@ -80,34 +96,56 @@ Use these flags inside templates with `{{#flag}} ... {{/flag}}` instead of recom
 
 Entry point run by Mason before file generation. It:
 
-1. Reads current variables from `context.vars`.
-2. Runs the composite planner with registered plugins:
-   - `ProjectModePlanner`
-   - `FeatureModePlanner`
-   - `ServiceModePlanner`
-3. Merges the resulting derived flags back into `context.vars`.
+1. Reads current variables from `context.vars` and creates `BaseTemplateVariables`.
+2. Applies preset configuration if specified.
+3. Runs the `CompositePlanner` which:
+   - Executes all cross-cutting planners to build `SharedDerivedVariables`.
+   - Selects and runs the appropriate mode-specific planner.
+   - Composes results into `ComposedDerivedVariables`.
+4. Converts `ComposedDerivedVariables` to Mason variables and merges them into `context.vars`.
 
 This keeps templates thin and provides a central place to validate and evolve generator logic.
 
-### 4.2 Plugin Interface
+### 4.2 Planner Interfaces
 
-Located in `hooks/plugins/planner.dart`:
+**CrossCuttingPlanner** (located in `hooks/plugins/planners/cross_cutting_planner.dart`):
 
 ```dart
-abstract class PlannerPlugin {
-  bool canHandle(Map<String, dynamic> vars);
-  Map<String, dynamic> derive(Map<String, dynamic> vars, Logger logger);
+abstract class CrossCuttingPlanner {
+  bool canHandle(BaseTemplateVariables base);
+  SharedDerivedVariables derive(
+    BaseTemplateVariables base,
+    SharedDerivedVariables acc,
+    Logger logger,
+  );
 }
 ```
 
-A `CompositePlanner` runs the applicable plugins and merges their outputs. New cross‑cutting plugins (e.g., platforms, analytics rules) can be added over time.
+**ModeSpecificPlanner** (located in `hooks/plugins/planners/mode_specific_planner.dart`):
 
-### 4.3 Planner Plugins
+```dart
+abstract class ModeSpecificPlanner {
+  GenerationMode get supportedMode;
+  ModeSpecificVariables derive(
+    BaseTemplateVariables base,
+    Logger logger,
+  );
+}
+```
 
-- `preset_mode.dart`: Contains `PresetPlanner` (maps preset enum to internal flags) and `CoreVarsPlanner` (bridges public schema to internal names).
-- `project_mode.dart`: Normalizes platform flags and sets mode flags.
-- `feature_mode.dart`: Converts `screen_type` (from CoreVarsPlanner), `with_validation` (from PresetPlanner), and `state_mgmt` (from PresetPlanner) into derived flags for templates.
-- `service_mode.dart`: Maps `service_type` (from CoreVarsPlanner) and related toggles (from PresetPlanner) into service flags and enforces key constraints (e.g., disallow specific invalid combos).
+The `CompositePlanner` orchestrates planner execution, running cross-cutting planners first, then the mode-specific planner, and composing the results.
+
+### 4.3 Planner Implementations
+
+**Cross-cutting planners** (in `hooks/plugins/planners/`):
+- `naming_planner.dart`: Derives naming variants and template metadata.
+- `preset_planner.dart`: Maps preset enum to internal flags and fly packages.
+- `platform_planner.dart`: Computes platform support flags.
+
+**Mode-specific planners** (in `hooks/plugins/planners/`):
+- `project_planner.dart`: Derives project-specific variables (platform flags, project structure).
+- `feature_planner.dart`: Derives feature-specific variables (screen types, state management, validation, naming).
+- `service_planner.dart`: Derives service-specific variables (service types, capabilities, mocks, naming) and enforces constraints.
 
 ---
 
@@ -226,12 +264,13 @@ Use this to monitor complexity trends after large changes. Aim to reduce density
 ### 9.2 New Mode (e.g., `provider`, `repository`, `widget`, `bloc/cubit` variants)
 
 1. Add support in `brick.yaml` (`generation_mode` values or auxiliary flags).
-2. Create a new planner plugin under `hooks/plugins/` (e.g., `provider_mode.dart`) and register it in `pre_gen.dart`.
-3. Start with a minimal set of templates for the new mode. Prefer:
+2. Create a new mode-specific variable class in `hooks/plugins/variables/` (e.g., `provider_variables.dart`) extending `ModeSpecificVariables`.
+3. Create a new mode-specific planner in `hooks/plugins/planners/` (e.g., `provider_planner.dart`) implementing `ModeSpecificPlanner` and register it in `PlannerFactory`.
+4. Start with a minimal set of templates for the new mode. Prefer:
    - Service partials in `__brick__/modes/service/common/services/...`
    - Mode‑scoped templates under `__brick__/modes/<mode>/...` (as the repository evolves)
-4. Add scenarios and goldens for the new mode.
-5. Iterate: keep mode logic inside the plugin, and keep templates declarative.
+5. Add scenarios and goldens for the new mode.
+6. Iterate: keep mode logic inside the planner, and keep templates declarative.
 
 ---
 

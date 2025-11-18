@@ -34,10 +34,17 @@ void run(HookContext context) {
     }
   } else {
     // Fallback: determine from generation mode
-    final compositionPlanner = CompositionPlanner();
-    // No longer using DerivedTemplateVariables - using raw vars from context
-    final activeModules = compositionPlanner.getActiveModules(base, derived);
-    activeModuleNames.addAll(activeModules.map((m) => m.name));
+    switch (base.generationMode) {
+      case GenerationMode.project:
+        activeModuleNames.add('project');
+        break;
+      case GenerationMode.feature:
+        activeModuleNames.add('feature');
+        break;
+      case GenerationMode.service:
+        activeModuleNames.add('service');
+        break;
+    }
   }
 
   // Get the output directory
