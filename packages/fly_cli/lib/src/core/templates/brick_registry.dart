@@ -55,11 +55,34 @@ class BrickRegistry {
   /// Cache for validation results
   final Map<String, BrickValidationResult> _validationCache = {};
 
+  /// Find bricks directory (workspace root/bricks)
+  ///
+  /// Returns the absolute path to the bricks directory if it exists.
+  static String? findBricksDirectory() {
+    final currentDir = Directory.current.path;
+    
+    // Try workspace root/bricks
+    final bricksPath = path.join(currentDir, 'bricks');
+    if (Directory(bricksPath).existsSync()) {
+      return path.normalize(bricksPath);
+    }
+    
+    // Try from packages/fly_cli location (monorepo)
+    final monorepoBricksPath = path.join(currentDir, '..', '..', 'bricks');
+    final normalizedMonorepoPath = path.normalize(monorepoBricksPath);
+    if (Directory(normalizedMonorepoPath).existsSync()) {
+      return normalizedMonorepoPath;
+    }
+    
+    return null;
+  }
+
   /// Discover all available bricks
   ///
   /// Searches in the known template directory structure:
   /// - {templatesDirectory}/projects/
   /// - {templatesDirectory}/components/
+  /// - {workspaceRoot}/bricks/ (for publishable bricks)
   Future<List<BrickInfo>> discoverBricks({bool forceRefresh = false}) async {
     if (!forceRefresh && _brickCache.isNotEmpty) {
       return _brickCache.values.toList();
@@ -80,6 +103,14 @@ class BrickRegistry {
     final componentsPath = path.join(templatesDirectory, 'components');
     final componentsBricks = await _discoverBricksInPath(componentsPath);
     bricks.addAll(componentsBricks);
+
+    // Search in bricks/ workspace directory (for publishable bricks)
+    final bricksDirectory = findBricksDirectory();
+    if (bricksDirectory != null) {
+      logger.detail('Searching for bricks in: $bricksDirectory');
+      final workspaceBricks = await _discoverBricksInPath(bricksDirectory);
+      bricks.addAll(workspaceBricks);
+    }
 
     // Search in custom paths if provided
     for (final customPath in _customBrickPaths) {

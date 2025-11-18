@@ -9,6 +9,7 @@ import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/foundation_enums.dart';
+import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -284,12 +285,17 @@ class GenerateServiceCommand extends FlyCommand {
         ..info('Base URL: $baseUrl');
       }
 
-      // Use injected template manager
+      // Use foundation orchestrator for service generation
       final templateManager = context.templateManager;
+      final orchestrator = FoundationOrchestrator(
+        templateManager: templateManager,
+        logger: logger,
+      );
 
-      // Create service configuration for Mason brick
-      final serviceConfig = <String, dynamic>{
-        'component_name': serviceName,
+      // Prepare raw variables for planning
+      final rawVars = <String, dynamic>{
+        'name': serviceName,
+        'generation_mode': 'service',
         'feature': feature,
         'service_type': serviceType.key,
         'with_tests': withTests,
@@ -297,35 +303,27 @@ class GenerateServiceCommand extends FlyCommand {
         'with_interceptors': withInterceptors,
         'with_retry_logic': withRetryLogic,
         'with_caching': withCaching,
-        'base_url': baseUrl,
+        'api_base_url': baseUrl,
+        'preset': 'starter', // Default preset
       };
 
-      // Generate service using TemplateManager
-      final result = await templateManager.generateComponent(
-        componentName: serviceName,
-        componentType: BrickType.service,
-        config: serviceConfig,
-        targetPath: outputDir,
+      // Generate using orchestrator
+      final result = await orchestrator.generateFoundation(
+        rawVars: rawVars,
+        outputDirectory: outputDir,
       );
 
       stopwatch.stop();
 
-      if (result is TemplateGenerationFailure) {
+      if (!result.success) {
         return CommandResult.error(
           message: 'Failed to generate service: ${result.error}',
           suggestion: 'Check service brick availability and try again',
         );
       }
 
-      if (result is! TemplateGenerationSuccess) {
-        return CommandResult.error(
-          message: 'Unexpected generation result',
-          suggestion: 'Try again or contact support',
-        );
-      }
-
       // Count generated files
-      var filesGenerated = result.filesGenerated;
+      var filesGenerated = result.files?.length ?? 0;
 
       return CommandResult.success(
         command: 'generate service',

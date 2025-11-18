@@ -1,0 +1,6 @@
+{
+  "@@locale": "en",
+  "appTitle": "{{project_name.pascalCase()}}",
+  "homeGreeting": "Welcome to {{project_name.pascalCase()}}"
+}
+

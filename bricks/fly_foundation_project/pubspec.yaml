@@ -1,0 +1,11 @@
+name: fly_foundation_project
+description: Fly foundation project scaffolding brick for generating complete Flutter applications
+version: 1.0.0
+homepage: https://github.com/fly-cli/fly
+repository: https://github.com/fly-cli/fly.git
+issue_tracker: https://github.com/fly-cli/fly/issues
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+

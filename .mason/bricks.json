@@ -1,1 +1,5 @@
-{"fly_foundation":"/Users/apple/Desktop/dev/flutter/me/projects/Fly/packages/fly_cli/templates/projects/fly_foundation"}
+{
+  "fly_foundation_project": "/Users/apple/Desktop/dev/flutter/me/projects/Fly/bricks/fly_foundation_project",
+  "fly_foundation_feature": "/Users/apple/Desktop/dev/flutter/me/projects/Fly/bricks/fly_foundation_feature",
+  "fly_foundation_service": "/Users/apple/Desktop/dev/flutter/me/projects/Fly/bricks/fly_foundation_service"
+}

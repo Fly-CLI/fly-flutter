@@ -1,0 +1,8 @@
+name: fly_foundation_service
+description: Fly foundation service scaffolding brick for generating API, local, cache, analytics, and storage services for existing Fly projects
+version: 1.0.0
+
+# Variables are passed programmatically by the CLI orchestrator
+# This brick generates service scaffolding for existing projects
+# For usage, see: https://github.com/fly-cli/fly
+

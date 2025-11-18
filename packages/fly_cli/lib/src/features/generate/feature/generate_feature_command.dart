@@ -9,6 +9,7 @@ import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/foundation_enums.dart';
+import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -270,51 +271,43 @@ class GenerateFeatureCommand extends FlyCommand {
       }
       logger.info('With navigation: $withNavigation');
 
-      // Use injected template manager
+      // Use foundation orchestrator for feature generation
       final templateManager = context.templateManager;
+      final orchestrator = FoundationOrchestrator(
+        templateManager: templateManager,
+        logger: logger,
+      );
 
-      // Create screen configuration for Mason brick
-      final screenConfig = <String, dynamic>{
-        'component_name': componentName,
+      // Prepare raw variables for planning
+      final rawVars = <String, dynamic>{
+        'name': componentName,
+        'generation_mode': 'feature',
         'feature': feature,
         'screen_type': screenType.key,
-        'screen_type_list': screenType == ScreenType.list,
-        'screen_type_detail': screenType == ScreenType.detail,
-        'screen_type_form': screenType == ScreenType.form,
-        'screen_type_auth': screenType == ScreenType.auth,
-        'screen_type_settings': screenType == ScreenType.settings,
         'with_viewmodel': withViewModel,
         'with_tests': withTests,
         'with_validation': withValidation,
         'with_navigation': withNavigation,
+        'preset': 'starter', // Default preset
       };
 
-      // Generate feature component using TemplateManager
-      final result = await templateManager.generateComponent(
-        componentName: componentName,
-        componentType: BrickType.feature,
-        config: screenConfig,
-        targetPath: outputDir,
+      // Generate using orchestrator
+      final result = await orchestrator.generateFoundation(
+        rawVars: rawVars,
+        outputDirectory: outputDir,
       );
 
       stopwatch.stop();
 
-      if (result is TemplateGenerationFailure) {
+      if (!result.success) {
         return CommandResult.error(
           message: 'Failed to generate feature component: ${result.error}',
           suggestion: 'Check feature brick availability and try again',
         );
       }
 
-      if (result is! TemplateGenerationSuccess) {
-        return CommandResult.error(
-          message: 'Unexpected generation result',
-          suggestion: 'Try again or contact support',
-        );
-      }
-
       // Count generated files
-      var filesGenerated = result.filesGenerated;
+      var filesGenerated = result.files?.length ?? 0;
 
       return CommandResult.success(
         command: 'generate feature',

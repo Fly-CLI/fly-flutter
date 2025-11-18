@@ -1,0 +1,11 @@
+name: fly_foundation_feature
+description: Fly foundation feature scaffolding brick for generating feature screens and view models
+version: 1.0.0
+homepage: https://github.com/fly-cli/fly
+repository: https://github.com/fly-cli/fly.git
+issue_tracker: https://github.com/fly-cli/fly/issues
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
