@@ -22,7 +22,7 @@ class ProjectModePlanner implements PlannerPlugin {
       PlatformType.linux.key,
     };
 
-    return DerivedTemplateVariables(
+    return acc.copyWith(
       isProject: true,
       isFeature: false,
       isService: false,

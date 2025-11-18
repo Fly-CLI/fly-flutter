@@ -55,15 +55,7 @@ class PresetConfiguration {
   ///
   /// [presetKey] is the string key of the preset being applied.
   BaseTemplateVariables applyTo(BaseTemplateVariables base, String presetKey) {
-    return BaseTemplateVariables(
-      name: base.name,
-      organization: base.organization,
-      generationMode: base.generationMode,
-      platforms: base.platforms,
-      description: base.description,
-      templateVariant: base.templateVariant,
-      minFlutterSdk: base.minFlutterSdk,
-      minDartSdk: base.minDartSdk,
+    return base.copyWith(
       withTests: withTests,
       withDocs: withDocs,
       withMcp: withMcp,
@@ -77,9 +69,6 @@ class PresetConfiguration {
       featureValidation: featureValidation,
       featureNavigation: featureNavigation,
       stateManagement: stateMgmt,
-      screenType: base.screenType,
-      serviceType: base.serviceType,
-      apiBaseUrl: base.apiBaseUrl,
       preset: presetKey,
     );
   }

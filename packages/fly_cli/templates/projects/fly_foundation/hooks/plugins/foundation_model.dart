@@ -377,6 +377,65 @@ class BaseTemplateVariables {
       preset: vars.getVar<String>(MasonVarKey.preset),
     );
   }
+
+  /// Creates a copy with updated fields.
+  ///
+  /// Returns a new instance with the specified fields updated, keeping others unchanged.
+  BaseTemplateVariables copyWith({
+    String? name,
+    String? organization,
+    GenerationMode? generationMode,
+    List<PlatformType>? platforms,
+    String? description,
+    String? templateVariant,
+    String? minFlutterSdk,
+    String? minDartSdk,
+    bool? withTests,
+    bool? withDocs,
+    bool? withMcp,
+    bool? codeGeneration,
+    bool? aiIntegration,
+    bool? serviceRetry,
+    bool? serviceCaching,
+    bool? serviceInterceptors,
+    bool? serviceMocks,
+    bool? featureViewModel,
+    bool? featureValidation,
+    bool? featureNavigation,
+    StateManagement? stateManagement,
+    ScreenType? screenType,
+    ServiceType? serviceType,
+    String? apiBaseUrl,
+    String? preset,
+  }) {
+    return BaseTemplateVariables(
+      name: name ?? this.name,
+      organization: organization ?? this.organization,
+      generationMode: generationMode ?? this.generationMode,
+      platforms: platforms ?? this.platforms,
+      description: description ?? this.description,
+      templateVariant: templateVariant ?? this.templateVariant,
+      minFlutterSdk: minFlutterSdk ?? this.minFlutterSdk,
+      minDartSdk: minDartSdk ?? this.minDartSdk,
+      withTests: withTests ?? this.withTests,
+      withDocs: withDocs ?? this.withDocs,
+      withMcp: withMcp ?? this.withMcp,
+      codeGeneration: codeGeneration ?? this.codeGeneration,
+      aiIntegration: aiIntegration ?? this.aiIntegration,
+      serviceRetry: serviceRetry ?? this.serviceRetry,
+      serviceCaching: serviceCaching ?? this.serviceCaching,
+      serviceInterceptors: serviceInterceptors ?? this.serviceInterceptors,
+      serviceMocks: serviceMocks ?? this.serviceMocks,
+      featureViewModel: featureViewModel ?? this.featureViewModel,
+      featureValidation: featureValidation ?? this.featureValidation,
+      featureNavigation: featureNavigation ?? this.featureNavigation,
+      stateManagement: stateManagement ?? this.stateManagement,
+      screenType: screenType ?? this.screenType,
+      serviceType: serviceType ?? this.serviceType,
+      apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
+      preset: preset ?? this.preset,
+    );
+  }
 }
 
 /// Derived template variables representing computed/derived flags and values.

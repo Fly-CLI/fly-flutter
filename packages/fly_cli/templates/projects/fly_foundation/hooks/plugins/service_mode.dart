@@ -35,7 +35,7 @@ class ServiceModePlanner implements PlannerPlugin {
       );
     }
 
-    return DerivedTemplateVariables(
+    return acc.copyWith(
       isProject: false,
       isFeature: false,
       isService: true,

@@ -24,7 +24,7 @@ class FeatureModePlanner implements PlannerPlugin {
         screenType == ScreenType.form || screenType == ScreenType.auth;
     final requiresValidation = withValidation || isFormScreen;
 
-    return DerivedTemplateVariables(
+    return acc.copyWith(
       isProject: false,
       isFeature: true,
       isService: false,

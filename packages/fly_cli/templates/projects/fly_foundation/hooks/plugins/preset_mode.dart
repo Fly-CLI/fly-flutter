@@ -56,7 +56,7 @@ class CoreVarsPlanner implements PlannerPlugin {
     // Set mode flags and naming based on generation mode
     switch (base.generationMode) {
       case GenerationMode.project:
-        return DerivedTemplateVariables(
+        return acc.copyWith(
           isProject: true,
           isFeature: false,
           isService: false,
@@ -75,7 +75,7 @@ class CoreVarsPlanner implements PlannerPlugin {
 
       case GenerationMode.feature:
         final screenType = base.screenType ?? ScreenType.list;
-        return DerivedTemplateVariables(
+        return acc.copyWith(
           isProject: false,
           isFeature: true,
           isService: false,
@@ -92,7 +92,7 @@ class CoreVarsPlanner implements PlannerPlugin {
 
       case GenerationMode.service:
         final serviceType = base.serviceType ?? ServiceType.api;
-        return DerivedTemplateVariables(
+        return acc.copyWith(
           isProject: false,
           isFeature: false,
           isService: true,
