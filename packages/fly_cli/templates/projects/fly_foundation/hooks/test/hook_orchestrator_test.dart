@@ -13,9 +13,11 @@ import '../plugins/composition.dart';
 void main() {
   group('HookOrchestrator', () {
     late Logger logger;
+    late HookOrchestrator orchestrator;
 
     setUp(() {
       logger = Logger();
+      orchestrator = HookOrchestrator();
     });
 
     group('plan', () {
@@ -27,7 +29,7 @@ void main() {
           platforms: [PlatformType.ios, PlatformType.android],
         );
 
-        final result = HookOrchestrator.plan(base, logger);
+        final result = orchestrator.plan(base, logger);
 
         expect(result.shared.projectName, equals('test_project'));
         expect(result.shared.supportsIos, isTrue);
@@ -50,7 +52,7 @@ void main() {
           modeSpecific: const ProjectVariables(),
         );
 
-        final result = HookOrchestrator.selectModules(base, composed);
+        final result = orchestrator.selectModules(base, composed);
 
         expect(result.activeModules.length, equals(1));
         expect(result.activeModules.first, isA<ProjectModule>());
@@ -64,7 +66,7 @@ void main() {
         final outputDir = Directory('${tempDir.path}/nonexistent');
 
         // Should not throw
-        HookOrchestrator.reorganizeFiles(
+        orchestrator.reorganizeFiles(
           outputDir,
           ['project'],
           logger,
@@ -77,7 +79,7 @@ void main() {
         final tempDir = Directory.systemTemp.createTempSync('hook_test_');
 
         // Should not throw
-        HookOrchestrator.reorganizeFiles(
+        orchestrator.reorganizeFiles(
           tempDir,
           ['project'],
           logger,
@@ -97,7 +99,7 @@ void main() {
         final testFile = File('${inactiveModule.path}/test.txt');
         testFile.writeAsStringSync('test');
 
-        HookOrchestrator.reorganizeFiles(
+        orchestrator.reorganizeFiles(
           tempDir,
           ['project'], // Only project is active
           logger,
@@ -120,7 +122,7 @@ void main() {
         final testFile = File('${projectModule.path}/test.txt');
         testFile.writeAsStringSync('test content');
 
-        HookOrchestrator.reorganizeFiles(
+        orchestrator.reorganizeFiles(
           tempDir,
           ['project'],
           logger,
@@ -150,7 +152,7 @@ void main() {
         final testFile = File('${libDir.path}/test.dart');
         testFile.writeAsStringSync('test content');
 
-        HookOrchestrator.reorganizeFiles(
+        orchestrator.reorganizeFiles(
           tempDir,
           ['feature'],
           logger,

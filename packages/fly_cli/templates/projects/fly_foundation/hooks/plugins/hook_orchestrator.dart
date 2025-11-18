@@ -36,19 +36,29 @@ class ModuleSelectionResult {
 
 /// Core hook orchestration API.
 ///
-/// This class provides pure functions for planning, module selection, and
+/// This class provides methods for planning, module selection, and
 /// file reorganization that can be easily tested and reused.
 class HookOrchestrator {
+  /// Creates a hook orchestrator with default registry and planner.
+  HookOrchestrator({
+    ModuleRegistry? registry,
+    CompositePlanner? planner,
+  })  : _registry = registry ?? ModuleRegistry(),
+        _planner = planner ?? CompositePlanner();
+
+  final ModuleRegistry _registry;
+  final CompositePlanner _planner;
+
   /// Plans variable derivation using the composite planner system.
   ///
-  /// This function:
+  /// This method:
   /// 1. Applies preset configuration to base variables
   /// 2. Runs cross-cutting planners to build shared variables
   /// 3. Runs the appropriate mode-specific planner
   /// 4. Composes results into ComposedDerivedVariables
   ///
   /// Returns the composed derived variables ready for template rendering.
-  static ComposedDerivedVariables plan(
+  ComposedDerivedVariables plan(
     BaseTemplateVariables base,
     Logger logger,
   ) {
@@ -56,63 +66,58 @@ class HookOrchestrator {
     final baseWithPreset = PresetPlanner.applyPresetToBase(base, logger);
 
     // Run planners to derive variables
-    final planner = CompositePlanner();
-    return planner.run(baseWithPreset, logger);
+    return _planner.run(baseWithPreset, logger);
   }
 
   /// Selects active modules based on generation mode and derived variables.
   ///
-  /// This function determines which template modules should be active
+  /// This method determines which template modules should be active
   /// for the given generation mode and variables, and computes module-specific
   /// variables.
   ///
   /// Returns a ModuleSelectionResult containing active modules and their vars.
-  static ModuleSelectionResult selectModules(
+  ModuleSelectionResult selectModules(
     BaseTemplateVariables base,
     ComposedDerivedVariables derived,
   ) {
-    return selectModulesWithRegistry(
-      base,
-      derived,
-      ModuleRegistry(),
+    final modeVars = derived.toMasonVars();
+    final moduleConfigs = _registry.resolveModules(base.generationMode, modeVars);
+    final activeModules = _createModuleInstances(moduleConfigs, derived);
+    final moduleVars = _computeModuleVars(activeModules, modeVars);
+
+    return ModuleSelectionResult(
+      activeModules: activeModules,
+      moduleVars: moduleVars,
     );
   }
 
-  /// Selects active modules using a custom registry.
-  ///
-  /// This is useful for testing or when custom module configurations are needed.
-  static ModuleSelectionResult selectModulesWithRegistry(
-    BaseTemplateVariables base,
+  /// Creates module instances with proper initialization from configs.
+  List<TemplateModule> _createModuleInstances(
+    List<ModuleConfig> configs,
     ComposedDerivedVariables derived,
-    ModuleRegistry registry,
   ) {
-    final modeVars = derived.toMasonVars();
-
-    // Resolve active modules using the registry
-    final moduleConfigs = registry.resolveModules(base.generationMode, modeVars);
-
-    // Create module instances with proper initialization
-    final activeModules = <TemplateModule>[];
-    for (final config in moduleConfigs) {
+    return configs.map((config) {
       final module = config.module;
       if (module is FeatureModule) {
-        activeModules.add(FeatureModule(
-          feature: derived.modeSpecific is FeatureVariables
-              ? (derived.modeSpecific as FeatureVariables).feature
-              : null,
-        ));
+        final feature = derived.modeSpecific is FeatureVariables
+            ? (derived.modeSpecific as FeatureVariables).feature
+            : null;
+        return FeatureModule(feature: feature);
       } else if (module is ServiceModule) {
-        activeModules.add(ServiceModule(
-          serviceName: derived.modeSpecific is ServiceVariables
-              ? (derived.modeSpecific as ServiceVariables).componentName
-              : null,
-        ));
-      } else {
-        activeModules.add(module);
+        final serviceName = derived.modeSpecific is ServiceVariables
+            ? (derived.modeSpecific as ServiceVariables).componentName
+            : null;
+        return ServiceModule(serviceName: serviceName);
       }
-    }
+      return module;
+    }).toList();
+  }
 
-    // Compute module-specific variables
+  /// Computes module-specific variables from active modules.
+  Map<String, dynamic> _computeModuleVars(
+    List<TemplateModule> activeModules,
+    Map<String, dynamic> modeVars,
+  ) {
     final moduleVars = <String, dynamic>{
       'active_modules': activeModules.map((m) => m.name).toList(),
       'module_template_paths': activeModules
@@ -121,51 +126,34 @@ class HookOrchestrator {
           .toList(),
     };
 
-    // Add module-specific variables from each active module
     for (final module in activeModules) {
       try {
         moduleVars.addAll(module.getModuleVars(modeVars));
       } catch (e) {
-        // If module vars fail, continue without them
-        // This is logged at a higher level if needed
         throw HookException(
           'Failed to get vars from module ${module.name}: $e',
         );
       }
     }
 
-    return ModuleSelectionResult(
-      activeModules: activeModules,
-      moduleVars: moduleVars,
-    );
+    return moduleVars;
   }
 
   /// Reorganizes generated files based on active modules.
   ///
-  /// This function:
+  /// This method:
   /// 1. Moves files from `modes/{module}/` to appropriate locations
   /// 2. Removes files from inactive modules
   /// 3. Cleans up the `modes/` directory structure
   ///
   /// The [activeModuleNames] should be a list of module names (e.g., ['project']).
   /// The [outputDir] is the target output directory.
-  static void reorganizeFiles(
+  void reorganizeFiles(
     Directory outputDir,
     List<String> activeModuleNames,
     Logger logger,
   ) {
-    reorganizeFilesWithRegistry(outputDir, activeModuleNames, logger, ModuleRegistry());
-  }
 
-  /// Reorganizes generated files using a custom registry.
-  ///
-  /// This is useful for testing or when custom module configurations are needed.
-  static void reorganizeFilesWithRegistry(
-    Directory outputDir,
-    List<String> activeModuleNames,
-    Logger logger,
-    ModuleRegistry registry,
-  ) {
     if (!outputDir.existsSync()) {
       logger.warn('Output directory does not exist: ${outputDir.path}');
       return;
@@ -175,67 +163,24 @@ class HookOrchestrator {
       outputDir.path.replaceAll(RegExp(r'[/\\]$'), '') + '/modes',
     );
     if (!modesDir.existsSync()) {
-      // No modes directory, nothing to reorganize
       return;
     }
 
-    // Process each module directory
     for (final entity in modesDir.listSync()) {
       if (entity is! Directory) continue;
 
       final moduleName = entity.path.split(Platform.pathSeparator).last;
-      final moduleDir = entity;
-
       if (!activeModuleNames.contains(moduleName)) {
-        // Inactive module - remove it
         logger.detail('Removing inactive module: $moduleName');
-        moduleDir.deleteSync(recursive: true);
+        entity.deleteSync(recursive: true);
         continue;
       }
 
-      // Active module - move files to appropriate location
       logger.detail('Processing active module: $moduleName');
-
-      // Get disposition from registry
-      final disposition = registry.getDisposition(moduleName);
-      if (disposition == null) {
-        logger.warn(
-          'Unknown module disposition for $moduleName, using mergeIntoExisting',
-        );
-        _mergeDirectoryContents(moduleDir, outputDir, logger);
-        continue;
-      }
-
-      switch (disposition) {
-        case ModuleDisposition.moveToRoot:
-          // Project files should be moved to root
-          _moveDirectoryContents(moduleDir, outputDir, logger);
-          break;
-        case ModuleDisposition.mergeIntoExisting:
-          // Feature/service/provider files should be merged into existing structure
-          // e.g., modes/feature/lib/features/ -> lib/features/
-          _mergeDirectoryContents(moduleDir, outputDir, logger);
-          break;
-        case ModuleDisposition.removeIfInactive:
-          // Should not reach here as inactive modules are removed above
-          logger.warn(
-            'Module $moduleName marked as removeIfInactive but is active',
-          );
-          break;
-      }
+      _processActiveModule(entity, outputDir, moduleName, logger);
     }
 
-    // Clean up the modes directory if empty
-    try {
-      if (modesDir.existsSync() && modesDir.listSync().isEmpty) {
-        modesDir.deleteSync(recursive: true);
-      }
-    } catch (e) {
-      logger.warn('Could not remove modes directory: $e');
-    }
-
-    // Clean up any common/ directories that were copied to output
-    // These are template partials, not output files
+    _cleanupModesDirectory(modesDir, logger);
     _removeCommonDirectories(outputDir, logger);
 
     logger.info(
@@ -243,8 +188,50 @@ class HookOrchestrator {
     );
   }
 
+  /// Processes an active module directory based on its disposition.
+  void _processActiveModule(
+    Directory moduleDir,
+    Directory outputDir,
+    String moduleName,
+    Logger logger,
+  ) {
+    final disposition = _registry.getDisposition(moduleName);
+    if (disposition == null) {
+      logger.warn(
+        'Unknown module disposition for $moduleName, using mergeIntoExisting',
+      );
+      _mergeDirectoryContents(moduleDir, outputDir, logger);
+      return;
+    }
+
+    switch (disposition) {
+      case ModuleDisposition.moveToRoot:
+        _moveDirectoryContents(moduleDir, outputDir, logger);
+        break;
+      case ModuleDisposition.mergeIntoExisting:
+        _mergeDirectoryContents(moduleDir, outputDir, logger);
+        break;
+      case ModuleDisposition.removeIfInactive:
+        logger.warn(
+          'Module $moduleName marked as removeIfInactive but is active',
+        );
+        break;
+    }
+  }
+
+  /// Cleans up the modes directory if empty.
+  void _cleanupModesDirectory(Directory modesDir, Logger logger) {
+    try {
+      if (modesDir.existsSync() && modesDir.listSync().isEmpty) {
+        modesDir.deleteSync(recursive: true);
+      }
+    } catch (e) {
+      logger.warn('Could not remove modes directory: $e');
+    }
+  }
+
   /// Remove common/ directories from output (these are template partials, not output files).
-  static void _removeCommonDirectories(Directory root, Logger logger) {
+  void _removeCommonDirectories(Directory root, Logger logger) {
     if (!root.existsSync()) return;
 
     try {
@@ -261,7 +248,7 @@ class HookOrchestrator {
   }
 
   /// Move all contents from source to destination root.
-  static void _moveDirectoryContents(
+  void _moveDirectoryContents(
     Directory source,
     Directory destination,
     Logger logger,
@@ -293,7 +280,7 @@ class HookOrchestrator {
   }
 
   /// Merge directory contents, handling conflicts by merging subdirectories.
-  static void _mergeDirectoryContents(
+  void _mergeDirectoryContents(
     Directory source,
     Directory destination,
     Logger logger,

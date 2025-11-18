@@ -46,7 +46,8 @@ void run(HookContext context) {
     final outputDir = Directory(outputDirPath);
 
     // Reorganize files based on active modules
-    HookOrchestrator.reorganizeFiles(
+    final orchestrator = HookOrchestrator();
+    orchestrator.reorganizeFiles(
       outputDir,
       activeModuleNames,
       context.logger,

@@ -11,14 +11,15 @@ void run(HookContext context) {
     // Create base template variables from raw Mason vars
     final base = BaseTemplateVariables.fromVars(rawVars);
 
-    // Plan variable derivation
-    final composed = HookOrchestrator.plan(base, context.logger);
+    // Create orchestrator and plan variable derivation
+    final orchestrator = HookOrchestrator();
+    final composed = orchestrator.plan(base, context.logger);
 
     // Add derived variables back to Mason context
     context.vars.addAll(composed.toMasonVars());
 
     // Select active modules and compute module-specific variables
-    final moduleSelection = HookOrchestrator.selectModules(base, composed);
+    final moduleSelection = orchestrator.selectModules(base, composed);
 
     // Add module metadata and module-specific variables to context
     context.vars.addAll(moduleSelection.moduleVars);
