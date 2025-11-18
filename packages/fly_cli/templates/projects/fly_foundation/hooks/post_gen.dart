@@ -5,7 +5,6 @@ import 'package:path/path.dart' as path;
 
 import 'plugins/mason_variable_keys.dart';
 import 'plugins/foundation_model.dart';
-import 'plugins/composition_planner.dart';
 
 /// Post-generation hook that reorganizes files based on active modules.
 ///
@@ -36,7 +35,7 @@ void run(HookContext context) {
   } else {
     // Fallback: determine from generation mode
     final compositionPlanner = CompositionPlanner();
-    final derived = DerivedTemplateVariables.empty();
+    // No longer using DerivedTemplateVariables - using raw vars from context
     final activeModules = compositionPlanner.getActiveModules(base, derived);
     activeModuleNames.addAll(activeModules.map((m) => m.name));
   }

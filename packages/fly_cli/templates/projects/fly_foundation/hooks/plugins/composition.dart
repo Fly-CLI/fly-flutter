@@ -11,7 +11,7 @@ abstract class TemplateModule {
   String get name;
 
   /// Determines if this module can be composed with the given mode and variables
-  bool canComposeWith(GenerationMode mode, DerivedTemplateVariables vars);
+  bool canComposeWith(GenerationMode mode, Map<String, dynamic> vars);
 
   /// List of template directory paths relative to __brick__/
   ///
@@ -22,7 +22,7 @@ abstract class TemplateModule {
   ///
   /// Returns additional variables that should be added to the template context
   /// when this module is active.
-  Map<String, dynamic> getModuleVars(DerivedTemplateVariables base);
+  Map<String, dynamic> getModuleVars(Map<String, dynamic> vars);
 }
 
 /// Project module - includes base foundation classes and full project scaffolding.
@@ -36,7 +36,7 @@ class ProjectModule implements TemplateModule {
   String get name => 'project';
 
   @override
-  bool canComposeWith(GenerationMode mode, DerivedTemplateVariables vars) {
+  bool canComposeWith(GenerationMode mode, Map<String, dynamic> vars) {
     return mode == GenerationMode.project;
   }
 
@@ -46,7 +46,7 @@ class ProjectModule implements TemplateModule {
       ];
 
   @override
-  Map<String, dynamic> getModuleVars(DerivedTemplateVariables base) {
+  Map<String, dynamic> getModuleVars(Map<String, dynamic> vars) {
     return {
       'includes_base_foundation': true,
       'project_structure': 'full',
@@ -67,9 +67,9 @@ class FeatureModule implements TemplateModule {
   String get name => 'feature';
 
   @override
-  bool canComposeWith(GenerationMode mode, DerivedTemplateVariables vars) {
+  bool canComposeWith(GenerationMode mode, Map<String, dynamic> vars) {
     return mode == GenerationMode.feature ||
-        (mode == GenerationMode.project && vars.feature != null);
+        (mode == GenerationMode.project && vars['feature'] != null);
   }
 
   @override
@@ -78,10 +78,10 @@ class FeatureModule implements TemplateModule {
       ];
 
   @override
-  Map<String, dynamic> getModuleVars(DerivedTemplateVariables base) {
+  Map<String, dynamic> getModuleVars(Map<String, dynamic> vars) {
     return {
       'assumes_existing_project': true,
-      'feature_name': feature ?? base.feature ?? 'home',
+      'feature_name': feature ?? vars['feature'] ?? 'home',
     };
   }
 }
@@ -98,7 +98,7 @@ class ServiceModule implements TemplateModule {
   String get name => 'service';
 
   @override
-  bool canComposeWith(GenerationMode mode, DerivedTemplateVariables vars) {
+  bool canComposeWith(GenerationMode mode, Map<String, dynamic> vars) {
     return mode == GenerationMode.service;
   }
 
@@ -108,10 +108,10 @@ class ServiceModule implements TemplateModule {
       ];
 
   @override
-  Map<String, dynamic> getModuleVars(DerivedTemplateVariables base) {
+  Map<String, dynamic> getModuleVars(Map<String, dynamic> vars) {
     return {
       'assumes_existing_project': true,
-      'service_name': serviceName ?? base.componentName ?? 'service',
+      'service_name': serviceName ?? vars['component_name'] ?? 'service',
     };
   }
 }
@@ -124,7 +124,7 @@ class ProviderModule implements TemplateModule {
   String get name => 'provider';
 
   @override
-  bool canComposeWith(GenerationMode mode, DerivedTemplateVariables vars) {
+  bool canComposeWith(GenerationMode mode, Map<String, dynamic> vars) {
     // Provider module can be used in any mode, but typically standalone
     return true;
   }
@@ -135,7 +135,7 @@ class ProviderModule implements TemplateModule {
       ];
 
   @override
-  Map<String, dynamic> getModuleVars(DerivedTemplateVariables base) {
+  Map<String, dynamic> getModuleVars(Map<String, dynamic> vars) {
     return {
       'assumes_existing_project': true,
     };
