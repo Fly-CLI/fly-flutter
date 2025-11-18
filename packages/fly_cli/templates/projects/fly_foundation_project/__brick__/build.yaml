@@ -1,0 +1,28 @@
+{{#code_generation}}
+targets:
+  $default:
+    builders:
+      riverpod_generator:
+        enabled: true
+        options:
+          provider_name_suffix: Provider
+      drift_dev:
+        enabled: true
+        generate_for:
+          - lib/**.dart
+      auto_mappr:
+        enabled: true
+      json_serializable:
+        enabled: true
+        options:
+          explicit_to_json: true
+
+builders:
+  incremental_build_runner:
+    import: "package:build_runner/builder.dart"
+    builder_factories: ["build"]
+    build_extensions: {"": [""]}
+    auto_apply: none
+    build_to: cache
+{{/code_generation}}
+

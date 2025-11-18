@@ -9,6 +9,7 @@ import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
+import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -274,6 +275,19 @@ class GenerateProjectCommand extends FlyCommand {
       // Use injected template manager
       final templateManager = context.templateManager;
 
+      // Check if this is fly_foundation template - use orchestrator
+      if (template == 'fly_foundation') {
+        return await _generateFoundationProject(
+          projectName: projectName,
+          organization: organization,
+          platforms: platforms,
+          features: features,
+          projectPath: projectPath,
+          templateManager: templateManager,
+          stopwatch: stopwatch,
+        );
+      }
+
       // Create template variables
       final templateVariables = TemplateVariables(
         projectName: projectName,
@@ -282,7 +296,7 @@ class GenerateProjectCommand extends FlyCommand {
         features: features,
       );
 
-      // Generate project using template manager
+      // Generate project using template manager (legacy approach)
       final generationResult = await templateManager.generateProject(
         templateName: template,
         projectName: projectName,
@@ -352,6 +366,91 @@ class GenerateProjectCommand extends FlyCommand {
           'create_project',
           projectName,
           projectType: template,
+        ),
+      );
+    }
+  }
+
+  /// Generate foundation project using the new orchestrator approach.
+  Future<CommandResult> _generateFoundationProject({
+    required String projectName,
+    required String organization,
+    required List<String> platforms,
+    required List<String> features,
+    required String projectPath,
+    required TemplateManager templateManager,
+    required Stopwatch stopwatch,
+  }) async {
+    try {
+      // Create orchestrator
+      final orchestrator = FoundationOrchestrator(
+        templateManager: templateManager,
+        logger: logger,
+      );
+
+      // Prepare raw variables for planning
+      final rawVars = <String, dynamic>{
+        'name': projectName,
+        'organization': organization,
+        'platforms': platforms,
+        'generation_mode': 'project',
+        'preset': 'starter', // Default preset
+        'features': features.isNotEmpty ? features : ['home'],
+      };
+
+      // Generate using orchestrator
+      final result = await orchestrator.generateFoundation(
+        rawVars: rawVars,
+        outputDirectory: projectPath,
+      );
+
+      stopwatch.stop();
+
+      if (!result.success) {
+        return CommandResult.error(
+          message: 'Failed to generate foundation project: ${result.error}',
+          suggestion: 'Check your input and try again',
+          errorCode: ErrorCode.templateGenerationFailed,
+          context: ErrorContext.forCommand(
+            'generate project',
+            arguments: argResults?.arguments,
+          ),
+        );
+      }
+
+      return CommandResult.success(
+        command: 'generate project',
+        message: 'Foundation project created successfully',
+        data: {
+          'project_name': projectName,
+          'template': 'fly_foundation',
+          'organization': organization,
+          'platforms': platforms,
+          'features': features,
+          'files_generated': result.files?.length ?? 0,
+          'duration_ms': stopwatch.elapsedMilliseconds,
+          'target_directory': result.targetDirectory ?? projectPath,
+        },
+        nextSteps: [
+          NextStep(
+            command: 'cd $projectName',
+            description: 'Navigate to project directory',
+          ),
+          const NextStep(
+            command: 'flutter run',
+            description: 'Run the application',
+          ),
+        ],
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return CommandResult.error(
+        message: 'Failed to create foundation project: $e',
+        suggestion: 'Check your input and try again',
+        errorCode: ErrorCode.templateGenerationFailed,
+        context: ErrorContext.forCommand(
+          'generate project',
+          arguments: argResults?.arguments,
         ),
       );
     }

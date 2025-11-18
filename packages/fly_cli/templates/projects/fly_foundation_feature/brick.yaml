@@ -1,0 +1,7 @@
+name: fly_foundation_feature
+description: Fly foundation feature scaffolding brick
+version: 1.0.0
+
+# Variables are passed programmatically by the CLI orchestrator
+# This brick generates feature screens and view models for existing projects
+

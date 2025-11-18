@@ -1,0 +1,70 @@
+{{#features}}
+{{#use_riverpod}}
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+{{/use_riverpod}}
+import 'package:fly_mvvm/fly_mvvm.dart';
+
+import '../../../../../core/foundation/screen/base_view_model.dart';
+
+class {{feature.pascalCase()}}ViewModelState implements FlyViewModelState<{{feature.pascalCase()}}ViewModelState> {
+  const {{feature.pascalCase()}}ViewModelState({
+    this.isLoading = false,
+    this.error,
+    this.message = 'You are ready to build with Fly.',
+  });
+
+  @override
+  final bool isLoading;
+
+  @override
+  final String? error;
+
+  final String message;
+
+  @override
+  bool get hasError => error != null;
+
+  @override
+  {{feature.pascalCase()}}ViewModelState copyWith({
+    bool? isLoading,
+    String? error,
+    bool updateError = false,
+    String? message,
+  }) {
+    return {{feature.pascalCase()}}ViewModelState(
+      isLoading: isLoading ?? this.isLoading,
+      error: updateError ? error : this.error,
+      message: message ?? this.message,
+    );
+  }
+
+  @override
+  {{feature.pascalCase()}}ViewModelState withError(String? error) => copyWith(error: error, updateError: true);
+
+  @override
+  {{feature.pascalCase()}}ViewModelState withLoading(bool isLoading) => copyWith(isLoading: isLoading);
+
+  @override
+  {{feature.pascalCase()}}ViewModelState clearError() => copyWith(error: null, updateError: true);
+
+  factory {{feature.pascalCase()}}ViewModelState.initial() => const {{feature.pascalCase()}}ViewModelState();
+}
+
+class {{feature.pascalCase()}}ViewModel extends BaseViewModel<{{feature.pascalCase()}}ViewModelState> {
+  @override
+  {{feature.pascalCase()}}ViewModelState build() => {{feature.pascalCase()}}ViewModelState.initial();
+
+  Future<void> refresh() async {
+    await runAsyncOperation(() async {
+      state = state.copyWith(message: 'Refreshed at ${DateTime.now().toIso8601String()}');
+    });
+  }
+}
+
+{{#use_riverpod}}
+final {{feature}}ViewModelProvider = NotifierProvider<{{feature.pascalCase()}}ViewModel, {{feature.pascalCase()}}ViewModelState>(
+  {{feature.pascalCase()}}ViewModel.new,
+);
+{{/use_riverpod}}
+{{/features}}
+
