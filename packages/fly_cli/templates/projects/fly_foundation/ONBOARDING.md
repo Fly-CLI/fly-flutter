@@ -29,9 +29,13 @@ Key paths you will work with:
   - `modes/service/common/`: Service partials used by service templates (e.g., service snippets).
   - Existing mode folders/files will progressively move under a `modes/` tree as the template evolves (not required to contribute now).
 - `hooks/`: Hook scripts executed by Mason.
-  - `pre_gen.dart`: Main planner that computes derived variables and validates combinations.
-  - `plugins/`: Planner system and variable classes:
+  - `pre_gen.dart`: Thin orchestration layer that delegates to `HookOrchestrator`.
+  - `post_gen.dart`: Thin orchestration layer that delegates file reorganization to `HookOrchestrator`.
+  - `plugins/`: Core hook logic and planner system:
+    - `hook_orchestrator.dart`: Core orchestration API (`plan`, `selectModules`, `reorganizeFiles`).
+    - `module_registry.dart`: Data-driven module registry that manages template modules and their composition rules.
     - `planner.dart`: Composite planner that orchestrates planner execution.
+    - `hook_exception.dart`: Unified exception type for all hook errors.
     - `planners/`: Planner implementations:
       - `mode_specific_planner.dart`: Interface for mode-specific planners.
       - `cross_cutting_planner.dart`: Interface for cross-cutting planners.
@@ -39,10 +43,11 @@ Key paths you will work with:
       - `project_planner.dart`, `feature_planner.dart`, `service_planner.dart`: Mode-specific planners.
       - `naming_planner.dart`, `preset_planner.dart`, `platform_planner.dart`: Cross-cutting planners.
     - `variables/`: Variable classes:
-      - `shared_derived_variables.dart`: Common variables across all modes.
+      - `shared_derived_variables.dart`: Common variables across all modes (includes platform flags).
       - `mode_specific_variables.dart`: Abstract class for mode-specific variables.
       - `project_variables.dart`, `feature_variables.dart`, `service_variables.dart`: Mode-specific implementations.
       - `composed_derived_variables.dart`: Composed result of shared + mode-specific variables.
+    - `composition.dart`: Template module definitions (ProjectModule, FeatureModule, ServiceModule).
 - `tools/`: Local developer utilities.
   - `run_scenarios.sh`: Scenario/golden runner (non‑interactive).
   - `scenarios/`: JSON answers for sample runs (services, features, project).
@@ -73,7 +78,7 @@ The planner system computes easy‑to‑consume flags so templates don't need to
    - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`, `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles, `state_mgmt`) and fly packages.
    - **PlatformPlanner**: Computes platform support flags from the platforms list.
 2. **Mode-specific planner** (selected based on `generation_mode`):
-   - **ProjectPlanner**: Derives project-specific variables (platform flags, project structure).
+   - **ProjectPlanner**: Derives project-specific variables (`is_project` flag only; platform flags are handled by PlatformPlanner).
    - **FeaturePlanner**: Derives feature-specific variables (screen types, state management, validation, naming).
    - **ServicePlanner**: Derives service-specific variables (service types, capabilities, mocks, naming).
 3. **Composition**: Results are composed into `ComposedDerivedVariables` (shared + mode-specific).
@@ -97,12 +102,17 @@ Use these flags inside templates with `{{#flag}} ... {{/flag}}` instead of recom
 Entry point run by Mason before file generation. It:
 
 1. Reads current variables from `context.vars` and creates `BaseTemplateVariables`.
-2. Applies preset configuration if specified.
-3. Runs the `CompositePlanner` which:
-   - Executes all cross-cutting planners to build `SharedDerivedVariables`.
-   - Selects and runs the appropriate mode-specific planner.
-   - Composes results into `ComposedDerivedVariables`.
-4. Converts `ComposedDerivedVariables` to Mason variables and merges them into `context.vars`.
+2. Delegates to `HookOrchestrator.plan()` which:
+   - Applies preset configuration if specified.
+   - Runs the `CompositePlanner` which:
+     - Executes all cross-cutting planners to build `SharedDerivedVariables`.
+     - Selects and runs the appropriate mode-specific planner.
+     - Composes results into `ComposedDerivedVariables`.
+3. Converts `ComposedDerivedVariables` to Mason variables and merges them into `context.vars`.
+4. Delegates to `HookOrchestrator.selectModules()` to determine active modules and compute module-specific variables.
+5. Adds module metadata and module-specific variables to `context.vars`.
+
+All errors are caught and rethrown as `HookException` with clear, user-facing messages.
 
 This keeps templates thin and provides a central place to validate and evolve generator logic.
 
@@ -135,6 +145,8 @@ abstract class ModeSpecificPlanner {
 
 The `CompositePlanner` orchestrates planner execution, running cross-cutting planners first, then the mode-specific planner, and composing the results.
 
+All planner errors are thrown as `HookException` with clear, actionable messages.
+
 ### 4.3 Planner Implementations
 
 **Cross-cutting planners** (in `hooks/plugins/planners/`):
@@ -143,9 +155,11 @@ The `CompositePlanner` orchestrates planner execution, running cross-cutting pla
 - `platform_planner.dart`: Computes platform support flags.
 
 **Mode-specific planners** (in `hooks/plugins/planners/`):
-- `project_planner.dart`: Derives project-specific variables (platform flags, project structure).
+- `project_planner.dart`: Derives project-specific variables (`is_project` flag only; platform flags are handled by PlatformPlanner).
 - `feature_planner.dart`: Derives feature-specific variables (screen types, state management, validation, naming).
 - `service_planner.dart`: Derives service-specific variables (service types, capabilities, mocks, naming) and enforces constraints.
+
+**Note on platform flags**: `PlatformPlanner` is the single source of truth for all platform flags (`supports_ios`, `supports_android`, etc.). These flags are stored in `SharedDerivedVariables` and are available to all generation modes. `ProjectPlanner` no longer duplicates platform flags.
 
 ---
 
@@ -266,11 +280,15 @@ Use this to monitor complexity trends after large changes. Aim to reduce density
 1. Add support in `brick.yaml` (`generation_mode` values or auxiliary flags).
 2. Create a new mode-specific variable class in `hooks/plugins/variables/` (e.g., `provider_variables.dart`) extending `ModeSpecificVariables`.
 3. Create a new mode-specific planner in `hooks/plugins/planners/` (e.g., `provider_planner.dart`) implementing `ModeSpecificPlanner` and register it in `PlannerFactory`.
-4. Start with a minimal set of templates for the new mode. Prefer:
+4. Create a new module class in `hooks/plugins/composition.dart` (e.g., `ProviderModule`) implementing `TemplateModule`.
+5. Register the new module in `ModuleRegistry` (in `hooks/plugins/module_registry.dart`) with the appropriate `ModuleDisposition`:
+   - `moveToRoot`: For modules that should move files to the output root (like project mode).
+   - `mergeIntoExisting`: For modules that should merge files into existing structure (like feature/service modes).
+6. Start with a minimal set of templates for the new mode. Prefer:
    - Service partials in `__brick__/modes/service/common/services/...`
    - Mode‑scoped templates under `__brick__/modes/<mode>/...` (as the repository evolves)
-5. Add scenarios and goldens for the new mode.
-6. Iterate: keep mode logic inside the planner, and keep templates declarative.
+7. Add scenarios and goldens for the new mode.
+8. Iterate: keep mode logic inside the planner, and keep templates declarative.
 
 ---
 
@@ -306,6 +324,9 @@ A: No. The current layout already benefits from the planner + partials. We will 
 
 Q: How do I test locally without prompts?  
 A: Use the scenario files: `tools/run_scenarios.sh` runs `mason make` with the provided JSON answers.
+
+Q: How do I test hook logic?  
+A: The hooks package includes unit tests in `hooks/test/` that test planners, module resolution, and file reorganization. Run them with `dart test` from the `hooks/` directory. For end-to-end testing, use scenario/golden tests in `tools/run_scenarios.sh`.
 
 ---
 

@@ -6,6 +6,7 @@ import 'variables/composed_derived_variables.dart';
 import 'planners/planner_factory.dart';
 import 'planners/mode_specific_planner.dart';
 import 'planners/cross_cutting_planner.dart';
+import 'hook_exception.dart';
 
 /// Composite planner that orchestrates variable derivation.
 ///
@@ -23,6 +24,9 @@ class CompositePlanner {
   CompositePlanner.custom(PlannerFactory factory) : _factory = factory;
 
   /// Runs the planner system to derive composed variables.
+  ///
+  /// Throws [HookException] if no planner is found for the generation mode
+  /// or if any planner encounters a validation error.
   ComposedDerivedVariables run(
     BaseTemplateVariables base,
     Logger logger,
@@ -41,8 +45,9 @@ class CompositePlanner {
     // Step 2: Run mode-specific planner
     final modePlanner = _factory.getModePlanner(base.generationMode);
     if (modePlanner == null) {
-      throw Exception(
-        'No planner found for generation mode: ${base.generationMode.key}',
+      throw HookException(
+        'No planner found for generation mode: ${base.generationMode.key}. '
+        'Supported modes: ${GenerationMode.values.map((m) => m.key).join(", ")}.',
       );
     }
 

@@ -14,12 +14,14 @@ understanding.
 Core pieces involved in generation:
 
 - `brick.yaml` – Declares user‑facing variables with types, defaults, and prompts.
-- `hooks/pre_gen.dart` – Orchestrates planning via the planner system and writes derived variables to
-  `context.vars`.
+- `hooks/pre_gen.dart` – Thin orchestration layer that delegates to `HookOrchestrator`.
+- `hooks/post_gen.dart` – Thin orchestration layer that delegates file reorganization to `HookOrchestrator`.
+- `hooks/plugins/hook_orchestrator.dart` – Core orchestration API providing `plan`, `selectModules`, and `reorganizeFiles` functions.
+- `hooks/plugins/module_registry.dart` – Data-driven module registry that manages template modules and their composition rules.
 - `hooks/plugins/planners/*.dart` – Planner system with mode-specific and cross-cutting planners.
 - `hooks/plugins/variables/*.dart` – Variable classes (SharedDerivedVariables, ModeSpecificVariables, ComposedDerivedVariables).
 - `hooks/plugins/composition.dart` – Defines composable template modules (ProjectModule, FeatureModule, ServiceModule).
-- `hooks/post_gen.dart` – Reorganizes generated files based on active modules.
+- `hooks/plugins/hook_exception.dart` – Unified exception type for all hook errors.
 - `__brick__/modes/` – Module-specific templates organized by mode (project, feature, service).
 - `__brick__/{{~ *.dart }}` – Mason partials at root level for reusable template fragments.
 - `tools/scenarios/` – Non‑interactive answer files for end‑to‑end runs.
@@ -50,20 +52,21 @@ brick.yaml  ──►  mason reads variables  ──►  hooks/pre_gen.dart (pla
 1. The CLI (Fly CLI or Mason CLI) collects inputs defined in `brick.yaml` (minimal public schema:
    `generation_mode`, `name`, `description`, `organization`, `platforms`, `preset`).
 2. Mason makes these inputs available as `context.vars` to hooks.
-3. `pre_gen.dart` resolves a canonical "view" of the inputs through the planner system:
+3. `pre_gen.dart` delegates to `HookOrchestrator.plan()` which resolves a canonical "view" of the inputs through the planner system:
     - **Cross-cutting planners** (run first, in sequence):
       - **NamingPlanner**: Derives naming variants (project name in snake_case, camelCase, PascalCase).
       - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`,
         `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles) and fly packages.
       - **PlatformPlanner**: Computes platform support flags from the platforms list.
     - **Mode-specific planner** (selected based on `generation_mode`):
-      - **ProjectPlanner**: Derives project-specific variables (platform flags, project structure).
+      - **ProjectPlanner**: Derives project-specific variables (`is_project` flag only; platform flags are handled by PlatformPlanner).
       - **FeaturePlanner**: Derives feature-specific variables (screen types, state management, validation).
       - **ServicePlanner**: Derives service-specific variables (service types, capabilities, mocks).
     - The system composes `SharedDerivedVariables` (from cross-cutting planners) with `ModeSpecificVariables` (from mode-specific planner) into `ComposedDerivedVariables`.
-    - Validates impossible or unsupported combinations (fail fast with actionable messages).
-4. The hook converts `ComposedDerivedVariables` to Mason variables and merges them into `context.vars`. From this point on, templates reference normalized flags; no complex logic remains in templates.
-5. `post_gen.dart` reorganizes generated files:
+    - Validates impossible or unsupported combinations (fail fast with `HookException` and actionable messages).
+4. `pre_gen.dart` converts `ComposedDerivedVariables` to Mason variables and merges them into `context.vars`. From this point on, templates reference normalized flags; no complex logic remains in templates.
+5. `pre_gen.dart` delegates to `HookOrchestrator.selectModules()` which uses `ModuleRegistry` to determine active modules and compute module-specific variables, then adds them to `context.vars`.
+6. `post_gen.dart` delegates to `HookOrchestrator.reorganizeFiles()` which reorganizes generated files:
     - Moves files from `modes/project/` to output root (for project mode)
     - Merges files from `modes/feature/` and `modes/service/` into existing structure
     - Removes files from inactive modules
@@ -77,7 +80,7 @@ Key normalization examples:
   `is_form_screen`, `requires_validation`.
 - Service mode: `service_type` (from CoreVarsPlanner) + preset-derived toggles → `is_api_service`,
   `supports_retry`, `supports_caching`, `supports_interceptors`, `generate_mocks`.
-- Project/platforms: `platforms` list → `supports_ios/android/web/macos/windows/linux/desktop`.
+- Project/platforms: `platforms` list → `supports_ios/android/web/macos/windows/linux/desktop` (derived by PlatformPlanner, stored in SharedDerivedVariables).
 - State management: `state_mgmt` (from PresetPlanner, default `riverpod`) → `use_riverpod`,
   `use_bloc`, `use_cubit`.
 
@@ -221,18 +224,34 @@ This approach completely eliminates path-level conditionals while maintaining cl
 
 ## 7) Error Handling and Validation
 
-Validation lives in plugins (e.g., `ServiceModePlanner`):
+All hook errors use the unified `HookException` type for consistent, user-facing error messages:
 
-- If a combination is unsupported (example: `service_type=analytics` + `with_caching=true`), the
-  plugin throws a `HookException`.
-- Failures occur **before** any files are generated, avoiding partial outputs.
-- Add new constraints in the appropriate plugin to centralize policy.
+- **Planner validation**: If a combination is unsupported (example: `service_type=analytics` + `with_caching=true`), the planner throws a `HookException` with a clear message.
+- **Missing planners**: If no planner is found for a generation mode, `CompositePlanner` throws a `HookException` listing supported modes.
+- **Module errors**: If module variable computation fails, `HookOrchestrator.selectModules()` throws a `HookException`.
+- **Error propagation**: Both `pre_gen.dart` and `post_gen.dart` catch `HookException` and log it before rethrowing, ensuring errors are visible to users.
+
+Failures occur **before** any files are generated, avoiding partial outputs. Add new constraints in the appropriate planner to centralize policy.
 
 ---
 
 ## 8) Testing and Goldens
 
-The template uses **scenario‑based testing**:
+The template uses a **two-tier testing approach**:
+
+### 8.1 Unit Tests
+
+Unit tests in `hooks/test/` provide focused testing of hook logic:
+
+- **Planner tests** (`planner_test.dart`): Test variable derivation for all modes, error handling, and validation.
+- **Module registry tests** (`module_registry_test.dart`): Test module resolution and disposition strategies.
+- **Hook orchestrator tests** (`hook_orchestrator_test.dart`): Test file reorganization, module selection, and edge cases.
+
+Run unit tests with `dart test` from the `hooks/` directory.
+
+### 8.2 Scenario-Based Testing (End-to-End)
+
+Scenario-based testing provides end-to-end validation:
 
 - `tools/scenarios/` stores JSON inputs representing real user cases (service/feature/project).
 - `tools/run_scenarios.sh` runs all scenarios non‑interactively, generating outputs in
@@ -271,12 +290,13 @@ Workflow: `.github/workflows/template-ci.yml`
 
 ## 11) Extension Points
 
-- Add variables: `brick.yaml` (user‑facing) or compute them in a plugin (derived).
-- Add plugins: create `hooks/plugins/<something>_mode.dart` and register it in the composite
-  planner.
-- Add service partials: place under `__brick__/modes/service/common/services/…` and include with `{{> modes/service/common/services/... }}`.
-- Add scenarios: put JSONs under `tools/scenarios/<mode>/` and add to `tools/run_scenarios.sh`.
-- Add goldens: copy `.scenario_out/<name>` into `test/goldens/<name>` after verifying correctness.
+- **Add variables**: `brick.yaml` (user‑facing) or compute them in a planner (derived).
+- **Add planners**: Create a new planner implementing `CrossCuttingPlanner` or `ModeSpecificPlanner` and register it in `PlannerFactory`.
+- **Add modules**: Create a new module class implementing `TemplateModule` in `composition.dart` and register it in `ModuleRegistry` with the appropriate `ModuleDisposition`.
+- **Add service partials**: Place under `__brick__/modes/service/common/services/…` and include with `{{> modes/service/common/services/... }}`.
+- **Add unit tests**: Add tests to `hooks/test/` for new planners or modules.
+- **Add scenarios**: Put JSONs under `tools/scenarios/<mode>/` and add to `tools/run_scenarios.sh`.
+- **Add goldens**: Copy `.scenario_out/<name>` into `test/goldens/<name>` after verifying correctness.
 
 ---
 

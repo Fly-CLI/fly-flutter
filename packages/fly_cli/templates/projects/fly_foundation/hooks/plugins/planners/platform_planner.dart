@@ -5,8 +5,16 @@ import 'cross_cutting_planner.dart';
 
 /// Planner that computes platform support flags.
 ///
-/// This planner derives platform-specific flags from the base template variables,
-/// including individual platform flags and the desktop platform flag.
+/// This planner is the single source of truth for all platform flags:
+/// - supports_ios, supports_android, supports_web
+/// - supports_macos, supports_windows, supports_linux
+/// - supports_desktop (computed from desktop platforms)
+///
+/// These flags are stored in SharedDerivedVariables and are available
+/// to all generation modes (project, feature, service).
+///
+/// Note: ProjectPlanner no longer duplicates platform flags. All platform
+/// flags should be derived by this planner only.
 class PlatformPlanner implements CrossCuttingPlanner {
   @override
   bool canHandle(BaseTemplateVariables base) {
