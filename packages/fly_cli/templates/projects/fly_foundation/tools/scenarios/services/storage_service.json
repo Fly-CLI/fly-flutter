@@ -1,9 +1,0 @@
-{
-  "generation_mode": "service",
-  "name": "localstorage",
-  "description": "Storage service scenario",
-  "organization": "com.example",
-  "platforms": ["ios", "android"],
-  "preset": "minimal"
-}
-

@@ -1,8 +1,0 @@
-{
-  "generation_mode": "project",
-  "name": "starter_app",
-  "description": "Minimal Fly foundation project without tests",
-  "organization": "com.example",
-  "platforms": ["ios", "android"],
-  "preset": "minimal"
-}

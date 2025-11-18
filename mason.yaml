@@ -2,5 +2,3 @@
 # Run "mason get" to install all registered bricks.
 # To learn more, visit https://docs.brickhub.dev.
 bricks:
-  fly_foundation:
-    path: packages/fly_cli/templates/projects/fly_foundation
