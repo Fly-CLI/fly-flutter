@@ -1,10 +1,9 @@
 import 'package:mason/mason.dart';
 
-import 'plugins/mason_variable_keys.dart';
 import 'plugins/foundation_model.dart';
 import 'plugins/planner.dart';
-import 'plugins/preset_mode.dart';
-import 'plugins/presets.dart';
+import 'plugins/naming_planner.dart';
+import 'plugins/preset_planner.dart';
 import 'plugins/composition_planner.dart';
 
 void run(HookContext context) {
@@ -13,23 +12,16 @@ void run(HookContext context) {
   // Create base template variables from raw Mason vars
   var base = BaseTemplateVariables.fromVars(rawVars);
 
-  // Apply preset if specified
-  if (base.preset != null) {
-    try {
-      final preset =
-          FoundationPreset.fromVars({MasonVarKey.preset.key: base.preset});
-      base = preset.applyTo(base);
-    } catch (e) {
-      context.logger.err('Failed to apply preset: $e');
-      // Continue with original base if preset fails
-    }
-  }
+  // Apply preset if specified (consolidated in PresetPlanner)
+  base = PresetPlanner.applyPresetToBase(base, context.logger);
 
   // Run planners to derive variables
   final planner = CompositePlanner([
-    CoreVarsPlanner(),
-    // Composition planner replaces mode-specific planners
-    // It handles module composition and maintains backward compatibility
+    // NamingPlanner handles mode-based naming logic
+    NamingPlanner(),
+    // PresetPlanner handles preset-based configuration (e.g., fly packages)
+    PresetPlanner(),
+    // CompositionPlanner handles module composition and mode flags
     CompositionPlanner(),
   ]);
 

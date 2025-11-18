@@ -28,6 +28,8 @@ class PresetConfiguration {
     required this.featureNavigation,
     // State management
     required this.stateMgmt,
+    // Package configuration
+    required this.flyPackages,
   });
 
   // Cross-cutting features
@@ -50,6 +52,9 @@ class PresetConfiguration {
 
   // State management
   final StateManagement stateMgmt;
+
+  // Package configuration
+  final List<String> flyPackages;
 
   /// Applies this configuration to a BaseTemplateVariables instance.
   ///
@@ -91,6 +96,16 @@ enum FoundationPreset {
       featureValidation: false,
       featureNavigation: true,
       stateMgmt: StateManagement.riverpod,
+      flyPackages: [
+        'fly_core',
+        'fly_mvvm',
+        'fly_state',
+        'fly_navigation',
+        'fly_flow_guard',
+        'fly_logger',
+        'fly_events',
+        'fly_networking',
+      ],
     ),
   ),
   batteriesIncluded(
@@ -108,6 +123,16 @@ enum FoundationPreset {
       featureValidation: true,
       featureNavigation: true,
       stateMgmt: StateManagement.riverpod,
+      flyPackages: [
+        'fly_core',
+        'fly_mvvm',
+        'fly_state',
+        'fly_navigation',
+        'fly_flow_guard',
+        'fly_logger',
+        'fly_events',
+        'fly_networking',
+      ],
     ),
   ),
   minimal(
@@ -125,6 +150,11 @@ enum FoundationPreset {
       featureValidation: false,
       featureNavigation: false,
       stateMgmt: StateManagement.riverpod,
+      flyPackages: [
+        'fly_core',
+        'fly_mvvm',
+        'fly_state',
+      ],
     ),
   );
 
@@ -146,6 +176,7 @@ enum FoundationPreset {
   bool get featureValidation => config.featureValidation;
   bool get featureNavigation => config.featureNavigation;
   StateManagement get stateMgmt => config.stateMgmt;
+  List<String> get flyPackages => config.flyPackages;
 
   /// Returns the string key for this preset.
   String get key {

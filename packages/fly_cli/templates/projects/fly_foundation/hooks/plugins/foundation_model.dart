@@ -280,6 +280,24 @@ enum StateManagement {
   }
 }
 
+/// Model representing project name in different naming conventions.
+class ProjectName {
+  const ProjectName({
+    required this.snake,
+    required this.camel,
+    required this.pascal,
+  });
+
+  /// Project name in snake_case format.
+  final String snake;
+
+  /// Project name in camelCase format.
+  final String camel;
+
+  /// Project name in PascalCase format.
+  final String pascal;
+}
+
 /// Base template variables representing the core input variables.
 ///
 /// This is a simplified version for hook context that works with Vars maps.
@@ -474,9 +492,7 @@ class DerivedTemplateVariables {
     this.projectName,
     this.feature,
     this.componentName,
-    this.projectNameSnake,
-    this.projectNameCamel,
-    this.projectNamePascal,
+    this.projectNameVariants,
     this.templateVariant,
     this.minFlutterSdk,
     this.minDartSdk,
@@ -516,9 +532,7 @@ class DerivedTemplateVariables {
   final String? projectName;
   final String? feature;
   final String? componentName;
-  final String? projectNameSnake;
-  final String? projectNameCamel;
-  final String? projectNamePascal;
+  final ProjectName? projectNameVariants;
   final String? templateVariant;
   final String? minFlutterSdk;
   final String? minDartSdk;
@@ -563,9 +577,7 @@ class DerivedTemplateVariables {
       projectName: other.projectName ?? projectName,
       feature: other.feature ?? feature,
       componentName: other.componentName ?? componentName,
-      projectNameSnake: other.projectNameSnake ?? projectNameSnake,
-      projectNameCamel: other.projectNameCamel ?? projectNameCamel,
-      projectNamePascal: other.projectNamePascal ?? projectNamePascal,
+      projectNameVariants: other.projectNameVariants ?? projectNameVariants,
       templateVariant: other.templateVariant ?? templateVariant,
       minFlutterSdk: other.minFlutterSdk ?? minFlutterSdk,
       minDartSdk: other.minDartSdk ?? minDartSdk,
@@ -620,14 +632,10 @@ class DerivedTemplateVariables {
     if (feature != null) result[MasonVarKey.feature.key] = feature;
     if (componentName != null)
       result[MasonVarKey.componentName.key] = componentName;
-    if (projectNameSnake != null) {
-      result[MasonVarKey.projectNameSnake.key] = projectNameSnake;
-    }
-    if (projectNameCamel != null) {
-      result[MasonVarKey.projectNameCamel.key] = projectNameCamel;
-    }
-    if (projectNamePascal != null) {
-      result[MasonVarKey.projectNamePascal.key] = projectNamePascal;
+    if (projectNameVariants != null) {
+      result[MasonVarKey.projectNameSnake.key] = projectNameVariants.snake;
+      result[MasonVarKey.projectNameCamel.key] = projectNameVariants.camel;
+      result[MasonVarKey.projectNamePascal.key] = projectNameVariants.pascal;
     }
 
     if (templateVariant != null) {
@@ -675,9 +683,7 @@ class DerivedTemplateVariables {
     String? projectName,
     String? feature,
     String? componentName,
-    String? projectNameSnake,
-    String? projectNameCamel,
-    String? projectNamePascal,
+    ProjectName? projectNameVariants,
     String? templateVariant,
     String? minFlutterSdk,
     String? minDartSdk,
@@ -717,9 +723,7 @@ class DerivedTemplateVariables {
       projectName: projectName ?? this.projectName,
       feature: feature ?? this.feature,
       componentName: componentName ?? this.componentName,
-      projectNameSnake: projectNameSnake ?? this.projectNameSnake,
-      projectNameCamel: projectNameCamel ?? this.projectNameCamel,
-      projectNamePascal: projectNamePascal ?? this.projectNamePascal,
+      projectNameVariants: projectNameVariants ?? this.projectNameVariants,
       templateVariant: templateVariant ?? this.templateVariant,
       minFlutterSdk: minFlutterSdk ?? this.minFlutterSdk,
       minDartSdk: minDartSdk ?? this.minDartSdk,

@@ -43,7 +43,7 @@ class CompositionPlanner implements PlannerPlugin {
         // but we support initial features during project creation
         if (base.name.isNotEmpty) {
           // For project mode, the first feature is typically 'home'
-          // This is handled by CoreVarsPlanner which sets feature: 'home'
+          // This is handled by NamingPlanner which sets feature: 'home'
         }
         break;
 
