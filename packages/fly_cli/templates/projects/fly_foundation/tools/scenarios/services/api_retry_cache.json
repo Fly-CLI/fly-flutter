@@ -1,8 +1,0 @@
-{
-  "generation_mode": "service",
-  "name": "summary",
-  "description": "API service with retry and cache scenario",
-  "organization": "com.example",
-  "platforms": ["ios", "android"],
-  "preset": "batteries_included"
-}

@@ -1,8 +1,0 @@
-{
-  "generation_mode": "project",
-  "name": "acme_app",
-  "description": "Default Fly foundation project",
-  "organization": "com.example",
-  "platforms": ["ios", "android", "web"],
-  "preset": "batteries_included"
-}
