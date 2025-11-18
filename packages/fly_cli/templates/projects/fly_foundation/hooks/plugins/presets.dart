@@ -4,83 +4,159 @@ import 'mason_variable_keys.dart';
 import 'foundation_model.dart';
 import 'hook_exception.dart';
 
-/// Foundation preset enum with configuration for each preset.
-enum FoundationPreset {
-  starter(
-    withTests: true,
-    withDocs: true,
-    withMcp: true,
-    codeGeneration: true,
-    aiIntegration: true,
-    serviceRetry: false,
-    serviceCaching: false,
-    serviceInterceptors: false,
-    serviceMocks: true,
-    featureViewModel: true,
-    featureValidation: false,
-    featureNavigation: true,
-    stateMgmt: StateManagement.riverpod,
-  ),
-  batteriesIncluded(
-    withTests: true,
-    withDocs: true,
-    withMcp: true,
-    codeGeneration: true,
-    aiIntegration: true,
-    serviceRetry: true,
-    serviceCaching: true,
-    serviceInterceptors: true,
-    serviceMocks: true,
-    featureViewModel: true,
-    featureValidation: true,
-    featureNavigation: true,
-    stateMgmt: StateManagement.riverpod,
-  ),
-  minimal(
-    withTests: false,
-    withDocs: false,
-    withMcp: false,
-    codeGeneration: true,
-    aiIntegration: false,
-    serviceRetry: false,
-    serviceCaching: false,
-    serviceInterceptors: false,
-    serviceMocks: false,
-    featureViewModel: true,
-    featureValidation: false,
-    featureNavigation: false,
-    stateMgmt: StateManagement.riverpod,
-  );
-
-  const FoundationPreset({
+/// Comprehensive configuration for a foundation preset.
+///
+/// This class contains all configurable properties that a preset can set,
+/// making it easy to see what each preset includes at a glance.
+/// All properties are required to ensure presets are comprehensive and exhaustive.
+class PresetConfiguration {
+  const PresetConfiguration({
+    // Cross-cutting features
     required this.withTests,
     required this.withDocs,
     required this.withMcp,
     required this.codeGeneration,
     required this.aiIntegration,
+    // Service features
     required this.serviceRetry,
     required this.serviceCaching,
     required this.serviceInterceptors,
     required this.serviceMocks,
+    // Feature capabilities
     required this.featureViewModel,
     required this.featureValidation,
     required this.featureNavigation,
+    // State management
     required this.stateMgmt,
   });
 
+  // Cross-cutting features
   final bool withTests;
   final bool withDocs;
   final bool withMcp;
   final bool codeGeneration;
   final bool aiIntegration;
+
+  // Service features
   final bool serviceRetry;
   final bool serviceCaching;
   final bool serviceInterceptors;
   final bool serviceMocks;
+
+  // Feature capabilities
   final bool featureViewModel;
   final bool featureValidation;
   final bool featureNavigation;
+
+  // State management
   final StateManagement stateMgmt;
+
+  /// Applies this configuration to a BaseTemplateVariables instance.
+  ///
+  /// [presetKey] is the string key of the preset being applied.
+  BaseTemplateVariables applyTo(BaseTemplateVariables base, String presetKey) {
+    return BaseTemplateVariables(
+      name: base.name,
+      organization: base.organization,
+      generationMode: base.generationMode,
+      platforms: base.platforms,
+      description: base.description,
+      templateVariant: base.templateVariant,
+      minFlutterSdk: base.minFlutterSdk,
+      minDartSdk: base.minDartSdk,
+      withTests: withTests,
+      withDocs: withDocs,
+      withMcp: withMcp,
+      codeGeneration: codeGeneration,
+      aiIntegration: aiIntegration,
+      serviceRetry: serviceRetry,
+      serviceCaching: serviceCaching,
+      serviceInterceptors: serviceInterceptors,
+      serviceMocks: serviceMocks,
+      featureViewModel: featureViewModel,
+      featureValidation: featureValidation,
+      featureNavigation: featureNavigation,
+      stateManagement: stateMgmt,
+      screenType: base.screenType,
+      serviceType: base.serviceType,
+      apiBaseUrl: base.apiBaseUrl,
+      preset: presetKey,
+    );
+  }
+}
+
+/// Foundation preset enum with configuration for each preset.
+enum FoundationPreset {
+  starter(
+    PresetConfiguration(
+      withTests: true,
+      withDocs: true,
+      withMcp: true,
+      codeGeneration: true,
+      aiIntegration: true,
+      serviceRetry: false,
+      serviceCaching: false,
+      serviceInterceptors: false,
+      serviceMocks: true,
+      featureViewModel: true,
+      featureValidation: false,
+      featureNavigation: true,
+      stateMgmt: StateManagement.riverpod,
+    ),
+  ),
+  batteriesIncluded(
+    PresetConfiguration(
+      withTests: true,
+      withDocs: true,
+      withMcp: true,
+      codeGeneration: true,
+      aiIntegration: true,
+      serviceRetry: true,
+      serviceCaching: true,
+      serviceInterceptors: true,
+      serviceMocks: true,
+      featureViewModel: true,
+      featureValidation: true,
+      featureNavigation: true,
+      stateMgmt: StateManagement.riverpod,
+    ),
+  ),
+  minimal(
+    PresetConfiguration(
+      withTests: false,
+      withDocs: false,
+      withMcp: false,
+      codeGeneration: true,
+      aiIntegration: false,
+      serviceRetry: false,
+      serviceCaching: false,
+      serviceInterceptors: false,
+      serviceMocks: false,
+      featureViewModel: true,
+      featureValidation: false,
+      featureNavigation: false,
+      stateMgmt: StateManagement.riverpod,
+    ),
+  );
+
+  const FoundationPreset(this.config);
+
+  final PresetConfiguration config;
+
+  // Convenience getters that delegate to config for backward compatibility
+  bool get withTests => config.withTests;
+  bool get withDocs => config.withDocs;
+  bool get withMcp => config.withMcp;
+  bool get codeGeneration => config.codeGeneration;
+  bool get aiIntegration => config.aiIntegration;
+  bool get serviceRetry => config.serviceRetry;
+  bool get serviceCaching => config.serviceCaching;
+  bool get serviceInterceptors => config.serviceInterceptors;
+  bool get serviceMocks => config.serviceMocks;
+  bool get featureViewModel => config.featureViewModel;
+  bool get featureValidation => config.featureValidation;
+  bool get featureNavigation => config.featureNavigation;
+  StateManagement get stateMgmt => config.stateMgmt;
 
   /// Returns the string key for this preset.
   String get key {
@@ -119,32 +195,6 @@ enum FoundationPreset {
 
   /// Creates a BaseTemplateVariables with preset values applied.
   BaseTemplateVariables applyTo(BaseTemplateVariables base) {
-    return BaseTemplateVariables(
-      name: base.name,
-      organization: base.organization,
-      generationMode: base.generationMode,
-      platforms: base.platforms,
-      description: base.description,
-      templateVariant: base.templateVariant,
-      minFlutterSdk: base.minFlutterSdk,
-      minDartSdk: base.minDartSdk,
-      withTests: withTests,
-      withDocs: withDocs,
-      withMcp: withMcp,
-      codeGeneration: codeGeneration,
-      aiIntegration: aiIntegration,
-      serviceRetry: serviceRetry,
-      serviceCaching: serviceCaching,
-      serviceInterceptors: serviceInterceptors,
-      serviceMocks: serviceMocks,
-      featureViewModel: featureViewModel,
-      featureValidation: featureValidation,
-      featureNavigation: featureNavigation,
-      stateManagement: stateMgmt,
-      screenType: base.screenType,
-      serviceType: base.serviceType,
-      apiBaseUrl: base.apiBaseUrl,
-      preset: key,
-    );
+    return config.applyTo(base, key);
   }
 }
