@@ -4,28 +4,6 @@ import 'foundation_model.dart';
 import 'planner.dart';
 import 'presets.dart';
 
-/// Planner that derives all internal flags from the preset enum.
-///
-/// Note: Presets are now applied in pre_gen.dart before planners run,
-/// so this planner returns empty derived vars. It's kept for compatibility.
-class PresetPlanner implements PlannerPlugin {
-  @override
-  bool canHandle(BaseTemplateVariables base) {
-    // Presets are global, so this planner always handles
-    return true;
-  }
-
-  @override
-  DerivedTemplateVariables derive(
-    BaseTemplateVariables base,
-    DerivedTemplateVariables acc,
-    Logger logger,
-  ) {
-    // Preset is already applied to base in pre_gen.dart, so return empty
-    return DerivedTemplateVariables.empty();
-  }
-}
-
 /// Planner that bridges the new public schema to legacy internal names.
 /// Derives project_name, feature, component_name, and other mode-specific vars.
 class CoreVarsPlanner implements PlannerPlugin {

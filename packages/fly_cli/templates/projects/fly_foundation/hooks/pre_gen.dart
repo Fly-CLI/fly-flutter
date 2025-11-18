@@ -27,8 +27,6 @@ void run(HookContext context) {
 
   // Run planners to derive variables
   final planner = CompositePlanner([
-    // Core planners that derive internal vars from public schema
-    PresetPlanner(),
     CoreVarsPlanner(),
     // Composition planner replaces mode-specific planners
     // It handles module composition and maintains backward compatibility
