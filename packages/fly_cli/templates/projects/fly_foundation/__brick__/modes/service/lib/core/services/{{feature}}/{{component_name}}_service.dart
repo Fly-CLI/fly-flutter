@@ -1,7 +1,7 @@
 import 'package:fly_flow_guard/fly_flow_guard.dart';
 
-{{> partials/_interceptors_types.dart }}
-{{> partials/_interceptors_run.dart }}
+{{> interceptors_types.dart }}
+{{> interceptors_run.dart }}
 
 class {{component_name.pascalCase()}}Service {
   {{component_name.pascalCase()}}Service({
@@ -27,11 +27,11 @@ class {{component_name.pascalCase()}}Service {
 {{#supports_interceptors}}
   final List<ServiceInterceptor<Map<String, dynamic>>> _interceptors;
 {{/supports_interceptors}}
-{{> partials/_caching_field.dart }}
+{{> caching_field.dart }}
 
   /// Example endpoint demonstrating {{#is_api_service}}API{{/is_api_service}}{{#is_local_service}}local{{/is_local_service}}{{#is_cache_service}}cache{{/is_cache_service}}{{#is_analytics_service}}analytics{{/is_analytics_service}}{{#is_storage_service}}storage{{/is_storage_service}} service scaffolding.
   Future<AppResult<Map<String, dynamic>>> fetchSummary() async {
-{{> partials/_caching_get.dart }}
+{{> caching_get.dart }}
 
     Future<AppResult<Map<String, dynamic>>> action() async {
       try {
@@ -60,14 +60,14 @@ class {{component_name.pascalCase()}}Service {
     final result = await _execute(action: action);
 {{/supports_interceptors}}
 
-{{> partials/_caching_set.dart }}
+{{> caching_set.dart }}
     return result;
   }
 
   Future<AppResult<Map<String, dynamic>>> _execute({
     required Future<AppResult<Map<String, dynamic>>> Function() action,
   }) async {
-{{> partials/_retry_execute.dart }}
+{{> retry_execute.dart }}
   }
 }
 

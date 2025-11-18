@@ -1,4 +1,3 @@
 {{#supports_caching}}
-_cache['summary'] = result;
+    _cache['summary'] = result;
 {{/supports_caching}}
-

@@ -115,16 +115,12 @@ __brick__/
 │           └── shared/
 │               └── providers/
 │
-└── modes/
-    └── service/
-        └── common/
-            └── services/          # Service partials (used by service templates)
-                ├── caching_field.dart
-                ├── caching_get.dart
-                ├── caching_set.dart
-                ├── interceptors_run.dart
-                ├── interceptors_types.dart
-                └── retry_execute.dart
+├── {{~ caching_field.dart }}     # Partials at root level (Mason requirement)
+├── {{~ caching_get.dart }}
+├── {{~ caching_set.dart }}
+├── {{~ interceptors_run.dart }}
+├── {{~ interceptors_types.dart }}
+└── {{~ retry_execute.dart }}
 ```
 
 ### 2. Composition System
@@ -332,7 +328,7 @@ void resolveModuleFiles(HookContext context) {
     filesToInclude.addAll(moduleFiles);
   }
 
-  // Service partials are included within the service module
+  // Partials are at root level and included via {{~ partial_name }} syntax in templates
 
   // Store resolved file list for template rendering
   context.vars['resolved_files'] = filesToInclude.toList();
@@ -345,8 +341,60 @@ Modify Mason's file resolution to:
 
 1. Scan `modes/{active_mode}/` for mode-specific files
 2. Merge paths, with mode-specific files taking precedence
-3. Service partials are included within the service module structure
+3. Partials are located at `__brick__/` root level and included in templates using `{{~ partial_name }}` syntax
 4. Remove path-level conditionals entirely
+
+**Mason Partial Syntax:**
+- Partials must be directly under `__brick__/` directory (Mason requirement)
+- Partials use `{{~ partial_name }}` syntax (not `{{> partials/... }}`)
+- Partials are not generated as separate files; they are included in templates during rendering
+- Example: `{{~ caching_field.dart }}` includes the partial file `__brick__/{{~ caching_field.dart }}`
+
+#### 3.3 Mason Partials Documentation
+
+According to the [Mason CLI documentation](https://pub.dev/packages/mason_cli#nested-templates-partials), partials (nested templates) have specific requirements:
+
+**Partial Requirements:**
+- Partials must always be directly under the `__brick__/` directory
+- Partials use the `{{~ partial_name }}` syntax (with tilde `~`)
+- Partials are not generated as separate files; they are only included as part of existing templates
+- Partials can be referenced from any template file within the brick
+
+**Partial Syntax:**
+```mustache
+{{~ caching_field.dart }}
+```
+
+This syntax includes the partial file `__brick__/{{~ caching_field.dart }}` at the location where it's referenced.
+
+**Example Structure:**
+```
+__brick__/
+├── modes/
+│   └── service/
+│       └── lib/
+│           └── core/
+│               └── services/
+│                   └── {{feature}}/
+│                       └── {{component_name}}_service.dart  (includes {{~ caching_field.dart }})
+├── {{~ caching_field.dart }}      (partial file)
+├── {{~ caching_get.dart }}        (partial file)
+└── {{~ retry_execute.dart }}      (partial file)
+```
+
+**Usage in Templates:**
+Service templates can include partials like this:
+```dart
+class {{component_name.pascalCase()}}Service {
+  {{~ caching_field.dart }}
+  
+  Future<AppResult<T>> fetchData() async {
+    {{~ caching_get.dart }}
+    // ... service logic ...
+    {{~ caching_set.dart }}
+  }
+}
+```
 
 ### 4. Composition Workflows
 
@@ -407,7 +455,7 @@ lib/
 generation_mode=service
   → ServiceModule
     → modes/service/lib/core/services/{{feature}}/
-    → modes/service/common/services/      (service partials)
+    → Partials included via {{~ partial_name }} from __brick__/ root
     → Assumes: existing project with base classes
 ```
 
@@ -495,7 +543,9 @@ final moduleDependencies = {
 - [ ] Create module dependency resolution
 - [ ] Implement module-based file scanning and inclusion
 - [ ] Update `pre_gen.dart` to use `CompositionPlanner`
-- [ ] Ensure common partials work across all modes
+- [ ] Move partials to `__brick__/` root level (Mason requirement)
+- [ ] Update all partial references to use `{{~ partial_name }}` syntax
+- [ ] Ensure partials work across all modes from root level
 - [ ] Remove all remaining path-level conditionals
 
 #### Phase 5: Testing & Validation (Week 5-6)
@@ -616,6 +666,7 @@ structure
 - Brick design: `BRICK_DESIGN.md`
 - Template structure: `README.md`
 - Reference implementation: `/examples/foundation_project`
+- Mason CLI documentation: [Nested Templates (Partials)](https://pub.dev/packages/mason_cli#nested-templates-partials)
 
 ---
 

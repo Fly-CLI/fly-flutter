@@ -17,8 +17,11 @@ Core pieces involved in generation:
 - `hooks/pre_gen.dart` – Orchestrates planning via lightweight plugins and writes derived flags to
   `context.vars`.
 - `hooks/plugins/*.dart` – Per‑mode derivation logic (project/feature/service) and validation rules.
-- `__brick__/` – Mustache templates and partials. Templates remain declarative and consume derived
-  flags.
+- `hooks/plugins/composition.dart` – Defines composable template modules (ProjectModule, FeatureModule, ServiceModule).
+- `hooks/plugins/composition_planner.dart` – Unified planner that composes modules based on generation_mode.
+- `hooks/post_gen.dart` – Reorganizes generated files based on active modules.
+- `__brick__/modes/` – Module-specific templates organized by mode (project, feature, service).
+- `__brick__/{{~ *.dart }}` – Mason partials at root level for reusable template fragments.
 - `tools/scenarios/` – Non‑interactive answer files for end‑to‑end runs.
 - `test/goldens/` – Expected outputs for scenarios; used for regression checks.
 - `.github/workflows/template-ci.yml` – CI pipeline running scenarios, diffs, and metrics.
@@ -47,16 +50,21 @@ brick.yaml  ──►  mason reads variables  ──►  hooks/pre_gen.dart (pla
 1. The CLI (Fly CLI or Mason CLI) collects inputs defined in `brick.yaml` (minimal public schema:
    `generation_mode`, `name`, `description`, `organization`, `platforms`, `preset`).
 2. Mason makes these inputs available as `context.vars` to hooks.
-3. `pre_gen.dart` resolves a canonical “view” of the inputs through a planner chain:
+3. `pre_gen.dart` resolves a canonical "view" of the inputs through a planner chain:
     - **PresetPlanner**: Maps `preset` enum to internal boolean flags (`with_tests`, `with_docs`,
       `with_mcp`, `code_generation`, `ai_integration`, service toggles, feature toggles).
     - **CoreVarsPlanner**: Bridges public schema to legacy internal names (`project_name`, `feature`,
       `component_name`, `screen_type`, `service_type`, defaults for SDK versions, packages).
-    - **Mode-specific planners** (ProjectModePlanner, FeatureModePlanner, ServiceModePlanner):
-      Compute mode-specific derived flags based on `generation_mode` and derived vars.
+    - **CompositionPlanner**: Unified planner that determines which modules to activate based on
+      `generation_mode` and composes them together. Replaces mode-specific planners.
     - Validates impossible or unsupported combinations (fail fast with actionable messages).
 4. The hook merges all derived flags back into `context.vars`. From this point on, templates reference
    normalized flags; no complex logic remains in templates.
+5. `post_gen.dart` reorganizes generated files:
+    - Moves files from `modes/project/` to output root (for project mode)
+    - Merges files from `modes/feature/` and `modes/service/` into existing structure
+    - Removes files from inactive modules
+    - Cleans up temporary `modes/` directory
 
 Key normalization examples:
 
@@ -86,10 +94,9 @@ Registered plugins (evaluated in order):
 - `CoreVarsPlanner` – Bridges public schema (`name`, `generation_mode`) to legacy internal names
   (`project_name`, `feature`, `component_name`, `screen_type`, `service_type`, SDK defaults,
   package lists). Always handles (core vars are global).
-- `ProjectModePlanner` – Normalizes platform flags and sets `is_project`/`is_feature`/`is_service`
-  flags; mode = project.
-- `FeatureModePlanner` – Normalizes screen and state management flags; mode = feature.
-- `ServiceModePlanner` – Normalizes service archetype flags and asserts constraints; mode = service.
+- `CompositionPlanner` – Unified planner that determines active modules based on `generation_mode` and
+  composes them together. Maintains backward compatibility with `is_project`/`is_feature`/`is_service`
+  flags while enabling composition-based architecture.
 
 The planner chain ensures that:
 1. Presets drive all internal toggles (no user-facing boolean flags).
@@ -101,36 +108,68 @@ into a monolith.
 
 ---
 
-## 4) Template Structure and Partials
+## 4) Composition-Based Template Structure
 
-Templates live under `__brick__/`. The system follows **thin templates**:
+Templates are organized by mode under `__brick__/modes/`, following a **composition architecture**:
 
-- Most branching is expressed with one‑liner `{{#flag}} ... {{/flag}}` using hook‑derived flags.
-- Service partials live under `__brick__/modes/service/common/services/` and are included via Mustache partials.
+### Module Organization
 
-Service partials example:
+```
+__brick__/
+├── modes/
+│   ├── project/         # Full project scaffolding (includes base foundation)
+│   │   ├── lib/
+│   │   │   ├── core/foundation/  # Base classes (part of project mode)
+│   │   │   ├── shared/           # Navigation, themes
+│   │   │   └── l10n/             # Localization
+│   │   ├── main.dart
+│   │   └── pubspec.yaml
+│   ├── feature/         # Standalone feature generation
+│   │   ├── lib/features/
+│   │   ├── test/
+│   │   └── docs/
+│   └── service/         # Standalone service generation
+│       ├── lib/core/services/
+│       ├── test/
+│       └── docs/
+└── {{~ *.dart }}       # Mason partials at root level
+```
 
-- `modes/service/common/services/interceptors_types.dart` – Typedef for interceptors.
-- `modes/service/common/services/interceptors_run.dart` – Generic interceptor chain runner.
-- `modes/service/common/services/caching_field.dart` – Cache field gated by `supports_caching`.
-- `modes/service/common/services/caching_get.dart` / `caching_set.dart` – Cache access around the operation.
-- `modes/service/common/services/retry_execute.dart` – Retry loop gated by `supports_retry`.
+### Mason Partials
 
-This approach **reduces duplication** and keeps conditionals shallow and local.
+Partials are reusable template fragments that live at `__brick__/` root level (Mason requirement):
+
+- `{{~ caching_field.dart }}` – Cache field declaration gated by `supports_caching`.
+- `{{~ caching_get.dart }}` / `{{~ caching_set.dart }}` – Cache access around operations.
+- `{{~ retry_execute.dart }}` – Retry loop gated by `supports_retry`.
+- `{{~ interceptors_types.dart }}` – Typedef for interceptors.
+- `{{~ interceptors_run.dart }}` – Generic interceptor chain runner.
+
+Partials are included using `{{~ partial_name }}` syntax (not generated as separate files).
+
+### Composition Benefits
+
+- **Maintainability**: Each mode is self-contained and easier to modify independently
+- **No Path Conditionals**: Removed all `{{#is_project}}`, `{{#is_feature}}`, `{{#is_service}}` path-level conditionals
+- **Extensibility**: New modes can be added without affecting existing ones
+- **Clarity**: Template structure reflects the modular architecture
 
 ---
 
-## 5) File Path Resolution
+## 5) Module-Based File Resolution
 
-Mason renders both file contents and paths. Two strategies are used:
+The composition architecture uses module-based file resolution instead of path conditionals:
 
-- Paths conditioned by high‑level mode variables (e.g., inclusion of a service file under service
-  mode).
-- Content‑level blocks with hook‑derived flags when a file is common but contains optional
-  sections (e.g., adding retry/caching within the same service).
+1. **Module Selection**: `CompositionPlanner` determines which modules are active based on `generation_mode`
+2. **Template Rendering**: Mason generates files from all active module directories
+3. **Post-Generation Reorganization**: `post_gen.dart` hook reorganizes files:
+   - **Project mode**: Moves `modes/project/` files to output root
+   - **Feature mode**: Merges `modes/feature/` files into existing `lib/features/` structure
+   - **Service mode**: Merges `modes/service/` files into existing `lib/core/services/` structure
+   - Removes files from inactive modules
+   - Cleans up temporary `modes/` directory
 
-Where feasible, the project will progressively group mode‑specific files into a `modes/<mode>/`
-tree, further minimizing path‑level conditionals.
+This approach completely eliminates path-level conditionals while maintaining clean separation of concerns.
 
 ---
 

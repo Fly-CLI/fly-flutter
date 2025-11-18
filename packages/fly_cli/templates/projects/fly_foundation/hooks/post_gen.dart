@@ -100,10 +100,6 @@ void run(HookContext context) {
   // These are template partials, not output files
   _removeCommonDirectories(outputDir, context.logger);
 
-  // Clean up partials/ directory that was copied to output
-  // These are template partials, not output files
-  _removePartialsDirectory(outputDir, context.logger);
-
   context.logger.info('✅ File reorganization complete. Active modules: ${activeModuleNames.join(", ")}');
 }
 
@@ -120,22 +116,6 @@ void _removeCommonDirectories(Directory root, Logger logger) {
     }
   } catch (e) {
     logger.warn('Error removing common directories: $e');
-  }
-}
-
-/// Remove partials/ directory from output (these are template partials, not output files)
-void _removePartialsDirectory(Directory root, Logger logger) {
-  if (!root.existsSync()) return;
-
-  try {
-    for (final entity in root.listSync(recursive: true)) {
-      if (entity is Directory && path.basename(entity.path) == 'partials') {
-        logger.detail('Removing partials directory: ${entity.path}');
-        entity.deleteSync(recursive: true);
-      }
-    }
-  } catch (e) {
-    logger.warn('Error removing partials directory: $e');
   }
 }
 
