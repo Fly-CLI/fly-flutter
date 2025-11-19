@@ -1,0 +1,10 @@
+{
+  "generation_mode": "feature",
+  "name": "product_detail",
+  "description": "Detail screen feature scenario",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "preset": "batteries_included",
+  "screen_type": "detail"
+}
+

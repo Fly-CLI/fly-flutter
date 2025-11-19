@@ -11,16 +11,17 @@ void main() {
   group('Scenario Integration Tests', () {
     late Directory tempDir;
     late MockLogger mockLogger;
+    // Use encapsulated scenario root under tool/integration_scenarios
     final scenariosDir = Directory(path.join(
       Directory.current.path,
-      'test',
-      'integration',
+      'tool',
+      'integration_scenarios',
       'scenarios',
     ));
     final goldensDir = Directory(path.join(
       Directory.current.path,
-      'test',
-      'integration',
+      'tool',
+      'integration_scenarios',
       'goldens',
     ));
 
@@ -70,9 +71,9 @@ void main() {
       
       // Define golden directory for this scenario
       final goldenDir = Directory(path.join(
-        'test', 
-        'integration', 
-        'goldens', 
+        'tool',
+        'integration_scenarios',
+        'goldens',
         scenarioName
       ));
       

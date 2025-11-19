@@ -1,0 +1,9 @@
+{
+  "generation_mode": "service",
+  "name": "usercache",
+  "description": "Cache service scenario with batteries_included preset (tests caching partials)",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "preset": "batteries_included"
+}
+

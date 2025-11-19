@@ -65,6 +65,16 @@ This directory contains scripts and tools for manually testing Fly CLI commands 
   - Schema export
   - Completion generation
 
+### Integration Scenario Runner
+
+- **`packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh`** - Encapsulated integration scenario runner
+  - Executes all JSON scenarios from `packages/fly_cli/tool/integration_scenarios/scenarios`
+  - Supports both Fly CLI and Mason execution modes
+  - Compares generated outputs against golden files in `packages/fly_cli/tool/integration_scenarios/goldens`
+  - Provides comprehensive summary reporting suitable for CI/CD
+  - Options: `--mode=fly|mason`, `--accept-missing-goldens`, `--keep-temp`, `--verbose`
+  - See the script's `--help` for detailed usage
+
 ### Validation Scripts
 
 - **`validate-output.sh`** - Validate command output and generated files
@@ -129,6 +139,25 @@ cat ~/fly_test_workspace/results/*/test_summary.txt
 
 # Full clean (remove entire workspace)
 ./scripts/testing/clean-test-env.sh --full
+```
+
+### Running Integration Scenarios
+
+```bash
+# Run all scenarios using Fly CLI (default)
+./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh
+
+# Run scenarios using Mason
+./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh --mode=mason
+
+# Run with verbose output
+./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh --verbose
+
+# Accept missing goldens automatically
+./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh --accept-missing-goldens
+
+# Keep temporary output for inspection
+./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh --keep-temp
 ```
 
 ### Validating Output

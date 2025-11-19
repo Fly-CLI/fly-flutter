@@ -1,0 +1,8 @@
+{
+  "generation_mode": "feature",
+  "name": "dashboard",
+  "description": "Feature list (riverpod) scenario",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "preset": "starter"
+}
