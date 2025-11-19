@@ -57,6 +57,7 @@ class GenerateProjectCommand extends FlyCommand {
   List<CliFlag> get flags => [
         const CreateTemplateFlag(),
         const CreateOrganizationFlag(),
+        const CreateDescriptionFlag(),
         CreatePlatformsFlag(),
         CreateFeaturesFlag(),
         const InteractiveFlag(),
@@ -91,6 +92,10 @@ class GenerateProjectCommand extends FlyCommand {
       argResults,
       const CreateOrganizationFlag(),
       'com.example',
+    );
+    final description = FlagAccessor.getString(
+      argResults,
+      const CreateDescriptionFlag(),
     );
     final platforms = FlagAccessor.getStringList(
       argResults,
@@ -133,6 +138,7 @@ class GenerateProjectCommand extends FlyCommand {
         projectName,
         template,
         organization,
+        description ?? '',
         platforms,
         features,
         projectPath.absolute,
@@ -143,6 +149,7 @@ class GenerateProjectCommand extends FlyCommand {
       projectName,
       template,
       organization,
+      description ?? '',
       platforms,
       features,
       projectPath.absolute,
@@ -154,6 +161,7 @@ class GenerateProjectCommand extends FlyCommand {
     String projectName,
     String template,
     String organization,
+    String description,
     List<String> platforms,
     List<String> features,
     String projectPath,
@@ -235,6 +243,7 @@ class GenerateProjectCommand extends FlyCommand {
         finalProjectName,
         finalTemplate,
         finalOrganization,
+        description, // Use description from flags if available
         finalPlatforms,
         finalFeatures,
         projectPath,
@@ -258,6 +267,7 @@ class GenerateProjectCommand extends FlyCommand {
     String projectName,
     String template,
     String organization,
+    String description,
     List<String> platforms,
     List<String> features,
     String projectPath,
@@ -280,6 +290,7 @@ class GenerateProjectCommand extends FlyCommand {
         return await _generateFoundationProject(
           projectName: projectName,
           organization: organization,
+          description: description,
           platforms: platforms,
           features: features,
           projectPath: projectPath,
@@ -293,6 +304,7 @@ class GenerateProjectCommand extends FlyCommand {
         projectName: projectName,
         organization: organization,
         platforms: platforms,
+        description: description,
         features: features,
       );
 
@@ -375,6 +387,7 @@ class GenerateProjectCommand extends FlyCommand {
   Future<CommandResult> _generateFoundationProject({
     required String projectName,
     required String organization,
+    required String description,
     required List<String> platforms,
     required List<String> features,
     required String projectPath,
@@ -392,6 +405,7 @@ class GenerateProjectCommand extends FlyCommand {
       final rawVars = <String, dynamic>{
         'name': projectName,
         'organization': organization,
+        'description': description.isNotEmpty ? description : 'A new Flutter project',
         'platforms': platforms,
         'generation_mode': 'project',
         'preset': 'starter', // Default preset

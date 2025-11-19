@@ -247,6 +247,11 @@ class TemplateValidationRule extends fly_core.AsyncValidationRule<String> {
     }
 
     try {
+      // Special handling for fly_foundation template (handled by orchestrator)
+      if (templateName == 'fly_foundation') {
+        return ValidationResult.success();
+      }
+
       final templates = await context.templateManager.getAvailableTemplates();
       final templateNames = templates.map((TemplateInfo t) => t.name).toList();
       final validationResult = templateNames.contains(templateName)

@@ -203,6 +203,10 @@ class CommandTestHelper {
     // Final fallback to current directory
     workspaceRoot ??= Directory.current.path;
 
+    // Set templates directory environment variable so template validation works
+    final templatesDir = path.join(workspaceRoot, 'packages', 'fly_cli', 'templates');
+    testEnvironment['FLY_TEMPLATES_DIR'] = templatesDir;
+
     final flyDartPath =
         path.join(workspaceRoot, 'packages', 'fly_cli', 'bin', 'fly.dart');
     final flyDartFile = File(flyDartPath);

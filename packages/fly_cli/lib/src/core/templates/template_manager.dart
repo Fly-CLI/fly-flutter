@@ -643,6 +643,7 @@ class TemplateManager {
   ///
   /// Discovers and loads all templates from the templates directory.
   /// Searches in projects/ and components/ subdirectories.
+  /// Also discovers bricks from the brick registry and converts them to templates.
   /// Each template includes compatibility data if specified in template.yaml.
   Future<List<TemplateInfo>> getAvailableTemplates() async {
     final templates = <TemplateInfo>[];
@@ -651,44 +652,13 @@ class TemplateManager {
       final dir = Directory(templatesDirectory);
       if (!await dir.exists()) {
         logger.warn('Templates directory does not exist: $templatesDirectory');
-        return templates;
-      }
-
-      // Search in projects/ and components/ subdirectories
-      final projectsDir = Directory(path.join(templatesDirectory, 'projects'));
-      if (await projectsDir.exists()) {
-        await for (final entity in projectsDir.list()) {
-          if (entity is Directory) {
-            final templateInfo = await _loadTemplateInfo(entity.path);
-            if (templateInfo != null) {
-              templates.add(templateInfo);
-            }
-          }
-        }
-      }
-
-      final componentsDir =
-          Directory(path.join(templatesDirectory, 'components'));
-      if (await componentsDir.exists()) {
-        await for (final entity in componentsDir.list()) {
-          if (entity is Directory) {
-            final templateInfo = await _loadTemplateInfo(entity.path);
-            if (templateInfo != null) {
-              templates.add(templateInfo);
-            }
-          }
-        }
-      }
-
-      // Fallback: check flat structure (for test compatibility and backward compatibility)
-      // Only check if no subdirectories were found or if subdirectories don't exist
-      if (templates.isEmpty ||
-          (!await projectsDir.exists() && !await componentsDir.exists())) {
-        await for (final entity in dir.list()) {
-          if (entity is Directory) {
-            final entityName = path.basename(entity.path);
-            // Skip known subdirectories to avoid duplicates
-            if (entityName != 'projects' && entityName != 'components') {
+        // Still try to discover bricks even if templates directory doesn't exist
+      } else {
+        // Search in projects/ and components/ subdirectories
+        final projectsDir = Directory(path.join(templatesDirectory, 'projects'));
+        if (await projectsDir.exists()) {
+          await for (final entity in projectsDir.list()) {
+            if (entity is Directory) {
               final templateInfo = await _loadTemplateInfo(entity.path);
               if (templateInfo != null) {
                 templates.add(templateInfo);
@@ -696,6 +666,56 @@ class TemplateManager {
             }
           }
         }
+
+        final componentsDir =
+            Directory(path.join(templatesDirectory, 'components'));
+        if (await componentsDir.exists()) {
+          await for (final entity in componentsDir.list()) {
+            if (entity is Directory) {
+              final templateInfo = await _loadTemplateInfo(entity.path);
+              if (templateInfo != null) {
+                templates.add(templateInfo);
+              }
+            }
+          }
+        }
+
+        // Fallback: check flat structure (for test compatibility and backward compatibility)
+        // Only check if no subdirectories were found or if subdirectories don't exist
+        if (templates.isEmpty ||
+            (!await projectsDir.exists() && !await componentsDir.exists())) {
+          await for (final entity in dir.list()) {
+            if (entity is Directory) {
+              final entityName = path.basename(entity.path);
+              // Skip known subdirectories to avoid duplicates
+              if (entityName != 'projects' && entityName != 'components') {
+                final templateInfo = await _loadTemplateInfo(entity.path);
+                if (templateInfo != null) {
+                  templates.add(templateInfo);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Also discover bricks and convert them to templates
+      try {
+        final bricks = await getAvailableBricks();
+        for (final brick in bricks) {
+          // Only include project bricks as templates (for project generation)
+          // Feature and service bricks are handled separately
+          if (brick.type == BrickType.project) {
+            final templateInfo = _brickToTemplateInfo(brick);
+            // Avoid duplicates by checking if template with same name already exists
+            if (!templates.any((t) => t.name == templateInfo.name)) {
+              templates.add(templateInfo);
+            }
+          }
+        }
+      } catch (e) {
+        logger.warn('Error discovering bricks: $e');
+        // Don't fail if brick discovery fails, just log a warning
       }
     } catch (e) {
       logger.err('Error loading templates: $e');
@@ -759,6 +779,20 @@ class TemplateManager {
           if (await Directory(directPath).exists()) {
             template = await _loadTemplateInfo(directPath);
           }
+        }
+      }
+
+      // If template not found in old format, try to find it as a brick
+      if (template == null) {
+        try {
+          final brick = await getBrick(name);
+          if (brick != null && brick.type == BrickType.project) {
+            template = _brickToTemplateInfo(brick);
+            logger.info('Found template "$name" as brick');
+          }
+        } catch (e) {
+          logger.warn('Error checking for brick "$name": $e');
+          // Don't fail if brick lookup fails
         }
       }
 

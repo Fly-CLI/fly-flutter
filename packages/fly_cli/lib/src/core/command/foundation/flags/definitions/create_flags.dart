@@ -30,6 +30,17 @@ class CreateOrganizationFlag extends CliFlag {
       );
 }
 
+/// Create description flag
+class CreateDescriptionFlag extends CliFlag {
+  const CreateDescriptionFlag() : super(
+        name: 'description',
+        description: 'Project description',
+        isGlobal: false,
+        category: CliFlagCategory.execution,
+        type: FlagType.singleValue,
+      );
+}
+
 /// Create platforms flag (multi-value)
 /// Note: Cannot be const because defaultValue is a non-const list
 class CreatePlatformsFlag extends CliFlag {

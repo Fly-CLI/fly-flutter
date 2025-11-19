@@ -6,7 +6,6 @@ import 'package:test/test.dart';
 
 import '../helpers/command_test_helper.dart';
 import '../helpers/mock_logger.dart';
-import '../helpers/test_fixtures.dart';
 
 void main() {
   group('Scenario Integration Tests', () {
@@ -98,7 +97,7 @@ void main() {
     for (final file in scenarioFiles) {
       test('Scenario: ${path.basenameWithoutExtension(file.path)}', () async {
         await executeScenario(file);
-      }, timeout: Timeout(Duration(minutes: 10)));
+      }, timeout: const Timeout(Duration(minutes: 10)));
     }
   });
 }
@@ -194,7 +193,8 @@ Future<void> _compareDirectory(Directory goldenDir, Directory actualDir) async {
 Future<void> _executeProjectScenario(Map<String, dynamic> json, Directory tempDir, String scenarioName) async {
   final name = json['name'] as String;
   final args = <String>[
-    'create',
+    'generate',
+    'project',
     name,
     '--output-dir=${tempDir.path}',
   ];
@@ -210,7 +210,8 @@ Future<void> _executeProjectScenario(Map<String, dynamic> json, Directory tempDi
     args.add('--platforms=$platforms');
   }
   if (json.containsKey('preset')) {
-    args.add('--template=fly_foundation'); 
+    args.add('--template');
+    args.add('fly_foundation'); 
   }
   
   final result = await CommandTestHelper.runCommand(args);
@@ -227,9 +228,11 @@ Future<void> _executeFeatureScenario(Map<String, dynamic> json, Directory tempDi
   
   if (!projectDir.existsSync()) {
      final result = await CommandTestHelper.runCommand([
-      'create',
+      'generate',
+      'project',
       projectName,
-      '--template=fly_foundation',
+      '--template',
+      'fly_foundation',
       '--output-dir=${tempDir.path}',
     ]);
     print('Create result: ${result.message}');
@@ -274,9 +277,11 @@ Future<void> _executeServiceScenario(Map<String, dynamic> json, Directory tempDi
   
   if (!projectDir.existsSync()) {
      final result = await CommandTestHelper.runCommand([
-      'create',
+      'generate',
+      'project',
       projectName,
-      '--template=fly_foundation',
+      '--template',
+      'fly_foundation',
       '--output-dir=${tempDir.path}',
     ]);
     print('Create result: ${result.message}');
