@@ -1,215 +1,109 @@
-import 'package:mason_logger/mason_logger.dart';
-import 'package:test/test.dart';
+import 'package:fly_cli/src/core/logging/logger.dart';
+import 'package:fly_cli/src/core/logging/log_level.dart';
 
 /// Mock logger for testing that captures log messages
-class MockLogger extends Logger {
-  final List<LogMessage> _messages = [];
+class MockLogger implements Logger {
+  final List<_LogEntry> _entries = [];
 
-  /// All logged messages
-  List<LogMessage> get messages => List.unmodifiable(_messages);
+  /// All logged entries
+  List<_LogEntry> get entries => List.unmodifiable(_entries);
 
   /// Info messages only
-  List<String> get infoMessages => _messages
-      .where((m) => m.level == Level.info)
-      .map((m) => m.message)
+  List<String> get infoMessages => _entries
+      .where((e) => e.level == LogLevel.info)
+      .map((e) => e.message)
       .toList();
 
   /// Warning messages only
-  List<String> get warningMessages => _messages
-      .where((m) => m.level == Level.warning)
-      .map((m) => m.message)
+  List<String> get warningMessages => _entries
+      .where((e) => e.level == LogLevel.warn)
+      .map((e) => e.message)
       .toList();
 
   /// Error messages only
-  List<String> get errorMessages => _messages
-      .where((m) => m.level == Level.error)
-      .map((m) => m.message)
+  List<String> get errorMessages => _entries
+      .where((e) => e.level == LogLevel.error)
+      .map((e) => e.message)
       .toList();
 
-  /// Detail messages only
-  List<String> get detailMessages => _messages
-      .where((m) =>
-          m.level == Level.info) // Use info level since detail doesn't exist
-      .map((m) => m.message)
+  /// Debug messages only
+  List<String> get debugMessages => _entries
+      .where((e) => e.level == LogLevel.debug)
+      .map((e) => e.message)
       .toList();
 
   /// Clear all logged messages
   void clear() {
-    _messages.clear();
+    _entries.clear();
   }
 
   /// Check if a specific message was logged
-  bool hasMessage(String message, {Level? level}) => _messages.any((m) {
-        final messageMatch = m.message.contains(message);
+  bool hasMessage(String message, {LogLevel? level}) => _entries.any((e) {
+        final messageMatch = e.message.contains(message);
         if (level != null) {
-          return messageMatch && m.level == level;
+          return messageMatch && e.level == level;
         }
         return messageMatch;
       });
 
-  /// Check if any message contains the given text
-  bool containsMessage(String text) =>
-      _messages.any((m) => m.message.contains(text));
+  @override
+  String get name => 'MockLogger';
 
-  /// Get the last message of a specific level
-  String? getLastMessage({Level? level}) {
-    final filteredMessages = level != null
-        ? _messages.where((m) => m.level == level).toList()
-        : _messages;
+  @override
+  Logger child(JsonMap contextFields) => this;
 
-    if (filteredMessages.isEmpty) return null;
-    return filteredMessages.last.message;
+  @override
+  Logger withFields(JsonMap fields) => this;
+
+  @override
+  void log(LogLevel level, String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    _entries.add(_LogEntry(level, message, error, stackTrace));
+  }
+
+  // Implement all the convenience methods from Logger interface
+  @override
+  void trace(String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    log(LogLevel.trace, message, error: error, stackTrace: stackTrace, fields: fields);
   }
 
   @override
-  void info(String? message, {LogStyle? style}) {
-    if (message != null) {
-      _messages.add(LogMessage(Level.info, message));
-    }
+  void debug(String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    log(LogLevel.debug, message, error: error, stackTrace: stackTrace, fields: fields);
   }
 
   @override
-  void warn(String? message, {String tag = 'WARN', LogStyle? style}) {
-    if (message != null) {
-      _messages.add(LogMessage(Level.warning, message));
-    }
+  void info(String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    log(LogLevel.info, message, error: error, stackTrace: stackTrace, fields: fields);
   }
 
   @override
-  void err(String? message, {LogStyle? style}) {
-    if (message != null) {
-      _messages.add(LogMessage(Level.error, message));
-    }
+  void warn(String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    log(LogLevel.warn, message, error: error, stackTrace: stackTrace, fields: fields);
   }
 
   @override
-  void detail(String? message, {LogStyle? style}) {
-    if (message != null) {
-      _messages.add(LogMessage(
-          Level.info, message)); // Use info level since detail doesn't exist
-    }
+  void error(String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    log(LogLevel.error, message, error: error, stackTrace: stackTrace, fields: fields);
   }
 
   @override
-  void alert(String? message, {LogStyle? style}) {
-    if (message != null) {
-      _messages.add(LogMessage(
-          Level.error, message)); // Use error level since alert doesn't exist
-    }
-  }
-
-  @override
-  void write(String? message) {
-    if (message != null) {
-      _messages.add(LogMessage(Level.info, message));
-    }
-  }
-
-  @override
-  void writeln(String message) {
-    _messages.add(LogMessage(Level.info, message));
-  }
-
-  /// Verify that specific messages were logged
-  void verifyMessages({
-    List<String>? expectedInfo,
-    List<String>? expectedWarnings,
-    List<String>? expectedErrors,
-    List<String>? expectedDetails,
-  }) {
-    if (expectedInfo != null) {
-      for (final expected in expectedInfo) {
-        expect(
-          hasMessage(expected, level: Level.info),
-          isTrue,
-          reason: 'Expected info message: $expected',
-        );
-      }
-    }
-
-    if (expectedWarnings != null) {
-      for (final expected in expectedWarnings) {
-        expect(
-          hasMessage(expected, level: Level.warning),
-          isTrue,
-          reason: 'Expected warning message: $expected',
-        );
-      }
-    }
-
-    if (expectedErrors != null) {
-      for (final expected in expectedErrors) {
-        expect(
-          hasMessage(expected, level: Level.error),
-          isTrue,
-          reason: 'Expected error message: $expected',
-        );
-      }
-    }
-
-    if (expectedDetails != null) {
-      for (final expected in expectedDetails) {
-        expect(
-          hasMessage(expected, level: Level.info), isTrue,
-          // Use info level since detail doesn't exist
-          reason: 'Expected detail message: $expected',
-        );
-      }
-    }
-  }
-
-  /// Verify that no error messages were logged
-  void verifyNoErrors() {
-    expect(errorMessages, isEmpty, reason: 'Expected no error messages');
-  }
-
-  /// Verify that no warning messages were logged
-  void verifyNoWarnings() {
-    expect(warningMessages, isEmpty, reason: 'Expected no warning messages');
-  }
-
-  /// Print all messages for debugging
-  void printAllMessages() {
-    for (final message in _messages) {
-      print('${message.level.name.toUpperCase()}: ${message.message}');
-    }
+  void fatal(String message,
+      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+    log(LogLevel.fatal, message, error: error, stackTrace: stackTrace, fields: fields);
   }
 }
 
-/// Represents a logged message with its level
-class LogMessage {
-  LogMessage(this.level, this.message);
-
-  final Level level;
+class _LogEntry {
+  final LogLevel level;
   final String message;
+  final Object? error;
+  final StackTrace? stackTrace;
 
-  @override
-  String toString() => '${level.name}: $message';
-}
-
-/// Extension methods for easier testing
-extension MockLoggerMatchers on MockLogger {
-  /// Expect that a specific message was logged
-  void expectMessage(String message, {Level? level}) {
-    expect(
-      hasMessage(message, level: level),
-      isTrue,
-      reason:
-          'Expected message: $message${level != null ? ' (${level.name})' : ''}',
-    );
-  }
-
-  /// Expect that no messages were logged
-  void expectNoMessages() {
-    expect(_messages, isEmpty, reason: 'Expected no messages to be logged');
-  }
-
-  /// Expect that exactly N messages were logged
-  void expectMessageCount(int count) {
-    expect(
-      _messages.length,
-      equals(count),
-      reason: 'Expected $count messages, got ${_messages.length}',
-    );
-  }
+  _LogEntry(this.level, this.message, this.error, this.stackTrace);
 }

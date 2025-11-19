@@ -9,7 +9,6 @@ import 'package:fly_cli/src/core/command/foundation/infrastructure/command_conte
 import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
-import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
@@ -28,7 +27,7 @@ class MockContextFactory implements IContextFactory {
 
   @override
   CommandContext createExecutionContext(ArgResults args) {
-    final logger = MockLogger();
+    final logger = Logger();
     const metricsConfig = MetricsConfig(enabled: false);
     final metricsCollector = MetricsFactory(metricsConfig).create();
 
@@ -90,15 +89,15 @@ class CommandTestHelper {
 
     return CommandContextImpl(
       argResults: mockArgResults,
-      logger: mockLogger,
+      logger: Logger(),
       templateManager: TemplateManager(
         templatesDirectory: '/test/templates',
-        logger: mockLogger,
+        logger: Logger(),
       ),
-      systemChecker: SystemChecker(logger: mockLogger),
-      interactivePrompt: InteractivePrompt(mockLogger),
+      systemChecker: SystemChecker(logger: Logger()),
+      interactivePrompt: InteractivePrompt(Logger()),
       pathResolver: PathResolver(
-        logger: mockLogger,
+        logger: Logger(),
         isDevelopment: true,
       ),
       metricsCollector: metricsCollector,

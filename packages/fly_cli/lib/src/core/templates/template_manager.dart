@@ -31,11 +31,11 @@ class TemplateManager {
     required this.logger,
     TemplateCacheManager? cacheManager,
     BrickCacheManager? brickCacheManager,
-  })  : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger),
+  })  : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger as dynamic),
         _brickCacheManager =
-            brickCacheManager ?? BrickCacheManager(logger: logger),
-        _brickRegistry = BrickRegistry(logger: logger),
-        _previewService = GenerationPreviewService(logger: logger);
+            brickCacheManager ?? BrickCacheManager(logger: logger as dynamic),
+        _brickRegistry = BrickRegistry(logger: logger as dynamic),
+        _previewService = GenerationPreviewService(logger: logger as dynamic);
 
   static const String _defaultUnifiedTemplate = 'fly_foundation';
 
@@ -117,7 +117,7 @@ class TemplateManager {
   VersionRegistry get _versionRegistryInstance {
     _versionRegistry ??= VersionRegistry(
       templatesDirectory: templatesDirectory,
-      logger: logger,
+      logger: logger as dynamic, // Cast to dynamic to avoid Logger type ambiguity
       loadTemplateInfo: _loadTemplateInfo,
     );
     return _versionRegistry!;
@@ -280,7 +280,7 @@ class TemplateManager {
 
       // Generate preview if dry run
       if (dryRun) {
-        logger.detail('Generating dry run preview for brick: $brickName');
+        logger.warn('Generating dry run preview for brick: $brickName');
         final preview = await _previewService.generatePreview(
           brickName: brickName,
           brickType: brickType,
@@ -474,25 +474,25 @@ class TemplateManager {
       final startTime = DateTime.now();
 
       logger.info('Generating from brick: ${brick.name}');
-      logger.detail('Brick path: ${brick.path}');
-      logger.detail('Variables: $variables');
+      logger.warn('Brick path: ${brick.path}');
+      logger.warn('Variables: $variables');
 
       // Create Brick instance from brick directory
       final brickInstance = Brick.path(brick.path);
-      logger.detail('Brick loaded: ${brick.path}');
+      logger.warn('Brick loaded: ${brick.path}');
 
       // Create MasonGenerator from brick
       final generator = await MasonGenerator.fromBrick(brickInstance);
-      logger.detail('Generator created successfully');
+      logger.warn('Generator created successfully');
 
       // Create target directory
       final targetDir = Directory(outputDirectory);
       await targetDir.create(recursive: true);
-      logger.detail('Target directory created: $outputDirectory');
+      logger.warn('Target directory created: $outputDirectory');
 
       // Create DirectoryGeneratorTarget
       final target = DirectoryGeneratorTarget(targetDir);
-      logger.detail('Target created: $outputDirectory');
+      logger.warn('Target created: $outputDirectory');
 
       // Handle feature iteration for project bricks
       // Mason doesn't automatically iterate over list variables in directory names
@@ -514,7 +514,7 @@ class TemplateManager {
           final baseFiles = await generator.generate(
             target,
             vars: baseVariables,
-            logger: logger,
+            logger: logger as dynamic,
             fileConflictResolution: FileConflictResolution.overwrite,
           );
 
@@ -528,7 +528,7 @@ class TemplateManager {
                 'Generating ${uniqueFeatures.length - 1} additional feature(s)...');
             for (int i = 1; i < uniqueFeatures.length; i++) {
               final featureName = uniqueFeatures[i];
-              logger.detail('Generating feature: $featureName');
+              logger.warn('Generating feature: $featureName');
 
               final featureVariables = Map<String, dynamic>.from(variables);
               featureVariables[MasonVarKey.feature.key] = featureName;
@@ -537,14 +537,14 @@ class TemplateManager {
               final featureFiles = await generator.generate(
                 target,
                 vars: featureVariables,
-                logger: logger,
+                logger: logger as dynamic, // Cast to dynamic to avoid Logger type ambiguity
                 fileConflictResolution: FileConflictResolution.overwrite,
               );
 
               // Count only new feature-specific files (approximate)
               // Note: This will include base files being regenerated, but that's okay
               totalFiles += featureFiles.length;
-              logger.detail(
+              logger.warn(
                   '✓ Feature "$featureName" generated (${featureFiles.length} files)');
             }
           }
@@ -554,9 +554,7 @@ class TemplateManager {
           logger.info('Generated features: ${uniqueFeatures.join(', ')}');
 
           // Debug: Log generated files
-          if (logger.level == Level.verbose) {
-            logger.detail('All generated files logged above');
-          }
+          // Note: Verbose logging removed as CLI Logger doesn't have level property
 
           final endTime = DateTime.now();
           final duration = endTime.difference(startTime);
@@ -576,7 +574,7 @@ class TemplateManager {
       final generatedFiles = await generator.generate(
         target,
         vars: variables,
-        logger: logger,
+        logger: logger as dynamic, // Cast to dynamic to avoid Logger type ambiguity
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
@@ -584,11 +582,7 @@ class TemplateManager {
       logger.info('✓ Generation successful ($fileCount files generated)');
 
       // Debug: Log generated files
-      if (logger.level == Level.verbose) {
-        for (final file in generatedFiles) {
-          logger.detail('Generated: ${file.path}');
-        }
-      }
+      // Note: Verbose logging removed as CLI Logger doesn't have level property
 
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
@@ -611,7 +605,7 @@ class TemplateManager {
           'File system error: ${e.message}');
     } catch (e, stackTrace) {
       logger.err('Unexpected error: $e');
-      logger.detail(stackTrace.toString());
+      logger.warn(stackTrace.toString());
       return TemplateGenerationResult.failure('Generation failed: $e');
     }
   }

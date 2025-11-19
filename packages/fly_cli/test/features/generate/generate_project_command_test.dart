@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/features/generate/project/generate_project_command.dart';
+import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -17,7 +18,7 @@ void main() {
     setUp(() {
       mockLogger = mock_logger.MockLogger();
       final mockContext = CommandTestHelper.createMockCommandContext(
-        logger: mockLogger,
+        logger: Logger(),
       );
       command = GenerateProjectCommand(mockContext);
       tempDir = CommandTestHelper.createTempDir();

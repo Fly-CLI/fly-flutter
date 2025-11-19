@@ -1,0 +1,10 @@
+{
+  "generation_mode": "feature",
+  "name": "login",
+  "description": "Auth screen feature scenario",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "preset": "starter",
+  "screen_type": "auth"
+}
+

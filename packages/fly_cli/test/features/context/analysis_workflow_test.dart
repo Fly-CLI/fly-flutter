@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fly_cli/src/features/context/context_generator.dart';
 import 'package:fly_cli/src/features/context/models.dart';
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -16,7 +17,7 @@ void main() {
 
     setUp(() {
       mockLogger = MockLogger();
-      generator = ContextGenerator(logger: mockLogger);
+      generator = ContextGenerator(logger: Logger());
       tempDir = Directory.systemTemp.createTempSync('fly_test_');
     });
 

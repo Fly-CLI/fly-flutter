@@ -6,10 +6,10 @@ import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_p
 import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
-import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:mason/mason.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'command_test_helper.dart';
@@ -24,7 +24,7 @@ class CommandTestHarness {
   void initialize() {
     // Initialize with mock services
     container
-      ..registerSingleton<Logger>(MockLogger())
+      ..registerSingleton<Logger>(Logger())
       ..registerSingleton<TemplateManager>(MockTemplateManager())
       ..registerSingleton<SystemChecker>(MockSystemChecker())
       ..registerSingleton<InteractivePrompt>(MockInteractivePrompt())

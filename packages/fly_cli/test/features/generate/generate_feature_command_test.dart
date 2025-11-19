@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 import 'package:fly_cli/src/features/generate/feature/generate_feature_command.dart';
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -20,7 +21,7 @@ void main() {
     setUp(() {
       mockLogger = MockLogger();
       final mockContext = CommandTestHelper.createMockCommandContext(
-        logger: mockLogger,
+        logger: Logger(),
       );
       command = GenerateFeatureCommand(mockContext);
       tempDir = CommandTestHelper.createTempDir();

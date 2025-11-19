@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import '../../helpers/analysis_test_fixtures.dart';
 import '../../helpers/mock_logger.dart';
+import 'package:mason/mason.dart';
 
 void main() {
   group('ContextGenerator', () {
@@ -16,7 +17,7 @@ void main() {
 
     setUp(() {
       mockLogger = MockLogger();
-      generator = ContextGenerator(logger: mockLogger);
+      generator = ContextGenerator(logger: Logger());
       tempDir = Directory.systemTemp.createTempSync('fly_test_');
     });
 

@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:mason/mason.dart';
+import 'package:mason/mason.dart' hide Logger, GeneratedFile;
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 
-import '../logging/logger.dart';
 import 'template_manager.dart';
 import 'brick_info.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// Orchestrator for Fly foundation generation using multi-brick approach.
 ///
@@ -74,12 +74,13 @@ class FoundationOrchestrator {
           );
         }
 
-        allGeneratedFiles.addAll(result.files);
-        totalFiles += result.files.length;
-
-        _logger.info(
-          '✓ Module "${invocation.moduleName}" generated (${result.files.length} files)',
-        );
+        if (result.files != null) {
+          allGeneratedFiles.addAll(result.files!);
+          totalFiles += result.files!.length;
+          _logger.info(
+            '✓ Module "${invocation.moduleName}" generated (${result.files!.length} files)',
+          );
+        }
       }
 
       _logger.info('✓ Foundation generation complete ($totalFiles total files)');
@@ -90,7 +91,7 @@ class FoundationOrchestrator {
       );
     } catch (e, stackTrace) {
       _logger.err('Foundation generation failed: $e');
-      _logger.detail('Stack trace: $stackTrace');
+      _logger.warn('Stack trace: $stackTrace');
       return FoundationGenerationResult.failure('Generation failed: $e');
     }
   }
@@ -115,15 +116,20 @@ class FoundationOrchestrator {
       // Create DirectoryGeneratorTarget
       final target = DirectoryGeneratorTarget(targetDir);
 
-      // Generate files
-      final files = await generator.generate(
+      // Generate files (returns Mason's GeneratedFile list)
+      final masonFiles = await generator.generate(
         target,
         vars: vars,
-        logger: _logger,
+        logger: _logger as dynamic, // Cast to dynamic to avoid type issues
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
-      return _ModuleGenerationResult.success(files: files);
+      // Convert Mason's GeneratedFile to CLI's GeneratedFile
+      final cliFiles = masonFiles
+          .map((masonFile) => GeneratedFile(masonFile.path))
+          .toList();
+
+      return _ModuleGenerationResult.success(files: cliFiles);
     } catch (e) {
       return _ModuleGenerationResult.failure(error: e.toString());
     }
@@ -200,6 +206,6 @@ class _MasonLoggerAdapter implements PlanningLogger {
   void err(String message) => _logger.err(message);
 
   @override
-  void detail(String message) => _logger.detail(message);
+  void detail(String message) => _logger.warn(message);
 }
 

@@ -19,7 +19,7 @@ void main() {
       tempDir = Directory.systemTemp.createTempSync('fly_test_');
       templateManager = TemplateManager(
         templatesDirectory: tempDir.path,
-        logger: mockLogger,
+        logger: Logger(),
       );
     });
 
@@ -217,7 +217,7 @@ packages: []
         // Create a new template manager with the test directory
         final testTemplateManager = TemplateManager(
           templatesDirectory: tempDir.path,
-          logger: mockLogger,
+          logger: Logger(),
         );
 
         // Clear any cache to ensure we load from the test directory

@@ -64,7 +64,7 @@ import 'package:fly_logger/fly_logger.dart';
 /// 3. **Add tests** to verify formatting behavior:
 /// ```dart
 /// test('should format MyCustomException', () {
-///   final formatter = ErrorMessageFormatter(logger: mockLogger);
+///   final formatter = ErrorMessageFormatter(logger: Logger());
 ///   final error = MyCustomException('Custom error');
 ///   final formatted = formatter.format(error);
 ///   expect(formatted, equals('Custom error'));

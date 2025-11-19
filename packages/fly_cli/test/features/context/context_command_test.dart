@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 import '../../helpers/command_test_helper.dart';
 import '../../helpers/mock_logger.dart';
 import '../../helpers/test_fixtures.dart';
+import 'package:mason/mason.dart';
 
 void main() {
   group('ContextCommand', () {
@@ -19,7 +20,7 @@ void main() {
     setUp(() {
       mockLogger = MockLogger();
       final mockContext = CommandTestHelper.createMockCommandContext(
-        logger: mockLogger,
+        logger: Logger(),
       );
       command = ContextCommand(mockContext);
       tempDir = CommandTestHelper.createTempDir();
