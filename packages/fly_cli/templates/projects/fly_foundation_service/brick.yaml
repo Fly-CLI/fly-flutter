@@ -1,7 +1,0 @@
-name: fly_foundation_service
-description: Fly foundation service scaffolding brick
-version: 1.0.0
-
-# Variables are passed programmatically by the CLI orchestrator
-# This brick generates service scaffolding for existing projects
-

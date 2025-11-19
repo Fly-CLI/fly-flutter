@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/brick_registry.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
@@ -282,10 +282,10 @@ class GenerationPreviewService {
     // Additional time for complex variables
     var complexityMultiplier = 1.0;
     for (final value in variables.values) {
-      if (value is List && (value as List).length > 5) {
+      if (value is List && value.length > 5) {
         complexityMultiplier += 0.1;
       }
-      if (value is String && (value as String).length > 100) {
+      if (value is String && value.length > 100) {
         complexityMultiplier += 0.05;
       }
     }
@@ -296,31 +296,25 @@ class GenerationPreviewService {
         milliseconds: estimatedMs.clamp(100, 10000)); // Min 100ms, max 10s
   }
 
-  /// Get brick path based on name and type
+  /// Get brick path based on name
+  /// 
+  /// Note: Bricks are now located in the workspace root /bricks directory
   String? _getBrickPath(String brickName, BrickType brickType) {
-    final templatesDirectory = TemplateManager.findTemplatesDirectory();
-
-    switch (brickType) {
-      case BrickType.project:
-        final brickPath = path.join(templatesDirectory, 'projects', brickName);
-        final dir = Directory(brickPath);
-        if (dir.existsSync()) {
-          return brickPath;
-        }
-        return null;
-      case BrickType.feature:
-      case BrickType.service:
-      case BrickType.component:
-        final brickPath =
-            path.join(templatesDirectory, 'components', brickName);
-        final dir = Directory(brickPath);
-        if (dir.existsSync()) {
-          return brickPath;
-        }
-        return null;
-      case BrickType.custom:
-        return null; // Custom paths would need to be provided
+    // Use BrickRegistry to find bricks directory
+    final bricksDirectory = BrickRegistry.findBricksDirectory();
+    if (bricksDirectory == null) {
+      logger.warn('Bricks directory not found');
+      return null;
     }
+
+    final brickPath = path.join(bricksDirectory, brickName);
+    final dir = Directory(brickPath);
+    if (dir.existsSync()) {
+      return brickPath;
+    }
+    
+    logger.warn('Brick not found at: $brickPath');
+    return null;
   }
 
   /// Create preview from cached generation plan

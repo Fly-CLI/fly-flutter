@@ -140,3 +140,7 @@ AuthKey_*.p8
 
 # Template generation output
 .scenario_out
+
+# Compiled CLI binary
+packages/fly_cli/bin/fly
+packages/fly_cli/bin/fly.exe

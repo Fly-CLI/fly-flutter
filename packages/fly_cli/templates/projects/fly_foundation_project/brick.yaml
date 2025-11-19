@@ -1,7 +1,0 @@
-name: fly_foundation_project
-description: Fly foundation project scaffolding brick
-version: 1.0.0
-
-# Variables are passed programmatically by the CLI orchestrator
-# This brick generates the full project structure including base foundation classes
-

@@ -629,6 +629,8 @@ fly create --from-manifest=fly_project.yaml
   details
 - **[MCP Integration](/packages/fly_cli/lib/src/integrations/README.md)** – Model Context Protocol
   implementation
+- **[Performance Improvements](./PERFORMANCE_IMPROVEMENTS.md)** – Performance optimizations and benchmarks
+- **[Development Workflow](./DEVELOPMENT_WORKFLOW.md)** – Development guidelines and best practices
 
 ---
 

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
 import 'package:fly_cli/src/core/cache/cache_models.dart';
+import 'package:fly_cli/src/core/cache/sdk_version_cache.dart';
 import 'package:fly_cli/src/core/cache/template_cache.dart';
 import 'package:fly_cli/src/core/utils/version_utils.dart';
 import 'package:mason/mason.dart';
@@ -31,13 +32,18 @@ class TemplateManager {
     required this.logger,
     TemplateCacheManager? cacheManager,
     BrickCacheManager? brickCacheManager,
-  })  : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger as dynamic),
+    SdkVersionCache? sdkVersionCache,
+  })  : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger),
         _brickCacheManager =
-            brickCacheManager ?? BrickCacheManager(logger: logger as dynamic),
-        _brickRegistry = BrickRegistry(logger: logger as dynamic),
-        _previewService = GenerationPreviewService(logger: logger as dynamic);
+            brickCacheManager ?? BrickCacheManager(logger: logger),
+        _brickRegistry = BrickRegistry(logger: logger),
+        _previewService = GenerationPreviewService(logger: logger),
+        _sdkVersionCache = sdkVersionCache ?? SdkVersionCache(logger: logger);
 
   static const String _defaultUnifiedTemplate = 'fly_foundation';
+
+  /// Cached templates directory (avoids repeated directory existence checks)
+  static String? _cachedTemplatesDir;
 
   /// Find templates directory using a single definitive path
   ///
@@ -46,26 +52,34 @@ class TemplateManager {
   /// For production: templates are located relative to the executable
   ///
   /// Returns the absolute path to the templates directory.
+  /// Results are cached after first lookup to improve performance.
   static String findTemplatesDirectory() {
-    // Try development path: packages/fly_cli/templates
-    // This works when running from the monorepo
+    // Return cached value if available
+    if (_cachedTemplatesDir != null) {
+      return _cachedTemplatesDir!;
+    }
+
+    // Check environment variable first (fastest)
     final envTemplatesDir = Platform.environment['FLY_TEMPLATES_DIR'];
     if (envTemplatesDir != null && envTemplatesDir.isNotEmpty) {
-      return path.normalize(envTemplatesDir);
+      _cachedTemplatesDir = path.normalize(envTemplatesDir);
+      return _cachedTemplatesDir!;
     }
 
     final currentDir = Directory.current.path;
 
     final localTemplatesPath = path.join(currentDir, 'templates');
     if (Directory(localTemplatesPath).existsSync()) {
-      return path.normalize(localTemplatesPath);
+      _cachedTemplatesDir = path.normalize(localTemplatesPath);
+      return _cachedTemplatesDir!;
     }
 
     final devTemplatesPath =
         path.join(currentDir, 'packages', 'fly_cli', 'templates');
     final devTemplatesDir = Directory(devTemplatesPath);
     if (devTemplatesDir.existsSync()) {
-      return path.normalize(devTemplatesPath);
+      _cachedTemplatesDir = path.normalize(devTemplatesPath);
+      return _cachedTemplatesDir!;
     }
 
     // Try relative to script location (development)
@@ -88,7 +102,8 @@ class TemplateManager {
       final normalizedPath = path.normalize(scriptRelativePath);
       final scriptRelativeDir = Directory(normalizedPath);
       if (scriptRelativeDir.existsSync()) {
-        return normalizedPath;
+        _cachedTemplatesDir = normalizedPath;
+        return _cachedTemplatesDir!;
       }
     }
 
@@ -97,9 +112,10 @@ class TemplateManager {
     final executableDir = path.dirname(executablePath);
 
     // Templates are located at: {executable_dir}/../templates
-    return path.normalize(
+    _cachedTemplatesDir = path.normalize(
       path.join(executableDir, '..', 'templates'),
     );
+    return _cachedTemplatesDir!;
   }
 
   final String templatesDirectory;
@@ -108,6 +124,7 @@ class TemplateManager {
   final BrickCacheManager _brickCacheManager;
   final BrickRegistry _brickRegistry;
   final GenerationPreviewService _previewService;
+  final SdkVersionCache _sdkVersionCache;
 
   // Versioning services (lazy initialized)
   VersionRegistry? _versionRegistry;
@@ -117,7 +134,7 @@ class TemplateManager {
   VersionRegistry get _versionRegistryInstance {
     _versionRegistry ??= VersionRegistry(
       templatesDirectory: templatesDirectory,
-      logger: logger as dynamic, // Cast to dynamic to avoid Logger type ambiguity
+      logger: logger, // Cast to dynamic to avoid Logger type ambiguity
       loadTemplateInfo: _loadTemplateInfo,
     );
     return _versionRegistry!;
@@ -137,8 +154,8 @@ class TemplateManager {
       cliVersion = Version.parse('1.0.0'); // Safe default
     }
 
-    final flutterVersion = await _getFlutterVersion();
-    final dartVersion = await _getDartVersion();
+    final flutterVersion = await _sdkVersionCache.getFlutterVersion();
+    final dartVersion = await _sdkVersionCache.getDartVersion();
 
     _compatibilityChecker = CompatibilityChecker(
       currentCliVersion: cliVersion,
@@ -149,57 +166,6 @@ class TemplateManager {
     return _compatibilityChecker!;
   }
 
-  /// Get Flutter SDK version
-  ///
-  /// Returns a valid Version object. Falls back to safe default if detection fails.
-  Future<Version> _getFlutterVersion() async {
-    try {
-      final result =
-          await Process.run('flutter', ['--version'], runInShell: true);
-      if (result.exitCode == 0) {
-        final output = result.stdout as String;
-        final match = RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(output);
-        if (match != null) {
-          final versionStr = match.group(1)!;
-          try {
-            return Version.parse(versionStr);
-          } catch (e) {
-            logger.warn('Invalid Flutter version format: $versionStr');
-          }
-        }
-      }
-    } catch (e) {
-      logger.warn('Failed to detect Flutter version: $e');
-    }
-    // Safe default
-    return Version.parse('3.10.0');
-  }
-
-  /// Get Dart SDK version
-  ///
-  /// Returns a valid Version object. Falls back to safe default if detection fails.
-  Future<Version> _getDartVersion() async {
-    try {
-      final result = await Process.run('dart', ['--version'], runInShell: true);
-      if (result.exitCode == 0) {
-        final output = result.stdout as String;
-        final match =
-            RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(output);
-        if (match != null) {
-          final versionStr = match.group(1)!;
-          try {
-            return Version.parse(versionStr);
-          } catch (e) {
-            logger.warn('Invalid Dart version format: $versionStr');
-          }
-        }
-      }
-    } catch (e) {
-      logger.warn('Failed to detect Dart version: $e');
-    }
-    // Safe default
-    return Version.parse('3.0.0');
-  }
 
   /// Get all available bricks from registry
   Future<List<BrickInfo>> getAvailableBricks({BrickType? filterByType}) async {
@@ -514,7 +480,7 @@ class TemplateManager {
           final baseFiles = await generator.generate(
             target,
             vars: baseVariables,
-            logger: logger as dynamic,
+            logger: logger,
             fileConflictResolution: FileConflictResolution.overwrite,
           );
 
@@ -537,7 +503,7 @@ class TemplateManager {
               final featureFiles = await generator.generate(
                 target,
                 vars: featureVariables,
-                logger: logger as dynamic, // Cast to dynamic to avoid Logger type ambiguity
+                logger: logger, // Cast to dynamic to avoid Logger type ambiguity
                 fileConflictResolution: FileConflictResolution.overwrite,
               );
 
@@ -574,7 +540,7 @@ class TemplateManager {
       final generatedFiles = await generator.generate(
         target,
         vars: variables,
-        logger: logger as dynamic, // Cast to dynamic to avoid Logger type ambiguity
+        logger: logger, // Cast to dynamic to avoid Logger type ambiguity
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
@@ -641,84 +607,25 @@ class TemplateManager {
 
   /// Get all available templates
   ///
-  /// Discovers and loads all templates from the templates directory.
-  /// Searches in projects/ and components/ subdirectories.
-  /// Also discovers bricks from the brick registry and converts them to templates.
-  /// Each template includes compatibility data if specified in template.yaml.
+  /// Discovers templates from the brick registry and converts them to templates.
+  /// All templates are now stored as bricks in the bricks/ directory.
+  /// Each template includes compatibility data if specified in brick.yaml.
   Future<List<TemplateInfo>> getAvailableTemplates() async {
     final templates = <TemplateInfo>[];
 
     try {
-      final dir = Directory(templatesDirectory);
-      if (!await dir.exists()) {
-        logger.warn('Templates directory does not exist: $templatesDirectory');
-        // Still try to discover bricks even if templates directory doesn't exist
-      } else {
-        // Search in projects/ and components/ subdirectories
-        final projectsDir = Directory(path.join(templatesDirectory, 'projects'));
-        if (await projectsDir.exists()) {
-          await for (final entity in projectsDir.list()) {
-            if (entity is Directory) {
-              final templateInfo = await _loadTemplateInfo(entity.path);
-              if (templateInfo != null) {
-                templates.add(templateInfo);
-              }
-            }
-          }
+      // Discover bricks and convert them to templates
+      final bricks = await getAvailableBricks();
+      for (final brick in bricks) {
+        // Only include project bricks as templates (for project generation)
+        // Feature and service bricks are handled separately
+        if (brick.type == BrickType.project) {
+          final templateInfo = _brickToTemplateInfo(brick);
+          templates.add(templateInfo);
         }
-
-        final componentsDir =
-            Directory(path.join(templatesDirectory, 'components'));
-        if (await componentsDir.exists()) {
-          await for (final entity in componentsDir.list()) {
-            if (entity is Directory) {
-              final templateInfo = await _loadTemplateInfo(entity.path);
-              if (templateInfo != null) {
-                templates.add(templateInfo);
-              }
-            }
-          }
-        }
-
-        // Fallback: check flat structure (for test compatibility and backward compatibility)
-        // Only check if no subdirectories were found or if subdirectories don't exist
-        if (templates.isEmpty ||
-            (!await projectsDir.exists() && !await componentsDir.exists())) {
-          await for (final entity in dir.list()) {
-            if (entity is Directory) {
-              final entityName = path.basename(entity.path);
-              // Skip known subdirectories to avoid duplicates
-              if (entityName != 'projects' && entityName != 'components') {
-                final templateInfo = await _loadTemplateInfo(entity.path);
-                if (templateInfo != null) {
-                  templates.add(templateInfo);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Also discover bricks and convert them to templates
-      try {
-        final bricks = await getAvailableBricks();
-        for (final brick in bricks) {
-          // Only include project bricks as templates (for project generation)
-          // Feature and service bricks are handled separately
-          if (brick.type == BrickType.project) {
-            final templateInfo = _brickToTemplateInfo(brick);
-            // Avoid duplicates by checking if template with same name already exists
-            if (!templates.any((t) => t.name == templateInfo.name)) {
-              templates.add(templateInfo);
-            }
-          }
-        }
-      } catch (e) {
-        logger.warn('Error discovering bricks: $e');
-        // Don't fail if brick discovery fails, just log a warning
       }
     } catch (e) {
-      logger.err('Error loading templates: $e');
+      logger.err('Error discovering templates: $e');
     }
 
     return templates;
@@ -760,40 +667,18 @@ class TemplateManager {
         logger.warn('Cached template $name corrupted, reloading from source');
       }
 
-      // Load from source - search in subdirectories, then flat structure
+      // Load from bricks (templates are now stored as bricks)
       TemplateInfo? template;
 
-      // Try projects subdirectory first
-      final projectsPath = path.join(templatesDirectory, 'projects', name);
-      if (await Directory(projectsPath).exists()) {
-        template = await _loadTemplateInfo(projectsPath);
-      } else {
-        // Try components subdirectory
-        final componentsPath =
-            path.join(templatesDirectory, 'components', name);
-        if (await Directory(componentsPath).exists()) {
-          template = await _loadTemplateInfo(componentsPath);
-        } else {
-          // Fallback: check flat structure (for test compatibility)
-          final directPath = path.join(templatesDirectory, name);
-          if (await Directory(directPath).exists()) {
-            template = await _loadTemplateInfo(directPath);
-          }
+      try {
+        final brick = await getBrick(name);
+        if (brick != null && brick.type == BrickType.project) {
+          template = _brickToTemplateInfo(brick);
+          logger.info('Found template "$name" as brick');
         }
-      }
-
-      // If template not found in old format, try to find it as a brick
-      if (template == null) {
-        try {
-          final brick = await getBrick(name);
-          if (brick != null && brick.type == BrickType.project) {
-            template = _brickToTemplateInfo(brick);
-            logger.info('Found template "$name" as brick');
-          }
-        } catch (e) {
-          logger.warn('Error checking for brick "$name": $e');
-          // Don't fail if brick lookup fails
-        }
+      } catch (e) {
+        logger.warn('Error checking for brick "$name": $e');
+        // Don't fail if brick lookup fails
       }
 
       // Cache for future use

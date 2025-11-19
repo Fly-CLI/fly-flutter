@@ -74,13 +74,19 @@ command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
-# Determine if we should use dart run instead of fly command
-# This is needed because workspace packages can't be globally activated with dart pub
-# When in the repository, always use dart run for reliability
+# Determine if we should use compiled binary, dart run, or fly command
+# Prefer compiled binary for best performance
+# When in the repository, try compiled binary first, then fall back to dart run
 if [ -f "${REPO_ROOT}/pubspec.yaml" ] && [ -f "${FLY_CLI_DIR}/bin/fly.dart" ]; then
-  # We're in the repository, use dart run
-  FLY_CMD="dart run ${FLY_CLI_DIR}/bin/fly.dart"
-  verbose_log "Using dart run mode (in repository)"
+  # We're in the repository, prefer compiled binary for performance
+  if [ -f "${FLY_CLI_DIR}/bin/fly" ] && [ -x "${FLY_CLI_DIR}/bin/fly" ]; then
+    FLY_CMD="${FLY_CLI_DIR}/bin/fly"
+    verbose_log "Using compiled binary (in repository)"
+  else
+    # Fall back to dart run if binary doesn't exist
+    FLY_CMD="dart run ${FLY_CLI_DIR}/bin/fly.dart"
+    verbose_log "Using dart run mode (compiled binary not found)"
+  fi
 else
   # Not in repository, try to use fly command
   FLY_CMD="fly"

@@ -16,46 +16,6 @@ class BrickDiscoveryService {
 
   final Logger logger;
 
-  /// Discover all available bricks in the templates directory
-  ///
-  /// Searches in the standardized directory structure:
-  /// - templates/projects/
-  /// - templates/components/
-  /// - templates/addons/
-  Future<List<BrickMetadata>> discoverBricks(String templatesPath) async {
-    logger.info('Discovering bricks in: $templatesPath');
-    final bricks = <BrickMetadata>[];
-
-    try {
-      final templatesDir = Directory(templatesPath);
-      if (!await templatesDir.exists()) {
-        logger.warn('Templates directory does not exist: $templatesPath');
-        return bricks;
-      }
-
-      // Search in each category directory
-      final categories = ['projects', 'components', 'addons'];
-      for (final category in categories) {
-        final categoryPath = path.join(templatesPath, category);
-        final categoryDir = Directory(categoryPath);
-
-        if (await categoryDir.exists()) {
-          final categoryBricks =
-              await _discoverBricksInCategory(categoryPath, category);
-          bricks.addAll(categoryBricks);
-        } else {
-          logger.detail('Category directory does not exist: $categoryPath');
-        }
-      }
-
-      logger.info('Discovered ${bricks.length} bricks');
-      return bricks;
-    } catch (e) {
-      logger.err('Error discovering bricks: $e');
-      return bricks;
-    }
-  }
-
   /// Discover bricks in a specific category directory
   Future<List<BrickMetadata>> _discoverBricksInCategory(
     String categoryPath,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/core/templates/brick_registry.dart';
 import 'package:fly_cli/src/core/templates/template_info.dart';
 import 'package:fly_cli/src/core/templates/template_version.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -46,27 +47,16 @@ class VersionRegistry {
     return sanitized;
   }
 
-  /// Find template path in projects or components subdirectories
+  /// Find template path in bricks directory
   /// Returns the path to the template directory, or null if not found
   Future<String?> _findTemplatePath(String sanitizedName) async {
-    // Check projects subdirectory
-    final projectsPath =
-        path.join(templatesDirectory, 'projects', sanitizedName);
-    if (await Directory(projectsPath).exists()) {
-      return projectsPath;
-    }
-
-    // Check components subdirectory
-    final componentsPath =
-        path.join(templatesDirectory, 'components', sanitizedName);
-    if (await Directory(componentsPath).exists()) {
-      return componentsPath;
-    }
-
-    // Fallback: check directly in templatesDirectory (for test compatibility and flexibility)
-    final directPath = path.join(templatesDirectory, sanitizedName);
-    if (await Directory(directPath).exists()) {
-      return directPath;
+    // Templates are now stored as bricks in the bricks/ directory
+    final bricksDirectory = BrickRegistry.findBricksDirectory();
+    if (bricksDirectory != null) {
+      final brickPath = path.join(bricksDirectory, sanitizedName);
+      if (await Directory(brickPath).exists()) {
+        return brickPath;
+      }
     }
 
     return null;
@@ -219,14 +209,11 @@ class VersionRegistry {
     try {
       // First check if template name@version format directory exists
       // (this can exist independently without a base template)
-      // Try in both subdirectories and direct path (for test compatibility)
-      final possiblePaths = [
-        path.join(templatesDirectory, 'projects', '$sanitizedName@$version'),
-        path.join(templatesDirectory, 'components', '$sanitizedName@$version'),
-        path.join(templatesDirectory, '$sanitizedName@$version'),
-      ];
-
-      for (final templateVersionPath in possiblePaths) {
+      // Check in bricks directory
+      final bricksDirectory = BrickRegistry.findBricksDirectory();
+      if (bricksDirectory != null) {
+        final templateVersionPath =
+            path.join(bricksDirectory, '$sanitizedName@$version');
         final templateVersionDir = Directory(templateVersionPath);
         if (await templateVersionDir.exists()) {
           return await loadTemplateInfo(templateVersionPath);

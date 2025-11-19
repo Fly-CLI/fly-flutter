@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
@@ -79,10 +78,8 @@ class BrickRegistry {
 
   /// Discover all available bricks
   ///
-  /// Searches in the known template directory structure:
-  /// - {templatesDirectory}/projects/
-  /// - {templatesDirectory}/components/
-  /// - {workspaceRoot}/bricks/ (for publishable bricks)
+  /// Searches in the bricks directory:
+  /// - {workspaceRoot}/bricks/
   Future<List<BrickInfo>> discoverBricks({bool forceRefresh = false}) async {
     if (!forceRefresh && _brickCache.isNotEmpty) {
       return _brickCache.values.toList();
@@ -91,25 +88,14 @@ class BrickRegistry {
     logger.info('Discovering Mason bricks...');
     final bricks = <BrickInfo>[];
 
-    // Get templates directory from centralized location
-    final templatesDirectory = TemplateManager.findTemplatesDirectory();
-
-    // Search in projects subdirectory
-    final projectsPath = path.join(templatesDirectory, 'projects');
-    final projectsBricks = await _discoverBricksInPath(projectsPath);
-    bricks.addAll(projectsBricks);
-
-    // Search in components subdirectory
-    final componentsPath = path.join(templatesDirectory, 'components');
-    final componentsBricks = await _discoverBricksInPath(componentsPath);
-    bricks.addAll(componentsBricks);
-
-    // Search in bricks/ workspace directory (for publishable bricks)
+    // Search in bricks/ workspace directory
     final bricksDirectory = findBricksDirectory();
     if (bricksDirectory != null) {
       logger.detail('Searching for bricks in: $bricksDirectory');
       final workspaceBricks = await _discoverBricksInPath(bricksDirectory);
       bricks.addAll(workspaceBricks);
+    } else {
+      logger.warn('Bricks directory not found. Expected at workspace root/bricks/');
     }
 
     // Search in custom paths if provided
@@ -181,7 +167,7 @@ class BrickRegistry {
       }
 
       // Parse yaml file
-      final yamlContent = await yamlFile!.readAsString();
+      final yamlContent = await yamlFile.readAsString();
       final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
 
       // Determine brick type based on path
@@ -245,14 +231,19 @@ class BrickRegistry {
       }
     }
 
-    // Check if it's in the projects subdirectory (after components check)
-    if (pathSegments.contains('projects')) {
-      // Make sure it's actually in the templates/projects directory structure
-      final templatesIndex = pathSegments.indexOf('templates');
-      if (templatesIndex != -1 &&
-          templatesIndex + 1 < pathSegments.length &&
-          pathSegments[templatesIndex + 1] == 'projects') {
-        logger.detail('Detected as project brick');
+    // Check if brick name indicates it's a project brick
+    // Project bricks follow the pattern: fly_foundation_project, *_project, etc.
+    if (brickName.contains('_project')) {
+      logger.detail('Detected as project brick (by name)');
+      return BrickType.project;
+    }
+    
+    // Check if it's in the bricks directory at root level (all are considered projects)
+    if (pathSegments.contains('bricks')) {
+      final bricksIndex = pathSegments.indexOf('bricks');
+      // If this is directly under bricks/, it's a top-level brick (likely project)
+      if (bricksIndex + 1 < pathSegments.length) {
+        logger.detail('Detected as project brick (in bricks directory)');
         return BrickType.project;
       }
     }

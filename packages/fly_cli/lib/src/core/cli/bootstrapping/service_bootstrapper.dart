@@ -95,7 +95,9 @@ class ServiceBootstrapper {
         logger: structuredLogger,
         isDevelopment: config.isDevelopment,
       ))
-      ..registerSingleton<TemplateManager>(TemplateManager(
+      // Register TemplateManager as factory (lazy initialization)
+      // This avoids expensive initialization for simple commands like --version
+      ..registerFactory<TemplateManager>(() => TemplateManager(
         templatesDirectory: config.templatesDirectory ??
             TemplateManager.findTemplatesDirectory(),
         logger: structuredLogger,
