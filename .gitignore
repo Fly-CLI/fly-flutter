@@ -139,4 +139,4 @@ AuthKey_*.p8
 /test_generated/
 
 # Template generation output
-/packages/fly_cli/templates/projects/fly_foundation/.scenario_out
+.scenario_out

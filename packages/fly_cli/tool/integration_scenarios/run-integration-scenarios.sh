@@ -74,6 +74,19 @@ command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Determine if we should use dart run instead of fly command
+# This is needed because workspace packages can't be globally activated with dart pub
+# When in the repository, always use dart run for reliability
+if [ -f "${REPO_ROOT}/pubspec.yaml" ] && [ -f "${FLY_CLI_DIR}/bin/fly.dart" ]; then
+  # We're in the repository, use dart run
+  FLY_CMD="dart run ${FLY_CLI_DIR}/bin/fly.dart"
+  verbose_log "Using dart run mode (in repository)"
+else
+  # Not in repository, try to use fly command
+  FLY_CMD="fly"
+  verbose_log "Using fly command (not in repository)"
+fi
+
 # ============================================================================
 # Pre-flight Checks
 # ============================================================================
@@ -240,7 +253,7 @@ execute_fly_project() {
   local platforms="$6"
   local preset="$7"
 
-  local cmd="fly generate project \"${name}\" --output-dir=\"${scenario_out_dir}\""
+  local cmd="${FLY_CMD} generate project \"${name}\" --output-dir=\"${scenario_out_dir}\""
 
   if [ -n "$description" ]; then
     cmd="${cmd} --description=\"${description}\""
@@ -269,12 +282,12 @@ execute_fly_feature() {
   # Ensure base project exists
   if [ ! -d "$base_project_dir" ]; then
     verbose_log "Creating base project for feature scenario"
-    if ! run_command "fly generate project test_project --template=fly_foundation --output-dir=\"${scenario_out_dir}\""; then
+    if ! run_command "${FLY_CMD} generate project test_project --template=fly_foundation --output-dir=\"${scenario_out_dir}\""; then
       return 1
     fi
   fi
 
-  local cmd="fly generate feature \"${name}\" --output-dir=\"${base_project_dir}\""
+  local cmd="${FLY_CMD} generate feature \"${name}\" --output-dir=\"${base_project_dir}\""
   if [ -n "$screen_type" ]; then
     cmd="${cmd} --type=\"${screen_type}\""
   fi
@@ -293,12 +306,12 @@ execute_fly_service() {
   # Ensure base project exists
   if [ ! -d "$base_project_dir" ]; then
     verbose_log "Creating base project for service scenario"
-    if ! run_command "fly generate project test_project --template=fly_foundation --output-dir=\"${scenario_out_dir}\""; then
+    if ! run_command "${FLY_CMD} generate project test_project --template=fly_foundation --output-dir=\"${scenario_out_dir}\""; then
       return 1
     fi
   fi
 
-  local cmd="fly generate service \"${name}\" --output-dir=\"${base_project_dir}\" --type=\"${service_type}\""
+  local cmd="${FLY_CMD} generate service \"${name}\" --output-dir=\"${base_project_dir}\" --type=\"${service_type}\""
   run_command "$cmd"
 }
 
