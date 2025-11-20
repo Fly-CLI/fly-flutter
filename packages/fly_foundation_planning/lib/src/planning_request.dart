@@ -3,13 +3,17 @@ import 'package:fly_foundation_planning/src/workflow_definition.dart';
 
 /// A normalized planning request that represents user input.
 class PlanningRequest {
-  const PlanningRequest({
+  PlanningRequest({
     required this.workflowId,
     required this.raw,
-  });
+    GenerationMode? generationMode,
+  }) : generationMode = generationMode ?? GenerationMode.fromVars(raw);
 
   /// Workflow identifier indicating which workflow to execute.
   final WorkflowId workflowId;
+
+  /// Generation mode (project, feature, service).
+  final GenerationMode generationMode;
 
   /// Raw input variables from CLI, manifest, or interactive prompts.
   ///

@@ -1,182 +1,85 @@
-import 'dart:io';
-
 import 'package:mason/mason.dart' hide Logger, GeneratedFile;
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
-import 'package:path/path.dart' as path;
-
-import 'template_manager.dart';
-import 'brick_info.dart';
 import 'package:mason_logger/mason_logger.dart';
 
-/// Orchestrator for Fly foundation generation using multi-brick approach.
+import 'foundation_brick_executor.dart';
+import 'planning_logger_adapter.dart';
+import 'template_manager.dart';
+
+/// CLI wrapper for Fly foundation generation orchestration.
 ///
-/// This orchestrator:
-/// 1. Uses the planning library to determine which bricks to run
-/// 2. Executes each brick with the appropriate variables and target directories
-/// 3. Supports phase-based ordering and prepares for optional parallel execution
-class FoundationOrchestrator {
+/// This is a thin wrapper that adapts CLI-specific types to the planning
+/// library's generic orchestrator. The actual orchestration logic lives
+/// in the `fly_foundation_planning` package.
+class TemplateGenerationOrchestrator {
   final TemplateManager _templateManager;
   final Logger _logger;
-  final FoundationPlanner _planner;
+  final FoundationPlanner? _planner;
 
-  FoundationOrchestrator({
+  /// Creates a foundation orchestrator with CLI-specific dependencies.
+  ///
+  /// [templateManager] is used to find and execute bricks.
+  /// [logger] is used for logging orchestration progress.
+  /// [planner] is optional; if not provided, a default planner will be created.
+  TemplateGenerationOrchestrator({
     required TemplateManager templateManager,
     required Logger logger,
     FoundationPlanner? planner,
   })  : _templateManager = templateManager,
         _logger = logger,
-        _planner = planner ?? FoundationPlanner(
-          logger: _MasonLoggerAdapter(logger),
-        );
+        _planner = planner;
 
   /// Plans and executes foundation generation using bricks.
+  ///
+  /// [rawVars] is the raw input variables from the user (e.g., from CLI flags).
+  /// [outputDirectory] is the root directory where files should be generated.
   ///
   /// Returns a result indicating success or failure with details.
   Future<FoundationGenerationResult> generateFoundation({
     required Map<String, dynamic> rawVars,
     required String outputDirectory,
   }) async {
-    try {
-      _logger.info('Planning foundation generation...');
+    // Create the adapter for planning logger
+    final planningLogger = PlanningLoggerAdapter(_logger);
 
-      // Step 1: Plan generation using the planning library
-      final planningResult = _planner.planFoundationGeneration(rawVars);
+    // Create the executor that uses TemplateManager
+    final executor = TemplateManagerBrickExecutor(
+      templateManager: _templateManager,
+    );
 
-      // Use brickInvocations (new model) if available, fall back to moduleInvocations
-      final invocations = planningResult.brickInvocations.isNotEmpty
-          ? planningResult.brickInvocations
-          : planningResult.moduleInvocations
-              .map((inv) => inv.toBrickInvocation())
-              .toList();
+    // Create the planner if not provided
+    final planner = _planner ?? FoundationPlanner(logger: planningLogger);
 
-      _logger.info(
-        'Planned ${invocations.length} brick invocation(s) to generate',
-      );
+    // Create the orchestrator from the planning package
+    final orchestrator = FoundationOrchestrator<GeneratedFile>(
+      executor: executor,
+      logger: planningLogger,
+      planner: planner,
+    );
 
-      // Step 2: Group invocations by phase for potential parallel execution
-      final invocationsByPhase = <int, List<BrickInvocation>>{};
-      for (final invocation in invocations) {
-        invocationsByPhase.putIfAbsent(invocation.phase, () => []).add(invocation);
-      }
+    // Execute orchestration
+    final result = await orchestrator.generateFoundation(
+      rawVars: rawVars,
+      outputDirectory: outputDirectory,
+    );
 
-      // Step 3: Execute invocations phase by phase (sequentially for now)
-      final allGeneratedFiles = <GeneratedFile>[];
-      var totalFiles = 0;
-
-      final sortedPhases = invocationsByPhase.keys.toList()..sort();
-      for (final phase in sortedPhases) {
-        final phaseInvocations = invocationsByPhase[phase]!;
-        _logger.info('Executing phase $phase (${phaseInvocations.length} invocation(s))');
-
-        // Execute invocations in this phase sequentially
-        // TODO: In the future, these could be executed in parallel if safe
-        for (final invocation in phaseInvocations) {
-          _logger.info('Generating: ${invocation.displayName}');
-
-          // Get brick info
-          final brick = await _templateManager.getBrick(invocation.brickId);
-          if (brick == null) {
-            return FoundationGenerationResult.failure(
-              'Brick "${invocation.brickId}" not found. '
-              'Make sure the bricks are available.',
-            );
-          }
-
-          // Resolve target directory
-          final targetDir = _resolveTargetDirectory(
-            outputDirectory,
-            invocation.targetDir,
-          );
-
-          // Generate using the brick
-          final result = await _generateBrick(
-            brick: brick,
-            vars: invocation.vars,
-            targetDirectory: targetDir,
-          );
-
-          if (!result.success) {
-            return FoundationGenerationResult.failure(
-              'Failed to generate ${invocation.displayName}: ${result.error}',
-            );
-          }
-
-          if (result.files != null) {
-            allGeneratedFiles.addAll(result.files!);
-            totalFiles += result.files!.length;
-            _logger.info(
-              '✓ ${invocation.displayName} generated (${result.files!.length} files)',
-            );
-          }
-        }
-      }
-
-      _logger.info('✓ Foundation generation complete ($totalFiles total files)');
-
+    // Adapt the result to CLI-specific type
+    if (result.success) {
       return FoundationGenerationResult.success(
-        files: allGeneratedFiles,
-        targetDirectory: outputDirectory,
+        files: result.files ?? [],
+        targetDirectory: result.targetDirectory ?? outputDirectory,
       );
-    } catch (e, stackTrace) {
-      _logger.err('Foundation generation failed: $e');
-      _logger.warn('Stack trace: $stackTrace');
-      return FoundationGenerationResult.failure('Generation failed: $e');
-    }
-  }
-
-  /// Resolves the target directory for a brick invocation.
-  ///
-  /// If the invocation has a targetDir, it's combined with the root output directory.
-  /// Otherwise, the root output directory is used.
-  String _resolveTargetDirectory(String rootOutputDir, String? invocationTargetDir) {
-    if (invocationTargetDir == null || invocationTargetDir.isEmpty) {
-      return rootOutputDir;
-    }
-    return path.join(rootOutputDir, invocationTargetDir);
-  }
-
-  /// Generates a single brick using its definition.
-  Future<_ModuleGenerationResult> _generateBrick({
-    required BrickInfo brick,
-    required Map<String, dynamic> vars,
-    required String targetDirectory,
-  }) async {
-    try {
-      // Create Brick instance from brick directory
-      final brickInstance = Brick.path(brick.path);
-
-      // Create MasonGenerator from brick
-      final generator = await MasonGenerator.fromBrick(brickInstance);
-
-      // Create target directory
-      final targetDir = Directory(targetDirectory);
-      await targetDir.create(recursive: true);
-
-      // Create DirectoryGeneratorTarget
-      final target = DirectoryGeneratorTarget(targetDir);
-
-      // Generate files (returns Mason's GeneratedFile list)
-      // Note: Mason's generate method expects a specific Logger type, but we use
-      // the CLI's Logger. Passing null and letting Mason use its default logger.
-      final masonFiles = await generator.generate(
-        target,
-        vars: vars,
-        fileConflictResolution: FileConflictResolution.overwrite,
+    } else {
+      return FoundationGenerationResult.failure(
+        result.error ?? 'Generation failed',
       );
-
-      // Convert Mason's GeneratedFile to CLI's GeneratedFile
-      final cliFiles = masonFiles
-          .map((masonFile) => GeneratedFile(masonFile.path))
-          .toList();
-
-      return _ModuleGenerationResult.success(files: cliFiles);
-    } catch (e) {
-      return _ModuleGenerationResult.failure(error: e.toString());
     }
   }
 }
 
-/// Result of foundation generation.
+/// Result of foundation generation (CLI-specific type).
+///
+/// This is kept for backward compatibility with existing CLI code.
 class FoundationGenerationResult {
   const FoundationGenerationResult._({
     required this.success,
@@ -207,45 +110,5 @@ class FoundationGenerationResult {
   final List<GeneratedFile>? files;
   final String? targetDirectory;
   final String? error;
-}
-
-/// Internal result for module generation.
-class _ModuleGenerationResult {
-  const _ModuleGenerationResult._({
-    required this.success,
-    this.files,
-    this.error,
-  });
-
-  factory _ModuleGenerationResult.success({required List<GeneratedFile> files}) {
-    return _ModuleGenerationResult._(success: true, files: files);
-  }
-
-  factory _ModuleGenerationResult.failure({required String error}) {
-    return _ModuleGenerationResult._(success: false, error: error);
-  }
-
-  final bool success;
-  final List<GeneratedFile>? files;
-  final String? error;
-}
-
-/// Adapter to convert CLI Logger to PlanningLogger.
-class _MasonLoggerAdapter implements PlanningLogger {
-  final Logger _logger;
-
-  _MasonLoggerAdapter(this._logger);
-
-  @override
-  void info(String message) => _logger.info(message);
-
-  @override
-  void warn(String message) => _logger.warn(message);
-
-  @override
-  void err(String message) => _logger.err(message);
-
-  @override
-  void detail(String message) => _logger.warn(message);
 }
 

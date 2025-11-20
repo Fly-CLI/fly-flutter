@@ -91,11 +91,14 @@ Extracts:
 final composed = _planner.run(base, _logger);
 ```
 
-The `CompositePlanner`:
-1. Applies preset (if specified)
-2. Runs cross-cutting planners (naming, platform, etc.)
-3. Runs mode-specific planner (project/feature/service)
-4. Composes shared + mode-specific variables
+The `CompositePlanner` delegates to `VariableDerivationPipeline`:
+1. **Preprocessing**: Applies preset (if specified) to base variables
+2. **Shared Derivation Steps**: Runs shared derivation steps in order:
+   - Naming step: Derives name variants (snake, camel, pascal)
+   - Preset shared step: Applies preset-based configuration (flyPackages)
+   - Platform step: Computes platform support flags
+3. **Mode-Specific Derivation**: Runs mode-specific function (project/feature/service)
+4. **Composition**: Merges shared + mode-specific variables into `ComposedDerivedVariables`
 
 ### 4. Global Variables Wrapper
 

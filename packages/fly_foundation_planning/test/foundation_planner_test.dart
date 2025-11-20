@@ -8,7 +8,7 @@ void main() {
 
     setUp(() {
       logger = TestLogger();
-      planner = FoundationPlanner(logger: logger);
+      planner = FoundationPlanner.withDefaultPipeline(logger: logger);
     });
 
     test('plans project generation correctly', () {

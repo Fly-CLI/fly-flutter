@@ -36,9 +36,17 @@ The planning system follows a **workflow-driven, brick-based architecture** that
                      │
                      ▼
 ┌─────────────────────────────────────────────────────────┐
-│              Foundation Orchestrator                     │
+│          Foundation Orchestrator                         │
+│    (in fly_foundation_planning)                          │
 │  • Phase-based execution                                │
 │  • Per-invocation target directories                    │
+│  • Uses BrickExecutor abstraction                       │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│          CLI Executor Adapter                            │
+│  • Implements BrickExecutor for CLI                     │
 │  • Brick generation via Mason                           │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -72,15 +80,26 @@ Defines how bricks are composed together. A workflow consists of:
 Orchestrates the planning process:
 
 1. **Input Normalization**: Converts raw input → `PlanningRequest`
-2. **Variable Derivation**: Runs `CompositePlanner` to compute global variables
+2. **Variable Derivation**: Runs `CompositePlanner` (which uses `VariableDerivationPipeline`) to compute global variables
 3. **Workflow Expansion**: Expands workflow steps into `BrickInvocation` objects
 4. **Ordering**: Sorts invocations by phase and display name
 
 **Key Design**: The planner is workflow-agnostic. It doesn't hard-code brick relationships.
 
-### 4. Variable System
+### 4. Orchestration Engine (`FoundationOrchestrator`)
 
-Multi-layered variable derivation:
+Executes planned brick invocations:
+
+1. **Planning**: Uses `FoundationPlanner` to plan brick invocations
+2. **Phase Grouping**: Groups invocations by phase for ordered execution
+3. **Brick Execution**: Uses `BrickExecutor` abstraction to execute each brick
+4. **Result Aggregation**: Collects results from all brick executions
+
+**Key Design**: The orchestrator is generic and CLI-agnostic. It uses the `BrickExecutor<TFile>` interface, allowing different hosts (CLI, tests, etc.) to provide their own execution implementation.
+
+### 5. Variable System
+
+Multi-layered variable derivation using a unified pipeline:
 
 - **Base Variables**: Raw input (name, organization, platforms, etc.)
 - **Shared Variables**: Common across all modes (naming variants, platform flags)
@@ -89,7 +108,7 @@ Multi-layered variable derivation:
 - **Global Variables**: Wrapper around composed + base for brick access
 - **Brick Variables**: Final vars for each brick (global + instance-specific)
 
-**Key Design**: Variables flow from global → brick-specific, with each brick receiving only what it needs.
+**Key Design**: The variable derivation pipeline (`VariableDerivationPipeline`) uses declarative steps configured as data rather than multiple planner classes. Variables flow from global → brick-specific, with each brick receiving only what it needs.
 
 ## Data Flow
 
@@ -118,15 +137,21 @@ PlanningResult (sorted, ready for execution)
 ```
 PlanningResult.brickInvocations
     ↓
+FoundationOrchestrator (in planning package)
+    ↓
 Grouped by phase
     ↓
 Sorted within phase
     ↓
 For each invocation:
-    - Resolve brick definition
     - Resolve target directory
+    - Call BrickExecutor.executeBrick()
+        ↓
+    CLI Executor Adapter (implements BrickExecutor)
+        ↓
+    - Resolve brick definition (via TemplateManager)
     - Build Mason vars
-    - Execute brick generation
+    - Execute brick generation (via Mason)
 ```
 
 ## Extension Points
@@ -135,8 +160,9 @@ The architecture provides several extension points:
 
 1. **New Bricks**: Register in `BrickRegistry` with variable builder
 2. **New Workflows**: Define in `WorkflowRegistry` with step definitions
-3. **New Variable Planners**: Add to `CompositePlanner` via `PlannerFactory`
+3. **New Variable Derivation Steps**: Add `SharedDerivationStep` to `VariableDerivationPipeline` or create custom pipeline
 4. **New Instance Config Types**: Extend `InstanceConfig` with typed helpers
+5. **Custom Brick Executors**: Implement `BrickExecutor<TFile>` for different execution contexts (CLI, tests, etc.)
 
 ## Design Principles
 

@@ -396,7 +396,7 @@ class GenerateProjectCommand extends FlyCommand {
   }) async {
     try {
       // Create orchestrator
-      final orchestrator = FoundationOrchestrator(
+      final orchestrator = TemplateGenerationOrchestrator(
         templateManager: templateManager,
         logger: logger,
       );

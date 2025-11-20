@@ -2,9 +2,12 @@ import 'package:fly_foundation_planning/src/brick_registry.dart';
 import 'package:fly_foundation_planning/src/foundation_model.dart';
 import 'package:fly_foundation_planning/src/logger.dart';
 import 'package:fly_foundation_planning/src/module_invocation.dart';
-import 'package:fly_foundation_planning/src/planner.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
 import 'package:fly_foundation_planning/src/planning_request.dart';
+import 'package:fly_foundation_planning/src/variables/foundation/foundation_pipeline.dart';
+import 'package:fly_foundation_planning/src/variables/generation_context.dart';
+import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
+import 'package:fly_foundation_planning/src/variables/variable_pipeline.dart';
 import 'package:fly_foundation_planning/src/workflow_definition.dart';
 
 /// Main entry point for planning Fly foundation generation.
@@ -14,24 +17,45 @@ import 'package:fly_foundation_planning/src/workflow_definition.dart';
 /// 2. Determine which bricks should be executed based on workflow definitions
 /// 3. Get the variables to pass to each brick
 class FoundationPlanner {
-  final CompositePlanner _planner;
+  final VariablePipeline _variablePipeline;
   final PlanningLogger _logger;
   final BrickRegistry _brickRegistry;
   final WorkflowRegistry _workflowRegistry;
 
-  /// Creates a foundation planner with default configuration.
+  /// Creates a foundation planner with the given variable pipeline.
   FoundationPlanner({
-    CompositePlanner? planner,
+    VariablePipeline? variablePipeline,
     PlanningLogger? logger,
     BrickRegistry? brickRegistry,
     WorkflowRegistry? workflowRegistry,
-  })  : _planner = planner ?? CompositePlanner(),
+  })  : _variablePipeline = variablePipeline ??
+            (throw PlanningException(
+              'VariablePipeline is required. Provide a pipeline or use FoundationPlanner.withDefaultPipeline().',
+            )),
         _logger = logger ?? const NoOpLogger(),
         _brickRegistry = brickRegistry ?? BrickRegistry.defaultRegistry(),
         _workflowRegistry = workflowRegistry ??
             WorkflowRegistry.defaultRegistry(
               brickRegistry ?? BrickRegistry.defaultRegistry(),
             );
+
+  /// Creates a foundation planner with default pipeline configuration.
+  ///
+  /// Uses the standard foundation variable pipeline that includes naming,
+  /// platform, preset, and mode-specific derivation steps.
+  factory FoundationPlanner.withDefaultPipeline({
+    PlanningLogger? logger,
+    BrickRegistry? brickRegistry,
+    WorkflowRegistry? workflowRegistry,
+  }) {
+    final registry = brickRegistry ?? BrickRegistry.defaultRegistry();
+    return FoundationPlanner(
+      variablePipeline: createFoundationPipeline(),
+      logger: logger,
+      brickRegistry: registry,
+      workflowRegistry: workflowRegistry ?? WorkflowRegistry.defaultRegistry(registry),
+    );
+  }
 
   /// Plans foundation generation from raw user input variables.
   ///
@@ -56,17 +80,24 @@ class FoundationPlanner {
     // Step 1: Validate workflow ID
     _workflowRegistry.validateWorkflowId(request.workflowId);
 
-    // Step 2: Convert raw vars to base template variables
+    // Step 2: Create generation context from request
+    final ctx = GenerationContext.fromVars(
+      request.raw,
+      mode: request.generationMode,
+      workflowId: request.workflowId,
+    );
+
+    // Step 3: Convert raw vars to base template variables for convenience
     final base = BaseTemplateVariables.fromVars(request.raw);
 
-    // Step 3: Run the planner to derive composed variables
-    final composed = _planner.run(base, _logger);
+    // Step 4: Run the variable pipeline to derive variables
+    final variableBag = _variablePipeline.run(ctx, _logger);
 
-    // Step 4: Build global vars wrapper
-    final globalVars = GlobalVars(composed: composed, base: base);
+    // Step 5: Build global vars wrapper for backward compatibility
+    final globalVars = GlobalVars(variables: variableBag, base: base);
 
-    // Step 5: Expand workflow into brick invocations
-    final brickInvocations = _expandWorkflow(request, globalVars)
+    // Step 6: Expand workflow into brick invocations
+    final brickInvocations = _expandWorkflow(request, variableBag, base)
 
       // Step 6: Sort invocations by phase and displayName for deterministic execution
       ..sort((a, b) {
@@ -87,7 +118,8 @@ class FoundationPlanner {
   /// Expands a workflow definition into a list of brick invocations.
   List<BrickInvocation> _expandWorkflow(
     PlanningRequest request,
-    GlobalVars globalVars,
+    VariableBag variableBag,
+    BaseTemplateVariables base,
   ) {
     final workflow = _workflowRegistry.getById(request.workflowId);
     if (workflow == null) {
@@ -131,9 +163,9 @@ class FoundationPlanner {
                 };
           final instanceConfig = InstanceConfig.fromMap(instanceMap);
 
-          final vars = brickDef.buildVars(globalVars, instanceConfig);
+          final vars = brickDef.buildVars(variableBag, instanceConfig);
           final targetDir =
-              brickDef.resolveTargetDir?.call(globalVars, instanceConfig);
+              brickDef.resolveTargetDir?.call(variableBag, instanceConfig);
 
           final displayName = _buildDisplayName(step.id, instanceConfig);
           final invocationId = '${step.id}_${invocationCounter++}';
@@ -159,9 +191,9 @@ class FoundationPlanner {
               _createInstanceConfigFromRaw(step.brickId, request.raw);
         }
 
-        final vars = brickDef.buildVars(globalVars, instanceConfig);
+        final vars = brickDef.buildVars(variableBag, instanceConfig);
         final targetDir =
-            brickDef.resolveTargetDir?.call(globalVars, instanceConfig);
+            brickDef.resolveTargetDir?.call(variableBag, instanceConfig);
 
         final displayName = instanceConfig != null
             ? _buildDisplayName(step.id, instanceConfig)

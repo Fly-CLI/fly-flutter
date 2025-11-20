@@ -1,6 +1,6 @@
 import 'package:fly_foundation_planning/src/foundation_model.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
-import 'package:fly_foundation_planning/src/variables/composed_derived_variables.dart';
+import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 
 /// Kind/category of a brick.
 enum BrickKind {
@@ -176,24 +176,24 @@ class ServiceInstanceConfig {
 
 /// Global variables available to all bricks during planning.
 ///
-/// This is essentially a wrapper around ComposedDerivedVariables plus
-/// base template variables for convenience.
+/// This is a wrapper around VariableBag that provides convenient access
+/// to derived variables and base template variables.
 class GlobalVars {
   const GlobalVars({
-    required this.composed,
+    required this.variables,
     required this.base,
   });
 
-  /// Composed derived variables (shared + mode-specific).
-  final ComposedDerivedVariables composed;
+  /// Derived variables from the variable pipeline.
+  final VariableBag variables;
 
   /// Base template variables.
   final BaseTemplateVariables base;
 
   /// Converts to a Mason variables map.
   Map<String, dynamic> toMasonVars() {
-    final result = composed.toMasonVars();
-    // Add base variables that might not be in derived vars
+    final result = variables.toMap();
+    // Ensure base variables are included (they may already be in variables)
     result['name'] = base.name;
     result['organization'] = base.organization;
     result['description'] = base.description;
@@ -225,13 +225,13 @@ class BrickDefinition {
   /// List of brick IDs this brick depends on.
   final List<String> dependencies;
 
-  /// Function to build Mason variables for this brick from global vars and instance config.
-  final Map<String, dynamic> Function(GlobalVars, InstanceConfig?) buildVars;
+  /// Function to build Mason variables for this brick from variable bag and instance config.
+  final Map<String, dynamic> Function(VariableBag variables, InstanceConfig?) buildVars;
 
   /// Optional function to resolve the target directory for this brick.
   ///
   /// If null, the brick will use the root output directory.
-  final String? Function(GlobalVars, InstanceConfig?)? resolveTargetDir;
+  final String? Function(VariableBag variables, InstanceConfig?)? resolveTargetDir;
 }
 
 /// Registry of all known bricks.
@@ -284,9 +284,8 @@ class BrickRegistry {
       id: 'fly_foundation_project',
       kind: BrickKind.projectTemplate,
       dependencies: [],
-      buildVars: (globalVars, instanceConfig) {
-        final vars = globalVars.toMasonVars();
-        return vars;
+      buildVars: (variables, instanceConfig) {
+        return variables.toMap();
       },
     ));
 
@@ -295,8 +294,8 @@ class BrickRegistry {
       id: 'fly_foundation_feature',
       kind: BrickKind.featureComponent,
       dependencies: ['fly_foundation_project'],
-      buildVars: (globalVars, instanceConfig) {
-        final vars = globalVars.toMasonVars();
+      buildVars: (variables, instanceConfig) {
+        final vars = variables.toMap();
         if (instanceConfig != null) {
           final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
             instanceConfig,
@@ -313,7 +312,7 @@ class BrickRegistry {
         }
         return vars;
       },
-      resolveTargetDir: (globalVars, instanceConfig) {
+      resolveTargetDir: (variables, instanceConfig) {
         if (instanceConfig != null) {
           final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
             instanceConfig,
@@ -329,8 +328,8 @@ class BrickRegistry {
       id: 'fly_foundation_service',
       kind: BrickKind.serviceComponent,
       dependencies: ['fly_foundation_project'],
-      buildVars: (globalVars, instanceConfig) {
-        final vars = globalVars.toMasonVars();
+      buildVars: (variables, instanceConfig) {
+        final vars = variables.toMap();
         if (instanceConfig != null) {
           final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
             instanceConfig,
@@ -349,7 +348,7 @@ class BrickRegistry {
         }
         return vars;
       },
-      resolveTargetDir: (globalVars, instanceConfig) {
+      resolveTargetDir: (variables, instanceConfig) {
         if (instanceConfig != null) {
           final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
             instanceConfig,

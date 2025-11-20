@@ -53,10 +53,19 @@ final rawVars = {
 
 final result = planner.planFoundationGeneration(rawVars);
 
-// Execute the planned invocations
-for (final invocation in result.brickInvocations) {
-  print('${invocation.displayName} (phase ${invocation.phase})');
-}
+// Execute the planned invocations using the orchestrator
+// Note: In CLI, use the FoundationOrchestrator wrapper that implements
+// BrickExecutor using TemplateManager and Mason
+final orchestrator = FoundationOrchestrator<String>(
+  executor: myBrickExecutor,  // Implement BrickExecutor for your context
+  logger: myLogger,
+  planner: planner,
+);
+
+final orchestrationResult = await orchestrator.generateFoundation(
+  rawVars: rawVars,
+  outputDirectory: './output',
+);
 ```
 
 ## Architecture
@@ -66,7 +75,8 @@ The planning system consists of several key components:
 1. **[Brick Registry](docs/brick-registry.md)**: Manages brick definitions and metadata
 2. **[Workflow Definitions](docs/workflows.md)**: Declares how bricks are composed
 3. **[Planning Engine](docs/planning.md)**: Expands workflows into execution plans
-4. **[Variable Derivation](docs/variables.md)**: Computes variables for each brick
+4. **[Variable Derivation](docs/variables.md)**: Computes variables for each brick using unified pipeline
+5. **[Orchestration](docs/architecture.md)**: Executes planned brick invocations with phase-based ordering
 
 ## Documentation
 

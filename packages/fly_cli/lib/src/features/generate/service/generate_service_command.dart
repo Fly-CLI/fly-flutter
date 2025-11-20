@@ -287,7 +287,7 @@ class GenerateServiceCommand extends FlyCommand {
 
       // Use foundation orchestrator for service generation
       final templateManager = context.templateManager;
-      final orchestrator = FoundationOrchestrator(
+      final orchestrator = TemplateGenerationOrchestrator(
         templateManager: templateManager,
         logger: logger,
       );

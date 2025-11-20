@@ -91,14 +91,14 @@ SharedDerivedVariables(
 )
 ```
 
-**Planners involved:**
-- `NamingPlanner`: Name variants (snake, camel, pascal)
-- `PlatformPlanner`: Platform flags
-- `PresetPlanner`: Preset application
+**Derivation steps involved:**
+- **Naming step**: Name variants (snake, camel, pascal) - derived in `VariableDerivationPipeline`
+- **Platform step**: Platform flags - computed from base.platforms
+- **Preset shared step**: Preset-based configuration (flyPackages) - applied from active preset
 
 ## Mode-Specific Variables
 
-Computed by mode-specific planners, unique to each generation mode:
+Computed by mode-specific derivation functions in `VariableDerivationPipeline`, unique to each generation mode:
 
 ### Project Variables
 
@@ -231,40 +231,42 @@ Bricks receive a flat `Map<String, dynamic>` with all variables:
 
 ## Variable Derivation Flow
 
-### 1. Preset Application
+The variable derivation uses `VariableDerivationPipeline`, which runs steps in a declarative sequence:
+
+### 1. Preprocessing
 
 ```dart
-final baseWithPreset = PresetPlanner.applyPresetToBase(base, logger);
+final baseWithPreset = pipeline.preprocessor(base, logger);
 ```
 
-Applies preset defaults to base variables.
+Applies preset defaults to base variables (if a preset is specified).
 
-### 2. Cross-Cutting Planners
+### 2. Shared Derivation Steps
 
 ```dart
-for (final planner in _factory.getCrossCuttingPlanners()) {
-  if (planner.canHandle(baseWithPreset)) {
-    shared = planner.derive(baseWithPreset, shared, logger);
+for (final step in pipeline.sharedSteps) {
+  if (step.predicate(baseWithPreset)) {
+    shared = step.derive(baseWithPreset, shared, logger);
   }
 }
 ```
 
-Planners run in order:
-1. `NamingPlanner`: Name variants
-2. `PlatformPlanner`: Platform flags
-3. `CrossCuttingPlanner`: Other shared concerns
+Steps run in order:
+1. **Naming step**: Derives name variants (snake, camel, pascal case)
+2. **Preset shared step**: Applies preset-based configuration (flyPackages)
+3. **Platform step**: Computes platform support flags from base.platforms
 
-### 3. Mode-Specific Planner
+### 3. Mode-Specific Derivation
 
 ```dart
-final modePlanner = _factory.getModePlanner(baseWithPreset.generationMode);
-final modeSpecific = modePlanner.derive(baseWithPreset, logger);
+final modeFn = pipeline.modeFunctions[baseWithPreset.generationMode];
+final modeSpecific = modeFn(baseWithPreset, logger);
 ```
 
-Selects and runs:
-- `ProjectPlanner` for `GenerationMode.project`
-- `FeaturePlanner` for `GenerationMode.feature`
-- `ServicePlanner` for `GenerationMode.service`
+Selects and runs the mode-specific function:
+- Project derivation for `GenerationMode.project`
+- Feature derivation for `GenerationMode.feature`
+- Service derivation for `GenerationMode.service`
 
 ### 4. Composition
 
@@ -272,6 +274,25 @@ Selects and runs:
 return ComposedDerivedVariables(
   shared: shared,
   modeSpecific: modeSpecific,
+);
+```
+
+### Extending the Pipeline
+
+To add new shared derivation steps:
+
+```dart
+final customPipeline = VariableDerivationPipeline(
+  preprocessor: _defaultPreprocessor,
+  sharedSteps: [
+    ..._defaultSharedSteps,
+    SharedDerivationStep(
+      id: 'custom_step',
+      predicate: (base) => base.someCondition,
+      derive: _customDerivation,
+    ),
+  ],
+  modeFunctions: _defaultModeFunctions,
 );
 ```
 
@@ -296,10 +317,10 @@ The brick's `buildVars` receives this and merges it with global vars.
 
 ## Variable Validation
 
-Planners validate variable combinations:
+Derivation functions validate variable combinations:
 
 ```dart
-// ServicePlanner validates service type + options
+// Service derivation validates service type + options
 if (serviceType == ServiceType.analytics && withCaching) {
   throw PlanningException('Analytics services do not support caching');
 }

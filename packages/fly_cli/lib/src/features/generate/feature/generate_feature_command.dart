@@ -273,7 +273,7 @@ class GenerateFeatureCommand extends FlyCommand {
 
       // Use foundation orchestrator for feature generation
       final templateManager = context.templateManager;
-      final orchestrator = FoundationOrchestrator(
+      final orchestrator = TemplateGenerationOrchestrator(
         templateManager: templateManager,
         logger: logger,
       );
