@@ -19,20 +19,18 @@ class FoundationPlanner {
 
   /// Creates a foundation planner with the given variable pipeline.
   ///
-  /// The [variablePipeline] is required. Domain-specific pipelines (e.g., for Fly foundation)
+  /// The [variablePipeline], [workflowRegistry], and [brickRegistry] are required.
+  /// Domain-specific pipelines, workflows, and bricks (e.g., for Fly foundation)
   /// should be provided by higher-level packages (e.g., fly_cli).
   FoundationPlanner({
     required VariablePipeline variablePipeline,
+    required WorkflowRegistry workflowRegistry,
+    required BrickRegistry brickRegistry,
     PlanningLogger? logger,
-    BrickRegistry? brickRegistry,
-    WorkflowRegistry? workflowRegistry,
   })  : _variablePipeline = variablePipeline,
-        _logger = logger ?? const NoOpLogger(),
-        _brickRegistry = brickRegistry ?? BrickRegistry.defaultRegistry(),
-        _workflowRegistry = workflowRegistry ??
-            WorkflowRegistry.defaultRegistry(
-              brickRegistry ?? BrickRegistry.defaultRegistry(),
-            );
+        _workflowRegistry = workflowRegistry,
+        _brickRegistry = brickRegistry,
+        _logger = logger ?? const NoOpLogger();
   final VariablePipeline _variablePipeline;
   final PlanningLogger _logger;
   final BrickRegistry _brickRegistry;
@@ -41,14 +39,19 @@ class FoundationPlanner {
   /// Plans foundation generation from raw user input variables.
   ///
   /// This is a convenience method that creates a PlanningRequest and calls
-  /// [planFromRequest]. For backward compatibility, it infers the workflow
-  /// from the generation_mode in rawVars.
+  /// [planFromRequest]. The [workflowId] must be provided explicitly.
   ///
   /// Returns a [PlanningResult] containing:
   /// - Derived variables ready for template rendering
   /// - List of brick invocations that should be executed
-  PlanningResult planFoundationGeneration(Map<String, dynamic> rawVars) {
-    final request = PlanningRequest.fromVars(rawVars);
+  PlanningResult planFoundationGeneration(
+    Map<String, dynamic> rawVars,
+    WorkflowId workflowId,
+  ) {
+    final request = PlanningRequest.fromVars(
+      rawVars,
+      workflowId: workflowId,
+    );
     return planFromRequest(request);
   }
 
@@ -105,7 +108,7 @@ class FoundationPlanner {
     final workflow = _workflowRegistry.getById(request.workflowId);
     if (workflow == null) {
       throw PlanningException(
-        'Workflow "${request.workflowId.value}" not found in registry.',
+        'Workflow "${request.workflowId}" not found in registry.',
       );
     }
 

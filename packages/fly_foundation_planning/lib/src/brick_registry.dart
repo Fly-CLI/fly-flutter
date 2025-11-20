@@ -25,6 +25,15 @@ enum BrickKind {
 /// This is a flexible model that can represent any per-instance configuration
 /// needed by a brick, with type-specific helpers for common patterns.
 class InstanceConfig {
+
+  /// Creates from a generic map (e.g., from manifest or CLI).
+  factory InstanceConfig.fromMap(Map<String, dynamic> map) {
+    return InstanceConfig(
+      type: map['type'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      params: Map<String, dynamic>.from(map['params'] as Map? ?? {}),
+    );
+  }
   const InstanceConfig({
     required this.type,
     required this.name,
@@ -40,15 +49,6 @@ class InstanceConfig {
   /// Additional parameters specific to this instance.
   final Map<String, dynamic> params;
 
-  /// Creates from a generic map (e.g., from manifest or CLI).
-  factory InstanceConfig.fromMap(Map<String, dynamic> map) {
-    return InstanceConfig(
-      type: map['type'] as String? ?? '',
-      name: map['name'] as String? ?? '',
-      params: Map<String, dynamic>.from(map['params'] as Map? ?? {}),
-    );
-  }
-
   /// Converts to a map representation.
   Map<String, dynamic> toMap() {
     return {
@@ -61,6 +61,22 @@ class InstanceConfig {
 
 /// Helper for feature instance configurations.
 class FeatureInstanceConfig {
+
+  /// Creates from a generic InstanceConfig.
+  factory FeatureInstanceConfig.fromInstanceConfig(InstanceConfig config) {
+    final params = config.params;
+    return FeatureInstanceConfig(
+      name: config.name,
+      featureKey: params['feature'] as String? ?? 'core',
+      screenType: params['screen_type'] != null
+          ? ScreenType.fromKey(params['screen_type'] as String)
+          : null,
+      withViewModel: params['with_viewmodel'] as bool? ?? true,
+      withTests: params['with_tests'] as bool? ?? true,
+      withValidation: params['with_validation'] as bool? ?? false,
+      withNavigation: params['with_navigation'] as bool? ?? false,
+    );
+  }
   const FeatureInstanceConfig({
     required this.name,
     required this.featureKey,
@@ -78,22 +94,6 @@ class FeatureInstanceConfig {
   final bool withTests;
   final bool withValidation;
   final bool withNavigation;
-
-  /// Creates from a generic InstanceConfig.
-  factory FeatureInstanceConfig.fromInstanceConfig(InstanceConfig config) {
-    final params = config.params;
-    return FeatureInstanceConfig(
-      name: config.name,
-      featureKey: params['feature'] as String? ?? 'core',
-      screenType: params['screen_type'] != null
-          ? ScreenType.fromKey(params['screen_type'] as String)
-          : null,
-      withViewModel: params['with_viewmodel'] as bool? ?? true,
-      withTests: params['with_tests'] as bool? ?? true,
-      withValidation: params['with_validation'] as bool? ?? false,
-      withNavigation: params['with_navigation'] as bool? ?? false,
-    );
-  }
 
   /// Converts to InstanceConfig.
   InstanceConfig toInstanceConfig() {
@@ -114,6 +114,25 @@ class FeatureInstanceConfig {
 
 /// Helper for service instance configurations.
 class ServiceInstanceConfig {
+
+  /// Creates from a generic InstanceConfig.
+  factory ServiceInstanceConfig.fromInstanceConfig(InstanceConfig config) {
+    final params = config.params;
+    return ServiceInstanceConfig(
+      name: config.name,
+      featureKey: params['feature'] as String? ?? 'core',
+      serviceType: params['service_type'] != null
+          ? ServiceType.fromKey(params['service_type'] as String)
+          : ServiceType.api,
+      withTests: params['with_tests'] as bool? ?? true,
+      withMocks: params['with_mocks'] as bool? ?? false,
+      withInterceptors: params['with_interceptors'] as bool? ?? false,
+      withRetryLogic: params['with_retry_logic'] as bool? ?? false,
+      withCaching: params['with_caching'] as bool? ?? false,
+      baseUrl:
+          params['base_url'] as String? ?? params['api_base_url'] as String?,
+    );
+  }
   const ServiceInstanceConfig({
     required this.name,
     required this.featureKey,
@@ -135,25 +154,6 @@ class ServiceInstanceConfig {
   final bool withRetryLogic;
   final bool withCaching;
   final String? baseUrl;
-
-  /// Creates from a generic InstanceConfig.
-  factory ServiceInstanceConfig.fromInstanceConfig(InstanceConfig config) {
-    final params = config.params;
-    return ServiceInstanceConfig(
-      name: config.name,
-      featureKey: params['feature'] as String? ?? 'core',
-      serviceType: params['service_type'] != null
-          ? ServiceType.fromKey(params['service_type'] as String)
-          : ServiceType.api,
-      withTests: params['with_tests'] as bool? ?? true,
-      withMocks: params['with_mocks'] as bool? ?? false,
-      withInterceptors: params['with_interceptors'] as bool? ?? false,
-      withRetryLogic: params['with_retry_logic'] as bool? ?? false,
-      withCaching: params['with_caching'] as bool? ?? false,
-      baseUrl:
-          params['base_url'] as String? ?? params['api_base_url'] as String?,
-    );
-  }
 
   /// Converts to InstanceConfig.
   InstanceConfig toInstanceConfig() {
@@ -192,7 +192,8 @@ class GlobalVars {
 
   /// Converts to a Mason variables map.
   Map<String, dynamic> toMasonVars() {
-    final result = variables.toMap();
+    // Create a new map from variables to avoid modifying unmodifiable maps
+    final result = Map<String, dynamic>.from(variables.toMap());
     // Ensure base variables are included (they may already be in variables)
     result['name'] = base.name;
     result['organization'] = base.organization;
@@ -237,20 +238,14 @@ class BrickDefinition {
 /// Registry of all known bricks.
 ///
 /// This registry holds all BrickDefinitions and provides lookup methods.
-/// Bricks are registered in code for now; in the future, this could be data-driven.
+/// This is a domain-agnostic registry. Domain-specific bricks (e.g., for Fly foundation)
+/// should be registered by higher-level packages (e.g., fly_cli).
 class BrickRegistry {
   final Map<String, BrickDefinition> _bricks = {};
   final Map<BrickKind, List<BrickDefinition>> _byKind = {};
 
   /// Creates an empty registry.
   BrickRegistry();
-
-  /// Creates a registry with default foundation bricks registered.
-  factory BrickRegistry.defaultRegistry() {
-    final registry = BrickRegistry();
-    registry._registerFoundationBricks();
-    return registry;
-  }
 
   /// Registers a brick definition.
   void register(BrickDefinition definition) {
@@ -275,88 +270,5 @@ class BrickRegistry {
         'Available bricks: ${_bricks.keys.join(", ")}.',
       );
     }
-  }
-
-  /// Registers the default foundation bricks.
-  void _registerFoundationBricks() {
-    // Project template brick
-    register(BrickDefinition(
-      id: 'fly_foundation_project',
-      kind: BrickKind.projectTemplate,
-      dependencies: [],
-      buildVars: (variables, instanceConfig) {
-        return variables.toMap();
-      },
-    ));
-
-    // Feature component brick
-    register(BrickDefinition(
-      id: 'fly_foundation_feature',
-      kind: BrickKind.featureComponent,
-      dependencies: ['fly_foundation_project'],
-      buildVars: (variables, instanceConfig) {
-        final vars = variables.toMap();
-        if (instanceConfig != null) {
-          final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
-            instanceConfig,
-          );
-          vars['component_name'] = featureConfig.name;
-          vars['feature'] = featureConfig.featureKey;
-          if (featureConfig.screenType != null) {
-            vars['screen_type'] = featureConfig.screenType!.key;
-          }
-          vars['with_viewmodel'] = featureConfig.withViewModel;
-          vars['with_tests'] = featureConfig.withTests;
-          vars['with_validation'] = featureConfig.withValidation;
-          vars['with_navigation'] = featureConfig.withNavigation;
-        }
-        return vars;
-      },
-      resolveTargetDir: (variables, instanceConfig) {
-        if (instanceConfig != null) {
-          final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
-            instanceConfig,
-          );
-          return 'lib/features/${featureConfig.featureKey}';
-        }
-        return null;
-      },
-    ));
-
-    // Service component brick
-    register(BrickDefinition(
-      id: 'fly_foundation_service',
-      kind: BrickKind.serviceComponent,
-      dependencies: ['fly_foundation_project'],
-      buildVars: (variables, instanceConfig) {
-        final vars = variables.toMap();
-        if (instanceConfig != null) {
-          final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
-            instanceConfig,
-          );
-          vars['component_name'] = serviceConfig.name;
-          vars['feature'] = serviceConfig.featureKey;
-          vars['service_type'] = serviceConfig.serviceType.key;
-          vars['with_tests'] = serviceConfig.withTests;
-          vars['with_mocks'] = serviceConfig.withMocks;
-          vars['with_interceptors'] = serviceConfig.withInterceptors;
-          vars['with_retry_logic'] = serviceConfig.withRetryLogic;
-          vars['with_caching'] = serviceConfig.withCaching;
-          if (serviceConfig.baseUrl != null) {
-            vars['api_base_url'] = serviceConfig.baseUrl;
-          }
-        }
-        return vars;
-      },
-      resolveTargetDir: (variables, instanceConfig) {
-        if (instanceConfig != null) {
-          final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
-            instanceConfig,
-          );
-          return 'lib/services/${serviceConfig.featureKey}';
-        }
-        return null;
-      },
-    ),);
   }
 }

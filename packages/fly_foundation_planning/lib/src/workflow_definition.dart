@@ -2,22 +2,25 @@ import 'package:fly_foundation_planning/src/brick_registry.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
 
 /// Identifier for a workflow.
-enum WorkflowId {
-  /// Foundation project workflow (project + optional features + optional services).
-  foundationProject('foundation_project'),
-
-  /// Feature-only workflow (single feature generation).
-  featureOnly('feature_only'),
-
-  /// Service-only workflow (single service generation).
-  serviceOnly('service_only');
-
+///
+/// This is a domain-agnostic value object. Domain-specific workflow IDs
+/// (e.g., for Fly foundation) should be defined in higher-level packages.
+class WorkflowId {
   const WorkflowId(this.value);
 
+  /// The string identifier for this workflow.
   final String value;
 
   @override
   String toString() => value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WorkflowId && runtimeType == other.runtimeType && value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 /// A single step in a workflow definition.
@@ -79,22 +82,15 @@ class WorkflowDefinition {
 }
 
 /// Registry of workflow definitions.
+///
+/// This is a domain-agnostic registry that stores and validates workflows.
+/// Domain-specific workflows (e.g., for Fly foundation) should be registered
+/// by higher-level packages (e.g., fly_cli).
 class WorkflowRegistry {
+  final Map<WorkflowId, WorkflowDefinition> _workflows = {};
 
   /// Creates an empty registry.
   WorkflowRegistry();
-
-  /// Creates a registry with default workflows registered.
-  factory WorkflowRegistry.defaultRegistry(BrickRegistry brickRegistry) {
-    final registry = WorkflowRegistry()
-    .._registerDefaultWorkflows();
-    // Validate all workflows against the brick registry
-    for (final workflow in registry._workflows.values) {
-      workflow.validateBrickIds(brickRegistry);
-    }
-    return registry;
-  }
-  final Map<WorkflowId, WorkflowDefinition> _workflows = {};
 
   /// Registers a workflow definition.
   void register(WorkflowDefinition workflow) {
@@ -114,60 +110,14 @@ class WorkflowRegistry {
     }
   }
 
-  /// Registers default workflows.
-  void _registerDefaultWorkflows() {
-    // Foundation project workflow: project + optional features + optional services
-    register(const WorkflowDefinition(
-      id: WorkflowId.foundationProject,
-      steps: [
-        WorkflowStep(
-          id: 'project',
-          brickId: 'fly_foundation_project',
-          defaultPhase: 0,
-          repeatable: false,
-        ),
-        WorkflowStep(
-          id: 'features',
-          brickId: 'fly_foundation_feature',
-          defaultPhase: 1,
-          repeatable: true,
-          selectionKey: 'features',
-        ),
-        WorkflowStep(
-          id: 'services',
-          brickId: 'fly_foundation_service',
-          defaultPhase: 2,
-          repeatable: true,
-          selectionKey: 'services',
-        ),
-      ],
-    ));
-
-    // Feature-only workflow
-    register(const WorkflowDefinition(
-      id: WorkflowId.featureOnly,
-      steps: [
-        WorkflowStep(
-          id: 'feature',
-          brickId: 'fly_foundation_feature',
-          defaultPhase: 0,
-          repeatable: false,
-        ),
-      ],
-    ));
-
-    // Service-only workflow
-    register(const WorkflowDefinition(
-      id: WorkflowId.serviceOnly,
-      steps: [
-        WorkflowStep(
-          id: 'service',
-          brickId: 'fly_foundation_service',
-          defaultPhase: 0,
-          repeatable: false,
-        ),
-      ],
-    ));
+  /// Validates all registered workflows against a brick registry.
+  ///
+  /// This ensures that all brick IDs referenced in workflow steps exist
+  /// in the given brick registry.
+  void validateAll(BrickRegistry brickRegistry) {
+    for (final workflow in _workflows.values) {
+      workflow.validateBrickIds(brickRegistry);
+    }
   }
 }
 

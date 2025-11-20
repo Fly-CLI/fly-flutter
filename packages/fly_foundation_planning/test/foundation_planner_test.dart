@@ -1,17 +1,25 @@
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 import 'package:test/test.dart';
 
+import 'test_helpers/test_brick_registry.dart';
 import 'test_helpers/test_pipeline.dart';
+import 'test_helpers/test_workflows.dart';
 
 void main() {
   group('FoundationPlanner', () {
     late FoundationPlanner planner;
     late TestLogger logger;
+    late WorkflowRegistry workflowRegistry;
+    late BrickRegistry brickRegistry;
 
     setUp(() {
       logger = TestLogger();
+      brickRegistry = createTestBrickRegistry();
+      workflowRegistry = createTestWorkflowRegistry(brickRegistry);
       planner = FoundationPlanner(
         variablePipeline: createTestPipeline(),
+        workflowRegistry: workflowRegistry,
+        brickRegistry: brickRegistry,
         logger: logger,
       );
     });
@@ -25,7 +33,10 @@ void main() {
         'preset': 'starter',
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       expect(result.moduleInvocations.length, equals(1));
       expect(result.moduleInvocations.first.moduleName, equals('project'));
@@ -45,7 +56,10 @@ void main() {
         'with_tests': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.featureWorkflow,
+      );
 
       expect(result.moduleInvocations.length, equals(1));
       expect(result.moduleInvocations.first.moduleName, equals('feature'));
@@ -66,7 +80,10 @@ void main() {
         'with_mocks': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.serviceWorkflow,
+      );
 
       expect(result.moduleInvocations.length, equals(1));
       expect(result.moduleInvocations.first.moduleName, equals('service'));
@@ -86,7 +103,10 @@ void main() {
         'preset': 'minimal',
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       // Minimal preset should have fewer features enabled
       expect(result.derivedVars['with_tests'], isFalse);
@@ -102,7 +122,7 @@ void main() {
       };
 
       expect(
-        () => planner.planFoundationGeneration(rawVars),
+        () => planner.planFoundationGeneration(rawVars, TestWorkflowIds.serviceWorkflow),
         throwsA(isA<PlanningException>()),
       );
     });
@@ -119,7 +139,10 @@ void main() {
           'preset': preset,
         };
 
-        final result = planner.planFoundationGeneration(rawVars);
+        final result = planner.planFoundationGeneration(
+          rawVars,
+          TestWorkflowIds.projectWorkflow,
+        );
 
         expect(result.moduleInvocations.length, equals(1));
         expect(result.moduleInvocations.first.brickId, equals('fly_foundation_project'));
@@ -136,7 +159,10 @@ void main() {
         'code_generation': false,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       expect(result.derivedVars['code_generation'], isFalse);
       expect(result.derivedVars.containsKey('build_yaml'), isTrue);
@@ -151,7 +177,10 @@ void main() {
         'ai_integration': false,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       expect(result.derivedVars['ai_integration'], isFalse);
       expect(result.derivedVars['with_mcp'], isFalse);
@@ -166,7 +195,10 @@ void main() {
         'with_tests': false,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       expect(result.derivedVars['with_tests'], isFalse);
     });
@@ -179,7 +211,10 @@ void main() {
         'platforms': ['macos', 'windows', 'linux'],
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       expect(result.derivedVars['supports_macos'], isTrue);
       expect(result.derivedVars['supports_windows'], isTrue);
@@ -195,7 +230,10 @@ void main() {
         'with_viewmodel': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.featureWorkflow,
+      );
 
       expect(result.moduleInvocations.first.brickId, equals('fly_foundation_feature'));
       expect(result.derivedVars['is_auth_screen'], isTrue);
@@ -210,7 +248,10 @@ void main() {
         'with_viewmodel': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.featureWorkflow,
+      );
 
       expect(result.derivedVars['is_detail_screen'], isTrue);
     });
@@ -225,7 +266,10 @@ void main() {
         'with_validation': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.featureWorkflow,
+      );
 
       expect(result.derivedVars['is_form_screen'], isTrue);
       expect(result.derivedVars['with_validation'], isTrue);
@@ -240,7 +284,10 @@ void main() {
         'with_viewmodel': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.featureWorkflow,
+      );
 
       expect(result.derivedVars['is_settings_screen'], isTrue);
     });
@@ -253,7 +300,10 @@ void main() {
         'service_type': 'analytics',
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.serviceWorkflow,
+      );
 
       expect(result.moduleInvocations.first.brickId, equals('fly_foundation_service'));
       expect(result.derivedVars['is_analytics_service'], isTrue);
@@ -267,7 +317,10 @@ void main() {
         'service_type': 'cache',
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.serviceWorkflow,
+      );
 
       expect(result.derivedVars['is_cache_service'], isTrue);
     });
@@ -280,7 +333,10 @@ void main() {
         'service_type': 'storage',
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.serviceWorkflow,
+      );
 
       expect(result.derivedVars['is_storage_service'], isTrue);
     });
@@ -293,7 +349,10 @@ void main() {
         'service_type': 'local',
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.serviceWorkflow,
+      );
 
       expect(result.derivedVars['is_local_service'], isTrue);
     });
@@ -309,7 +368,10 @@ void main() {
         'with_interceptors': true,
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.serviceWorkflow,
+      );
 
       expect(result.derivedVars['is_api_service'], isTrue);
       expect(result.derivedVars['supports_retry'], isTrue);
@@ -326,7 +388,10 @@ void main() {
         'features': ['home', 'profile', 'settings'],
       };
 
-      final result = planner.planFoundationGeneration(rawVars);
+      final result = planner.planFoundationGeneration(
+        rawVars,
+        TestWorkflowIds.projectWorkflow,
+      );
 
       expect(result.moduleInvocations.length, equals(1));
       expect(result.derivedVars['features'], isA<List>());

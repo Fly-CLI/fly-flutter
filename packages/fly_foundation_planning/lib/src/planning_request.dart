@@ -2,6 +2,10 @@ import 'package:fly_foundation_planning/src/foundation_model.dart';
 import 'package:fly_foundation_planning/src/workflow_definition.dart';
 
 /// A normalized planning request that represents user input.
+///
+/// This is a domain-agnostic request. Domain-specific workflow inference
+/// (e.g., mapping GenerationMode to WorkflowId) should be handled by
+/// higher-level packages (e.g., fly_cli).
 class PlanningRequest {
   PlanningRequest({
     required this.workflowId,
@@ -10,6 +14,9 @@ class PlanningRequest {
   }) : generationMode = generationMode ?? GenerationMode.fromVars(raw);
 
   /// Workflow identifier indicating which workflow to execute.
+  ///
+  /// This must be provided explicitly. Domain-specific inference should be
+  /// done by the caller (e.g., in fly_cli).
   final WorkflowId workflowId;
 
   /// Generation mode (project, feature, service).
@@ -23,30 +30,19 @@ class PlanningRequest {
   ///   where each entry is a map with `name` and `params`.
   final Map<String, dynamic> raw;
 
-  /// Creates a planning request from raw variables.
+  /// Creates a planning request from raw variables with an explicit workflow ID.
   ///
-  /// Attempts to infer the workflow ID from the raw variables if not explicitly provided.
+  /// The [workflowId] is required. Domain-specific inference logic should be
+  /// provided by higher-level packages.
   factory PlanningRequest.fromVars(
     Map<String, dynamic> rawVars, {
-    WorkflowId? workflowId,
+    required WorkflowId workflowId,
+    GenerationMode? generationMode,
   }) {
-    final inferredWorkflowId = workflowId ?? _inferWorkflowId(rawVars);
     return PlanningRequest(
-      workflowId: inferredWorkflowId,
+      workflowId: workflowId,
       raw: rawVars,
+      generationMode: generationMode,
     );
-  }
-
-  /// Infers the workflow ID from raw variables.
-  static WorkflowId _inferWorkflowId(Map<String, dynamic> rawVars) {
-    final generationMode = GenerationMode.fromVars(rawVars);
-    switch (generationMode) {
-      case GenerationMode.project:
-        return WorkflowId.foundationProject;
-      case GenerationMode.feature:
-        return WorkflowId.featureOnly;
-      case GenerationMode.service:
-        return WorkflowId.serviceOnly;
-    }
   }
 }

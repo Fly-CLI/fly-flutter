@@ -6,6 +6,7 @@ import 'foundation_brick_executor.dart';
 import 'foundation_planner_factory.dart';
 import 'planning_logger_adapter.dart';
 import 'template_manager.dart';
+import 'workflows/foundation_workflow_inference.dart';
 
 /// CLI wrapper for Fly foundation generation orchestration.
 ///
@@ -60,9 +61,13 @@ class TemplateGenerationOrchestrator {
       planner: planner,
     );
 
+    // Infer workflow ID from raw vars
+    final workflowId = FoundationWorkflowInference.inferFromVars(rawVars);
+
     // Execute orchestration
     final result = await orchestrator.generateFoundation(
       rawVars: rawVars,
+      workflowId: workflowId,
       outputDirectory: outputDirectory,
     );
 

@@ -1,3 +1,4 @@
+import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:fly_foundation_planning/src/foundation_planner.dart';
@@ -37,18 +38,20 @@ class FoundationOrchestrator<TFile> {
   /// Plans and executes foundation generation using bricks.
   ///
   /// [rawVars] is the raw input variables from the user (e.g., from CLI flags).
+  /// [workflowId] identifies which workflow to execute.
   /// [outputDirectory] is the root directory where files should be generated.
   ///
   /// Returns a result indicating success or failure with details.
   Future<OrchestrationResult<TFile>> generateFoundation({
     required Map<String, dynamic> rawVars,
+    required WorkflowId workflowId,
     required String outputDirectory,
   }) async {
     try {
       _logger.info('Planning foundation generation...');
 
       // Step 1: Plan generation using the planning library
-      final planningResult = _planner.planFoundationGeneration(rawVars);
+      final planningResult = _planner.planFoundationGeneration(rawVars, workflowId);
 
       // Use brickInvocations (new model) if available, fall back to moduleInvocations
       final invocations = planningResult.brickInvocations.isNotEmpty

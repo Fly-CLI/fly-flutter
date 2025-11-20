@@ -1,12 +1,16 @@
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_cli/src/core/templates/bricks/foundation_brick_registry_factory.dart';
 import 'package:fly_cli/src/core/templates/variable_derivers/foundation_pipeline.dart';
+import 'package:fly_cli/src/core/templates/workflows/foundation_workflow_registry_factory.dart';
 
 /// Factory for creating foundation-specific planners and orchestrators.
 ///
 /// This factory provides configured instances of FoundationPlanner and
-/// FoundationOrchestrator using the Fly foundation variable derivation pipeline.
+/// FoundationOrchestrator using the Fly foundation variable derivation pipeline,
+/// workflow definitions, and brick definitions.
 class FoundationPlannerFactory {
-  /// Creates a FoundationPlanner configured with the foundation variable pipeline.
+  /// Creates a FoundationPlanner configured with the foundation variable pipeline,
+  /// workflow registry, and brick registry.
   ///
   /// [logger] is used for logging during planning.
   /// [brickRegistry] and [workflowRegistry] are optional; defaults will be used if not provided.
@@ -15,12 +19,14 @@ class FoundationPlannerFactory {
     BrickRegistry? brickRegistry,
     WorkflowRegistry? workflowRegistry,
   }) {
-    final registry = brickRegistry ?? BrickRegistry.defaultRegistry();
+    final registry = brickRegistry ?? FoundationBrickRegistryFactory.create();
+    final finalWorkflowRegistry = workflowRegistry ??
+        FoundationWorkflowRegistryFactory.create(registry);
     return FoundationPlanner(
       variablePipeline: createFoundationPipeline(),
+      workflowRegistry: finalWorkflowRegistry,
       logger: logger,
       brickRegistry: registry,
-      workflowRegistry: workflowRegistry ?? WorkflowRegistry.defaultRegistry(registry),
     );
   }
 
