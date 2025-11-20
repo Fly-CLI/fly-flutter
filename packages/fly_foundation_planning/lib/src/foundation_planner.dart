@@ -4,7 +4,6 @@ import 'package:fly_foundation_planning/src/logger.dart';
 import 'package:fly_foundation_planning/src/module_invocation.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
 import 'package:fly_foundation_planning/src/planning_request.dart';
-import 'package:fly_foundation_planning/src/variables/foundation/foundation_pipeline.dart';
 import 'package:fly_foundation_planning/src/variables/generation_context.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 import 'package:fly_foundation_planning/src/variables/variable_pipeline.dart';
@@ -17,45 +16,27 @@ import 'package:fly_foundation_planning/src/workflow_definition.dart';
 /// 2. Determine which bricks should be executed based on workflow definitions
 /// 3. Get the variables to pass to each brick
 class FoundationPlanner {
-  final VariablePipeline _variablePipeline;
-  final PlanningLogger _logger;
-  final BrickRegistry _brickRegistry;
-  final WorkflowRegistry _workflowRegistry;
 
   /// Creates a foundation planner with the given variable pipeline.
+  ///
+  /// The [variablePipeline] is required. Domain-specific pipelines (e.g., for Fly foundation)
+  /// should be provided by higher-level packages (e.g., fly_cli).
   FoundationPlanner({
-    VariablePipeline? variablePipeline,
+    required VariablePipeline variablePipeline,
     PlanningLogger? logger,
     BrickRegistry? brickRegistry,
     WorkflowRegistry? workflowRegistry,
-  })  : _variablePipeline = variablePipeline ??
-            (throw PlanningException(
-              'VariablePipeline is required. Provide a pipeline or use FoundationPlanner.withDefaultPipeline().',
-            )),
+  })  : _variablePipeline = variablePipeline,
         _logger = logger ?? const NoOpLogger(),
         _brickRegistry = brickRegistry ?? BrickRegistry.defaultRegistry(),
         _workflowRegistry = workflowRegistry ??
             WorkflowRegistry.defaultRegistry(
               brickRegistry ?? BrickRegistry.defaultRegistry(),
             );
-
-  /// Creates a foundation planner with default pipeline configuration.
-  ///
-  /// Uses the standard foundation variable pipeline that includes naming,
-  /// platform, preset, and mode-specific derivation steps.
-  factory FoundationPlanner.withDefaultPipeline({
-    PlanningLogger? logger,
-    BrickRegistry? brickRegistry,
-    WorkflowRegistry? workflowRegistry,
-  }) {
-    final registry = brickRegistry ?? BrickRegistry.defaultRegistry();
-    return FoundationPlanner(
-      variablePipeline: createFoundationPipeline(),
-      logger: logger,
-      brickRegistry: registry,
-      workflowRegistry: workflowRegistry ?? WorkflowRegistry.defaultRegistry(registry),
-    );
-  }
+  final VariablePipeline _variablePipeline;
+  final PlanningLogger _logger;
+  final BrickRegistry _brickRegistry;
+  final WorkflowRegistry _workflowRegistry;
 
   /// Plans foundation generation from raw user input variables.
   ///

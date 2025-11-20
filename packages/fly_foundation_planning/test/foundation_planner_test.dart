@@ -1,6 +1,8 @@
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 import 'package:test/test.dart';
 
+import 'test_helpers/test_pipeline.dart';
+
 void main() {
   group('FoundationPlanner', () {
     late FoundationPlanner planner;
@@ -8,7 +10,10 @@ void main() {
 
     setUp(() {
       logger = TestLogger();
-      planner = FoundationPlanner.withDefaultPipeline(logger: logger);
+      planner = FoundationPlanner(
+        variablePipeline: createTestPipeline(),
+        logger: logger,
+      );
     });
 
     test('plans project generation correctly', () {

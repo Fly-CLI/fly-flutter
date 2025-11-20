@@ -16,25 +16,23 @@ import 'package:fly_foundation_planning/src/orchestration/orchestration_result.d
 /// The type parameter `TFile` allows different hosts (CLI, tests, etc.) to use
 /// their own file representations.
 class FoundationOrchestrator<TFile> {
-  final BrickExecutor<TFile> _executor;
-  final PlanningLogger _logger;
-  final FoundationPlanner _planner;
 
   /// Creates a foundation orchestrator with the given dependencies.
   ///
   /// [executor] is responsible for actually executing brick generation.
   /// [logger] is used for logging orchestration progress.
-  /// [planner] is used to plan the brick invocations from raw input.
+  /// [planner] is required and should be configured with an appropriate
+  /// VariablePipeline by the caller (e.g., from fly_cli package).
   FoundationOrchestrator({
     required BrickExecutor<TFile> executor,
     required PlanningLogger logger,
-    FoundationPlanner? planner,
+    required FoundationPlanner planner,
   })  : _executor = executor,
         _logger = logger,
-        _planner = planner ??
-            FoundationPlanner.withDefaultPipeline(
-              logger: logger,
-            );
+        _planner = planner;
+  final BrickExecutor<TFile> _executor;
+  final PlanningLogger _logger;
+  final FoundationPlanner _planner;
 
   /// Plans and executes foundation generation using bricks.
   ///

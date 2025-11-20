@@ -1,10 +1,10 @@
-import 'package:fly_foundation_planning/src/variables/foundation/feature_mode_deriver.dart';
-import 'package:fly_foundation_planning/src/variables/foundation/naming_deriver.dart';
-import 'package:fly_foundation_planning/src/variables/foundation/platform_deriver.dart';
-import 'package:fly_foundation_planning/src/variables/foundation/preset_deriver.dart';
-import 'package:fly_foundation_planning/src/variables/foundation/project_mode_deriver.dart';
-import 'package:fly_foundation_planning/src/variables/foundation/service_mode_deriver.dart';
-import 'package:fly_foundation_planning/src/variables/variable_pipeline.dart';
+import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_cli/src/core/templates/variable_derivers/feature_mode_deriver.dart';
+import 'package:fly_cli/src/core/templates/variable_derivers/naming_deriver.dart';
+import 'package:fly_cli/src/core/templates/variable_derivers/platform_deriver.dart';
+import 'package:fly_cli/src/core/templates/variable_derivers/preset_deriver.dart';
+import 'package:fly_cli/src/core/templates/variable_derivers/project_mode_deriver.dart';
+import 'package:fly_cli/src/core/templates/variable_derivers/service_mode_deriver.dart';
 
 /// Default foundation variable pipeline.
 ///

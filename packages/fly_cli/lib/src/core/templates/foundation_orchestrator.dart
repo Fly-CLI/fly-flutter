@@ -3,6 +3,7 @@ import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'foundation_brick_executor.dart';
+import 'foundation_planner_factory.dart';
 import 'planning_logger_adapter.dart';
 import 'template_manager.dart';
 
@@ -47,8 +48,10 @@ class TemplateGenerationOrchestrator {
       templateManager: _templateManager,
     );
 
-    // Create the planner if not provided
-    final planner = _planner ?? FoundationPlanner(logger: planningLogger);
+    // Create the planner if not provided using the foundation factory
+    final planner = _planner ?? FoundationPlannerFactory.createPlanner(
+      logger: planningLogger,
+    );
 
     // Create the orchestrator from the planning package
     final orchestrator = FoundationOrchestrator<GeneratedFile>(
