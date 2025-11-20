@@ -1,72 +1,129 @@
-# fly_foundation_planning
+# Fly Foundation Planning
 
-Shared planning library for Fly foundation template generation.
+A flexible, extensible planning system for orchestrating multi-brick Flutter project generation.
 
 ## Overview
 
-This library provides planning and variable derivation logic for the Fly foundation template generation system. It is a pure Dart library with no Mason-specific dependencies, making it reusable across different tools and integrations.
+The Fly Foundation Planning library provides a powerful workflow engine that enables composable brick-based project generation. Instead of hard-coding brick relationships, this system uses declarative workflow definitions to orchestrate multiple independent bricks in a single generation process.
 
-## Features
+## Key Concepts
 
-- **Variable Derivation**: Converts raw user input into derived variables for template rendering
-- **Module Selection**: Determines which module bricks should be executed based on generation mode
-- **Preset Support**: Applies preset configurations (starter, batteries_included, minimal)
-- **Mode Support**: Handles project, feature, and service generation modes
-- **Validation**: Validates variable combinations and throws clear errors for invalid inputs
+- **Bricks**: Independent, reusable code generation units (e.g., `fly_foundation_project`, `fly_foundation_feature`, `fly_foundation_service`)
+- **Workflows**: Declarative definitions that describe how to compose bricks together
+- **Planning**: The process of expanding a workflow into an ordered list of brick invocations
+- **Orchestration**: The execution of planned brick invocations with proper ordering and variable propagation
 
-## Usage
+## Quick Start
 
 ```dart
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 
+// Create a planner
 final planner = FoundationPlanner();
-final result = planner.planFoundationGeneration({
-  'name': 'my_project',
+
+// Plan a foundation project with features and services
+final rawVars = {
+  'name': 'my_app',
   'organization': 'com.example',
-  'generation_mode': 'project',
   'platforms': ['ios', 'android'],
-  'preset': 'starter',
-});
+  'generation_mode': 'project',
+  'features': [
+    {
+      'name': 'home',
+      'type': 'feature',
+      'params': {
+        'feature': 'home',
+        'screen_type': 'list',
+        'with_viewmodel': true,
+      },
+    },
+  ],
+  'services': [
+    {
+      'name': 'api',
+      'type': 'service',
+      'params': {
+        'feature': 'core',
+        'service_type': 'api',
+        'with_tests': true,
+      },
+    },
+  ],
+};
 
-// Get which bricks to run
-for (final invocation in result.moduleInvocations) {
-  print('Run brick: ${invocation.brickId}');
-  print('Variables: ${invocation.vars}');
+final result = planner.planFoundationGeneration(rawVars);
+
+// Execute the planned invocations
+for (final invocation in result.brickInvocations) {
+  print('${invocation.displayName} (phase ${invocation.phase})');
 }
-
-// Get all derived variables
-final derivedVars = result.derivedVars;
 ```
 
 ## Architecture
 
-### Core Components
+The planning system consists of several key components:
 
-- **FoundationPlanner**: Main entry point for planning generation
-- **CompositePlanner**: Orchestrates variable derivation using multiple planners
-- **PlannerFactory**: Manages mode-specific and cross-cutting planners
-- **ModuleInvocation**: Represents a brick that should be executed
+1. **[Brick Registry](docs/brick-registry.md)**: Manages brick definitions and metadata
+2. **[Workflow Definitions](docs/workflows.md)**: Declares how bricks are composed
+3. **[Planning Engine](docs/planning.md)**: Expands workflows into execution plans
+4. **[Variable Derivation](docs/variables.md)**: Computes variables for each brick
 
-### Planners
+## Documentation
 
-- **Mode-Specific Planners**: ProjectPlanner, FeaturePlanner, ServicePlanner
-- **Cross-Cutting Planners**: NamingPlanner, PresetPlanner, PlatformPlanner
+- [Architecture Overview](docs/architecture.md) - High-level system design
+- [Brick Registry](docs/brick-registry.md) - How bricks are defined and registered
+- [Workflows](docs/workflows.md) - Creating and using workflow definitions
+- [Planning Process](docs/planning.md) - How planning works internally
+- [Variable System](docs/variables.md) - Variable derivation and propagation
+- [Extending the System](docs/extending.md) - Adding new bricks and workflows
+- [Examples](docs/examples.md) - Practical usage examples
 
-### Variables
+## Features
 
-- **BaseTemplateVariables**: Raw input variables
-- **ComposedDerivedVariables**: Final derived variables (shared + mode-specific)
-- **SharedDerivedVariables**: Variables common to all modes
-- **ModeSpecificVariables**: Variables specific to project/feature/service
+- **Composable**: Mix and match bricks in any combination
+- **Extensible**: Add new bricks without modifying core logic
+- **Declarative**: Define workflows as data, not code
+- **Type-Safe**: Strong typing throughout the planning pipeline
+- **Flexible**: Support for single-brick and multi-brick workflows
+- **Ordered**: Automatic phase-based execution ordering
 
-## Integration
+## Usage Patterns
 
-This library is used by:
+### Single Brick Generation
 
-- **Fly CLI**: For orchestrating foundation generation
-- **Future Tools**: Can be integrated into other tools that need to plan Fly foundation generation
+```dart
+// Generate a single feature
+final result = planner.planFoundationGeneration({
+  'name': 'home_screen',
+  'generation_mode': 'feature',
+  'feature': 'home',
+  'screen_type': 'list',
+});
+```
+
+### Multi-Brick Project Generation
+
+```dart
+// Generate project with multiple features and services
+final result = planner.planFoundationGeneration({
+  'name': 'my_app',
+  'generation_mode': 'project',
+  'features': [/* ... */],
+  'services': [/* ... */],
+});
+```
+
+## Contributing
+
+When adding new bricks or workflows:
+
+1. Register the brick in `BrickRegistry`
+2. Define a workflow (if needed) in `WorkflowRegistry`
+3. Implement brick-specific variable mapping
+4. Add tests for the new functionality
+
+See [Extending the System](docs/extending.md) for detailed instructions.
 
 ## License
 
-See the main Fly repository for license information.
-
+See the main project LICENSE file.
