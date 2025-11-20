@@ -64,9 +64,28 @@ class ModuleInvocation {
   final String? targetDir;
 
   /// Creates a ModuleInvocation from a BrickInvocation.
+  ///
+  /// Extracts module name from brick ID or display name for backward compatibility.
+  /// For example: 'fly_foundation_project' → 'project', 'service_step' → 'service'
   factory ModuleInvocation.fromBrickInvocation(BrickInvocation invocation) {
+    // Extract module name from brick ID (e.g., 'fly_foundation_project' → 'project')
+    final brickId = invocation.brickId;
+    String moduleName;
+    if (brickId.startsWith('fly_foundation_')) {
+      moduleName = brickId.substring('fly_foundation_'.length);
+    } else {
+      // Try to extract from displayName (e.g., 'service_step' → 'service')
+      final displayName = invocation.displayName;
+      if (displayName.endsWith('_step')) {
+        moduleName = displayName.substring(0, displayName.length - '_step'.length);
+      } else {
+        // Fallback to displayName
+        moduleName = displayName;
+      }
+    }
+    
     return ModuleInvocation(
-      moduleName: invocation.displayName,
+      moduleName: moduleName,
       brickId: invocation.brickId,
       vars: invocation.vars,
       targetDir: invocation.targetDir,

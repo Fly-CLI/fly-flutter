@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/src/foundation_model.dart';
+import 'package:fly_foundation_planning/src/core_template_input.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 
@@ -59,146 +59,35 @@ class InstanceConfig {
   }
 }
 
-/// Helper for feature instance configurations.
-class FeatureInstanceConfig {
-
-  /// Creates from a generic InstanceConfig.
-  factory FeatureInstanceConfig.fromInstanceConfig(InstanceConfig config) {
-    final params = config.params;
-    return FeatureInstanceConfig(
-      name: config.name,
-      featureKey: params['feature'] as String? ?? 'core',
-      screenType: params['screen_type'] != null
-          ? ScreenType.fromKey(params['screen_type'] as String)
-          : null,
-      withViewModel: params['with_viewmodel'] as bool? ?? true,
-      withTests: params['with_tests'] as bool? ?? true,
-      withValidation: params['with_validation'] as bool? ?? false,
-      withNavigation: params['with_navigation'] as bool? ?? false,
-    );
-  }
-  const FeatureInstanceConfig({
-    required this.name,
-    required this.featureKey,
-    this.screenType,
-    this.withViewModel = true,
-    this.withTests = true,
-    this.withValidation = false,
-    this.withNavigation = false,
-  });
-
-  final String name;
-  final String featureKey;
-  final ScreenType? screenType;
-  final bool withViewModel;
-  final bool withTests;
-  final bool withValidation;
-  final bool withNavigation;
-
-  /// Converts to InstanceConfig.
-  InstanceConfig toInstanceConfig() {
-    return InstanceConfig(
-      type: 'feature',
-      name: name,
-      params: {
-        'feature': featureKey,
-        if (screenType != null) 'screen_type': screenType!.key,
-        'with_viewmodel': withViewModel,
-        'with_tests': withTests,
-        'with_validation': withValidation,
-        'with_navigation': withNavigation,
-      },
-    );
-  }
-}
-
-/// Helper for service instance configurations.
-class ServiceInstanceConfig {
-
-  /// Creates from a generic InstanceConfig.
-  factory ServiceInstanceConfig.fromInstanceConfig(InstanceConfig config) {
-    final params = config.params;
-    return ServiceInstanceConfig(
-      name: config.name,
-      featureKey: params['feature'] as String? ?? 'core',
-      serviceType: params['service_type'] != null
-          ? ServiceType.fromKey(params['service_type'] as String)
-          : ServiceType.api,
-      withTests: params['with_tests'] as bool? ?? true,
-      withMocks: params['with_mocks'] as bool? ?? false,
-      withInterceptors: params['with_interceptors'] as bool? ?? false,
-      withRetryLogic: params['with_retry_logic'] as bool? ?? false,
-      withCaching: params['with_caching'] as bool? ?? false,
-      baseUrl:
-          params['base_url'] as String? ?? params['api_base_url'] as String?,
-    );
-  }
-  const ServiceInstanceConfig({
-    required this.name,
-    required this.featureKey,
-    required this.serviceType,
-    this.withTests = true,
-    this.withMocks = false,
-    this.withInterceptors = false,
-    this.withRetryLogic = false,
-    this.withCaching = false,
-    this.baseUrl,
-  });
-
-  final String name;
-  final String featureKey;
-  final ServiceType serviceType;
-  final bool withTests;
-  final bool withMocks;
-  final bool withInterceptors;
-  final bool withRetryLogic;
-  final bool withCaching;
-  final String? baseUrl;
-
-  /// Converts to InstanceConfig.
-  InstanceConfig toInstanceConfig() {
-    return InstanceConfig(
-      type: 'service',
-      name: name,
-      params: {
-        'feature': featureKey,
-        'service_type': serviceType.key,
-        'with_tests': withTests,
-        'with_mocks': withMocks,
-        'with_interceptors': withInterceptors,
-        'with_retry_logic': withRetryLogic,
-        'with_caching': withCaching,
-        if (baseUrl != null) 'api_base_url': baseUrl,
-      },
-    );
-  }
-}
-
 /// Global variables available to all bricks during planning.
 ///
 /// This is a wrapper around VariableBag that provides convenient access
-/// to derived variables and base template variables.
+/// to derived variables and core template input.
+///
+/// Note: For domain-specific template variables (e.g., presets, feature/service
+/// flags), use domain-specific wrappers in higher-level packages (e.g., fly_cli).
 class GlobalVars {
   const GlobalVars({
     required this.variables,
-    required this.base,
+    required this.coreInput,
   });
 
   /// Derived variables from the variable pipeline.
   final VariableBag variables;
 
-  /// Base template variables.
-  final BaseTemplateVariables base;
+  /// Core template input variables.
+  final CoreTemplateInput coreInput;
 
   /// Converts to a Mason variables map.
   Map<String, dynamic> toMasonVars() {
     // Create a new map from variables to avoid modifying unmodifiable maps
     final result = Map<String, dynamic>.from(variables.toMap());
-    // Ensure base variables are included (they may already be in variables)
-    result['name'] = base.name;
-    result['organization'] = base.organization;
-    result['description'] = base.description;
-    result['generation_mode'] = base.generationMode.key;
+    // Ensure core input variables are included (they may already be in variables)
+    result['name'] = coreInput.name;
+    result['organization'] = coreInput.organization;
+    result['description'] = coreInput.description;
+    result['generation_mode'] = coreInput.generationMode.key;
+    result['platforms'] = coreInput.platforms;
     return result;
   }
 }

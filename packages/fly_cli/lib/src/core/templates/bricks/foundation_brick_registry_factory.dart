@@ -1,4 +1,5 @@
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_cli/src/core/templates/foundation_domain/foundation_instance_configs.dart';
 
 /// Factory for creating a BrickRegistry configured with Fly foundation bricks.
 class FoundationBrickRegistryFactory {
@@ -17,7 +18,8 @@ class FoundationBrickRegistryFactory {
       kind: BrickKind.projectTemplate,
       dependencies: [],
       buildVars: (variables, instanceConfig) {
-        return variables.toMap();
+        // Create a new map to avoid modifying unmodifiable maps
+        return Map<String, dynamic>.from(variables.toMap());
       },
     ));
 
@@ -27,7 +29,8 @@ class FoundationBrickRegistryFactory {
       kind: BrickKind.featureComponent,
       dependencies: ['fly_foundation_project'],
       buildVars: (variables, instanceConfig) {
-        final vars = variables.toMap();
+        // Create a new map to avoid modifying unmodifiable maps
+        final vars = Map<String, dynamic>.from(variables.toMap());
         if (instanceConfig != null) {
           final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
             instanceConfig,
@@ -61,7 +64,8 @@ class FoundationBrickRegistryFactory {
       kind: BrickKind.serviceComponent,
       dependencies: ['fly_foundation_project'],
       buildVars: (variables, instanceConfig) {
-        final vars = variables.toMap();
+        // Create a new map to avoid modifying unmodifiable maps
+        final vars = Map<String, dynamic>.from(variables.toMap());
         if (instanceConfig != null) {
           final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
             instanceConfig,

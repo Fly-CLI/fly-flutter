@@ -1,6 +1,8 @@
-import 'package:fly_foundation_planning/src/foundation_model.dart';
-import 'package:fly_foundation_planning/src/mason_variable_keys.dart';
-import 'package:fly_foundation_planning/src/planning_exception.dart';
+import 'package:fly_cli/src/core/templates/foundation_domain/foundation_exception.dart';
+import 'package:fly_cli/src/core/templates/foundation_domain/foundation_template_variables.dart';
+import 'package:fly_cli/src/core/templates/foundation_domain/foundation_types.dart'
+    show ScreenType, ServiceType, StateManagement, ProjectName, FoundationVars;
+import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
 /// Comprehensive configuration for a foundation preset.
 ///
@@ -54,10 +56,13 @@ class PresetConfiguration {
   // Package configuration
   final List<String> flyPackages;
 
-  /// Applies this configuration to a BaseTemplateVariables instance.
+  /// Applies this configuration to a FoundationTemplateVariables instance.
   ///
   /// [presetKey] is the string key of the preset being applied.
-  BaseTemplateVariables applyTo(BaseTemplateVariables base, String presetKey) {
+  FoundationTemplateVariables applyTo(
+    FoundationTemplateVariables base,
+    String presetKey,
+  ) {
     return base.copyWith(
       withTests: withTests,
       withDocs: withDocs,
@@ -207,7 +212,7 @@ enum FoundationPreset {
 
   /// Parses preset from vars and returns the corresponding enum.
   /// Defaults to starter if not specified.
-  static FoundationPreset fromVars(Vars vars) {
+  static FoundationPreset fromVars(FoundationVars vars) {
     final presetStr = vars.getVar<String>(MasonVarKey.preset)?.toLowerCase();
     if (presetStr == null || presetStr.isEmpty) {
       return FoundationPreset.starter; // Default
@@ -219,13 +224,14 @@ enum FoundationPreset {
       }
     }
 
-    throw PlanningException(
+    throw FoundationDomainException(
       'Invalid preset: "$presetStr". Must be one of: ${allKeys.join(', ')}.',
     );
   }
 
-  /// Creates a BaseTemplateVariables with preset values applied.
-  BaseTemplateVariables applyTo(BaseTemplateVariables base) {
+  /// Creates a FoundationTemplateVariables with preset values applied.
+  FoundationTemplateVariables applyTo(FoundationTemplateVariables base) {
     return config.applyTo(base, key);
   }
 }
+

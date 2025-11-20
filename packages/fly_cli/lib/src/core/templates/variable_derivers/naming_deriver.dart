@@ -1,4 +1,5 @@
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
 /// Deriver that sets naming-related variables (snake_case, camelCase, PascalCase).
 class NamingDeriver implements VariableDeriver {

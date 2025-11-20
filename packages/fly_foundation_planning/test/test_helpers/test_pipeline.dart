@@ -1,6 +1,5 @@
 import 'package:fly_foundation_planning/src/foundation_model.dart';
 import 'package:fly_foundation_planning/src/logger.dart';
-import 'package:fly_foundation_planning/src/mason_variable_keys.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
 import 'package:fly_foundation_planning/src/variables/generation_context.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
@@ -24,7 +23,7 @@ class TestBasicDeriver implements VariableDeriver {
     PlanningLogger logger,
   ) {
     final name = ctx.rawVars['name'] as String? ?? 'test';
-    return current.set(MasonVarKey.name.key, name);
+    return current.set('name', name);
   }
 }
 

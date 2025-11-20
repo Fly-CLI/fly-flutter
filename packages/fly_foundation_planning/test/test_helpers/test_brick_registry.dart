@@ -26,27 +26,23 @@ BrickRegistry createTestBrickRegistry() {
       // Create a new map to avoid modifying unmodifiable maps
       final vars = Map<String, dynamic>.from(variables.toMap());
       if (instanceConfig != null) {
-        final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
-          instanceConfig,
-        );
-        vars['component_name'] = featureConfig.name;
-        vars['feature'] = featureConfig.featureKey;
-        if (featureConfig.screenType != null) {
-          vars['screen_type'] = featureConfig.screenType!.key;
+        // Use generic InstanceConfig directly (domain-specific helpers are in CLI)
+        vars['component_name'] = instanceConfig.name;
+        vars['feature'] = instanceConfig.params['feature'] as String? ?? 'core';
+        if (instanceConfig.params['screen_type'] != null) {
+          vars['screen_type'] = instanceConfig.params['screen_type'];
         }
-        vars['with_viewmodel'] = featureConfig.withViewModel;
-        vars['with_tests'] = featureConfig.withTests;
-        vars['with_validation'] = featureConfig.withValidation;
-        vars['with_navigation'] = featureConfig.withNavigation;
+        vars['with_viewmodel'] = instanceConfig.params['with_viewmodel'] as bool? ?? true;
+        vars['with_tests'] = instanceConfig.params['with_tests'] as bool? ?? true;
+        vars['with_validation'] = instanceConfig.params['with_validation'] as bool? ?? false;
+        vars['with_navigation'] = instanceConfig.params['with_navigation'] as bool? ?? false;
       }
       return vars;
     },
     resolveTargetDir: (variables, instanceConfig) {
       if (instanceConfig != null) {
-        final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
-          instanceConfig,
-        );
-        return 'lib/features/${featureConfig.featureKey}';
+        final featureKey = instanceConfig.params['feature'] as String? ?? 'core';
+        return 'lib/features/$featureKey';
       }
       return null;
     },
@@ -61,29 +57,25 @@ BrickRegistry createTestBrickRegistry() {
       // Create a new map to avoid modifying unmodifiable maps
       final vars = Map<String, dynamic>.from(variables.toMap());
       if (instanceConfig != null) {
-        final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
-          instanceConfig,
-        );
-        vars['component_name'] = serviceConfig.name;
-        vars['feature'] = serviceConfig.featureKey;
-        vars['service_type'] = serviceConfig.serviceType.key;
-        vars['with_tests'] = serviceConfig.withTests;
-        vars['with_mocks'] = serviceConfig.withMocks;
-        vars['with_interceptors'] = serviceConfig.withInterceptors;
-        vars['with_retry_logic'] = serviceConfig.withRetryLogic;
-        vars['with_caching'] = serviceConfig.withCaching;
-        if (serviceConfig.baseUrl != null) {
-          vars['api_base_url'] = serviceConfig.baseUrl;
+        // Use generic InstanceConfig directly (domain-specific helpers are in CLI)
+        vars['component_name'] = instanceConfig.name;
+        vars['feature'] = instanceConfig.params['feature'] as String? ?? 'core';
+        vars['service_type'] = instanceConfig.params['service_type'] as String? ?? 'api';
+        vars['with_tests'] = instanceConfig.params['with_tests'] as bool? ?? true;
+        vars['with_mocks'] = instanceConfig.params['with_mocks'] as bool? ?? false;
+        vars['with_interceptors'] = instanceConfig.params['with_interceptors'] as bool? ?? false;
+        vars['with_retry_logic'] = instanceConfig.params['with_retry_logic'] as bool? ?? false;
+        vars['with_caching'] = instanceConfig.params['with_caching'] as bool? ?? false;
+        if (instanceConfig.params['api_base_url'] != null) {
+          vars['api_base_url'] = instanceConfig.params['api_base_url'];
         }
       }
       return vars;
     },
     resolveTargetDir: (variables, instanceConfig) {
       if (instanceConfig != null) {
-        final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
-          instanceConfig,
-        );
-        return 'lib/services/${serviceConfig.featureKey}';
+        final featureKey = instanceConfig.params['feature'] as String? ?? 'core';
+        return 'lib/services/$featureKey';
       }
       return null;
     },

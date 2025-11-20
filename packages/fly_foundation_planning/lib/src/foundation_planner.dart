@@ -1,4 +1,5 @@
 import 'package:fly_foundation_planning/src/brick_registry.dart';
+import 'package:fly_foundation_planning/src/core_template_input.dart';
 import 'package:fly_foundation_planning/src/foundation_model.dart';
 import 'package:fly_foundation_planning/src/logger.dart';
 import 'package:fly_foundation_planning/src/module_invocation.dart';
@@ -71,17 +72,24 @@ class FoundationPlanner {
       workflowId: request.workflowId,
     );
 
-    // Step 3: Convert raw vars to base template variables for convenience
-    final base = BaseTemplateVariables.fromVars(request.raw);
+    // Step 3: Convert raw vars to core template input
+    final coreInput = CoreTemplateInput(
+      name: request.raw['name'] as String? ?? 'unnamed',
+      organization: request.raw['organization'] as String? ?? 'com.example',
+      generationMode: request.generationMode,
+      platforms: (request.raw['platforms'] as List?)?.map((e) => e.toString()).toList() ?? 
+          ['ios', 'android'],
+      description: request.raw['description'] as String? ?? '',
+    );
 
     // Step 4: Run the variable pipeline to derive variables
     final variableBag = _variablePipeline.run(ctx, _logger);
 
-    // Step 5: Build global vars wrapper for backward compatibility
-    final globalVars = GlobalVars(variables: variableBag, base: base);
+    // Step 5: Build global vars wrapper
+    final globalVars = GlobalVars(variables: variableBag, coreInput: coreInput);
 
     // Step 6: Expand workflow into brick invocations
-    final brickInvocations = _expandWorkflow(request, variableBag, base)
+    final brickInvocations = _expandWorkflow(request, variableBag)
 
       // Step 6: Sort invocations by phase and displayName for deterministic execution
       ..sort((a, b) {
@@ -103,7 +111,6 @@ class FoundationPlanner {
   List<BrickInvocation> _expandWorkflow(
     PlanningRequest request,
     VariableBag variableBag,
-    BaseTemplateVariables base,
   ) {
     final workflow = _workflowRegistry.getById(request.workflowId);
     if (workflow == null) {
@@ -151,7 +158,10 @@ class FoundationPlanner {
           final targetDir =
               brickDef.resolveTargetDir?.call(variableBag, instanceConfig);
 
-          final displayName = _buildDisplayName(step.id, instanceConfig);
+          // Build display name from step ID and instance config
+          final displayName = instanceConfig != null
+              ? '${step.id}:${instanceConfig.name}'
+              : step.id;
           final invocationId = '${step.id}_${invocationCounter++}';
 
           invocations.add(
@@ -167,21 +177,12 @@ class FoundationPlanner {
         }
       } else {
         // Single step: create one invocation
-        // For standalone feature/service generation, create InstanceConfig from rawVars
-        InstanceConfig? instanceConfig;
-        if (step.brickId == 'fly_foundation_feature' ||
-            step.brickId == 'fly_foundation_service') {
-          instanceConfig =
-              _createInstanceConfigFromRaw(step.brickId, request.raw);
-        }
+        // Domain-specific instance config creation should be handled by
+        // the brick definition's buildVars function, not by the planner.
+        final vars = brickDef.buildVars(variableBag, null);
+        final targetDir = brickDef.resolveTargetDir?.call(variableBag, null);
 
-        final vars = brickDef.buildVars(variableBag, instanceConfig);
-        final targetDir =
-            brickDef.resolveTargetDir?.call(variableBag, instanceConfig);
-
-        final displayName = instanceConfig != null
-            ? _buildDisplayName(step.id, instanceConfig)
-            : step.id;
+        final displayName = step.id;
         final invocationId = '${step.id}_${invocationCounter++}';
 
         invocations.add(BrickInvocation(
@@ -198,58 +199,6 @@ class FoundationPlanner {
     return invocations;
   }
 
-  /// Creates an InstanceConfig from rawVars for standalone feature/service generation.
-  InstanceConfig? _createInstanceConfigFromRaw(
-      String brickId, Map<String, dynamic> raw,) {
-    if (brickId == 'fly_foundation_feature') {
-      return InstanceConfig(
-        type: 'feature',
-        name: raw['name'] as String? ??
-            raw['component_name'] as String? ??
-            'unnamed',
-        params: {
-          'feature': raw['feature'] as String? ?? 'core',
-          if (raw['screen_type'] != null) 'screen_type': raw['screen_type'],
-          'with_viewmodel': raw['with_viewmodel'] as bool? ?? true,
-          'with_tests': raw['with_tests'] as bool? ?? true,
-          'with_validation': raw['with_validation'] as bool? ?? false,
-          'with_navigation': raw['with_navigation'] as bool? ?? false,
-        },
-      );
-    } else if (brickId == 'fly_foundation_service') {
-      return InstanceConfig(
-        type: 'service',
-        name: raw['name'] as String? ??
-            raw['component_name'] as String? ??
-            'unnamed',
-        params: {
-          'feature': raw['feature'] as String? ?? 'core',
-          'service_type': raw['service_type'] as String? ?? 'api',
-          'with_tests': raw['with_tests'] as bool? ?? true,
-          'with_mocks': raw['with_mocks'] as bool? ?? false,
-          'with_interceptors': raw['with_interceptors'] as bool? ?? false,
-          'with_retry_logic': raw['with_retry_logic'] as bool? ?? false,
-          'with_caching': raw['with_caching'] as bool? ?? false,
-          if (raw['api_base_url'] != null) 'api_base_url': raw['api_base_url'],
-        },
-      );
-    }
-    return null;
-  }
-
-  /// Builds a display name for a brick invocation.
-  String _buildDisplayName(String stepId, InstanceConfig instanceConfig) {
-    if (instanceConfig.type == 'feature') {
-      final featureConfig =
-          FeatureInstanceConfig.fromInstanceConfig(instanceConfig);
-      return 'feature:${featureConfig.featureKey}:${instanceConfig.name}';
-    } else if (instanceConfig.type == 'service') {
-      final serviceConfig =
-          ServiceInstanceConfig.fromInstanceConfig(instanceConfig);
-      return 'service:${serviceConfig.serviceType.key}:${instanceConfig.name}';
-    }
-    return '$stepId:${instanceConfig.name}';
-  }
 }
 
 /// Result of planning foundation generation.
