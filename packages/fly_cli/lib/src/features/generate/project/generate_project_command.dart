@@ -401,6 +401,37 @@ class GenerateProjectCommand extends FlyCommand {
         logger: logger,
       );
 
+      // Convert features list to InstanceConfig format
+      final featureInstances = features.isNotEmpty
+          ? features.map((featureName) {
+              return {
+                'name': featureName,
+                'type': 'feature',
+                'params': {
+                  'feature': featureName,
+                  'screen_type': 'list', // Default screen type
+                  'with_viewmodel': true,
+                  'with_tests': true,
+                  'with_validation': false,
+                  'with_navigation': false,
+                },
+              };
+            }).toList()
+          : [
+              {
+                'name': 'home',
+                'type': 'feature',
+                'params': {
+                  'feature': 'home',
+                  'screen_type': 'list',
+                  'with_viewmodel': true,
+                  'with_tests': true,
+                  'with_validation': false,
+                  'with_navigation': false,
+                },
+              }
+            ];
+
       // Prepare raw variables for planning
       final rawVars = <String, dynamic>{
         'name': projectName,
@@ -409,7 +440,9 @@ class GenerateProjectCommand extends FlyCommand {
         'platforms': platforms,
         'generation_mode': 'project',
         'preset': 'starter', // Default preset
-        'features': features.isNotEmpty ? features : ['home'],
+        'features': featureInstances,
+        // Services can be added here in the future
+        'services': <Map<String, dynamic>>[],
       };
 
       // Generate using orchestrator

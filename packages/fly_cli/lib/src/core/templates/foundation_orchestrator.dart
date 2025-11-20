@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:mason/mason.dart' hide Logger, GeneratedFile;
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:path/path.dart' as path;
 
 import 'template_manager.dart';
 import 'brick_info.dart';
@@ -10,9 +11,9 @@ import 'package:mason_logger/mason_logger.dart';
 /// Orchestrator for Fly foundation generation using multi-brick approach.
 ///
 /// This orchestrator:
-/// 1. Uses the planning library to determine which module bricks to run
-/// 2. Executes each brick with the appropriate variables
-/// 3. Eliminates the need for post-generation file cleanup
+/// 1. Uses the planning library to determine which bricks to run
+/// 2. Executes each brick with the appropriate variables and target directories
+/// 3. Supports phase-based ordering and prepares for optional parallel execution
 class FoundationOrchestrator {
   final TemplateManager _templateManager;
   final Logger _logger;
@@ -28,7 +29,7 @@ class FoundationOrchestrator {
           logger: _MasonLoggerAdapter(logger),
         );
 
-  /// Plans and executes foundation generation using module bricks.
+  /// Plans and executes foundation generation using bricks.
   ///
   /// Returns a result indicating success or failure with details.
   Future<FoundationGenerationResult> generateFoundation({
@@ -41,45 +42,72 @@ class FoundationOrchestrator {
       // Step 1: Plan generation using the planning library
       final planningResult = _planner.planFoundationGeneration(rawVars);
 
+      // Use brickInvocations (new model) if available, fall back to moduleInvocations
+      final invocations = planningResult.brickInvocations.isNotEmpty
+          ? planningResult.brickInvocations
+          : planningResult.moduleInvocations
+              .map((inv) => inv.toBrickInvocation())
+              .toList();
+
       _logger.info(
-        'Planned ${planningResult.moduleInvocations.length} module(s) to generate',
+        'Planned ${invocations.length} brick invocation(s) to generate',
       );
 
-      // Step 2: Execute each module brick
+      // Step 2: Group invocations by phase for potential parallel execution
+      final invocationsByPhase = <int, List<BrickInvocation>>{};
+      for (final invocation in invocations) {
+        invocationsByPhase.putIfAbsent(invocation.phase, () => []).add(invocation);
+      }
+
+      // Step 3: Execute invocations phase by phase (sequentially for now)
       final allGeneratedFiles = <GeneratedFile>[];
       var totalFiles = 0;
 
-      for (final invocation in planningResult.moduleInvocations) {
-        _logger.info('Generating module: ${invocation.moduleName}');
+      final sortedPhases = invocationsByPhase.keys.toList()..sort();
+      for (final phase in sortedPhases) {
+        final phaseInvocations = invocationsByPhase[phase]!;
+        _logger.info('Executing phase $phase (${phaseInvocations.length} invocation(s))');
 
-        // Get brick info
-        final brick = await _templateManager.getBrick(invocation.brickId);
-        if (brick == null) {
-          return FoundationGenerationResult.failure(
-            'Brick "${invocation.brickId}" not found. '
-            'Make sure the module bricks are available.',
+        // Execute invocations in this phase sequentially
+        // TODO: In the future, these could be executed in parallel if safe
+        for (final invocation in phaseInvocations) {
+          _logger.info('Generating: ${invocation.displayName}');
+
+          // Get brick info
+          final brick = await _templateManager.getBrick(invocation.brickId);
+          if (brick == null) {
+            return FoundationGenerationResult.failure(
+              'Brick "${invocation.brickId}" not found. '
+              'Make sure the bricks are available.',
+            );
+          }
+
+          // Resolve target directory
+          final targetDir = _resolveTargetDirectory(
+            outputDirectory,
+            invocation.targetDir,
           );
-        }
 
-        // Generate using the brick
-        final result = await _generateModule(
-          brick: brick,
-          vars: invocation.vars,
-          outputDirectory: outputDirectory,
-        );
-
-        if (!result.success) {
-          return FoundationGenerationResult.failure(
-            'Failed to generate module ${invocation.moduleName}: ${result.error}',
+          // Generate using the brick
+          final result = await _generateBrick(
+            brick: brick,
+            vars: invocation.vars,
+            targetDirectory: targetDir,
           );
-        }
 
-        if (result.files != null) {
-          allGeneratedFiles.addAll(result.files!);
-          totalFiles += result.files!.length;
-          _logger.info(
-            '✓ Module "${invocation.moduleName}" generated (${result.files!.length} files)',
-          );
+          if (!result.success) {
+            return FoundationGenerationResult.failure(
+              'Failed to generate ${invocation.displayName}: ${result.error}',
+            );
+          }
+
+          if (result.files != null) {
+            allGeneratedFiles.addAll(result.files!);
+            totalFiles += result.files!.length;
+            _logger.info(
+              '✓ ${invocation.displayName} generated (${result.files!.length} files)',
+            );
+          }
         }
       }
 
@@ -96,11 +124,22 @@ class FoundationOrchestrator {
     }
   }
 
-  /// Generates a single module using its brick.
-  Future<_ModuleGenerationResult> _generateModule({
+  /// Resolves the target directory for a brick invocation.
+  ///
+  /// If the invocation has a targetDir, it's combined with the root output directory.
+  /// Otherwise, the root output directory is used.
+  String _resolveTargetDirectory(String rootOutputDir, String? invocationTargetDir) {
+    if (invocationTargetDir == null || invocationTargetDir.isEmpty) {
+      return rootOutputDir;
+    }
+    return path.join(rootOutputDir, invocationTargetDir);
+  }
+
+  /// Generates a single brick using its definition.
+  Future<_ModuleGenerationResult> _generateBrick({
     required BrickInfo brick,
     required Map<String, dynamic> vars,
-    required String outputDirectory,
+    required String targetDirectory,
   }) async {
     try {
       // Create Brick instance from brick directory
@@ -110,17 +149,18 @@ class FoundationOrchestrator {
       final generator = await MasonGenerator.fromBrick(brickInstance);
 
       // Create target directory
-      final targetDir = Directory(outputDirectory);
+      final targetDir = Directory(targetDirectory);
       await targetDir.create(recursive: true);
 
       // Create DirectoryGeneratorTarget
       final target = DirectoryGeneratorTarget(targetDir);
 
       // Generate files (returns Mason's GeneratedFile list)
+      // Note: Mason's generate method expects a specific Logger type, but we use
+      // the CLI's Logger. Passing null and letting Mason use its default logger.
       final masonFiles = await generator.generate(
         target,
         vars: vars,
-        logger: _logger as dynamic, // Cast to dynamic to avoid type issues
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
