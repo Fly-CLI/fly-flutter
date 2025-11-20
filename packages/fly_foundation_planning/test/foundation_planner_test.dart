@@ -38,9 +38,6 @@ void main() {
         TestWorkflowIds.projectWorkflow,
       );
 
-      expect(result.moduleInvocations.length, equals(1));
-      expect(result.moduleInvocations.first.moduleName, equals('project'));
-      expect(result.moduleInvocations.first.brickId, equals('fly_foundation_project'));
       expect(result.derivedVars['is_project'], isTrue);
       expect(result.derivedVars['supports_ios'], isTrue);
       expect(result.derivedVars['supports_android'], isTrue);
@@ -61,9 +58,6 @@ void main() {
         TestWorkflowIds.featureWorkflow,
       );
 
-      expect(result.moduleInvocations.length, equals(1));
-      expect(result.moduleInvocations.first.moduleName, equals('feature'));
-      expect(result.moduleInvocations.first.brickId, equals('fly_foundation_feature'));
       expect(result.derivedVars['is_feature'], isTrue);
       expect(result.derivedVars['is_list_screen'], isTrue);
     });
@@ -85,9 +79,6 @@ void main() {
         TestWorkflowIds.serviceWorkflow,
       );
 
-      expect(result.moduleInvocations.length, equals(1));
-      expect(result.moduleInvocations.first.moduleName, equals('service'));
-      expect(result.moduleInvocations.first.brickId, equals('fly_foundation_service'));
       expect(result.derivedVars['is_service'], isTrue);
       expect(result.derivedVars['is_api_service'], isTrue);
       expect(result.derivedVars['supports_retry'], isTrue);
@@ -144,8 +135,6 @@ void main() {
           TestWorkflowIds.projectWorkflow,
         );
 
-        expect(result.moduleInvocations.length, equals(1));
-        expect(result.moduleInvocations.first.brickId, equals('fly_foundation_project'));
         expect(result.derivedVars['preset'], equals(preset));
       }
     });
@@ -235,7 +224,6 @@ void main() {
         TestWorkflowIds.featureWorkflow,
       );
 
-      expect(result.moduleInvocations.first.brickId, equals('fly_foundation_feature'));
       expect(result.derivedVars['is_auth_screen'], isTrue);
     });
 
@@ -305,7 +293,6 @@ void main() {
         TestWorkflowIds.serviceWorkflow,
       );
 
-      expect(result.moduleInvocations.first.brickId, equals('fly_foundation_service'));
       expect(result.derivedVars['is_analytics_service'], isTrue);
     });
 
@@ -393,7 +380,6 @@ void main() {
         TestWorkflowIds.projectWorkflow,
       );
 
-      expect(result.moduleInvocations.length, equals(1));
       expect(result.derivedVars['features'], isA<List>());
       final features = result.derivedVars['features'] as List;
       expect(features.length, equals(3));

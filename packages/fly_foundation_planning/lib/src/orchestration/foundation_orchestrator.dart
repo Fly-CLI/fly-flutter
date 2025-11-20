@@ -53,12 +53,7 @@ class FoundationOrchestrator<TFile> {
       // Step 1: Plan generation using the planning library
       final planningResult = _planner.planFoundationGeneration(rawVars, workflowId);
 
-      // Use brickInvocations (new model) if available, fall back to moduleInvocations
-      final invocations = planningResult.brickInvocations.isNotEmpty
-          ? planningResult.brickInvocations
-          : planningResult.moduleInvocations
-              .map((inv) => inv.toBrickInvocation())
-              .toList();
+      final invocations = planningResult.brickInvocations;
 
       _logger.info(
         'Planned ${invocations.length} brick invocation(s) to generate',

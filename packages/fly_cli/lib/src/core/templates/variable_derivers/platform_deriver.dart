@@ -22,6 +22,9 @@ class PlatformDeriver implements VariableDeriver {
         ['ios', 'android'];
 
     final platforms = PlatformType.fromVars(ctx.rawVars);
+    
+    // Convert platform types to string list
+    final platformKeys = platforms.map((p) => p.key).toList();
 
     final desktopPlatforms = {
       PlatformType.macos.key,
@@ -29,11 +32,12 @@ class PlatformDeriver implements VariableDeriver {
       PlatformType.linux.key,
     };
 
-    final platformKeys = platforms.map((p) => p.key).toSet();
+    final platformKeysSet = platformKeys.toSet();
     final supportsDesktop =
-        platformKeys.intersection(desktopPlatforms).isNotEmpty;
+        platformKeysSet.intersection(desktopPlatforms).isNotEmpty;
 
     return current.setAll({
+      MasonVarKey.platforms.key: platformKeys, // Set platforms field itself
       MasonVarKey.supportsIos.key: platforms.contains(PlatformType.ios),
       MasonVarKey.supportsAndroid.key: platforms.contains(PlatformType.android),
       MasonVarKey.supportsWeb.key: platforms.contains(PlatformType.web),

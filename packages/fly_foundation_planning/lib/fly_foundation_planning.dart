@@ -9,7 +9,6 @@
 library;
 
 export 'src/brick_registry.dart';
-export 'src/core_template_input.dart';
 export 'src/foundation_model.dart';
 export 'src/foundation_planner.dart';
 export 'src/logger.dart';

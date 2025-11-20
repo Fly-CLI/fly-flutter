@@ -17,11 +17,26 @@ class NamingDeriver implements VariableDeriver {
     VariableBag current,
     PlanningLogger logger,
   ) {
+    // Extract basic fields from raw vars
     final name = ctx.rawVars[MasonVarKey.name.key] as String? ??
         ctx.rawVars['name'] as String? ??
         'unnamed';
+    final organization = ctx.rawVars[MasonVarKey.organization.key] as String? ??
+        ctx.rawVars['organization'] as String? ??
+        'com.example';
+    final description = ctx.rawVars[MasonVarKey.description.key] as String? ??
+        ctx.rawVars['description'] as String? ??
+        '';
 
     var bag = current;
+    
+    // Set basic fields
+    bag = bag.set(MasonVarKey.name.key, name);
+    bag = bag.set(MasonVarKey.organization.key, organization);
+    bag = bag.set('generation_mode', ctx.mode.key);
+    if (description.isNotEmpty) {
+      bag = bag.set(MasonVarKey.description.key, description);
+    }
 
     switch (ctx.mode) {
       case GenerationMode.project:

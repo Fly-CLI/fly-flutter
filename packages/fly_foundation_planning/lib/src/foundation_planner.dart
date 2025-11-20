@@ -1,6 +1,4 @@
 import 'package:fly_foundation_planning/src/brick_registry.dart';
-import 'package:fly_foundation_planning/src/core_template_input.dart';
-import 'package:fly_foundation_planning/src/foundation_model.dart';
 import 'package:fly_foundation_planning/src/logger.dart';
 import 'package:fly_foundation_planning/src/module_invocation.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
@@ -72,26 +70,15 @@ class FoundationPlanner {
       workflowId: request.workflowId,
     );
 
-    // Step 3: Convert raw vars to core template input
-    final coreInput = CoreTemplateInput(
-      name: request.raw['name'] as String? ?? 'unnamed',
-      organization: request.raw['organization'] as String? ?? 'com.example',
-      generationMode: request.generationMode,
-      platforms: (request.raw['platforms'] as List?)?.map((e) => e.toString()).toList() ?? 
-          ['ios', 'android'],
-      description: request.raw['description'] as String? ?? '',
-    );
-
-    // Step 4: Run the variable pipeline to derive variables
+    // Step 3: Run the variable pipeline to derive variables
+    // The pipeline is responsible for extracting and setting all necessary fields
+    // (name, organization, platforms, generation_mode, etc.) from the raw input.
     final variableBag = _variablePipeline.run(ctx, _logger);
 
-    // Step 5: Build global vars wrapper
-    final globalVars = GlobalVars(variables: variableBag, coreInput: coreInput);
-
-    // Step 6: Expand workflow into brick invocations
+    // Step 4: Expand workflow into brick invocations
     final brickInvocations = _expandWorkflow(request, variableBag)
 
-      // Step 6: Sort invocations by phase and displayName for deterministic execution
+      // Step 5: Sort invocations by phase and displayName for deterministic execution
       ..sort((a, b) {
         final phaseCompare = a.phase.compareTo(b.phase);
         if (phaseCompare != 0) return phaseCompare;
@@ -99,11 +86,8 @@ class FoundationPlanner {
       });
 
     return PlanningResult(
-      derivedVars: globalVars.toMasonVars(),
+      derivedVars: variableBag.toMap(),
       brickInvocations: brickInvocations,
-      // Keep moduleInvocations for backward compatibility
-      moduleInvocations:
-          brickInvocations.map(ModuleInvocation.fromBrickInvocation).toList(),
     );
   }
 
@@ -206,7 +190,6 @@ class PlanningResult {
   const PlanningResult({
     required this.derivedVars,
     required this.brickInvocations,
-    required this.moduleInvocations,
   });
 
   /// Derived variables ready for template rendering.
@@ -214,8 +197,5 @@ class PlanningResult {
 
   /// List of brick invocations that should be executed (new model).
   final List<BrickInvocation> brickInvocations;
-
-  /// List of module invocations that should be executed (legacy, for backward compatibility).
-  final List<ModuleInvocation> moduleInvocations;
 }
 

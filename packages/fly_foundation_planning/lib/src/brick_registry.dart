@@ -1,4 +1,3 @@
-import 'package:fly_foundation_planning/src/core_template_input.dart';
 import 'package:fly_foundation_planning/src/planning_exception.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 
@@ -56,39 +55,6 @@ class InstanceConfig {
       'name': name,
       'params': params,
     };
-  }
-}
-
-/// Global variables available to all bricks during planning.
-///
-/// This is a wrapper around VariableBag that provides convenient access
-/// to derived variables and core template input.
-///
-/// Note: For domain-specific template variables (e.g., presets, feature/service
-/// flags), use domain-specific wrappers in higher-level packages (e.g., fly_cli).
-class GlobalVars {
-  const GlobalVars({
-    required this.variables,
-    required this.coreInput,
-  });
-
-  /// Derived variables from the variable pipeline.
-  final VariableBag variables;
-
-  /// Core template input variables.
-  final CoreTemplateInput coreInput;
-
-  /// Converts to a Mason variables map.
-  Map<String, dynamic> toMasonVars() {
-    // Create a new map from variables to avoid modifying unmodifiable maps
-    final result = Map<String, dynamic>.from(variables.toMap());
-    // Ensure core input variables are included (they may already be in variables)
-    result['name'] = coreInput.name;
-    result['organization'] = coreInput.organization;
-    result['description'] = coreInput.description;
-    result['generation_mode'] = coreInput.generationMode.key;
-    result['platforms'] = coreInput.platforms;
-    return result;
   }
 }
 

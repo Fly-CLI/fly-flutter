@@ -6,7 +6,7 @@ import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 import 'package:fly_foundation_planning/src/variables/variable_deriver.dart';
 import 'package:fly_foundation_planning/src/variables/variable_pipeline.dart';
 
-/// Simple test deriver that sets a basic variable.
+/// Simple test deriver that sets basic variables from raw input.
 class TestBasicDeriver implements VariableDeriver {
   const TestBasicDeriver();
 
@@ -22,8 +22,24 @@ class TestBasicDeriver implements VariableDeriver {
     VariableBag current,
     PlanningLogger logger,
   ) {
+    var bag = current;
+    
+    // Extract and set basic fields from raw vars
     final name = ctx.rawVars['name'] as String? ?? 'test';
-    return current.set('name', name);
+    bag = bag.set('name', name);
+    
+    final organization = ctx.rawVars['organization'] as String? ?? 'com.example';
+    bag = bag.set('organization', organization);
+    
+    final generationMode = ctx.mode.key;
+    bag = bag.set('generation_mode', generationMode);
+    
+    final description = ctx.rawVars['description'] as String? ?? '';
+    if (description.isNotEmpty) {
+      bag = bag.set('description', description);
+    }
+    
+    return bag;
   }
 }
 
@@ -54,7 +70,7 @@ class TestModeDeriver implements VariableDeriver {
   }
 }
 
-/// Test deriver that sets platform flags.
+/// Test deriver that sets platform flags and platforms field.
 class TestPlatformDeriver implements VariableDeriver {
   const TestPlatformDeriver();
 
@@ -72,6 +88,11 @@ class TestPlatformDeriver implements VariableDeriver {
   ) {
     final platforms = ctx.rawVars['platforms'] as List? ?? ['ios', 'android'];
     var bag = current;
+    
+    // Set the platforms field itself
+    bag = bag.set('platforms', platforms.map((e) => e.toString()).toList());
+    
+    // Set platform support flags
     for (final platform in platforms) {
       if (platform == 'ios') {
         bag = bag.set('supports_ios', true);
