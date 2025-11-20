@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/src/logger.dart';
+import 'package:fly_foundation_planning/src/utils/logger.dart';
 import 'package:fly_foundation_planning/src/variables/generation_context.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 import 'package:fly_foundation_planning/src/variables/variable_deriver.dart';

@@ -1,9 +1,9 @@
 import 'package:fly_foundation_planning/fly_foundation_planning.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:fly_foundation_planning/src/foundation_planner.dart';
-import 'package:fly_foundation_planning/src/logger.dart';
-import 'package:fly_foundation_planning/src/module_invocation.dart';
+import 'package:fly_foundation_planning/src/core/foundation_planner.dart';
+import 'package:fly_foundation_planning/src/registry/module_invocation.dart';
+import 'package:fly_foundation_planning/src/utils/logger.dart';
 import 'package:fly_foundation_planning/src/orchestration/brick_executor.dart';
 import 'package:fly_foundation_planning/src/orchestration/orchestration_result.dart';
 

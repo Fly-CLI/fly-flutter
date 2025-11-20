@@ -1,5 +1,6 @@
-import 'package:fly_foundation_planning/src/brick_registry.dart';
-import 'package:fly_foundation_planning/src/planning_exception.dart';
+import 'package:fly_foundation_planning/src/exceptions/planning_exception.dart';
+
+import 'brick_registry.dart';
 
 /// Identifier for a workflow.
 ///

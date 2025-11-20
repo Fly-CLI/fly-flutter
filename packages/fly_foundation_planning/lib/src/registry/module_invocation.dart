@@ -1,5 +1,3 @@
-import 'package:fly_foundation_planning/src/foundation_model.dart';
-
 /// Represents a brick invocation that should be executed.
 ///
 /// This is the primary model for workflow-agnostic brick invocations.

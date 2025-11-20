@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/src/planning_exception.dart';
+import 'package:fly_foundation_planning/src/exceptions/planning_exception.dart';
 
 /// Hook-local typedef for Mason variables map.
 typedef Vars = Map<String, dynamic>;

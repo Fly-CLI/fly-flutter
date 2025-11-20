@@ -1,12 +1,13 @@
-import 'package:fly_foundation_planning/src/brick_registry.dart';
-import 'package:fly_foundation_planning/src/logger.dart';
-import 'package:fly_foundation_planning/src/module_invocation.dart';
-import 'package:fly_foundation_planning/src/planning_exception.dart';
-import 'package:fly_foundation_planning/src/planning_request.dart';
+import 'package:fly_foundation_planning/src/exceptions/planning_exception.dart';
+import 'package:fly_foundation_planning/src/registry/brick_registry.dart';
+import 'package:fly_foundation_planning/src/registry/module_invocation.dart';
+import 'package:fly_foundation_planning/src/registry/workflow_definition.dart';
+import 'package:fly_foundation_planning/src/utils/logger.dart';
 import 'package:fly_foundation_planning/src/variables/generation_context.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 import 'package:fly_foundation_planning/src/variables/variable_pipeline.dart';
-import 'package:fly_foundation_planning/src/workflow_definition.dart';
+
+import 'planning_request.dart';
 
 /// Main entry point for planning Fly foundation generation.
 ///

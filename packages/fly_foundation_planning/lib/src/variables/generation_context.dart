@@ -1,5 +1,5 @@
-import 'package:fly_foundation_planning/src/foundation_model.dart';
-import 'package:fly_foundation_planning/src/workflow_definition.dart';
+import 'package:fly_foundation_planning/src/core/foundation_model.dart';
+import 'package:fly_foundation_planning/src/registry/workflow_definition.dart';
 
 /// Context representing normalized input for a planning run.
 ///

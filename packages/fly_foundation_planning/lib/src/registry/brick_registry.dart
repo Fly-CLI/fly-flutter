@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/src/planning_exception.dart';
+import 'package:fly_foundation_planning/src/exceptions/planning_exception.dart';
 import 'package:fly_foundation_planning/src/variables/variable_bag.dart';
 
 /// Kind/category of a brick.

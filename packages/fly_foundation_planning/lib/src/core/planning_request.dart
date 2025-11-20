@@ -1,5 +1,6 @@
-import 'package:fly_foundation_planning/src/foundation_model.dart';
-import 'package:fly_foundation_planning/src/workflow_definition.dart';
+import 'package:fly_foundation_planning/src/registry/workflow_definition.dart';
+
+import 'foundation_model.dart';
 
 /// A normalized planning request that represents user input.
 ///

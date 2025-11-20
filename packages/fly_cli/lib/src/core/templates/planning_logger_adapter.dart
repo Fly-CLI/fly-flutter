@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/src/logger.dart';
+import 'package:fly_foundation_planning/src/utils/logger.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Adapter to convert CLI Logger to PlanningLogger.
