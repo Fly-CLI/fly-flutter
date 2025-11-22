@@ -1,9 +1,14 @@
 import 'package:mason/mason.dart';
 
+import 'package:fly_cli/src/core/templates/generation/generation_preview.dart';
+import 'package:fly_cli/src/core/templates/template/template_info.dart';
+
 /// Standardized result type for all generators.
 ///
 /// Provides a unified interface for generation results that can be converted
-/// to CommandResult for command responses.
+/// to CommandResult for command responses. This is the single source of truth
+/// for all generation operations, replacing TemplateGenerationResult,
+/// FoundationGenerationResult, and GenerationPreview.
 class GenerationResult {
   const GenerationResult._({
     required this.success,
@@ -11,6 +16,10 @@ class GenerationResult {
     this.targetDirectory,
     this.error,
     this.data,
+    this.isDryRun = false,
+    this.preview,
+    this.template,
+    this.duration,
   });
 
   /// Create a successful generation result.
@@ -18,12 +27,16 @@ class GenerationResult {
     required List<GeneratedFile> files,
     required String targetDirectory,
     Map<String, dynamic>? data,
+    TemplateInfo? template,
+    Duration? duration,
   }) {
     return GenerationResult._(
       success: true,
       files: files,
       targetDirectory: targetDirectory,
       data: data,
+      template: template,
+      duration: duration,
     );
   }
 
@@ -39,13 +52,29 @@ class GenerationResult {
     );
   }
 
+  /// Create a dry-run/preview result.
+  factory GenerationResult.dryRun({
+    required GenerationPreview preview,
+    TemplateInfo? template,
+    Map<String, dynamic>? data,
+  }) {
+    return GenerationResult._(
+      success: true,
+      isDryRun: true,
+      preview: preview,
+      targetDirectory: preview.targetDirectory,
+      template: template,
+      data: data,
+    );
+  }
+
   /// Whether the generation was successful.
   final bool success;
 
-  /// List of generated files (only present on success).
+  /// List of generated files (only present on success and non-dry-run).
   final List<GeneratedFile>? files;
 
-  /// Target directory where files were generated.
+  /// Target directory where files were generated or will be generated.
   final String? targetDirectory;
 
   /// Error message (only present on failure).
@@ -54,6 +83,18 @@ class GenerationResult {
   /// Additional data for the result.
   final Map<String, dynamic>? data;
 
+  /// Whether this is a dry-run/preview result.
+  final bool isDryRun;
+
+  /// Preview information (only present on dry-run).
+  final GenerationPreview? preview;
+
+  /// Template information used for generation.
+  final TemplateInfo? template;
+
+  /// Duration of the generation operation.
+  final Duration? duration;
+
   /// Number of files generated.
   int get filesGenerated => files?.length ?? 0;
 
@@ -61,9 +102,13 @@ class GenerationResult {
   Map<String, dynamic> toMap() {
     return {
       'success': success,
+      'is_dry_run': isDryRun,
       if (files != null) 'files_generated': files!.length,
       if (targetDirectory != null) 'target_directory': targetDirectory,
       if (error != null) 'error': error,
+      if (duration != null) 'duration_ms': duration!.inMilliseconds,
+      if (template != null) 'template_name': template!.name,
+      if (preview != null) 'preview': preview!.toJson(),
       if (data != null) ...data!,
     };
   }

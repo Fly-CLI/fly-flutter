@@ -1,5 +1,5 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
-import 'package:fly_cli/src/core/templates/bricks/foundation_brick_registry_factory.dart';
+import 'package:fly_cli/src/core/templates/brick/foundation_brick_registry_factory.dart';
 import 'package:fly_cli/src/core/templates/workflows/foundation_workflows.dart';
 
 /// Factory for creating a WorkflowRegistry configured with Fly foundation workflows.

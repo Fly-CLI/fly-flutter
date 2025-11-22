@@ -1,8 +1,9 @@
 import 'dart:io';
 
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/generation/component_generation_service.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_adapter.dart';
+import 'package:fly_cli/src/core/templates/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_service.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_params.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_result.dart';
@@ -81,20 +82,30 @@ class FlyGenerateServiceStrategy extends McpToolStrategy<
         );
       }
 
-      // Convert MCP params to generation request using adapter
-      final request = GenerationAdapter.fromMcpServiceParams(
-        params: params,
-        outputDirectory: Directory.current.path,
-        context: context,
-      );
+      // Convert MCP params to raw variables
+      final rawVars = <String, dynamic>{
+        'name': params.serviceName,
+        'generation_mode': 'service',
+        'feature': params.feature ?? 'core',
+        'service_type': params.serviceType ?? 'api',
+        'with_tests': params.withTests ?? true,
+        'with_mocks': params.withMocks ?? false,
+        'with_interceptors': params.withInterceptors ?? false,
+        if (params.baseUrl != null) 'api_base_url': params.baseUrl,
+      };
 
       // Create unified generation service
-      final generationService = ComponentGenerationService(context: context);
+      final generationService = GenerationService(
+        templateManager: context.templateManager,
+        logger: context.logger,
+      );
 
       // Generate service using unified service
-      final result = await generationService.generateService(
-        request: request,
-        progressNotifier: progressNotifier,
+      final result = await generationService.generate(
+        mode: GenerationMode.service,
+        rawVars: rawVars,
+        outputDirectory: Directory.current.path,
+        dryRun: false,
       );
 
       cancelToken?.throwIfCancelled();

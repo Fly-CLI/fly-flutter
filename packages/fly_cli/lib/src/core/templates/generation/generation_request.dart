@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_brick_composer/src/core/composer_model.dart';
 
 /// Request model for code generation operations.
 ///
@@ -57,7 +58,7 @@ sealed class GenerationRequest {
 
   /// Create a request from a map (e.g., from manifest)
   factory GenerationRequest.fromMap({
-    required GenerationType type,
+    required GenerationMode type,
     required Map<String, dynamic> input,
     required String outputDirectory,
     CommandContext? context,
@@ -71,7 +72,7 @@ sealed class GenerationRequest {
     }
 
     switch (type) {
-      case GenerationType.feature:
+      case GenerationMode.feature:
         return FeatureGenerationRequest(
           componentName: componentName,
           feature: input['feature'] as String?,
@@ -83,7 +84,7 @@ sealed class GenerationRequest {
           outputDirectory: outputDirectory,
           context: context,
         );
-      case GenerationType.service:
+      case GenerationMode.service:
         return ServiceGenerationRequest(
           componentName: componentName,
           feature: input['feature'] as String?,
@@ -96,7 +97,7 @@ sealed class GenerationRequest {
           outputDirectory: outputDirectory,
           context: context,
         );
-      case GenerationType.project:
+      case GenerationMode.project:
         throw UnimplementedError('Project generation not yet supported');
     }
   }
@@ -109,7 +110,7 @@ sealed class GenerationRequest {
   });
 
   /// Type of generation (feature or service)
-  GenerationType get type;
+  GenerationMode get type;
 
   /// Name of the component to generate
   final String componentName;
@@ -142,7 +143,7 @@ final class FeatureGenerationRequest extends GenerationRequest {
   });
 
   @override
-  GenerationType get type => GenerationType.feature;
+  GenerationMode get type => GenerationMode.feature;
 
   /// Screen type (for feature generation)
   final String? screenType;
@@ -190,7 +191,7 @@ final class ServiceGenerationRequest extends GenerationRequest {
   });
 
   @override
-  GenerationType get type => GenerationType.service;
+  GenerationMode get type => GenerationMode.service;
 
   /// Service type (for service generation)
   final String? serviceType;
@@ -227,25 +228,6 @@ final class ServiceGenerationRequest extends GenerationRequest {
     baseMap['with_caching'] = serviceType == 'cache';
 
     return baseMap;
-  }
-}
-
-/// Type of generation operation
-enum GenerationType {
-  feature,
-  service,
-  project;
-
-  /// Key used in variable maps
-  String get key {
-    switch (this) {
-      case GenerationType.feature:
-        return 'feature';
-      case GenerationType.service:
-        return 'service';
-      case GenerationType.project:
-        return 'project';
-    }
   }
 }
 

@@ -9,7 +9,7 @@ import 'package:fly_mcp/fly_mcp.dart';
 /// Tools are organized by category for better discoverability:
 /// - Diagnostic: echo, doctor
 /// - Template: templateList, templateApply
-/// - Generation: generateScreen, generateService
+/// - Generation: generateProject, generateFeature, generateService
 /// - Export: contextExport, schemaExport
 /// - Integration: completion, version
 enum McpTool {
@@ -22,6 +22,7 @@ enum McpTool {
   templateApply,
 
   // Generation tools
+  generateProject,
   generateFeature,
   generateService,
 
@@ -85,6 +86,7 @@ extension McpToolExtension on McpTool {
       case McpTool.templateList:
       case McpTool.templateApply:
         return ToolCategory.template;
+      case McpTool.generateProject:
       case McpTool.generateFeature:
       case McpTool.generateService:
         return ToolCategory.generation;

@@ -1,8 +1,9 @@
 import 'dart:io';
 
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/generation/component_generation_service.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_adapter.dart';
+import 'package:fly_cli/src/core/templates/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_service.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_screen_params.dart';
@@ -163,20 +164,30 @@ class FlyGenerateFeatureStrategy
         );
       }
 
-      // Convert MCP params to generation request using adapter
-      final request = GenerationAdapter.fromMcpFeatureParams(
-        params: params,
-        outputDirectory: Directory.current.path,
-        context: context,
-      );
+      // Convert MCP params to raw variables
+      final rawVars = <String, dynamic>{
+        'name': params.screenName,
+        'generation_mode': 'feature',
+        'feature': params.feature ?? 'home',
+        'screen_type': params.screenType ?? 'list',
+        'with_viewmodel': params.withViewModel ?? false,
+        'with_tests': params.withTests ?? false,
+        'with_validation': params.withValidation ?? false,
+        'with_navigation': params.withNavigation ?? true,
+      };
 
       // Create unified generation service
-      final generationService = ComponentGenerationService(context: context);
+      final generationService = GenerationService(
+        templateManager: context.templateManager,
+        logger: context.logger,
+      );
 
       // Generate feature using unified service
-      final result = await generationService.generateFeature(
-        request: request,
-        progressNotifier: progressNotifier,
+      final result = await generationService.generate(
+        mode: GenerationMode.feature,
+        rawVars: rawVars,
+        outputDirectory: Directory.current.path,
+        dryRun: false,
       );
 
       cancelToken?.throwIfCancelled();
@@ -185,7 +196,7 @@ class FlyGenerateFeatureStrategy
         throw McpError.templateError(
           templateId: 'screen',
           error: result.error ?? 'Screen generation failed',
-          variables: request.toVariableMap(),
+          variables: rawVars,
           context: {
             'screen_name': params.screenName,
             'feature': params.feature ?? 'home',

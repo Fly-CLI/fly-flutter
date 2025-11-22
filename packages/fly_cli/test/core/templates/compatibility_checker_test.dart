@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/compatibility_checker.dart';
-import 'package:fly_cli/src/core/templates/template_compatibility.dart';
-import 'package:fly_cli/src/core/templates/template_info.dart';
+import 'package:fly_cli/src/core/templates/brick/brick_info.dart';
+import 'package:fly_cli/src/core/templates/versioning/compatibility_checker.dart';
+import 'package:fly_cli/src/core/templates/template/template_compatibility.dart';
+import 'package:fly_cli/src/core/templates/template/template_info.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 

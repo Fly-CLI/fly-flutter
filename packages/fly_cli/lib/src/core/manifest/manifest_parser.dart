@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/template/template_manager.dart';
 import 'package:yaml/yaml.dart';
 
 /// Exception thrown when manifest parsing fails

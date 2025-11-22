@@ -1,11 +1,12 @@
 import 'package:fly_cli/src/core/definitions/mcp_tool.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_feature_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_service_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_completion_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_context_export_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_doctor_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_echo_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_feature_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_project_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_service_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_schema_export_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_template_apply_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_version_strategy.dart';
@@ -35,6 +36,8 @@ class McpToolStrategyRegistry {
         return FlyTemplateListStrategy();
       case McpTool.templateApply:
         return FlyTemplateApplyStrategy();
+      case McpTool.generateProject:
+        return FlyGenerateProjectStrategy();
       case McpTool.generateFeature:
         return FlyGenerateFeatureStrategy();
       case McpTool.generateService:

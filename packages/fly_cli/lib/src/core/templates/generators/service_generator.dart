@@ -1,12 +1,13 @@
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/generation/component_generation_service.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_request.dart';
+import 'package:fly_cli/src/core/templates/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_service.dart';
 import 'package:fly_cli/src/core/templates/generators/generation_result.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Generator for service components.
 ///
-/// Handles service generation using the ComponentGenerationService,
+/// Handles service generation using the GenerationService,
 /// working in both standalone and project-scaffolding contexts.
 /// This ensures consistency between CLI commands and MCP tools.
 class ServiceGenerator {
@@ -15,7 +16,7 @@ class ServiceGenerator {
 
   /// Create a ServiceGenerator with the given context and logger.
   ///
-  /// [context] is required to create the ComponentGenerationService.
+  /// [context] is required to create the GenerationService.
   /// [logger] is used for logging generation progress.
   ServiceGenerator({
     required CommandContext context,
@@ -30,29 +31,26 @@ class ServiceGenerator {
   ///
   /// Returns a GenerationResult with success status and generated files.
   ///
-  /// This method delegates to ComponentGenerationService to ensure
+  /// This method delegates to GenerationService to ensure
   /// consistency with MCP tool generation paths.
   Future<GenerationResult> generate({
     required Map<String, dynamic> rawVars,
     required String outputDirectory,
   }) async {
     try {
-      // Create generation request from rawVars
-      final request = GenerationRequest.service(
-        componentName: rawVars['name'] as String,
-        feature: rawVars['feature'] as String?,
-        serviceType: rawVars['service_type'] as String?,
-        withTests: rawVars['with_tests'] as bool?,
-        withMocks: rawVars['with_mocks'] as bool?,
-        withInterceptors: rawVars['with_interceptors'] as bool?,
-        baseUrl: rawVars['api_base_url'] as String?,
-        outputDirectory: outputDirectory,
-        context: _context,
+      // Create unified generation service
+      final service = GenerationService(
+        templateManager: _context.templateManager,
+        logger: _logger,
       );
 
-      // Use ComponentGenerationService for consistent generation
-      final service = ComponentGenerationService(context: _context);
-      return await service.generateService(request: request);
+      // Generate using unified service
+      return await service.generate(
+        mode: GenerationMode.service,
+        rawVars: rawVars,
+        outputDirectory: outputDirectory,
+        dryRun: false,
+      );
     } catch (e, stackTrace) {
       _logger.err('Service generation failed: $e');
       _logger.detail('Stack trace: $stackTrace');

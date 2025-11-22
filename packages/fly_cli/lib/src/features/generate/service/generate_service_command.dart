@@ -7,8 +7,8 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
-import 'package:fly_cli/src/core/templates/generation_variable_builder.dart';
+import 'package:fly_cli/src/core/templates/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/core/templates/generators/service_generator.dart';
 
 /// GenerateServiceCommand using new architecture
@@ -94,7 +94,7 @@ class GenerateServiceCommand extends FlyCommand {
       }
       final targetDir = outputDirResult.path!.absolute;
 
-      // Create generator (which uses ComponentGenerationService internally)
+      // Create generator (which uses GenerationService internally)
       final generator = ServiceGenerator(
         context: context,
         logger: logger,

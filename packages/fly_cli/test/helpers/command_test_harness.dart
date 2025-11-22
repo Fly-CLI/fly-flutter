@@ -8,7 +8,7 @@ import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/template/template_manager.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_logger/mason_logger.dart';
 

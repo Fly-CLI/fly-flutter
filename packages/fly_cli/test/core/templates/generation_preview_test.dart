@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/templates/brick_info.dart';
+import 'package:fly_cli/src/core/templates/brick/brick_info.dart';
 import 'package:fly_cli/src/core/templates/generation_preview.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
