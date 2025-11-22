@@ -231,57 +231,6 @@ packages: []
     });
   });
 
-  group('TemplateVariables', () {
-    test('converts to Mason variables correctly', () {
-      const variables = TemplateVariables(
-        projectName: 'My App',
-        organization: 'com.example',
-        platforms: ['ios', 'android'],
-        description: 'A test app',
-        features: ['routing', 'state_management'],
-      );
-
-      final masonVars = variables.toMasonVars();
-
-      expect(masonVars['project_name'], 'My App');
-      expect(masonVars['organization'], 'com.example');
-      expect(masonVars['platforms'], ['ios', 'android']);
-      expect(masonVars['description'], 'A test app');
-      expect(masonVars['features'], ['routing', 'state_management']);
-      expect(masonVars['project_name_snake'], 'my_app');
-      expect(masonVars['project_name_camel'], 'myApp');
-      expect(masonVars['project_name_pascal'], 'MyApp');
-    });
-
-    test('handles empty project name', () {
-      const variables = TemplateVariables(
-        projectName: '',
-        organization: 'com.example',
-        platforms: ['ios'],
-      );
-
-      final masonVars = variables.toMasonVars();
-
-      expect(masonVars['project_name'], '');
-      expect(masonVars['project_name_snake'], '');
-      expect(masonVars['project_name_camel'], '');
-      expect(masonVars['project_name_pascal'], '');
-    });
-
-    test('converts multi-word project names correctly', () {
-      const variables = TemplateVariables(
-        projectName: 'My Awesome App',
-        organization: 'com.example',
-        platforms: ['ios'],
-      );
-
-      final masonVars = variables.toMasonVars();
-
-      expect(masonVars['project_name_snake'], 'my_awesome_app');
-      expect(masonVars['project_name_camel'], 'myAwesomeApp');
-      expect(masonVars['project_name_pascal'], 'MyAwesomeApp');
-    });
-  });
 
   group('TemplateInfo', () {
     test('parses YAML correctly', () {

@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_params.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_result.dart';
@@ -93,49 +92,51 @@ class FlyGenerateServiceStrategy extends McpToolStrategy<
 
       final templateManager = context.templateManager;
 
-      // Create service configuration for Mason brick
-      final serviceConfig = <String, dynamic>{
-        'service_name': params.serviceName,
+      // Prepare raw variables for orchestrator
+      final isApiService = serviceType == 'api';
+      final rawVars = <String, dynamic>{
+        'name': params.serviceName,
+        'generation_mode': 'service',
         'feature': feature,
         'service_type': serviceType,
         'with_tests': withTests,
         'with_mocks': withMocks,
         'with_interceptors': withInterceptors,
-        'base_url': baseUrl,
+        'with_retry_logic': isApiService,
+        'with_caching': serviceType == 'cache',
+        if (isApiService) 'api_base_url': baseUrl,
+        'preset': 'starter',
       };
 
       await progressNotifier?.notify(
           message: 'Generating service files...', percent: 50);
 
-      // Generate service using TemplateManager
-      final result = await templateManager.generateComponent(
-        componentName: params.serviceName,
-        componentType: BrickType.service,
-        config: serviceConfig,
-        targetPath: Directory.current.path,
+      // Create orchestrator and generate
+      final orchestrator = TemplateGenerationOrchestrator(
+        templateManager: templateManager,
+        logger: context.logger,
+      );
+
+      final result = await orchestrator.generate(
+        rawVars: rawVars,
+        outputDirectory: Directory.current.path,
       );
 
       cancelToken?.throwIfCancelled();
 
-      if (result is TemplateGenerationFailure) {
+      if (!result.success) {
         return FlyGenerateServiceResult(
           success: false,
-          message: 'Failed to generate service: ${result.error}',
-        );
-      }
-
-      if (result is! TemplateGenerationSuccess) {
-        return FlyGenerateServiceResult(
-          success: false,
-          message: 'Unexpected generation result',
+          message:
+              'Failed to generate service: ${result.error ?? 'Unknown error'}',
         );
       }
 
       return FlyGenerateServiceResult(
         success: true,
         message: 'Service generated successfully',
-        filesGenerated: result.filesGenerated,
-        servicePath: result.targetDirectory,
+        filesGenerated: result.files?.length ?? 0,
+        servicePath: result.targetDirectory ?? Directory.current.path,
       );
     };
   }

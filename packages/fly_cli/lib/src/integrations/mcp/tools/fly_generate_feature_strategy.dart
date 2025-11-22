@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_screen_params.dart';
@@ -175,35 +174,40 @@ class FlyGenerateFeatureStrategy
 
       final templateManager = context.templateManager;
 
-      // Create screen configuration for Mason brick
-      final screenConfig = <String, dynamic>{
-        'screen_name': params.screenName,
+      // Prepare raw variables for orchestrator
+      final rawVars = <String, dynamic>{
+        'name': params.screenName,
+        'generation_mode': 'feature',
         'feature': feature,
         'screen_type': screenType,
         'with_viewmodel': withViewModel,
         'with_tests': withTests,
         'with_validation': withValidation,
         'with_navigation': withNavigation,
+        'preset': 'starter',
       };
 
       await progressNotifier?.notify(
           message: 'Generating screen files...', percent: 50);
 
-      // Generate screen using TemplateManager
-      final result = await templateManager.generateComponent(
-        componentName: params.screenName,
-        componentType: BrickType.feature,
-        config: screenConfig,
-        targetPath: Directory.current.path,
+      // Create orchestrator and generate
+      final orchestrator = TemplateGenerationOrchestrator(
+        templateManager: templateManager,
+        logger: context.logger,
+      );
+
+      final result = await orchestrator.generate(
+        rawVars: rawVars,
+        outputDirectory: Directory.current.path,
       );
 
       cancelToken?.throwIfCancelled();
 
-      if (result is TemplateGenerationFailure) {
+      if (!result.success) {
         throw McpError.templateError(
           templateId: 'screen',
-          error: result.error,
-          variables: screenConfig,
+          error: result.error ?? 'Screen generation failed',
+          variables: rawVars,
           context: {
             'screen_name': params.screenName,
             'feature': feature,
@@ -212,18 +216,11 @@ class FlyGenerateFeatureStrategy
         );
       }
 
-      if (result is! TemplateGenerationSuccess) {
-        return FlyGenerateScreenResult(
-          success: false,
-          message: 'Unexpected generation result',
-        );
-      }
-
       return FlyGenerateScreenResult(
         success: true,
         message: 'Screen generated successfully',
-        filesGenerated: result.filesGenerated,
-        screenPath: result.targetDirectory,
+        filesGenerated: result.files?.length ?? 0,
+        screenPath: result.targetDirectory ?? Directory.current.path,
       );
     };
   }

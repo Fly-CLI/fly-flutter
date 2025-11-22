@@ -160,40 +160,6 @@ void main() {
       });
     });
 
-    group('toTemplateVariables', () {
-      test('should convert to TemplateVariables', () {
-        final manifest = ProjectManifest(
-          name: 'test_app',
-          template: 'fly_foundation',
-          organization: 'com.test',
-          description: 'Test app',
-          platforms: ['ios', 'android', 'web'],
-          screens: [
-            ScreenConfig(
-              name: 'login',
-              type: 'auth',
-              features: ['validation'],
-            ),
-          ],
-          services: [
-            ServiceConfig(
-              name: 'api_service',
-              type: 'api',
-              features: ['caching'],
-            ),
-          ],
-        );
-
-        final variables = manifest.toTemplateVariables();
-
-        expect(variables.projectName, equals('test_app'));
-        expect(variables.organization, equals('com.test'));
-        expect(variables.platforms, equals(['ios', 'android', 'web']));
-        expect(variables.description, equals('Test app'));
-        expect(variables.features, contains('validation'));
-        expect(variables.features, contains('caching'));
-      });
-    });
 
     group('fromFile', () {
       late Directory tempDir;

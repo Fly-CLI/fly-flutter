@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/core/definitions/mcp_tool.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_screen_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_feature_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_service_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_completion_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/fly_context_export_strategy.dart';

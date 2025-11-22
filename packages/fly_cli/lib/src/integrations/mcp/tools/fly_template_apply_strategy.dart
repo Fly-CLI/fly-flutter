@@ -1,5 +1,5 @@
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
+import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_template_apply_params.dart';
@@ -185,13 +185,24 @@ class FlyTemplateApplyStrategy
         TemplateProgressStage.generating,
       );
 
-      // Convert variables to TemplateVariables
-      final templateVariables = TemplateVariables.fromJson({
-        'projectName': variablesMap['projectName'] ?? params.templateId,
-        'organization': variablesMap['organization'] ?? 'com.example',
-        'platforms': variablesMap['platforms'] ?? ['ios', 'android'],
+      // Prepare raw variables for orchestrator
+      final projectName =
+          variablesMap['projectName'] as String? ?? params.templateId;
+      final rawVars = <String, dynamic>{
+        'name': projectName,
+        'template': params.templateId,
+        'organization':
+            variablesMap['organization'] as String? ?? 'com.example',
+        'description':
+            variablesMap['description'] as String? ?? 'A new Flutter project',
+        'platforms':
+            variablesMap['platforms'] as List<dynamic>? ?? ['ios', 'android'],
+        'generation_mode': 'project',
+        'preset': variablesMap['preset'] as String? ?? 'starter',
+        'features': variablesMap['features'] as List<dynamic>? ?? [],
+        'services': variablesMap['services'] as List<dynamic>? ?? [],
         ...variablesMap,
-      });
+      };
 
       // Progress: Generating files
       await ProgressHelpers.notifyTemplateProgress(
@@ -205,14 +216,18 @@ class FlyTemplateApplyStrategy
         TemplateProgressStage.applying,
       );
 
-      final result = await templateManager.generateProject(
-        templateName: params.templateId,
-        projectName:
-            variablesMap['projectName'] as String? ?? params.templateId,
-        outputDirectory: params.outputDirectory,
-        variables: templateVariables,
-        dryRun: dryRun,
+      // Create orchestrator
+      final orchestrator = TemplateGenerationOrchestrator(
+        templateManager: templateManager,
+        logger: context.logger,
       );
+
+      final stopwatch = Stopwatch()..start();
+      final result = await orchestrator.generate(
+        rawVars: rawVars,
+        outputDirectory: params.outputDirectory,
+      );
+      stopwatch.stop();
 
       cancelToken?.throwIfCancelled();
 
@@ -222,10 +237,10 @@ class FlyTemplateApplyStrategy
         TemplateProgressStage.processing,
       );
 
-      if (result is TemplateGenerationFailure) {
+      if (!result.success) {
         throw McpError.templateError(
           templateId: params.templateId,
-          error: result.error,
+          error: result.error ?? 'Template generation failed',
           variables: variablesMap,
           context: {
             'output_directory': params.outputDirectory,
@@ -234,47 +249,26 @@ class FlyTemplateApplyStrategy
         );
       }
 
-      if (result is TemplateGenerationSuccess) {
-        // Progress: Finalizing
-        await ProgressHelpers.notifyTemplateProgress(
-          progressNotifier,
-          TemplateProgressStage.finalizing,
-        );
+      // Progress: Finalizing
+      await ProgressHelpers.notifyTemplateProgress(
+        progressNotifier,
+        TemplateProgressStage.finalizing,
+      );
 
-        // Progress: Complete
-        await ProgressHelpers.notifyTemplateProgress(
-          progressNotifier,
-          TemplateProgressStage.complete,
-        );
-
-        return FlyTemplateApplyResult(
-          success: true,
-          targetDirectory: result.targetDirectory,
-          filesGenerated: result.filesGenerated,
-          durationMs: result.duration.inMilliseconds,
-          message: 'Template applied successfully',
-        );
-      }
-
-      if (result is TemplateGenerationDryRun) {
-        // Progress: Complete (dry-run)
-        await ProgressHelpers.notifyTemplateProgress(
-          progressNotifier,
-          TemplateProgressStage.complete,
-        );
-
-        return FlyTemplateApplyResult(
-          success: true,
-          targetDirectory: null,
-          filesGenerated: 0,
-          durationMs: 0,
-          message: 'Dry run completed - preview generated',
-        );
-      }
+      // Progress: Complete
+      await ProgressHelpers.notifyTemplateProgress(
+        progressNotifier,
+        TemplateProgressStage.complete,
+      );
 
       return FlyTemplateApplyResult(
-        success: false,
-        message: 'Unexpected generation result',
+        success: true,
+        targetDirectory: result.targetDirectory,
+        filesGenerated: result.files?.length ?? 0,
+        durationMs: stopwatch.elapsedMilliseconds,
+        message: dryRun
+            ? 'Dry run completed - preview generated'
+            : 'Template applied successfully',
       );
     };
   }

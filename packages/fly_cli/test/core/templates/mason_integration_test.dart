@@ -240,40 +240,6 @@ void main() {
       expect(result, isA<TemplateGenerationResult>());
     });
 
-    test('should handle component generation', () async {
-      final bricks = await templateManager.getAvailableBricks();
-
-      // Skip if no bricks available
-      if (bricks.isEmpty) {
-        return;
-      }
-
-      // Check if screen brick exists
-      final screenBricks = await templateManager.getScreenBricks();
-      if (screenBricks.isEmpty) {
-        // Skip if no screen bricks available
-        return;
-      }
-
-      final result = await templateManager.generateComponent(
-        componentName: 'test_screen',
-        componentType: BrickType.feature,
-        config: {
-          'screen_name': 'test_screen',
-          'feature': 'home',
-          'screen_type': 'list',
-          'with_viewmodel': true,
-          'with_tests': true,
-          'with_validation': false,
-          'with_navigation': true,
-        },
-        targetPath: '/tmp/test',
-      );
-
-      expect(result, isNotNull);
-      // Component generation returns a result (may be failure if brick structure is invalid)
-      expect(result, isA<TemplateGenerationResult>());
-    });
 
     test('should maintain backward compatibility with legacy methods', () async {
       // Test that the legacy getAvailableTemplates method still works

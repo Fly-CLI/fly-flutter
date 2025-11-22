@@ -375,21 +375,6 @@ class ProjectManifest {
     );
   }
 
-  /// Convert to TemplateVariables for project generation
-  TemplateVariables toTemplateVariables() => TemplateVariables(
-        projectName: name,
-        organization: organization,
-        platforms: platforms,
-        description: description ?? 'A new Flutter project',
-        features: _extractFeatures(),
-        withTests: config.generateTests,
-        withDocs: config.generateDocs,
-        aiIntegration: config.generateContext,
-        flyPackages: packages.isEmpty
-            ? TemplateVariables.defaultFlyPackages
-            : packages,
-      );
-
   /// Extract features from screens and services
   List<String> _extractFeatures() {
     final features = <String>{};
