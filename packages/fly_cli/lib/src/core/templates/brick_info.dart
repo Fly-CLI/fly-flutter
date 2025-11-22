@@ -39,11 +39,12 @@ class BrickInfo {
     }
 
     // Parse type from YAML (required field)
+    // Type should come from fly_metadata.yaml (Mason doesn't allow custom keys in brick.yaml)
     final typeStr = yaml['type'] as String?;
     if (typeStr == null || typeStr.trim().isEmpty) {
       throw ArgumentError(
-        'Brick type is required in brick.yaml. '
-        'Add a "type" field with one of: project, feature, service, component, custom',
+        'Brick type is required. '
+        'Add a "type" field to fly_metadata.yaml with one of: project, feature, service, component, custom',
       );
     }
     final brickType = _parseBrickType(typeStr);

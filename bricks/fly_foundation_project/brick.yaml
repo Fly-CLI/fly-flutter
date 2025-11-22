@@ -1,7 +1,6 @@
 name: fly_foundation_project
 description: Fly foundation project scaffolding brick for generating complete Flutter applications with MVVM, navigation, and best practices
 version: 1.0.0
-type: project
 
 # Variables are passed programmatically by the CLI orchestrator
 # This brick generates the full project structure including base foundation classes

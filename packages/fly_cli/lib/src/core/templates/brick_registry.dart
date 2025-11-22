@@ -170,8 +170,47 @@ class BrickRegistry {
       final yamlContent = await yamlFile.readAsString();
       final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
 
-      // Create BrickInfo (type is now parsed from YAML)
-      final brickInfo = BrickInfo.fromYaml(yaml, brickPath);
+      // Check for separate fly_metadata.yaml file for type (Mason doesn't allow custom keys in brick.yaml)
+      final flyMetadataFile = File(path.join(brickPath, 'fly_metadata.yaml'));
+      Map<dynamic, dynamic>? flyMetadata;
+      if (await flyMetadataFile.exists()) {
+        try {
+          final metadataContent = await flyMetadataFile.readAsString();
+          flyMetadata = loadYaml(metadataContent) as Map<dynamic, dynamic>?;
+          logger.detail('Loaded fly_metadata.yaml for brick $brickPath: $flyMetadata');
+        } catch (e) {
+          logger.warn('Failed to parse fly_metadata.yaml for brick $brickPath: $e');
+        }
+      } else {
+        logger.warn(
+          'Brick $brickPath missing fly_metadata.yaml file. '
+          'Type information is required for brick discovery.',
+        );
+      }
+
+      // Merge metadata into yaml if available (metadata takes precedence)
+      final mergedYaml = Map<dynamic, dynamic>.from(yaml);
+      if (flyMetadata != null) {
+        mergedYaml.addAll(flyMetadata);
+        logger.detail('Merged metadata into YAML for brick $brickPath. Type: ${mergedYaml['type']}');
+      } else {
+        // Type is required - throw a clear error if fly_metadata.yaml is missing
+        throw ArgumentError(
+          'Brick $brickPath is missing fly_metadata.yaml file with type information. '
+          'Create fly_metadata.yaml with: type: <project|feature|service|component|custom>',
+        );
+      }
+
+      // Verify type is present before creating BrickInfo
+      if (mergedYaml['type'] == null) {
+        throw ArgumentError(
+          'Brick $brickPath: type field is missing in fly_metadata.yaml. '
+          'Add "type: <project|feature|service|component|custom>" to fly_metadata.yaml',
+        );
+      }
+
+      // Create BrickInfo (type is now parsed from fly_metadata.yaml)
+      final brickInfo = BrickInfo.fromYaml(mergedYaml, brickPath);
 
       // Validate brick
       final validationResult = await validateBrick(brickInfo);
@@ -195,8 +234,16 @@ class BrickRegistry {
       }
 
       return brickInfo;
-    } catch (e) {
+    } catch (e, stackTrace) {
       logger.warn('Error loading brick from $brickPath: $e');
+      logger.detail('Stack trace: $stackTrace');
+      // If it's an ArgumentError about missing type, provide helpful message
+      if (e is ArgumentError && e.message.contains('type')) {
+        logger.err(
+          'Brick $brickPath is missing type information. '
+          'Ensure fly_metadata.yaml exists with a "type" field.',
+        );
+      }
       return null;
     }
   }
