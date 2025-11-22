@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:mason/mason.dart' hide Logger, GeneratedFile;
-import 'package:fly_foundation_planning/src/orchestration/brick_executor.dart';
+import 'package:fly_brick_composer/src/orchestration/brick_executor.dart';
 import 'package:fly_cli/src/core/templates/brick_info.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 

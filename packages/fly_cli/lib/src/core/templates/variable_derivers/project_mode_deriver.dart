@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
 /// Deriver that sets project-mode-specific variables.
@@ -16,7 +16,7 @@ class ProjectModeDeriver implements VariableDeriver {
   VariableBag derive(
     GenerationContext ctx,
     VariableBag current,
-    PlanningLogger logger,
+    ComposerLogger logger,
   ) {
     return current.set(MasonVarKey.isProject.key, true);
   }

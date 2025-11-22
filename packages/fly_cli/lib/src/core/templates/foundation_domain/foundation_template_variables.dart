@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/foundation_domain/foundation_types.dart'
     show ScreenType, ServiceType, StateManagement, FoundationVars;
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';

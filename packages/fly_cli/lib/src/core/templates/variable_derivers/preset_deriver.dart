@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/foundation_domain/foundation_presets.dart';
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
@@ -16,7 +16,7 @@ class PresetDeriver implements VariableDeriver {
   VariableBag derive(
     GenerationContext ctx,
     VariableBag current,
-    PlanningLogger logger,
+    ComposerLogger logger,
   ) {
     // Get the active preset (defaults to starter if not specified)
     FoundationPreset preset;

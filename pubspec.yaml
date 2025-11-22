@@ -19,7 +19,7 @@ workspace:
   - packages/fly_flow_guard
   - packages/fly_mvvm
   - packages/fly_state
-  - packages/fly_foundation_planning
+  - packages/fly_brick_composer
 
 dependencies:
   yaml: ^3.1.2

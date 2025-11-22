@@ -348,12 +348,12 @@ packages/fly_cli/bin/fly <command>
 
 ## Summary
 
-| Scenario | Command | When to Use |
-|----------|---------|-------------|
-| **Development** | `dart run packages/fly_cli/bin/fly.dart` | Active coding, debugging |
-| **Performance** | `./scripts/development/build-cli.sh && packages/fly_cli/bin/fly` | Benchmarks, measurements |
-| **Integration Tests** | `./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh` | Test suite execution |
-| **CI/CD** | Compile + use binary | Automated pipelines |
+| Scenario              | Command                                                                      | When to Use              |
+|-----------------------|------------------------------------------------------------------------------|--------------------------|
+| **Development**       | `dart run packages/fly_cli/bin/fly.dart`                                     | Active coding, debugging |
+| **Performance**       | `./scripts/development/build-cli.sh && packages/fly_cli/bin/fly`             | Benchmarks, measurements |
+| **Integration Tests** | `./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh` | Test suite execution     |
+| **CI/CD**             | Compile + use binary                                                         | Automated pipelines      |
 
 **Key Principle**: Use `dart run` for development speed, compile binary for performance.
 

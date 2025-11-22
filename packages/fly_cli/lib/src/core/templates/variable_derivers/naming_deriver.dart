@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
 /// Deriver that sets naming-related variables (snake_case, camelCase, PascalCase).
@@ -15,7 +15,7 @@ class NamingDeriver implements VariableDeriver {
   VariableBag derive(
     GenerationContext ctx,
     VariableBag current,
-    PlanningLogger logger,
+    ComposerLogger logger,
   ) {
     // Extract basic fields from raw vars
     final name = ctx.rawVars[MasonVarKey.name.key] as String? ??

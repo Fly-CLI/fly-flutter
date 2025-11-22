@@ -39,8 +39,8 @@ dependencies:
     path: ../fly_core
   fly_mcp:
     path: ../fly_mcp
-  fly_foundation_planning:
-    path: ../fly_foundation_planning
+  fly_brick_composer:
+    path: ../fly_brick_composer
   mustache_template: ^2.0.2
 
 dev_dependencies:

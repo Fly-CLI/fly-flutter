@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/foundation_domain/foundation_types.dart';
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
@@ -17,7 +17,7 @@ class FeatureModeDeriver implements VariableDeriver {
   VariableBag derive(
     GenerationContext ctx,
     VariableBag current,
-    PlanningLogger logger,
+    ComposerLogger logger,
   ) {
     final screenTypeStr = ctx.rawVars[MasonVarKey.screenType.key] as String? ??
         ctx.rawVars['screen_type'] as String?;

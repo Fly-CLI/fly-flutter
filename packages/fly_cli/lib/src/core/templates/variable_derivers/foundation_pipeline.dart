@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/variable_derivers/feature_mode_deriver.dart';
 import 'package:fly_cli/src/core/templates/variable_derivers/naming_deriver.dart';
 import 'package:fly_cli/src/core/templates/variable_derivers/platform_deriver.dart';

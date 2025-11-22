@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/foundation_domain/foundation_instance_configs.dart';
 
 /// Factory for creating a BrickRegistry configured with Fly foundation bricks.

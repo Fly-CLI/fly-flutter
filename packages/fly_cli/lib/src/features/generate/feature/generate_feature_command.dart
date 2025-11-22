@@ -261,11 +261,11 @@ class GenerateFeatureCommand extends FlyCommand {
     try {
       final stopwatch = Stopwatch()..start();
 
-      logger.info('Generating feature component: $componentName');
-      logger.info('Feature: $feature');
-      logger.info('Type: ${screenType.key}');
-      logger.info('With viewmodel: $withViewModel');
-      logger.info('With tests: $withTests');
+      logger..info('Generating feature component: $componentName')
+      ..info('Feature: $feature')
+      ..info('Type: ${screenType.key}')
+      ..info('With viewmodel: $withViewModel')
+      ..info('With tests: $withTests');
       if (screenType == ScreenType.form) {
         logger.info('With validation: $withValidation');
       }
@@ -292,7 +292,7 @@ class GenerateFeatureCommand extends FlyCommand {
       };
 
       // Generate using orchestrator
-      final result = await orchestrator.generateFoundation(
+      final result = await orchestrator.generate(
         rawVars: rawVars,
         outputDirectory: outputDir,
       );

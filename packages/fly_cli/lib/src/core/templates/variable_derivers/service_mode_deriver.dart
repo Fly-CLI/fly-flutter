@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/foundation_domain/foundation_types.dart';
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
@@ -17,7 +17,7 @@ class ServiceModeDeriver implements VariableDeriver {
   VariableBag derive(
     GenerationContext ctx,
     VariableBag current,
-    PlanningLogger logger,
+    ComposerLogger logger,
   ) {
     final serviceTypeStr = ctx.rawVars[MasonVarKey.serviceType.key] as String? ??
         ctx.rawVars['service_type'] as String?;
@@ -55,7 +55,7 @@ class ServiceModeDeriver implements VariableDeriver {
 
     // Validation: analytics + caching not supported
     if (isAnalyticsService && withCaching) {
-      throw const PlanningException(
+      throw const ComposerException(
         'Invalid combination: service_type=analytics does not support with_caching=true.',
       );
     }

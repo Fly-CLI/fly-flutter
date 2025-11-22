@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/workflows/foundation_workflows.dart';
 
 /// Helper for inferring foundation workflow IDs from raw variables.
@@ -15,7 +15,7 @@ class FoundationWorkflowInference {
   /// - `feature` → feature_only workflow
   /// - `service` → service_only workflow
   ///
-  /// Throws [PlanningException] if the generation mode is invalid or cannot
+  /// Throws [ComposerException] if the generation mode is invalid or cannot
   /// be inferred.
   static WorkflowId inferFromVars(Map<String, dynamic> rawVars) {
     final generationMode = GenerationMode.fromVars(rawVars);

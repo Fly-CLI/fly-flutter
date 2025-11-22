@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 
 /// Foundation-specific workflow identifiers.
 class FoundationWorkflowIds {

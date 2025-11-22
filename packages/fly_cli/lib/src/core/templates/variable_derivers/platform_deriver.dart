@@ -1,4 +1,4 @@
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/templates/mason_variable_keys.dart';
 
 /// Deriver that sets platform support flags based on platforms in raw vars.
@@ -15,7 +15,7 @@ class PlatformDeriver implements VariableDeriver {
   VariableBag derive(
     GenerationContext ctx,
     VariableBag current,
-    PlanningLogger logger,
+    ComposerLogger logger,
   ) {
     final platformsRaw = ctx.rawVars[MasonVarKey.platforms.key] as List? ??
         ctx.rawVars['platforms'] as List? ??

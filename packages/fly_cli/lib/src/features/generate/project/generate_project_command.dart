@@ -446,7 +446,7 @@ class GenerateProjectCommand extends FlyCommand {
       };
 
       // Generate using orchestrator
-      final result = await orchestrator.generateFoundation(
+      final result = await orchestrator.generate(
         rawVars: rawVars,
         outputDirectory: projectPath,
       );

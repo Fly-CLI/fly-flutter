@@ -1,5 +1,5 @@
 import 'package:mason/mason.dart' hide Logger, GeneratedFile;
-import 'package:fly_foundation_planning/fly_foundation_planning.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'foundation_brick_executor.dart';
@@ -10,26 +10,26 @@ import 'workflows/foundation_workflow_inference.dart';
 
 /// CLI wrapper for Fly foundation generation orchestration.
 ///
-/// This is a thin wrapper that adapts CLI-specific types to the planning
+/// This is a thin wrapper that adapts CLI-specific types to the composer
 /// library's generic orchestrator. The actual orchestration logic lives
-/// in the `fly_foundation_planning` package.
+/// in the `fly_brick_composer` package.
 class TemplateGenerationOrchestrator {
   final TemplateManager _templateManager;
   final Logger _logger;
-  final FoundationPlanner? _planner;
+  final BrickComposer? _composer;
 
   /// Creates a foundation orchestrator with CLI-specific dependencies.
   ///
   /// [templateManager] is used to find and execute bricks.
   /// [logger] is used for logging orchestration progress.
-  /// [planner] is optional; if not provided, a default planner will be created.
+  /// [composer] is optional; if not provided, a default composer will be created.
   TemplateGenerationOrchestrator({
     required TemplateManager templateManager,
     required Logger logger,
-    FoundationPlanner? planner,
+    BrickComposer? composer,
   })  : _templateManager = templateManager,
         _logger = logger,
-        _planner = planner;
+        _composer = composer;
 
   /// Plans and executes foundation generation using bricks.
   ///
@@ -37,35 +37,35 @@ class TemplateGenerationOrchestrator {
   /// [outputDirectory] is the root directory where files should be generated.
   ///
   /// Returns a result indicating success or failure with details.
-  Future<FoundationGenerationResult> generateFoundation({
+  Future<FoundationGenerationResult> generate({
     required Map<String, dynamic> rawVars,
     required String outputDirectory,
   }) async {
-    // Create the adapter for planning logger
-    final planningLogger = PlanningLoggerAdapter(_logger);
+    // Create the adapter for composer logger
+    final composerLogger = ComposerLoggerAdapter(_logger);
 
     // Create the executor that uses TemplateManager
     final executor = TemplateManagerBrickExecutor(
       templateManager: _templateManager,
     );
 
-    // Create the planner if not provided using the foundation factory
-    final planner = _planner ?? FoundationPlannerFactory.createPlanner(
-      logger: planningLogger,
+    // Create the composer if not provided using the foundation factory
+    final composer = _composer ?? BrickComposerFactory.createComposer(
+      logger: composerLogger,
     );
 
-    // Create the orchestrator from the planning package
-    final orchestrator = FoundationOrchestrator<GeneratedFile>(
+    // Create the orchestrator from the composer package
+    final orchestrator = BrickOrchestrator<GeneratedFile>(
       executor: executor,
-      logger: planningLogger,
-      planner: planner,
+      logger: composerLogger,
+      composer: composer,
     );
 
     // Infer workflow ID from raw vars
     final workflowId = FoundationWorkflowInference.inferFromVars(rawVars);
 
     // Execute orchestration
-    final result = await orchestrator.generateFoundation(
+    final result = await orchestrator.generate(
       rawVars: rawVars,
       workflowId: workflowId,
       outputDirectory: outputDirectory,
