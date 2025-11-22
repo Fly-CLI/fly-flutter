@@ -723,53 +723,6 @@ class TemplateManager {
     }
   }
 
-  /// Run pre-generation hooks
-  Future<void> _runPreGenerationHooks(
-    TemplateInfo template,
-    TemplateVariables variables,
-  ) async {
-    final hooksDir = path.join(template.path, 'hooks');
-    final preGenFile = File(path.join(hooksDir, 'pre_gen.dart'));
-
-    if (await preGenFile.exists()) {
-      try {
-        // Execute pre-generation hook
-        final result = await Process.run('dart', [preGenFile.path]);
-        if (result.exitCode != 0) {
-          logger.warn('Pre-generation hook failed: ${result.stderr}');
-        }
-      } catch (e) {
-        logger.warn('Error running pre-generation hook: $e');
-      }
-    }
-  }
-
-  /// Run post-generation hooks
-  Future<void> _runPostGenerationHooks(
-    TemplateInfo template,
-    String targetDirectory,
-    TemplateVariables variables,
-  ) async {
-    final hooksDir = path.join(template.path, 'hooks');
-    final postGenFile = File(path.join(hooksDir, 'post_gen.dart'));
-
-    if (await postGenFile.exists()) {
-      try {
-        // Execute post-generation hook
-        final result = await Process.run(
-          'dart',
-          [postGenFile.path],
-          workingDirectory: targetDirectory,
-        );
-        if (result.exitCode != 0) {
-          logger.warn('Post-generation hook failed: ${result.stderr}');
-        }
-      } catch (e) {
-        logger.warn('Error running post-generation hook: $e');
-      }
-    }
-  }
-
   /// Generate project files using fallback method (simple file copying)
   Future<void> _generateProjectFilesFallback(
     String brickPath,

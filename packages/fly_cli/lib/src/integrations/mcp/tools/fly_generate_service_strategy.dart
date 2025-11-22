@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/templates/generation/component_generation_service.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_adapter.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_params.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_result.dart';
@@ -80,46 +81,20 @@ class FlyGenerateServiceStrategy extends McpToolStrategy<
         );
       }
 
-      final feature = params.feature ?? 'core';
-      final serviceType = params.serviceType ?? 'api';
-      final withTests = params.withTests ?? false;
-      final withMocks = params.withMocks ?? false;
-      final withInterceptors = params.withInterceptors ?? false;
-      final baseUrl = params.baseUrl ?? 'https://api.example.com';
-
-      await progressNotifier?.notify(
-          message: 'Generating service: ${params.serviceName}...', percent: 10);
-
-      final templateManager = context.templateManager;
-
-      // Prepare raw variables for orchestrator
-      final isApiService = serviceType == 'api';
-      final rawVars = <String, dynamic>{
-        'name': params.serviceName,
-        'generation_mode': 'service',
-        'feature': feature,
-        'service_type': serviceType,
-        'with_tests': withTests,
-        'with_mocks': withMocks,
-        'with_interceptors': withInterceptors,
-        'with_retry_logic': isApiService,
-        'with_caching': serviceType == 'cache',
-        if (isApiService) 'api_base_url': baseUrl,
-        'preset': 'starter',
-      };
-
-      await progressNotifier?.notify(
-          message: 'Generating service files...', percent: 50);
-
-      // Create orchestrator and generate
-      final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: templateManager,
-        logger: context.logger,
+      // Convert MCP params to generation request using adapter
+      final request = GenerationAdapter.fromMcpServiceParams(
+        params: params,
+        outputDirectory: Directory.current.path,
+        context: context,
       );
 
-      final result = await orchestrator.generate(
-        rawVars: rawVars,
-        outputDirectory: Directory.current.path,
+      // Create unified generation service
+      final generationService = ComponentGenerationService(context: context);
+
+      // Generate service using unified service
+      final result = await generationService.generateService(
+        request: request,
+        progressNotifier: progressNotifier,
       );
 
       cancelToken?.throwIfCancelled();
@@ -127,15 +102,14 @@ class FlyGenerateServiceStrategy extends McpToolStrategy<
       if (!result.success) {
         return FlyGenerateServiceResult(
           success: false,
-          message:
-              'Failed to generate service: ${result.error ?? 'Unknown error'}',
+          message: 'Failed to generate service: ${result.error ?? 'Unknown error'}',
         );
       }
 
       return FlyGenerateServiceResult(
         success: true,
         message: 'Service generated successfully',
-        filesGenerated: result.files?.length ?? 0,
+        filesGenerated: result.filesGenerated,
         servicePath: result.targetDirectory ?? Directory.current.path,
       );
     };

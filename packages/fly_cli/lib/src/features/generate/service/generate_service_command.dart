@@ -94,13 +94,9 @@ class GenerateServiceCommand extends FlyCommand {
       }
       final targetDir = outputDirResult.path!.absolute;
 
-      // Create orchestrator and generator
-      final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: context.templateManager,
-        logger: logger,
-      );
+      // Create generator (which uses ComponentGenerationService internally)
       final generator = ServiceGenerator(
-        orchestrator: orchestrator,
+        context: context,
         logger: logger,
       );
 

@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/templates/generation/component_generation_service.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_adapter.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_screen_params.dart';
@@ -162,43 +163,20 @@ class FlyGenerateFeatureStrategy
         );
       }
 
-      final feature = params.feature ?? 'home';
-      final screenType = params.screenType ?? 'list';
-      final withViewModel = params.withViewModel ?? false;
-      final withTests = params.withTests ?? false;
-      final withValidation = params.withValidation ?? false;
-      final withNavigation = params.withNavigation ?? true;
-
-      await progressNotifier?.notify(
-          message: 'Generating screen: ${params.screenName}...', percent: 10);
-
-      final templateManager = context.templateManager;
-
-      // Prepare raw variables for orchestrator
-      final rawVars = <String, dynamic>{
-        'name': params.screenName,
-        'generation_mode': 'feature',
-        'feature': feature,
-        'screen_type': screenType,
-        'with_viewmodel': withViewModel,
-        'with_tests': withTests,
-        'with_validation': withValidation,
-        'with_navigation': withNavigation,
-        'preset': 'starter',
-      };
-
-      await progressNotifier?.notify(
-          message: 'Generating screen files...', percent: 50);
-
-      // Create orchestrator and generate
-      final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: templateManager,
-        logger: context.logger,
+      // Convert MCP params to generation request using adapter
+      final request = GenerationAdapter.fromMcpFeatureParams(
+        params: params,
+        outputDirectory: Directory.current.path,
+        context: context,
       );
 
-      final result = await orchestrator.generate(
-        rawVars: rawVars,
-        outputDirectory: Directory.current.path,
+      // Create unified generation service
+      final generationService = ComponentGenerationService(context: context);
+
+      // Generate feature using unified service
+      final result = await generationService.generateFeature(
+        request: request,
+        progressNotifier: progressNotifier,
       );
 
       cancelToken?.throwIfCancelled();
@@ -207,11 +185,11 @@ class FlyGenerateFeatureStrategy
         throw McpError.templateError(
           templateId: 'screen',
           error: result.error ?? 'Screen generation failed',
-          variables: rawVars,
+          variables: request.toVariableMap(),
           context: {
             'screen_name': params.screenName,
-            'feature': feature,
-            'screen_type': screenType,
+            'feature': params.feature ?? 'home',
+            'screen_type': params.screenType ?? 'list',
           },
         );
       }
@@ -219,7 +197,7 @@ class FlyGenerateFeatureStrategy
       return FlyGenerateScreenResult(
         success: true,
         message: 'Screen generated successfully',
-        filesGenerated: result.files?.length ?? 0,
+        filesGenerated: result.filesGenerated,
         screenPath: result.targetDirectory ?? Directory.current.path,
       );
     };

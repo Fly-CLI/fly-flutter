@@ -97,13 +97,9 @@ class GenerateFeatureCommand extends FlyCommand {
       }
       final targetDir = outputDirResult.path!.absolute;
 
-      // Create orchestrator and generator
-      final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: context.templateManager,
-        logger: logger,
-      );
+      // Create generator (which uses ComponentGenerationService internally)
       final generator = FeatureGenerator(
-        orchestrator: orchestrator,
+        context: context,
         logger: logger,
       );
 

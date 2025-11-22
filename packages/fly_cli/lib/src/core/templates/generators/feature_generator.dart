@@ -1,20 +1,26 @@
-import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
+import 'package:fly_cli/src/core/templates/generation/component_generation_service.dart';
+import 'package:fly_cli/src/core/templates/generation/generation_request.dart';
 import 'package:fly_cli/src/core/templates/generators/generation_result.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Generator for feature/screen components.
 ///
-/// Handles feature generation using the TemplateGenerationOrchestrator,
+/// Handles feature generation using the ComponentGenerationService,
 /// working in both standalone and project-scaffolding contexts.
+/// This ensures consistency between CLI commands and MCP tools.
 class FeatureGenerator {
-  final TemplateGenerationOrchestrator _orchestrator;
+  final CommandContext _context;
   final Logger _logger;
 
-  /// Create a FeatureGenerator with the given orchestrator and logger.
+  /// Create a FeatureGenerator with the given context and logger.
+  ///
+  /// [context] is required to create the ComponentGenerationService.
+  /// [logger] is used for logging generation progress.
   FeatureGenerator({
-    required TemplateGenerationOrchestrator orchestrator,
+    required CommandContext context,
     required Logger logger,
-  })  : _orchestrator = orchestrator,
+  })  : _context = context,
         _logger = logger;
 
   /// Generate a feature component.
@@ -23,57 +29,37 @@ class FeatureGenerator {
   /// [outputDirectory] is the target directory for generation.
   ///
   /// Returns a GenerationResult with success status and generated files.
+  ///
+  /// This method delegates to ComponentGenerationService to ensure
+  /// consistency with MCP tool generation paths.
   Future<GenerationResult> generate({
     required Map<String, dynamic> rawVars,
     required String outputDirectory,
   }) async {
     try {
-      _logger.info('Generating feature component: ${rawVars['name']}');
-      _logger.info('Feature: ${rawVars['feature']}');
-      _logger.info('Type: ${rawVars['screen_type']}');
-      _logger.info('With viewmodel: ${rawVars['with_viewmodel']}');
-      _logger.info('With tests: ${rawVars['with_tests']}');
-      if (rawVars['screen_type'] == 'form') {
-        _logger.info('With validation: ${rawVars['with_validation']}');
-      }
-      _logger.info('With navigation: ${rawVars['with_navigation']}');
-
-      final result = await _orchestrator.generate(
-        rawVars: rawVars,
+      // Create generation request from rawVars
+      final request = GenerationRequest.feature(
+        componentName: rawVars['name'] as String,
+        feature: rawVars['feature'] as String?,
+        screenType: rawVars['screen_type'] as String?,
+        withViewModel: rawVars['with_viewmodel'] as bool?,
+        withTests: rawVars['with_tests'] as bool?,
+        withValidation: rawVars['with_validation'] as bool?,
+        withNavigation: rawVars['with_navigation'] as bool?,
         outputDirectory: outputDirectory,
+        context: _context,
       );
 
-      if (!result.success) {
-        return GenerationResult.failure(
-          error: result.error ?? 'Failed to generate feature component',
-          data: {
-            'component_name': rawVars['name'],
-            'feature': rawVars['feature'],
-            'screen_type': rawVars['screen_type'],
-          },
-        );
-      }
-
-      return GenerationResult.success(
-        files: result.files ?? [],
-        targetDirectory: result.targetDirectory ?? outputDirectory,
-        data: {
-          'component_name': rawVars['name'],
-          'feature': rawVars['feature'],
-          'screen_type': rawVars['screen_type'],
-          'with_viewmodel': rawVars['with_viewmodel'],
-          'with_tests': rawVars['with_tests'],
-          'with_validation': rawVars['with_validation'] ?? false,
-          'with_navigation': rawVars['with_navigation'] ?? false,
-        },
-      );
+      // Use ComponentGenerationService for consistent generation
+      final service = ComponentGenerationService(context: _context);
+      return await service.generateFeature(request: request);
     } catch (e, stackTrace) {
       _logger.err('Feature generation failed: $e');
       _logger.detail('Stack trace: $stackTrace');
       return GenerationResult.failure(
         error: 'Failed to generate feature component: $e',
         data: {
-          'component_name': rawVars['name'],
+          'component_name': rawVars['name'] as String? ?? 'unknown',
           'error_type': e.runtimeType.toString(),
         },
       );
