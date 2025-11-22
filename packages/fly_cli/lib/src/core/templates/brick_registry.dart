@@ -231,14 +231,26 @@ class BrickRegistry {
       }
     }
 
-    // Check if brick name indicates it's a project brick
+    // Check if brick name indicates its type by pattern matching
+    // Service bricks follow the pattern: fly_foundation_service, *_service, etc.
+    if (brickName.contains('_service')) {
+      logger.detail('Detected as service brick (by name)');
+      return BrickType.service;
+    }
+    
+    // Feature bricks follow the pattern: fly_foundation_feature, *_feature, etc.
+    if (brickName.contains('_feature')) {
+      logger.detail('Detected as feature brick (by name)');
+      return BrickType.feature;
+    }
+    
     // Project bricks follow the pattern: fly_foundation_project, *_project, etc.
     if (brickName.contains('_project')) {
       logger.detail('Detected as project brick (by name)');
       return BrickType.project;
     }
     
-    // Check if it's in the bricks directory at root level (all are considered projects)
+    // Check if it's in the bricks directory at root level (fallback to project)
     if (pathSegments.contains('bricks')) {
       final bricksIndex = pathSegments.indexOf('bricks');
       // If this is directly under bricks/, it's a top-level brick (likely project)
