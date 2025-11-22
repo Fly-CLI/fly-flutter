@@ -170,11 +170,8 @@ class BrickRegistry {
       final yamlContent = await yamlFile.readAsString();
       final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
 
-      // Determine brick type based on path
-      final brickType = _determineBrickType(brickPath);
-
-      // Create BrickInfo
-      final brickInfo = BrickInfo.fromYaml(yaml, brickPath, brickType);
+      // Create BrickInfo (type is now parsed from YAML)
+      final brickInfo = BrickInfo.fromYaml(yaml, brickPath);
 
       // Validate brick
       final validationResult = await validateBrick(brickInfo);
@@ -202,67 +199,6 @@ class BrickRegistry {
       logger.warn('Error loading brick from $brickPath: $e');
       return null;
     }
-  }
-
-  /// Determine brick type based on path
-  BrickType _determineBrickType(String brickPath) {
-    final pathSegments = path.split(brickPath);
-    final brickName = pathSegments.last;
-
-    logger.detail('Determining brick type for path: $brickPath');
-    logger.detail('Path segments: $pathSegments');
-    logger.detail('Brick name: $brickName');
-
-    // Check if it's in the components subdirectory first (more specific)
-    if (pathSegments.contains('components')) {
-      // Determine specific component type by directory name
-      final componentDir = pathSegments[pathSegments.indexOf('components') + 1];
-      logger.detail('Component directory: $componentDir');
-      switch (componentDir) {
-        case 'screen':
-          logger.detail('Detected as screen brick');
-          return BrickType.feature;
-        case 'service':
-          logger.detail('Detected as service brick');
-          return BrickType.service;
-        default:
-          logger.detail('Detected as generic component brick');
-          return BrickType.component;
-      }
-    }
-
-    // Check if brick name indicates its type by pattern matching
-    // Service bricks follow the pattern: fly_foundation_service, *_service, etc.
-    if (brickName.contains('_service')) {
-      logger.detail('Detected as service brick (by name)');
-      return BrickType.service;
-    }
-    
-    // Feature bricks follow the pattern: fly_foundation_feature, *_feature, etc.
-    if (brickName.contains('_feature')) {
-      logger.detail('Detected as feature brick (by name)');
-      return BrickType.feature;
-    }
-    
-    // Project bricks follow the pattern: fly_foundation_project, *_project, etc.
-    if (brickName.contains('_project')) {
-      logger.detail('Detected as project brick (by name)');
-      return BrickType.project;
-    }
-    
-    // Check if it's in the bricks directory at root level (fallback to project)
-    if (pathSegments.contains('bricks')) {
-      final bricksIndex = pathSegments.indexOf('bricks');
-      // If this is directly under bricks/, it's a top-level brick (likely project)
-      if (bricksIndex + 1 < pathSegments.length) {
-        logger.detail('Detected as project brick (in bricks directory)');
-        return BrickType.project;
-      }
-    }
-
-    // Default to custom if path doesn't match expected structure
-    logger.detail('Detected as custom brick');
-    return BrickType.custom;
   }
 
   /// Get brick by name

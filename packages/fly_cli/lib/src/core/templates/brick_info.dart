@@ -31,12 +31,22 @@ class BrickInfo {
 
   /// Create BrickInfo from brick.yaml content
   factory BrickInfo.fromYaml(
-      Map<dynamic, dynamic> yaml, String brickPath, BrickType type) {
+      Map<dynamic, dynamic> yaml, String brickPath) {
     // Helper to treat empty strings as null
     String? nonEmptyString(dynamic value) {
       final str = value as String?;
       return (str != null && str.trim().isNotEmpty) ? str : null;
     }
+
+    // Parse type from YAML (required field)
+    final typeStr = yaml['type'] as String?;
+    if (typeStr == null || typeStr.trim().isEmpty) {
+      throw ArgumentError(
+        'Brick type is required in brick.yaml. '
+        'Add a "type" field with one of: project, feature, service, component, custom',
+      );
+    }
+    final brickType = _parseBrickType(typeStr);
 
     // Parse variables from vars section
     final varsSection = yaml['vars'] as Map<dynamic, dynamic>? ?? {};
@@ -62,13 +72,34 @@ class BrickInfo {
       version: nonEmptyString(yaml['version']) ?? '1.0.0',
       description: nonEmptyString(yaml['description']) ?? '',
       path: brickPath,
-      type: type,
+      type: brickType,
       variables: variables,
       features: (yaml['features'] as List<dynamic>? ?? []).cast<String>(),
       packages: (yaml['packages'] as List<dynamic>? ?? []).cast<String>(),
       minFlutterSdk: nonEmptyString(yaml['min_flutter_sdk']) ?? '3.10.0',
       minDartSdk: nonEmptyString(yaml['min_dart_sdk']) ?? '3.0.0',
     );
+  }
+
+  /// Parse brick type from string
+  static BrickType _parseBrickType(String typeStr) {
+    switch (typeStr.toLowerCase().trim()) {
+      case 'project':
+        return BrickType.project;
+      case 'feature':
+        return BrickType.feature;
+      case 'service':
+        return BrickType.service;
+      case 'component':
+        return BrickType.component;
+      case 'custom':
+        return BrickType.custom;
+      default:
+        throw ArgumentError(
+          'Invalid brick type: "$typeStr". '
+          'Must be one of: project, feature, service, component, custom',
+        );
+    }
   }
 
   /// Create BrickInfo from JSON
