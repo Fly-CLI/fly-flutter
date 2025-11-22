@@ -11,6 +11,7 @@ import 'package:fly_cli/src/core/manifest/manifest_parser.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
 import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/templates/generation_variable_builder.dart';
 import 'package:fly_cli/src/core/templates/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
@@ -157,14 +158,26 @@ class GenerateProjectCommand extends FlyCommand {
       );
     }
 
+    // Build variables using ProjectVariableBuilder
+    const variableBuilder = ProjectVariableBuilder();
+    final rawVars = variableBuilder.buildFromContext(
+      context: context,
+      interactive: false,
+      outputDir: null,
+    );
+
+    // Validate variables
+    final validationResult = variableBuilder.validate(await rawVars);
+    if (!validationResult.isValid) {
+      return CommandResult.error(
+        message: 'Validation failed: ${validationResult.errors.join(', ')}',
+        suggestion: 'Check your input and try again',
+        errorCode: ErrorCode.invalidArgumentValue,
+      );
+    }
+
     return _createProject(
-      projectName: projectName,
-      template: template,
-      organization: organization,
-      description: description ?? '',
-      platforms: platforms,
-      features: features,
-      services: const [],
+      rawVars: await rawVars,
       projectPath: projectPath.absolute,
     );
   }
@@ -226,8 +239,6 @@ class GenerateProjectCommand extends FlyCommand {
       // Convert manifest screens to feature instances
       final featureInstances =
           _convertScreensToFeatureInstances(manifest.screens);
-
-      // If no screens, use default home feature
       if (featureInstances.isEmpty) {
         featureInstances.add({
           'name': 'home',
@@ -247,18 +258,31 @@ class GenerateProjectCommand extends FlyCommand {
       final serviceInstances =
           _convertServicesToServiceInstances(manifest.services);
 
-      // Determine preset from manifest config or default
-      final preset = _determinePresetFromManifest(manifest.config);
+      // Convert manifest to rawVars format using ProjectVariableBuilder
+      const variableBuilder = ProjectVariableBuilder();
+      final rawVars = variableBuilder.buildFromMap({
+        'name': projectName,
+        'template': manifest.template,
+        'organization': manifest.organization,
+        'description': manifest.description ?? 'A new Flutter project',
+        'platforms': manifest.platforms,
+        'features': featureInstances,
+        'services': serviceInstances,
+        'preset': _determinePresetFromManifest(manifest.config),
+      });
+
+      // Validate variables
+      final validationResult = variableBuilder.validate(rawVars);
+      if (!validationResult.isValid) {
+        return CommandResult.error(
+          message: 'Validation failed: ${validationResult.errors.join(', ')}',
+          suggestion: 'Check your manifest file and try again',
+          errorCode: ErrorCode.invalidArgumentValue,
+        );
+      }
 
       return _createProject(
-        projectName: projectName,
-        template: manifest.template,
-        organization: manifest.organization,
-        description: manifest.description ?? 'A new Flutter project',
-        platforms: manifest.platforms,
-        features: featureInstances.map((f) => f['name'] as String).toList(),
-        services: serviceInstances,
-        preset: preset,
+        rawVars: rawVars,
         projectPath: projectPath.absolute,
       );
     } on ManifestException catch (e) {
@@ -432,15 +456,49 @@ class GenerateProjectCommand extends FlyCommand {
 
       logger.info('\nGenerating project...\n');
 
+      // Build variables using ProjectVariableBuilder
+      const variableBuilder = ProjectVariableBuilder();
+      final rawVars = await variableBuilder.buildFromContext(
+        context: context,
+        interactive: true,
+        outputDir: null,
+      );
+
+      // Override with interactive values
+      rawVars['name'] = finalProjectName;
+      rawVars['template'] = finalTemplate;
+      rawVars['organization'] = finalOrganization;
+      rawVars['description'] =
+          description.isNotEmpty ? description : 'A new Flutter project';
+      rawVars['platforms'] = finalPlatforms;
+      rawVars['features'] = finalFeatures.map((featureName) {
+        return {
+          'name': featureName,
+          'type': 'feature',
+          'params': {
+            'feature': featureName,
+            'screen_type': 'list',
+            'with_viewmodel': true,
+            'with_tests': true,
+            'with_validation': false,
+            'with_navigation': false,
+          },
+        };
+      }).toList();
+      rawVars['services'] = [];
+
+      // Validate variables
+      final validationResult = variableBuilder.validate(rawVars);
+      if (!validationResult.isValid) {
+        return CommandResult.error(
+          message: 'Validation failed: ${validationResult.errors.join(', ')}',
+          suggestion: 'Check your input and try again',
+          errorCode: ErrorCode.invalidArgumentValue,
+        );
+      }
+
       return _createProject(
-        projectName: finalProjectName,
-        template: finalTemplate,
-        organization: finalOrganization,
-        description: description,
-        // Use description from flags if available
-        platforms: finalPlatforms,
-        features: finalFeatures,
-        services: const [],
+        rawVars: rawVars,
         projectPath: projectPath,
       );
     } catch (e) {
@@ -459,52 +517,131 @@ class GenerateProjectCommand extends FlyCommand {
 
   /// Create the project
   Future<CommandResult> _createProject({
-    required String projectName,
-    required String template,
-    required String organization,
-    required String description,
-    required List<String> platforms,
-    required List<String> features,
-    required List<Map<String, dynamic>> services,
+    required Map<String, dynamic> rawVars,
     required String projectPath,
-    String preset = 'starter',
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
+      final projectName = rawVars['name'] as String;
+      final template = rawVars['template'] as String? ?? 'fly_foundation';
+      final organization = rawVars['organization'] as String? ?? 'com.example';
+      final description =
+          rawVars['description'] as String? ?? 'A new Flutter project';
+      final platforms =
+          (rawVars['platforms'] as List<dynamic>?)?.cast<String>() ??
+              ['ios', 'android'];
+      final features = (rawVars['features'] as List<dynamic>?) ?? [];
+      final featureNames = features.map((f) {
+        if (f is Map) return f['name'] as String;
+        return f.toString();
+      }).toList();
 
       logger
         ..info('Creating Flutter project...')
         ..info('Template: $template')
         ..info('Organization: $organization')
-        ..info('Platforms: ${platforms.join(', ')}')
-        ..info('Features: ${features.join(', ')}');
+        ..info('Platforms: ${platforms.join(', ')}')..info(
+          'Features: ${featureNames.join(', ')}');
 
       // Use injected template manager
       final templateManager = context.templateManager;
 
       // Check if this is fly_foundation template - use orchestrator
       if (template == 'fly_foundation') {
-        return await _generateFoundationProject(
-          projectName: projectName,
-          organization: organization,
-          description: description,
-          platforms: platforms,
-          features: features,
-          services: services,
-          preset: preset,
-          projectPath: projectPath,
+        // Ensure features list is in the correct format
+        final featureInstances = features.isNotEmpty
+            ? features.cast<Map<String, dynamic>>()
+            : [
+                {
+                  'name': 'home',
+                  'type': 'feature',
+                  'params': {
+                    'feature': 'home',
+                    'screen_type': 'list',
+                    'with_viewmodel': true,
+                    'with_tests': true,
+                    'with_validation': false,
+                    'with_navigation': false,
+                  },
+                }
+              ];
+
+        // Ensure services list is in the correct format
+        final serviceInstances = (rawVars['services'] as List<dynamic>?)
+                ?.cast<Map<String, dynamic>>() ??
+            [];
+
+        // Prepare raw variables for planning
+        final projectRawVars = <String, dynamic>{
+          'name': projectName,
+          'organization': organization,
+          'description': description,
+          'platforms': platforms,
+          'generation_mode': 'project',
+          'preset': rawVars['preset'] as String? ?? 'starter',
+          'features': featureInstances,
+          'services': serviceInstances,
+        };
+
+        // Create orchestrator
+        final orchestrator = TemplateGenerationOrchestrator(
           templateManager: templateManager,
-          stopwatch: stopwatch,
+          logger: logger,
+        );
+
+        // Generate using orchestrator
+        final result = await orchestrator.generate(
+          rawVars: projectRawVars,
+          outputDirectory: projectPath,
+        );
+
+        stopwatch.stop();
+
+        if (!result.success) {
+          return CommandResult.error(
+            message: 'Failed to generate foundation project: ${result.error}',
+            suggestion: 'Check your input and try again',
+            errorCode: ErrorCode.templateGenerationFailed,
+            context: ErrorContext.forCommand(
+              'generate project',
+              arguments: argResults?.arguments,
+            ),
+          );
+        }
+
+        return CommandResult.success(
+          command: 'generate project',
+          message: 'Foundation project created successfully',
+          data: {
+            'project_name': projectName,
+            'template': 'fly_foundation',
+            'organization': organization,
+            'platforms': platforms,
+            'features': featureNames,
+            'files_generated': result.files?.length ?? 0,
+            'duration_ms': stopwatch.elapsedMilliseconds,
+            'target_directory': result.targetDirectory ?? projectPath,
+          },
+          nextSteps: [
+            NextStep(
+              command: 'cd $projectName',
+              description: 'Navigate to project directory',
+            ),
+            const NextStep(
+              command: 'flutter run',
+              description: 'Run the application',
+            ),
+          ],
         );
       }
 
-      // Create template variables
+      // Create template variables for legacy templates
       final templateVariables = TemplateVariables(
         projectName: projectName,
         organization: organization,
         platforms: platforms,
         description: description,
-        features: features,
+        features: featureNames,
       );
 
       // Generate project using template manager (legacy approach)
@@ -514,6 +651,8 @@ class GenerateProjectCommand extends FlyCommand {
         outputDirectory: projectPath,
         variables: templateVariables,
       );
+
+      stopwatch.stop();
 
       if (generationResult is TemplateGenerationFailure) {
         return CommandResult.error(
@@ -542,8 +681,6 @@ class GenerateProjectCommand extends FlyCommand {
         );
       }
 
-      stopwatch.stop();
-
       return CommandResult.success(
         command: 'generate project',
         message: 'Project created successfully',
@@ -552,7 +689,7 @@ class GenerateProjectCommand extends FlyCommand {
           'template': template,
           'organization': organization,
           'platforms': platforms,
-          'features': features,
+          'features': featureNames,
           'files_generated': generationResult.filesGenerated,
           'duration_ms': stopwatch.elapsedMilliseconds,
           'target_directory': generationResult.targetDirectory,
@@ -575,129 +712,8 @@ class GenerateProjectCommand extends FlyCommand {
         errorCode: ErrorCode.templateGenerationFailed,
         context: ErrorContext.forProjectOperation(
           'create_project',
-          projectName,
-          projectType: template,
-        ),
-      );
-    }
-  }
-
-  /// Generate foundation project using the new orchestrator approach.
-  Future<CommandResult> _generateFoundationProject({
-    required String projectName,
-    required String organization,
-    required String description,
-    required List<String> platforms,
-    required List<String> features,
-    required List<Map<String, dynamic>> services,
-    String preset = 'starter',
-    required String projectPath,
-    required TemplateManager templateManager,
-    required Stopwatch stopwatch,
-  }) async {
-    try {
-      // Create orchestrator
-      final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: templateManager,
-        logger: logger,
-      );
-
-      // Convert features list to InstanceConfig format
-      final featureInstances = features.isNotEmpty
-          ? features.map((featureName) {
-              return {
-                'name': featureName,
-                'type': 'feature',
-                'params': {
-                  'feature': featureName,
-                  'screen_type': 'list', // Default screen type
-                  'with_viewmodel': true,
-                  'with_tests': true,
-                  'with_validation': false,
-                  'with_navigation': false,
-                },
-              };
-            }).toList()
-          : [
-              {
-                'name': 'home',
-                'type': 'feature',
-                'params': {
-                  'feature': 'home',
-                  'screen_type': 'list',
-                  'with_viewmodel': true,
-                  'with_tests': true,
-                  'with_validation': false,
-                  'with_navigation': false,
-                },
-              }
-            ];
-
-      // Prepare raw variables for planning
-      final rawVars = <String, dynamic>{
-        'name': projectName,
-        'organization': organization,
-        'description': description.isNotEmpty ? description : 'A new Flutter project',
-        'platforms': platforms,
-        'generation_mode': 'project',
-        'preset': preset,
-        'features': featureInstances,
-        'services': services,
-      };
-
-      // Generate using orchestrator
-      final result = await orchestrator.generate(
-        rawVars: rawVars,
-        outputDirectory: projectPath,
-      );
-
-      stopwatch.stop();
-
-      if (!result.success) {
-        return CommandResult.error(
-          message: 'Failed to generate foundation project: ${result.error}',
-          suggestion: 'Check your input and try again',
-          errorCode: ErrorCode.templateGenerationFailed,
-          context: ErrorContext.forCommand(
-            'generate project',
-            arguments: argResults?.arguments,
-          ),
-        );
-      }
-
-      return CommandResult.success(
-        command: 'generate project',
-        message: 'Foundation project created successfully',
-        data: {
-          'project_name': projectName,
-          'template': 'fly_foundation',
-          'organization': organization,
-          'platforms': platforms,
-          'features': features,
-          'files_generated': result.files?.length ?? 0,
-          'duration_ms': stopwatch.elapsedMilliseconds,
-          'target_directory': result.targetDirectory ?? projectPath,
-        },
-        nextSteps: [
-          NextStep(
-            command: 'cd $projectName',
-            description: 'Navigate to project directory',
-          ),
-          const NextStep(
-            command: 'flutter run',
-            description: 'Run the application',
-          ),
-        ],
-      );
-    } catch (e) {
-      stopwatch.stop();
-      return CommandResult.error(
-        message: 'Failed to create foundation project: $e',
-        suggestion: 'Check your input and try again',
-        errorCode: ErrorCode.templateGenerationFailed,
-        context: ErrorContext.forCommand(
-          'generate project',
-          arguments: argResults?.arguments,
+          rawVars['name'] as String? ?? 'unknown',
+          projectType: rawVars['template'] as String? ?? 'unknown',
         ),
       );
     }

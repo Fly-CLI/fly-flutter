@@ -7,11 +7,9 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/templates/brick_info.dart';
-import 'package:fly_cli/src/core/templates/foundation_enums.dart';
 import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
-import 'package:fly_cli/src/core/templates/template_manager.dart';
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/core/templates/generation_variable_builder.dart';
+import 'package:fly_cli/src/core/templates/generators/service_generator.dart';
 
 /// GenerateServiceCommand using new architecture
 class GenerateServiceCommand extends FlyCommand {
@@ -53,114 +51,39 @@ class GenerateServiceCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-    final interactive =
-        FlagAccessor.getBool(argResults, const InteractiveFlag());
-    final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
-
-    if (interactive) {
-      return _runInteractiveMode(outputDir);
-    }
-
-    return _runNonInteractiveMode(outputDir);
-  }
-
-  /// Run in interactive mode
-  Future<CommandResult> _runInteractiveMode(String? outputDir) async {
     try {
-      final prompter = context.interactivePrompt;
+      final stopwatch = Stopwatch()..start();
+      final interactive =
+          FlagAccessor.getBool(argResults, const InteractiveFlag());
+      final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
 
-      logger..info('🔧 Generating a new service')
-      ..info('');
-
-      // 1. Service name
-      final componentName = await prompter.promptString(
-        prompt: 'Service name',
-        validator: NameValidationRule.isValidServiceName,
-        validationError:
-            'Service name must contain only lowercase letters, numbers, and underscores',
+      // Build variables using ServiceVariableBuilder
+      final variableBuilder = const ServiceVariableBuilder();
+      final rawVars = await variableBuilder.buildFromContext(
+        context: context,
+        interactive: interactive,
+        outputDir: outputDir,
       );
 
-      // 2. Feature
-      final feature = await prompter.promptString(
-        prompt: 'Feature name',
-        defaultValue: 'core',
-        validator: NameValidationRule.isValidFeatureName,
-        validationError:
-            'Feature name must contain only lowercase letters, numbers, and underscores',
-      );
-
-      // 3. Service type
-      final serviceTypeStr = await prompter.promptChoice(
-        prompt: 'Service type',
-        choices: ServiceType.values.map((e) => e.key).toList(),
-        defaultChoice: ServiceType.api.key,
-      );
-      final serviceType = ServiceType.fromKey(serviceTypeStr);
-
-      // 4. Tests
-      final withTests = await prompter.promptConfirm(
-        prompt: 'Include test files?',
-      );
-
-      // 5. Mocks
-      final withMocks = await prompter.promptConfirm(
-        prompt: 'Include mock files?',
-      );
-
-      // 6. Additional options based on service type
-      var withInterceptors = false;
-      var baseUrl = 'https://api.example.com';
-      if (serviceType == ServiceType.api) {
-        withInterceptors = await prompter.promptConfirm(
-          prompt: 'Include HTTP interceptors?',
-        );
-
-        baseUrl = await prompter.promptString(
-          prompt: 'Base URL',
-          defaultValue: 'https://api.example.com',
-        );
-      }
-
-      // 7. Confirmation
-      final withRetryLogic = serviceType == ServiceType.api;
-      final withCaching = serviceType == ServiceType.cache;
-
-      logger..info('')
-      ..info('Service Configuration:')
-      ..info('  Name: $componentName')
-      ..info('  Feature: $feature')
-      ..info('  Type: ${serviceType.key}')
-      ..info('  With Tests: $withTests')
-      ..info('  With Mocks: $withMocks')
-      ..info('  With Retry Logic: $withRetryLogic')
-      ..info('  With Caching: $withCaching');
-      if (serviceType == ServiceType.api) {
-        logger..info('  With Interceptors: $withInterceptors')
-        ..info('  Base URL: $baseUrl');
-      }
-
-      final confirmed = await prompter.promptConfirm(
-        prompt: '\nCreate service with this configuration?',
-      );
-
-      if (!confirmed) {
+      // Validate variables
+      final validationResult = variableBuilder.validate(rawVars);
+      if (!validationResult.isValid) {
         return CommandResult.error(
-          message: 'Service creation cancelled',
-          suggestion: 'Run the command again to start over',
+          message: 'Validation failed: ${validationResult.errors.join(', ')}',
+          suggestion: 'Check your input and try again',
+          errorCode: ErrorCode.invalidArgumentValue,
         );
       }
 
-      // Resolve output directory via PathResolver
-      final resolvedOutputDir =
-          await context.pathResolver.resolveOutputDirectory(
+      // Resolve output directory
+      final outputDirResult = await context.pathResolver.resolveOutputDirectory(
         context,
         outputDir,
       );
-
-      if (!resolvedOutputDir.success) {
+      if (!outputDirResult.success) {
         return CommandResult.error(
           message:
-              'Failed to resolve output directory: ${resolvedOutputDir.errors.join(', ')}',
+              'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
           suggestion: 'Specify a valid --output-dir or run from a project root',
           errorCode: ErrorCode.fileSystemError,
           context: ErrorContext.forCommand(
@@ -169,176 +92,41 @@ class GenerateServiceCommand extends FlyCommand {
           ),
         );
       }
+      final targetDir = outputDirResult.path!.absolute;
 
-      final targetDir = resolvedOutputDir.path!.absolute;
-
-      // Generate service using Mason brick
-      return await _generateServiceWithMason(
-        serviceName: componentName,
-        feature: feature,
-        serviceType: serviceType,
-        withTests: withTests,
-        withMocks: withMocks,
-        withInterceptors: withInterceptors,
-        withRetryLogic: withRetryLogic,
-        withCaching: withCaching,
-        baseUrl: baseUrl,
-        outputDir: targetDir,
-      );
-    } catch (e) {
-      return CommandResult.error(
-        message: 'Interactive mode failed: $e',
-        suggestion: 'Try running without --interactive flag',
-      );
-    }
-  }
-
-  /// Run in non-interactive mode
-  Future<CommandResult> _runNonInteractiveMode(String? outputDir) async {
-    final serviceName = argResults!.rest.first;
-    final feature = FlagAccessor.getStringOrDefault(
-      argResults,
-      const GenerateServiceFeatureFlag(),
-      'core',
-    );
-    final serviceTypeStr = FlagAccessor.getStringOrDefault(
-      argResults,
-      const GenerateServiceTypeFlag(),
-      ServiceType.api.key,
-    );
-    final serviceType = ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ?? ServiceType.api;
-    final withTests =
-        FlagAccessor.getBool(argResults, const GenerateServiceWithTestsFlag());
-    final withMocks =
-        FlagAccessor.getBool(argResults, const GenerateServiceWithMocksFlag());
-    final withInterceptors = FlagAccessor.getBool(
-      argResults,
-      const GenerateServiceWithInterceptorsFlag(),
-    );
-    final withRetryLogic = serviceType == ServiceType.api;
-    final withCaching = serviceType == ServiceType.cache;
-
-    final baseUrl = FlagAccessor.getStringOrDefault(
-      argResults,
-      const GenerateServiceBaseUrlFlag(),
-      'https://api.example.com',
-    );
-
-    // Resolve the target output directory, prioritizing --output-dir and FLY_OUTPUT_DIR.
-    final outputDirResult = await context.pathResolver.resolveOutputDirectory(
-      context,
-      outputDir,
-    );
-    if (!outputDirResult.success) {
-      return CommandResult.error(
-        message:
-            'Failed to resolve output directory: ${outputDirResult.errors.join(', ')}',
-        suggestion: 'Specify a valid --output-dir or set FLY_OUTPUT_DIR',
-        errorCode: ErrorCode.fileSystemError,
-        context: ErrorContext.forCommand(
-          'generate service',
-          arguments: argResults?.arguments,
-        ),
-      );
-    }
-    final targetProjectDir = outputDirResult.path!.absolute;
-
-    return _generateServiceWithMason(
-      serviceName: serviceName,
-      feature: feature,
-      serviceType: serviceType,
-      withTests: withTests,
-      withMocks: withMocks,
-      withInterceptors: withInterceptors,
-      withRetryLogic: withRetryLogic,
-      withCaching: withCaching,
-      baseUrl: baseUrl,
-      outputDir: targetProjectDir,
-    );
-  }
-
-  /// Generate service using Mason brick
-  Future<CommandResult> _generateServiceWithMason({
-    required String serviceName,
-    required String feature,
-    required ServiceType serviceType,
-    required bool withTests,
-    required bool withMocks,
-    required bool withInterceptors,
-    required bool withRetryLogic,
-    required bool withCaching,
-    required String baseUrl,
-    required String outputDir,
-  }) async {
-    try {
-      final stopwatch = Stopwatch()..start();
-
-      logger..info('Generating service: $serviceName')
-      ..info('Feature: $feature')
-      ..info('Type: ${serviceType.key}')
-      ..info('With tests: $withTests')
-      ..info('With mocks: $withMocks')
-      ..info('With retry logic: $withRetryLogic')
-      ..info('With caching: $withCaching');
-      if (serviceType == ServiceType.api) {
-        logger..info('With interceptors: $withInterceptors')
-        ..info('Base URL: $baseUrl');
-      }
-
-      // Use foundation orchestrator for service generation
-      final templateManager = context.templateManager;
+      // Create orchestrator and generator
       final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: templateManager,
+        templateManager: context.templateManager,
+        logger: logger,
+      );
+      final generator = ServiceGenerator(
+        orchestrator: orchestrator,
         logger: logger,
       );
 
-      // Prepare raw variables for planning
-      final rawVars = <String, dynamic>{
-        'name': serviceName,
-        'generation_mode': 'service',
-        'feature': feature,
-        'service_type': serviceType.key,
-        'with_tests': withTests,
-        'with_mocks': withMocks,
-        'with_interceptors': withInterceptors,
-        'with_retry_logic': withRetryLogic,
-        'with_caching': withCaching,
-        'api_base_url': baseUrl,
-        'preset': 'starter', // Default preset
-      };
-
-      // Generate using orchestrator
-      final result = await orchestrator.generate(
+      // Generate service
+      final result = await generator.generate(
         rawVars: rawVars,
-        outputDirectory: outputDir,
+        outputDirectory: targetDir,
       );
 
       stopwatch.stop();
 
       if (!result.success) {
         return CommandResult.error(
-          message: 'Failed to generate service: ${result.error}',
+          message: result.error ?? 'Failed to generate service',
           suggestion: 'Check service brick availability and try again',
+          errorCode: ErrorCode.templateGenerationFailed,
         );
       }
 
-      // Count generated files
-      var filesGenerated = result.files?.length ?? 0;
-
+      // Convert GenerationResult to CommandResult
       return CommandResult.success(
         command: 'generate service',
         message: 'Service generated successfully',
         data: {
-          'component_name': serviceName,
-          'feature': feature,
-          'service_type': serviceType.key,
-          'with_tests': withTests,
-          'with_mocks': withMocks,
-          'with_interceptors': withInterceptors,
-          'with_retry_logic': withRetryLogic,
-          'with_caching': withCaching,
-          'base_url': baseUrl,
-          'files_generated': filesGenerated,
+          ...result.data ?? {},
+          'files_generated': result.filesGenerated,
           'duration_ms': stopwatch.elapsedMilliseconds,
         },
         nextSteps: [
@@ -355,6 +143,7 @@ class GenerateServiceCommand extends FlyCommand {
       );
     }
   }
+
 
   // Lifecycle hooks implementation
   @override
