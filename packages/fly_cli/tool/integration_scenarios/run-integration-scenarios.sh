@@ -283,17 +283,7 @@ execute_fly_feature() {
   local name="$3"
   local screen_type="$4"
 
-  local base_project_dir="${scenario_out_dir}/test_project"
-
-  # Ensure base project exists
-  if [ ! -d "$base_project_dir" ]; then
-    verbose_log "Creating base project for feature scenario"
-    if ! run_command "${FLY_CMD} generate project test_project --template=fly_foundation --output-dir=\"${scenario_out_dir}\""; then
-      return 1
-    fi
-  fi
-
-  local cmd="${FLY_CMD} generate feature \"${name}\" --output-dir=\"${base_project_dir}\""
+  local cmd="${FLY_CMD} generate feature \"${name}\" --output-dir=\"${scenario_out_dir}\""
   if [ -n "$screen_type" ]; then
     cmd="${cmd} --type=\"${screen_type}\""
   fi
@@ -307,17 +297,7 @@ execute_fly_service() {
   local name="$3"
   local service_type="$4"
 
-  local base_project_dir="${scenario_out_dir}/test_project"
-
-  # Ensure base project exists
-  if [ ! -d "$base_project_dir" ]; then
-    verbose_log "Creating base project for service scenario"
-    if ! run_command "${FLY_CMD} generate project test_project --template=fly_foundation --output-dir=\"${scenario_out_dir}\""; then
-      return 1
-    fi
-  fi
-
-  local cmd="${FLY_CMD} generate service \"${name}\" --output-dir=\"${base_project_dir}\" --type=\"${service_type}\""
+  local cmd="${FLY_CMD} generate service \"${name}\" --output-dir=\"${scenario_out_dir}\" --type=\"${service_type}\""
   run_command "$cmd"
 }
 
@@ -340,35 +320,9 @@ execute_mason_feature() {
   local scenario_path="$1"
   local scenario_out_dir="$2"
 
-  local base_project_dir="${scenario_out_dir}/test_project"
-
-  # Ensure base project exists using Mason
-  if [ ! -d "$base_project_dir" ]; then
-    verbose_log "Creating base project for feature scenario using Mason"
-    # Create a minimal config for base project
-    local base_config="${scenario_out_dir}/.base_project_config.json"
-    cat > "$base_config" <<EOF
-{
-  "generation_mode": "project",
-  "name": "test_project",
-  "organization": "com.example",
-  "platforms": ["ios", "android"],
-  "preset": "minimal"
-}
-EOF
-    (
-      cd "$scenario_out_dir" || return 1
-      if ! run_command "mason make fly_foundation_project -c \"${base_config}\" --on-conflict overwrite"; then
-        rm -f "$base_config"
-        return 1
-      fi
-      rm -f "$base_config"
-    )
-  fi
-
-  # Run feature generation from within base project
+  # Run feature generation directly
   (
-    cd "$base_project_dir" || return 1
+    cd "$scenario_out_dir" || return 1
     run_command "mason make fly_foundation_feature -c \"${scenario_path}\" --on-conflict overwrite"
   )
 }
@@ -377,35 +331,9 @@ execute_mason_service() {
   local scenario_path="$1"
   local scenario_out_dir="$2"
 
-  local base_project_dir="${scenario_out_dir}/test_project"
-
-  # Ensure base project exists using Mason
-  if [ ! -d "$base_project_dir" ]; then
-    verbose_log "Creating base project for service scenario using Mason"
-    # Create a minimal config for base project
-    local base_config="${scenario_out_dir}/.base_project_config.json"
-    cat > "$base_config" <<EOF
-{
-  "generation_mode": "project",
-  "name": "test_project",
-  "organization": "com.example",
-  "platforms": ["ios", "android"],
-  "preset": "minimal"
-}
-EOF
-    (
-      cd "$scenario_out_dir" || return 1
-      if ! run_command "mason make fly_foundation_project -c \"${base_config}\" --on-conflict overwrite"; then
-        rm -f "$base_config"
-        return 1
-      fi
-      rm -f "$base_config"
-    )
-  fi
-
-  # Run service generation from within base project
+  # Run service generation directly
   (
-    cd "$base_project_dir" || return 1
+    cd "$scenario_out_dir" || return 1
     run_command "mason make fly_foundation_service -c \"${scenario_path}\" --on-conflict overwrite"
   )
 }
@@ -497,13 +425,13 @@ process_scenario() {
       feature)
         if execute_fly_feature "$scenario_path" "$scenario_out_dir" "$name" "$screen_type"; then
           execution_success=true
-          actual_dir="${scenario_out_dir}/test_project"
+          actual_dir="${scenario_out_dir}"
         fi
         ;;
       service)
         if execute_fly_service "$scenario_path" "$scenario_out_dir" "$name" "$service_type"; then
           execution_success=true
-          actual_dir="${scenario_out_dir}/test_project"
+          actual_dir="${scenario_out_dir}"
         fi
         ;;
       *)
@@ -523,13 +451,13 @@ process_scenario() {
       feature)
         if execute_mason_feature "$scenario_path" "$scenario_out_dir"; then
           execution_success=true
-          actual_dir="${scenario_out_dir}/test_project"
+          actual_dir="${scenario_out_dir}"
         fi
         ;;
       service)
         if execute_mason_service "$scenario_path" "$scenario_out_dir"; then
           execution_success=true
-          actual_dir="${scenario_out_dir}/test_project"
+          actual_dir="${scenario_out_dir}"
         fi
         ;;
       *)

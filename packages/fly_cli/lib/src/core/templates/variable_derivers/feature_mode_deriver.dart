@@ -44,6 +44,12 @@ class FeatureModeDeriver implements VariableDeriver {
         'unnamed';
     final snakeName = NamingUtils.toSnakeCase(name);
 
+    // Get feature from input vars or current bag, defaulting to 'core' if not provided
+    final feature = ctx.rawVars[MasonVarKey.feature.key] as String? ??
+        ctx.rawVars['feature'] as String? ??
+        current.get<String>(MasonVarKey.feature.key) ??
+        'core';
+
     final isFormScreen =
         screenType == ScreenType.form || screenType == ScreenType.auth;
     final requiresValidation = withValidation || isFormScreen;
@@ -59,7 +65,7 @@ class FeatureModeDeriver implements VariableDeriver {
       MasonVarKey.useRiverpod.key: stateMgmt == StateManagement.riverpod,
       MasonVarKey.useBloc.key: stateMgmt == StateManagement.bloc,
       MasonVarKey.useCubit.key: stateMgmt == StateManagement.cubit,
-      MasonVarKey.feature.key: snakeName,
+      MasonVarKey.feature.key: feature,
       MasonVarKey.componentName.key: snakeName,
     });
   }
