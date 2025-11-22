@@ -1,0 +1,39 @@
+{
+  "generation_mode": "project",
+  "name": "app_with_services",
+  "description": "Fly foundation project with services",
+  "organization": "com.example",
+  "platforms": ["ios", "android"],
+  "preset": "starter",
+  "features": [
+    {
+      "name": "home",
+      "type": "feature",
+      "params": {
+        "feature": "home",
+        "screen_type": "list",
+        "with_viewmodel": true,
+        "with_tests": true,
+        "with_validation": false,
+        "with_navigation": false
+      }
+    }
+  ],
+  "services": [
+    {
+      "name": "user_api",
+      "type": "service",
+      "params": {
+        "feature": "core",
+        "service_type": "api",
+        "with_tests": true,
+        "with_mocks": false,
+        "with_interceptors": true,
+        "with_retry_logic": true,
+        "with_caching": false,
+        "api_base_url": "https://api.example.com"
+      }
+    }
+  ]
+}
+

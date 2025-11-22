@@ -7,6 +7,7 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
+import 'package:fly_cli/src/core/manifest/manifest_parser.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
 import 'package:fly_cli/src/core/templates/foundation_orchestrator.dart';
@@ -82,6 +83,17 @@ class GenerateProjectCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
+    // Check if manifest-based generation is requested
+    final manifestPath = FlagAccessor.getString(
+      argResults,
+      const CreateFromManifestFlag(),
+    );
+
+    if (manifestPath != null) {
+      return _executeFromManifest(manifestPath);
+    }
+
+    // Standard flag-based generation
     final projectName = argResults!.rest.first;
     final template = FlagAccessor.getStringOrDefault(
       argResults,
@@ -146,14 +158,195 @@ class GenerateProjectCommand extends FlyCommand {
     }
 
     return _createProject(
-      projectName,
-      template,
-      organization,
-      description ?? '',
-      platforms,
-      features,
-      projectPath.absolute,
+      projectName: projectName,
+      template: template,
+      organization: organization,
+      description: description ?? '',
+      platforms: platforms,
+      features: features,
+      services: const [],
+      projectPath: projectPath.absolute,
     );
+  }
+
+  /// Execute project generation from manifest file
+  Future<CommandResult> _executeFromManifest(String manifestPath) async {
+    try {
+      // Parse manifest
+      final manifest = await ProjectManifest.fromFile(manifestPath);
+
+      // Warn if CLI flags are also provided (manifest takes precedence)
+      final hasCliFlags = FlagAccessor.getString(
+                argResults,
+                const CreateOrganizationFlag(),
+              ) !=
+              null ||
+          FlagAccessor.getStringList(
+            argResults,
+            CreatePlatformsFlag(),
+          ).isNotEmpty ||
+          FlagAccessor.getStringList(
+            argResults,
+            CreateFeaturesFlag(),
+          ).isNotEmpty;
+
+      if (hasCliFlags) {
+        logger.warn(
+          '⚠️  Manifest file provided. CLI flags (--organization, --platforms, --features) will be ignored in favor of manifest values.',
+        );
+      }
+
+      // Extract project name from manifest (required)
+      final projectName = manifest.name;
+
+      // Resolve output directory
+      final outputDir =
+          FlagAccessor.getString(argResults, const OutputDirFlag());
+      final projectPathResult = await context.pathResolver.resolveProjectPath(
+        context,
+        projectName,
+        outputDir,
+      );
+
+      if (!projectPathResult.success) {
+        return CommandResult.error(
+          message:
+              'Failed to resolve project path: ${projectPathResult.errors.join(', ')}',
+          suggestion: 'Check your output directory and permissions',
+          errorCode: ErrorCode.fileSystemError,
+          context: ErrorContext.forCommand(
+            'generate project',
+            arguments: argResults?.arguments,
+          ),
+        );
+      }
+
+      final projectPath = projectPathResult.path!;
+
+      // Convert manifest screens to feature instances
+      final featureInstances =
+          _convertScreensToFeatureInstances(manifest.screens);
+
+      // If no screens, use default home feature
+      if (featureInstances.isEmpty) {
+        featureInstances.add({
+          'name': 'home',
+          'type': 'feature',
+          'params': {
+            'feature': 'home',
+            'screen_type': 'list',
+            'with_viewmodel': true,
+            'with_tests': manifest.config.generateTests,
+            'with_validation': false,
+            'with_navigation': false,
+          },
+        });
+      }
+
+      // Convert manifest services to service instances
+      final serviceInstances =
+          _convertServicesToServiceInstances(manifest.services);
+
+      // Determine preset from manifest config or default
+      final preset = _determinePresetFromManifest(manifest.config);
+
+      return _createProject(
+        projectName: projectName,
+        template: manifest.template,
+        organization: manifest.organization,
+        description: manifest.description ?? 'A new Flutter project',
+        platforms: manifest.platforms,
+        features: featureInstances.map((f) => f['name'] as String).toList(),
+        services: serviceInstances,
+        preset: preset,
+        projectPath: projectPath.absolute,
+      );
+    } on ManifestException catch (e) {
+      return CommandResult.error(
+        message: 'Failed to parse manifest: $e',
+        suggestion: 'Check the manifest file format and try again',
+        errorCode: ErrorCode.invalidArgumentValue,
+        context: ErrorContext.forCommand(
+          'generate project',
+          arguments: argResults?.arguments,
+        ),
+      );
+    } catch (e) {
+      return CommandResult.error(
+        message: 'Failed to load manifest: $e',
+        suggestion: 'Check that the manifest file exists and is readable',
+        errorCode: ErrorCode.fileSystemError,
+        context: ErrorContext.forCommand(
+          'generate project',
+          arguments: argResults?.arguments,
+        ),
+      );
+    }
+  }
+
+  /// Convert manifest screens to feature instance configs
+  List<Map<String, dynamic>> _convertScreensToFeatureInstances(
+    List<ScreenConfig> screens,
+  ) {
+    return screens.map((screen) {
+      // Extract feature from screen (default to screen name if no features specified)
+      final feature =
+          screen.features.isNotEmpty ? screen.features.first : screen.name;
+
+      return {
+        'name': screen.name,
+        'type': 'feature',
+        'params': {
+          'feature': feature,
+          'screen_type': screen.type ?? 'list',
+          'with_viewmodel': true,
+          'with_tests': true, // Will be overridden by preset if needed
+          'with_validation': screen.type == 'form',
+          'with_navigation': false,
+        },
+      };
+    }).toList();
+  }
+
+  /// Convert manifest services to service instance configs
+  List<Map<String, dynamic>> _convertServicesToServiceInstances(
+    List<ServiceConfig> services,
+  ) {
+    return services.map((service) {
+      final serviceType = service.type ?? 'api';
+      final isApiService = serviceType == 'api';
+
+      return {
+        'name': service.name,
+        'type': 'service',
+        'params': {
+          'feature':
+              service.features.isNotEmpty ? service.features.first : 'core',
+          'service_type': serviceType,
+          'with_tests': true,
+          'with_mocks': false,
+          'with_interceptors': isApiService,
+          'with_retry_logic': isApiService,
+          'with_caching': serviceType == 'cache',
+          if (isApiService && service.apiBase != null)
+            'api_base_url': service.apiBase,
+        },
+      };
+    }).toList();
+  }
+
+  /// Determine preset from manifest config
+  String _determinePresetFromManifest(ManifestConfig config) {
+    // If tests/docs are disabled, use minimal preset
+    if (!config.generateTests && !config.generateDocs) {
+      return 'minimal';
+    }
+    // If both tests and docs are enabled, use batteries_included
+    if (config.generateTests && config.generateDocs) {
+      return 'batteries_included';
+    }
+    // Default to starter
+    return 'starter';
   }
 
   /// Run in interactive mode
@@ -240,13 +433,15 @@ class GenerateProjectCommand extends FlyCommand {
       logger.info('\nGenerating project...\n');
 
       return _createProject(
-        finalProjectName,
-        finalTemplate,
-        finalOrganization,
-        description, // Use description from flags if available
-        finalPlatforms,
-        finalFeatures,
-        projectPath,
+        projectName: finalProjectName,
+        template: finalTemplate,
+        organization: finalOrganization,
+        description: description,
+        // Use description from flags if available
+        platforms: finalPlatforms,
+        features: finalFeatures,
+        services: const [],
+        projectPath: projectPath,
       );
     } catch (e) {
       return CommandResult.error(
@@ -263,15 +458,17 @@ class GenerateProjectCommand extends FlyCommand {
   }
 
   /// Create the project
-  Future<CommandResult> _createProject(
-    String projectName,
-    String template,
-    String organization,
-    String description,
-    List<String> platforms,
-    List<String> features,
-    String projectPath,
-  ) async {
+  Future<CommandResult> _createProject({
+    required String projectName,
+    required String template,
+    required String organization,
+    required String description,
+    required List<String> platforms,
+    required List<String> features,
+    required List<Map<String, dynamic>> services,
+    required String projectPath,
+    String preset = 'starter',
+  }) async {
     try {
       final stopwatch = Stopwatch()..start();
 
@@ -293,6 +490,8 @@ class GenerateProjectCommand extends FlyCommand {
           description: description,
           platforms: platforms,
           features: features,
+          services: services,
+          preset: preset,
           projectPath: projectPath,
           templateManager: templateManager,
           stopwatch: stopwatch,
@@ -390,6 +589,8 @@ class GenerateProjectCommand extends FlyCommand {
     required String description,
     required List<String> platforms,
     required List<String> features,
+    required List<Map<String, dynamic>> services,
+    String preset = 'starter',
     required String projectPath,
     required TemplateManager templateManager,
     required Stopwatch stopwatch,
@@ -439,10 +640,9 @@ class GenerateProjectCommand extends FlyCommand {
         'description': description.isNotEmpty ? description : 'A new Flutter project',
         'platforms': platforms,
         'generation_mode': 'project',
-        'preset': 'starter', // Default preset
+        'preset': preset,
         'features': featureInstances,
-        // Services can be added here in the future
-        'services': <Map<String, dynamic>>[],
+        'services': services,
       };
 
       // Generate using orchestrator

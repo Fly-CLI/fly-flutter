@@ -234,6 +234,25 @@ void main() {
         final option = parser.options['from-manifest']!;
         expect(option.type, isNotNull);
       });
+
+      test('should parse manifest file path from arguments', () {
+        final parser = command.argParser;
+        final result = parser.parse([
+          'test_app',
+          '--from-manifest=project.yaml',
+        ]);
+
+        expect(result['from-manifest'], equals('project.yaml'));
+      });
+
+      test('should handle manifest-based creation', () {
+        final parser = command.argParser;
+        final result = parser.parse([
+          '--from-manifest=project.yaml',
+        ]);
+
+        expect(result['from-manifest'], equals('project.yaml'));
+      });
     });
 
     group('Plan Mode', () {

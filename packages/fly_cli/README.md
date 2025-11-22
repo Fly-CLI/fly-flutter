@@ -212,7 +212,7 @@ services:
 
 ```bash
 # Create the entire integrated ecosystem
-fly create --from-manifest=fly_project.yaml
+fly generate project my_app --from-manifest=fly_project.yaml
 ```
 
 ---
@@ -233,7 +233,10 @@ fly --help
 
 ```bash
 # Generate a complete Flutter project with all integrated components
-fly create my_app --template=fly_foundation --platforms=ios,android,web
+fly generate project my_app --template=fly_foundation --platforms=ios,android,web
+
+# Or create from a manifest file
+fly generate project my_app --from-manifest=fly_project.yaml
 
 # This creates:
 # - Architecture foundation (fly_core, fly_mvvm)
@@ -341,7 +344,7 @@ fly create my_app --template=fly_foundation
 fly generate project my_app --features=home,profile,settings
 
 # Create from manifest (AI can understand and modify)
-fly create --from-manifest=fly_project.yaml
+fly generate project my_app --from-manifest=fly_project.yaml
 
 # Preview before creating
 fly create my_app --template=fly_foundation --plan
@@ -548,7 +551,7 @@ services:
 
 ```bash
 # Create the entire integrated ecosystem
-fly create --from-manifest=fly_project.yaml
+fly generate project my_app --from-manifest=fly_project.yaml
 ```
 
 ---
