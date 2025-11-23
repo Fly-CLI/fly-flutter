@@ -60,6 +60,7 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
+      'component_name': componentName, // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
       'screen_type': screenType.key,
@@ -140,6 +141,7 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
+      'component_name': componentName, // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
       'screen_type': screenType.key,
@@ -187,6 +189,7 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
+      'component_name': componentName, // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
       'screen_type': screenType.key,
@@ -230,6 +233,7 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': serviceName,
+      'component_name': serviceName, // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
       'service_type': serviceType.key,
@@ -317,6 +321,7 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
+      'component_name': componentName, // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
       'service_type': serviceType.key,
@@ -370,6 +375,7 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': serviceName,
+      'component_name': serviceName, // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
       'service_type': serviceType.key,
@@ -460,6 +466,7 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': projectName,
+      'project_name': projectName, // Required by validation - project names are already snake_case
       'organization': organization,
       'description': description,
       'platforms': platforms,
@@ -544,6 +551,7 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': projectName,
+      'project_name': projectName, // Required by validation - project names are already snake_case
       'template': template,
       'organization': organization,
       'description': 'A new Flutter project',
@@ -603,6 +611,7 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': projectName,
+      'project_name': projectName, // Required by validation - project names are already snake_case
       'template': template,
       'organization': organization,
       'description': description,

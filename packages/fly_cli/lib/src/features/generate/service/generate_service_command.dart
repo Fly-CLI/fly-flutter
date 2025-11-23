@@ -58,9 +58,11 @@ class GenerateServiceCommand extends FlyCommand {
       final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
 
       // Build variables using ServiceVariableBuilder
-      final variableBuilder = const ServiceVariableBuilder();
+      // Use execution context's argResults (set by CommandRunner) instead of registration context
+      final executionContext = context.factory.createExecutionContext(argResults!);
+      const variableBuilder = ServiceVariableBuilder();
       final rawVars = await variableBuilder.buildFromContext(
-        context: context,
+        context: executionContext,
         interactive: interactive,
         outputDir: outputDir,
       );

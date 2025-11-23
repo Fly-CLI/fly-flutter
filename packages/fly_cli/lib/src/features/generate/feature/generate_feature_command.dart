@@ -60,9 +60,11 @@ class GenerateFeatureCommand extends FlyCommand {
       final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
 
       // Build variables using FeatureVariableBuilder
+      // Use execution context's argResults (set by CommandRunner) instead of registration context
+      final executionContext = context.factory.createExecutionContext(argResults!);
       const variableBuilder = FeatureVariableBuilder();
       final rawVars = await variableBuilder.buildFromContext(
-        context: context,
+        context: executionContext,
         interactive: interactive,
         outputDir: outputDir,
       );

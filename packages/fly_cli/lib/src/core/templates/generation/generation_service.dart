@@ -190,11 +190,11 @@ class GenerationService {
   String _getBrickNameForMode(GenerationMode mode) {
     switch (mode) {
       case GenerationMode.project:
-        return 'fly_foundation';
+        return 'fly_foundation_project';
       case GenerationMode.feature:
-        return 'fly_feature';
+        return 'fly_foundation_feature';
       case GenerationMode.service:
-        return 'fly_service';
+        return 'fly_foundation_service';
     }
   }
 

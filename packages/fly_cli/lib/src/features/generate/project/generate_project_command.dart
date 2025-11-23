@@ -159,9 +159,11 @@ class GenerateProjectCommand extends FlyCommand {
     }
 
     // Build variables using ProjectVariableBuilder
+    // Use execution context's argResults (set by CommandRunner) instead of registration context
+    final executionContext = context.factory.createExecutionContext(argResults!);
     const variableBuilder = ProjectVariableBuilder();
     final rawVars = variableBuilder.buildFromContext(
-      context: context,
+      context: executionContext,
       interactive: false,
       outputDir: null,
     );
