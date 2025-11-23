@@ -77,10 +77,10 @@ package:stock_ai/src/core/command/foundation/domain/command_result.dart
 package:stock_ai/src/core/command/foundation/domain/command_validator.dart
 [2025-10-28 15:30:42]   Line 8: ../../../core/command/foundation/domain/command_middleware.dart ->
 package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
-[2025-10-28 15:30:42]   Line 9: ../../../core/templates/models/brick_info.dart -> package:
-stock_ai/src/core/templates/models/brick_info.dart
-[2025-10-28 15:30:42]   Line 10: ../../../core/templates/template_manager.dart -> package:
-stock_ai/src/core/templates/template_manager.dart
+[2025-10-28 15:30:42]   Line 9: ../../../core/scaffolding/models/brick_info.dart -> package:
+stock_ai/src/core/scaffolding/models/brick_info.dart
+[2025-10-28 15:30:42]   Line 10: ../../../core/scaffolding/template_manager.dart -> package:
+stock_ai/src/core/scaffolding/template_manager.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] Processing: lib/src/features/service/application/add_service_command.dart
 [2025-10-28 15:30:42]   Line 4: ../../../core/command/foundation/application/command_base.dart ->
@@ -93,10 +93,10 @@ package:stock_ai/src/core/command/foundation/domain/command_result.dart
 package:stock_ai/src/core/command/foundation/domain/command_validator.dart
 [2025-10-28 15:30:42]   Line 8: ../../../core/command/foundation/domain/command_middleware.dart ->
 package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
-[2025-10-28 15:30:42]   Line 9: ../../../core/templates/models/brick_info.dart -> package:
-stock_ai/src/core/templates/models/brick_info.dart
-[2025-10-28 15:30:42]   Line 10: ../../../core/templates/template_manager.dart -> package:
-stock_ai/src/core/templates/template_manager.dart
+[2025-10-28 15:30:42]   Line 9: ../../../core/scaffolding/models/brick_info.dart -> package:
+stock_ai/src/core/scaffolding/models/brick_info.dart
+[2025-10-28 15:30:42]   Line 10: ../../../core/scaffolding/template_manager.dart -> package:
+stock_ai/src/core/scaffolding/template_manager.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] Processing: lib/src/features/create/application/create_command.dart
 [2025-10-28 15:30:42]   Line 4: ../../../core/command/foundation/application/command_base.dart ->
@@ -109,8 +109,8 @@ package:stock_ai/src/core/command/foundation/domain/command_result.dart
 package:stock_ai/src/core/command/foundation/domain/command_validator.dart
 [2025-10-28 15:30:42]   Line 8: ../../../core/command/foundation/domain/command_middleware.dart ->
 package:stock_ai/src/core/command/foundation/domain/command_middleware.dart
-[2025-10-28 15:30:42]   Line 10: ../../../core/templates/template_manager.dart -> package:
-stock_ai/src/core/templates/template_manager.dart
+[2025-10-28 15:30:42]   Line 10: ../../../core/scaffolding/template_manager.dart -> package:
+stock_ai/src/core/scaffolding/template_manager.dart
 [2025-10-28 15:30:42]
 [2025-10-28 15:30:42] ✅ Conversion complete!
 [2025-10-28 15:30:42] 📊 Files changed: 46/73

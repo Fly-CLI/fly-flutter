@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-import 'package:fly_cli/src/core/templates/template/template_manager.dart';
+import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Mock TemplateManager for testing

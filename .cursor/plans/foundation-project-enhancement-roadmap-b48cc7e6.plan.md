@@ -140,7 +140,7 @@ specifications, testing strategy, and success metrics framework.
 
 **Template System:**
 
-- Evaluate Mason brick integration (`packages/fly_cli/lib/src/core/templates/template_manager.dart`)
+- Evaluate Mason brick integration (`packages/fly_cli/lib/src/core/scaffolding/template_manager.dart`)
 - Assess template composition capabilities
 - Review template validation (`template_validator.dart`)
 - Analyze template variable system
@@ -396,7 +396,7 @@ specifications, testing strategy, and success metrics framework.
     - Create template merger (`TemplateComposer`)
     - Support partial templates (components)
     - Implement template inheritance
-    - Location: `packages/fly_cli/lib/src/core/templates/composition/`
+    - Location: `packages/fly_cli/lib/src/core/scaffolding/composition/`
 
 2. Enhance manifest system
 
@@ -669,14 +669,14 @@ specifications, testing strategy, and success metrics framework.
     - Remote template registry
     - Template versioning
     - Template discovery
-    - Location: `packages/fly_cli/lib/src/core/templates/registry/`
+    - Location: `packages/fly_cli/lib/src/core/scaffolding/registry/`
 
 2. Create template sharing mechanism
 
     - Template publishing
     - Template authentication
     - Template access control
-    - Location: `packages/fly_cli/lib/src/core/templates/sharing/`
+    - Location: `packages/fly_cli/lib/src/core/scaffolding/sharing/`
 
 **Week 18: Manifest Validation**
 
@@ -863,7 +863,7 @@ fly_cli/lib/src/core/plugins/
 **Architecture:**
 
 ```
-fly_cli/lib/src/core/templates/composition/
+fly_cli/lib/src/core/scaffolding/composition/
 ├── composer.dart
 ├── merger.dart
 ├── partial_template.dart
@@ -1091,7 +1091,7 @@ fly_cli/lib/src/core/templates/composition/
 
 - `/packages/fly_cli/` - CLI implementation
 - `/packages/fly_cli/lib/src/command_runner.dart` - Command runner
-- `/packages/fly_cli/lib/src/core/templates/` - Template system
+- `/packages/fly_cli/lib/src/core/scaffolding/` - Template system
 - `/packages/fly_cli/lib/src/core/manifest/` - Manifest parser
 
 **Packages:**

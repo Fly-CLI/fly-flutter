@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_cli/src/core/templates/brick/brick_info.dart';
-import 'package:fly_cli/src/core/templates/brick/brick_registry.dart';
+import 'package:fly_cli/src/core/scaffolding/brick/brick_info.dart';
+import 'package:fly_cli/src/core/scaffolding/brick/brick_registry.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/file_operations/file_operations.dart';

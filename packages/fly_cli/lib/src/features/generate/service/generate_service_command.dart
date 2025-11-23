@@ -7,9 +7,9 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/templates/foundation/foundation_orchestrator.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/templates/generators/service_generator.dart';
+import 'package:fly_cli/src/core/scaffolding/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/scaffolding/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/core/scaffolding/generators/service_generator.dart';
 
 /// GenerateServiceCommand using new architecture
 class GenerateServiceCommand extends FlyCommand {

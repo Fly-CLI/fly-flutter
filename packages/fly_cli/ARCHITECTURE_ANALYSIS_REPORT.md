@@ -486,7 +486,7 @@ and reduce core maintenance burden.
 
 Template system uses Mason bricks with caching:
 
-```16:623:packages/fly_cli/lib/src/core/templates/template_manager.dart
+```16:623:packages/fly_cli/lib/src/core/scaffolding/template_manager.dart
 /// Enhanced template management system for Fly CLI
 /// 
 /// Handles template discovery, validation, and generation using Mason bricks.

@@ -70,7 +70,7 @@
 - When `generation_mode == project`: require `project_name`, `organization`, `platforms`; validate `template` choice and `fly_packages` against allowed values.
 - When `generation_mode != project`: require `component_name` and `feature` and validate combinations like `screen_type`.
 - For Week 1, focus on project-mode validation so `fly_foundation` project generation is robust; structure the validator so adding full screen/service/provider rules in later phases is straightforward.
-- Add unit tests under `packages/fly_cli/test/core/templates/` to cover both happy-path and failure cases, matching the Week 1 deliverable “Unit tests for variable validation”.
+- Add unit tests under `packages/fly_cli/test/core/scaffolding/` to cover both happy-path and failure cases, matching the Week 1 deliverable “Unit tests for variable validation”.
 
 ### 2. H1 – Explicit `build.yaml` Configuration
 

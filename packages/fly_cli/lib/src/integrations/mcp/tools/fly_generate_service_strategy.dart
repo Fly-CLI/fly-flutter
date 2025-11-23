@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_service.dart';
+import 'package:fly_cli/src/core/scaffolding/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/core/scaffolding/generation/generation_service.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_params.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_generate_service_result.dart';

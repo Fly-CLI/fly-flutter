@@ -206,5 +206,5 @@ For feature-specific documentation:
 
 - `features/README.md`
 - `core/logging/README.md`
-- `core/templates/versioning/README.md`
+- `core/scaffolding/versioning/README.md`
 

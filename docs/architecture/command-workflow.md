@@ -82,7 +82,7 @@ class ComponentPath extends ResolvedPath { }
 
 #### Self-Describing Bricks
 
-**Location**: `packages/fly_cli/lib/src/core/templates/models/brick_metadata.dart`
+**Location**: `packages/fly_cli/lib/src/core/scaffolding/models/brick_metadata.dart`
 
 Bricks now declare their type explicitly in `brick.yaml`:
 
@@ -104,7 +104,7 @@ variables:
 
 #### Brick Discovery Service
 
-**Location**: `packages/fly_cli/lib/src/core/templates/brick_discovery_service.dart`
+**Location**: `packages/fly_cli/lib/src/core/scaffolding/brick_discovery_service.dart`
 
 Responsible ONLY for finding and loading brick metadata:
 
@@ -120,7 +120,7 @@ class BrickDiscoveryService {
 
 #### Brick Validation Service
 
-**Location**: `packages/fly_cli/lib/src/core/templates/brick_validation_service.dart`
+**Location**: `packages/fly_cli/lib/src/core/scaffolding/brick_validation_service.dart`
 
 Responsible ONLY for validating brick structure and compatibility:
 

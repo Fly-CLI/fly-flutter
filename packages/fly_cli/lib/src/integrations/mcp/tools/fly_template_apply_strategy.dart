@@ -1,5 +1,5 @@
 import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/templates/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/scaffolding/foundation/foundation_orchestrator.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/tools/types/fly_template_apply_params.dart';

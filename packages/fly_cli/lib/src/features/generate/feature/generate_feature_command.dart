@@ -7,8 +7,8 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/templates/generators/feature_generator.dart';
+import 'package:fly_cli/src/core/scaffolding/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/core/scaffolding/generators/feature_generator.dart';
 
 /// GenerateFeatureCommand using new architecture
 class GenerateFeatureCommand extends FlyCommand {

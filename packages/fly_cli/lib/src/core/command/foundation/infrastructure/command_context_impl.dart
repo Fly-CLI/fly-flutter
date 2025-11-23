@@ -10,7 +10,7 @@ import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_p
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
-import 'package:fly_cli/src/core/templates/template/template_manager.dart';
+import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:mason_logger/mason_logger.dart';

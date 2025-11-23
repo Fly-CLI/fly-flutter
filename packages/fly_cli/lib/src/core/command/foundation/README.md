@@ -244,5 +244,5 @@ import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart'
 - `../../../FILE_SYSTEM_ANALYSIS_AND_RECOMMENDATIONS.md` - Organization analysis
 - `../../../lib/src/README.md` - Overall source structure
 - `core/logging/README.md` - Logging system (excellent example)
-- `core/templates/README.md` - Template management
+- `core/scaffolding/README.md` - Template management
 

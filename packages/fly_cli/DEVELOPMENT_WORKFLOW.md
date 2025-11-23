@@ -62,7 +62,7 @@ dart run packages/fly_cli/bin/fly.dart <command>
 **Example**:
 ```bash
 # Edit code in template_manager.dart
-vim packages/fly_cli/lib/src/core/templates/template_manager.dart
+vim packages/fly_cli/lib/src/core/scaffolding/template_manager.dart
 
 # Test immediately
 dart run packages/fly_cli/bin/fly.dart --version
@@ -181,7 +181,7 @@ Recompile the binary when:
 
 ```bash
 # 1. Make code changes
-vim packages/fly_cli/lib/src/core/templates/template_manager.dart
+vim packages/fly_cli/lib/src/core/scaffolding/template_manager.dart
 
 # 2. Test with dart run (fast iteration)
 dart run packages/fly_cli/bin/fly.dart generate project test_app
@@ -205,7 +205,7 @@ packages/fly_cli/bin/fly generate project final_test
 time packages/fly_cli/bin/fly --version
 
 # 3. Make optimizations
-vim packages/fly_cli/lib/src/core/templates/template_manager.dart
+vim packages/fly_cli/lib/src/core/scaffolding/template_manager.dart
 
 # 4. Recompile
 ./scripts/development/build-cli.sh --force

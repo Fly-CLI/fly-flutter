@@ -10,9 +10,9 @@ import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/manifest/manifest_parser.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
-import 'package:fly_cli/src/core/templates/foundation/foundation_orchestrator.dart';
-import 'package:fly_cli/src/core/templates/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/templates/template/template_manager.dart';
+import 'package:fly_cli/src/core/scaffolding/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/core/scaffolding/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
 
 /// GenerateProjectCommand using new architecture

@@ -16,7 +16,7 @@ import 'package:fly_cli/src/core/telemetry/domain/metric.dart';
 import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
-import 'package:fly_cli/src/core/templates/template/template_manager.dart';
+import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Bootstraps and initializes all services for the CLI

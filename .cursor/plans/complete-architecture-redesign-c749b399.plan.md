@@ -137,7 +137,7 @@ category: ui
 output_path_template: "lib/features/{{feature}}/presentation"
 ```
 
-**New file:** `packages/fly_cli/lib/src/core/templates/brick_manifest.dart`
+**New file:** `packages/fly_cli/lib/src/core/scaffolding/brick_manifest.dart`
 
 ```dart
 /// Brick manifest - parsed from brick.yaml
@@ -195,7 +195,7 @@ class BrickTypeDescriptor {
 
 ### 3. Decoupled Brick Registry
 
-**Rewrite:** `packages/fly_cli/lib/src/core/templates/brick_registry.dart`
+**Rewrite:** `packages/fly_cli/lib/src/core/scaffolding/brick_registry.dart`
 
 ```dart
 /// Decoupled brick registry - no dependencies on TemplateManager
@@ -744,7 +744,7 @@ class ServiceRegistry extends ServiceContainer {
 
 #### 2.1 Brick Manifest with Versioning
 
-**New file:** `packages/fly_cli/lib/src/core/templates/brick_manifest_v2.dart`
+**New file:** `packages/fly_cli/lib/src/core/scaffolding/brick_manifest_v2.dart`
 
 ```dart
 /// V2 Brick manifest with explicit configuration
@@ -803,7 +803,7 @@ class BrickManifestV2 {
 
 #### 2.2 Decoupled Brick Registry
 
-**Rewrite:** `packages/fly_cli/lib/src/core/templates/brick_registry_v2.dart`
+**Rewrite:** `packages/fly_cli/lib/src/core/scaffolding/brick_registry_v2.dart`
 
 ```dart
 class BrickRegistryV2 {
