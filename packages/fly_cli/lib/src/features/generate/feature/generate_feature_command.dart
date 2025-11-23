@@ -7,8 +7,8 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/scaffolding/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/scaffolding/generators/feature_generator.dart';
+import 'package:fly_cli/src/core/generation/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 
 /// GenerateFeatureCommand using new architecture
 class GenerateFeatureCommand extends FlyCommand {
@@ -98,44 +98,24 @@ class GenerateFeatureCommand extends FlyCommand {
       }
       final targetDir = outputDirResult.path!.absolute;
 
-      // Create generator (which uses GenerationService internally)
-      final generator = FeatureGenerator(
-        context: context,
-        logger: logger,
-      );
+      // Get generation handler from service container
+      final handler = context.getService<GenerationCommandHandler>();
 
       // Generate feature
-      final result = await generator.generate(
-        rawVars: rawVars,
+      final result = await handler.executeFeature(
+        variables: rawVars,
         outputDirectory: targetDir,
+        dryRun: context.planMode,
       );
 
       stopwatch.stop();
 
-      if (!result.success) {
-        return CommandResult.error(
-          message: result.error ?? 'Failed to generate feature component',
-          suggestion: 'Check feature brick availability and try again',
-          errorCode: ErrorCode.templateGenerationFailed,
-        );
+      // Result is already a CommandResult from the handler
+      // Add timing information
+      if (result.success && result.data != null) {
+        result.data!['duration_ms'] = stopwatch.elapsedMilliseconds;
       }
-
-      // Convert GenerationResult to CommandResult
-      return CommandResult.success(
-        command: 'generate feature',
-        message: 'Feature component generated successfully',
-        data: {
-          ...result.data ?? {},
-          'files_generated': result.filesGenerated,
-          'duration_ms': stopwatch.elapsedMilliseconds,
-        },
-        nextSteps: [
-          const NextStep(
-            command: 'flutter run',
-            description: 'Run the application to see the new screen',
-          ),
-        ],
-      );
+      return result;
     } catch (e) {
       return CommandResult.error(
         message: 'Failed to generate feature component: $e',

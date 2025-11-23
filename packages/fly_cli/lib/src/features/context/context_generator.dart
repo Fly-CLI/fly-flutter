@@ -391,7 +391,7 @@ class ContextGenerator {
       }
     } else {
       suggestions.add(
-        'This is a standard Flutter project. Consider using "fly create" to scaffold a new Fly project',
+        'This is a standard Flutter project. Consider using "fly create" to generate a new Fly project',
       );
     }
 

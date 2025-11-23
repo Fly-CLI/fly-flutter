@@ -10,10 +10,9 @@ import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/manifest/manifest_parser.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
-import 'package:fly_cli/src/core/scaffolding/foundation/foundation_orchestrator.dart';
-import 'package:fly_cli/src/core/scaffolding/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
+import 'package:fly_cli/src/core/generation/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 
 /// GenerateProjectCommand using new architecture
 class GenerateProjectCommand extends FlyCommand {
@@ -424,7 +423,7 @@ class GenerateProjectCommand extends FlyCommand {
 
       // 5. Features
       final finalFeatures = await prompter.promptMultiChoice(
-        prompt: 'Select initial features to scaffold',
+        prompt: 'Select initial features to generate',
         choices: ['home', 'auth', 'profile', 'settings', 'catalog', 'cart'],
         defaultChoices: features,
       );
@@ -585,56 +584,31 @@ class GenerateProjectCommand extends FlyCommand {
         'services': serviceInstances,
       };
 
-      // Create orchestrator
-      final orchestrator = TemplateGenerationOrchestrator(
-        templateManager: templateManager,
-        logger: logger,
-      );
+      // Get generation handler from service container
+      final handler = context.getService<GenerationCommandHandler>();
 
-      // Generate using orchestrator
-      final result = await orchestrator.generate(
-        rawVars: projectRawVars,
+      // Generate project
+      final result = await handler.executeProject(
+        variables: projectRawVars,
         outputDirectory: projectPath,
+        dryRun: context.planMode,
       );
 
       stopwatch.stop();
 
-      if (!result.success) {
-        return CommandResult.error(
-          message: 'Failed to generate project: ${result.error}',
-          suggestion: 'Check your input and try again',
-          errorCode: ErrorCode.templateGenerationFailed,
-          context: ErrorContext.forCommand(
-            'generate project',
-            arguments: argResults?.arguments,
-          ),
-        );
+      // Result is already a CommandResult from the handler
+      // Add additional data if needed
+      if (result.success && result.data != null) {
+        result.data!['duration_ms'] = stopwatch.elapsedMilliseconds;
+        result.data!['project_name'] = projectName;
+        result.data!['template'] = template;
+        result.data!['organization'] = organization;
+        result.data!['platforms'] = platforms;
+        result.data!['features'] = featureNames;
+        result.data!['target_directory'] = projectPath;
       }
 
-      return CommandResult.success(
-        command: 'generate project',
-        message: 'Project created successfully',
-        data: {
-          'project_name': projectName,
-          'template': template,
-          'organization': organization,
-          'platforms': platforms,
-          'features': featureNames,
-          'files_generated': result.files?.length ?? 0,
-          'duration_ms': stopwatch.elapsedMilliseconds,
-          'target_directory': result.targetDirectory ?? projectPath,
-        },
-        nextSteps: [
-          NextStep(
-            command: 'cd $projectName',
-            description: 'Navigate to project directory',
-          ),
-          const NextStep(
-            command: 'flutter run',
-            description: 'Run the application',
-          ),
-        ],
-      );
+      return result;
     } catch (e) {
       return CommandResult.error(
         message: 'Failed to create project: $e',

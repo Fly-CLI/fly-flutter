@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_cli/src/core/scaffolding/brick/brick_info.dart';
-import 'package:fly_cli/src/core/scaffolding/brick/brick_registry.dart';
+import 'package:fly_cli/src/core/generation/brick/brick_metadata.dart';
+import 'package:fly_cli/src/core/generation/brick/brick_registry.dart';
+import 'package:fly_cli/src/core/generation/domain/entities/brick.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:fly_core/src/file_operations/file_operations.dart';
@@ -114,7 +115,7 @@ class BrickCacheManager {
   }
 
   /// Cache brick registry snapshot
-  Future<void> cacheBrickRegistry(List<BrickInfo> bricks) async {
+  Future<void> cacheBrickRegistry(List<Brick> bricks) async {
     try {
       final cacheFile = File(path.join(_cacheDirectory, 'registry.json'));
       await _directoryManager.ensureExists(cacheFile.parent.path);
@@ -143,7 +144,7 @@ class BrickCacheManager {
   }
 
   /// Load brick registry from cache
-  Future<List<BrickInfo>?> loadBrickRegistry() async {
+  Future<List<Brick>?> loadBrickRegistry() async {
     try {
       final cacheFile = File(path.join(_cacheDirectory, 'registry.json'));
       if (!await _fileReader.isReadable(cacheFile)) {
@@ -168,7 +169,7 @@ class BrickCacheManager {
 
       final bricksJson = data['bricks'] as List<dynamic>;
       final bricks = bricksJson
-          .map((json) => BrickInfo.fromJson(json as Map<String, dynamic>))
+          .map((json) => Brick.fromJson(json as Map<String, dynamic>))
           .toList();
 
       logger.detail(
@@ -388,7 +389,7 @@ class BrickCacheManager {
   }
 
   /// Calculate checksum for brick list
-  Future<String> _calculateChecksum(List<BrickInfo> bricks) async {
+  Future<String> _calculateChecksum(List<Brick> bricks) async {
     // Convert to list of strings for checksum calculation
     final data = bricks.map((b) => b.toJson()).toList();
     return _checksumCalculator.calculateForList(

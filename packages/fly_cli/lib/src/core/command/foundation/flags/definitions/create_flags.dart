@@ -59,7 +59,7 @@ class CreatePlatformsFlag extends CliFlag {
 class CreateFeaturesFlag extends CliFlag {
   CreateFeaturesFlag() : super(
         name: 'features',
-        description: 'Initial feature modules to scaffold',
+        description: 'Initial feature modules to generate',
         isGlobal: false,
         category: CliFlagCategory.execution,
         type: FlagType.multiValue,

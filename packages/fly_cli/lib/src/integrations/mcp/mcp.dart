@@ -15,17 +15,18 @@ export 'prompts/prompt_error.dart';
 export 'prompts/prompt_validator.dart';
 // Resource exports
 export 'resources/resource_error.dart';
-export 'tools/fly_completion_strategy.dart';
-export 'tools/fly_context_export_strategy.dart';
-export 'tools/fly_doctor_strategy.dart';
-export 'tools/fly_echo_strategy.dart';
 // Tool strategy exports
-export 'tools/fly_generate_feature_strategy.dart';
-export 'tools/fly_generate_service_strategy.dart';
-export 'tools/fly_schema_export_strategy.dart';
-export 'tools/fly_template_apply_strategy.dart';
-export 'tools/fly_version_strategy.dart';
-export 'tools/types/fly_template_list_strategy.dart';
+export 'tools/command_schema_export_strategy.dart';
+export 'tools/diagnostic_echo_strategy.dart';
+export 'tools/generate_screen_strategy.dart';
+export 'tools/project_context_export_strategy.dart';
+export 'tools/generate_flutter_project_strategy.dart';
+export 'tools/generate_service_strategy.dart';
+export 'tools/shell_completion_strategy.dart';
+export 'tools/system_diagnostics_strategy.dart';
+export 'tools/template_apply_strategy.dart';
+export 'tools/types/template_list_strategy.dart';
+export 'tools/version_info_strategy.dart';
 // Utility exports
 export 'utils/progress_helpers.dart';
 export 'utils/tool_logger.dart';

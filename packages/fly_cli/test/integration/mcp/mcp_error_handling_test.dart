@@ -8,11 +8,11 @@ import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
-import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
+import 'package:fly_cli/src/core/generation/template/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/prompts/prompt_error.dart';
 import 'package:fly_cli/src/integrations/mcp/resources/resource_error.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_template_apply_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/template_apply_strategy.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:mason_logger/mason_logger.dart' as mason_logger;
 import 'package:path/path.dart' as path;
@@ -78,7 +78,7 @@ void main() {
 
     group('tool error handling', () {
       test('should throw McpError with structured context', () async {
-        final strategy = FlyTemplateApplyStrategy();
+        final strategy = TemplateApplyStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
         try {
@@ -99,7 +99,7 @@ void main() {
 
       test('should include field-level errors in validation failures',
           () async {
-        final strategy = FlyTemplateApplyStrategy();
+        final strategy = TemplateApplyStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
         try {

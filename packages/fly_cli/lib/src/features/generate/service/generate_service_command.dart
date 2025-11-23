@@ -7,9 +7,8 @@ import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
 import 'package:fly_cli/src/core/errors/error_codes.dart';
 import 'package:fly_cli/src/core/errors/error_context.dart';
 import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/scaffolding/foundation/foundation_orchestrator.dart';
-import 'package:fly_cli/src/core/scaffolding/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/scaffolding/generators/service_generator.dart';
+import 'package:fly_cli/src/core/generation/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 
 /// GenerateServiceCommand using new architecture
 class GenerateServiceCommand extends FlyCommand {
@@ -96,44 +95,24 @@ class GenerateServiceCommand extends FlyCommand {
       }
       final targetDir = outputDirResult.path!.absolute;
 
-      // Create generator (which uses GenerationService internally)
-      final generator = ServiceGenerator(
-        context: context,
-        logger: logger,
-      );
+      // Get generation handler from service container
+      final handler = context.getService<GenerationCommandHandler>();
 
       // Generate service
-      final result = await generator.generate(
-        rawVars: rawVars,
+      final result = await handler.executeService(
+        variables: rawVars,
         outputDirectory: targetDir,
+        dryRun: context.planMode,
       );
 
       stopwatch.stop();
 
-      if (!result.success) {
-        return CommandResult.error(
-          message: result.error ?? 'Failed to generate service',
-          suggestion: 'Check service brick availability and try again',
-          errorCode: ErrorCode.templateGenerationFailed,
-        );
+      // Result is already a CommandResult from the handler
+      // Add timing information
+      if (result.success && result.data != null) {
+        result.data!['duration_ms'] = stopwatch.elapsedMilliseconds;
       }
-
-      // Convert GenerationResult to CommandResult
-      return CommandResult.success(
-        command: 'generate service',
-        message: 'Service generated successfully',
-        data: {
-          ...result.data ?? {},
-          'files_generated': result.filesGenerated,
-          'duration_ms': stopwatch.elapsedMilliseconds,
-        },
-        nextSteps: [
-          const NextStep(
-            command: 'flutter run',
-            description: 'Run the application to test the new service',
-          ),
-        ],
-      );
+      return result;
     } catch (e) {
       return CommandResult.error(
         message: 'Failed to generate service: $e',

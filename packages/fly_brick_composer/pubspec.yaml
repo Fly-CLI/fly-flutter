@@ -3,7 +3,7 @@ description: Shared brick composition library for Fly template composition
 version: 1.0.0
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.10.0"
 
 resolution: workspace

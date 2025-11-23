@@ -7,7 +7,7 @@ issue_tracker: https://github.com/fly-cli/fly/issues
 publish_to: none
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.10.0"
 
 resolution: workspace

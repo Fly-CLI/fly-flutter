@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
+import 'package:fly_cli/src/core/generation/domain/repositories/itemplate_repository.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
@@ -9,10 +9,12 @@ import 'package:path/path.dart' as path;
 class TemplateCheck extends SystemCheck {
   TemplateCheck({
     required this.templatesDirectory,
+    required this.templateRepository,
     this.logger,
   });
 
   final String templatesDirectory;
+  final ITemplateRepository templateRepository;
   final Logger? logger;
 
   @override
@@ -42,13 +44,8 @@ class TemplateCheck extends SystemCheck {
         );
       }
 
-      // Get available templates
-      final templateManager = TemplateManager(
-        templatesDirectory: templatesDirectory,
-        logger: logger ?? Logger(),
-      );
-
-      final templates = await templateManager.getAvailableTemplates();
+      // Get available templates using repository interface
+      final templates = await templateRepository.discoverTemplates();
 
       if (templates.isEmpty) {
         return CheckResult.error(

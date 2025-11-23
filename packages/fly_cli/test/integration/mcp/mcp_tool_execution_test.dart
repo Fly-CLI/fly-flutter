@@ -8,9 +8,9 @@ import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
-import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_echo_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_template_apply_strategy.dart';
+import 'package:fly_cli/src/core/generation/template/template_manager.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/diagnostic_echo_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/template_apply_strategy.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:mason_logger/mason_logger.dart' as mason_logger;
 import 'package:path/path.dart' as path;
@@ -76,7 +76,7 @@ void main() {
 
     group('fly.echo tool', () {
       test('should execute successfully with valid parameters', () async {
-        final strategy = FlyEchoStrategy();
+        final strategy = DiagnosticEchoStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
         final result = await handler(
@@ -87,7 +87,7 @@ void main() {
       });
 
       test('should validate parameters and throw structured error', () async {
-        final strategy = FlyEchoStrategy();
+        final strategy = DiagnosticEchoStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
         expect(
@@ -99,7 +99,7 @@ void main() {
 
     group('tool error handling', () {
       test('should return structured error for invalid parameters', () async {
-        final strategy = FlyTemplateApplyStrategy();
+        final strategy = TemplateApplyStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
         try {
@@ -129,7 +129,7 @@ void main() {
         final progressNotifications = <String, int>{};
 
         // Create a strategy and get handler with progress tracking
-        final strategy = FlyTemplateApplyStrategy();
+        final strategy = TemplateApplyStrategy();
 
         // Note: Progress notifications are handled by MCP server middleware
         // In integration tests, we'd test through the MCP protocol
@@ -139,7 +139,7 @@ void main() {
 
     group('correlation ID tracking', () {
       test('should generate correlation ID for each tool execution', () async {
-        final strategy = FlyEchoStrategy();
+        final strategy = DiagnosticEchoStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
         final result1 = await handler({'message': 'Test 1'});

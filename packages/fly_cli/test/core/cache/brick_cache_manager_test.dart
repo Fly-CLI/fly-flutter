@@ -1,5 +1,5 @@
 import 'package:fly_cli/src/core/cache/brick_cache_manager.dart';
-import 'package:fly_cli/src/core/scaffolding/brick/brick_info.dart';
+import 'package:fly_cli/src/core/generation/brick/brick_metadata.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
 

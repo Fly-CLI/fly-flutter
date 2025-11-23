@@ -6,11 +6,12 @@ import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart'
 import 'package:fly_cli/src/core/command/foundation/domain/command_execution_context.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
 import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
+import 'package:fly_cli/src/core/command/foundation/infrastructure/context_factory.dart';
 import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
-import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
+import 'package:fly_cli/src/core/generation/template/template_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -151,6 +152,17 @@ class CommandContextImpl implements CommandContext {
 
   @override
   final IContextFactory factory;
+
+  @override
+  T getService<T>() {
+    // Access container through factory
+    if (factory is ContextFactory) {
+      return (factory as ContextFactory).services.get<T>();
+    }
+    throw UnsupportedError(
+      'Service access requires ContextFactory implementation',
+    );
+  }
 
   final Map<String, dynamic> _data = {};
   String? _commandName;

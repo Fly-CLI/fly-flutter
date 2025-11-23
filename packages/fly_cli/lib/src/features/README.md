@@ -516,7 +516,7 @@ expect(harness.container.mockTemplateManager.generatedProjects, contains('test-p
 - [Command System Architecture](../docs/architecture/command-system.md) - Detailed technical
   documentation
 - [Core Components](../core/) - Core implementation details
-- [Template System](../core/scaffolding/) - Template management system
+- [Template System](../core/generation/) - Template management system
 - [Validation System](../core/validation/) - Validation framework details
 
 ## Contributing

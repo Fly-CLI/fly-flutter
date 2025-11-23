@@ -6,7 +6,7 @@ import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_p
 import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
 import 'package:fly_cli/src/core/path_management/path_resolver.dart';
 import 'package:fly_cli/src/core/telemetry/domain/metrics_collector.dart';
-import 'package:fly_cli/src/core/scaffolding/template/template_manager.dart';
+import 'package:fly_cli/src/core/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Command execution context providing access to dependencies and configuration
@@ -78,6 +78,16 @@ abstract class CommandContext {
   /// This factory allows commands to create new execution contexts
   /// with actual parsed arguments during command execution.
   IContextFactory get factory;
+
+  /// Get a service from the service container.
+  ///
+  /// This method provides access to services registered in the DI container.
+  /// It delegates to the factory's service container.
+  ///
+  /// [T] - The type of service to retrieve
+  ///
+  /// Returns the service instance, or throws if not registered.
+  T getService<T>();
 
   /// Provides helpful suggestions for common errors.
   String getErrorSuggestion(Object error);

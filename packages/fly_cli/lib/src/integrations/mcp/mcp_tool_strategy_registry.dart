@@ -1,58 +1,70 @@
 import 'package:fly_cli/src/core/definitions/mcp_tool.dart';
 import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_completion_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_context_export_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_doctor_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_echo_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_feature_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_project_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_generate_service_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_schema_export_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_template_apply_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/fly_version_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/fly_template_list_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/registry/tool_strategy_factory.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/command_schema_export_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/diagnostic_echo_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/generate_flutter_project_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/generate_screen_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/generate_service_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/project_context_export_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/shell_completion_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/system_diagnostics_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/template_apply_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/types/template_list_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/tools/version_info_strategy.dart';
 
-/// Registry for MCP tool strategies
+/// Registry for MCP tool strategies using factory pattern.
 ///
 /// Maps McpTool enum values to their corresponding strategy instances.
-
 /// Strategies are created lazily on demand and cached for reuse.
+/// Uses IToolStrategyFactory for extensibility and dependency injection.
 class McpToolStrategyRegistry {
+  McpToolStrategyRegistry({
+    IToolStrategyFactory? factory,
+  }) : _factory = factory ?? _createDefaultFactory();
+
+  final IToolStrategyFactory _factory;
   final Map<McpTool, McpToolStrategy> _strategies = {};
 
   /// Gets the strategy for the given tool type
   ///
   /// Creates and caches the strategy instance on first access.
   McpToolStrategy getStrategy(McpTool toolType) {
-    return _strategies.putIfAbsent(toolType, () => _createStrategy(toolType));
+    return _strategies.putIfAbsent(
+      toolType,
+      () => _factory.create(toolType),
+    );
   }
 
-  /// Creates a strategy instance for the given tool type
-  McpToolStrategy _createStrategy(McpTool toolType) {
-    switch (toolType) {
-      case McpTool.echo:
-        return FlyEchoStrategy();
-      case McpTool.templateList:
-        return FlyTemplateListStrategy();
-      case McpTool.templateApply:
-        return FlyTemplateApplyStrategy();
-      case McpTool.generateProject:
-        return FlyGenerateProjectStrategy();
-      case McpTool.generateFeature:
-        return FlyGenerateFeatureStrategy();
-      case McpTool.generateService:
-        return FlyGenerateServiceStrategy();
-      case McpTool.contextExport:
-        return FlyContextExportStrategy();
-      case McpTool.schemaExport:
-        return FlySchemaExportStrategy();
-      case McpTool.completion:
-        return FlyCompletionStrategy();
-      case McpTool.version:
-        return FlyVersionStrategy();
-      case McpTool.doctor:
-        return FlyDoctorStrategy();
-    }
+  /// Register a custom strategy factory for a tool type
+  ///
+  /// Allows extending the registry with new tools without modifying existing code.
+  void registerStrategy(
+    McpTool toolType,
+    McpToolStrategy Function() factory,
+  ) {
+    _factory.register(toolType, factory);
+    // Clear cache for this tool type to force recreation
+    _strategies.remove(toolType);
+  }
+
+  /// Create default factory with all built-in strategies
+  static IToolStrategyFactory _createDefaultFactory() {
+    final factories = <McpTool, McpToolStrategy Function()>{
+      McpTool.echo: DiagnosticEchoStrategy.new,
+      McpTool.templateList: TemplateListStrategy.new,
+      McpTool.templateApply: TemplateApplyStrategy.new,
+      McpTool.generateProject: GenerateFlutterProjectStrategy.new,
+      McpTool.generateFeature: GenerateScreenStrategy.new,
+      McpTool.generateService: GenerateServiceStrategy.new,
+      McpTool.contextExport: ProjectContextExportStrategy.new,
+      McpTool.schemaExport: CommandSchemaExportStrategy.new,
+      McpTool.completion: ShellCompletionStrategy.new,
+      McpTool.version: VersionInfoStrategy.new,
+      McpTool.doctor: SystemDiagnosticsStrategy.new,
+    };
+
+    return ToolStrategyFactory(factories: factories);
   }
 }
 
