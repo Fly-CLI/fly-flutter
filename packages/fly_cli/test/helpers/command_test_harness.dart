@@ -1,14 +1,14 @@
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command/foundation/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/core/command/foundation/infrastructure/interactive_prompt.dart';
-import 'package:fly_cli/src/core/dependency_injection/service_container.dart';
-import 'package:fly_cli/src/core/diagnostics/system_checker.dart';
-import 'package:fly_cli/src/core/path_management/path_resolver.dart';
-import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_config.dart';
-import 'package:fly_cli/src/core/telemetry/infrastructure/metrics_factory.dart';
-import 'package:fly_cli/src/core/generation/template/template_manager.dart';
+import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/shared/di/service_container.dart';
+import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
+import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
+import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_logger/mason_logger.dart';
 

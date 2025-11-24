@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/generation/generation/generation_service.dart';
-import 'package:fly_cli/src/core/generation/generation/generation_adapter.dart';
-import 'package:fly_cli/src/core/generation/generation/generation_request.dart';
-import 'package:fly_cli/src/core/generation/generators/generation_result.dart';
-import 'package:fly_cli/src/core/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/core/generation/template/template_manager.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/generate_screen_params.dart';
-import 'package:fly_cli/src/integrations/mcp/tools/types/generate_service_params.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/generation/generation_service.dart';
+import 'package:fly_cli/src/generation/generation_adapter.dart';
+import 'package:fly_cli/src/generation/generation_request.dart';
+import 'package:fly_cli/src/generation/generators/generation_result.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/template/template_manager.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_screen_params.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_service_params.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:mason_logger/mason_logger.dart' as logger;
 import 'package:test/test.dart';

@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
-import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:test/test.dart';
 
 void main() {

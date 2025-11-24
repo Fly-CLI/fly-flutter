@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/integrations/mcp/utils/progress_helpers.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/utils/progress_helpers.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:test/test.dart';
 

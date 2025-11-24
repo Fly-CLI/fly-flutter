@@ -46,85 +46,42 @@ lib/src/
     └── version/                  # Version info
 ```
 
-## Core Directory
+## Module Organization
 
 ### Architecture Patterns
 
-The `core/` directory follows clean architecture principles with some inconsistency:
+All modules follow clean architecture principles with consistent layering:
 
-**Well-Organized Examples:**
+**Standard Module Structure:**
 
-- **`logging/`** - Excellent example with clear layering:
-  ```
-  logging/
-  ├── domain/                    # Interfaces & abstractions
-  ├── application/               # Business logic
-  ├── infrastructure/            # Implementations
-  │   ├── appenders/
-  │   └── formatters/
-  └── README.md
-  ```
-
-- **`templates/`** - Good organization with logical groupings:
-  ```
-  templates/
-  ├── versioning/               # Template versioning
-  └── (18 other files)          # Core template logic
-  ```
-
-**Areas Needing Improvement:**
-
-- **`command_foundation/`** - Mixed domain/application/infrastructure concerns
-- **`dependency_injection/`** - No clear layering
-- Other directories - Inconsistent patterns
-
-**Recommendation:**
-See [FILE_SYSTEM_ANALYSIS_AND_RECOMMENDATIONS.md](../../FILE_SYSTEM_ANALYSIS_AND_RECOMMENDATIONS.md)
-for detailed restructuring suggestions.
-
-### Key Core Components
-
-- **CLI Infrastructure** (`cli/`) - Command runner, bootstrapping, formatting, error handling
-- **Command Foundation** - Base classes, middleware, lifecycle hooks
-- **Command Metadata** - Introspection and schema generation for AI
-- **Definitions** - Command types, categories, MCP tool types
-- **Dependency Injection** - Simple service container pattern
-- **Logging** - Structured, multi-appender logging system
-- **Templates** - Mason brick integration with versioning
-- **Validation** - Composable validation pipeline
-
-## Features Directory
-
-### Structure
-
-Each feature typically contains:
-
-- `{feature}_command.dart` - Main command implementation
-- `{feature}_command_strategy.dart` - Metadata and factory
-- Additional implementation files as needed
-
-### Examples
-
-**Simple Features:**
-
-- `create/` - 2 files (command + strategy)
-- `version/` - 2 files (command + strategy)
-
-**Complex Features:**
-
-- `context/` - 11 files with analyzers, models, utils
-- `completion/` - 7 files with generators/ subdirectory
-
-**Recommended Pattern:**
-
-```dart
-features/
-  {feature}/
-    ├── domain/                  # Interfaces, models
-    ├── application/             # Command implementation
-    ├── infrastructure/          # External integrations
-    └── README.md               # Feature documentation
 ```
+{module}/
+├── domain/                      # Interfaces, abstractions, value objects
+├── application/                 # Business logic, use cases, orchestration
+├── infrastructure/              # Concrete implementations, adapters
+└── README.md                    # Module documentation
+```
+
+### Key Modules
+
+- **`shared/`** - Cross-cutting concerns used by all modules (logging, errors, DI, utils)
+- **`commands/`** - Command system foundation, metadata, and registration
+- **`generation/`** - Template/project generation with caching and security
+- **`integrations/`** - External system integrations (MCP, etc.)
+- **`diagnostics/`** - System health checks and diagnostics
+- **`context/`** - Project analysis and context generation
+- **`completion/`** - Shell completion generation
+- **`schema/`** - Command schema export
+- **`version/`** - Version information
+- **`cli/`** - CLI infrastructure (bootstrapping, formatting, middleware, etc.)
+
+### Module Principles
+
+1. **Full Encapsulation**: Each module contains all related functionality
+2. **Business Domain Focus**: Modules organized by business capability, not technical layer
+3. **Internal Layering**: Each module has domain/application/infrastructure internally
+4. **Minimal Shared**: Only truly cross-cutting concerns in `shared/`
+5. **Clear Boundaries**: Module boundaries align with business capabilities
 
 ## Command Registration
 
@@ -183,28 +140,24 @@ Use package-relative imports:
 
 ```dart
 // ✅ Good
-import 'package:fly_cli/src/core/logging/logger.dart';
-import 'package:fly_cli/src/features/generate/project/generate_project_command.dart';
+import 'package:fly_cli/src/shared/logging/infrastructure/logger.dart';
+import 'package:fly_cli/src/generation/application/generate/project/generate_project_command.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 
 // ❌ Avoid
-import '../../core/logging/logger.dart';
+import '../../shared/logging/infrastructure/logger.dart';
 ```
 
 ## Documentation
 
-- Each directory should have a README.md explaining its purpose
-- Complex features should document their architecture
-- See existing examples in `core/logging/` and `features/mcp/docs/`
+- Each module should have a README.md explaining its purpose and structure
+- Complex modules should document their architecture
+- See existing examples in `shared/logging/README.md` and `integrations/mcp/docs/`
 
-## Next Steps
+## Module Documentation
 
-For detailed analysis and recommendations, see:
-
-- `FILE_SYSTEM_ANALYSIS_AND_RECOMMENDATIONS.md` in project root
-
-For feature-specific documentation:
-
-- `features/README.md`
-- `core/logging/README.md`
-- `core/generation/versioning/README.md`
+- `shared/logging/README.md` - Logging system documentation
+- `commands/README.md` - Command system architecture
+- `generation/README.md` - Generation system documentation
+- `integrations/README.md` - Integration modules documentation
 

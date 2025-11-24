@@ -1,12 +1,12 @@
-import 'package:fly_cli/src/core/generation/application/dto/generation_request_dto.dart';
-import 'package:fly_cli/src/core/generation/application/ports/igeneration_engine.dart';
-import 'package:fly_cli/src/core/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/core/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/core/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/core/generation/domain/repositories/ibrick_repository.dart';
-import 'package:fly_cli/src/core/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/core/generation/generators/generation_result.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
+import 'package:fly_cli/src/generation/domain/entities/brick.dart';
+import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 

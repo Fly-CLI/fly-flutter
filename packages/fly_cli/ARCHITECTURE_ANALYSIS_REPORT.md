@@ -252,7 +252,7 @@ reflection or directory scanning.
 
 Uses a simple but effective service container:
 
-```1:39:packages/fly_cli/lib/src/core/dependency_injection/domain/service_container.dart
+```1:39:packages/fly_cli/lib/src/core/di/domain/service_container.dart
 /// Simple service container for dependency injection
 class ServiceContainer {
   /// Creates a new service container

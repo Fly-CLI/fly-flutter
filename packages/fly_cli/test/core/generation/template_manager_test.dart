@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/generation/template/template_info.dart';
-import 'package:fly_cli/src/core/generation/template/template_manager.dart';
+import 'package:fly_cli/src/generation/template/template_info.dart';
+import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

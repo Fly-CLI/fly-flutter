@@ -688,7 +688,7 @@ class Failure<T> extends Result<T> {
 
 #### 1.4 Dependency Injection Setup
 
-**Update:** `packages/fly_cli/lib/src/core/dependency_injection/service_registry.dart`
+**Update:** `packages/fly_cli/lib/src/core/di/service_registry.dart`
 
 ```dart
 /// Central service registry extending ServiceContainer

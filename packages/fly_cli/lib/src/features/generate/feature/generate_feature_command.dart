@@ -1,14 +1,14 @@
-import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/errors/error_codes.dart';
-import 'package:fly_cli/src/core/errors/error_context.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/generation/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/features/commands/application/command_base.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
 
 /// GenerateFeatureCommand using new architecture
 class GenerateFeatureCommand extends FlyCommand {

@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/fly_command_strategy.dart';
-import 'package:fly_cli/src/core/definitions/categories.dart';
+import 'package:fly_cli/src/features/commands/domain/categories.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/features/generate/service/generate_service_command.dart';
 
 /// Strategy for service command

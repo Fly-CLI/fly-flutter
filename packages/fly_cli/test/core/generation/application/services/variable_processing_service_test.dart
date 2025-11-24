@@ -1,9 +1,9 @@
-import 'package:fly_cli/src/core/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/core/generation/application/services/variable_processing_service.dart';
-import 'package:fly_cli/src/core/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/core/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/core/generation/domain/value_objects/brick_variable.dart' as domain;
-import 'package:fly_cli/src/core/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
+import 'package:fly_cli/src/generation/application/services/variable_processing_service.dart';
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
+import 'package:fly_cli/src/generation/domain/entities/brick.dart';
+import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart' as domain;
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 

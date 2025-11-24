@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/generation/versioning/compatibility_result.dart';
+import 'package:fly_cli/src/generation/versioning/compatibility_result.dart';
 import 'package:test/test.dart';
 
 void main() {

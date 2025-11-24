@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/integrations/mcp/validation/structured_schema_validator.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/validation/structured_schema_validator.dart';
 import 'package:test/test.dart';
 
 void main() {

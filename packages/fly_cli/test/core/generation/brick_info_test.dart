@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/generation/brick/brick_info.dart';
+import 'package:fly_cli/src/generation/brick/brick_info.dart';
 import 'package:test/test.dart';
 
 void main() {

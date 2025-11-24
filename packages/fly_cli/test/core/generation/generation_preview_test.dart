@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/core/generation/generation/generation_preview.dart';
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
+import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
 

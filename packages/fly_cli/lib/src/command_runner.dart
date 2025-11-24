@@ -2,19 +2,19 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/core/cli/bootstrapping/service_bootstrapper.dart';
-import 'package:fly_cli/src/core/cli/bootstrapping/service_bootstrapper_factory.dart';
-import 'package:fly_cli/src/core/cli/output_format.dart';
-import 'package:fly_cli/src/core/cli/error_handling/error_handler.dart';
-import 'package:fly_cli/src/core/cli/formatting/output_format_parser.dart';
-import 'package:fly_cli/src/core/cli/formatting/output_formatter.dart';
-import 'package:fly_cli/src/core/cli/interfaces/i_context_factory.dart';
-import 'package:fly_cli/src/core/cli/interfaces/i_output_formatter.dart';
-import 'package:fly_cli/src/core/cli/registration/command_registrar.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/global_flags_registry.dart';
-import 'package:fly_cli/src/core/utils/version_utils.dart';
+import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper.dart';
+import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_factory.dart';
+import 'package:fly_cli/src/cli/domain/output_format.dart';
+import 'package:fly_cli/src/cli/infrastructure/error_handling/error_handler.dart';
+import 'package:fly_cli/src/cli/infrastructure/formatting/output_format_parser.dart';
+import 'package:fly_cli/src/cli/infrastructure/formatting/output_formatter.dart';
+import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/cli/domain/interfaces/i_output_formatter.dart';
+import 'package:fly_cli/src/cli/application/registration/command_registrar.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
+import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Enhanced Fly CLI Command Runner with SOLID principles

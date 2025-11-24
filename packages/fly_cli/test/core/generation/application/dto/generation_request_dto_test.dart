@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/generation/application/dto/generation_request_dto.dart';
-import 'package:fly_cli/src/core/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:test/test.dart';
 
 void main() {

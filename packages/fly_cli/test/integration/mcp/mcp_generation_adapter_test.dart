@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_project_use_case.dart';
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_service_use_case.dart';
-import 'package:fly_cli/src/integrations/mcp/adapters/generation_mcp_adapter.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:test/test.dart';
 
 // Mock implementations for testing

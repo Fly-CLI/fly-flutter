@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/generate/feature/generate_feature_command.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
@@ -156,7 +156,7 @@ void main() {
       test('should reject invalid screen types', () {
         final parser = command.argParser;
         expect(
-          () => parser.parse(['--type', 'invalid']),
+              () => parser.parse(['--type', 'invalid']),
           throwsA(isA<FormatException>()),
         );
       });
@@ -302,7 +302,7 @@ void main() {
       test('should handle screen with custom feature with separate flag', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--feature', 'auth', 'login_screen']);
+        parser.parse(['--feature', 'auth', 'login_screen']);
         expect(args['feature'], equals('auth'));
         expect(args.rest, equals(['login_screen']));
       });
@@ -318,7 +318,7 @@ void main() {
       test('should handle screen with viewmodel with separate flag', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--with-viewmodel', 'profile_screen']);
+        parser.parse(['--with-viewmodel', 'profile_screen']);
         expect(args['with-viewmodel'], equals(true));
         expect(args.rest, equals(['profile_screen']));
       });
@@ -334,7 +334,7 @@ void main() {
       test('should handle screen with tests with separate flag', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--with-tests', 'settings_screen']);
+        parser.parse(['--with-tests', 'settings_screen']);
         expect(args['with-tests'], equals(true));
         expect(args.rest, equals(['settings_screen']));
       });
@@ -541,7 +541,7 @@ void main() {
 
       test('should handle repeated parsing efficiently with different syntax', () {
         expect(
-          () {
+              () {
             for (var i = 0; i < 100; i++) {
               command.argParser.parse(['test_screen_$i']);
             }

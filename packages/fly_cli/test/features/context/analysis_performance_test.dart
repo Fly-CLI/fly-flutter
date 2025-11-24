@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/context_generator.dart';
-import 'package:fly_cli/src/features/context/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
+import 'package:fly_cli/src/features/context/domain/models.dart';
 import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 

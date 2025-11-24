@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/generation/utils/mason_error_handler.dart';
+import 'package:fly_cli/src/generation/utils/mason_error_handler.dart';
 import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 

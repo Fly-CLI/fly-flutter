@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/generation/template/template_info.dart';
-import 'package:fly_cli/src/core/generation/versioning/version_registry.dart';
+import 'package:fly_cli/src/generation/template/template_info.dart';
+import 'package:fly_cli/src/generation/versioning/version_registry.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';

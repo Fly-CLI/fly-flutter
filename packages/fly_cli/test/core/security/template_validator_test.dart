@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/security/template_validator.dart';
+import 'package:fly_cli/src/generation/security/infrastructure/template_validator.dart';
 import 'package:test/test.dart';
 
 void main() {

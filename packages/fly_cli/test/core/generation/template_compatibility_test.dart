@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/generation/template/template_compatibility.dart';
+import 'package:fly_cli/src/generation/template/template_compatibility.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 

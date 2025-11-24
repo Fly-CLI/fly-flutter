@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/generation/domain/value_objects/version_range.dart';
+import 'package:fly_cli/src/generation/domain/value_objects/version_range.dart';
 import 'package:pub_semver/pub_semver.dart' hide VersionRange;
 import 'package:test/test.dart';
 

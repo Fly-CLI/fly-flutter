@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/integrations/mcp/prompts/prompt_template_engine.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/prompts/prompt_template_engine.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/core/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/core/generation/brick/brick_registry.dart';
-import 'package:fly_cli/src/core/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/core/generation/infrastructure/brick/brick_repository_impl.dart';
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
+import 'package:fly_cli/src/generation/brick/brick_registry.dart';
+import 'package:fly_cli/src/generation/domain/entities/brick.dart';
+import 'package:fly_cli/src/generation/infrastructure/brick/brick_repository_impl.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
 

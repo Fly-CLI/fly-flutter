@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/core/generation/versioning/version_parser.dart';
+import 'package:fly_cli/src/generation/versioning/version_parser.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 

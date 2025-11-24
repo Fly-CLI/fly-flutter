@@ -1,18 +1,18 @@
-import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_context.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/command/foundation/domain/command_validator.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/cli_flags.dart';
-import 'package:fly_cli/src/core/command/foundation/flags/flag_accessor.dart';
-import 'package:fly_cli/src/core/command/metadata/command_metadata.dart';
-import 'package:fly_cli/src/core/errors/error_codes.dart';
-import 'package:fly_cli/src/core/errors/error_context.dart';
-import 'package:fly_cli/src/core/manifest/manifest_parser.dart';
-import 'package:fly_cli/src/core/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/core/middleware/infrastructure/optional/caching_middleware.dart';
-import 'package:fly_cli/src/core/generation/generation/generation_variable_builder.dart';
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/optional/caching_middleware.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/commands/application/command_base.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_definition.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/generation/domain/entities/manifest_parser.dart';
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
 
 /// GenerateProjectCommand using new architecture
 class GenerateProjectCommand extends FlyCommand {

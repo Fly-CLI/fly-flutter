@@ -123,7 +123,7 @@ class LoggingMiddleware implements CommandMiddleware {
 The CommandFactory is a core component for dependency injection but throws `UnimplementedError`:
 
 ```dart
-// In /core/dependency_injection/application/command_factory.dart
+// In /core/di/application/command_factory.dart
 class CommandFactory {
   const CommandFactory(this._container);
   final ServiceContainer _container;

@@ -125,7 +125,7 @@ When adding new MCP features:
 ### Example Test Structure
 
 ```dart
-import 'package:fly_cli/src/features/mcp/...';
+import 'package:fly_cli/src/integrations/mcp/...';
 import 'package:test/test.dart';
 
 void main() {

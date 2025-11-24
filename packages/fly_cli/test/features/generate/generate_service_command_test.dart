@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/core/command/foundation/application/command_base.dart';
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/generate/service/generate_service_command.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -155,7 +155,7 @@ void main() {
       test('should reject invalid service types', () {
         final parser = command.argParser;
         expect(
-          () => parser.parse(['--type', 'invalid']),
+              () => parser.parse(['--type', 'invalid']),
           throwsA(isA<FormatException>()),
         );
       });
@@ -317,7 +317,7 @@ void main() {
       test('should accept custom base-url', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--base-url', 'https://api.custom.com']);
+        parser.parse(['--base-url', 'https://api.custom.com']);
         expect(args['base-url'], equals('https://api.custom.com'));
       });
     });
@@ -351,7 +351,7 @@ void main() {
       test('should handle service with custom feature with separate flag', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--feature', 'auth', 'auth_service']);
+        parser.parse(['--feature', 'auth', 'auth_service']);
         expect(args['feature'], equals('auth'));
         expect(args.rest, equals(['auth_service']));
       });
@@ -406,7 +406,7 @@ void main() {
       test('should handle cache service', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--type', 'cache', 'cache_service']);
+        parser.parse(['--type', 'cache', 'cache_service']);
         expect(args['type'], equals('cache'));
         expect(args.rest, equals(['cache_service']));
       });
@@ -422,7 +422,7 @@ void main() {
       test('should handle storage service', () {
         final parser = command.argParser;
         final args =
-            parser.parse(['--type', 'storage', 'storage_service']);
+        parser.parse(['--type', 'storage', 'storage_service']);
         expect(args['type'], equals('storage'));
         expect(args.rest, equals(['storage_service']));
       });
@@ -500,7 +500,7 @@ void main() {
         final parser = command.argParser;
 
         expect(
-          () => parser.parse(['auth', '--type=invalid']),
+              () => parser.parse(['auth', '--type=invalid']),
           throwsA(isA<FormatException>()),
         );
       });
@@ -679,7 +679,7 @@ void main() {
 
       test('should handle repeated parsing efficiently with different syntax', () {
         expect(
-          () {
+              () {
             for (var i = 0; i < 100; i++) {
               command.argParser.parse(['test_service_$i']);
             }

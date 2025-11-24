@@ -1,5 +1,5 @@
 /// Test fixtures and sample data for Fly CLI tests
-import 'package:fly_cli/src/core/validation/validation_rules.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
 
 class TestFixtures {
   /// Sample project names for testing

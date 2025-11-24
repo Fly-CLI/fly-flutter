@@ -1,4 +1,4 @@
-import 'package:fly_cli/src/features/completion/completion_command.dart';
+import 'package:fly_cli/src/features/completion/application/completion_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';

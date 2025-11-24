@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/logging/logger.dart';
-import 'package:fly_cli/src/core/logging/log_level.dart';
+import 'package:fly_cli/src/shared/logging/domain/logger.dart';
+import 'package:fly_cli/src/shared/logging/domain/log_level.dart';
 
 /// Mock logger for testing that captures log messages
 class MockLogger implements Logger {

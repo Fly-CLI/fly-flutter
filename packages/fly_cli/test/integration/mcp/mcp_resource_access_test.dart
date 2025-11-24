@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/integrations/mcp/resources/manifest_resource_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/resources/resource_error.dart';
-import 'package:fly_cli/src/integrations/mcp/resources/workspace_resource_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/resources/manifest_resource_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/resources/resource_error.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/resources/workspace_resource_strategy.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';

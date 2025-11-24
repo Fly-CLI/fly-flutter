@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/core/definitions/mcp_tool.dart';
-import 'package:fly_cli/src/integrations/mcp/mcp_tool_strategy.dart';
+import 'package:fly_cli/src/features/commands/domain/mcp_tool.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 
 /// Factory interface for creating tool strategies.
 ///

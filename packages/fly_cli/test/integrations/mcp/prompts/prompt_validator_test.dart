@@ -1,6 +1,6 @@
 import 'package:dart_mcp/server.dart';
-import 'package:fly_cli/src/integrations/mcp/prompts/prompt_error.dart';
-import 'package:fly_cli/src/integrations/mcp/prompts/prompt_validator.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/prompts/prompt_error.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/prompts/prompt_validator.dart';
 import 'package:test/test.dart';
 
 void main() {

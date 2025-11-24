@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/core/logging/log_level.dart';
-import 'package:fly_cli/src/core/logging/logger.dart' as flylog;
-import 'package:fly_cli/src/core/logging/logger_impl.dart' as flylog_impl;
-import 'package:fly_cli/src/integrations/mcp/utils/tool_logger.dart';
+import 'package:fly_cli/src/shared/logging/domain/log_level.dart';
+import 'package:fly_cli/src/shared/logging/domain/logger.dart' as flylog;
+import 'package:fly_cli/src/shared/logging/infrastructure/logger_impl.dart' as flylog_impl;
+import 'package:fly_cli/src/integrations/mcp/infrastructure/utils/tool_logger.dart';
 import 'package:test/test.dart';
 
 void main() {

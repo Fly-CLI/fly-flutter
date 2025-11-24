@@ -1,11 +1,11 @@
-import 'package:fly_cli/src/core/command/foundation/domain/command_result.dart';
-import 'package:fly_cli/src/core/errors/error_codes.dart';
-import 'package:fly_cli/src/core/generation/application/dto/generation_request_dto.dart';
-import 'package:fly_cli/src/core/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_project_use_case.dart';
-import 'package:fly_cli/src/core/generation/application/use_cases/generate_service_use_case.dart';
-import 'package:fly_cli/src/core/generation/foundation/foundation_enums.dart';
+import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 
 /// Handler for generation commands that delegates to use cases.
 ///

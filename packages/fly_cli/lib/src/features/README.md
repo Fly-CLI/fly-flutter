@@ -88,7 +88,7 @@ The command foundation provides the core abstractions and base classes for all c
 - **`CommandContextImpl`** - Concrete implementation of CommandContext
 - **`Environment`** - Environment information abstraction
 
-### 2. Dependency Injection (`core/dependency_injection/`)
+### 2. Dependency Injection (`core/di/`)
 
 Factory-based dependency injection system for managing service lifecycles and dependencies.
 
