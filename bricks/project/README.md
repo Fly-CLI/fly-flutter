@@ -1,4 +1,4 @@
-# fly_foundation_project
+# project
 
 Fly foundation project scaffolding brick for generating complete Flutter applications.
 

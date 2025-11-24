@@ -32,13 +32,13 @@ WorkflowDefinition(
   steps: [
     WorkflowStep(
       id: 'project',
-      brickId: 'fly_foundation_project',
+      brickId: 'project',
       defaultPhase: 0,
       repeatable: false,
     ),
     WorkflowStep(
       id: 'features',
-      brickId: 'fly_foundation_feature',
+      brickId: 'feature',
       defaultPhase: 1,
       repeatable: true,
       selectionKey: 'features',
@@ -67,7 +67,7 @@ Non-repeatable steps execute exactly once:
 ```dart
 WorkflowStep(
   id: 'project',
-  brickId: 'fly_foundation_project',
+  brickId: 'project',
   defaultPhase: 0,
   repeatable: false,
 )
@@ -82,7 +82,7 @@ Repeatable steps can execute zero or more times based on input:
 ```dart
 WorkflowStep(
   id: 'features',
-  brickId: 'fly_foundation_feature',
+  brickId: 'feature',
   defaultPhase: 1,
   repeatable: true,
   selectionKey: 'features',  // Look in rawVars['features']
@@ -115,13 +115,13 @@ WorkflowDefinition(
   id: WorkflowId.foundationProject,
   steps: [
     // Phase 0: Project template (required, single)
-    WorkflowStep(id: 'project', brickId: 'fly_foundation_project', ...),
+    WorkflowStep(id: 'project', brickId: 'project', ...),
     
     // Phase 1: Features (optional, repeatable)
-    WorkflowStep(id: 'features', brickId: 'fly_foundation_feature', ...),
+    WorkflowStep(id: 'features', brickId: 'feature', ...),
     
     // Phase 2: Services (optional, repeatable)
-    WorkflowStep(id: 'services', brickId: 'fly_foundation_service', ...),
+    WorkflowStep(id: 'services', brickId: 'service', ...),
   ],
 )
 ```
@@ -134,7 +134,7 @@ Generates a single feature (standalone):
 WorkflowDefinition(
   id: WorkflowId.featureOnly,
   steps: [
-    WorkflowStep(id: 'feature', brickId: 'fly_foundation_feature', ...),
+    WorkflowStep(id: 'feature', brickId: 'feature', ...),
   ],
 )
 ```
@@ -147,7 +147,7 @@ Generates a single service (standalone):
 WorkflowDefinition(
   id: WorkflowId.serviceOnly,
   steps: [
-    WorkflowStep(id: 'service', brickId: 'fly_foundation_service', ...),
+    WorkflowStep(id: 'service', brickId: 'service', ...),
   ],
 )
 ```

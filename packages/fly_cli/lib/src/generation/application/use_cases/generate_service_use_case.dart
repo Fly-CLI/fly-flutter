@@ -30,7 +30,7 @@ class GenerateServiceUseCase {
   Future<GenerationResultDto> execute(GenerationRequestDto request) async {
     try {
       // 1. Get brick
-      const brickName = 'fly_foundation_service';
+      const brickName = 'service';
       final brick = await _brickRepository.getBrick(brickName);
       if (brick == null) {
         return GenerationResultDto(

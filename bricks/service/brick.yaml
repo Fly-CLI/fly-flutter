@@ -1,4 +1,4 @@
-name: fly_foundation_service
+name: service
 description: Fly foundation service scaffolding brick for generating API, local, cache, analytics, and storage services for existing Fly projects
 version: 1.0.0
 

@@ -1,4 +1,4 @@
-# fly_foundation_service
+# service
 
 Fly foundation service scaffolding brick for generating services.
 

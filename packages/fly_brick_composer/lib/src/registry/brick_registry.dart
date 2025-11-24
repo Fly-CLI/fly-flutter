@@ -3,13 +3,13 @@ import 'package:fly_brick_composer/src/variables/variable_bag.dart';
 
 /// Kind/category of a brick.
 enum BrickKind {
-  /// Project template brick (e.g., fly_foundation_project).
+  /// Project template brick (e.g., project).
   projectTemplate,
 
-  /// Feature component brick (e.g., fly_foundation_feature).
+  /// Feature component brick (e.g., feature).
   featureComponent,
 
-  /// Service component brick (e.g., fly_foundation_service).
+  /// Service component brick (e.g., service).
   serviceComponent,
 
   /// Utility brick (e.g., tooling, scripts).
@@ -69,7 +69,7 @@ class BrickDefinition {
     this.resolveTargetDir,
   });
 
-  /// Unique brick identifier (e.g., 'fly_foundation_project').
+  /// Unique brick identifier (e.g., 'project').
   final String id;
 
   /// Kind/category of this brick.

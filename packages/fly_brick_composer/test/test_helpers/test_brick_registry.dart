@@ -9,7 +9,7 @@ BrickRegistry createTestBrickRegistry() {
 
   // Test project template brick
   ..register(BrickDefinition(
-    id: 'fly_foundation_project',
+    id: 'project',
     kind: BrickKind.projectTemplate,
     dependencies: [],
     buildVars: (variables, instanceConfig) {
@@ -19,9 +19,9 @@ BrickRegistry createTestBrickRegistry() {
 
   // Test feature component brick
   ..register(BrickDefinition(
-    id: 'fly_foundation_feature',
+    id: 'feature',
     kind: BrickKind.featureComponent,
-    dependencies: ['fly_foundation_project'],
+    dependencies: ['project'],
     buildVars: (variables, instanceConfig) {
       // Create a new map to avoid modifying unmodifiable maps
       final vars = Map<String, dynamic>.from(variables.toMap());
@@ -50,9 +50,9 @@ BrickRegistry createTestBrickRegistry() {
 
   // Test service component brick
   ..register(BrickDefinition(
-    id: 'fly_foundation_service',
+    id: 'service',
     kind: BrickKind.serviceComponent,
-    dependencies: ['fly_foundation_project'],
+    dependencies: ['project'],
     buildVars: (variables, instanceConfig) {
       // Create a new map to avoid modifying unmodifiable maps
       final vars = Map<String, dynamic>.from(variables.toMap());

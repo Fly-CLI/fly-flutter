@@ -1,4 +1,4 @@
-# fly_foundation_feature
+# feature
 
 Fly foundation feature scaffolding brick for generating feature screens and view models.
 

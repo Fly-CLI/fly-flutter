@@ -5,8 +5,8 @@ monolithic `fly_foundation` brick and the new multi-brick architecture.
 
 ## Overview
 
-The new multi-brick architecture (`fly_foundation_project`, `fly_foundation_feature`,
-`fly_foundation_service`) replaces the legacy monolithic brick. While functionally equivalent, there
+The new multi-brick architecture (`project`, `feature`,
+`service`) replaces the legacy monolithic brick. While functionally equivalent, there
 are intentional improvements and structural changes.
 
 ## Classification

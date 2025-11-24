@@ -181,7 +181,7 @@ For standalone feature/service generation, the planner creates an `InstanceConfi
 
 ```dart
 // For feature-only workflow
-if (step.brickId == 'fly_foundation_feature') {
+if (step.brickId == 'feature') {
   instanceConfig = InstanceConfig(
     type: 'feature',
     name: raw['name'],
@@ -252,7 +252,7 @@ ComposerResult(
   brickInvocations: [
     // Phase 0: Project
     BrickInvocation(
-      brickId: 'fly_foundation_project',
+      brickId: 'project',
       phase: 0,
       displayName: 'project',
       vars: {...},  // All project vars
@@ -260,14 +260,14 @@ ComposerResult(
     
     // Phase 1: Features
     BrickInvocation(
-      brickId: 'fly_foundation_feature',
+      brickId: 'feature',
       phase: 1,
       displayName: 'feature:home:home',
       vars: {...},  // Global + feature-specific
       targetDir: 'lib/features/home',
     ),
     BrickInvocation(
-      brickId: 'fly_foundation_feature',
+      brickId: 'feature',
       phase: 1,
       displayName: 'feature:profile:profile',
       vars: {...},
@@ -276,7 +276,7 @@ ComposerResult(
     
     // Phase 2: Services
     BrickInvocation(
-      brickId: 'fly_foundation_service',
+      brickId: 'service',
       phase: 2,
       displayName: 'service:api:api',
       vars: {...},  // Global + service-specific

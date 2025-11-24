@@ -312,7 +312,7 @@ execute_mason_project() {
   # Change to output directory and run mason
   (
     cd "$scenario_out_dir" || return 1
-    run_command "mason make fly_foundation_project -c \"${scenario_path}\" --on-conflict overwrite"
+    run_command "mason make project -c \"${scenario_path}\" --on-conflict overwrite"
   )
 }
 
@@ -323,7 +323,7 @@ execute_mason_feature() {
   # Run feature generation directly
   (
     cd "$scenario_out_dir" || return 1
-    run_command "mason make fly_foundation_feature -c \"${scenario_path}\" --on-conflict overwrite"
+    run_command "mason make feature -c \"${scenario_path}\" --on-conflict overwrite"
   )
 }
 
@@ -334,7 +334,7 @@ execute_mason_service() {
   # Run service generation directly
   (
     cd "$scenario_out_dir" || return 1
-    run_command "mason make fly_foundation_service -c \"${scenario_path}\" --on-conflict overwrite"
+    run_command "mason make service -c \"${scenario_path}\" --on-conflict overwrite"
   )
 }
 

@@ -57,7 +57,7 @@ The composition system follows a **workflow-driven, brick-based architecture** t
 
 The central registry of all available bricks. Each brick is defined with:
 
-- **Identity**: Unique ID (e.g., `fly_foundation_project`)
+- **Identity**: Unique ID (e.g., `project`)
 - **Kind**: Category (projectTemplate, featureComponent, serviceComponent, etc.)
 - **Dependencies**: Other bricks this brick depends on
 - **Variable Builder**: Function to map global vars + instance config → brick vars

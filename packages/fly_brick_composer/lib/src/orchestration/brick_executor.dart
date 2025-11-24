@@ -48,7 +48,7 @@ class BrickExecutionResult<TFile> {
 abstract class BrickExecutor<TFile> {
   /// Executes a brick generation with the given parameters.
   ///
-  /// [brickId] is the identifier of the brick to execute (e.g., 'fly_foundation_project').
+  /// [brickId] is the identifier of the brick to execute (e.g., 'project').
   /// [vars] is the map of variables to pass to the brick template.
   /// [targetDirectory] is the absolute path where the brick should generate files.
   ///

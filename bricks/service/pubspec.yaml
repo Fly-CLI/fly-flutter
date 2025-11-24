@@ -1,5 +1,5 @@
-name: fly_foundation_feature
-description: Fly foundation feature scaffolding brick for generating feature screens and view models
+name: service
+description: Fly foundation service scaffolding brick for generating API, local, cache, analytics, and storage services
 version: 1.0.0
 homepage: https://github.com/fly-cli/fly
 repository: https://github.com/fly-cli/fly.git

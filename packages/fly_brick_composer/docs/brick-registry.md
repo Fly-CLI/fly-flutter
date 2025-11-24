@@ -16,7 +16,7 @@ A `BrickDefinition` describes a brick's identity, behavior, and requirements:
 
 ```dart
 BrickDefinition(
-  id: 'fly_foundation_project',
+  id: 'project',
   kind: BrickKind.projectTemplate,
   dependencies: [],
   buildVars: (globalVars, instanceConfig) {
@@ -32,7 +32,7 @@ BrickDefinition(
 
 ### Fields
 
-- **`id`** (String): Unique identifier for the brick (e.g., `fly_foundation_project`)
+- **`id`** (String): Unique identifier for the brick (e.g., `project`)
 - **`kind`** (BrickKind): Category of brick (projectTemplate, featureComponent, etc.)
 - **`requiredCapabilities`** (List<String>): Capabilities this brick requires (future use)
 - **`dependencies`** (List<String>): Brick IDs this brick depends on (metadata only)
@@ -43,9 +43,9 @@ BrickDefinition(
 
 ```dart
 enum BrickKind {
-  projectTemplate,    // Base project structure (e.g., fly_foundation_project)
-  featureComponent,   // Feature/screen components (e.g., fly_foundation_feature)
-  serviceComponent,   // Service components (e.g., fly_foundation_service)
+  projectTemplate,    // Base project structure (e.g., project)
+  featureComponent,   // Feature/screen components (e.g., feature)
+  serviceComponent,   // Service components (e.g., service)
   utility,            // Utility bricks (tooling, scripts)
   custom,             // Custom/unknown types
 }
@@ -136,9 +136,9 @@ ServiceInstanceConfig(
 
 The `BrickRegistry.defaultRegistry()` factory creates a registry with all bricks pre-registered:
 
-- `fly_foundation_project` (projectTemplate)
-- `fly_foundation_feature` (featureComponent)
-- `fly_foundation_service` (serviceComponent)
+- `project` (projectTemplate)
+- `feature` (featureComponent)
+- `service` (serviceComponent)
 
 ## Using the Registry
 
@@ -147,13 +147,13 @@ The `BrickRegistry.defaultRegistry()` factory creates a registry with all bricks
 final registry = BrickRegistry.defaultRegistry();
 
 // Look up a brick
-final brick = registry.getById('fly_foundation_project');
+final brick = registry.getById('project');
 
 // Get all bricks of a kind
 final featureBricks = registry.getByKind(BrickKind.featureComponent);
 
 // Validate a brick exists
-registry.validateBrickId('fly_foundation_project'); // Throws if not found
+registry.validateBrickId('project'); // Throws if not found
 ```
 
 ## Adding New Bricks
@@ -171,7 +171,7 @@ However, dependencies are useful for:
 
 ## Best Practices
 
-1. **Unique IDs**: Use descriptive, unique brick IDs (e.g., `fly_foundation_project`, not `project`)
+1. **Unique IDs**: Use descriptive, unique brick IDs (e.g., `project`, not `project`)
 2. **Complete Variable Mapping**: Ensure `buildVars` provides all variables the brick template needs
 3. **Consistent Naming**: Use the same variable keys as defined in `MasonVarKey`
 4. **Optional Target Dir**: Only provide `resolveTargetDir` if the brick needs a specific output location

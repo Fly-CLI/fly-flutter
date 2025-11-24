@@ -1,5 +1,5 @@
-name: fly_foundation_service
-description: Fly foundation service scaffolding brick for generating API, local, cache, analytics, and storage services
+name: project
+description: Fly foundation project scaffolding brick for generating complete Flutter applications
 version: 1.0.0
 homepage: https://github.com/fly-cli/fly
 repository: https://github.com/fly-cli/fly.git

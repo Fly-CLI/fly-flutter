@@ -62,7 +62,7 @@ final result = composer.composeBricks({
 
 // Only project brick is invoked
 expect(result.brickInvocations.length, 1);
-expect(result.brickInvocations.first.brickId, 'fly_foundation_project');
+expect(result.brickInvocations.first.brickId, 'project');
 ```
 
 ### Project with Features
@@ -106,11 +106,11 @@ expect(result.brickInvocations.length, 3);
 
 // Phase 0: Project
 expect(result.brickInvocations[0].phase, 0);
-expect(result.brickInvocations[0].brickId, 'fly_foundation_project');
+expect(result.brickInvocations[0].brickId, 'project');
 
 // Phase 1: Features
 expect(result.brickInvocations[1].phase, 1);
-expect(result.brickInvocations[1].brickId, 'fly_foundation_feature');
+expect(result.brickInvocations[1].brickId, 'feature');
 expect(result.brickInvocations[1].displayName, 'feature:home:home');
 expect(result.brickInvocations[1].targetDir, 'lib/features/home');
 
@@ -253,7 +253,7 @@ workflowRegistry.register(WorkflowDefinition(
   steps: [
     WorkflowStep(
       id: 'project',
-      brickId: 'fly_foundation_project',
+      brickId: 'project',
       defaultPhase: 0,
       repeatable: false,
     ),
@@ -390,7 +390,7 @@ test('compose project correctly', () {
   });
   
   expect(result.brickInvocations.length, 1);
-  expect(result.brickInvocations.first.brickId, 'fly_foundation_project');
+  expect(result.brickInvocations.first.brickId, 'project');
   expect(result.brickInvocations.first.phase, 0);
 });
 ```
@@ -413,7 +413,7 @@ test('expands workflow with multiple features', () {
   expect(result.brickInvocations.length, 3);  // Project + 2 features
   
   final featureInvocations = result.brickInvocations
-      .where((inv) => inv.brickId == 'fly_foundation_feature')
+      .where((inv) => inv.brickId == 'feature')
       .toList();
   
   expect(featureInvocations.length, 2);

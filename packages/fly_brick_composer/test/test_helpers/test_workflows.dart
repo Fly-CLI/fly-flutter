@@ -40,7 +40,7 @@ const testProjectWorkflow = WorkflowDefinition(
   steps: [
     WorkflowStep(
       id: 'project_step',
-      brickId: 'fly_foundation_project',
+      brickId: 'project',
       defaultPhase: 0,
       repeatable: false,
     ),
@@ -55,7 +55,7 @@ const testFeatureWorkflow = WorkflowDefinition(
   steps: [
     WorkflowStep(
       id: 'feature_step',
-      brickId: 'fly_foundation_feature',
+      brickId: 'feature',
       defaultPhase: 0,
       repeatable: false,
     ),
@@ -70,7 +70,7 @@ const testServiceWorkflow = WorkflowDefinition(
   steps: [
     WorkflowStep(
       id: 'service_step',
-      brickId: 'fly_foundation_service',
+      brickId: 'service',
       defaultPhase: 0,
       repeatable: false,
     ),

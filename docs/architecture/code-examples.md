@@ -128,7 +128,7 @@ void main() {
 
     test('executes successfully', () async {
       // Arrange
-      when(mockRepository.getBrick('fly_foundation_feature'))
+      when(mockRepository.getBrick('feature'))
           .thenAnswer((_) async => mockBrick);
       when(mockProcessor.process(any))
           .thenAnswer((_) async => processedVariables);
@@ -140,7 +140,7 @@ void main() {
 
       // Assert
       expect(result.success, isTrue);
-      verify(mockRepository.getBrick('fly_foundation_feature')).called(1);
+      verify(mockRepository.getBrick('feature')).called(1);
     });
   });
 }

@@ -8,7 +8,7 @@ The Fly Brick Composer library provides a powerful workflow engine that enables 
 
 ## Key Concepts
 
-- **Bricks**: Independent, reusable code generation units (e.g., `fly_foundation_project`, `fly_foundation_feature`, `fly_foundation_service`)
+- **Bricks**: Independent, reusable code generation units (e.g., `project`, `feature`, `service`)
 - **Workflows**: Declarative definitions that describe how to compose bricks together
 - **Composition**: The process of expanding a workflow into an ordered list of brick invocations
 - **Orchestration**: The execution of composed brick invocations with proper ordering and variable propagation

@@ -12,7 +12,7 @@ Define your brick in `BrickRegistry._registerFoundationBricks()`:
 register(BrickDefinition(
   id: 'my_custom_brick',
   kind: BrickKind.utility,  // or appropriate kind
-  dependencies: ['fly_foundation_project'],  // if needed
+  dependencies: ['project'],  // if needed
   buildVars: (globalVars, instanceConfig) {
     final vars = globalVars.toMasonVars();
     
@@ -72,7 +72,7 @@ register(WorkflowDefinition(
   steps: [
     WorkflowStep(
       id: 'step1',
-      brickId: 'fly_foundation_project',
+      brickId: 'project',
       defaultPhase: 0,
       repeatable: false,
     ),

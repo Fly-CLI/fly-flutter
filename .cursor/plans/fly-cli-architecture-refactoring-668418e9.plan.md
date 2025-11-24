@@ -470,7 +470,7 @@ class GenerateFeatureUseCaseImpl implements GenerateFeatureUseCase {
   @override
   Future<GenerationResult> execute(GenerateFeatureRequest request) async {
     // 1. Get brick
-    final brick = await _brickRepository.getBrick('fly_foundation_feature');
+    final brick = await _brickRepository.getBrick('feature');
     if (brick == null) throw BrickNotFoundException();
 
     // 2. Process variables

@@ -1,4 +1,4 @@
-name: fly_foundation_project
+name: project
 description: Fly foundation project scaffolding brick for generating complete Flutter applications with MVVM, navigation, and best practices
 version: 1.0.0
 

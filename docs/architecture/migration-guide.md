@@ -173,7 +173,7 @@ test('GenerateFeatureUseCase executes successfully', () async {
 
   // Assert
   expect(result.success, isTrue);
-  verify(mockBrickRepository.getBrick('fly_foundation_feature')).called(1);
+  verify(mockBrickRepository.getBrick('feature')).called(1);
 });
 ```
 

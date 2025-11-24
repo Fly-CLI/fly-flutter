@@ -30,7 +30,7 @@ class GenerateFeatureUseCase {
   Future<GenerationResultDto> execute(GenerationRequestDto request) async {
     try {
       // 1. Get brick
-      const brickName = 'fly_foundation_feature';
+      const brickName = 'feature';
       final brick = await _brickRepository.getBrick(brickName);
       if (brick == null) {
         return const GenerationResultDto(

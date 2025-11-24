@@ -147,7 +147,7 @@ void main() {
       test('should execute feature generation successfully', () async {
         // Arrange
         final brick = Brick(
-          name: 'fly_foundation_feature',
+          name: 'feature',
           version: Version.parse('1.0.0'),
           description: 'Test brick',
           path: '/test/brick',
@@ -185,7 +185,7 @@ void main() {
       test('should handle dry run mode', () async {
         // Arrange
         final brick = Brick(
-          name: 'fly_foundation_feature',
+          name: 'feature',
           version: Version.parse('1.0.0'),
           description: 'Test brick',
           path: '/test/brick',
@@ -239,7 +239,7 @@ void main() {
       test('should return error when variable validation fails', () async {
         // Arrange
         final brick = Brick(
-          name: 'fly_foundation_feature',
+          name: 'feature',
           version: Version.parse('1.0.0'),
           description: 'Test brick',
           path: '/test/brick',
@@ -270,7 +270,7 @@ void main() {
       test('should handle generation engine errors', () async {
         // Arrange
         final brick = Brick(
-          name: 'fly_foundation_feature',
+          name: 'feature',
           version: Version.parse('1.0.0'),
           description: 'Test brick',
           path: '/test/brick',
