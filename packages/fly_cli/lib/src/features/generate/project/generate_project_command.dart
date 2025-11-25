@@ -11,6 +11,7 @@ import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/domain/entities/manifest_parser.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
 
@@ -247,15 +248,15 @@ class GenerateProjectCommand extends FlyCommand {
       );
       if (featureInstances.isEmpty) {
         featureInstances.add({
-          'name': 'home',
+          BaseVarKey.name.key: 'home',
           'type': 'feature',
           'params': {
-            'feature': 'home',
-            'screen_type': 'list',
-            'with_viewmodel': true,
-            'with_tests': manifest.config.generateTests,
-            'with_validation': false,
-            'with_navigation': false,
+            BaseVarKey.feature.key: 'home',
+            FeatureVarKey.screenType.key: 'list',
+            FeatureVarKey.withViewModel.key: true,
+            BaseVarKey.withTests.key: manifest.config.generateTests,
+            FeatureVarKey.withValidation.key: false,
+            FeatureVarKey.withNavigation.key: false,
           },
         });
       }
@@ -268,14 +269,14 @@ class GenerateProjectCommand extends FlyCommand {
       // Convert manifest to rawVars format using ProjectVariableBuilder
       const variableBuilder = ProjectVariableBuilder();
       final rawVars = variableBuilder.buildFromMap({
-        'name': projectName,
+        BaseVarKey.name.key: projectName,
         'template': manifest.template,
-        'organization': manifest.organization,
-        'description': manifest.description ?? 'A new Flutter project',
-        'platforms': manifest.platforms,
-        'features': featureInstances,
+        BaseVarKey.organization.key: manifest.organization,
+        BaseVarKey.description.key: manifest.description ?? 'A new Flutter project',
+        BaseVarKey.platforms.key: manifest.platforms,
+        BaseVarKey.features.key: featureInstances,
         'services': serviceInstances,
-        'preset': _determinePresetFromManifest(manifest.config),
+        ProjectVarKey.preset.key: _determinePresetFromManifest(manifest.config),
       });
 
       // Validate variables
@@ -326,15 +327,15 @@ class GenerateProjectCommand extends FlyCommand {
           : screen.name;
 
       return {
-        'name': screen.name,
+        BaseVarKey.name.key: screen.name,
         'type': 'feature',
         'params': {
-          'feature': feature,
-          'screen_type': screen.type ?? 'list',
-          'with_viewmodel': true,
-          'with_tests': true, // Will be overridden by preset if needed
-          'with_validation': screen.type == 'form',
-          'with_navigation': false,
+          BaseVarKey.feature.key: feature,
+          FeatureVarKey.screenType.key: screen.type ?? 'list',
+          FeatureVarKey.withViewModel.key: true,
+          BaseVarKey.withTests.key: true, // Will be overridden by preset if needed
+          FeatureVarKey.withValidation.key: screen.type == 'form',
+          FeatureVarKey.withNavigation.key: false,
         },
       };
     }).toList();
@@ -349,20 +350,20 @@ class GenerateProjectCommand extends FlyCommand {
       final isApiService = serviceType == 'api';
 
       return {
-        'name': service.name,
+        BaseVarKey.name.key: service.name,
         'type': 'service',
         'params': {
-          'feature': service.features.isNotEmpty
+          BaseVarKey.feature.key: service.features.isNotEmpty
               ? service.features.first
               : 'core',
-          'service_type': serviceType,
-          'with_tests': true,
-          'with_mocks': false,
-          'with_interceptors': isApiService,
-          'with_retry_logic': isApiService,
-          'with_caching': serviceType == 'cache',
+          ServiceVarKey.serviceType.key: serviceType,
+          BaseVarKey.withTests.key: true,
+          ServiceVarKey.withMocks.key: false,
+          ServiceVarKey.withInterceptors.key: isApiService,
+          ServiceVarKey.withRetryLogic.key: isApiService,
+          ServiceVarKey.withCaching.key: serviceType == 'cache',
           if (isApiService && service.apiBase != null)
-            'api_base_url': service.apiBase,
+            ServiceVarKey.apiBaseUrl.key: service.apiBase,
         },
       };
     }).toList();
@@ -475,24 +476,24 @@ class GenerateProjectCommand extends FlyCommand {
       );
 
       // Override with interactive values
-      rawVars['name'] = finalProjectName;
+      rawVars[BaseVarKey.name.key] = finalProjectName;
       rawVars['template'] = finalTemplate;
-      rawVars['organization'] = finalOrganization;
-      rawVars['description'] = description.isNotEmpty
+      rawVars[BaseVarKey.organization.key] = finalOrganization;
+      rawVars[BaseVarKey.description.key] = description.isNotEmpty
           ? description
           : 'A new Flutter project';
-      rawVars['platforms'] = finalPlatforms;
-      rawVars['features'] = finalFeatures.map((featureName) {
+      rawVars[BaseVarKey.platforms.key] = finalPlatforms;
+      rawVars[BaseVarKey.features.key] = finalFeatures.map((featureName) {
         return {
-          'name': featureName,
+          BaseVarKey.name.key: featureName,
           'type': 'feature',
           'params': {
-            'feature': featureName,
-            'screen_type': 'list',
-            'with_viewmodel': true,
-            'with_tests': true,
-            'with_validation': false,
-            'with_navigation': false,
+            BaseVarKey.feature.key: featureName,
+            FeatureVarKey.screenType.key: 'list',
+            FeatureVarKey.withViewModel.key: true,
+            BaseVarKey.withTests.key: true,
+            FeatureVarKey.withValidation.key: false,
+            FeatureVarKey.withNavigation.key: false,
           },
         };
       }).toList();
@@ -533,17 +534,17 @@ class GenerateProjectCommand extends FlyCommand {
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
-      final projectName = rawVars['name'] as String;
+      final projectName = rawVars[BaseVarKey.name.key] as String;
       final template = rawVars['template'] as String? ?? 'fly_foundation';
-      final organization = rawVars['organization'] as String? ?? 'com.example';
+      final organization = rawVars[BaseVarKey.organization.key] as String? ?? 'com.example';
       final description =
-          rawVars['description'] as String? ?? 'A new Flutter project';
+          rawVars[BaseVarKey.description.key] as String? ?? 'A new Flutter project';
       final platforms =
-          (rawVars['platforms'] as List<dynamic>?)?.cast<String>() ??
+          (rawVars[BaseVarKey.platforms.key] as List<dynamic>?)?.cast<String>() ??
           ['ios', 'android'];
-      final features = (rawVars['features'] as List<dynamic>?) ?? [];
+      final features = (rawVars[BaseVarKey.features.key] as List<dynamic>?) ?? [];
       final featureNames = features.map((f) {
-        if (f is Map) return f['name'] as String;
+        if (f is Map) return f[BaseVarKey.name.key] as String;
         return f.toString();
       }).toList();
 
@@ -554,24 +555,21 @@ class GenerateProjectCommand extends FlyCommand {
         ..info('Platforms: ${platforms.join(', ')}')
         ..info('Features: ${featureNames.join(', ')}');
 
-      // Use injected template manager
-      final templateManager = context.templateManager;
-
       // All templates now use orchestrator
       // Ensure features list is in the correct format
       final featureInstances = features.isNotEmpty
           ? features.cast<Map<String, dynamic>>()
           : [
               {
-                'name': 'home',
+                BaseVarKey.name.key: 'home',
                 'type': 'feature',
                 'params': {
-                  'feature': 'home',
-                  'screen_type': 'list',
-                  'with_viewmodel': true,
-                  'with_tests': true,
-                  'with_validation': false,
-                  'with_navigation': false,
+                  BaseVarKey.feature.key: 'home',
+                  FeatureVarKey.screenType.key: 'list',
+                  FeatureVarKey.withViewModel.key: true,
+                  BaseVarKey.withTests.key: true,
+                  FeatureVarKey.withValidation.key: false,
+                  FeatureVarKey.withNavigation.key: false,
                 },
               },
             ];
@@ -584,14 +582,14 @@ class GenerateProjectCommand extends FlyCommand {
 
       // Prepare raw variables for planning
       final projectRawVars = <String, dynamic>{
-        'name': projectName,
-        'organization': organization,
-        'description': description,
-        'platforms': platforms,
-        'generation_mode': 'project',
+        BaseVarKey.name.key: projectName,
+        BaseVarKey.organization.key: organization,
+        BaseVarKey.description.key: description,
+        BaseVarKey.platforms.key: platforms,
+        BaseVarKey.generationMode.key: 'project',
         'template': template,
-        'preset': rawVars['preset'] as String? ?? 'starter',
-        'features': featureInstances,
+        ProjectVarKey.preset.key: rawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
+        BaseVarKey.features.key: featureInstances,
         'services': serviceInstances,
       };
 
@@ -611,11 +609,11 @@ class GenerateProjectCommand extends FlyCommand {
       // Add additional data if needed
       if (result.success && result.data != null) {
         result.data!['duration_ms'] = stopwatch.elapsedMilliseconds;
-        result.data!['project_name'] = projectName;
+        result.data![BaseVarKey.projectName.key] = projectName;
         result.data!['template'] = template;
-        result.data!['organization'] = organization;
-        result.data!['platforms'] = platforms;
-        result.data!['features'] = featureNames;
+        result.data![BaseVarKey.organization.key] = organization;
+        result.data![BaseVarKey.platforms.key] = platforms;
+        result.data![BaseVarKey.features.key] = featureNames;
         result.data!['target_directory'] = projectPath;
       }
 
@@ -627,7 +625,7 @@ class GenerateProjectCommand extends FlyCommand {
         errorCode: ErrorCode.templateGenerationFailed,
         context: ErrorContext.forProjectOperation(
           'create_project',
-          rawVars['name'] as String? ?? 'unknown',
+          rawVars[BaseVarKey.name.key] as String? ?? 'unknown',
           projectType: rawVars['template'] as String? ?? 'unknown',
         ),
       );
