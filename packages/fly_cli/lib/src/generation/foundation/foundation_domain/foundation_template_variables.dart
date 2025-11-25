@@ -62,11 +62,11 @@ class FoundationTemplateVariables {
   final String? apiBaseUrl;
   final String? preset;
 
-  /// Creates [FoundationTemplateVariables] from a Mason variables map using MasonVarKey.
+  /// Creates [FoundationTemplateVariables] from a Mason variables map using specialized enums.
   factory FoundationTemplateVariables.fromVars(FoundationVars vars) {
-    final name = vars.getVar<String>(MasonVarKey.name) ?? 'unnamed';
+    final name = vars.getVar<String>(BaseVarKey.name) ?? 'unnamed';
     final organization =
-        vars.getVar<String>(MasonVarKey.organization) ?? 'com.example';
+        vars.getVar<String>(BaseVarKey.organization) ?? 'com.example';
     final generationMode = GenerationMode.fromVars(vars);
     final platforms = PlatformType.fromVars(vars);
 
@@ -76,30 +76,30 @@ class FoundationTemplateVariables {
       generationMode: generationMode,
       platforms: platforms,
       description:
-          vars.getVar<String>(MasonVarKey.description) ??
+          vars.getVar<String>(BaseVarKey.description) ??
           'A new Fly foundation project',
       templateVariant:
-          vars.getVar<String>(MasonVarKey.templateVariant) ?? 'foundation',
-      minFlutterSdk: vars.getVar<String>(MasonVarKey.minFlutterSdk) ?? '3.10.0',
-      minDartSdk: vars.getVar<String>(MasonVarKey.minDartSdk) ?? '3.0.0',
-      withTests: vars.getVar<bool>(MasonVarKey.withTests) ?? true,
-      withDocs: vars.getVar<bool>(MasonVarKey.withDocs) ?? true,
-      withMcp: vars.getVar<bool>(MasonVarKey.withMcp) ?? true,
-      codeGeneration: vars.getVar<bool>(MasonVarKey.codeGeneration) ?? true,
-      aiIntegration: vars.getVar<bool>(MasonVarKey.aiIntegration) ?? true,
-      serviceRetry: vars.getVar<bool>(MasonVarKey.withRetryLogic) ?? false,
-      serviceCaching: vars.getVar<bool>(MasonVarKey.withCaching) ?? false,
+          vars.getVar<String>(BaseVarKey.templateVariant) ?? 'foundation',
+      minFlutterSdk: vars.getVar<String>(BaseVarKey.minFlutterSdk) ?? '3.10.0',
+      minDartSdk: vars.getVar<String>(BaseVarKey.minDartSdk) ?? '3.0.0',
+      withTests: vars.getVar<bool>(BaseVarKey.withTests) ?? true,
+      withDocs: vars.getVar<bool>(BaseVarKey.withDocs) ?? true,
+      withMcp: vars.getVar<bool>(BaseVarKey.withMcp) ?? true,
+      codeGeneration: vars.getVar<bool>(BaseVarKey.codeGeneration) ?? true,
+      aiIntegration: vars.getVar<bool>(BaseVarKey.aiIntegration) ?? true,
+      serviceRetry: vars.getVar<bool>(ServiceVarKey.withRetryLogic) ?? false,
+      serviceCaching: vars.getVar<bool>(ServiceVarKey.withCaching) ?? false,
       serviceInterceptors:
-          vars.getVar<bool>(MasonVarKey.withInterceptors) ?? false,
-      serviceMocks: vars.getVar<bool>(MasonVarKey.withMocks) ?? false,
-      featureViewModel: vars.getVar<bool>(MasonVarKey.withViewModel) ?? true,
-      featureValidation: vars.getVar<bool>(MasonVarKey.withValidation) ?? false,
-      featureNavigation: vars.getVar<bool>(MasonVarKey.withNavigation) ?? false,
+          vars.getVar<bool>(ServiceVarKey.withInterceptors) ?? false,
+      serviceMocks: vars.getVar<bool>(ServiceVarKey.withMocks) ?? false,
+      featureViewModel: vars.getVar<bool>(FeatureVarKey.withViewModel) ?? true,
+      featureValidation: vars.getVar<bool>(FeatureVarKey.withValidation) ?? false,
+      featureNavigation: vars.getVar<bool>(FeatureVarKey.withNavigation) ?? false,
       stateManagement: StateManagement.fromVars(vars),
       screenType: ScreenType.fromVars(vars),
       serviceType: ServiceType.fromVars(vars),
-      apiBaseUrl: vars.getVar<String>(MasonVarKey.apiBaseUrl),
-      preset: vars.getVar<String>(MasonVarKey.preset),
+      apiBaseUrl: vars.getVar<String>(ServiceVarKey.apiBaseUrl),
+      preset: vars.getVar<String>(ProjectVarKey.preset),
     );
   }
 

@@ -19,40 +19,40 @@ class FeatureModeDeriver implements VariableDeriver {
     ComposerLogger logger,
   ) {
     final screenTypeStr =
-        ctx.rawVars[MasonVarKey.screenType.key] as String? ??
+        ctx.rawVars[FeatureVarKey.screenType.key] as String? ??
         ctx.rawVars['screen_type'] as String?;
     final screenType = screenTypeStr != null
         ? ScreenType.fromKey(screenTypeStr)
         : ScreenType.list;
 
     final withValidation =
-        ctx.rawVars[MasonVarKey.withValidation.key] as bool? ??
+        ctx.rawVars[FeatureVarKey.withValidation.key] as bool? ??
         ctx.rawVars['with_validation'] as bool? ??
         false;
 
     final withNavigation =
-        ctx.rawVars[MasonVarKey.withNavigation.key] as bool? ??
+        ctx.rawVars[FeatureVarKey.withNavigation.key] as bool? ??
         ctx.rawVars['with_navigation'] as bool? ??
         false;
 
     final stateMgmtStr =
-        ctx.rawVars[MasonVarKey.stateMgmt.key] as String? ??
+        ctx.rawVars[BaseVarKey.stateMgmt.key] as String? ??
         ctx.rawVars['state_mgmt'] as String?;
     final stateMgmt = stateMgmtStr != null
         ? StateManagement.fromKey(stateMgmtStr)
         : StateManagement.riverpod;
 
     final name =
-        ctx.rawVars[MasonVarKey.name.key] as String? ??
+        ctx.rawVars[BaseVarKey.name.key] as String? ??
         ctx.rawVars['name'] as String? ??
         'unnamed';
     final snakeName = NamingUtils.toSnakeCase(name);
 
     // Get feature from input vars or current bag, defaulting to 'core' if not provided
     final feature =
-        ctx.rawVars[MasonVarKey.feature.key] as String? ??
+        ctx.rawVars[BaseVarKey.feature.key] as String? ??
         ctx.rawVars['feature'] as String? ??
-        current.get<String>(MasonVarKey.feature.key) ??
+        current.get<String>(BaseVarKey.feature.key) ??
         'core';
 
     final isFormScreen =
@@ -60,18 +60,17 @@ class FeatureModeDeriver implements VariableDeriver {
     final requiresValidation = withValidation || isFormScreen;
 
     return current.setAll({
-      MasonVarKey.isFeature.key: true,
-      MasonVarKey.screenType.key: screenType.key,
-      MasonVarKey.isListScreen.key: screenType == ScreenType.list,
-      MasonVarKey.isDetailScreen.key: screenType == ScreenType.detail,
-      MasonVarKey.isFormScreen.key: isFormScreen,
-      MasonVarKey.requiresValidation.key: requiresValidation,
-      MasonVarKey.withNavigation.key: withNavigation,
-      MasonVarKey.useRiverpod.key: stateMgmt == StateManagement.riverpod,
-      MasonVarKey.useBloc.key: stateMgmt == StateManagement.bloc,
-      MasonVarKey.useCubit.key: stateMgmt == StateManagement.cubit,
-      MasonVarKey.feature.key: feature,
-      MasonVarKey.componentName.key: snakeName,
+      FeatureVarKey.screenType.key: screenType.key,
+      FeatureVarKey.isListScreen.key: screenType == ScreenType.list,
+      FeatureVarKey.isDetailScreen.key: screenType == ScreenType.detail,
+      FeatureVarKey.isFormScreen.key: isFormScreen,
+      FeatureVarKey.requiresValidation.key: requiresValidation,
+      FeatureVarKey.withNavigation.key: withNavigation,
+      FeatureVarKey.useRiverpod.key: stateMgmt == StateManagement.riverpod,
+      FeatureVarKey.useBloc.key: stateMgmt == StateManagement.bloc,
+      FeatureVarKey.useCubit.key: stateMgmt == StateManagement.cubit,
+      BaseVarKey.feature.key: feature,
+      BaseVarKey.componentName.key: snakeName,
     });
   }
 }

@@ -378,8 +378,8 @@ class TemplateManager {
       // Handle feature iteration for project bricks
       // Mason doesn't automatically iterate over list variables in directory names
       if (brick.type == BrickType.project &&
-          variables.containsKey(MasonVarKey.features.key)) {
-        final features = variables.getVar<List<dynamic>>(MasonVarKey.features);
+          variables.containsKey(BaseVarKey.features.key)) {
+        final features = variables.getVar<List<dynamic>>(BaseVarKey.features);
         if (features != null && features.isNotEmpty) {
           // Convert features to strings and remove duplicates
           final uniqueFeatures = features
@@ -390,7 +390,7 @@ class TemplateManager {
           // First, generate base project structure with first feature
           // This ensures base files are generated
           final baseVariables = Map<String, dynamic>.from(variables);
-          baseVariables[MasonVarKey.feature.key] = uniqueFeatures.first;
+          baseVariables[BaseVarKey.feature.key] = uniqueFeatures.first;
 
           logger.info(
             'Generating base project structure with feature: ${uniqueFeatures.first}...',
@@ -418,7 +418,7 @@ class TemplateManager {
               logger.warn('Generating feature: $featureName');
 
               final featureVariables = Map<String, dynamic>.from(variables);
-              featureVariables[MasonVarKey.feature.key] = featureName;
+              featureVariables[BaseVarKey.feature.key] = featureName;
 
               // Generate with this feature - Mason will create {{feature}}/ directory
               final featureFiles = await generator.generate(

@@ -49,10 +49,10 @@ enum ScreenType {
     }
   }
 
-  /// Parses screen_type from vars using MasonVarKey.
+  /// Parses screen_type from vars using FeatureVarKey.
   static ScreenType? fromVars(FoundationVars vars) {
     final screenTypeStr = vars
-        .getVar<String>(MasonVarKey.screenType)
+        .getVar<String>(FeatureVarKey.screenType)
         ?.toLowerCase();
     if (screenTypeStr == null || screenTypeStr.isEmpty) {
       return null;
@@ -117,10 +117,10 @@ enum ServiceType {
     }
   }
 
-  /// Parses service_type from vars using MasonVarKey.
+  /// Parses service_type from vars using ServiceVarKey.
   static ServiceType? fromVars(FoundationVars vars) {
     final serviceTypeStr = vars
-        .getVar<String>(MasonVarKey.serviceType)
+        .getVar<String>(ServiceVarKey.serviceType)
         ?.toLowerCase();
     if (serviceTypeStr == null || serviceTypeStr.isEmpty) {
       return null;
@@ -175,10 +175,10 @@ enum StateManagement {
     }
   }
 
-  /// Parses state_mgmt from vars using MasonVarKey.
+  /// Parses state_mgmt from vars using BaseVarKey.
   static StateManagement fromVars(FoundationVars vars) {
     final stateMgmtStr = vars
-        .getVar<String>(MasonVarKey.stateMgmt)
+        .getVar<String>(BaseVarKey.stateMgmt)
         ?.toLowerCase();
     if (stateMgmtStr == null || stateMgmtStr.isEmpty) {
       return StateManagement.riverpod; // Default
