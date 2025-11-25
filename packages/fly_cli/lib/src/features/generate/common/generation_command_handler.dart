@@ -12,6 +12,7 @@ import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 /// Provides a unified interface for executing generation operations
 /// through use cases, following Clean Architecture principles.
 class GenerationCommandHandler {
+  /// Creates a new instance of [GenerationCommandHandler].
   GenerationCommandHandler({
     required GenerateFeatureUseCase generateFeatureUseCase,
     required GenerateServiceUseCase generateServiceUseCase,
@@ -27,25 +28,25 @@ class GenerationCommandHandler {
   /// Execute generation for a feature.
   Future<CommandResult> executeFeature(FeatureGenerationRequest request) async {
     final result = await _generateFeatureUseCase.execute(request);
-    return _convertToCommandResult(result, 'feature');
+    return _convertToCommandResult(result, GenerationMode.feature);
   }
 
   /// Execute generation for a service.
   Future<CommandResult> executeService(ServiceGenerationRequest request) async {
     final result = await _generateServiceUseCase.execute(request);
-    return _convertToCommandResult(result, 'service');
+    return _convertToCommandResult(result, GenerationMode.service);
   }
 
   /// Execute generation for a project.
   Future<CommandResult> executeProject(ProjectGenerationRequest request) async {
     final result = await _generateProjectUseCase.execute(request);
-    return _convertToCommandResult(result, 'project');
+    return _convertToCommandResult(result, GenerationMode.project);
   }
 
   /// Convert GenerationResultDto to CommandResult.
   CommandResult _convertToCommandResult(
     GenerationResultDto result,
-    String commandType,
+    GenerationMode mode,
   ) {
     if (!result.success) {
       return CommandResult.error(
@@ -56,34 +57,34 @@ class GenerationCommandHandler {
     }
 
     return CommandResult.success(
-      command: 'generate $commandType',
-      message: '${commandType.capitalize()} generated successfully',
+      command: 'generate ${mode.key}',
+      message: '${mode.key.capitalize()} generated successfully',
       data: {
         ...result.data,
         'files_generated': result.generatedFiles.length,
       },
-      nextSteps: _getNextSteps(commandType),
+      nextSteps: _getNextSteps(mode),
     );
   }
 
   /// Get next steps for a command type.
-  List<NextStep> _getNextSteps(String commandType) {
-    switch (commandType) {
-      case 'feature':
+  List<NextStep> _getNextSteps(GenerationMode mode) {
+    switch (mode) {
+      case GenerationMode.feature:
         return [
           const NextStep(
             command: 'flutter run',
             description: 'Run the application to see the new screen',
           ),
         ];
-      case 'service':
+      case GenerationMode.service:
         return [
           const NextStep(
             command: 'flutter pub get',
             description: 'Install dependencies',
           ),
         ];
-      case 'project':
+      case GenerationMode.project:
         return [
           const NextStep(
             command: 'cd <project_name>',
@@ -94,13 +95,14 @@ class GenerationCommandHandler {
             description: 'Install dependencies',
           ),
         ];
-      default:
-        return [];
-    }
+      }
   }
 }
-
+/// Extension method to capitalize a string.
 extension StringExtension on String {
+  /// Capitalizes the first letter of the string.
+  ///
+  /// If the string is empty, it returns the original string.
   String capitalize() {
     if (isEmpty) return this;
     return '${this[0].toUpperCase()}${substring(1)}';

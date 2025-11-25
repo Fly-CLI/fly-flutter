@@ -72,7 +72,6 @@ class ServiceModeDeriver implements VariableDeriver {
     }
 
     return current.setAll({
-      BaseVarKey.isService.key: true,
       ServiceVarKey.serviceType.key: serviceType.key,
       ServiceVarKey.isApiService.key: isApiService,
       ServiceVarKey.isLocalService.key: isLocalService,

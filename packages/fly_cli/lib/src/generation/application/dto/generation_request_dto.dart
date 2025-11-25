@@ -1,4 +1,7 @@
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'generation_request_dto.g.dart';
 
 /// Sealed class for generation requests with type-safe variants.
 ///
@@ -21,23 +24,16 @@ sealed class GenerationRequestDto {
   GenerationMode get mode;
 
   /// Convert to a variables map for backward compatibility with existing code
-  Map<String, dynamic> toVariablesMap();
-
-  /// Convert to a map
-  Map<String, dynamic> toMap() {
-    return {
-      'mode': mode.key,
-      'variables': toVariablesMap(),
-      'output_directory': outputDirectory,
-      'dry_run': dryRun,
-    };
-  }
+  Map<String, dynamic> toJson();
 }
 
 /// Request for project generation.
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 final class ProjectGenerationRequest extends GenerationRequestDto {
+  /// Create a new ProjectGenerationRequest.
   const ProjectGenerationRequest({
     required this.name,
+    required super.outputDirectory,
     this.template = 'fly_foundation',
     this.organization = 'com.example',
     this.description,
@@ -45,7 +41,6 @@ final class ProjectGenerationRequest extends GenerationRequestDto {
     this.features = const [],
     this.services = const [],
     this.preset = 'starter',
-    required super.outputDirectory,
     super.dryRun = false,
   });
 
@@ -73,27 +68,25 @@ final class ProjectGenerationRequest extends GenerationRequestDto {
   /// Preset configuration
   final String preset;
 
+  /// Create from JSON.
+  factory ProjectGenerationRequest.fromJson(Map<String, dynamic> json) =>
+      _$ProjectGenerationRequestFromJson(json);
+
   @override
   GenerationMode get mode => GenerationMode.project;
 
   @override
-  Map<String, dynamic> toVariablesMap() {
-    return {
-      'name': name,
-      'project_name': name,
-      'generation_mode': 'project',
-      'template': template,
-      'organization': organization,
-      if (description != null) 'description': description,
-      'platforms': platforms,
-      'features': features,
-      'services': services,
-      'preset': preset,
-    };
+  Map<String, dynamic> toJson() {
+    final json = _$ProjectGenerationRequestToJson(this);
+    // Add extra fields for backward compatibility
+    json['project_name'] = name;
+    json['generation_mode'] = 'project';
+    return json;
   }
 }
 
 /// Request for feature generation.
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 final class FeatureGenerationRequest extends GenerationRequestDto {
   const FeatureGenerationRequest({
     required this.name,
@@ -115,44 +108,44 @@ final class FeatureGenerationRequest extends GenerationRequestDto {
   final String feature;
 
   /// Type of screen to generate
+  @JsonKey(name: 'screen_type')
+  @_ScreenTypeConverter()
   final ScreenType screenType;
 
   /// Whether to include ViewModel/Provider
+  @JsonKey(name: 'with_viewmodel')
   final bool withViewModel;
 
   /// Whether to include test files
+  @JsonKey(name: 'with_tests')
   final bool withTests;
 
   /// Whether to include form validation
+  @JsonKey(name: 'with_validation')
   final bool withValidation;
 
   /// Whether to include navigation logic
+  @JsonKey(name: 'with_navigation')
   final bool withNavigation;
 
   /// Preset configuration
   final String preset;
 
+  /// Create from JSON.
+  factory FeatureGenerationRequest.fromJson(Map<String, dynamic> json) =>
+      _$FeatureGenerationRequestFromJson(json);
+
   @override
   GenerationMode get mode => GenerationMode.feature;
 
   @override
-  Map<String, dynamic> toVariablesMap() {
-    return {
-      'name': name,
-      'component_name': name,
-      'generation_mode': 'feature',
-      'feature': feature,
-      'screen_type': screenType.key,
-      'with_viewmodel': withViewModel,
-      'with_tests': withTests,
-      'with_validation': withValidation,
-      'with_navigation': withNavigation,
-      'preset': preset,
-    };
+  Map<String, dynamic> toJson() {
+    return _$FeatureGenerationRequestToJson(this);
   }
 }
 
 /// Request for service generation.
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 final class ServiceGenerationRequest extends GenerationRequestDto {
   const ServiceGenerationRequest({
     required this.name,
@@ -174,42 +167,60 @@ final class ServiceGenerationRequest extends GenerationRequestDto {
   final String feature;
 
   /// Type of service to generate
+  @JsonKey(name: 'service_type')
+  @_ServiceTypeConverter()
   final ServiceType serviceType;
 
   /// Whether to include test files
+  @JsonKey(name: 'with_tests')
   final bool withTests;
 
   /// Whether to include mock files
+  @JsonKey(name: 'with_mocks')
   final bool withMocks;
 
   /// Whether to include HTTP interceptors
+  @JsonKey(name: 'with_interceptors')
   final bool withInterceptors;
 
   /// Base URL for API services (only used for API service type)
+  @JsonKey(name: 'api_base_url')
   final String? apiBaseUrl;
 
   /// Preset configuration
   final String preset;
 
+  /// Create from JSON.
+  factory ServiceGenerationRequest.fromJson(Map<String, dynamic> json) =>
+      _$ServiceGenerationRequestFromJson(json);
+
   @override
   GenerationMode get mode => GenerationMode.service;
 
   @override
-  Map<String, dynamic> toVariablesMap() {
-    return {
-      'name': name,
-      'component_name': name,
-      'generation_mode': 'service',
-      'feature': feature,
-      'service_type': serviceType.key,
-      'with_tests': withTests,
-      'with_mocks': withMocks,
-      'with_interceptors': withInterceptors,
-      'with_retry_logic': serviceType == ServiceType.api,
-      'with_caching': serviceType == ServiceType.cache,
-      if (serviceType == ServiceType.api)
-        'api_base_url': apiBaseUrl ?? 'https://api.example.com',
-      'preset': preset,
-    };
+  Map<String, dynamic> toJson() {
+    return _$ServiceGenerationRequestToJson(this);
   }
+}
+
+/// Converter for ScreenType enum using .key property
+class _ScreenTypeConverter implements JsonConverter<ScreenType, String> {
+  const _ScreenTypeConverter();
+
+  @override
+  ScreenType fromJson(String json) => ScreenType.fromKey(json);
+
+  @override
+  String toJson(ScreenType object) => object.key;
+}
+
+/// Converter for ServiceType enum using .key property
+class _ServiceTypeConverter implements JsonConverter<ServiceType, String> {
+  const _ServiceTypeConverter();
+
+  @override
+  ServiceType fromJson(String json) => ServiceType.fromKey(json);
+
+  @override
+  String toJson(ServiceType object) => object.key;
 }

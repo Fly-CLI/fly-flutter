@@ -27,7 +27,7 @@ BrickRegistry createTestBrickRegistry() {
       final vars = Map<String, dynamic>.from(variables.toMap());
       if (instanceConfig != null) {
         // Use generic InstanceConfig directly (domain-specific helpers are in CLI)
-        vars['component_name'] = instanceConfig.name;
+        vars['name'] = instanceConfig.name;
         vars['feature'] = instanceConfig.params['feature'] as String? ?? 'core';
         if (instanceConfig.params['screen_type'] != null) {
           vars['screen_type'] = instanceConfig.params['screen_type'];
@@ -58,7 +58,7 @@ BrickRegistry createTestBrickRegistry() {
       final vars = Map<String, dynamic>.from(variables.toMap());
       if (instanceConfig != null) {
         // Use generic InstanceConfig directly (domain-specific helpers are in CLI)
-        vars['component_name'] = instanceConfig.name;
+        vars['name'] = instanceConfig.name;
         vars['feature'] = instanceConfig.params['feature'] as String? ?? 'core';
         vars['service_type'] = instanceConfig.params['service_type'] as String? ?? 'api';
         vars['with_tests'] = instanceConfig.params['with_tests'] as bool? ?? true;

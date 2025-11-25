@@ -26,7 +26,7 @@ class GenerateProjectUseCase {
       // which handles the complex multi-step process
       final result = await _workflowOrchestrator.executeWorkflow(
         mode: GenerationMode.project,
-        variables: request.toVariablesMap(),
+        variables: request.toJson(),
         outputDirectory: request.outputDirectory,
         dryRun: request.dryRun,
       );

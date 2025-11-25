@@ -1,19 +1,19 @@
-# {{component_name.pascalCase()}} Feature
+# {{name.pascalCase()}} Feature
 
-This document describes the {{component_name.pascalCase()}} feature module.
+This document describes the {{name.pascalCase()}} feature module.
 
 ## Overview
 
-The {{component_name.pascalCase()}} feature is a {{#is_list_screen}}list{{/is_list_screen}}{{#is_detail_screen}}detail{{/is_detail_screen}}{{#is_form_screen}}form{{/is_form_screen}} screen implementation.
+The {{name.pascalCase()}} feature is a {{#is_list_screen}}list{{/is_list_screen}}{{#is_detail_screen}}detail{{/is_detail_screen}}{{#is_form_screen}}form{{/is_form_screen}} screen implementation.
 
 ## Components
 
 ### Screen
 
-- **{{component_name.pascalCase()}}Screen**: {{#is_list_screen}}List{{/is_list_screen}}{{#is_detail_screen}}Detail{{/is_detail_screen}}{{#is_form_screen}}Form{{/is_form_screen}} screen implementation
+- **{{name.pascalCase()}}Screen**: {{#is_list_screen}}List{{/is_list_screen}}{{#is_detail_screen}}Detail{{/is_detail_screen}}{{#is_form_screen}}Form{{/is_form_screen}} screen implementation
 {{#with_viewmodel}}
   - Extends `BaseScreen` for consistent behavior
-  - Uses `{{component_name.pascalCase()}}ViewModel` for state management
+  - Uses `{{name.pascalCase()}}ViewModel` for state management
 {{/with_viewmodel}}
 {{^with_viewmodel}}
   - Standalone screen without view model
@@ -22,7 +22,7 @@ The {{component_name.pascalCase()}} feature is a {{#is_list_screen}}list{{/is_li
 {{#with_viewmodel}}
 ### View Model
 
-- **{{component_name.pascalCase()}}ViewModel**: State management for {{component_name.pascalCase()}} screen
+- **{{name.pascalCase()}}ViewModel**: State management for {{name.pascalCase()}} screen
   - Extends `BaseViewModel`
   - Manages loading, error, and data states
 {{/with_viewmodel}}

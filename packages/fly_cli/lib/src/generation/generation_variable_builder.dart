@@ -46,7 +46,7 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
   @override
   Map<String, dynamic> buildFromMap(Map<String, dynamic> input) {
     final componentName =
-        input['name'] as String? ?? input['component_name'] as String?;
+        input['name'] as String?;
     if (componentName == null) {
       throw ArgumentError('Feature name is required');
     }
@@ -59,7 +59,6 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName,
       // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
@@ -141,7 +140,6 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName,
       // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
@@ -192,7 +190,6 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName,
       // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
@@ -240,7 +237,6 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': serviceName,
-      'component_name': serviceName,
       // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
@@ -334,7 +330,6 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName,
       // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
@@ -391,7 +386,6 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': serviceName,
-      'component_name': serviceName,
       // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,

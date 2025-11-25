@@ -68,7 +68,8 @@ enum BaseVarKey {
   // Basic Variables
   // ============================================================================
 
-  /// Project/component name provided by the user.
+  ///
+  /// Component name provided by the user.
   name('name'),
 
   /// Organization identifier in reverse domain format (e.g., 'com.example.app').
@@ -122,32 +123,6 @@ enum BaseVarKey {
   stateMgmt('state_mgmt'),
 
   // ============================================================================
-  // Derived Naming Variables
-  // ============================================================================
-
-  /// Project name (may be derived from component name in feature/service mode).
-  projectName('project_name'),
-
-  /// Project name in snake_case format.
-  projectNameSnake('project_name_snake'),
-
-  /// Project name in camelCase format.
-  projectNameCamel('project_name_camel'),
-
-  /// Project name in PascalCase format.
-  projectNamePascal('project_name_pascal'),
-
-  // ============================================================================
-  // Mode Flags
-  // ============================================================================
-
-  /// Whether the generation mode is 'service'.
-  isService('is_service'),
-
-  /// Active generation mode key (derived from generation_mode).
-  activeMode('active_mode'),
-
-  // ============================================================================
   // Platform Flags
   // ============================================================================
 
@@ -180,7 +155,7 @@ enum BaseVarKey {
   feature('feature'),
 
   /// Component name (screen name or service name).
-  componentName('component_name'),
+  componentName('name'),
 
   /// List of features (for project generation with multiple features).
   features('features');
@@ -198,7 +173,23 @@ enum BaseVarKey {
 /// Project-specific variable keys used only in project generation mode.
 enum ProjectVarKey {
   /// Preset identifier (e.g., 'starter', 'batteries_included', 'minimal').
-  preset('preset');
+  preset('preset'),
+
+  // ============================================================================
+  // Derived Naming Variables
+  // ============================================================================
+
+  /// Project name (may be derived from component name in feature/service mode).
+  projectName('project_name'),
+
+  /// Project name in snake_case format.
+  projectNameSnake('project_name_snake'),
+
+  /// Project name in camelCase format.
+  projectNameCamel('project_name_camel'),
+
+  /// Project name in PascalCase format.
+  projectNamePascal('project_name_pascal');
 
   /// The string key used in Mason variable maps.
   final String key;

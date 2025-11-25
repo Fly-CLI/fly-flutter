@@ -48,7 +48,7 @@ Each scenario JSON file contains:
 ```json
 {
   "generation_mode": "project|feature|service",
-  "name": "component_name",
+  "name": "name",
   "description": "Optional description",
   "organization": "com.example",
   "platforms": ["ios", "android", "web"],

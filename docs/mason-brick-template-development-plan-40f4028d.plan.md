@@ -431,14 +431,14 @@ fly_foundation/
 │   │           └── {{feature}}/
 │   │               └── presentation/
 │   │                   ├── screens/
-│   │                   │   └── {{component_name}}_screen.dart
+│   │                   │   └── {{name}}_screen.dart
 │   │                   {{#with_viewmodel}}
 │   │                   ├── view_models/
-│   │                   │   └── {{component_name}}_view_model.dart
+│   │                   │   └── {{name}}_view_model.dart
 │   │                   {{/with_viewmodel}}
 │   │                   {{#with_tests}}
 │   │                   └── test/
-│   │                       └── {{component_name}}_screen_test.dart
+│   │                       └── {{name}}_screen_test.dart
 │   │                   {{/with_tests}}
 │   │   {{/is_screen}}
 │   │
@@ -446,7 +446,7 @@ fly_foundation/
 │   │   └── lib/
 │   │       └── core/
 │   │           └── services/
-│   │               └── {{component_name}}_service.dart
+│   │               └── {{name}}_service.dart
 │   │       {{#with_provider}}
 │   │       └── core/
 │   │           └── providers/
@@ -456,7 +456,7 @@ fly_foundation/
 │   │       └── test/
 │   │           └── core/
 │   │               └── services/
-│   │                   └── {{component_name}}_service_test.dart
+│   │                   └── {{name}}_service_test.dart
 │   │       {{/with_tests}}
 │   │   {{/is_service}}
 │   │   Note: Services are generated in core/services/ directory which is created when needed
@@ -465,7 +465,7 @@ fly_foundation/
 │       └── lib/
 │           └── core/
 │               └── providers/
-│                   └── {{component_name}}_provider.dart
+│                   └── {{name}}_provider.dart
 │       {{/is_provider}}
 │       Note: Providers are generated in core/providers/ directory which is created when needed
 │
@@ -573,7 +573,7 @@ fly_foundation/
 
 #### Component Mode Variables (when generation_mode != project)
 
-**component_name** (string) - **REQUIRED when component**
+**name** (string) - **REQUIRED when component**
 
 - Description: Name of the component (snake_case)
 - Validation: Must be valid Dart identifier
@@ -660,9 +660,9 @@ fly_foundation/
 
 **Variable Transformations:**
 
-- `{{component_name.pascalCase()}}` - PascalCase for class names
-- `{{component_name.snakeCase()}}` - snake_case for file names
-- `{{component_name.camelCase()}}` - camelCase for variable names
+- `{{name.pascalCase()}}` - PascalCase for class names
+- `{{name.snakeCase()}}` - snake_case for file names
+- `{{name.camelCase()}}` - camelCase for variable names
 - `{{project_name.snakeCase()}}` - Project name in snake_case
 
 ### 2.4 Template Files
@@ -747,7 +747,7 @@ The foundation project includes additional core directories (analytics, database
 
 #### Screen Mode Files
 
-**{{component_name}}_screen.dart**
+**{{name}}_screen.dart**
 
 - Extends `BaseScreen<V, S>` (which extends `FlyScreen<V, S>`)
 - ViewModel integration via `getViewModelProvider()` method
@@ -759,7 +759,7 @@ The foundation project includes additional core directories (analytics, database
 - Pull-to-refresh support via `onRefresh()` method
 - Localization support via `AppLocalizations`
 
-**{{component_name}}_view_model.dart** (if with_viewmodel=true)
+**{{name}}_view_model.dart** (if with_viewmodel=true)
 
 - Extends `BaseViewModel<S>` (which extends `FlyViewModel<S>`)
 - State class implementing `FlyViewModelState<S>`
@@ -768,9 +768,9 @@ The foundation project includes additional core directories (analytics, database
 - Error handling via `runAsyncOperation()` error callbacks
 - Loading state management
 - Screen type-specific logic
-- Provider definition: `final {{component_name}}ViewModelProvider = NotifierProvider<...>`
+- Provider definition: `final {{name}}ViewModelProvider = NotifierProvider<...>`
 
-**{{component_name}}_screen_test.dart** (if with_tests=true)
+**{{name}}_screen_test.dart** (if with_tests=true)
 
 - Widget tests
 - Provider mocking
@@ -779,7 +779,7 @@ The foundation project includes additional core directories (analytics, database
 
 #### Service Mode Files
 
-**{{component_name}}_service.dart**
+**{{name}}_service.dart**
 
 - Service class with dependency injection via providers
 - Returns `AppResult<T>` from `fly_flow_guard` for consistent error handling
@@ -789,9 +789,9 @@ The foundation project includes additional core directories (analytics, database
 - Retry logic with connectivity (if enabled)
 - Caching support via `CacheService` (if enabled)
 - API endpoint definitions
-- Provider definition: `final {{component_name}}ServiceProvider = Provider<...>`
+- Provider definition: `final {{name}}ServiceProvider = Provider<...>`
 
-**{{component_name}}_service_test.dart** (if with_tests=true)
+**{{name}}_service_test.dart** (if with_tests=true)
 
 - Service tests
 - API mocking
@@ -800,7 +800,7 @@ The foundation project includes additional core directories (analytics, database
 
 #### Provider Mode Files
 
-**{{component_name}}_provider.dart**
+**{{name}}_provider.dart**
 
 - Riverpod provider with @riverpod annotation
 - Provider type-specific implementation
@@ -986,7 +986,7 @@ class {{ComponentName}}ViewModel extends BaseViewModel<{{ComponentName}}ViewMode
   }
 }
 
-final {{component_name}}ViewModelProvider = NotifierProvider<{{ComponentName}}ViewModel, {{ComponentName}}ViewModelState>(
+final {{name}}ViewModelProvider = NotifierProvider<{{ComponentName}}ViewModel, {{ComponentName}}ViewModelState>(
   () => {{ComponentName}}ViewModel(),
 );
 ```

@@ -7,33 +7,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 {{#with_viewmodel}}
 {{#use_riverpod}}
 import '../../../../../core/foundation/screen/base_screen.dart';
-import '{{component_name}}_view_model.dart';
+import '{{name}}_view_model.dart';
 {{/use_riverpod}}
 {{/with_viewmodel}}
 
 {{#with_viewmodel}}
 {{#use_riverpod}}
-class {{component_name.pascalCase()}}Screen extends BaseScreen<{{component_name.pascalCase()}}ViewModel, {{component_name.pascalCase()}}ViewModelState> {
-  const {{component_name.pascalCase()}}Screen({super.key});
+class {{name.pascalCase()}}Screen extends BaseScreen<{{name.pascalCase()}}ViewModel, {{name.pascalCase()}}ViewModelState> {
+  const {{name.pascalCase()}}Screen({super.key});
 
   @override
-  NotifierProvider<{{component_name.pascalCase()}}ViewModel, {{component_name.pascalCase()}}ViewModelState> getViewModelProvider() {
-    return {{component_name}}ViewModelProvider;
+  NotifierProvider<{{name.pascalCase()}}ViewModel, {{name.pascalCase()}}ViewModelState> getViewModelProvider() {
+    return {{name}}ViewModelProvider;
   }
 
   @override
-  Future<void> onRefresh({{component_name.pascalCase()}}ViewModel viewModel) => viewModel.refresh();
+  Future<void> onRefresh({{name.pascalCase()}}ViewModel viewModel) => viewModel.refresh();
 
   @override
   Widget buildAccessibleContent(
     BuildContext context,
-    {{component_name.pascalCase()}}ViewModel viewModel,
-    {{component_name.pascalCase()}}ViewModelState viewModelState,
+    {{name.pascalCase()}}ViewModel viewModel,
+    {{name.pascalCase()}}ViewModelState viewModelState,
     WidgetRef ref,
   ) {
     final resolvedTitle =
-        AppLocalizations.of(context)?.appTitle ?? '{{component_name.pascalCase()}}';
-    return _{{component_name.pascalCase()}}Body(
+        AppLocalizations.of(context)?.appTitle ?? '{{name.pascalCase()}}';
+    return _{{name.pascalCase()}}Body(
       title: resolvedTitle,
       message: viewModelState.message,
       onRefresh: viewModel.refresh,
@@ -44,24 +44,24 @@ class {{component_name.pascalCase()}}Screen extends BaseScreen<{{component_name.
 {{/with_viewmodel}}
 
 {{^with_viewmodel}}
-class {{component_name.pascalCase()}}Screen extends StatelessWidget {
-  const {{component_name.pascalCase()}}Screen({super.key});
+class {{name.pascalCase()}}Screen extends StatelessWidget {
+  const {{name.pascalCase()}}Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final resolvedTitle =
-        AppLocalizations.of(context)?.appTitle ?? '{{component_name.pascalCase()}}';
-    return _{{component_name.pascalCase()}}Body(
+        AppLocalizations.of(context)?.appTitle ?? '{{name.pascalCase()}}';
+    return _{{name.pascalCase()}}Body(
       title: resolvedTitle,
-      message: '{{component_name.pascalCase()}} screen is ready.',
+      message: '{{name.pascalCase()}} screen is ready.',
       onRefresh: () async {},
     );
   }
 }
 {{/with_viewmodel}}
 
-class _{{component_name.pascalCase()}}Body extends StatelessWidget {
-  const _{{component_name.pascalCase()}}Body({
+class _{{name.pascalCase()}}Body extends StatelessWidget {
+  const _{{name.pascalCase()}}Body({
     required this.title,
     required this.message,
     required this.onRefresh,

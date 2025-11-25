@@ -60,7 +60,7 @@ void main() {
       );
 
       // Act
-      final map = dto.toMap();
+      final map = dto.toJson();
 
       // Assert
       expect(map['mode'], equals('feature'));
@@ -79,7 +79,7 @@ void main() {
       );
 
       // Act
-      final map = dto.toMap();
+      final map = dto.toJson();
 
       // Assert
       expect(map['mode'], equals('service'));
@@ -98,7 +98,7 @@ void main() {
       );
 
       // Act
-      final map = dto.toMap();
+      final map = dto.toJson();
 
       // Assert
       expect(map['mode'], equals('project'));

@@ -41,7 +41,6 @@ Represents user-provided input variables with proper types:
 
 Represents computed/derived flags and values from planner plugins:
 
-- Mode flags: `isProject`, `isFeature`, `isService`, `activeMode`
 - Platform flags: `supportsIos`, `supportsAndroid`, etc.
 - Feature flags: `screenType`, `isListScreen`, `isDetailScreen`, etc.
 - Service flags: `serviceType`, `isApiService`, `supportsRetry`, etc.

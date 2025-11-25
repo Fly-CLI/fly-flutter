@@ -45,17 +45,17 @@ class NamingDeriver implements VariableDeriver {
     switch (ctx.mode) {
       case GenerationMode.project:
         bag = bag
-            .set(BaseVarKey.projectName.key, name)
+            .set(ProjectVarKey.projectName.key, name)
             .set(
-              BaseVarKey.projectNameSnake.key,
+              ProjectVarKey.projectNameSnake.key,
               NamingUtils.toSnakeCase(name),
             )
             .set(
-              BaseVarKey.projectNameCamel.key,
+              ProjectVarKey.projectNameCamel.key,
               NamingUtils.toCamelCase(name),
             )
             .set(
-              BaseVarKey.projectNamePascal.key,
+              ProjectVarKey.projectNamePascal.key,
               NamingUtils.toPascalCase(name),
             );
 
@@ -63,10 +63,10 @@ class NamingDeriver implements VariableDeriver {
       case GenerationMode.service:
         // For feature/service mode, use default project name
         bag = bag
-            .set(BaseVarKey.projectName.key, 'acme_app')
-            .set(BaseVarKey.projectNameSnake.key, 'acme_app')
-            .set(BaseVarKey.projectNameCamel.key, 'acmeApp')
-            .set(BaseVarKey.projectNamePascal.key, 'AcmeApp');
+            .set(ProjectVarKey.projectName.key, 'acme_app')
+            .set(ProjectVarKey.projectNameSnake.key, 'acme_app')
+            .set(ProjectVarKey.projectNameCamel.key, 'acmeApp')
+            .set(ProjectVarKey.projectNamePascal.key, 'AcmeApp');
     }
 
     // Set template variant and SDK versions if present

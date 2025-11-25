@@ -231,7 +231,7 @@ for (final invocation in result.brickInvocations) {
 final invocation = result.brickInvocations.first;
 
 // Access variables passed to brick
-final componentName = invocation.vars['component_name'];
+final componentName = invocation.vars['name'];
 final feature = invocation.vars['feature'];
 final screenType = invocation.vars['screen_type'];
 

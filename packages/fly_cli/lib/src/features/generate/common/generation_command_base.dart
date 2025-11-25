@@ -47,7 +47,7 @@ abstract class GenerationCommandBase extends FlyCommand {
 
   @override
   List<CommandValidator> get validators => [
-    RequiredArgumentValidator('component_name'),
+    RequiredArgumentValidator('name'),
     FlutterProjectValidator(),
     DirectoryWritableValidator(),
   ];

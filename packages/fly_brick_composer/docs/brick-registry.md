@@ -72,7 +72,7 @@ buildVars: (globalVars, instanceConfig) {
   
   if (instanceConfig != null) {
     final featureConfig = FeatureInstanceConfig.fromInstanceConfig(instanceConfig);
-    vars['component_name'] = featureConfig.name;
+    vars['name'] = featureConfig.name;
     vars['feature'] = featureConfig.featureKey;
     vars['screen_type'] = featureConfig.screenType?.key;
     // ... more feature-specific vars

@@ -620,7 +620,7 @@ class GenerateProjectCommand extends FlyCommand {
       // Add additional data if needed
       if (result.success && result.data != null) {
         result.data!['duration_ms'] = stopwatch.elapsedMilliseconds;
-        result.data![BaseVarKey.projectName.key] = projectName;
+        result.data![ProjectVarKey.projectName.key] = projectName;
         result.data!['template'] = template;
         result.data![BaseVarKey.organization.key] = organization;
         result.data![BaseVarKey.platforms.key] = platforms;

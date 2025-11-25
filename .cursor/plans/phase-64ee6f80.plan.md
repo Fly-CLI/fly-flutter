@@ -41,14 +41,14 @@
 - `lib/shared/themes/app_theme.dart` for Material 3 themes.
 - `l10n/` and `l10n.yaml` for localization.
 - Adapt these files into Mustache templates that:
-- Respect the directory/variable conventions in the plan (e.g. `{{project_name.snakeCase()}}`, `{{feature}}`, `{{component_name}}`).
+- Respect the directory/variable conventions in the plan (e.g. `{{project_name.snakeCase()}}`, `{{feature}}`, `{{name}}`).
 - Use `{{#is_project}}` guards around project-only files so the brick can later serve component modes.
 
 - **1.3 Define `brick.yaml` and `template.yaml` with full variable metadata**
 - Implement the variable schema described in the plan, including:
 - `generation_mode` enum (`project`, `screen`, `service`, `provider`) with default `project`.
 - Project-mode variables: `project_name`, `organization`, `platforms`, `description`, `template`, `features`, `min_flutter_sdk`, `min_dart_sdk`, `with_mcp`, `with_tests`, `with_docs`, `fly_packages`, `code_generation`, `ai_integration`.
-- Component-mode variables: `component_name`, `feature`, plus mode-specific ones (`screen_type`, `with_viewmodel`, etc.), even if only partially used in Week 1.
+- Component-mode variables: `name`, `feature`, plus mode-specific ones (`screen_type`, `with_viewmodel`, etc.), even if only partially used in Week 1.
 - Ensure `template.yaml` includes:
 - `name: fly_foundation`, semantic `version`, `description`, `min_flutter_sdk`, `min_dart_sdk`.
 - A compatibility block so `TemplateManager`/`CompatibilityChecker` can enforce SDK and CLI version constraints.
@@ -68,7 +68,7 @@
 - **1.5 Implement generation-mode-aware variable validation (foundation)**
 - Extend the existing `_validateVariables` logic in `TemplateManager` and/or add a dedicated validator in the templates core to enforce mode-specific rules:
 - When `generation_mode == project`: require `project_name`, `organization`, `platforms`; validate `template` choice and `fly_packages` against allowed values.
-- When `generation_mode != project`: require `component_name` and `feature` and validate combinations like `screen_type`.
+- When `generation_mode != project`: require `name` and `feature` and validate combinations like `screen_type`.
 - For Week 1, focus on project-mode validation so `fly_foundation` project generation is robust; structure the validator so adding full screen/service/provider rules in later phases is straightforward.
 - Add unit tests under `packages/fly_cli/test/core/scaffolding/` to cover both happy-path and failure cases, matching the Week 1 deliverable “Unit tests for variable validation”.
 

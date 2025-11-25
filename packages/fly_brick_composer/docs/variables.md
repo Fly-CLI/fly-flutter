@@ -126,7 +126,6 @@ FeatureVariables(
 
 ```dart
 ServiceVariables(
-  isService: true,
   serviceType: ServiceType.api,
   isApiService: true,
   supportsRetry: true,
@@ -175,7 +174,7 @@ buildVars: (globalVars, instanceConfig) {
   
   if (instanceConfig != null) {
     // Add instance-specific vars
-    vars['component_name'] = instanceConfig.name;
+    vars['name'] = instanceConfig.name;
     vars['feature'] = instanceConfig.params['feature'];
     // ...
   }

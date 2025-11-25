@@ -90,7 +90,6 @@ sealed class GenerationRequest {
   }) {
     final componentName =
         input['name'] as String? ??
-        input['component_name'] as String? ??
         input['service_name'] as String? ??
         input['screen_name'] as String?;
     if (componentName == null) {

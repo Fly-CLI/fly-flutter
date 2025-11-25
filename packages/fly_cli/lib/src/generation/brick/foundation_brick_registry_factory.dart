@@ -10,10 +10,10 @@ class FoundationBrickRegistryFactory {
   /// - feature (feature component brick)
   /// - service (service component brick)
   static BrickRegistry create() {
-    final registry = BrickRegistry();
+    final registry = BrickRegistry()
 
     // Project template brick
-    registry.register(
+    ..register(
       BrickDefinition(
         id: 'project',
         kind: BrickKind.projectTemplate,
@@ -23,10 +23,10 @@ class FoundationBrickRegistryFactory {
           return Map<String, dynamic>.from(variables.toMap());
         },
       ),
-    );
+    )
 
     // Feature component brick
-    registry.register(
+    ..register(
       BrickDefinition(
         id: 'feature',
         kind: BrickKind.featureComponent,
@@ -38,7 +38,7 @@ class FoundationBrickRegistryFactory {
             final featureConfig = FeatureInstanceConfig.fromInstanceConfig(
               instanceConfig,
             );
-            vars['component_name'] = featureConfig.name;
+            vars['name'] = featureConfig.name;
             vars['feature'] = featureConfig.featureKey;
             if (featureConfig.screenType != null) {
               vars['screen_type'] = featureConfig.screenType!.key;
@@ -60,10 +60,10 @@ class FoundationBrickRegistryFactory {
           return null;
         },
       ),
-    );
+    )
 
     // Service component brick
-    registry.register(
+    ..register(
       BrickDefinition(
         id: 'service',
         kind: BrickKind.serviceComponent,
@@ -75,7 +75,7 @@ class FoundationBrickRegistryFactory {
             final serviceConfig = ServiceInstanceConfig.fromInstanceConfig(
               instanceConfig,
             );
-            vars['component_name'] = serviceConfig.name;
+            vars['name'] = serviceConfig.name;
             vars['feature'] = serviceConfig.featureKey;
             vars['service_type'] = serviceConfig.serviceType.key;
             vars['with_tests'] = serviceConfig.withTests;

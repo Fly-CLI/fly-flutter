@@ -133,7 +133,7 @@ class VariableValidationService {
     Map<String, dynamic> variables,
   ) {
     final errors = <String>[];
-    final projectName = variables.getVar<String>(BaseVarKey.projectName);
+    final projectName = variables.getVar<String>(ProjectVarKey.projectName);
     final organization = variables.getVar<String>(BaseVarKey.organization);
     final platforms = variables.getVar(BaseVarKey.platforms);
 
@@ -182,10 +182,10 @@ class VariableValidationService {
     final screenTypeStr = variables.getVar<String>(FeatureVarKey.screenType);
 
     if (componentName == null || componentName.isEmpty) {
-      errors.add('component_name is required for feature generation');
+      errors.add('name is required for feature generation');
     } else if (!NameValidationRule.isValidScreenName(componentName)) {
       errors.add(
-        'component_name "$componentName" must be snake_case (e.g. profile_overview)',
+        'name "$componentName" must be snake_case (e.g. profile_overview)',
       );
     }
 
@@ -219,10 +219,10 @@ class VariableValidationService {
     final serviceTypeStr = variables.getVar<String>(ServiceVarKey.serviceType);
 
     if (componentName == null || componentName.isEmpty) {
-      errors.add('component_name is required for service generation');
+      errors.add('name is required for service generation');
     } else if (!NameValidationRule.isValidServiceName(componentName)) {
       errors.add(
-        'component_name "$componentName" must be snake_case (e.g. auth_service)',
+        'name "$componentName" must be snake_case (e.g. auth_service)',
       );
     }
 

@@ -4,6 +4,7 @@ import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 
 /// Deriver that sets feature-mode-specific variables.
 class FeatureModeDeriver implements VariableDeriver {
+  /// Creates a new [FeatureModeDeriver].
   const FeatureModeDeriver();
 
   @override

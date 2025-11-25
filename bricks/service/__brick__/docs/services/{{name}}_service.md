@@ -1,10 +1,10 @@
-# {{component_name.pascalCase()}}Service
+# {{name.pascalCase()}}Service
 
-This document describes the {{component_name.pascalCase()}}Service implementation.
+This document describes the {{name.pascalCase()}}Service implementation.
 
 ## Overview
 
-The {{component_name.pascalCase()}}Service is a {{#is_api_service}}API{{/is_api_service}}{{#is_local_service}}local{{/is_local_service}}{{#is_cache_service}}cache{{/is_cache_service}}{{#is_analytics_service}}analytics{{/is_analytics_service}}{{#is_storage_service}}storage{{/is_storage_service}} service that provides data access functionality.
+The {{name.pascalCase()}}Service is a {{#is_api_service}}API{{/is_api_service}}{{#is_local_service}}local{{/is_local_service}}{{#is_cache_service}}cache{{/is_cache_service}}{{#is_analytics_service}}analytics{{/is_analytics_service}}{{#is_storage_service}}storage{{/is_storage_service}} service that provides data access functionality.
 
 ## Service Type
 
@@ -53,9 +53,9 @@ Returns: `AppResult<Map<String, dynamic>>`
 ## Testing
 
 {{#with_tests}}
-Tests are available in `test/core/services/{{feature}}/{{component_name}}_service_test.dart`.
+Tests are available in `test/core/services/{{feature}}/{{name}}_service_test.dart`.
 {{/with_tests}}
 {{#generate_mocks}}
-Mock implementation is available in `test/core/services/{{feature}}/mocks/{{component_name}}_service_mock.dart`.
+Mock implementation is available in `test/core/services/{{feature}}/mocks/{{name}}_service_mock.dart`.
 {{/generate_mocks}}
 
