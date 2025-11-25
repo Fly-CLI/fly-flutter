@@ -20,7 +20,7 @@ class CommandGroup {
 ///
 /// Each command implements a concrete strategy that encapsulates all command-specific
 /// metadata, aliases, grouping, and factory methods.
-abstract class FlyCommandStrategy {
+abstract class FlyCommandDescriptor {
   /// The command name as it appears in CLI (e.g., 'create')
   String get name;
 

@@ -2,19 +2,19 @@ import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/features/commands/domain/categories.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_doctor_command.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_serve_command.dart';
 
-/// Strategy for doctor command
-class McpDoctorCommandStrategy extends FlyCommandStrategy {
+/// Strategy for serve command
+class McpServeCommandDescriptor extends FlyCommandDescriptor {
   @override
-  String get name => 'doctor';
-
-  @override
-  String get description =>
-      'Show MCP setup guidance and smoke-test instructions';
+  String get name => 'serve';
 
   @override
-  List<String> get aliases => ['mcp.doctor', 'mcp:doctor'];
+  String get description => 'Start the MCP server over stdio for integration '
+      'with assistants';
+
+  @override
+  List<String> get aliases => ['mcp.serve', 'mcp:serve'];
 
   @override
   CommandGroup? get group => const CommandGroup(
@@ -27,6 +27,6 @@ class McpDoctorCommandStrategy extends FlyCommandStrategy {
 
   @override
   Command<int> createInstance(CommandContext context) {
-    return McpDoctorCommand.create(context);
+    return McpServeCommand.create(context);
   }
 }

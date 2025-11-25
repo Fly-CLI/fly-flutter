@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/schema/application/schema_command.dart';
 
 /// Strategy for schema command
-class SchemaCommandStrategy extends FlyCommandStrategy {
+class SchemaCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'schema';
 

@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/features/generate/feature/generate_feature_command.dart';
 
 /// Strategy for feature command
-class FeatureCommandStrategy extends FlyCommandStrategy {
+class FeatureCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'feature';
 

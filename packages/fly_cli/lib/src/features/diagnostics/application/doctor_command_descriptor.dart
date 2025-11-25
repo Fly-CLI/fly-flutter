@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/diagnostics/application/doctor_command.dart';
 
 /// Strategy for doctor command
-class DoctorCommandStrategy extends FlyCommandStrategy {
+class DoctorCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'doctor';
 

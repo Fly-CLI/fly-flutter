@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/completion/application/completion_command.dart';
 
 /// Strategy for completion command
-class CompletionCommandStrategy extends FlyCommandStrategy {
+class CompletionCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'completion';
 

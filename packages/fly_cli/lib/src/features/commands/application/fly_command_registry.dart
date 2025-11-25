@@ -20,13 +20,13 @@ class FlyCommandRegistry {
   }
 
   /// Cached strategy instances
-  final Map<FlyCommand, FlyCommandStrategy> _strategies = {};
+  final Map<FlyCommand, FlyCommandDescriptor> _strategies = {};
 
   /// Gets the strategy for the given command type
   ///
   /// Creates and caches the strategy instance on first access using the
   /// exhaustive switch-based factory from FlyCommandExtension.
-  FlyCommandStrategy getStrategy(FlyCommand commandType) {
+  FlyCommandDescriptor getStrategy(FlyCommand commandType) {
     return _strategies.putIfAbsent(
       commandType,
       () => commandType.strategyFactory(),
@@ -36,8 +36,8 @@ class FlyCommandRegistry {
   /// Gets all strategy instances
   ///
   /// Creates strategies for all registered commands if not already cached.
-  Map<FlyCommand, FlyCommandStrategy> getAllStrategies() {
-    final result = <FlyCommand, FlyCommandStrategy>{};
+  Map<FlyCommand, FlyCommandDescriptor> getAllStrategies() {
+    final result = <FlyCommand, FlyCommandDescriptor>{};
     for (final commandType in FlyCommand.values) {
       result[commandType] = getStrategy(commandType);
     }

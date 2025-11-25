@@ -3,16 +3,16 @@ import 'package:fly_cli/src/features/commands/application/fly_command_registry.d
 import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
-import 'package:fly_cli/src/features/completion/application/completion_command_strategy.dart';
-import 'package:fly_cli/src/features/context/application/context_command_strategy.dart';
-import 'package:fly_cli/src/features/diagnostics/application/doctor_command_strategy.dart';
-import 'package:fly_cli/src/features/generate/feature/feature_command_strategy.dart';
-import 'package:fly_cli/src/features/generate/project/project_command_strategy.dart';
-import 'package:fly_cli/src/features/generate/service/service_command_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_doctor_command_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_serve_command_strategy.dart';
-import 'package:fly_cli/src/features/schema/application/schema_command_strategy.dart';
-import 'package:fly_cli/src/features/version/version/version_command_strategy.dart';
+import 'package:fly_cli/src/features/completion/application/completion_command_descriptor.dart';
+import 'package:fly_cli/src/features/context/application/context_command_descriptor.dart';
+import 'package:fly_cli/src/features/diagnostics/application/doctor_command_descriptor.dart';
+import 'package:fly_cli/src/features/generate/feature/feature_command_descriptor.dart';
+import 'package:fly_cli/src/features/generate/project/project_command_descriptor.dart';
+import 'package:fly_cli/src/features/generate/service/service_command_descriptor.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_doctor_command_descriptor.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_serve_command_descriptor.dart';
+import 'package:fly_cli/src/features/schema/application/schema_command_descriptor.dart';
+import 'package:fly_cli/src/features/version/version/version_command_descriptor.dart';
 
 /// Enum representing all available Fly CLI commands
 ///
@@ -54,21 +54,21 @@ extension FlyCommandExtension on FlyCommand {
   /// cause a compile-time error if omitted.
   ///
   /// This is the single source of truth for command-to-strategy mapping.
-  FlyCommandStrategy Function() get strategyFactory => switch (this) {
-    FlyCommand.generateProject => ProjectCommandStrategy.new,
-    FlyCommand.doctor => DoctorCommandStrategy.new,
-    FlyCommand.schema => SchemaCommandStrategy.new,
-    FlyCommand.version => VersionCommandStrategy.new,
-    FlyCommand.context => ContextCommandStrategy.new,
-    FlyCommand.completion => CompletionCommandStrategy.new,
-    FlyCommand.generateFeature => FeatureCommandStrategy.new,
-    FlyCommand.generateService => ServiceCommandStrategy.new,
-    FlyCommand.mcpServe => McpServeCommandStrategy.new,
-    FlyCommand.mcpDoctor => McpDoctorCommandStrategy.new,
+  FlyCommandDescriptor Function() get strategyFactory => switch (this) {
+    FlyCommand.generateProject => ProjectCommandDescriptor.new,
+    FlyCommand.doctor => DoctorCommandDescriptor.new,
+    FlyCommand.schema => SchemaCommandDescriptor.new,
+    FlyCommand.version => VersionCommandDescriptor.new,
+    FlyCommand.context => ContextCommandDescriptor.new,
+    FlyCommand.completion => CompletionCommandDescriptor.new,
+    FlyCommand.generateFeature => FeatureCommandDescriptor.new,
+    FlyCommand.generateService => ServiceCommandDescriptor.new,
+    FlyCommand.mcpServe => McpServeCommandDescriptor.new,
+    FlyCommand.mcpDoctor => McpDoctorCommandDescriptor.new,
   };
 
   /// Gets the strategy for this command type
-  FlyCommandStrategy get _strategy =>
+  FlyCommandDescriptor get _strategy =>
       FlyCommandRegistry.instance.getStrategy(this);
 
   /// The command name as it appears in CLI

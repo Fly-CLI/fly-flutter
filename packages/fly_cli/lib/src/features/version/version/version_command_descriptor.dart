@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/version/version/version_command.dart';
 
 /// Strategy for version command
-class VersionCommandStrategy extends FlyCommandStrategy {
+class VersionCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'version';
 

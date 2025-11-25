@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/features/generate/project/generate_project_command.dart';
 
 /// Strategy for project command
-class ProjectCommandStrategy extends FlyCommandStrategy {
+class ProjectCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'project';
 

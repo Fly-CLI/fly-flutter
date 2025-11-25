@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/features/generate/service/generate_service_command.dart';
 
 /// Strategy for service command
-class ServiceCommandStrategy extends FlyCommandStrategy {
+class ServiceCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'service';
 

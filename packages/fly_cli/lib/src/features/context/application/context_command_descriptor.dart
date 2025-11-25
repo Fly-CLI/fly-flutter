@@ -5,7 +5,7 @@ import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/context/application/context_command.dart';
 
 /// Strategy for context command
-class ContextCommandStrategy extends FlyCommandStrategy {
+class ContextCommandDescriptor extends FlyCommandDescriptor {
   @override
   String get name => 'context';
 

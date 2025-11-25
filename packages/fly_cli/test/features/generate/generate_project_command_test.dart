@@ -2,7 +2,7 @@ import 'dart:io';
 
 // TODO: GenerateProjectCommand doesn't exist - this test needs to be updated when command is implemented
 // import 'package:fly_cli/src/features/commands/application/command_base.dart';
-// import 'package:fly_cli/src/generation/application/generate/project/project_command_strategy.dart';
+// import 'package:fly_cli/src/generation/application/generate/project/project_command_descriptor.dart';
 import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 
