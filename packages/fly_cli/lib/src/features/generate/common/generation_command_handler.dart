@@ -25,52 +25,19 @@ class GenerationCommandHandler {
   final GenerateProjectUseCase _generateProjectUseCase;
 
   /// Execute generation for a feature.
-  Future<CommandResult> executeFeature({
-    required Map<String, dynamic> variables,
-    required String outputDirectory,
-    bool dryRun = false,
-  }) async {
-    final request = GenerationRequestDto(
-      mode: GenerationMode.feature,
-      variables: variables,
-      outputDirectory: outputDirectory,
-      dryRun: dryRun,
-    );
-
+  Future<CommandResult> executeFeature(FeatureGenerationRequest request) async {
     final result = await _generateFeatureUseCase.execute(request);
     return _convertToCommandResult(result, 'feature');
   }
 
   /// Execute generation for a service.
-  Future<CommandResult> executeService({
-    required Map<String, dynamic> variables,
-    required String outputDirectory,
-    bool dryRun = false,
-  }) async {
-    final request = GenerationRequestDto(
-      mode: GenerationMode.service,
-      variables: variables,
-      outputDirectory: outputDirectory,
-      dryRun: dryRun,
-    );
-
+  Future<CommandResult> executeService(ServiceGenerationRequest request) async {
     final result = await _generateServiceUseCase.execute(request);
     return _convertToCommandResult(result, 'service');
   }
 
   /// Execute generation for a project.
-  Future<CommandResult> executeProject({
-    required Map<String, dynamic> variables,
-    required String outputDirectory,
-    bool dryRun = false,
-  }) async {
-    final request = GenerationRequestDto(
-      mode: GenerationMode.project,
-      variables: variables,
-      outputDirectory: outputDirectory,
-      dryRun: dryRun,
-    );
-
+  Future<CommandResult> executeProject(ProjectGenerationRequest request) async {
     final result = await _generateProjectUseCase.execute(request);
     return _convertToCommandResult(result, 'project');
   }

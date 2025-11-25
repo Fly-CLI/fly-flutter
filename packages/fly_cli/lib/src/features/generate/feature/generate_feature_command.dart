@@ -6,6 +6,7 @@ import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
@@ -108,12 +109,15 @@ class GenerateFeatureCommand extends FlyCommand {
       // Get generation handler from service container
       final handler = context.getService<GenerationCommandHandler>();
 
-      // Generate feature
-      final result = await handler.executeFeature(
+      // Construct request
+      final request = FeatureGenerationRequest(
         variables: rawVars,
         outputDirectory: targetDir,
         dryRun: context.planMode,
       );
+
+      // Generate feature
+      final result = await handler.executeFeature(request);
 
       stopwatch.stop();
 

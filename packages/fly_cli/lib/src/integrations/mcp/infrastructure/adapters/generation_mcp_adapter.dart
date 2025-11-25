@@ -46,8 +46,7 @@ class GenerationMcpAdapter {
       'preset': 'starter',
     };
 
-    final request = GenerationRequestDto(
-      mode: GenerationMode.feature,
+    final request = FeatureGenerationRequest(
       variables: variables,
       outputDirectory: outputDirectory,
     );
@@ -78,8 +77,7 @@ class GenerationMcpAdapter {
       'preset': 'starter',
     };
 
-    final request = GenerationRequestDto(
-      mode: GenerationMode.service,
+    final request = ServiceGenerationRequest(
       variables: variables,
       outputDirectory: outputDirectory,
     );
@@ -109,8 +107,7 @@ class GenerationMcpAdapter {
       'preset': 'starter',
     };
 
-    final request = GenerationRequestDto(
-      mode: GenerationMode.project,
+    final request = ProjectGenerationRequest(
       variables: variables,
       outputDirectory: outputDirectory,
     );

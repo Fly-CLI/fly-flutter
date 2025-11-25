@@ -27,7 +27,7 @@ class GenerateServiceUseCase {
   /// [request] contains the generation parameters.
   ///
   /// Returns a [GenerationResultDto] with the generation result.
-  Future<GenerationResultDto> execute(GenerationRequestDto request) async {
+  Future<GenerationResultDto> execute(ServiceGenerationRequest request) async {
     try {
       // 1. Get brick
       const brickName = 'service';

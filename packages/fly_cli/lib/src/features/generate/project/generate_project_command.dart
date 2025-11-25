@@ -9,6 +9,7 @@ import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/domain/entities/manifest_parser.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
@@ -596,12 +597,15 @@ class GenerateProjectCommand extends FlyCommand {
       // Get generation handler from service container
       final handler = context.getService<GenerationCommandHandler>();
 
-      // Generate project
-      final result = await handler.executeProject(
+      // Construct request
+      final request = ProjectGenerationRequest(
         variables: projectRawVars,
         outputDirectory: projectPath,
         dryRun: context.planMode,
       );
+
+      // Generate project
+      final result = await handler.executeProject(request);
 
       stopwatch.stop();
 

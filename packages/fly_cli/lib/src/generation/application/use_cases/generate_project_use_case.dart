@@ -20,7 +20,7 @@ class GenerateProjectUseCase {
   /// [request] contains the generation parameters.
   ///
   /// Returns a [GenerationResultDto] with the generation result.
-  Future<GenerationResultDto> execute(GenerationRequestDto request) async {
+  Future<GenerationResultDto> execute(ProjectGenerationRequest request) async {
     try {
       // For project generation, use workflow orchestrator
       // which handles the complex multi-step process
