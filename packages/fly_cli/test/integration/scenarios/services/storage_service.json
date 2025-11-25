@@ -3,7 +3,10 @@
   "name": "localstorage",
   "description": "Storage service scenario",
   "organization": "com.example",
-  "platforms": ["ios", "android"],
+  "platforms": [
+    "ios",
+    "android"
+  ],
   "preset": "minimal"
 }
 

@@ -1,10 +1,10 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_pipeline.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/middleware_pipeline_impl.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/mandatory/dry_run_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/mandatory/logging_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/mandatory/metrics_middleware.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/middleware_pipeline_impl.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 
 /// Factory for creating middleware pipelines.
 ///

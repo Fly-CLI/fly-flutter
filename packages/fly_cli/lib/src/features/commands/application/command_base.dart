@@ -4,26 +4,23 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_pipeline.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/middleware_factory.dart';
+import 'package:fly_cli/src/cli/infrastructure/progress/infrastructure/progress_factory.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_execution_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_lifecycle.dart';
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_factory.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
-import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_pipeline.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/infrastructure/middleware_factory.dart';
-import 'package:fly_cli/src/cli/infrastructure/progress/infrastructure/progress_factory.dart';
 import 'package:fly_core/fly_core_dart.dart';
-import 'package:fly_core/src/validation/validation.dart';
-import 'package:fly_mcp/fly_mcp.dart' hide Logger;
 import 'package:mason_logger/mason_logger.dart';
 
 /// Enhanced base command class following SOLID principles
@@ -43,11 +40,10 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   ///
   /// Uses MiddlewareFactory to create a configured pipeline with mandatory
   /// and optional middleware in the correct priority order.
-  MiddlewarePipeline get middlewarePipeline =>
-      MiddlewareFactory.create(
-        context: context,
-        optional: middleware,
-      );
+  MiddlewarePipeline get middlewarePipeline => MiddlewareFactory.create(
+    context: context,
+    optional: middleware,
+  );
 
   /// List of validators to run before execution
   List<CommandValidator> get validators => [];
@@ -67,7 +63,8 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       FlagAccessor.getString(argResults, GlobalFormatFlag()) == 'ai';
 
   /// Whether to run in debug mode with verbose error output
-  bool get debugMode => FlagAccessor.getBool(argResults, const GlobalDebugFlag());
+  bool get debugMode =>
+      FlagAccessor.getBool(argResults, const GlobalDebugFlag());
 
   /// Whether to run in plan mode (dry-run)
   bool get planMode => FlagAccessor.getBool(argResults, const GlobalPlanFlag());
@@ -77,8 +74,9 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       FlagAccessor.getBool(argResults, const GlobalVerboseFlag()) || debugMode;
 
   /// Logger instance (respects output format settings)
-  Logger get logger =>
-      (isJsonOutputFormat || isAiOutputFormat) ? _SilentLogger() : context.logger;
+  Logger get logger => (isJsonOutputFormat || isAiOutputFormat)
+      ? _SilentLogger()
+      : context.logger;
 
   @override
   ArgParser get argParser {
@@ -101,7 +99,7 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     final executionCommandContext = (argResults != null)
         ? context.factory.createExecutionContext(argResults!)
         : context;
-    
+
     // Create execution context at the start of command execution
     final executionContext = CommandExecutionContext(
       commandName: name,
@@ -116,7 +114,6 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     final signalSubscription = _setupCancellationHandler(executionContext);
 
     try {
-
       // 1. Run validators
       executionContext.setPhase(ExecutionPhase.validation);
       final validationResult = await _runValidators(executionCommandContext);
@@ -138,7 +135,8 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
       // 4. Call lifecycle hook
       // Create a default result if pipeline returned null (shouldn't happen normally)
       executionContext.setPhase(ExecutionPhase.completion);
-      final finalResult = result ??
+      final finalResult =
+          result ??
           CommandResult.error(
             message: 'Command execution returned no result',
             suggestion: 'Check command implementation',
@@ -228,11 +226,12 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   /// Run all validators for this command
   ///
   /// [executionContext] - The execution context with actual parsed args
-  Future<ValidationResult> _runValidators(CommandContext executionContext) async {
-    final applicableValidators = validators
-        .where((v) => v.shouldRun(executionContext, name))
-        .toList()
-      ..sort((a, b) => a.priority.compareTo(b.priority));
+  Future<ValidationResult> _runValidators(
+    CommandContext executionContext,
+  ) async {
+    final applicableValidators =
+        validators.where((v) => v.shouldRun(executionContext, name)).toList()
+          ..sort((a, b) => a.priority.compareTo(b.priority));
 
     final results = <ValidationResult>[];
 
@@ -240,7 +239,10 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
     final effectiveArgResults = argResults ?? executionContext.argResults;
 
     for (final validator in applicableValidators) {
-      final result = await validator.validate(executionContext, effectiveArgResults);
+      final result = await validator.validate(
+        executionContext,
+        effectiveArgResults,
+      );
       results.add(result);
 
       // Stop on first validation failure
@@ -258,7 +260,9 @@ abstract class FlyCommand extends Command<int> implements CommandLifecycle {
   /// followed by the command's execute method.
   ///
   /// [executionContext] - The execution context with actual parsed args
-  Future<CommandResult?> _runMiddlewarePipeline(CommandContext executionContext) async {
+  Future<CommandResult?> _runMiddlewarePipeline(
+    CommandContext executionContext,
+  ) async {
     return middlewarePipeline.execute(executionContext, execute);
   }
 

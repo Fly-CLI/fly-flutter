@@ -1,17 +1,17 @@
 /// CLI flag definitions following industry standards (POSIX/GNU conventions)
 library;
 
+part 'definitions/common_flags.dart';
+part 'definitions/completion_flags.dart';
+part 'definitions/context_flags.dart';
+part 'definitions/create_flags.dart';
+part 'definitions/doctor_flags.dart';
+part 'definitions/generate_flags.dart';
 // Part files
 part 'definitions/global_flags.dart';
-part 'definitions/common_flags.dart';
-part 'definitions/schema_flags.dart';
-part 'definitions/context_flags.dart';
-part 'definitions/completion_flags.dart';
-part 'definitions/create_flags.dart';
-part 'definitions/generate_flags.dart';
-part 'definitions/doctor_flags.dart';
-part 'definitions/version_flags.dart';
 part 'definitions/mcp_flags.dart';
+part 'definitions/schema_flags.dart';
+part 'definitions/version_flags.dart';
 
 /// Flag categories following industry standards
 enum CliFlagCategory {
@@ -122,10 +122,10 @@ abstract class CliFlag {
 }
 
 String _flagTypeToJsonType(FlagType type) => switch (type) {
-      FlagType.boolean => 'flag',
-      FlagType.singleValue => 'value',
-      FlagType.multiValue => 'multiple',
-    };
+  FlagType.boolean => 'flag',
+  FlagType.singleValue => 'value',
+  FlagType.multiValue => 'multiple',
+};
 
 FlagType _flagTypeFromJson(String? raw) {
   return switch (raw) {

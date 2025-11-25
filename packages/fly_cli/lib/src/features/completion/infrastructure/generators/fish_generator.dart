@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
 
 /// Fish shell completion generator
@@ -100,8 +100,7 @@ class FishCompletionGenerator extends CompletionGenerator {
   @override
   String generateSubcommandsCompletion(
     List<SubcommandDefinition> subcommands,
-  ) =>
-      subcommands.map((s) => s.name).join(' ');
+  ) => subcommands.map((s) => s.name).join(' ');
 
   @override
   String generateOptionValuesCompletion(CliFlag option) {

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
@@ -20,11 +19,11 @@ class BrickCacheInfo {
   });
 
   factory BrickCacheInfo.fromJson(Map<String, dynamic> json) => BrickCacheInfo(
-        cachedAt: DateTime.parse(json['cached_at'] as String),
-        version: json['version'] as String,
-        checksum: json['checksum'] as String,
-        brickCount: json['brick_count'] as int,
-      );
+    cachedAt: DateTime.parse(json['cached_at'] as String),
+    version: json['version'] as String,
+    checksum: json['checksum'] as String,
+    brickCount: json['brick_count'] as int,
+  );
 
   final DateTime cachedAt;
   final String version;
@@ -32,11 +31,11 @@ class BrickCacheInfo {
   final int brickCount;
 
   Map<String, dynamic> toJson() => {
-        'cached_at': cachedAt.toIso8601String(),
-        'version': version,
-        'checksum': checksum,
-        'brick_count': brickCount,
-      };
+    'cached_at': cachedAt.toIso8601String(),
+    'version': version,
+    'checksum': checksum,
+    'brick_count': brickCount,
+  };
 }
 
 /// Generation plan for dry-run functionality
@@ -51,18 +50,19 @@ class GenerationPlan {
   });
 
   factory GenerationPlan.fromJson(Map<String, dynamic> json) => GenerationPlan(
-        brickName: json['brick_name'] as String,
-        brickType: BrickType.values.firstWhere(
-          (e) => e.name == json['brick_type'],
-          orElse: () => BrickType.custom,
-        ),
-        targetDirectory: json['target_directory'] as String,
-        variables: Map<String, dynamic>.from(json['variables'] as Map),
-        filesToGenerate:
-            (json['files_to_generate'] as List<dynamic>).cast<String>(),
-        estimatedDuration:
-            Duration(milliseconds: json['estimated_duration_ms'] as int),
-      );
+    brickName: json['brick_name'] as String,
+    brickType: BrickType.values.firstWhere(
+      (e) => e.name == json['brick_type'],
+      orElse: () => BrickType.custom,
+    ),
+    targetDirectory: json['target_directory'] as String,
+    variables: Map<String, dynamic>.from(json['variables'] as Map),
+    filesToGenerate: (json['files_to_generate'] as List<dynamic>)
+        .cast<String>(),
+    estimatedDuration: Duration(
+      milliseconds: json['estimated_duration_ms'] as int,
+    ),
+  );
 
   final String brickName;
   final BrickType brickType;
@@ -72,13 +72,13 @@ class GenerationPlan {
   final Duration estimatedDuration;
 
   Map<String, dynamic> toJson() => {
-        'brick_name': brickName,
-        'brick_type': brickType.name,
-        'target_directory': targetDirectory,
-        'variables': variables,
-        'files_to_generate': filesToGenerate,
-        'estimated_duration_ms': estimatedDuration.inMilliseconds,
-      };
+    'brick_name': brickName,
+    'brick_type': brickType.name,
+    'target_directory': targetDirectory,
+    'variables': variables,
+    'files_to_generate': filesToGenerate,
+    'estimated_duration_ms': estimatedDuration.inMilliseconds,
+  };
 }
 
 /// Specialized cache manager for Mason bricks
@@ -90,11 +90,11 @@ class BrickCacheManager {
     FileWriter? fileWriter,
     ChecksumCalculator? checksumCalculator,
     DirectoryManager? directoryManager,
-  })  : _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory(),
-        _fileReader = fileReader ?? const FileReader(),
-        _fileWriter = fileWriter ?? const FileWriter(),
-        _checksumCalculator = checksumCalculator ?? const ChecksumCalculator(),
-        _directoryManager = directoryManager ?? const DirectoryManager();
+  }) : _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory(),
+       _fileReader = fileReader ?? const FileReader(),
+       _fileWriter = fileWriter ?? const FileWriter(),
+       _checksumCalculator = checksumCalculator ?? const ChecksumCalculator(),
+       _directoryManager = directoryManager ?? const DirectoryManager();
 
   final Logger logger;
   final String _cacheDirectory;
@@ -173,7 +173,8 @@ class BrickCacheManager {
           .toList();
 
       logger.detail(
-          'Loaded brick registry from cache with ${bricks.length} bricks');
+        'Loaded brick registry from cache with ${bricks.length} bricks',
+      );
       return bricks;
     } catch (e) {
       logger.warn('Failed to load brick registry from cache: $e');
@@ -184,8 +185,13 @@ class BrickCacheManager {
   /// Cache generation plan
   Future<void> cacheGenerationPlan(GenerationPlan plan) async {
     try {
-      final cacheFile = File(path.join(_cacheDirectory, 'plans',
-          '${plan.brickName}_${plan.brickType.name}.json'));
+      final cacheFile = File(
+        path.join(
+          _cacheDirectory,
+          'plans',
+          '${plan.brickName}_${plan.brickType.name}.json',
+        ),
+      );
       await _directoryManager.ensureExists(cacheFile.parent.path);
 
       final success = await _fileWriter.writeFileAtomic(
@@ -205,10 +211,17 @@ class BrickCacheManager {
 
   /// Load generation plan from cache
   Future<GenerationPlan?> loadGenerationPlan(
-      String brickName, BrickType brickType) async {
+    String brickName,
+    BrickType brickType,
+  ) async {
     try {
-      final cacheFile = File(path.join(
-          _cacheDirectory, 'plans', '${brickName}_${brickType.name}.json'));
+      final cacheFile = File(
+        path.join(
+          _cacheDirectory,
+          'plans',
+          '${brickName}_${brickType.name}.json',
+        ),
+      );
       if (!await _fileReader.isReadable(cacheFile)) {
         return null;
       }
@@ -229,10 +242,13 @@ class BrickCacheManager {
 
   /// Cache brick validation result
   Future<void> cacheValidationResult(
-      String brickName, BrickValidationResult result) async {
+    String brickName,
+    BrickValidationResult result,
+  ) async {
     try {
-      final cacheFile =
-          File(path.join(_cacheDirectory, 'validations', '$brickName.json'));
+      final cacheFile = File(
+        path.join(_cacheDirectory, 'validations', '$brickName.json'),
+      );
       await _directoryManager.ensureExists(cacheFile.parent.path);
 
       final cacheData = {
@@ -260,8 +276,9 @@ class BrickCacheManager {
   /// Load brick validation result from cache
   Future<BrickValidationResult?> loadValidationResult(String brickName) async {
     try {
-      final cacheFile =
-          File(path.join(_cacheDirectory, 'validations', '$brickName.json'));
+      final cacheFile = File(
+        path.join(_cacheDirectory, 'validations', '$brickName.json'),
+      );
       if (!await _fileReader.isReadable(cacheFile)) {
         return null;
       }

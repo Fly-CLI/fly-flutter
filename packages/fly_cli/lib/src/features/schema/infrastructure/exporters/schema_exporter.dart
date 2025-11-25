@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 
 /// Configuration for schema export
@@ -39,15 +39,14 @@ class ExportConfig {
     bool? includeValidation,
     bool? includeGlobalOptions,
     bool? prettyPrint,
-  }) =>
-      ExportConfig(
-        format: format ?? this.format,
-        commandFilter: commandFilter ?? this.commandFilter,
-        includeExamples: includeExamples ?? this.includeExamples,
-        includeValidation: includeValidation ?? this.includeValidation,
-        includeGlobalOptions: includeGlobalOptions ?? this.includeGlobalOptions,
-        prettyPrint: prettyPrint ?? this.prettyPrint,
-      );
+  }) => ExportConfig(
+    format: format ?? this.format,
+    commandFilter: commandFilter ?? this.commandFilter,
+    includeExamples: includeExamples ?? this.includeExamples,
+    includeValidation: includeValidation ?? this.includeValidation,
+    includeGlobalOptions: includeGlobalOptions ?? this.includeGlobalOptions,
+    prettyPrint: prettyPrint ?? this.prettyPrint,
+  );
 }
 
 /// Abstract base class for schema exporters
@@ -97,8 +96,10 @@ class SchemaExportUtils {
   }
 
   /// Format JSON with proper indentation
-  static String formatJson(Map<String, dynamic> json,
-      {bool prettyPrint = true}) {
+  static String formatJson(
+    Map<String, dynamic> json, {
+    bool prettyPrint = true,
+  }) {
     if (!prettyPrint) {
       return json.toString();
     }

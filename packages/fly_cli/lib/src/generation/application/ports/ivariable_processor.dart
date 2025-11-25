@@ -56,4 +56,3 @@ abstract class IVariableProcessor {
     required Brick brick,
   });
 }
-

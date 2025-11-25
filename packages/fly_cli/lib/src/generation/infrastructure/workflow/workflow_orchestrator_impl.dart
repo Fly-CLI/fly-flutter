@@ -14,8 +14,8 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
   WorkflowOrchestratorImpl({
     required TemplateManager templateManager,
     required Logger logger,
-  })  : _templateManager = templateManager,
-        _logger = logger;
+  }) : _templateManager = templateManager,
+       _logger = logger;
 
   final TemplateManager _templateManager;
   final Logger _logger;

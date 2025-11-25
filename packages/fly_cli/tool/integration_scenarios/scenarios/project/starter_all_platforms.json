@@ -3,7 +3,14 @@
   "name": "starter_app",
   "description": "Starter preset project with all platforms",
   "organization": "com.example",
-  "platforms": ["ios", "android", "web", "macos", "windows", "linux"],
+  "platforms": [
+    "ios",
+    "android",
+    "web",
+    "macos",
+    "windows",
+    "linux"
+  ],
   "preset": "starter"
 }
 

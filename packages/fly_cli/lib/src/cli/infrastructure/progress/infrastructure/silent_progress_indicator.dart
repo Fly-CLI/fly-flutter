@@ -55,4 +55,3 @@ class SilentProgressIndicator implements ProgressIndicator {
     _progress = null;
   }
 }
-

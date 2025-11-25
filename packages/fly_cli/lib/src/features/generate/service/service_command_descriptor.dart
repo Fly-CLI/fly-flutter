@@ -15,18 +15,18 @@ class ServiceCommandDescriptor extends FlyCommandDescriptor {
 
   @override
   List<String> get aliases => [
-        'generate-service',
-        'add-service',
-        'new-service',
-        'make-service',
-        'generateService',
-      ];
+    'generate-service',
+    'add-service',
+    'new-service',
+    'make-service',
+    'generateService',
+  ];
 
   @override
   CommandGroup? get group => const CommandGroup(
-        name: 'generate',
-        description: 'Generate new components for the current project',
-      );
+    name: 'generate',
+    description: 'Generate new components for the current project',
+  );
 
   @override
   CommandCategory get category => CommandCategory.generation;

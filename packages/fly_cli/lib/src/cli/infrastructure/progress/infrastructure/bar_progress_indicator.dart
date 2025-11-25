@@ -9,9 +9,9 @@ import 'package:mason_logger/mason_logger.dart';
 /// Suitable for operations with known total progress.
 class BarProgressIndicator implements ProgressIndicator {
   BarProgressIndicator({Logger? logger})
-      : _logger = logger ?? Logger(),
-        _progress = null,
-        _bar = null;
+    : _logger = logger ?? Logger(),
+      _progress = null,
+      _bar = null;
 
   final Logger _logger;
   ProgressInfo? _progress;
@@ -100,4 +100,3 @@ class BarProgressIndicator implements ProgressIndicator {
     return stdout.hasTerminal && !stdout.supportsAnsiEscapes == false;
   }
 }
-

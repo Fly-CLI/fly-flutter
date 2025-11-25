@@ -3,7 +3,10 @@
   "name": "analytics",
   "description": "Analytics service scenario (no partials - analytics doesn't support caching)",
   "organization": "com.example",
-  "platforms": ["ios", "android"],
+  "platforms": [
+    "ios",
+    "android"
+  ],
   "preset": "starter"
 }
 

@@ -30,12 +30,11 @@ class CheckResult {
   factory CheckResult.success({
     required String message,
     Map<String, dynamic>? data,
-  }) =>
-      CheckResult(
-        healthy: true,
-        message: message,
-        data: data,
-      );
+  }) => CheckResult(
+    healthy: true,
+    message: message,
+    data: data,
+  );
 
   /// Create a warning check result
   factory CheckResult.warning({
@@ -43,15 +42,14 @@ class CheckResult {
     String? suggestion,
     String? fixCommand,
     Map<String, dynamic>? data,
-  }) =>
-      CheckResult(
-        healthy: false,
-        message: message,
-        severity: CheckSeverity.warning,
-        suggestion: suggestion,
-        fixCommand: fixCommand,
-        data: data,
-      );
+  }) => CheckResult(
+    healthy: false,
+    message: message,
+    severity: CheckSeverity.warning,
+    suggestion: suggestion,
+    fixCommand: fixCommand,
+    data: data,
+  );
 
   /// Create an error check result
   factory CheckResult.error({
@@ -59,15 +57,14 @@ class CheckResult {
     String? suggestion,
     String? fixCommand,
     Map<String, dynamic>? data,
-  }) =>
-      CheckResult(
-        healthy: false,
-        message: message,
-        severity: CheckSeverity.error,
-        suggestion: suggestion,
-        fixCommand: fixCommand,
-        data: data,
-      );
+  }) => CheckResult(
+    healthy: false,
+    message: message,
+    severity: CheckSeverity.error,
+    suggestion: suggestion,
+    fixCommand: fixCommand,
+    data: data,
+  );
 
   /// Whether the check passed
   final bool healthy;
@@ -89,13 +86,13 @@ class CheckResult {
 
   /// Convert to JSON for structured output
   Map<String, dynamic> toJson() => {
-        'healthy': healthy,
-        'message': message,
-        'severity': severity.name,
-        'suggestion': suggestion,
-        'fixCommand': fixCommand,
-        'data': data,
-      };
+    'healthy': healthy,
+    'message': message,
+    'severity': severity.name,
+    'suggestion': suggestion,
+    'fixCommand': fixCommand,
+    'data': data,
+  };
 }
 
 /// Severity levels for check results
@@ -145,10 +142,12 @@ class SystemChecker {
 
   /// Get overall system health status
   SystemHealthStatus getOverallStatus(List<CheckResult> results) {
-    final errors =
-        results.where((r) => r.severity == CheckSeverity.error).length;
-    final warnings =
-        results.where((r) => r.severity == CheckSeverity.warning).length;
+    final errors = results
+        .where((r) => r.severity == CheckSeverity.error)
+        .length;
+    final warnings = results
+        .where((r) => r.severity == CheckSeverity.warning)
+        .length;
 
     if (errors > 0) {
       return SystemHealthStatus.unhealthy;

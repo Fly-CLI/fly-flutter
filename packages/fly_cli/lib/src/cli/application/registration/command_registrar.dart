@@ -1,9 +1,9 @@
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/application/command_registry.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/command_wrappers.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/command_wrappers.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 
 /// Handles command registration for the CLI
 ///
@@ -33,11 +33,11 @@ class CommandRegistrar {
     final context = contextFactory.createRegistrationContext();
 
     // Delegate command creation to registry
-    final registrationData =
-        CommandMetadataRegistry.instance.createAndInitialize(
-      context: context,
-      globalFlags: globalFlags,
-    );
+    final registrationData = CommandMetadataRegistry.instance
+        .createAndInitialize(
+          context: context,
+          globalFlags: globalFlags,
+        );
 
     // Register top-level commands
     for (final entry in registrationData.topLevelCommands.entries) {

@@ -94,30 +94,30 @@ class CommandDefinition {
     List<CommandExample>? examples,
     List<CliFlag>? globalOptions,
     bool? isHidden,
-  }) =>
-      CommandDefinition(
-        name: name ?? this.name,
-        description: description ?? this.description,
-        arguments: arguments ?? this.arguments,
-        options: options ?? this.options,
-        subcommands: subcommands ?? this.subcommands,
-        examples: examples ?? this.examples,
-        globalOptions: globalOptions ?? this.globalOptions,
-        isHidden: isHidden ?? this.isHidden,
-      );
+  }) => CommandDefinition(
+    name: name ?? this.name,
+    description: description ?? this.description,
+    arguments: arguments ?? this.arguments,
+    options: options ?? this.options,
+    subcommands: subcommands ?? this.subcommands,
+    examples: examples ?? this.examples,
+    globalOptions: globalOptions ?? this.globalOptions,
+    isHidden: isHidden ?? this.isHidden,
+  );
 
   /// Convert to JSON for schema export
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'arguments': arguments.map((e) => e.toJson()).toList(),
-        'options': options.map((flag) => flag.toJson()).toList(),
-        'subcommands': subcommands.map((e) => e.toJson()).toList(),
-        'examples': examples.map((e) => e.toJson()).toList(),
-        'global_options':
-            globalOptions.map((flag) => flag.toJson(isGlobalOverride: true)).toList(),
-        'is_hidden': isHidden,
-      };
+    'name': name,
+    'description': description,
+    'arguments': arguments.map((e) => e.toJson()).toList(),
+    'options': options.map((flag) => flag.toJson()).toList(),
+    'subcommands': subcommands.map((e) => e.toJson()).toList(),
+    'examples': examples.map((e) => e.toJson()).toList(),
+    'global_options': globalOptions
+        .map((flag) => flag.toJson(isGlobalOverride: true))
+        .toList(),
+    'is_hidden': isHidden,
+  };
 
   /// Validate metadata integrity
   bool isValid() {

@@ -1,7 +1,6 @@
-import 'package:pub_semver/pub_semver.dart';
-
 import 'package:fly_cli/src/generation/template/template_compatibility.dart';
 import 'package:fly_cli/src/generation/template/template_version.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 /// Utilities for parsing version-related data from YAML
 class VersionParser {

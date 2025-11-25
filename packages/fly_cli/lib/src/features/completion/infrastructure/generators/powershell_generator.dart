@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
 
 /// PowerShell completion generator
@@ -21,7 +21,6 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
       ..writeln('    ')
       ..writeln(r'    $completions = @()')
       ..writeln('    ')
-
       // Generate commands list - include top-level commands and subcommands
       ..writeln('    # Commands');
     final commandNamesList = <String>[]
@@ -38,11 +37,12 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
     buffer
       ..writeln("    \$commands = @('$commandNames')")
       ..writeln('    ')
-
       // Generate global options
       ..writeln('    # Global options');
-    final globalOptionsString =
-        registry.getGlobalOptions().map((o) => "'--${o.name}'").join(',');
+    final globalOptionsString = registry
+        .getGlobalOptions()
+        .map((o) => "'--${o.name}'")
+        .join(',');
     buffer
       ..writeln('    \$globalOptions = @($globalOptionsString)')
       ..writeln('    ')
@@ -81,8 +81,7 @@ class PowerShellCompletionGenerator extends CompletionGenerator {
   @override
   String generateSubcommandsCompletion(
     List<SubcommandDefinition> subcommands,
-  ) =>
-      subcommands.map((s) => s.name).join(' ');
+  ) => subcommands.map((s) => s.name).join(' ');
 
   @override
   String generateOptionValuesCompletion(CliFlag option) {

@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
-import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart' show GenerationPlan;
-import 'package:fly_cli/src/generation/brick/brick_metadata.dart' show BrickType;
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart'
+    show BrickType;
 import 'package:fly_cli/src/generation/brick/brick_registry.dart';
+import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 
@@ -31,10 +31,11 @@ class GenerationPreview {
 
   /// Display the preview in a user-friendly format
   void display(Logger logger) {
-    logger..info('📋 Generation Preview')
-    ..info('Brick: $brickName (${brickType.name})')
-    ..info('Target: $targetDirectory')
-    ..info('Estimated Duration: ${estimatedDuration.inMilliseconds}ms');
+    logger
+      ..info('📋 Generation Preview')
+      ..info('Brick: $brickName (${brickType.name})')
+      ..info('Target: $targetDirectory')
+      ..info('Estimated Duration: ${estimatedDuration.inMilliseconds}ms');
 
     if (variables.isNotEmpty) {
       logger.info('\n🔧 Variables:');
@@ -70,15 +71,15 @@ class GenerationPreview {
 
   /// Convert to JSON for caching
   Map<String, dynamic> toJson() => {
-        'brick_name': brickName,
-        'brick_type': brickType.name,
-        'target_directory': targetDirectory,
-        'variables': variables,
-        'files_to_generate': filesToGenerate,
-        'directories_to_create': directoriesToCreate,
-        'estimated_duration_ms': estimatedDuration.inMilliseconds,
-        'warnings': warnings,
-      };
+    'brick_name': brickName,
+    'brick_type': brickType.name,
+    'target_directory': targetDirectory,
+    'variables': variables,
+    'files_to_generate': filesToGenerate,
+    'directories_to_create': directoriesToCreate,
+    'estimated_duration_ms': estimatedDuration.inMilliseconds,
+    'warnings': warnings,
+  };
 
   /// Create from JSON
   factory GenerationPreview.fromJson(Map<String, dynamic> json) =>
@@ -90,12 +91,13 @@ class GenerationPreview {
         ),
         targetDirectory: json['target_directory'] as String,
         variables: Map<String, dynamic>.from(json['variables'] as Map),
-        filesToGenerate:
-            (json['files_to_generate'] as List<dynamic>).cast<String>(),
-        directoriesToCreate:
-            (json['directories_to_create'] as List<dynamic>).cast<String>(),
-        estimatedDuration:
-            Duration(milliseconds: json['estimated_duration_ms'] as int),
+        filesToGenerate: (json['files_to_generate'] as List<dynamic>)
+            .cast<String>(),
+        directoriesToCreate: (json['directories_to_create'] as List<dynamic>)
+            .cast<String>(),
+        estimatedDuration: Duration(
+          milliseconds: json['estimated_duration_ms'] as int,
+        ),
         warnings: (json['warnings'] as List<dynamic>).cast<String>(),
       );
 }
@@ -121,8 +123,10 @@ class GenerationPreviewService {
     logger.detail('Generating preview for brick: $brickName');
 
     // Check cache first
-    final cachedPlan =
-        await _cacheManager.loadGenerationPlan(brickName, brickType);
+    final cachedPlan = await _cacheManager.loadGenerationPlan(
+      brickName,
+      brickType,
+    );
     if (cachedPlan != null) {
       logger.detail('Using cached generation plan');
       return _createPreviewFromPlan(cachedPlan, variables);
@@ -191,8 +195,9 @@ class GenerationPreviewService {
 
     final brickContentDir = Directory(path.join(brickPath, '__brick__'));
     if (!await brickContentDir.exists()) {
-      warnings
-          .add('Brick content directory not found: ${brickContentDir.path}');
+      warnings.add(
+        'Brick content directory not found: ${brickContentDir.path}',
+      );
       return GenerationPreview(
         brickName: brickName,
         brickType: brickType,
@@ -215,8 +220,10 @@ class GenerationPreviewService {
     );
 
     // Estimate duration based on file count and complexity
-    final estimatedDuration =
-        _estimateDuration(filesToGenerate.length, variables);
+    final estimatedDuration = _estimateDuration(
+      filesToGenerate.length,
+      variables,
+    );
 
     return GenerationPreview(
       brickName: brickName,
@@ -240,8 +247,10 @@ class GenerationPreviewService {
   ) async {
     await for (final entity in brickContentDir.list(recursive: true)) {
       if (entity is File) {
-        final relativePath =
-            path.relative(entity.path, from: brickContentDir.path);
+        final relativePath = path.relative(
+          entity.path,
+          from: brickContentDir.path,
+        );
         final processedPath = _processTemplatePath(relativePath, variables);
         final fullPath = path.join(targetDir, processedPath);
 
@@ -259,14 +268,18 @@ class GenerationPreviewService {
 
   /// Process template path with variable substitution
   String _processTemplatePath(
-      String templatePath, Map<String, dynamic> variables) {
+    String templatePath,
+    Map<String, dynamic> variables,
+  ) {
     var result = templatePath;
 
     for (final entry in variables.entries) {
       final placeholder = '{{${entry.key}}}';
       if (entry.value is List) {
-        result =
-            result.replaceAll(placeholder, (entry.value as List).join(', '));
+        result = result.replaceAll(
+          placeholder,
+          (entry.value as List).join(', '),
+        );
       } else {
         result = result.replaceAll(placeholder, entry.value.toString());
       }
@@ -291,14 +304,15 @@ class GenerationPreviewService {
       }
     }
 
-    final estimatedMs =
-        (fileCount * baseTimePerFile * complexityMultiplier).round();
+    final estimatedMs = (fileCount * baseTimePerFile * complexityMultiplier)
+        .round();
     return Duration(
-        milliseconds: estimatedMs.clamp(100, 10000)); // Min 100ms, max 10s
+      milliseconds: estimatedMs.clamp(100, 10000),
+    ); // Min 100ms, max 10s
   }
 
   /// Get brick path based on name
-  /// 
+  ///
   /// Note: Bricks are now located in the workspace root /bricks directory
   String? _getBrickPath(String brickName, BrickType brickType) {
     // Use BrickRegistry to find bricks directory
@@ -313,14 +327,16 @@ class GenerationPreviewService {
     if (dir.existsSync()) {
       return brickPath;
     }
-    
+
     logger.warn('Brick not found at: $brickPath');
     return null;
   }
 
   /// Create preview from cached generation plan
   GenerationPreview _createPreviewFromPlan(
-      GenerationPlan plan, Map<String, dynamic> variables) {
+    GenerationPlan plan,
+    Map<String, dynamic> variables,
+  ) {
     return GenerationPreview(
       brickName: plan.brickName,
       brickType: plan.brickType,
@@ -349,14 +365,14 @@ class GenerationPreviewService {
 
   /// Get preview statistics
   Map<String, dynamic> getPreviewStats(GenerationPreview preview) => {
-        'brick_name': preview.brickName,
-        'brick_type': preview.brickType.name,
-        'files_count': preview.filesToGenerate.length,
-        'directories_count': preview.directoriesToCreate.length,
-        'estimated_duration_ms': preview.estimatedDuration.inMilliseconds,
-        'warnings_count': preview.warnings.length,
-        'variables_count': preview.variables.length,
-      };
+    'brick_name': preview.brickName,
+    'brick_type': preview.brickType.name,
+    'files_count': preview.filesToGenerate.length,
+    'directories_count': preview.directoriesToCreate.length,
+    'estimated_duration_ms': preview.estimatedDuration.inMilliseconds,
+    'warnings_count': preview.warnings.length,
+    'variables_count': preview.variables.length,
+  };
 
   /// Clear the generation cache
   Future<void> clearCache() async {

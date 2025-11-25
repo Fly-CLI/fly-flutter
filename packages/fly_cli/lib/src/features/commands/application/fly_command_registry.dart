@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
+import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
 
 /// Unified registry for Fly command strategies and metadata
 ///

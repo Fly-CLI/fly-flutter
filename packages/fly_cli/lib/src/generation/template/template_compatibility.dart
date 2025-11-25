@@ -110,8 +110,9 @@ class TemplateCompatibility {
     final parsedCliMax = cliMax != null ? parseVersionConstraint(cliMax) : null;
     final parsedFlutterMin = parseVersion(flutterMin);
     final parsedDartMin = parseVersion(dartMin);
-    final parsedDeprecationDate =
-        parseDate(yaml['deprecation_date'] as String?);
+    final parsedDeprecationDate = parseDate(
+      yaml['deprecation_date'] as String?,
+    );
     final parsedEolDate = parseDate(yaml['eol_date'] as String?);
 
     // Validate version constraints: min <= max if both specified
@@ -286,12 +287,12 @@ class TemplateCompatibility {
 
   @override
   int get hashCode => Object.hash(
-        cliMinVersion,
-        cliMaxVersion,
-        flutterMinSdk,
-        dartMinSdk,
-        deprecated,
-        deprecationDate,
-        eolDate,
-      );
+    cliMinVersion,
+    cliMaxVersion,
+    flutterMinSdk,
+    dartMinSdk,
+    deprecated,
+    deprecationDate,
+    eolDate,
+  );
 }

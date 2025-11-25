@@ -43,11 +43,11 @@ class VersionResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (version != null) 'version': version,
-        if (sdkVersion != null) 'sdkVersion': sdkVersion,
-        if (latestVersion != null) 'latestVersion': latestVersion,
-        if (updateAvailable != null) 'updateAvailable': updateAvailable,
-      };
+    'success': success,
+    'message': message,
+    if (version != null) 'version': version,
+    if (sdkVersion != null) 'sdkVersion': sdkVersion,
+    if (latestVersion != null) 'latestVersion': latestVersion,
+    if (updateAvailable != null) 'updateAvailable': updateAvailable,
+  };
 }

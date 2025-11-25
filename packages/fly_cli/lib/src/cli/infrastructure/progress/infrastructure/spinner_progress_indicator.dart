@@ -9,9 +9,9 @@ import 'package:mason_logger/mason_logger.dart';
 /// Suitable for interactive terminals.
 class SpinnerProgressIndicator implements ProgressIndicator {
   SpinnerProgressIndicator({Logger? logger})
-      : _logger = logger ?? Logger(),
-        _progress = null,
-        _spinner = null;
+    : _logger = logger ?? Logger(),
+      _progress = null,
+      _spinner = null;
 
   final Logger _logger;
   ProgressInfo? _progress;
@@ -85,4 +85,3 @@ class SpinnerProgressIndicator implements ProgressIndicator {
     return stdout.hasTerminal && !stdout.supportsAnsiEscapes == false;
   }
 }
-

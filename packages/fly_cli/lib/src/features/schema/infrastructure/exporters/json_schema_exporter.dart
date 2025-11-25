@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 
 import 'schema_exporter.dart';
@@ -31,7 +31,9 @@ class JsonSchemaExporter extends SchemaExporter {
 
     // Add global options as a reusable definition
     if (globalOptions.isNotEmpty) {
-      schema['definitions']['GlobalOptions'] = _buildOptionsSchema(globalOptions);
+      schema['definitions']['GlobalOptions'] = _buildOptionsSchema(
+        globalOptions,
+      );
     }
 
     // Add each command as a property
@@ -42,20 +44,26 @@ class JsonSchemaExporter extends SchemaExporter {
       schema['properties'][commandName] = _buildCommandSchema(command, config);
     }
 
-    return SchemaExportUtils.formatJson(schema,
-        prettyPrint: config.prettyPrint);
+    return SchemaExportUtils.formatJson(
+      schema,
+      prettyPrint: config.prettyPrint,
+    );
   }
 
   @override
   String exportCommand(CommandDefinition command, ExportConfig config) {
     final schema = _buildCommandSchema(command, config);
-    return SchemaExportUtils.formatJson(schema,
-        prettyPrint: config.prettyPrint);
+    return SchemaExportUtils.formatJson(
+      schema,
+      prettyPrint: config.prettyPrint,
+    );
   }
 
   /// Build JSON Schema for a single command
   Map<String, dynamic> _buildCommandSchema(
-      CommandDefinition command, ExportConfig config) {
+    CommandDefinition command,
+    ExportConfig config,
+  ) {
     final schema = <String, dynamic>{
       'type': 'object',
       'title': command.name,
@@ -80,8 +88,9 @@ class JsonSchemaExporter extends SchemaExporter {
     // Add options as optional properties
     if (command.options.isNotEmpty) {
       final optionsSchema = _buildOptionsSchema(command.options);
-      schema['properties']
-          .addAll(optionsSchema['properties'] as Map<String, dynamic>);
+      schema['properties'].addAll(
+        optionsSchema['properties'] as Map<String, dynamic>,
+      );
     }
 
     // Add global options reference

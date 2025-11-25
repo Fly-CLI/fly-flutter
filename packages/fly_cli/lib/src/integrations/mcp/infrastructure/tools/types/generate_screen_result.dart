@@ -33,10 +33,9 @@ class GenerateScreenResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (filesGenerated != null) 'filesGenerated': filesGenerated,
-        if (screenPath != null) 'screenPath': screenPath,
-      };
+    'success': success,
+    'message': message,
+    if (filesGenerated != null) 'filesGenerated': filesGenerated,
+    if (screenPath != null) 'screenPath': screenPath,
+  };
 }
-

@@ -31,55 +31,54 @@ class GenerateProjectCommand extends FlyCommand {
 
   @override
   CommandDefinition? get metadata => CommandDefinition(
-        name: name,
-        description: description,
-        arguments: [
-          const ArgumentDefinition(
-            name: 'project_name',
-            description: 'Name of the Flutter project to create',
-          ),
-        ],
-        options: flags,
-        examples: [
-          const CommandExample(
-            command:
-                'fly generate project my_app --template=fly_foundation --platforms=ios,android,web',
-            description: 'Create a Fly foundation project',
-          ),
-          const CommandExample(
-            command:
-                'fly generate project my_app --features=home,profile,settings',
-            description: 'Create a project with multiple features',
-          ),
-        ],
-      );
+    name: name,
+    description: description,
+    arguments: [
+      const ArgumentDefinition(
+        name: 'project_name',
+        description: 'Name of the Flutter project to create',
+      ),
+    ],
+    options: flags,
+    examples: [
+      const CommandExample(
+        command:
+            'fly generate project my_app --template=fly_foundation --platforms=ios,android,web',
+        description: 'Create a Fly foundation project',
+      ),
+      const CommandExample(
+        command: 'fly generate project my_app --features=home,profile,settings',
+        description: 'Create a project with multiple features',
+      ),
+    ],
+  );
 
   @override
   List<CliFlag> get flags => [
-        const CreateTemplateFlag(),
-        const CreateOrganizationFlag(),
-        const CreateDescriptionFlag(),
-        CreatePlatformsFlag(),
-        CreateFeaturesFlag(),
-        const InteractiveFlag(),
-        const CreateFromManifestFlag(),
-        const OutputDirFlag(),
-      ];
+    const CreateTemplateFlag(),
+    const CreateOrganizationFlag(),
+    const CreateDescriptionFlag(),
+    CreatePlatformsFlag(),
+    CreateFeaturesFlag(),
+    const InteractiveFlag(),
+    const CreateFromManifestFlag(),
+    const OutputDirFlag(),
+  ];
 
   @override
   List<CommandValidator> get validators => [
-        RequiredArgumentValidator('project_name'),
-        ProjectNameValidator(),
-        TemplateExistsValidator(),
-        PlatformValidator(),
-        DirectoryWritableValidator(),
-        EnvironmentValidator(),
-      ];
+    RequiredArgumentValidator('project_name'),
+    ProjectNameValidator(),
+    TemplateExistsValidator(),
+    PlatformValidator(),
+    DirectoryWritableValidator(),
+    EnvironmentValidator(),
+  ];
 
   @override
   List<CommandMiddleware> get middleware => [
-        CachingMiddleware(),
-      ];
+    CachingMiddleware(),
+  ];
 
   @override
   Future<CommandResult> execute() async {
@@ -159,7 +158,9 @@ class GenerateProjectCommand extends FlyCommand {
 
     // Build variables using ProjectVariableBuilder
     // Use execution context's argResults (set by CommandRunner) instead of registration context
-    final executionContext = context.factory.createExecutionContext(argResults!);
+    final executionContext = context.factory.createExecutionContext(
+      argResults!,
+    );
     const variableBuilder = ProjectVariableBuilder();
     final rawVars = variableBuilder.buildFromContext(
       context: executionContext,
@@ -190,7 +191,8 @@ class GenerateProjectCommand extends FlyCommand {
       final manifest = await ProjectManifest.fromFile(manifestPath);
 
       // Warn if CLI flags are also provided (manifest takes precedence)
-      final hasCliFlags = FlagAccessor.getString(
+      final hasCliFlags =
+          FlagAccessor.getString(
                 argResults,
                 const CreateOrganizationFlag(),
               ) !=
@@ -214,8 +216,10 @@ class GenerateProjectCommand extends FlyCommand {
       final projectName = manifest.name;
 
       // Resolve output directory
-      final outputDir =
-          FlagAccessor.getString(argResults, const OutputDirFlag());
+      final outputDir = FlagAccessor.getString(
+        argResults,
+        const OutputDirFlag(),
+      );
       final projectPathResult = await context.pathResolver.resolveProjectPath(
         context,
         projectName,
@@ -238,8 +242,9 @@ class GenerateProjectCommand extends FlyCommand {
       final projectPath = projectPathResult.path!;
 
       // Convert manifest screens to feature instances
-      final featureInstances =
-          _convertScreensToFeatureInstances(manifest.screens);
+      final featureInstances = _convertScreensToFeatureInstances(
+        manifest.screens,
+      );
       if (featureInstances.isEmpty) {
         featureInstances.add({
           'name': 'home',
@@ -256,8 +261,9 @@ class GenerateProjectCommand extends FlyCommand {
       }
 
       // Convert manifest services to service instances
-      final serviceInstances =
-          _convertServicesToServiceInstances(manifest.services);
+      final serviceInstances = _convertServicesToServiceInstances(
+        manifest.services,
+      );
 
       // Convert manifest to rawVars format using ProjectVariableBuilder
       const variableBuilder = ProjectVariableBuilder();
@@ -315,8 +321,9 @@ class GenerateProjectCommand extends FlyCommand {
   ) {
     return screens.map((screen) {
       // Extract feature from screen (default to screen name if no features specified)
-      final feature =
-          screen.features.isNotEmpty ? screen.features.first : screen.name;
+      final feature = screen.features.isNotEmpty
+          ? screen.features.first
+          : screen.name;
 
       return {
         'name': screen.name,
@@ -345,8 +352,9 @@ class GenerateProjectCommand extends FlyCommand {
         'name': service.name,
         'type': 'service',
         'params': {
-          'feature':
-              service.features.isNotEmpty ? service.features.first : 'core',
+          'feature': service.features.isNotEmpty
+              ? service.features.first
+              : 'core',
           'service_type': serviceType,
           'with_tests': true,
           'with_mocks': false,
@@ -397,7 +405,8 @@ class GenerateProjectCommand extends FlyCommand {
         prompt: 'Project name',
         defaultValue: projectName,
         validator: NameValidationRule.isValidProjectName,
-        validationError: 'Project name must contain only lowercase letters, '
+        validationError:
+            'Project name must contain only lowercase letters, '
             'numbers, and underscores',
       );
 
@@ -469,8 +478,9 @@ class GenerateProjectCommand extends FlyCommand {
       rawVars['name'] = finalProjectName;
       rawVars['template'] = finalTemplate;
       rawVars['organization'] = finalOrganization;
-      rawVars['description'] =
-          description.isNotEmpty ? description : 'A new Flutter project';
+      rawVars['description'] = description.isNotEmpty
+          ? description
+          : 'A new Flutter project';
       rawVars['platforms'] = finalPlatforms;
       rawVars['features'] = finalFeatures.map((featureName) {
         return {
@@ -530,7 +540,7 @@ class GenerateProjectCommand extends FlyCommand {
           rawVars['description'] as String? ?? 'A new Flutter project';
       final platforms =
           (rawVars['platforms'] as List<dynamic>?)?.cast<String>() ??
-              ['ios', 'android'];
+          ['ios', 'android'];
       final features = (rawVars['features'] as List<dynamic>?) ?? [];
       final featureNames = features.map((f) {
         if (f is Map) return f['name'] as String;
@@ -541,8 +551,8 @@ class GenerateProjectCommand extends FlyCommand {
         ..info('Creating Flutter project...')
         ..info('Template: $template')
         ..info('Organization: $organization')
-        ..info('Platforms: ${platforms.join(', ')}')..info(
-          'Features: ${featureNames.join(', ')}');
+        ..info('Platforms: ${platforms.join(', ')}')
+        ..info('Features: ${featureNames.join(', ')}');
 
       // Use injected template manager
       final templateManager = context.templateManager;
@@ -563,11 +573,12 @@ class GenerateProjectCommand extends FlyCommand {
                   'with_validation': false,
                   'with_navigation': false,
                 },
-              }
+              },
             ];
 
       // Ensure services list is in the correct format
-      final serviceInstances = (rawVars['services'] as List<dynamic>?)
+      final serviceInstances =
+          (rawVars['services'] as List<dynamic>?)
               ?.cast<Map<String, dynamic>>() ??
           [];
 
@@ -651,4 +662,3 @@ class GenerateProjectCommand extends FlyCommand {
     }
   }
 }
-

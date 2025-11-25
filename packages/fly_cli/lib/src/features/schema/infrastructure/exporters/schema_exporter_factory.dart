@@ -1,5 +1,4 @@
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
-
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/cli_spec_exporter.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/json_schema_exporter.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/openapi_exporter.dart';

@@ -48,15 +48,12 @@ class ContextExportParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        if (outputFile != null) 'outputFile': outputFile,
-        if (includeCode != null) 'includeCode': includeCode,
-        if (includeDependencies != null)
-          'includeDependencies': includeDependencies,
-        if (includeArchitecture != null)
-          'includeArchitecture': includeArchitecture,
-        if (includeSuggestions != null)
-          'includeSuggestions': includeSuggestions,
-        if (maxFiles != null) 'maxFiles': maxFiles,
-        if (maxFileSize != null) 'maxFileSize': maxFileSize,
-      };
+    if (outputFile != null) 'outputFile': outputFile,
+    if (includeCode != null) 'includeCode': includeCode,
+    if (includeDependencies != null) 'includeDependencies': includeDependencies,
+    if (includeArchitecture != null) 'includeArchitecture': includeArchitecture,
+    if (includeSuggestions != null) 'includeSuggestions': includeSuggestions,
+    if (maxFiles != null) 'maxFiles': maxFiles,
+    if (maxFileSize != null) 'maxFileSize': maxFileSize,
+  };
 }

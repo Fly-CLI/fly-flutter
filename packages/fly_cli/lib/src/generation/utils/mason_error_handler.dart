@@ -47,7 +47,9 @@ class MasonErrorHandler {
 
   /// Get user-friendly suggestion for error type
   static String getSuggestion(
-      MasonErrorType errorType, Map<String, dynamic>? context) {
+    MasonErrorType errorType,
+    Map<String, dynamic>? context,
+  ) {
     switch (errorType) {
       case MasonErrorType.brickNotFound:
         return 'Check if the brick exists and is properly installed. Run "fly template list" to see available templates.';
@@ -161,7 +163,10 @@ class MasonErrorHandler {
 
   /// Get user-friendly error message
   static String _getErrorMessage(
-      MasonErrorType errorType, Exception error, String brickName) {
+    MasonErrorType errorType,
+    Exception error,
+    String brickName,
+  ) {
     switch (errorType) {
       case MasonErrorType.brickNotFound:
         return 'Brick "$brickName" not found';
@@ -200,7 +205,9 @@ class MasonErrorHandler {
 
   /// Create a recovery strategy for an error
   static List<String> getRecoveryStrategies(
-      MasonErrorType errorType, Map<String, dynamic>? context) {
+    MasonErrorType errorType,
+    Map<String, dynamic>? context,
+  ) {
     final strategies = <String>[];
     final brickName = context?['brick_name'] as String? ?? 'brick';
 

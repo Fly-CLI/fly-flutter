@@ -18,6 +18,6 @@ class DoctorParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        if (fix != null) 'fix': fix,
-      };
+    if (fix != null) 'fix': fix,
+  };
 }

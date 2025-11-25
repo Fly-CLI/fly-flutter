@@ -16,9 +16,9 @@ class GenerationCommandHandler {
     required GenerateFeatureUseCase generateFeatureUseCase,
     required GenerateServiceUseCase generateServiceUseCase,
     required GenerateProjectUseCase generateProjectUseCase,
-  })  : _generateFeatureUseCase = generateFeatureUseCase,
-        _generateServiceUseCase = generateServiceUseCase,
-        _generateProjectUseCase = generateProjectUseCase;
+  }) : _generateFeatureUseCase = generateFeatureUseCase,
+       _generateServiceUseCase = generateServiceUseCase,
+       _generateProjectUseCase = generateProjectUseCase;
 
   final GenerateFeatureUseCase _generateFeatureUseCase;
   final GenerateServiceUseCase _generateServiceUseCase;
@@ -139,4 +139,3 @@ extension StringExtension on String {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 }
-

@@ -116,7 +116,8 @@ class TestsResourceStrategy extends ResourceStrategy {
 
       if (!coverageFile.existsSync()) {
         throw StateError(
-            'Coverage file not found. Run tests with --coverage first.');
+          'Coverage file not found. Run tests with --coverage first.',
+        );
       }
 
       // Check if read is allowed

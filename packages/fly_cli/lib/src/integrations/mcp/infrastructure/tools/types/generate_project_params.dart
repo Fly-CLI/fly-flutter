@@ -52,13 +52,12 @@ class GenerateProjectParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        'projectName': projectName,
-        if (template != null) 'template': template,
-        if (organization != null) 'organization': organization,
-        if (description != null) 'description': description,
-        if (platforms != null) 'platforms': platforms,
-        if (features != null) 'features': features,
-        if (outputDir != null) 'outputDir': outputDir,
-      };
+    'projectName': projectName,
+    if (template != null) 'template': template,
+    if (organization != null) 'organization': organization,
+    if (description != null) 'description': description,
+    if (platforms != null) 'platforms': platforms,
+    if (features != null) 'features': features,
+    if (outputDir != null) 'outputDir': outputDir,
+  };
 }
-

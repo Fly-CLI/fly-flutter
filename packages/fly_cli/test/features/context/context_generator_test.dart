@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../../helpers/analysis_test_fixtures.dart';
 import '../../helpers/mock_logger.dart';
-import 'package:mason/mason.dart';
 
 void main() {
   group('ContextGenerator', () {
@@ -96,8 +96,9 @@ void main() {
       });
 
       test('should detect dependency conflicts', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createProblematicProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createProblematicProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(includeDependencies: true);
 
         final context = await generator.generate(projectDir, config);
@@ -140,8 +141,9 @@ void main() {
       });
 
       test('should respect file size limits', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         const config = ContextGeneratorConfig(
           includeCode: true,
           maxFileSize: 1000, // Very small limit
@@ -161,8 +163,9 @@ void main() {
       });
 
       test('should respect file count limits', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         const config = ContextGeneratorConfig(
           includeCode: true,
           maxFiles: 5,
@@ -215,18 +218,22 @@ void main() {
         expect(suggestions.every((s) => s is String), isTrue);
       });
 
-      test('should generate Fly-specific suggestions for Fly projects',
-          () async {
-        final projectDir = await AnalysisTestFixtures.createFlyProject(tempDir);
-        final config = const ContextGeneratorConfig(includeSuggestions: true);
+      test(
+        'should generate Fly-specific suggestions for Fly projects',
+        () async {
+          final projectDir = await AnalysisTestFixtures.createFlyProject(
+            tempDir,
+          );
+          final config = const ContextGeneratorConfig(includeSuggestions: true);
 
-        final context = await generator.generate(projectDir, config);
+          final context = await generator.generate(projectDir, config);
 
-        final suggestions = context['suggestions'] as List<dynamic>;
-        final suggestionStrings = suggestions.cast<String>();
+          final suggestions = context['suggestions'] as List<dynamic>;
+          final suggestionStrings = suggestions.cast<String>();
 
-        expect(suggestionStrings.any((s) => s.contains('fly add')), isTrue);
-      });
+          expect(suggestionStrings.any((s) => s.contains('fly add')), isTrue);
+        },
+      );
 
       test('should suggest state management for projects without it', () async {
         final projectDir =
@@ -241,8 +248,10 @@ void main() {
         final suggestions = context['suggestions'] as List<dynamic>;
         final suggestionStrings = suggestions.cast<String>();
 
-        expect(suggestionStrings.any((s) => s.contains('state management')),
-            isTrue);
+        expect(
+          suggestionStrings.any((s) => s.contains('state management')),
+          isTrue,
+        );
       });
     });
 
@@ -289,8 +298,9 @@ void main() {
         await projectDir.create(recursive: true);
 
         final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
-        await pubspecFile
-            .writeAsString(AnalysisTestFixtures.minimalPubspecContent);
+        await pubspecFile.writeAsString(
+          AnalysisTestFixtures.minimalPubspecContent,
+        );
 
         final config = const ContextGeneratorConfig(includeCode: true);
 
@@ -306,8 +316,9 @@ void main() {
 
     group('Performance', () {
       test('should complete analysis within reasonable time', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -319,7 +330,9 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(30000)); // 30 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(30000),
+        ); // 30 seconds max
       });
 
       test('should handle concurrent analysis requests', () async {
@@ -327,8 +340,10 @@ void main() {
             await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
         final config = const ContextGeneratorConfig();
 
-        final futures =
-            List.generate(5, (_) => generator.generate(projectDir, config));
+        final futures = List.generate(
+          5,
+          (_) => generator.generate(projectDir, config),
+        );
         final results = await Future.wait(futures);
 
         expect(results.length, equals(5));

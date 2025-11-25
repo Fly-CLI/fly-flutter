@@ -14,8 +14,8 @@ class TemplateCacheImpl implements ICacheManager<TemplateInfo> {
   TemplateCacheImpl({
     Logger? logger,
     String? cacheDirectory,
-  })  : _logger = logger ?? Logger(),
-        _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory();
+  }) : _logger = logger ?? Logger(),
+       _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory();
 
   final Logger _logger;
   final String _cacheDirectory;
@@ -199,4 +199,3 @@ class TemplateCacheImpl implements ICacheManager<TemplateInfo> {
     }
   }
 }
-

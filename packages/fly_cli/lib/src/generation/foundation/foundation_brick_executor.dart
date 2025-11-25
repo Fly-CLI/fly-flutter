@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:mason/mason.dart' hide Logger;
-import 'package:mason/mason.dart' as mason show Brick;
 import 'package:fly_brick_composer/src/orchestration/brick_executor.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
+import 'package:mason/mason.dart' as mason show Brick;
+import 'package:mason/mason.dart' hide Logger;
 
 /// CLI implementation of [BrickExecutor] that uses [TemplateManager] and Mason.
 ///
@@ -28,7 +28,8 @@ class TemplateManagerBrickExecutor implements BrickExecutor<GeneratedFile> {
       final brick = await _templateManager.getBrick(brickId);
       if (brick == null) {
         return BrickExecutionResult<GeneratedFile>.failure(
-          error: 'Brick "$brickId" not found. '
+          error:
+              'Brick "$brickId" not found. '
               'Make sure the bricks are available.',
         );
       }
@@ -61,4 +62,3 @@ class TemplateManagerBrickExecutor implements BrickExecutor<GeneratedFile> {
     }
   }
 }
-

@@ -71,8 +71,22 @@ class TemplateValidator {
   List<SecurityIssue> _checkForHardcodedSecrets(TemplateContent template) {
     final issues = <SecurityIssue>[];
     final patterns = [
-      (pattern: r'apiKey\s*[:=]\s*["' '][^"' ']+["' ']', type: 'API Key'),
-      (pattern: r'password\s*[:=]\s*["' '][^"' ']+["' ']', type: 'Password'),
+      (
+        pattern:
+            r'apiKey\s*[:=]\s*["'
+            '][^"'
+            ']+["'
+            ']',
+        type: 'API Key',
+      ),
+      (
+        pattern:
+            r'password\s*[:=]\s*["'
+            '][^"'
+            ']+["'
+            ']',
+        type: 'Password',
+      ),
       (pattern: 'sk-[a-zA-Z0-9]{32,}', type: 'OpenAI API Key'),
       (pattern: 'ghp_[a-zA-Z0-9]{36}', type: 'GitHub Token'),
       (pattern: r'AIza[0-9A-Za-z\\-_]{35}', type: 'Google API Key'),
@@ -137,7 +151,7 @@ class TemplateValidator {
       (pattern: r'''File\(['"]([^'"\n]+)['"]\)''', operation: 'File access'),
       (
         pattern: r'''Directory\(['"]([^'"\n]+)['"]\)''',
-        operation: 'Directory access'
+        operation: 'Directory access',
       ),
       (pattern: r'\.delete\(\)', operation: 'File deletion'),
       (pattern: r'\.writeAsString\(', operation: 'File writing'),

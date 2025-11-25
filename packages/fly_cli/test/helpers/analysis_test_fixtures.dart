@@ -6,7 +6,8 @@ import 'package:path/path.dart' as path;
 class AnalysisTestFixtures {
   /// Create a minimal Flutter project structure for testing
   static Future<Directory> createMinimalFlutterProject(
-      Directory tempDir) async {
+    Directory tempDir,
+  ) async {
     final projectDir = Directory(path.join(tempDir.path, 'minimal_project'));
     await projectDir.create(recursive: true);
 
@@ -26,7 +27,8 @@ class AnalysisTestFixtures {
 
   /// Create a complex Flutter project with multiple features
   static Future<Directory> createComplexFlutterProject(
-      Directory tempDir) async {
+    Directory tempDir,
+  ) async {
     final projectDir = Directory(path.join(tempDir.path, 'complex_project'));
     await projectDir.create(recursive: true);
 
@@ -46,19 +48,23 @@ class AnalysisTestFixtures {
     final homeDir = Directory(path.join(featuresDir.path, 'home'));
     await homeDir.create(recursive: true);
 
-    await File(path.join(homeDir.path, 'home_screen.dart'))
-        .writeAsString(homeScreenContent);
-    await File(path.join(homeDir.path, 'home_viewmodel.dart'))
-        .writeAsString(homeViewModelContent);
+    await File(
+      path.join(homeDir.path, 'home_screen.dart'),
+    ).writeAsString(homeScreenContent);
+    await File(
+      path.join(homeDir.path, 'home_viewmodel.dart'),
+    ).writeAsString(homeViewModelContent);
 
     // Create profile feature
     final profileDir = Directory(path.join(featuresDir.path, 'profile'));
     await profileDir.create(recursive: true);
 
-    await File(path.join(profileDir.path, 'profile_screen.dart'))
-        .writeAsString(profileScreenContent);
-    await File(path.join(profileDir.path, 'profile_service.dart'))
-        .writeAsString(profileServiceContent);
+    await File(
+      path.join(profileDir.path, 'profile_screen.dart'),
+    ).writeAsString(profileScreenContent);
+    await File(
+      path.join(profileDir.path, 'profile_service.dart'),
+    ).writeAsString(profileServiceContent);
 
     // Create core directory
     final coreDir = Directory(path.join(libDir.path, 'core'));
@@ -67,14 +73,16 @@ class AnalysisTestFixtures {
     // Create router directory
     final routerDir = Directory(path.join(coreDir.path, 'router'));
     await routerDir.create(recursive: true);
-    await File(path.join(routerDir.path, 'app_router.dart'))
-        .writeAsString(routerContent);
+    await File(
+      path.join(routerDir.path, 'app_router.dart'),
+    ).writeAsString(routerContent);
 
     // Create theme directory
     final themeDir = Directory(path.join(coreDir.path, 'theme'));
     await themeDir.create(recursive: true);
-    await File(path.join(themeDir.path, 'app_theme.dart'))
-        .writeAsString(themeContent);
+    await File(
+      path.join(themeDir.path, 'app_theme.dart'),
+    ).writeAsString(themeContent);
 
     // Create main.dart
     final mainFile = File(path.join(libDir.path, 'main.dart'));
@@ -84,17 +92,20 @@ class AnalysisTestFixtures {
     final testDir = Directory(path.join(projectDir.path, 'test'));
     await testDir.create(recursive: true);
 
-    await File(path.join(testDir.path, 'widget_test.dart'))
-        .writeAsString(widgetTestContent);
+    await File(
+      path.join(testDir.path, 'widget_test.dart'),
+    ).writeAsString(widgetTestContent);
 
     // Create README.md for documented convention
     await File(path.join(projectDir.path, 'README.md')).writeAsString(
-        '# Complex Test Project\n\nA complex Flutter project for testing.');
+      '# Complex Test Project\n\nA complex Flutter project for testing.',
+    );
 
     // Create platform directories
     await Directory(path.join(projectDir.path, 'ios')).create(recursive: true);
-    await Directory(path.join(projectDir.path, 'android'))
-        .create(recursive: true);
+    await Directory(
+      path.join(projectDir.path, 'android'),
+    ).create(recursive: true);
     await Directory(path.join(projectDir.path, 'web')).create(recursive: true);
 
     return projectDir;
@@ -117,16 +128,18 @@ class AnalysisTestFixtures {
     final libDir = Directory(path.join(projectDir.path, 'lib'));
     await libDir.create(recursive: true);
 
-    await File(path.join(libDir.path, 'main.dart'))
-        .writeAsString(flyMainContent);
+    await File(
+      path.join(libDir.path, 'main.dart'),
+    ).writeAsString(flyMainContent);
 
     return projectDir;
   }
 
   /// Create a project with problematic dependencies
   static Future<Directory> createProblematicProject(Directory tempDir) async {
-    final projectDir =
-        Directory(path.join(tempDir.path, 'problematic_project'));
+    final projectDir = Directory(
+      path.join(tempDir.path, 'problematic_project'),
+    );
     await projectDir.create(recursive: true);
 
     final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
@@ -135,8 +148,9 @@ class AnalysisTestFixtures {
     final libDir = Directory(path.join(projectDir.path, 'lib'));
     await libDir.create(recursive: true);
 
-    await File(path.join(libDir.path, 'main.dart'))
-        .writeAsString(problematicMainContent);
+    await File(
+      path.join(libDir.path, 'main.dart'),
+    ).writeAsString(problematicMainContent);
 
     return projectDir;
   }
@@ -157,14 +171,17 @@ class AnalysisTestFixtures {
       final featureDir = Directory(path.join(libDir.path, 'feature_$i'));
       await featureDir.create(recursive: true);
 
-      await File(path.join(featureDir.path, 'screen_$i.dart'))
-          .writeAsString(generateLargeFileContent(i));
-      await File(path.join(featureDir.path, 'service_$i.dart'))
-          .writeAsString(generateLargeFileContent(i + 1000));
+      await File(
+        path.join(featureDir.path, 'screen_$i.dart'),
+      ).writeAsString(generateLargeFileContent(i));
+      await File(
+        path.join(featureDir.path, 'service_$i.dart'),
+      ).writeAsString(generateLargeFileContent(i + 1000));
     }
 
-    await File(path.join(libDir.path, 'main.dart'))
-        .writeAsString(largeProjectMainContent);
+    await File(
+      path.join(libDir.path, 'main.dart'),
+    ).writeAsString(largeProjectMainContent);
 
     return projectDir;
   }
@@ -182,7 +199,8 @@ class AnalysisTestFixtures {
       buffer.writeln('  final int value;');
       buffer.writeln('');
       buffer.writeln(
-          '  GeneratedClass${seed}_$i({required this.name, required this.value});');
+        '  GeneratedClass${seed}_$i({required this.name, required this.value});',
+      );
       buffer.writeln('');
       buffer.writeln('  void method$i() {');
       buffer.writeln('    // Complex logic here');

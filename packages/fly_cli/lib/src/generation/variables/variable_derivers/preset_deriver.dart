@@ -30,4 +30,3 @@ class PresetDeriver implements VariableDeriver {
     return current.set(MasonVarKey.flyPackages.key, preset.flyPackages);
   }
 }
-

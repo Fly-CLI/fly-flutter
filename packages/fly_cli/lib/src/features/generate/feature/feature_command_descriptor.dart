@@ -15,18 +15,18 @@ class FeatureCommandDescriptor extends FlyCommandDescriptor {
 
   @override
   List<String> get aliases => [
-        'generate-feature',
-        'add-feature',
-        'new-feature',
-        'make-feature',
-        'generateFeature',
-      ];
+    'generate-feature',
+    'add-feature',
+    'new-feature',
+    'make-feature',
+    'generateFeature',
+  ];
 
   @override
   CommandGroup? get group => const CommandGroup(
-        name: 'generate',
-        description: 'Generate new components for the current project',
-      );
+    name: 'generate',
+    description: 'Generate new components for the current project',
+  );
 
   @override
   CommandCategory get category => CommandCategory.generation;

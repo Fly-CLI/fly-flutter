@@ -18,6 +18,6 @@ class VersionParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        if (checkUpdates != null) 'checkUpdates': checkUpdates,
-      };
+    if (checkUpdates != null) 'checkUpdates': checkUpdates,
+  };
 }

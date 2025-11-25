@@ -1,7 +1,7 @@
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_orchestrator.dart';
-import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/template_apply_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/template_apply_result.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/utils/progress_helpers.dart';
@@ -20,64 +20,63 @@ class TemplateApplyStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
+    description:
+        'Parameters for applying a Fly template. Template variables are passed in the variables object.',
+    properties: {
+      'templateId': Schema.string(
         description:
-            'Parameters for applying a Fly template. Template variables are passed in the variables object.',
-        properties: {
-          'templateId': Schema.string(
-            description:
-                'The identifier of the template to apply (e.g., "fly_foundation"). '
-                'Use fly.template.list to see available templates.',
-          ),
-          'outputDirectory': Schema.string(
-            description:
-                'The target directory where the template should be applied. Must be a valid path within the workspace.',
-          ),
-          'variables': ObjectSchema(
-            description:
-                'Template variables as key-value pairs. Common variables include: '
-                'projectName (string), organization (string), platforms (array of strings). '
-                'Available variables depend on the template being used.',
-            additionalProperties: true,
-          ),
-          'dryRun': Schema.bool(
-            description:
-                'If true, preview the template application without actually creating files. '
-                'Recommended for testing template parameters before applying.',
-          ),
-          'confirm': Schema.bool(
-            description:
-                'Explicit confirmation required for writes-to-disk operations. Must be true to apply template.',
-          ),
-        },
-        required: ['templateId', 'outputDirectory'],
-        additionalProperties: false,
-      );
+            'The identifier of the template to apply (e.g., "fly_foundation"). '
+            'Use fly.template.list to see available templates.',
+      ),
+      'outputDirectory': Schema.string(
+        description:
+            'The target directory where the template should be applied. Must be a valid path within the workspace.',
+      ),
+      'variables': ObjectSchema(
+        description:
+            'Template variables as key-value pairs. Common variables include: '
+            'projectName (string), organization (string), platforms (array of strings). '
+            'Available variables depend on the template being used.',
+        additionalProperties: true,
+      ),
+      'dryRun': Schema.bool(
+        description:
+            'If true, preview the template application without actually creating files. '
+            'Recommended for testing template parameters before applying.',
+      ),
+      'confirm': Schema.bool(
+        description:
+            'Explicit confirmation required for writes-to-disk operations. Must be true to apply template.',
+      ),
+    },
+    required: ['templateId', 'outputDirectory'],
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
+    description:
+        'Result from template application. Contains success status, generated files count, and execution details.',
+    properties: {
+      'success': Schema.bool(
+        description: 'Whether the template was applied successfully',
+      ),
+      'targetDirectory': Schema.string(
         description:
-            'Result from template application. Contains success status, generated files count, and execution details.',
-        properties: {
-          'success': Schema.bool(
-            description: 'Whether the template was applied successfully',
-          ),
-          'targetDirectory': Schema.string(
-            description:
-                'The directory where files were generated (null for dry-run)',
-          ),
-          'filesGenerated': Schema.int(
-            description: 'Number of files generated from the template',
-          ),
-          'duration_ms': Schema.int(
-            description: 'Time taken to apply the template in milliseconds',
-          ),
-          'message': Schema.string(
-            description:
-                'Human-readable message describing the operation result',
-          ),
-        },
-        required: ['success', 'message'],
-      );
+            'The directory where files were generated (null for dry-run)',
+      ),
+      'filesGenerated': Schema.int(
+        description: 'Number of files generated from the template',
+      ),
+      'duration_ms': Schema.int(
+        description: 'Time taken to apply the template in milliseconds',
+      ),
+      'message': Schema.string(
+        description: 'Human-readable message describing the operation result',
+      ),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => false;
@@ -100,8 +99,7 @@ class TemplateApplyStrategy
   }
 
   @override
-  TypedToolHandler<TemplateApplyParams, TemplateApplyResult>
-      createTypedHandler(
+  TypedToolHandler<TemplateApplyParams, TemplateApplyResult> createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -143,8 +141,8 @@ class TemplateApplyStrategy
 
       if (template == null) {
         // Get available templates for suggestion
-        final availableTemplates =
-            await templateManager.getAvailableTemplates();
+        final availableTemplates = await templateManager
+            .getAvailableTemplates();
         final availableNames = availableTemplates.map((t) => t.name).toList();
         throw McpError.templateError(
           templateId: params.templateId,
@@ -273,4 +271,3 @@ class TemplateApplyStrategy
     };
   }
 }
-

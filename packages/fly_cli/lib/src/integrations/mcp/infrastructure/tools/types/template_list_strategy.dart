@@ -15,27 +15,27 @@ class TemplateListStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {},
-        additionalProperties: false,
-      );
+    properties: {},
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'templates': Schema.list(
-            items: ObjectSchema(
-              properties: {
-                'name': Schema.string(),
-                'description': Schema.string(),
-                'version': Schema.string(),
-                'features': Schema.list(items: Schema.string()),
-              },
-              required: ['name', 'description', 'version'],
-            ),
-          ),
-        },
-        required: ['templates'],
-      );
+    properties: {
+      'templates': Schema.list(
+        items: ObjectSchema(
+          properties: {
+            'name': Schema.string(),
+            'description': Schema.string(),
+            'version': Schema.string(),
+            'features': Schema.list(items: Schema.string()),
+          },
+          required: ['name', 'description', 'version'],
+        ),
+      ),
+    },
+    required: ['templates'],
+  );
 
   @override
   bool get readOnly => true;
@@ -55,8 +55,7 @@ class TemplateListStrategy
   }
 
   @override
-  TypedToolHandler<TemplateListParams, TemplateListResult>
-      createTypedHandler(
+  TypedToolHandler<TemplateListParams, TemplateListResult> createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -71,18 +70,19 @@ class TemplateListStrategy
 
       final templateInfos = <TemplateInfo>[];
       for (final t in templates) {
-        templateInfos.add(TemplateInfo(
-          name: t.name,
-          description: t.description,
-          version: t.version,
-          features: t.features,
-          minFlutterSdk: t.minFlutterSdk,
-          minDartSdk: t.minDartSdk,
-        ));
+        templateInfos.add(
+          TemplateInfo(
+            name: t.name,
+            description: t.description,
+            version: t.version,
+            features: t.features,
+            minFlutterSdk: t.minFlutterSdk,
+            minDartSdk: t.minDartSdk,
+          ),
+        );
       }
 
       return TemplateListResult(templates: templateInfos);
     };
   }
 }
-

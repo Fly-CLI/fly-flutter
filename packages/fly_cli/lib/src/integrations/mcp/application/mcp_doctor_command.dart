@@ -1,6 +1,6 @@
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 
 class McpDoctorCommand extends FlyCommand {
@@ -16,8 +16,7 @@ class McpDoctorCommand extends FlyCommand {
   String get description => 'Run an MCP smoke test and show setup guidance';
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {

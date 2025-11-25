@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_screen_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_screen_result.dart';
 import 'package:fly_mcp/fly_mcp.dart';
@@ -22,73 +22,72 @@ class GenerateScreenStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
+    description:
+        'Parameters for generating a screen. Screen names follow Fly conventions: lowercase with snake_case for multi-word names.',
+    properties: {
+      'screenName': Schema.string(
         description:
-            'Parameters for generating a screen. Screen names follow Fly conventions: lowercase with snake_case for multi-word names.',
-        properties: {
-          'screenName': Schema.string(
-            description:
-                'The name of the screen to create. Must be lowercase and contain only letters, numbers, and underscores. '
-                'Examples: "home", "product_list", "user_profile". '
-                'Note: Names will be automatically converted to lowercase if provided in uppercase.',
-          ),
-          'feature': Schema.string(
-            description:
-                'The feature module this screen belongs to. Defaults to "home" if not specified.',
-          ),
-          'screenType': Schema.string(
-            description:
-                'The type of screen to generate. Each type has different structure and behavior: '
-                '- "list": Displays a list of items (e.g., product list) '
-                '- "detail": Shows detailed information about a single item '
-                '- "form": Input form for creating/editing data '
-                '- "auth": Authentication screen (login, signup) '
-                '- "settings": Application settings screen',
-            enumValues: ['list', 'detail', 'form', 'auth', 'settings'],
-          ),
-          'withViewModel': Schema.bool(
-            description:
-                'Whether to generate a view model for state management. Defaults to false.',
-          ),
-          'withTests': Schema.bool(
-            description:
-                'Whether to generate unit/widget tests for the screen. Defaults to false.',
-          ),
-          'withValidation': Schema.bool(
-            description:
-                'Whether to include form validation logic. Useful for form-type screens. Defaults to false.',
-          ),
-          'withNavigation': Schema.bool(
-            description:
-                'Whether to set up navigation/routing for this screen. Defaults to true.',
-          ),
-        },
-        required: ['screenName'],
-        additionalProperties: false,
-      );
+            'The name of the screen to create. Must be lowercase and contain only letters, numbers, and underscores. '
+            'Examples: "home", "product_list", "user_profile". '
+            'Note: Names will be automatically converted to lowercase if provided in uppercase.',
+      ),
+      'feature': Schema.string(
+        description:
+            'The feature module this screen belongs to. Defaults to "home" if not specified.',
+      ),
+      'screenType': Schema.string(
+        description:
+            'The type of screen to generate. Each type has different structure and behavior: '
+            '- "list": Displays a list of items (e.g., product list) '
+            '- "detail": Shows detailed information about a single item '
+            '- "form": Input form for creating/editing data '
+            '- "auth": Authentication screen (login, signup) '
+            '- "settings": Application settings screen',
+        enumValues: ['list', 'detail', 'form', 'auth', 'settings'],
+      ),
+      'withViewModel': Schema.bool(
+        description:
+            'Whether to generate a view model for state management. Defaults to false.',
+      ),
+      'withTests': Schema.bool(
+        description:
+            'Whether to generate unit/widget tests for the screen. Defaults to false.',
+      ),
+      'withValidation': Schema.bool(
+        description:
+            'Whether to include form validation logic. Useful for form-type screens. Defaults to false.',
+      ),
+      'withNavigation': Schema.bool(
+        description:
+            'Whether to set up navigation/routing for this screen. Defaults to true.',
+      ),
+    },
+    required: ['screenName'],
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
+    description:
+        'Result from generating a screen. Contains success status, generated files count, and screen path.',
+    properties: {
+      'success': Schema.bool(
+        description: 'Whether the screen was generated successfully',
+      ),
+      'message': Schema.string(
+        description: 'Human-readable message describing the operation result',
+      ),
+      'filesGenerated': Schema.int(
         description:
-            'Result from generating a screen. Contains success status, generated files count, and screen path.',
-        properties: {
-          'success': Schema.bool(
-            description: 'Whether the screen was generated successfully',
-          ),
-          'message': Schema.string(
-            description:
-                'Human-readable message describing the operation result',
-          ),
-          'filesGenerated': Schema.int(
-            description:
-                'Number of files generated for the screen (widget, tests, view model, etc.)',
-          ),
-          'screenPath': Schema.string(
-            description:
-                'Path to the generated screen directory containing all screen files',
-          ),
-        },
-        required: ['success', 'message'],
-      );
+            'Number of files generated for the screen (widget, tests, view model, etc.)',
+      ),
+      'screenPath': Schema.string(
+        description:
+            'Path to the generated screen directory containing all screen files',
+      ),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => false;
@@ -112,7 +111,7 @@ class GenerateScreenStrategy
 
   @override
   TypedToolHandler<GenerateScreenParams, GenerateScreenResult>
-      createTypedHandler(
+  createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -213,4 +212,3 @@ class GenerateScreenStrategy
     };
   }
 }
-

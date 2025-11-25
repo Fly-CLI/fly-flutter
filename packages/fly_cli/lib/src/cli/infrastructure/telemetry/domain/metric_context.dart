@@ -15,16 +15,14 @@ class MetricContext {
   MetricContext copyWith({
     String? operation,
     Map<String, String>? tags,
-  }) =>
-      MetricContext(
-        operation: operation ?? this.operation,
-        tags: tags != null ? {...this.tags, ...tags} : this.tags,
-      );
+  }) => MetricContext(
+    operation: operation ?? this.operation,
+    tags: tags != null ? {...this.tags, ...tags} : this.tags,
+  );
 
   /// Merge with another context
   MetricContext merge(MetricContext other) => copyWith(
-        operation: other.operation ?? operation,
-        tags: other.tags,
-      );
+    operation: other.operation ?? operation,
+    tags: other.tags,
+  );
 }
-

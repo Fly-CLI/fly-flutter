@@ -151,7 +151,8 @@ class BaseTemplateVariables {
       organization: organization,
       generationMode: generationMode,
       platforms: finalPlatforms,
-      description: vars.getVar<String>(MasonVarKey.description) ??
+      description:
+          vars.getVar<String>(MasonVarKey.description) ??
           'A new Fly foundation project',
       templateVariant:
           vars.getVar<String>(MasonVarKey.templateVariant) ?? 'foundation',
@@ -162,7 +163,8 @@ class BaseTemplateVariables {
       withMcp: vars.getVar<bool>(MasonVarKey.withMcp) ?? true,
       codeGeneration: vars.getVar<bool>(MasonVarKey.codeGeneration) ?? true,
       aiIntegration: vars.getVar<bool>(MasonVarKey.aiIntegration) ?? true,
-      flyPackages: vars.getVar<List>(MasonVarKey.flyPackages)?.cast<String>() ??
+      flyPackages:
+          vars.getVar<List>(MasonVarKey.flyPackages)?.cast<String>() ??
           defaultFlyPackages,
       serviceRetry: vars.getVar<bool>(MasonVarKey.withRetryLogic) ?? false,
       serviceCaching: vars.getVar<bool>(MasonVarKey.withCaching) ?? false,
@@ -175,8 +177,9 @@ class BaseTemplateVariables {
       stateManagement: StateManagement.tryFromKey(
         vars.getVar<String>(MasonVarKey.stateMgmt),
       ),
-      screenType:
-          ScreenType.tryFromKey(vars.getVar<String>(MasonVarKey.screenType)),
+      screenType: ScreenType.tryFromKey(
+        vars.getVar<String>(MasonVarKey.screenType),
+      ),
       serviceType: ServiceType.tryFromKey(
         vars.getVar<String>(MasonVarKey.serviceType),
         defaultValue: ServiceType.api,
@@ -311,8 +314,10 @@ class BaseTemplateVariables {
 
   /// Converts name to camelCase.
   String toCamelCase(String input) {
-    final words =
-        input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
+    final words = input
+        .split(RegExp(r'[\s_-]'))
+        .where((w) => w.isNotEmpty)
+        .toList();
     if (words.isEmpty) return input.toLowerCase();
 
     final firstWord = words.first.toLowerCase();
@@ -326,8 +331,10 @@ class BaseTemplateVariables {
 
   /// Converts name to PascalCase.
   String toPascalCase(String input) {
-    final words =
-        input.split(RegExp(r'[\s_-]')).where((w) => w.isNotEmpty).toList();
+    final words = input
+        .split(RegExp(r'[\s_-]'))
+        .where((w) => w.isNotEmpty)
+        .toList();
     if (words.isEmpty) return input;
 
     return words.map((word) {

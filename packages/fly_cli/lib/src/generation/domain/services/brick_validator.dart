@@ -1,6 +1,5 @@
-import 'package:fly_cli/src/generation/brick/brick_metadata.dart' show BrickCategory, BrickType, BrickValidationResult;
-import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart';
-import 'package:fly_cli/src/generation/brick/brick_registry.dart' show BrickValidationResult;
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart'
+    show BrickCategory, BrickType, BrickValidationResult;
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 
 /// Domain service for brick validation.
@@ -140,4 +139,3 @@ class BrickValidator implements IBrickValidator {
     return errors;
   }
 }
-

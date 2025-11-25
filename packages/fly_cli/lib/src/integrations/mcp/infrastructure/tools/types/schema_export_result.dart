@@ -43,11 +43,11 @@ class SchemaExportResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (outputFile != null) 'outputFile': outputFile,
-        if (fileSizeBytes != null) 'fileSizeBytes': fileSizeBytes,
-        if (format != null) 'format': format,
-        if (contentType != null) 'contentType': contentType,
-      };
+    'success': success,
+    'message': message,
+    if (outputFile != null) 'outputFile': outputFile,
+    if (fileSizeBytes != null) 'fileSizeBytes': fileSizeBytes,
+    if (format != null) 'format': format,
+    if (contentType != null) 'contentType': contentType,
+  };
 }

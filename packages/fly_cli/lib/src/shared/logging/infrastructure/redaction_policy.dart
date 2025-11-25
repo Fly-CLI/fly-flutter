@@ -2,8 +2,8 @@ typedef JsonMap = Map<String, Object?>;
 
 class RedactionPolicy {
   RedactionPolicy({List<Pattern>? redactKeys, List<Pattern>? redactValues})
-      : _redactKeyPatterns = redactKeys ?? _defaultKeyPatterns,
-        _redactValuePatterns = redactValues ?? _defaultValuePatterns;
+    : _redactKeyPatterns = redactKeys ?? _defaultKeyPatterns,
+      _redactValuePatterns = redactValues ?? _defaultValuePatterns;
 
   static final List<Pattern> _defaultKeyPatterns = <Pattern>[
     RegExp('token', caseSensitive: false),
@@ -29,8 +29,9 @@ class RedactionPolicy {
       } else if (v is Map<String, Object?>) {
         out[k] = scrub(v);
       } else if (v is List) {
-        out[k] =
-            v.map((e) => e is Map<String, Object?> ? scrub(e) : e).toList();
+        out[k] = v
+            .map((e) => e is Map<String, Object?> ? scrub(e) : e)
+            .toList();
       } else {
         out[k] = v;
       }

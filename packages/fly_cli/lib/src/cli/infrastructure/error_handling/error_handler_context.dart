@@ -1,5 +1,3 @@
-
-
 /// Context for error handling
 ///
 /// This class encapsulates all information needed for error handling,

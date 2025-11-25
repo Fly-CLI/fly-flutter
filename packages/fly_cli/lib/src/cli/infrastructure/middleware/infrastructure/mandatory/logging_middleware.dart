@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 
 /// Mandatory logging middleware that always runs.
 ///
@@ -19,7 +19,8 @@ class LoggingMiddleware implements CommandMiddleware {
     final commandName = context.argResults.command?.name ?? 'root';
 
     context.logger.detail(
-        'Executing command: $commandName with args: ${context.argResults.arguments}');
+      'Executing command: $commandName with args: ${context.argResults.arguments}',
+    );
 
     try {
       final result = await next();
@@ -27,14 +28,16 @@ class LoggingMiddleware implements CommandMiddleware {
 
       if (result != null) {
         context.logger.detail(
-            'Command $commandName completed in ${stopwatch.elapsedMilliseconds}ms with status: ${result.success ? 'SUCCESS' : 'FAILURE'}');
+          'Command $commandName completed in ${stopwatch.elapsedMilliseconds}ms with status: ${result.success ? 'SUCCESS' : 'FAILURE'}',
+        );
       }
 
       return result;
     } catch (e, st) {
       stopwatch.stop();
       context.logger.err(
-          'Command $commandName failed in ${stopwatch.elapsedMilliseconds}ms with error: $e');
+        'Command $commandName failed in ${stopwatch.elapsedMilliseconds}ms with error: $e',
+      );
       context.logger.detail(st.toString());
       rethrow;
     }

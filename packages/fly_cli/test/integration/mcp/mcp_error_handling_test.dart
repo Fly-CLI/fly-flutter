@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:args/args.dart' as args;
+import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/prompts/prompt_error.dart';
@@ -97,27 +97,30 @@ void main() {
         }
       });
 
-      test('should include field-level errors in validation failures',
-          () async {
-        final strategy = TemplateApplyStrategy();
-        final handler = strategy.createHandler(context, resourceRegistry);
+      test(
+        'should include field-level errors in validation failures',
+        () async {
+          final strategy = TemplateApplyStrategy();
+          final handler = strategy.createHandler(context, resourceRegistry);
 
-        try {
-          await handler({
-            'templateId': '', // Invalid: empty
-            'outputDirectory': '', // Invalid: empty
-          });
-          fail('Should have thrown error');
-        } catch (error) {
-          expect(error, isA<StateError>());
-          // Error should include field errors
-          final message = error.toString();
-          expect(
+          try {
+            await handler({
+              'templateId': '', // Invalid: empty
+              'outputDirectory': '', // Invalid: empty
+            });
+            fail('Should have thrown error');
+          } catch (error) {
+            expect(error, isA<StateError>());
+            // Error should include field errors
+            final message = error.toString();
+            expect(
               message.contains('templateId') ||
                   message.contains('outputDirectory'),
-              isTrue);
-        }
-      });
+              isTrue,
+            );
+          }
+        },
+      );
     });
 
     group('resource error handling', () {
@@ -157,25 +160,27 @@ void main() {
     });
 
     group('prompt error handling', () {
-      test('should provide structured PromptError with variable information',
-          () {
-        try {
-          throw PromptError.missingVariable(
-            variableName: 'name',
-            promptId: 'fly.scaffold.page',
-            description: 'The name of the page',
-          );
-        } catch (error) {
-          expect(error, isA<PromptError>());
-          final promptError = error as PromptError;
+      test(
+        'should provide structured PromptError with variable information',
+        () {
+          try {
+            throw PromptError.missingVariable(
+              variableName: 'name',
+              promptId: 'fly.scaffold.page',
+              description: 'The name of the page',
+            );
+          } catch (error) {
+            expect(error, isA<PromptError>());
+            final promptError = error as PromptError;
 
-          expect(promptError.code, 'missing_variable');
-          expect(promptError.variableName, 'name');
-          expect(promptError.promptId, 'fly.scaffold.page');
-          expect(promptError.hints, isNotEmpty);
-          expect(promptError.remediation, isNotNull);
-        }
-      });
+            expect(promptError.code, 'missing_variable');
+            expect(promptError.variableName, 'name');
+            expect(promptError.promptId, 'fly.scaffold.page');
+            expect(promptError.hints, isNotEmpty);
+            expect(promptError.remediation, isNotNull);
+          }
+        },
+      );
 
       test('should include allowed values in invalidVariableValue errors', () {
         try {
@@ -211,7 +216,9 @@ void main() {
         final message = error.toString();
         expect(message, contains('test.tool'));
         expect(
-            message.contains('Error 1') || message.contains('Error 2'), isTrue);
+          message.contains('Error 1') || message.contains('Error 2'),
+          isTrue,
+        );
       });
 
       test('should format ResourceError with hints and remediation', () {
@@ -222,9 +229,10 @@ void main() {
 
         final message = error.toString();
         expect(
-            message.contains('Invalid resource URI') ||
-                message.contains('invalid://path'),
-            isTrue);
+          message.contains('Invalid resource URI') ||
+              message.contains('invalid://path'),
+          isTrue,
+        );
       });
 
       test('should format PromptError with hints and remediation', () {
@@ -235,9 +243,10 @@ void main() {
 
         final message = error.toString();
         expect(
-            message.contains('Missing required variable') ||
-                message.contains('name'),
-            isTrue);
+          message.contains('Missing required variable') ||
+              message.contains('name'),
+          isTrue,
+        );
       });
     });
   });

@@ -8,7 +8,7 @@ import 'package:mason_logger/mason_logger.dart';
 /// including strings, choices, multi-choices, and confirmations.
 class InteractivePrompt {
   InteractivePrompt(this.logger, [Stdin? stdin])
-      : stdinInput = stdin ?? _defaultStdin();
+    : stdinInput = stdin ?? _defaultStdin();
   final Logger logger;
   final Stdin stdinInput;
 
@@ -25,15 +25,17 @@ class InteractivePrompt {
     String? validationError,
   }) async {
     while (true) {
-      final promptText =
-          defaultValue != null ? '$prompt (default: $defaultValue)' : prompt;
+      final promptText = defaultValue != null
+          ? '$prompt (default: $defaultValue)'
+          : prompt;
 
       logger.info('$promptText: ');
       final input = stdinInput.readLineSync()?.trim() ?? '';
 
       // Use default value if input is empty
-      final value =
-          input.isEmpty && defaultValue != null ? defaultValue : input;
+      final value = input.isEmpty && defaultValue != null
+          ? defaultValue
+          : input;
 
       if (value.isEmpty) {
         logger.err('Input cannot be empty');
@@ -66,7 +68,8 @@ class InteractivePrompt {
         logger.info('  ${i + 1}) ${choices[i]}$marker');
       }
       logger.info(
-          'Select an option${defaultChoice != null ? ' (default: $defaultChoice)' : ''}: ');
+        'Select an option${defaultChoice != null ? ' (default: $defaultChoice)' : ''}: ',
+      );
 
       final input = stdinInput.readLineSync()?.trim() ?? '';
 
@@ -135,16 +138,19 @@ class InteractivePrompt {
       }
 
       // Parse comma-separated numbers
-      final indices =
-          input.split(',').map((s) => int.tryParse(s.trim())).toList();
+      final indices = input
+          .split(',')
+          .map((s) => int.tryParse(s.trim()))
+          .toList();
 
       if (indices.any((i) => i == null)) {
         logger.err('Invalid input. Please enter comma-separated numbers.');
         continue;
       }
 
-      final validIndices =
-          indices.map((i) => i!).where((i) => i >= 1 && i <= choices.length);
+      final validIndices = indices
+          .map((i) => i!)
+          .where((i) => i >= 1 && i <= choices.length);
 
       if (validIndices.isEmpty) {
         logger.err('No valid selections. Please try again.');

@@ -1,6 +1,4 @@
 import 'metric.dart';
-import 'metric_context.dart';
-import 'metric_type.dart';
 
 /// Abstract interface for collecting performance metrics
 ///
@@ -117,4 +115,3 @@ abstract class MetricsCollector {
   /// Exports all current metrics in the configured format
   Future<void> export();
 }
-

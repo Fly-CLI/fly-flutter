@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/versioning/version_registry.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
-
-import 'package:mason_logger/mason_logger.dart';
 
 /// Mock logger for testing that captures log messages
 class MockMasonLogger implements Logger {
@@ -203,8 +202,7 @@ min_dart_sdk: 3.0.0
       test('should return versions from versions.yaml', () async {
         final templateDir = Directory(
           path.join(templatesDir.path, 'test_template'),
-        )
-        ..createSync();
+        )..createSync();
 
         final versionsYaml = File(path.join(templateDir.path, 'versions.yaml'));
         await versionsYaml.writeAsString('''

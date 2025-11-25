@@ -1,7 +1,7 @@
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_exception.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_template_variables.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_types.dart'
-    show ScreenType, ServiceType, StateManagement, ProjectName, FoundationVars;
+    show StateManagement, FoundationVars;
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 
 /// Comprehensive configuration for a foundation preset.
@@ -234,4 +234,3 @@ enum FoundationPreset {
     return config.applyTo(base, key);
   }
 }
-

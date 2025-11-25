@@ -38,10 +38,10 @@ class TemplateApplyResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (targetDirectory != null) 'targetDirectory': targetDirectory,
-        if (filesGenerated != null) 'filesGenerated': filesGenerated,
-        if (durationMs != null) 'duration_ms': durationMs,
-      };
+    'success': success,
+    'message': message,
+    if (targetDirectory != null) 'targetDirectory': targetDirectory,
+    if (filesGenerated != null) 'filesGenerated': filesGenerated,
+    if (durationMs != null) 'duration_ms': durationMs,
+  };
 }

@@ -1,9 +1,9 @@
 import 'package:args/args.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart'
+    as cli_validation;
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart'
-    as cli_validation;
 import 'package:fly_core/src/validation/validation.dart';
 
 /// Base interface for command validators
@@ -44,7 +44,9 @@ class RequiredArgumentValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     // For positional arguments, check args.rest
     final argValue = args.rest.isNotEmpty ? args.rest.first : null;
     if (argValue == null || (argValue is String && argValue.isEmpty)) {
@@ -69,7 +71,9 @@ class FlutterProjectValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final rule = cli_validation.FlutterProjectValidationRule();
     return rule.validate(context.workingDirectory);
   }
@@ -88,7 +92,9 @@ class ProjectNameValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final projectName = args.rest.isNotEmpty ? args.rest.first : null;
     if (projectName == null) {
       return ValidationResult.failure(['Project name is required']);
@@ -114,7 +120,9 @@ class DirectoryWritableValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final directoryPath = targetDirectory ?? context.workingDirectory;
     final rule = cli_validation.DirectoryValidationRule(targetDirectory);
     return rule.validate(directoryPath);
@@ -138,8 +146,11 @@ class TemplateExistsValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
-    final template = templateName ??
+    CommandContext context,
+    ArgResults args,
+  ) async {
+    final template =
+        templateName ??
         FlagAccessor.getString(args, const CreateTemplateFlag());
     if (template == null) return ValidationResult.success();
 
@@ -161,7 +172,9 @@ class EnvironmentValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final rule = cli_validation.EnvironmentValidationRule();
     return rule.validate(null);
   }
@@ -184,9 +197,12 @@ class NetworkValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
-    final rule =
-        cli_validation.NetworkValidationRule(requiredHosts: requiredHosts);
+    CommandContext context,
+    ArgResults args,
+  ) async {
+    final rule = cli_validation.NetworkValidationRule(
+      requiredHosts: requiredHosts,
+    );
     final results = <ValidationResult>[];
 
     for (final host in requiredHosts) {
@@ -211,7 +227,9 @@ class ScreenNameValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final screenName = args.rest.isNotEmpty ? args.rest.first : null;
     if (screenName == null) {
       return ValidationResult.failure(['Screen name is required']);
@@ -233,7 +251,9 @@ class ServiceNameValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final serviceName = args.rest.isNotEmpty ? args.rest.first : null;
     if (serviceName == null) {
       return ValidationResult.failure(['Service name is required']);
@@ -255,7 +275,9 @@ class FeatureNameValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
+    CommandContext context,
+    ArgResults args,
+  ) async {
     final featureName = FlagAccessor.getString(
       args,
       const GenerateScreenFeatureFlag(),
@@ -280,9 +302,10 @@ class PlatformValidator implements CommandValidator {
 
   @override
   Future<ValidationResult> validate(
-      CommandContext context, ArgResults args) async {
-    final platforms =
-        FlagAccessor.getStringList(args, CreatePlatformsFlag());
+    CommandContext context,
+    ArgResults args,
+  ) async {
+    final platforms = FlagAccessor.getStringList(args, CreatePlatformsFlag());
     if (platforms.isEmpty) return ValidationResult.success();
 
     final rule = cli_validation.PlatformValidationRule();

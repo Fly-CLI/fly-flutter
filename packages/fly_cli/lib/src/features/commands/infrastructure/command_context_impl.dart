@@ -2,15 +2,15 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/domain/command_execution_context.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/context_factory.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
-import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
 import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
 import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_execution_context.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/context_factory.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
@@ -43,7 +43,8 @@ class Environment {
       isLinux: Platform.isLinux,
       isUnix: Platform.isLinux || Platform.isMacOS,
       pathSeparator: Platform.pathSeparator,
-      homeDirectory: const EnvironmentManager().getString(EnvVar.home) ??
+      homeDirectory:
+          const EnvironmentManager().getString(EnvVar.home) ??
           const EnvironmentManager().getString(EnvVar.userProfile) ??
           '',
       tempDirectory: Directory.systemTemp.path,
@@ -176,8 +177,7 @@ class CommandContextImpl implements CommandContext {
       FlagAccessor.getString(argResults, GlobalFormatFlag()) == 'ai';
 
   @override
-  bool get planMode =>
-      FlagAccessor.getBool(argResults, const GlobalPlanFlag());
+  bool get planMode => FlagAccessor.getBool(argResults, const GlobalPlanFlag());
 
   @override
   String getErrorSuggestion(Object error) => _getErrorSuggestion(error);

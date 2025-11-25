@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
+import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -237,7 +237,6 @@ void main() {
       // Dry run returns a result (may be failure if brick structure is invalid)
       expect(result, isA<GenerationResult>());
     });
-
 
     test('should maintain backward compatibility with legacy methods', () async {
       // Test that the legacy getAvailableTemplates method still works

@@ -48,12 +48,12 @@ class DoctorResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (totalChecks != null) 'totalChecks': totalChecks,
-        if (healthyChecks != null) 'healthyChecks': healthyChecks,
-        if (issuesFound != null) 'issuesFound': issuesFound,
-        if (overallStatus != null) 'overallStatus': overallStatus,
-        if (checks != null) 'checks': checks,
-      };
+    'success': success,
+    'message': message,
+    if (totalChecks != null) 'totalChecks': totalChecks,
+    if (healthyChecks != null) 'healthyChecks': healthyChecks,
+    if (issuesFound != null) 'issuesFound': issuesFound,
+    if (overallStatus != null) 'overallStatus': overallStatus,
+    if (checks != null) 'checks': checks,
+  };
 }

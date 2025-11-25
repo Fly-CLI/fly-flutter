@@ -14,9 +14,9 @@ class GenerateServiceUseCase {
     required IBrickRepository brickRepository,
     required IVariableProcessor variableProcessor,
     required IGenerationEngine generationEngine,
-  })  : _brickRepository = brickRepository,
-        _variableProcessor = variableProcessor,
-        _generationEngine = generationEngine;
+  }) : _brickRepository = brickRepository,
+       _variableProcessor = variableProcessor,
+       _generationEngine = generationEngine;
 
   final IBrickRepository _brickRepository;
   final IVariableProcessor _variableProcessor;
@@ -50,7 +50,8 @@ class GenerateServiceUseCase {
       if (!processed.validationResult.isValid) {
         return GenerationResultDto(
           success: false,
-          error: 'Variable validation failed: ${processed.validationResult.errors.join(', ')}',
+          error:
+              'Variable validation failed: ${processed.validationResult.errors.join(', ')}',
           data: {
             'validation_errors': processed.validationResult.errors,
             'brick_name': brickName,
@@ -76,4 +77,3 @@ class GenerateServiceUseCase {
     }
   }
 }
-

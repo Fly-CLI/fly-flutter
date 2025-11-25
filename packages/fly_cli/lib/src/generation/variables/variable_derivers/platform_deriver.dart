@@ -17,12 +17,13 @@ class PlatformDeriver implements VariableDeriver {
     VariableBag current,
     ComposerLogger logger,
   ) {
-    final platformsRaw = ctx.rawVars[MasonVarKey.platforms.key] as List? ??
+    final platformsRaw =
+        ctx.rawVars[MasonVarKey.platforms.key] as List? ??
         ctx.rawVars['platforms'] as List? ??
         ['ios', 'android'];
 
     final platforms = PlatformType.fromVars(ctx.rawVars);
-    
+
     // Convert platform types to string list
     final platformKeys = platforms.map((p) => p.key).toList();
 
@@ -33,8 +34,9 @@ class PlatformDeriver implements VariableDeriver {
     };
 
     final platformKeysSet = platformKeys.toSet();
-    final supportsDesktop =
-        platformKeysSet.intersection(desktopPlatforms).isNotEmpty;
+    final supportsDesktop = platformKeysSet
+        .intersection(desktopPlatforms)
+        .isNotEmpty;
 
     return current.setAll({
       MasonVarKey.platforms.key: platformKeys, // Set platforms field itself
@@ -48,4 +50,3 @@ class PlatformDeriver implements VariableDeriver {
     });
   }
 }
-

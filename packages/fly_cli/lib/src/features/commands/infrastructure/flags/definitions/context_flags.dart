@@ -6,7 +6,8 @@ part of '../cli_flags.dart';
 
 /// Context include code flag
 class ContextIncludeCodeFlag extends CliFlag {
-  const ContextIncludeCodeFlag() : super(
+  const ContextIncludeCodeFlag()
+    : super(
         name: 'include-code',
         description: 'Include source code in context export',
         isGlobal: false,
@@ -19,7 +20,8 @@ class ContextIncludeCodeFlag extends CliFlag {
 
 /// Context include dependencies flag
 class ContextIncludeDependenciesFlag extends CliFlag {
-  const ContextIncludeDependenciesFlag() : super(
+  const ContextIncludeDependenciesFlag()
+    : super(
         name: 'include-dependencies',
         description: 'Include dependency analysis in context export',
         isGlobal: false,
@@ -32,7 +34,8 @@ class ContextIncludeDependenciesFlag extends CliFlag {
 
 /// Context include architecture flag
 class ContextIncludeArchitectureFlag extends CliFlag {
-  const ContextIncludeArchitectureFlag() : super(
+  const ContextIncludeArchitectureFlag()
+    : super(
         name: 'include-architecture',
         description: 'Include architecture analysis in context export',
         isGlobal: false,
@@ -45,7 +48,8 @@ class ContextIncludeArchitectureFlag extends CliFlag {
 
 /// Context include suggestions flag
 class ContextIncludeSuggestionsFlag extends CliFlag {
-  const ContextIncludeSuggestionsFlag() : super(
+  const ContextIncludeSuggestionsFlag()
+    : super(
         name: 'include-suggestions',
         description: 'Include AI suggestions in context export',
         isGlobal: false,
@@ -58,7 +62,8 @@ class ContextIncludeSuggestionsFlag extends CliFlag {
 
 /// Context max files flag
 class ContextMaxFilesFlag extends CliFlag {
-  const ContextMaxFilesFlag() : super(
+  const ContextMaxFilesFlag()
+    : super(
         name: 'max-files',
         description: 'Maximum number of files to analyze',
         isGlobal: false,
@@ -70,7 +75,8 @@ class ContextMaxFilesFlag extends CliFlag {
 
 /// Context max file size flag
 class ContextMaxFileSizeFlag extends CliFlag {
-  const ContextMaxFileSizeFlag() : super(
+  const ContextMaxFileSizeFlag()
+    : super(
         name: 'max-file-size',
         description: 'Maximum file size to include (in bytes)',
         isGlobal: false,

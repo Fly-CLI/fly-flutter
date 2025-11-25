@@ -15,28 +15,27 @@ class DiagnosticEchoStrategy extends McpToolStrategy<EchoParams, EchoResult> {
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        description:
-            'Parameters for echo tool - used to test MCP server connectivity',
-        properties: {
-          'message': Schema.string(
-            description: 'The message to echo back. Can be any string value.',
-          ),
-        },
-        required: ['message'],
-        additionalProperties: false,
-      );
+    description:
+        'Parameters for echo tool - used to test MCP server connectivity',
+    properties: {
+      'message': Schema.string(
+        description: 'The message to echo back. Can be any string value.',
+      ),
+    },
+    required: ['message'],
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        description: 'Result from echo tool - contains the echoed message',
-        properties: {
-          'message': Schema.string(
-            description:
-                'The same message that was provided as input, echoed back',
-          ),
-        },
-        required: ['message'],
-      );
+    description: 'Result from echo tool - contains the echoed message',
+    properties: {
+      'message': Schema.string(
+        description: 'The same message that was provided as input, echoed back',
+      ),
+    },
+    required: ['message'],
+  );
 
   @override
   bool get readOnly => false;
@@ -66,4 +65,3 @@ class DiagnosticEchoStrategy extends McpToolStrategy<EchoParams, EchoResult> {
     };
   }
 }
-

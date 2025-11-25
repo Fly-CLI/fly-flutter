@@ -21,31 +21,32 @@ class CommandSchemaExportStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {
-          'format':
-              Schema.string(enumValues: ['json-schema', 'openapi', 'cli-spec']),
-          'command': Schema.string(),
-          'outputFile': Schema.string(),
-          'includeExamples': Schema.bool(),
-          'includeValidation': Schema.bool(),
-          'includeGlobalOptions': Schema.bool(),
-          'prettyPrint': Schema.bool(),
-        },
-        additionalProperties: false,
-      );
+    properties: {
+      'format': Schema.string(
+        enumValues: ['json-schema', 'openapi', 'cli-spec'],
+      ),
+      'command': Schema.string(),
+      'outputFile': Schema.string(),
+      'includeExamples': Schema.bool(),
+      'includeValidation': Schema.bool(),
+      'includeGlobalOptions': Schema.bool(),
+      'prettyPrint': Schema.bool(),
+    },
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'success': Schema.bool(),
-          'message': Schema.string(),
-          'outputFile': Schema.string(),
-          'fileSizeBytes': Schema.int(),
-          'format': Schema.string(),
-          'contentType': Schema.string(),
-        },
-        required: ['success', 'message'],
-      );
+    properties: {
+      'success': Schema.bool(),
+      'message': Schema.string(),
+      'outputFile': Schema.string(),
+      'fileSizeBytes': Schema.int(),
+      'format': Schema.string(),
+      'contentType': Schema.string(),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => true;
@@ -68,8 +69,7 @@ class CommandSchemaExportStrategy
   }
 
   @override
-  TypedToolHandler<SchemaExportParams, SchemaExportResult>
-      createTypedHandler(
+  TypedToolHandler<SchemaExportParams, SchemaExportResult> createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -85,13 +85,17 @@ class CommandSchemaExportStrategy
       final prettyPrint = params.prettyPrint ?? true;
 
       await progressNotifier?.notify(
-          message: 'Exporting command schema...', percent: 10);
+        message: 'Exporting command schema...',
+        percent: 10,
+      );
 
       // Parse format
       final format = _parseFormat(formatStr);
 
       await progressNotifier?.notify(
-          message: 'Generating schema...', percent: 50);
+        message: 'Generating schema...',
+        percent: 50,
+      );
 
       // Get command registry
       final registry = CommandMetadataRegistry.instance;
@@ -101,15 +105,16 @@ class CommandSchemaExportStrategy
 
       // Export schema
       final schemaContent = exporter.export(
-          registry,
-          _createExportConfig(
-            format: format,
-            commandFilter: commandFilter,
-            includeExamples: includeExamples,
-            includeValidation: includeValidation,
-            includeGlobalOptions: includeGlobalOptions,
-            prettyPrint: prettyPrint,
-          ));
+        registry,
+        _createExportConfig(
+          format: format,
+          commandFilter: commandFilter,
+          includeExamples: includeExamples,
+          includeValidation: includeValidation,
+          includeGlobalOptions: includeGlobalOptions,
+          prettyPrint: prettyPrint,
+        ),
+      );
 
       cancelToken?.throwIfCancelled();
 
@@ -170,4 +175,3 @@ class CommandSchemaExportStrategy
     );
   }
 }
-

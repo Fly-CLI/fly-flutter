@@ -8,4 +8,3 @@ abstract class MetricExporter {
   /// Get exported metrics in a serializable format
   Future<Map<String, dynamic>> getExportedData();
 }
-

@@ -17,7 +17,8 @@ class DependencyHealthAnalyzer {
 
   /// Analyze dependency health for a project with parallel API calls
   Future<List<DependencyHealth>> analyzeDependencyHealth(
-      Directory projectDir) async {
+    Directory projectDir,
+  ) async {
     final healthReports = <DependencyHealth>[];
 
     try {
@@ -32,7 +33,8 @@ class DependencyHealthAnalyzer {
       // Filter out Flutter SDK dependencies
       final externalDependencies = dependencies
           .where(
-              (dep) => !dep.startsWith('flutter') && !dep.startsWith('dart:'))
+            (dep) => !dep.startsWith('flutter') && !dep.startsWith('dart:'),
+          )
           .toList();
 
       // Analyze dependencies in parallel batches
@@ -43,8 +45,11 @@ class DependencyHealthAnalyzer {
         healthReports.addAll(batchResults);
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError<void>('DependencyHealthAnalyzer', e,
-          defaultValue: null);
+      ErrorHandler.handleAnalyzerError<void>(
+        'DependencyHealthAnalyzer',
+        e,
+        defaultValue: null,
+      );
     }
 
     return healthReports;
@@ -52,9 +57,13 @@ class DependencyHealthAnalyzer {
 
   /// Analyze a batch of dependencies in parallel
   Future<List<DependencyHealth>> _analyzeBatch(
-      List<String> dependencies) async {
+    List<String> dependencies,
+  ) async {
     final futures = dependencies
-        .map((dependency) => () => _analyzeDependency(dependency))
+        .map(
+          (dependency) =>
+              () => _analyzeDependency(dependency),
+        )
         .toList();
 
     final retryExecutor = RetryExecutor.quick();
@@ -91,10 +100,12 @@ class DependencyHealthAnalyzer {
       }
 
       // Fetch package info from pub.dev API with timeout
-      final response = await http.get(
-        Uri.parse('https://pub.dev/api/packages/$packageName'),
-        headers: {'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse('https://pub.dev/api/packages/$packageName'),
+            headers: {'Accept': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -118,7 +129,10 @@ class DependencyHealthAnalyzer {
       }
     } catch (e) {
       ErrorHandler.handleNetworkError<void>(
-          'GET', 'https://pub.dev/api/packages/$packageName', e);
+        'GET',
+        'https://pub.dev/api/packages/$packageName',
+        e,
+      );
 
       // Return default health if API call fails
       return DependencyHealth(
@@ -168,7 +182,9 @@ class DependencyHealthAnalyzer {
 
   /// Parse package data from pub.dev API response
   DependencyHealth _parsePackageData(
-      String packageName, Map<String, dynamic> data) {
+    String packageName,
+    Map<String, dynamic> data,
+  ) {
     // Extract health score
     final healthScore = _calculateHealthScore(data);
 
@@ -311,8 +327,8 @@ class DependencyHealthAnalyzer {
       // Would need hit/miss tracking
       'oldest_entry': _cacheTimestamps.values.isNotEmpty
           ? _cacheTimestamps.values
-              .reduce((a, b) => a.isBefore(b) ? a : b)
-              .toIso8601String()
+                .reduce((a, b) => a.isBefore(b) ? a : b)
+                .toIso8601String()
           : null,
     };
   }

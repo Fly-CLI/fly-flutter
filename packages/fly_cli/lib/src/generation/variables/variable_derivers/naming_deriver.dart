@@ -18,18 +18,21 @@ class NamingDeriver implements VariableDeriver {
     ComposerLogger logger,
   ) {
     // Extract basic fields from raw vars
-    final name = ctx.rawVars[MasonVarKey.name.key] as String? ??
+    final name =
+        ctx.rawVars[MasonVarKey.name.key] as String? ??
         ctx.rawVars['name'] as String? ??
         'unnamed';
-    final organization = ctx.rawVars[MasonVarKey.organization.key] as String? ??
+    final organization =
+        ctx.rawVars[MasonVarKey.organization.key] as String? ??
         ctx.rawVars['organization'] as String? ??
         'com.example';
-    final description = ctx.rawVars[MasonVarKey.description.key] as String? ??
+    final description =
+        ctx.rawVars[MasonVarKey.description.key] as String? ??
         ctx.rawVars['description'] as String? ??
         '';
 
     var bag = current;
-    
+
     // Set basic fields
     bag = bag.set(MasonVarKey.name.key, name);
     bag = bag.set(MasonVarKey.organization.key, organization);
@@ -42,7 +45,10 @@ class NamingDeriver implements VariableDeriver {
       case GenerationMode.project:
         bag = bag
             .set(MasonVarKey.projectName.key, name)
-            .set(MasonVarKey.projectNameSnake.key, NamingUtils.toSnakeCase(name))
+            .set(
+              MasonVarKey.projectNameSnake.key,
+              NamingUtils.toSnakeCase(name),
+            )
             .set(
               MasonVarKey.projectNameCamel.key,
               NamingUtils.toCamelCase(name),
@@ -67,16 +73,18 @@ class NamingDeriver implements VariableDeriver {
     // Set template variant and SDK versions if present
     final templateVariant =
         ctx.rawVars[MasonVarKey.templateVariant.key] as String? ??
-            ctx.rawVars['template_variant'] as String? ??
-            'foundation';
+        ctx.rawVars['template_variant'] as String? ??
+        'foundation';
     bag = bag.set(MasonVarKey.templateVariant.key, templateVariant);
 
-    final minFlutterSdk = ctx.rawVars[MasonVarKey.minFlutterSdk.key] as String? ??
+    final minFlutterSdk =
+        ctx.rawVars[MasonVarKey.minFlutterSdk.key] as String? ??
         ctx.rawVars['min_flutter_sdk'] as String? ??
         '3.10.0';
     bag = bag.set(MasonVarKey.minFlutterSdk.key, minFlutterSdk);
 
-    final minDartSdk = ctx.rawVars[MasonVarKey.minDartSdk.key] as String? ??
+    final minDartSdk =
+        ctx.rawVars[MasonVarKey.minDartSdk.key] as String? ??
         ctx.rawVars['min_dart_sdk'] as String? ??
         '3.0.0';
     bag = bag.set(MasonVarKey.minDartSdk.key, minDartSdk);
@@ -84,4 +92,3 @@ class NamingDeriver implements VariableDeriver {
     return bag;
   }
 }
-

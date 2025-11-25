@@ -6,7 +6,8 @@ part of '../cli_flags.dart';
 
 /// Doctor fix flag
 class DoctorFixFlag extends CliFlag {
-  const DoctorFixFlag() : super(
+  const DoctorFixFlag()
+    : super(
         name: 'fix',
         description: 'Attempt to fix common issues',
         isGlobal: false,

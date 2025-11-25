@@ -217,12 +217,12 @@ class TestFixtures {
       'create',
       'test_app',
       '--template=fly_foundation',
-      '--organization=com.test'
+      '--organization=com.test',
     ],
     'create_with_platforms': [
       'create',
       'test_app',
-      '--platforms=ios,android,web'
+      '--platforms=ios,android,web',
     ],
     'create_interactive': ['create', 'test_app', '--interactive'],
     'create_from_manifest': ['create', '--from-manifest=manifest.yaml'],
@@ -292,20 +292,24 @@ packages:
 ''';
 
   /// Get a random valid project name
-  static String getRandomProjectName() => validProjectNames[
-      DateTime.now().millisecondsSinceEpoch % validProjectNames.length];
+  static String getRandomProjectName() =>
+      validProjectNames[DateTime.now().millisecondsSinceEpoch %
+          validProjectNames.length];
 
   /// Get a random valid organization
-  static String getRandomOrganization() => validOrganizations[
-      DateTime.now().millisecondsSinceEpoch % validOrganizations.length];
+  static String getRandomOrganization() =>
+      validOrganizations[DateTime.now().millisecondsSinceEpoch %
+          validOrganizations.length];
 
   /// Get a random valid screen name
-  static String getRandomScreenName() => validScreenNames[
-      DateTime.now().millisecondsSinceEpoch % validScreenNames.length];
+  static String getRandomScreenName() =>
+      validScreenNames[DateTime.now().millisecondsSinceEpoch %
+          validScreenNames.length];
 
   /// Get a random valid service name
-  static String getRandomServiceName() => validServiceNames[
-      DateTime.now().millisecondsSinceEpoch % validServiceNames.length];
+  static String getRandomServiceName() =>
+      validServiceNames[DateTime.now().millisecondsSinceEpoch %
+          validServiceNames.length];
 
   /// Create a test project name with timestamp
   static String createTestProjectName({String? prefix}) {

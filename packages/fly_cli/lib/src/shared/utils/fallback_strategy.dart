@@ -75,13 +75,15 @@ class FallbackStrategy {
 
     if (!await file.exists()) {
       throw BundledTemplateNotFoundException(
-          'Bundled template file not found: $bundledPath');
+        'Bundled template file not found: $bundledPath',
+      );
     }
 
     // Load and return bundled template
     // This would parse the JSON and return a Template object
     throw BundledTemplateNotFoundException(
-        'Bundled template loading not implemented');
+      'Bundled template loading not implemented',
+    );
   }
 
   /// Generate helpful suggestions based on the error context
@@ -90,14 +92,17 @@ class FallbackStrategy {
 
     if (offlineMode) {
       suggestions.add(
-          'You are in offline mode. Try: fly template fetch $templateName (when online)');
-      suggestions
-          .add('Check if template exists in cache: fly template cache list');
+        'You are in offline mode. Try: fly template fetch $templateName (when online)',
+      );
+      suggestions.add(
+        'Check if template exists in cache: fly template cache list',
+      );
     } else {
       suggestions.add('Check your internet connection and try again');
       suggestions.add('Verify template name: fly template list');
-      suggestions
-          .add('Download template manually: fly template fetch $templateName');
+      suggestions.add(
+        'Download template manually: fly template fetch $templateName',
+      );
     }
 
     suggestions.add('For help: fly help template');

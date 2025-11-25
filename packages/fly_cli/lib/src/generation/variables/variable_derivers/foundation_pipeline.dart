@@ -27,4 +27,3 @@ const foundationPipeline = VariablePipeline([
 VariablePipeline createFoundationPipeline() {
   return foundationPipeline;
 }
-

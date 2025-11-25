@@ -70,8 +70,9 @@ class ConnectivityChecker {
     try {
       final client = HttpClient();
       final request = await client.getUrl(Uri.parse('https://pub.dev'));
-      final response =
-          await request.close().timeout(const Duration(seconds: 5));
+      final response = await request.close().timeout(
+        const Duration(seconds: 5),
+      );
       client.close();
       return response.statusCode == 200;
     } catch (e) {

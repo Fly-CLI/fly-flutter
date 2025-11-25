@@ -21,8 +21,9 @@ void main() {
       cacheManager = TemplateCacheManager(
         cacheDirectory: path.join(tempDir.path, 'cache'),
         logger: logger,
-        cacheDuration:
-            const Duration(minutes: 5), // Longer duration for integration tests
+        cacheDuration: const Duration(
+          minutes: 5,
+        ), // Longer duration for integration tests
       );
 
       templateManager = TemplateManager(
@@ -32,8 +33,9 @@ void main() {
       );
 
       // Create templates directory
-      await Directory(templateManager.templatesDirectory)
-          .create(recursive: true);
+      await Directory(
+        templateManager.templatesDirectory,
+      ).create(recursive: true);
     });
 
     tearDown(() async {
@@ -43,16 +45,18 @@ void main() {
     });
 
     group('Template Caching Integration', () {
-      test('should cache template on first load and use cache on second load',
-          () async {
-        // Create a test template
-        final templateDir = Directory(
-          path.join(templateManager.templatesDirectory, 'test_template'),
-        );
-        await templateDir.create(recursive: true);
+      test(
+        'should cache template on first load and use cache on second load',
+        () async {
+          // Create a test template
+          final templateDir = Directory(
+            path.join(templateManager.templatesDirectory, 'test_template'),
+          );
+          await templateDir.create(recursive: true);
 
-        // Create template.yaml
-        File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync('''
+          // Create template.yaml
+          File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync(
+            '''
 name: test_template
 version: 1.0.0
 description: Test template for integration
@@ -60,30 +64,33 @@ minFlutterSdk: 3.0.0
 minDartSdk: 3.0.0
 features: [test]
 packages: [test_package]
-''');
+''',
+          );
 
-        // First load - should cache the template
-        final firstLoad = await templateManager.getTemplate('test_template');
-        expect(firstLoad, isNotNull);
-        expect(firstLoad!.name, equals('test_template'));
+          // First load - should cache the template
+          final firstLoad = await templateManager.getTemplate('test_template');
+          expect(firstLoad, isNotNull);
+          expect(firstLoad!.name, equals('test_template'));
 
-        // Verify template was cached
-        final cacheResult = await cacheManager.getTemplate('test_template');
-        expect(cacheResult, isA<CacheSuccess>());
+          // Verify template was cached
+          final cacheResult = await cacheManager.getTemplate('test_template');
+          expect(cacheResult, isA<CacheSuccess>());
 
-        // Second load - should use cache
-        final secondLoad = await templateManager.getTemplate('test_template');
-        expect(secondLoad, isNotNull);
-        expect(secondLoad!.name, equals('test_template'));
+          // Second load - should use cache
+          final secondLoad = await templateManager.getTemplate('test_template');
+          expect(secondLoad, isNotNull);
+          expect(secondLoad!.name, equals('test_template'));
 
-        // Both loads should return the same template
-        expect(firstLoad.name, equals(secondLoad.name));
-        expect(firstLoad.version, equals(secondLoad.version));
-      });
+          // Both loads should return the same template
+          expect(firstLoad.name, equals(secondLoad.name));
+          expect(firstLoad.version, equals(secondLoad.version));
+        },
+      );
 
       test('should handle cache miss gracefully', () async {
-        final result =
-            await templateManager.getTemplate('non_existent_template');
+        final result = await templateManager.getTemplate(
+          'non_existent_template',
+        );
         expect(result, isNull);
       });
 
@@ -118,16 +125,18 @@ packages: [test_package]
         );
 
         // First load - should cache
-        final firstLoad =
-            await shortTemplateManager.getTemplate('expiring_template');
+        final firstLoad = await shortTemplateManager.getTemplate(
+          'expiring_template',
+        );
         expect(firstLoad, isNotNull);
 
         // Wait for expiration
         await Future<void>.delayed(const Duration(milliseconds: 200));
 
         // Second load - should reload from source
-        final secondLoad =
-            await shortTemplateManager.getTemplate('expiring_template');
+        final secondLoad = await shortTemplateManager.getTemplate(
+          'expiring_template',
+        );
         expect(secondLoad, isNotNull);
         expect(firstLoad!.name, equals(secondLoad!.name));
       });
@@ -159,8 +168,9 @@ packages: [test_package]
         await templateDir.delete(recursive: true);
 
         // Second load - should still work from cache
-        final secondLoad =
-            await templateManager.getTemplate('offline_template');
+        final secondLoad = await templateManager.getTemplate(
+          'offline_template',
+        );
         expect(secondLoad, isNotNull);
         expect(secondLoad!.name, equals('offline_template'));
       });
@@ -190,8 +200,9 @@ packages: [test_package]
           path.join(cacheManager.cacheDirectory, 'corrupt_template'),
         );
         if (cacheDir.existsSync()) {
-          File(path.join(cacheDir.path, 'cache_entry.json'))
-              .writeAsStringSync('invalid json');
+          File(
+            path.join(cacheDir.path, 'cache_entry.json'),
+          ).writeAsStringSync('invalid json');
         }
 
         // Second load - should reload from source despite corruption
@@ -226,21 +237,24 @@ packages: [test_package]
         await templateManager.getTemplate('clearable_template');
 
         // Verify cache exists
-        final cacheResult =
-            await cacheManager.getTemplate('clearable_template');
+        final cacheResult = await cacheManager.getTemplate(
+          'clearable_template',
+        );
         expect(cacheResult, isA<CacheSuccess>());
 
         // Clear cache
         await cacheManager.clearCache();
 
         // Verify cache is cleared
-        final clearedResult =
-            await cacheManager.getTemplate('clearable_template');
+        final clearedResult = await cacheManager.getTemplate(
+          'clearable_template',
+        );
         expect(clearedResult, isA<CacheMiss>());
 
         // Template should still be loadable from source
-        final reloaded =
-            await templateManager.getTemplate('clearable_template');
+        final reloaded = await templateManager.getTemplate(
+          'clearable_template',
+        );
         expect(reloaded, isNotNull);
         expect(reloaded!.name, equals('clearable_template'));
       });
@@ -255,8 +269,8 @@ packages: [test_package]
           );
           await templateDir.create(recursive: true);
 
-          File(path.join(templateDir.path, 'template.yaml'))
-              .writeAsStringSync('''
+          File(path.join(templateDir.path, 'template.yaml')).writeAsStringSync(
+            '''
 name: $templateName
 version: 1.0.0
 description: Test template $templateName
@@ -264,7 +278,8 @@ minFlutterSdk: 3.0.0
 minDartSdk: 3.0.0
 features: [test]
 packages: [test_package]
-''');
+''',
+          );
         }
 
         // Load all templates to cache them

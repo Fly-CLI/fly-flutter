@@ -70,9 +70,7 @@ class FlagFactory {
 
     for (final flag in flags) {
       if (flag.abbreviation != null) {
-        abbreviations
-            .putIfAbsent(flag.abbreviation!, () => [])
-            .add(flag.name);
+        abbreviations.putIfAbsent(flag.abbreviation!, () => []).add(flag.name);
       }
     }
 
@@ -96,4 +94,3 @@ class FlagFactory {
     }
   }
 }
-

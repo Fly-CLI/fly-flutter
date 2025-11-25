@@ -77,4 +77,3 @@ const serviceOnlyWorkflow = WorkflowDefinition(
     ),
   ],
 );
-

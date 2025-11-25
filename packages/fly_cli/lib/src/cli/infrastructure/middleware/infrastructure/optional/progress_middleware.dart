@@ -1,6 +1,6 @@
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 
 /// Optional middleware for progress tracking during command execution
 ///
@@ -51,4 +51,3 @@ class ProgressMiddleware implements CommandMiddleware {
     }
   }
 }
-

@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 
 import 'schema_exporter.dart';
@@ -53,7 +53,9 @@ class CliSpecExporter extends SchemaExporter {
 
   /// Build CLI spec for a single command
   Map<String, dynamic> _buildCommandSpec(
-      CommandDefinition command, ExportConfig config) {
+    CommandDefinition command,
+    ExportConfig config,
+  ) {
     final spec = <String, dynamic>{
       'name': command.name,
       'description': command.description,
@@ -72,8 +74,9 @@ class CliSpecExporter extends SchemaExporter {
 
     // Add subcommands
     if (command.subcommands.isNotEmpty) {
-      spec['subcommands'] =
-          command.subcommands.map(_buildSubcommandSpec).toList();
+      spec['subcommands'] = command.subcommands
+          .map(_buildSubcommandSpec)
+          .toList();
     }
 
     // Add examples
@@ -180,16 +183,17 @@ class CliSpecExporter extends SchemaExporter {
 
     // Add subcommand completions
     if (command.subcommands.isNotEmpty) {
-      completion['subcommands'] =
-          command.subcommands.map((s) => s.name).toList();
+      completion['subcommands'] = command.subcommands
+          .map((s) => s.name)
+          .toList();
     }
 
     return completion;
   }
 
   String _mapFlagType(FlagType type) => switch (type) {
-        FlagType.boolean => 'flag',
-        FlagType.singleValue => 'value',
-        FlagType.multiValue => 'multiple',
-      };
+    FlagType.boolean => 'flag',
+    FlagType.singleValue => 'value',
+    FlagType.multiValue => 'multiple',
+  };
 }

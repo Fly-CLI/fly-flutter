@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 
@@ -42,9 +42,9 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            stopwatch.elapsedMilliseconds,
-            lessThan(
-                12000)); // 12 seconds max - accounts for full analysis with all options enabled
+          stopwatch.elapsedMilliseconds,
+          lessThan(12000),
+        ); // 12 seconds max - accounts for full analysis with all options enabled
       });
 
       test('should analyze complex project within 10 seconds', () async {
@@ -63,12 +63,15 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(10000)); // 10 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(10000),
+        ); // 10 seconds max
       });
 
       test('should analyze large project within 30 seconds', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -85,7 +88,9 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(30000)); // 30 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(30000),
+        ); // 30 seconds max
       });
 
       test('should analyze Fly project within 8 seconds', () async {
@@ -106,8 +111,9 @@ void main() {
       });
 
       test('should analyze problematic project within 12 seconds', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createProblematicProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createProblematicProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -121,7 +127,9 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(12000)); // 12 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(12000),
+        ); // 12 seconds max
       });
     });
 
@@ -145,10 +153,9 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            memoryIncrease,
-            lessThan(60 *
-                1024 *
-                1024)); // 60MB max increase (allowing some variance)
+          memoryIncrease,
+          lessThan(60 * 1024 * 1024),
+        ); // 60MB max increase (allowing some variance)
       });
 
       test('should not exceed memory limits for complex project', () async {
@@ -170,12 +177,15 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            memoryIncrease, lessThan(100 * 1024 * 1024)); // 100MB max increase
+          memoryIncrease,
+          lessThan(100 * 1024 * 1024),
+        ); // 100MB max increase
       });
 
       test('should respect file size limits to control memory usage', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(
           includeCode: true,
           maxFiles: 10, // Small limit
@@ -193,7 +203,9 @@ void main() {
 
         expect(context, isNotNull);
         expect(
-            memoryIncrease, lessThan(200 * 1024 * 1024)); // 200MB max increase
+          memoryIncrease,
+          lessThan(200 * 1024 * 1024),
+        ); // 200MB max increase
 
         // Verify limits were respected
         final code = context['code'] as Map<String, dynamic>;
@@ -218,7 +230,9 @@ void main() {
 
         // Run multiple analyses concurrently
         final futures = List<Future<Map<String, dynamic>>>.generate(
-            5, (_) => generator.generate(projectDir, config));
+          5,
+          (_) => generator.generate(projectDir, config),
+        );
         final results = await Future.wait(futures);
 
         stopwatch.stop();
@@ -231,7 +245,9 @@ void main() {
 
         // Should complete within reasonable time (not 5x the single request time)
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(20000)); // 20 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(20000),
+        ); // 20 seconds max
       });
 
       test('should handle mixed project types concurrently', () async {
@@ -266,7 +282,9 @@ void main() {
 
         // Should complete within reasonable time
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(15000)); // 15 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(15000),
+        ); // 15 seconds max
       });
     });
 
@@ -274,8 +292,9 @@ void main() {
       test('should scale linearly with project size', () async {
         final smallProject =
             await AnalysisTestFixtures.createMinimalFlutterProject(tempDir);
-        final largeProject =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final largeProject = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
 
         final config = const ContextGeneratorConfig(
           includeCode: true,
@@ -306,8 +325,9 @@ void main() {
       });
 
       test('should handle increasing file counts efficiently', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
 
         final configs = [
           const ContextGeneratorConfig(
@@ -344,13 +364,16 @@ void main() {
         // Verify all operations complete within reasonable time
         for (final time in times) {
           expect(
-              time, lessThan(15000)); // Each should complete within 15 seconds
+            time,
+            lessThan(15000),
+          ); // Each should complete within 15 seconds
         }
       });
 
       test('should handle increasing file sizes efficiently', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
 
         final configs = [
           const ContextGeneratorConfig(
@@ -385,7 +408,9 @@ void main() {
         // Verify all operations complete within reasonable time
         for (final time in times) {
           expect(
-              time, lessThan(15000)); // Each should complete within 15 seconds
+            time,
+            lessThan(15000),
+          ); // Each should complete within 15 seconds
         }
 
         // Verify that processing larger files doesn't cause dramatic slowdown
@@ -412,14 +437,18 @@ void main() {
 
         // Measure with code analysis
         final withCodeStopwatch = Stopwatch()..start();
-        final withCodeContext =
-            await generator.generate(projectDir, withCodeConfig);
+        final withCodeContext = await generator.generate(
+          projectDir,
+          withCodeConfig,
+        );
         withCodeStopwatch.stop();
 
         // Measure without code analysis
         final withoutCodeStopwatch = Stopwatch()..start();
-        final withoutCodeContext =
-            await generator.generate(projectDir, withoutCodeConfig);
+        final withoutCodeContext = await generator.generate(
+          projectDir,
+          withoutCodeConfig,
+        );
         withoutCodeStopwatch.stop();
 
         expect(withCodeContext, isNotNull);
@@ -450,14 +479,18 @@ void main() {
 
         // Measure with dependency analysis
         final withDepsStopwatch = Stopwatch()..start();
-        final withDepsContext =
-            await generator.generate(projectDir, withDepsConfig);
+        final withDepsContext = await generator.generate(
+          projectDir,
+          withDepsConfig,
+        );
         withDepsStopwatch.stop();
 
         // Measure without dependency analysis
         final withoutDepsStopwatch = Stopwatch()..start();
-        final withoutDepsContext =
-            await generator.generate(projectDir, withoutDepsConfig);
+        final withoutDepsContext = await generator.generate(
+          projectDir,
+          withoutDepsConfig,
+        );
         withoutDepsStopwatch.stop();
 
         expect(withDepsContext, isNotNull);
@@ -487,8 +520,10 @@ void main() {
 
         // Measure minimal configuration
         final minimalStopwatch = Stopwatch()..start();
-        final minimalContext =
-            await generator.generate(projectDir, minimalConfig);
+        final minimalContext = await generator.generate(
+          projectDir,
+          minimalConfig,
+        );
         minimalStopwatch.stop();
 
         // Measure full configuration
@@ -500,8 +535,10 @@ void main() {
         expect(fullContext, isNotNull);
 
         // Minimal configuration should be fastest
-        expect(minimalStopwatch.elapsedMilliseconds,
-            lessThan(fullStopwatch.elapsedMilliseconds));
+        expect(
+          minimalStopwatch.elapsedMilliseconds,
+          lessThan(fullStopwatch.elapsedMilliseconds),
+        );
       });
     });
 
@@ -529,7 +566,9 @@ void main() {
 
         // Memory increase should be reasonable (not a leak)
         expect(
-            memoryIncrease, lessThan(100 * 1024 * 1024)); // 100MB max increase
+          memoryIncrease,
+          lessThan(100 * 1024 * 1024),
+        ); // 100MB max increase
       });
 
       test('should handle rapid successive analysis requests', () async {
@@ -549,7 +588,9 @@ void main() {
 
         // Should complete within reasonable time
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(30000)); // 30 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(30000),
+        ); // 30 seconds max
       });
 
       test('should handle mixed configuration requests', () async {
@@ -591,7 +632,9 @@ void main() {
 
         // Should complete within reasonable time
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(60000)); // 60 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(60000),
+        ); // 60 seconds max
       });
     });
 

@@ -6,7 +6,8 @@ part of '../cli_flags.dart';
 
 /// Completion shell flag (-s, --shell)
 class CompletionShellFlag extends CliFlag {
-  const CompletionShellFlag() : super(
+  const CompletionShellFlag()
+    : super(
         name: 'shell',
         abbreviation: 's',
         description: 'Target shell for completion script',
@@ -20,7 +21,8 @@ class CompletionShellFlag extends CliFlag {
 
 /// Completion install flag
 class CompletionInstallFlag extends CliFlag {
-  const CompletionInstallFlag() : super(
+  const CompletionInstallFlag()
+    : super(
         name: 'install',
         description: 'Install completion script to shell configuration',
         isGlobal: false,
@@ -33,7 +35,8 @@ class CompletionInstallFlag extends CliFlag {
 
 /// Completion uninstall flag
 class CompletionUninstallFlag extends CliFlag {
-  const CompletionUninstallFlag() : super(
+  const CompletionUninstallFlag()
+    : super(
         name: 'uninstall',
         description: 'Remove completion script from shell configuration',
         isGlobal: false,

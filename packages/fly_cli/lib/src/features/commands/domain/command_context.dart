@@ -1,11 +1,11 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/features/commands/domain/command_execution_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 

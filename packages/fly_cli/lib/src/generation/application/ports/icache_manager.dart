@@ -27,4 +27,3 @@ abstract class ICacheManager<T> {
   /// Get all cache keys.
   Future<List<String>> getKeys();
 }
-

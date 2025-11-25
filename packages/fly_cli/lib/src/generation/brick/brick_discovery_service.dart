@@ -15,7 +15,7 @@ class BrickDiscoveryService {
   BrickDiscoveryService({
     required this.logger,
     BrickRegistry? brickRegistry,
-  })  : _brickRegistry = brickRegistry ?? BrickRegistry(logger: logger);
+  }) : _brickRegistry = brickRegistry ?? BrickRegistry(logger: logger);
 
   final Logger logger;
   final BrickRegistry _brickRegistry;
@@ -37,8 +37,9 @@ class BrickDiscoveryService {
               bricks.add(brick);
             } else {
               logger.warn(
-                  'Brick ${brick.name} has category ${brick.category.name} '
-                  'but is located in $category directory');
+                'Brick ${brick.name} has category ${brick.category.name} '
+                'but is located in $category directory',
+              );
             }
           }
         }
@@ -84,9 +85,13 @@ class BrickDiscoveryService {
         try {
           final metadataContent = await flyMetadataFile.readAsString();
           flyMetadata = loadYaml(metadataContent) as Map<dynamic, dynamic>?;
-          logger.detail('Loaded fly_metadata.yaml for brick $brickPath: $flyMetadata');
+          logger.detail(
+            'Loaded fly_metadata.yaml for brick $brickPath: $flyMetadata',
+          );
         } catch (e) {
-          logger.warn('Failed to parse fly_metadata.yaml for brick $brickPath: $e');
+          logger.warn(
+            'Failed to parse fly_metadata.yaml for brick $brickPath: $e',
+          );
         }
       }
 
@@ -98,7 +103,9 @@ class BrickDiscoveryService {
       final mergedYaml = Map<dynamic, dynamic>.from(yaml);
       if (flyMetadata != null) {
         mergedYaml.addAll(flyMetadata);
-        logger.detail('Merged metadata into YAML for brick $brickPath. Type: ${mergedYaml['type']}');
+        logger.detail(
+          'Merged metadata into YAML for brick $brickPath. Type: ${mergedYaml['type']}',
+        );
       }
 
       // Create Brick directly from YAML
@@ -106,7 +113,8 @@ class BrickDiscoveryService {
 
       if (!brick.isValid) {
         logger.warn(
-            'Invalid brick for ${brick.name}: ${brick.validationErrors.join(', ')}');
+          'Invalid brick for ${brick.name}: ${brick.validationErrors.join(', ')}',
+        );
       }
 
       return brick;

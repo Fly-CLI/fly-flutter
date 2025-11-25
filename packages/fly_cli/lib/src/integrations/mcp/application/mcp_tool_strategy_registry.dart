@@ -1,6 +1,5 @@
 import 'package:fly_cli/src/features/commands/domain/mcp_tool.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
-import 'package:fly_cli/src/integrations/mcp/registry/tool_strategy_factory.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/command_schema_export_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/diagnostic_echo_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/generate_flutter_project_strategy.dart';
@@ -12,6 +11,7 @@ import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/system_diagnos
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/template_apply_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/template_list_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/version_info_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/registry/tool_strategy_factory.dart';
 
 /// Registry for MCP tool strategies using factory pattern.
 ///

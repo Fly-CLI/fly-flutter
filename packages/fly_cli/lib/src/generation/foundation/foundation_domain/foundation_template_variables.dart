@@ -75,7 +75,8 @@ class FoundationTemplateVariables {
       organization: organization,
       generationMode: generationMode,
       platforms: platforms,
-      description: vars.getVar<String>(MasonVarKey.description) ??
+      description:
+          vars.getVar<String>(MasonVarKey.description) ??
           'A new Fly foundation project',
       templateVariant:
           vars.getVar<String>(MasonVarKey.templateVariant) ?? 'foundation',
@@ -161,4 +162,3 @@ class FoundationTemplateVariables {
     );
   }
 }
-

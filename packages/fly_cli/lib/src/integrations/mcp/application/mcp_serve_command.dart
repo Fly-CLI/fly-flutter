@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/features/commands/domain/mcp_tool.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/commands/domain/mcp_tool.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/integrations/mcp/application/prompt_strategy_registry_provider.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/resources/dependencies_resource_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/resources/logs_build_resource_strategy.dart';
@@ -33,17 +33,17 @@ class McpServeCommand extends FlyCommand {
 
   @override
   List<CliFlag> get flags => [
-        const McpServeStdioFlag(),
-        const McpServeMaxMessageMbFlag(),
-        const McpServeDefaultTimeoutSecondsFlag(),
-        const McpServeMaxConcurrencyFlag(),
-      ];
+    const McpServeStdioFlag(),
+    const McpServeMaxMessageMbFlag(),
+    const McpServeDefaultTimeoutSecondsFlag(),
+    const McpServeMaxConcurrencyFlag(),
+  ];
 
   @override
   List<CommandMiddleware> get middleware => [
-        // Note: DryRunMiddleware is intentionally omitted for serve
-        // because it's a long-running server process that must actually execute
-      ];
+    // Note: DryRunMiddleware is intentionally omitted for serve
+    // because it's a long-running server process that must actually execute
+  ];
 
   /// Builds per-tool timeout map from all tool strategies
   Map<String, Duration> get perToolTimeouts {
@@ -71,30 +71,33 @@ class McpServeCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async {
-      final maxMb = int.tryParse(
-            FlagAccessor.getStringOrDefault(
-              argResults,
-              const McpServeMaxMessageMbFlag(),
-              '2',
-            ),
-          ) ??
-          2;
-      final defaultTimeoutSeconds = int.tryParse(
-            FlagAccessor.getStringOrDefault(
-              argResults,
-              const McpServeDefaultTimeoutSecondsFlag(),
-              '300',
-            ),
-          ) ??
-          300;
-      final maxConcurrency = int.tryParse(
-            FlagAccessor.getStringOrDefault(
-              argResults,
-              const McpServeMaxConcurrencyFlag(),
-              '10',
-            ),
-          ) ??
-          10;
+    final maxMb =
+        int.tryParse(
+          FlagAccessor.getStringOrDefault(
+            argResults,
+            const McpServeMaxMessageMbFlag(),
+            '2',
+          ),
+        ) ??
+        2;
+    final defaultTimeoutSeconds =
+        int.tryParse(
+          FlagAccessor.getStringOrDefault(
+            argResults,
+            const McpServeDefaultTimeoutSecondsFlag(),
+            '300',
+          ),
+        ) ??
+        300;
+    final maxConcurrency =
+        int.tryParse(
+          FlagAccessor.getStringOrDefault(
+            argResults,
+            const McpServeMaxConcurrencyFlag(),
+            '10',
+          ),
+        ) ??
+        10;
 
     // Initialize prompt strategy registry provider
     initializePromptStrategyRegistry();
@@ -152,8 +155,10 @@ class McpServeCommand extends FlyCommand {
     // Register all tools using enum-based architecture
     final tools = ToolRegistry();
     for (final toolType in McpTool.values) {
-      final toolAndHandler =
-          toolType.createToolAndHandler(context, resourceRegistry);
+      final toolAndHandler = toolType.createToolAndHandler(
+        context,
+        resourceRegistry,
+      );
       tools.register(
         toolAndHandler.tool,
         toolAndHandler.handler,

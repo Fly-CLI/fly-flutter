@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -167,8 +167,9 @@ void main() {
       });
 
       test('should handle problematic project with conflicts', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createProblematicProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createProblematicProject(
+          tempDir,
+        );
         const config = ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -182,10 +183,14 @@ void main() {
         final dependencies = context['dependencies'] as Map<String, dynamic>;
         final conflicts = dependencies['conflicts'] as List<dynamic>;
         expect(conflicts.isNotEmpty, isTrue);
-        expect(conflicts.any((c) => c.toString().contains('state management')),
-            isTrue);
         expect(
-            conflicts.any((c) => c.toString().contains('HTTP client')), isTrue);
+          conflicts.any((c) => c.toString().contains('state management')),
+          isTrue,
+        );
+        expect(
+          conflicts.any((c) => c.toString().contains('HTTP client')),
+          isTrue,
+        );
 
         // Verify warnings section
         final warnings = dependencies['warnings'] as List<dynamic>;
@@ -331,8 +336,9 @@ void main() {
 
     group('Performance and Scalability', () {
       test('should handle large project efficiently', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(
           includeCode: true,
           includeDependencies: true,
@@ -349,7 +355,9 @@ void main() {
 
         // Should complete within reasonable time
         expect(
-            stopwatch.elapsedMilliseconds, lessThan(30000)); // 30 seconds max
+          stopwatch.elapsedMilliseconds,
+          lessThan(30000),
+        ); // 30 seconds max
 
         // Should have processed files within limits
         final code = context['code'] as Map<String, dynamic>;
@@ -372,8 +380,10 @@ void main() {
         );
 
         // Run multiple analyses concurrently
-        final futures =
-            List.generate(5, (_) => generator.generate(projectDir, config));
+        final futures = List.generate(
+          5,
+          (_) => generator.generate(projectDir, config),
+        );
         final results = await Future.wait(futures);
 
         // All should succeed
@@ -389,16 +399,21 @@ void main() {
         // Results should be consistent
         final firstResult = results.first;
         for (final result in results.skip(1)) {
-          expect(result['project']['name'],
-              equals(firstResult['project']['name']));
-          expect(result['project']['type'],
-              equals(firstResult['project']['type']));
+          expect(
+            result['project']['name'],
+            equals(firstResult['project']['name']),
+          );
+          expect(
+            result['project']['type'],
+            equals(firstResult['project']['type']),
+          );
         }
       });
 
       test('should handle memory constraints gracefully', () async {
-        final projectDir =
-            await AnalysisTestFixtures.createLargeProject(tempDir);
+        final projectDir = await AnalysisTestFixtures.createLargeProject(
+          tempDir,
+        );
         final config = const ContextGeneratorConfig(
           includeCode: true,
           maxFiles: 5, // Very small limit
@@ -431,8 +446,9 @@ void main() {
         await projectDir.create(recursive: true);
 
         final pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
-        await pubspecFile
-            .writeAsString(AnalysisTestFixtures.minimalPubspecContent);
+        await pubspecFile.writeAsString(
+          AnalysisTestFixtures.minimalPubspecContent,
+        );
 
         final config = const ContextGeneratorConfig(
           includeCode: true,
@@ -496,43 +512,45 @@ void main() {
         await File(tempPath).rename(pubspecFile.path);
       });
 
-      test('should handle partial analysis when some components fail',
-          () async {
-        final projectDir =
-            await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
+      test(
+        'should handle partial analysis when some components fail',
+        () async {
+          final projectDir =
+              await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
 
-        // Make some files unreadable but keep pubspec.yaml readable
-        final libDir = Directory(path.join(projectDir.path, 'lib'));
-        await for (final entity in libDir.list(recursive: true)) {
-          if (entity is File && entity.path.endsWith('.dart')) {
-            // Make file unreadable by deleting it temporarily
-            final tempPath = '${entity.path}.temp';
-            await entity.rename(tempPath);
-            break; // Only make one file unreadable
+          // Make some files unreadable but keep pubspec.yaml readable
+          final libDir = Directory(path.join(projectDir.path, 'lib'));
+          await for (final entity in libDir.list(recursive: true)) {
+            if (entity is File && entity.path.endsWith('.dart')) {
+              // Make file unreadable by deleting it temporarily
+              final tempPath = '${entity.path}.temp';
+              await entity.rename(tempPath);
+              break; // Only make one file unreadable
+            }
           }
-        }
 
-        final config = const ContextGeneratorConfig(
-          includeCode: true,
-          includeDependencies: true,
-        );
+          final config = const ContextGeneratorConfig(
+            includeCode: true,
+            includeDependencies: true,
+          );
 
-        // Should still complete successfully
-        final context = await generator.generate(projectDir, config);
+          // Should still complete successfully
+          final context = await generator.generate(projectDir, config);
 
-        expect(context.containsKey('project'), isTrue);
-        expect(context.containsKey('structure'), isTrue);
-        expect(context.containsKey('dependencies'), isTrue);
-        expect(context.containsKey('code'), isTrue);
+          expect(context.containsKey('project'), isTrue);
+          expect(context.containsKey('structure'), isTrue);
+          expect(context.containsKey('dependencies'), isTrue);
+          expect(context.containsKey('code'), isTrue);
 
-        // Restore files for cleanup
-        await for (final entity in libDir.list(recursive: true)) {
-          if (entity is File && entity.path.endsWith('.dart.temp')) {
-            final originalPath = entity.path.replaceAll('.temp', '');
-            await entity.rename(originalPath);
+          // Restore files for cleanup
+          await for (final entity in libDir.list(recursive: true)) {
+            if (entity is File && entity.path.endsWith('.dart.temp')) {
+              final originalPath = entity.path.replaceAll('.temp', '');
+              await entity.rename(originalPath);
+            }
           }
-        }
-      });
+        },
+      );
     });
 
     group('Output Consistency', () {
@@ -561,10 +579,14 @@ void main() {
           // Core data should be identical
           expect(current['project']['name'], equals(first['project']['name']));
           expect(current['project']['type'], equals(first['project']['type']));
-          expect(current['structure']['total_files'],
-              equals(first['structure']['total_files']));
-          expect(current['structure']['lines_of_code'],
-              equals(first['structure']['lines_of_code']));
+          expect(
+            current['structure']['total_files'],
+            equals(first['structure']['total_files']),
+          );
+          expect(
+            current['structure']['lines_of_code'],
+            equals(first['structure']['lines_of_code']),
+          );
 
           // Dependencies should be identical
           final firstDeps =

@@ -28,8 +28,8 @@ class CompletionParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        if (shell != null) 'shell': shell,
-        if (outputFile != null) 'outputFile': outputFile,
-        if (install != null) 'install': install,
-      };
+    if (shell != null) 'shell': shell,
+    if (outputFile != null) 'outputFile': outputFile,
+    if (install != null) 'install': install,
+  };
 }

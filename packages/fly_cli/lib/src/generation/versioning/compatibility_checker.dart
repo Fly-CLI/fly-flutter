@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/generation/versioning/compatibility_result.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
+import 'package:fly_cli/src/generation/versioning/compatibility_result.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 /// Service for checking template compatibility with current environment

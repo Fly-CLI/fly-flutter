@@ -31,4 +31,3 @@ abstract class IGenerationService {
     bool dryRun = false,
   });
 }
-

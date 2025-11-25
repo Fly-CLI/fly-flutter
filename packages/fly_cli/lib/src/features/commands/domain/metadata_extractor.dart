@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_definition.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 
 /// Extracts command metadata from Command instances and ArgParser
 class MetadataExtractor {
@@ -28,7 +28,10 @@ class MetadataExtractor {
       if (manualMetadata != null && manualMetadata.isValid()) {
         return manualMetadata.copyWith(
           options: _mergeFlags(manualMetadata.options, options),
-          globalOptions: _mergeFlags(manualMetadata.globalOptions, globalOptions),
+          globalOptions: _mergeFlags(
+            manualMetadata.globalOptions,
+            globalOptions,
+          ),
         );
       }
     }

@@ -83,7 +83,8 @@ class FileUtils {
 
       await for (final chunk in stream) {
         final content = String.fromCharCodes(chunk);
-        lineCount += content.split('\n').length -
+        lineCount +=
+            content.split('\n').length -
             1; // -1 because split creates extra element
       }
 
@@ -112,12 +113,14 @@ class FileUtils {
   static Map<String, dynamic> getCacheStats() {
     return {
       'cached_files': _cache.length,
-      'cache_size_bytes':
-          _cache.values.fold(0, (sum, content) => sum + content.length),
+      'cache_size_bytes': _cache.values.fold(
+        0,
+        (sum, content) => sum + content.length,
+      ),
       'oldest_entry': _cacheTimestamps.values.isNotEmpty
           ? _cacheTimestamps.values
-              .reduce((a, b) => a.isBefore(b) ? a : b)
-              .toIso8601String()
+                .reduce((a, b) => a.isBefore(b) ? a : b)
+                .toIso8601String()
           : null,
     };
   }

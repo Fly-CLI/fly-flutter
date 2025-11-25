@@ -34,8 +34,10 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description,
-            equals('Export command schema in various formats'));
+        expect(
+          command.description,
+          equals('Export command schema in various formats'),
+        );
       });
 
       test('should have required arguments', () {
@@ -102,7 +104,10 @@ void main() {
 
         // Should not throw for valid arguments
         expect(() => parser.parse([]), returnsNormally);
-        expect(() => parser.parse(['--output-file=test.json']), returnsNormally);
+        expect(
+          () => parser.parse(['--output-file=test.json']),
+          returnsNormally,
+        );
         expect(() => parser.parse(['--include-examples']), returnsNormally);
       });
 

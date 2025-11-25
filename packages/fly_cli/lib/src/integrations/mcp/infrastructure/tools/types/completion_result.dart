@@ -38,10 +38,10 @@ class CompletionResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (shell != null) 'shell': shell,
-        if (outputFile != null) 'outputFile': outputFile,
-        if (installPath != null) 'installPath': installPath,
-      };
+    'success': success,
+    'message': message,
+    if (shell != null) 'shell': shell,
+    if (outputFile != null) 'outputFile': outputFile,
+    if (installPath != null) 'installPath': installPath,
+  };
 }

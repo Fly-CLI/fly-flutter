@@ -14,9 +14,9 @@ class GenerationMcpAdapter {
     required GenerateFeatureUseCase generateFeatureUseCase,
     required GenerateServiceUseCase generateServiceUseCase,
     required GenerateProjectUseCase generateProjectUseCase,
-  })  : _generateFeatureUseCase = generateFeatureUseCase,
-        _generateServiceUseCase = generateServiceUseCase,
-        _generateProjectUseCase = generateProjectUseCase;
+  }) : _generateFeatureUseCase = generateFeatureUseCase,
+       _generateServiceUseCase = generateServiceUseCase,
+       _generateProjectUseCase = generateProjectUseCase;
 
   final GenerateFeatureUseCase _generateFeatureUseCase;
   final GenerateServiceUseCase _generateServiceUseCase;
@@ -118,4 +118,3 @@ class GenerationMcpAdapter {
     return await _generateProjectUseCase.execute(request);
   }
 }
-

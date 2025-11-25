@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
-import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_doctor_command.dart';
 
 /// Strategy for doctor command
@@ -18,9 +18,9 @@ class McpDoctorCommandDescriptor extends FlyCommandDescriptor {
 
   @override
   CommandGroup? get group => const CommandGroup(
-        name: 'mcp',
-        description: 'Model Context Protocol commands',
-      );
+    name: 'mcp',
+    description: 'Model Context Protocol commands',
+  );
 
   @override
   CommandCategory get category => CommandCategory.integration;

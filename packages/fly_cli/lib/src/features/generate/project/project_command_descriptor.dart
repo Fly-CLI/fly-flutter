@@ -17,9 +17,9 @@ class ProjectCommandDescriptor extends FlyCommandDescriptor {
 
   @override
   CommandGroup? get group => const CommandGroup(
-        name: 'generate',
-        description: 'Generate new components for the current project',
-      );
+    name: 'generate',
+    description: 'Generate new components for the current project',
+  );
 
   @override
   CommandCategory get category => CommandCategory.generation;
@@ -29,4 +29,3 @@ class ProjectCommandDescriptor extends FlyCommandDescriptor {
     return GenerateProjectCommand.create(context);
   }
 }
-

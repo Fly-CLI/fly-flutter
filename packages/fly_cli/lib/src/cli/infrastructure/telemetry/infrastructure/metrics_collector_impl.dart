@@ -12,9 +12,9 @@ class MetricsCollectorImpl implements MetricsCollector {
     required MetricsConfig config,
     required MetricStorage storage,
     MetricExporter? exporter,
-  })  : _config = config,
-        _storage = storage,
-        _exporter = exporter ?? InMemoryExporter();
+  }) : _config = config,
+       _storage = storage,
+       _exporter = exporter ?? InMemoryExporter();
 
   final MetricsConfig _config;
   final MetricStorage _storage;
@@ -154,7 +154,9 @@ class MetricsCollectorImpl implements MetricsCollector {
       grouped.putIfAbsent(metric.name, () => []).add(metric);
     }
 
-    return grouped.map((name, metrics) => MapEntry(name, _aggregateMetrics(metrics)));
+    return grouped.map(
+      (name, metrics) => MapEntry(name, _aggregateMetrics(metrics)),
+    );
   }
 
   @override
@@ -166,7 +168,9 @@ class MetricsCollectorImpl implements MetricsCollector {
       grouped.putIfAbsent(metric.name, () => []).add(metric);
     }
 
-    return grouped.map((name, metrics) => MapEntry(name, _aggregateMetrics(metrics)));
+    return grouped.map(
+      (name, metrics) => MapEntry(name, _aggregateMetrics(metrics)),
+    );
   }
 
   @override
@@ -176,14 +180,18 @@ class MetricsCollectorImpl implements MetricsCollector {
 
     if (durationMetrics.isEmpty) return 0.0;
 
-    final sum = durationMetrics.map((m) => m.value).fold(0.0, (a, b) => a + b.toDouble());
+    final sum = durationMetrics
+        .map((m) => m.value)
+        .fold(0.0, (a, b) => a + b.toDouble());
     return sum / durationMetrics.length;
   }
 
   @override
   int getExecutionCount(String operation) {
     final metrics = _storage.getMetricsByOperation(operation);
-    final counterMetrics = metrics.where((m) => m.type == MetricType.counter && !m.name.endsWith('.errors'));
+    final counterMetrics = metrics.where(
+      (m) => m.type == MetricType.counter && !m.name.endsWith('.errors'),
+    );
 
     return counterMetrics.fold(0, (sum, m) => sum + m.value.toInt());
   }
@@ -244,4 +252,3 @@ class MetricsCollectorImpl implements MetricsCollector {
     );
   }
 }
-

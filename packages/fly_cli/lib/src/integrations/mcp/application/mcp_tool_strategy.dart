@@ -1,5 +1,4 @@
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/utils/tool_logger.dart';
 import 'package:fly_core/fly_core_dart.dart';
@@ -12,12 +11,12 @@ import 'package:fly_mcp/fly_mcp.dart';
 /// [progressNotifier] - Progress notifier for sending progress updates
 ///
 /// Returns the typed tool execution result.
-typedef TypedToolHandler<TP extends ToolParameter, TR extends ToolResult>
-    = Future<TR> Function(
-  TP params, {
-  CancellationToken? cancelToken,
-  ProgressNotifier? progressNotifier,
-});
+typedef TypedToolHandler<TP extends ToolParameter, TR extends ToolResult> =
+    Future<TR> Function(
+      TP params, {
+      CancellationToken? cancelToken,
+      ProgressNotifier? progressNotifier,
+    });
 
 /// Abstract base class for MCP tool strategies
 ///
@@ -26,8 +25,10 @@ typedef TypedToolHandler<TP extends ToolParameter, TR extends ToolResult>
 ///
 /// [TP] - The typed parameter class implementing ToolParameter
 /// [TR] - The typed result class implementing ToolResult
-abstract class McpToolStrategy<TP extends ToolParameter,
-    TR extends ToolResult> {
+abstract class McpToolStrategy<
+  TP extends ToolParameter,
+  TR extends ToolResult
+> {
   /// The tool name as it appears in MCP (e.g., 'fly.echo')
   String get name;
 
@@ -98,8 +99,9 @@ abstract class McpToolStrategy<TP extends ToolParameter,
 
       if (validationErrors.isNotEmpty) {
         // Convert validation errors to structured format for MCP error reporting
-        final errorMessages =
-            validationErrors.map((e) => e.message as String).toList();
+        final errorMessages = validationErrors
+            .map((e) => e.message as String)
+            .toList();
         final fieldErrors = <String, Object?>{};
 
         for (final error in validationErrors) {
@@ -117,8 +119,9 @@ abstract class McpToolStrategy<TP extends ToolParameter,
           errors: errorMessages,
           context: {
             'field_errors': fieldErrors,
-            'validation_errors':
-                validationErrors.map((e) => e.toMap()).toList(),
+            'validation_errors': validationErrors
+                .map((e) => e.toMap())
+                .toList(),
           },
         );
       }
@@ -169,8 +172,9 @@ abstract class McpToolStrategy<TP extends ToolParameter,
           toolLogger.warn(
             'Result validation failed for tool $name',
             fields: {
-              'validation_errors':
-                  resultValidationErrors.map((e) => e.toMap()).toList(),
+              'validation_errors': resultValidationErrors
+                  .map((e) => e.toMap())
+                  .toList(),
             },
           );
         }
@@ -232,11 +236,8 @@ abstract class McpToolStrategy<TP extends ToolParameter,
   /// a complete [Tool] object that can be registered with ToolRegistry.
   /// Returns the Tool, handler, and requiresConfirmation separately,
   /// since Tool doesn't include the handler or confirmation requirement.
-  ({
-    Tool tool,
-    ToolHandler handler,
-    bool requiresConfirmation,
-  }) createToolAndHandler(
+  ({Tool tool, ToolHandler handler, bool requiresConfirmation})
+  createToolAndHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {

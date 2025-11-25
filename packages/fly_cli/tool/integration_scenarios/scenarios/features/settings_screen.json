@@ -3,7 +3,10 @@
   "name": "settings",
   "description": "Settings screen feature scenario",
   "organization": "com.example",
-  "platforms": ["ios", "android"],
+  "platforms": [
+    "ios",
+    "android"
+  ],
   "preset": "minimal",
   "screen_type": "settings"
 }

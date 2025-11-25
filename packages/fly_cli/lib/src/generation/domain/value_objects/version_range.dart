@@ -10,9 +10,9 @@ class VersionRange {
     this.includeMin = true,
     this.includeMax = false,
   }) : assert(
-          maxVersion == null || minVersion <= maxVersion,
-          'minVersion must be <= maxVersion',
-        );
+         maxVersion == null || minVersion <= maxVersion,
+         'minVersion must be <= maxVersion',
+       );
 
   /// Minimum version (inclusive by default).
   final Version minVersion;
@@ -38,7 +38,10 @@ class VersionRange {
       final parsed = VersionConstraint.parse(constraint);
       return VersionRange._fromConstraint(parsed);
     } catch (e) {
-      throw ArgumentError('Invalid version constraint: $constraint', 'constraint');
+      throw ArgumentError(
+        'Invalid version constraint: $constraint',
+        'constraint',
+      );
     }
   }
 
@@ -54,17 +57,13 @@ class VersionRange {
 
   /// Check if a version satisfies this range.
   bool satisfies(Version version) {
-    final minCheck = includeMin
-        ? version >= minVersion
-        : version > minVersion;
+    final minCheck = includeMin ? version >= minVersion : version > minVersion;
 
     if (!minCheck) return false;
 
     if (maxVersion == null) return true;
 
-    return includeMax
-        ? version <= maxVersion!
-        : version < maxVersion!;
+    return includeMax ? version <= maxVersion! : version < maxVersion!;
   }
 
   /// Check if this range overlaps with another range.
@@ -105,10 +104,7 @@ class VersionRange {
   @override
   String toString() {
     final minStr = includeMin ? '>=' : '>';
-    final maxStr = maxVersion != null
-        ? (includeMax ? ' <=' : ' <')
-        : '';
+    final maxStr = maxVersion != null ? (includeMax ? ' <=' : ' <') : '';
     return '$minStr$minVersion$maxStr${maxVersion ?? ''}';
   }
 }
-

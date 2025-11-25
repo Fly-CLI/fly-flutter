@@ -1,13 +1,14 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
-import 'package:fly_cli/src/generation/cache/domain/cache_models.dart';
-import 'package:fly_cli/src/generation/cache/infrastructure/sdk_version_cache.dart';
-import 'package:fly_cli/src/generation/cache/domain/template_cache.dart';
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/brick/brick_registry.dart';
+import 'package:fly_cli/src/generation/cache/domain/cache_models.dart';
+import 'package:fly_cli/src/generation/cache/domain/template_cache.dart';
+import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
+import 'package:fly_cli/src/generation/cache/infrastructure/sdk_version_cache.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart' as domain;
-import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart' as domain;
+import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart'
+    as domain;
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
@@ -37,12 +38,12 @@ class TemplateManager {
     TemplateCacheManager? cacheManager,
     BrickCacheManager? brickCacheManager,
     SdkVersionCache? sdkVersionCache,
-  })  : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger),
-        _brickCacheManager =
-            brickCacheManager ?? BrickCacheManager(logger: logger),
-        _brickRegistry = BrickRegistry(logger: logger),
-        _previewService = GenerationPreviewService(logger: logger),
-        _sdkVersionCache = sdkVersionCache ?? SdkVersionCache(logger: logger);
+  }) : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger),
+       _brickCacheManager =
+           brickCacheManager ?? BrickCacheManager(logger: logger),
+       _brickRegistry = BrickRegistry(logger: logger),
+       _previewService = GenerationPreviewService(logger: logger),
+       _sdkVersionCache = sdkVersionCache ?? SdkVersionCache(logger: logger);
 
   static const String _defaultUnifiedTemplate = 'fly_foundation';
 
@@ -78,8 +79,12 @@ class TemplateManager {
       return _cachedTemplatesDir!;
     }
 
-    final devTemplatesPath =
-        path.join(currentDir, 'packages', 'fly_cli', 'templates');
+    final devTemplatesPath = path.join(
+      currentDir,
+      'packages',
+      'fly_cli',
+      'templates',
+    );
     final devTemplatesDir = Directory(devTemplatesPath);
     if (devTemplatesDir.existsSync()) {
       _cachedTemplatesDir = path.normalize(devTemplatesPath);
@@ -95,10 +100,25 @@ class TemplateManager {
       path.join(scriptDir, '..', '..', 'templates'),
       // From packages/fly_cli/bin/
       path.join(
-          scriptDir, '..', '..', '..', 'packages', 'fly_cli', 'templates'),
+        scriptDir,
+        '..',
+        '..',
+        '..',
+        'packages',
+        'fly_cli',
+        'templates',
+      ),
       // From test files
-      path.join(scriptDir, '..', '..', '..', '..', 'packages', 'fly_cli',
-          'templates'),
+      path.join(
+        scriptDir,
+        '..',
+        '..',
+        '..',
+        '..',
+        'packages',
+        'fly_cli',
+        'templates',
+      ),
       // From deeper test files
     ];
 
@@ -170,9 +190,10 @@ class TemplateManager {
     return _compatibilityChecker!;
   }
 
-
   /// Get all available bricks from registry
-  Future<List<domain.Brick>> getAvailableBricks({BrickType? filterByType}) async {
+  Future<List<domain.Brick>> getAvailableBricks({
+    BrickType? filterByType,
+  }) async {
     try {
       final bricks = await _brickRegistry.discoverBricks();
 
@@ -308,7 +329,6 @@ class TemplateManager {
     }
   }
 
-
   /// Generate preview for brick generation
   Future<GenerationPreview> generatePreview({
     required String brickName,
@@ -316,28 +336,27 @@ class TemplateManager {
     required String outputDirectory,
     required Map<String, dynamic> variables,
     String? projectName,
-  }) async =>
-      _previewService.generatePreview(
-        brickName: brickName,
-        brickType: brickType,
-        outputDirectory: outputDirectory,
-        variables: variables,
-        projectName: projectName,
-      );
-
-
+  }) async => _previewService.generatePreview(
+    brickName: brickName,
+    brickType: brickType,
+    outputDirectory: outputDirectory,
+    variables: variables,
+    projectName: projectName,
+  );
 
   /// Perform actual generation using Mason
-  Future<GenerationResult> _performGeneration(domain.Brick brick,
+  Future<GenerationResult> _performGeneration(
+    domain.Brick brick,
     String outputDirectory,
     Map<String, dynamic> variables,
   ) async {
     try {
       final startTime = DateTime.now();
 
-      logger..info('Generating from brick: ${brick.name}')
-      ..warn('Brick path: ${brick.path}')
-      ..warn('Variables: $variables');
+      logger
+        ..info('Generating from brick: ${brick.name}')
+        ..warn('Brick path: ${brick.path}')
+        ..warn('Variables: $variables');
 
       // Create Brick instance from brick directory
       final brickInstance = mason.Brick.path(brick.path);
@@ -363,8 +382,10 @@ class TemplateManager {
         final features = variables.getVar<List<dynamic>>(MasonVarKey.features);
         if (features != null && features.isNotEmpty) {
           // Convert features to strings and remove duplicates
-          final uniqueFeatures =
-              features.map((f) => f.toString()).toSet().toList();
+          final uniqueFeatures = features
+              .map((f) => f.toString())
+              .toSet()
+              .toList();
 
           // First, generate base project structure with first feature
           // This ensures base files are generated
@@ -372,7 +393,8 @@ class TemplateManager {
           baseVariables[MasonVarKey.feature.key] = uniqueFeatures.first;
 
           logger.info(
-              'Generating base project structure with feature: ${uniqueFeatures.first}...');
+            'Generating base project structure with feature: ${uniqueFeatures.first}...',
+          );
           final baseFiles = await generator.generate(
             target,
             vars: baseVariables,
@@ -389,7 +411,8 @@ class TemplateManager {
           // Each generation will create the {{feature}}/ directory for that feature
           if (uniqueFeatures.length > 1) {
             logger.info(
-                'Generating ${uniqueFeatures.length - 1} additional feature(s)...');
+              'Generating ${uniqueFeatures.length - 1} additional feature(s)...',
+            );
             for (int i = 1; i < uniqueFeatures.length; i++) {
               final featureName = uniqueFeatures[i];
               logger.warn('Generating feature: $featureName');
@@ -409,12 +432,14 @@ class TemplateManager {
               allFiles.addAll(featureFiles);
               totalFiles += featureFiles.length;
               logger.warn(
-                  '✓ Feature "$featureName" generated (${featureFiles.length} files)');
+                '✓ Feature "$featureName" generated (${featureFiles.length} files)',
+              );
             }
           }
 
           logger.info(
-              '✓ Generation successful ($totalFiles total files generated)');
+            '✓ Generation successful ($totalFiles total files generated)',
+          );
           logger.info('Generated features: ${uniqueFeatures.join(', ')}');
 
           final endTime = DateTime.now();
@@ -487,14 +512,16 @@ class TemplateManager {
   TemplateInfo _brickToTemplateInfo(domain.Brick brick) {
     // Convert BrickVariable to TemplateVariable
     final templateVariables = brick.variables.values
-        .map<TemplateVariable>((domain.BrickVariable brickVar) => TemplateVariable(
-              name: brickVar.name,
-              type: brickVar.type,
-              required: brickVar.required,
-              defaultValue: brickVar.defaultValue,
-              choices: brickVar.choices,
-              description: brickVar.description,
-            ))
+        .map<TemplateVariable>(
+          (domain.BrickVariable brickVar) => TemplateVariable(
+            name: brickVar.name,
+            type: brickVar.type,
+            required: brickVar.required,
+            defaultValue: brickVar.defaultValue,
+            choices: brickVar.choices,
+            description: brickVar.description,
+          ),
+        )
         .toList();
 
     return TemplateInfo(
@@ -544,8 +571,8 @@ class TemplateManager {
     try {
       // If version specified, use version registry
       if (version != null) {
-        final versionedTemplate =
-            await _versionRegistryInstance.getTemplateVersion(name, version);
+        final versionedTemplate = await _versionRegistryInstance
+            .getTemplateVersion(name, version);
         if (versionedTemplate != null) {
           return versionedTemplate;
         }
@@ -661,14 +688,16 @@ class TemplateManager {
             // Validate version format
             if (VersionParser.parseTemplateVersion(version) == null) {
               issues.add(
-                  'Invalid version format: "$version". Expected SemVer format (MAJOR.MINOR.PATCH)');
+                'Invalid version format: "$version". Expected SemVer format (MAJOR.MINOR.PATCH)',
+              );
             }
           }
 
           // Check compatibility using template's compatibility data
           final checker = await _compatibilityCheckerInstance;
-          final compatibilityResult =
-              checker.checkTemplateCompatibility(template);
+          final compatibilityResult = checker.checkTemplateCompatibility(
+            template,
+          );
 
           if (compatibilityResult.isIncompatible) {
             issues.addAll(compatibilityResult.errors);
@@ -768,8 +797,10 @@ class TemplateManager {
       final placeholder = '{{${entry.key}}}';
       // Handle list variables
       if (entry.value is List) {
-        result =
-            result.replaceAll(placeholder, (entry.value as List).join(', '));
+        result = result.replaceAll(
+          placeholder,
+          (entry.value as List).join(', '),
+        );
       } else {
         result = result.replaceAll(placeholder, entry.value.toString());
       }
@@ -793,7 +824,8 @@ class TemplateManager {
   /// Uses TemplateInfo.compatibility for full checks (CLI, SDK, deprecation, EOL).
   /// If compatibility data is not available, returns compatible (no constraints).
   Future<CompatibilityResult> checkTemplateCompatibility(
-      String templateName) async {
+    String templateName,
+  ) async {
     final template = await getTemplate(templateName);
     if (template == null) {
       return CompatibilityResult.incompatible(
@@ -810,7 +842,6 @@ class TemplateManager {
     await _cacheManager.clearCache();
   }
 }
-
 
 /// Template validation result
 class TemplateValidationResult {
@@ -830,4 +861,3 @@ class TemplateValidationResult {
   final List<String> issues;
   final TemplateInfo? template;
 }
-

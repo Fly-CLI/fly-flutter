@@ -23,15 +23,20 @@ class DartSdkCheck extends SystemCheck {
   Future<CheckResult> run() async {
     try {
       // Check if dart command is available with timeout
-      final dartResult = await Process.run(
-        'dart',
-        ['--version'],
-        runInShell: true,
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(
-            0, 1, '', 'Dart --version timed out after 10 seconds'),
-      );
+      final dartResult =
+          await Process.run(
+            'dart',
+            ['--version'],
+            runInShell: true,
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => ProcessResult(
+              0,
+              1,
+              '',
+              'Dart --version timed out after 10 seconds',
+            ),
+          );
 
       if (dartResult.exitCode != 0) {
         return CheckResult.error(
@@ -48,8 +53,9 @@ class DartSdkCheck extends SystemCheck {
 
       // Parse Dart version
       final versionOutput = dartResult.stdout as String;
-      final versionMatch = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)')
-          .firstMatch(versionOutput);
+      final versionMatch = RegExp(
+        r'Dart SDK version: (\d+\.\d+\.\d+)',
+      ).firstMatch(versionOutput);
 
       if (versionMatch == null) {
         return CheckResult.warning(
@@ -88,15 +94,20 @@ class DartSdkCheck extends SystemCheck {
       }
 
       // Check Dart analyzer with timeout
-      final analyzeResult = await Process.run(
-        'dart',
-        ['analyze', '--version'],
-        runInShell: true,
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () =>
-            ProcessResult(0, 1, '', 'Dart analyze timed out after 10 seconds'),
-      );
+      final analyzeResult =
+          await Process.run(
+            'dart',
+            ['analyze', '--version'],
+            runInShell: true,
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => ProcessResult(
+              0,
+              1,
+              '',
+              'Dart analyze timed out after 10 seconds',
+            ),
+          );
 
       if (analyzeResult.exitCode != 0) {
         return CheckResult.warning(

@@ -7,10 +7,12 @@ import 'package:fly_cli/src/shared/logging/domain/formatter.dart';
 import 'package:fly_cli/src/shared/logging/domain/log_event.dart';
 
 class HttpAppender implements Appender {
-  HttpAppender(this.formatter,
-      {required this.endpoint,
-      this.token,
-      this.requestTimeout = const Duration(seconds: 2)});
+  HttpAppender(
+    this.formatter, {
+    required this.endpoint,
+    this.token,
+    this.requestTimeout = const Duration(seconds: 2),
+  });
 
   final LogFormatter formatter;
   final Uri endpoint;

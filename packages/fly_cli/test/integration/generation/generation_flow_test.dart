@@ -1,11 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/generation/brick/brick_info.dart';
 import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/infrastructure/brick/brick_repository_impl.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
@@ -69,4 +65,3 @@ void main() {
     });
   });
 }
-

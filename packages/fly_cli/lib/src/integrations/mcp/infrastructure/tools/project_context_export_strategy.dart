@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/context_export_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/context_export_result.dart';
@@ -20,29 +20,29 @@ class ProjectContextExportStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {
-          'outputFile': Schema.string(),
-          'includeCode': Schema.bool(),
-          'includeDependencies': Schema.bool(),
-          'includeArchitecture': Schema.bool(),
-          'includeSuggestions': Schema.bool(),
-          'maxFiles': Schema.int(),
-          'maxFileSize': Schema.int(),
-        },
-        additionalProperties: false,
-      );
+    properties: {
+      'outputFile': Schema.string(),
+      'includeCode': Schema.bool(),
+      'includeDependencies': Schema.bool(),
+      'includeArchitecture': Schema.bool(),
+      'includeSuggestions': Schema.bool(),
+      'maxFiles': Schema.int(),
+      'maxFileSize': Schema.int(),
+    },
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'success': Schema.bool(),
-          'message': Schema.string(),
-          'outputFile': Schema.string(),
-          'fileSizeBytes': Schema.int(),
-          'sectionsIncluded': Schema.list(items: Schema.string()),
-        },
-        required: ['success', 'message'],
-      );
+    properties: {
+      'success': Schema.bool(),
+      'message': Schema.string(),
+      'outputFile': Schema.string(),
+      'fileSizeBytes': Schema.int(),
+      'sectionsIncluded': Schema.list(items: Schema.string()),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => true;
@@ -65,8 +65,7 @@ class ProjectContextExportStrategy
   }
 
   @override
-  TypedToolHandler<ContextExportParams, ContextExportResult>
-      createTypedHandler(
+  TypedToolHandler<ContextExportParams, ContextExportResult> createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -81,7 +80,9 @@ class ProjectContextExportStrategy
       final maxFileSize = params.maxFileSize ?? 10000;
 
       await progressNotifier?.notify(
-          message: 'Analyzing project context...', percent: 10);
+        message: 'Analyzing project context...',
+        percent: 10,
+      );
 
       // Create context generator configuration
       final config = ContextGeneratorConfig(
@@ -100,7 +101,9 @@ class ProjectContextExportStrategy
       final projectDir = Directory(context.workingDirectory);
 
       await progressNotifier?.notify(
-          message: 'Generating context data...', percent: 50);
+        message: 'Generating context data...',
+        percent: 50,
+      );
 
       final contextData = await contextGenerator.generate(projectDir, config);
 
@@ -109,8 +112,7 @@ class ProjectContextExportStrategy
       // Write to file if specified
       if (params.outputFile != null) {
         final file = File(params.outputFile!);
-        await file.writeAsString(
-            _formatOutput(contextData));
+        await file.writeAsString(_formatOutput(contextData));
 
         final fileSize = await file.length();
         final sectionsIncluded = contextData.keys
@@ -144,4 +146,3 @@ class ProjectContextExportStrategy
     return encoder.convert(data);
   }
 }
-

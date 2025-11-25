@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
 
 //
@@ -21,15 +21,15 @@ class BashCompletionGenerator extends CompletionGenerator {
       ..writeln(r'    cur="${COMP_WORDS[COMP_CWORD]}"')
       ..writeln(r'    prev="${COMP_WORDS[COMP_CWORD-1]}"')
       ..writeln()
-
       // Generate global options list
       ..writeln('    # Global options');
-    final globalOpts =
-        registry.getGlobalOptions().map((o) => '--${o.name}').join(' ');
+    final globalOpts = registry
+        .getGlobalOptions()
+        .map((o) => '--${o.name}')
+        .join(' ');
     buffer
       ..writeln('    local global_opts="$globalOpts"')
       ..writeln()
-
       // Generate commands list
       ..writeln('    # Commands');
     final commandNames = registry.getCommandNames().join(' ');
@@ -119,8 +119,7 @@ class BashCompletionGenerator extends CompletionGenerator {
   @override
   String generateSubcommandsCompletion(
     List<SubcommandDefinition> subcommands,
-  ) =>
-      subcommands.map((s) => s.name).join(' ');
+  ) => subcommands.map((s) => s.name).join(' ');
 
   @override
   String generateOptionValuesCompletion(CliFlag option) {

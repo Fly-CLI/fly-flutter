@@ -1,7 +1,6 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/foundation_pipeline.dart';
 
@@ -13,8 +12,8 @@ class VariableProcessingService implements IVariableProcessor {
   VariableProcessingService({
     VariablePipeline? pipeline,
     ComposerLogger? logger,
-  })  : _pipeline = pipeline ?? foundationPipeline,
-        _logger = logger ?? const NoOpLogger();
+  }) : _pipeline = pipeline ?? foundationPipeline,
+       _logger = logger ?? const NoOpLogger();
 
   final VariablePipeline _pipeline;
   final ComposerLogger _logger;
@@ -68,4 +67,3 @@ class VariableProcessingService implements IVariableProcessor {
     );
   }
 }
-

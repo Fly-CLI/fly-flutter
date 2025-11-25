@@ -1,9 +1,9 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -18,7 +18,8 @@ List<CliFlag> _testGlobalFlags() => GlobalFlagsRegistry.globalFlags;
 ({
   Map<FlyCommand, Command<int>> commandInstances,
   Map<String, Command<int>> commandGroups,
-}) _createCommandInstances(CommandContext context) {
+})
+_createCommandInstances(CommandContext context) {
   final commandInstances = <FlyCommand, Command<int>>{};
 
   // Create instances for all command types
@@ -95,8 +96,10 @@ void main() {
         expect(registry.isInitialized, isTrue);
         expect(registry.hasCommand('create'), isTrue);
         expect(registry.hasCommand('doctor'), isTrue);
-        expect(registry.getGlobalOptions().length,
-            greaterThanOrEqualTo(3)); // verbose, quiet, output
+        expect(
+          registry.getGlobalOptions().length,
+          greaterThanOrEqualTo(3),
+        ); // verbose, quiet, output
       });
 
       test('does not reinitialize if already initialized', () {
@@ -123,7 +126,9 @@ void main() {
         // Should still have same commands
         expect(registry.isInitialized, isTrue);
         expect(
-            registry.getAllCommands().keys.toList(), equals(initialCommands));
+          registry.getAllCommands().keys.toList(),
+          equals(initialCommands),
+        );
       });
     });
 
@@ -160,7 +165,14 @@ void main() {
         expect(allCommands, isNotEmpty);
         expect(
           allCommands.keys,
-          containsAll(['version', 'doctor', 'completion', 'generate', 'ai', 'mcp']),
+          containsAll([
+            'version',
+            'doctor',
+            'completion',
+            'generate',
+            'ai',
+            'mcp',
+          ]),
         );
       });
 
@@ -169,7 +181,14 @@ void main() {
         expect(commandNames, isNotEmpty);
         expect(
           commandNames,
-          containsAll(['version', 'doctor', 'completion', 'generate', 'ai', 'mcp']),
+          containsAll([
+            'version',
+            'doctor',
+            'completion',
+            'generate',
+            'ai',
+            'mcp',
+          ]),
         );
       });
 
@@ -189,11 +208,13 @@ void main() {
         );
       });
 
-      test('getSubcommands returns empty list for command without subcommands',
-          () {
-        final subcommands = registry.getSubcommands('create');
-        expect(subcommands, isEmpty);
-      });
+      test(
+        'getSubcommands returns empty list for command without subcommands',
+        () {
+          final subcommands = registry.getSubcommands('create');
+          expect(subcommands, isEmpty);
+        },
+      );
 
       test('getSubcommands returns empty list for non-existent command', () {
         final subcommands = registry.getSubcommands('non-existent');
@@ -218,14 +239,16 @@ void main() {
         final globalOptions = registry.getGlobalOptions();
         expect(globalOptions.length, greaterThanOrEqualTo(3));
 
-        final verboseOption =
-            globalOptions.firstWhere((o) => o.name == 'verbose');
+        final verboseOption = globalOptions.firstWhere(
+          (o) => o.name == 'verbose',
+        );
         expect(verboseOption.type, equals(FlagType.boolean));
         expect(verboseOption.abbreviation, equals('v'));
         expect(verboseOption.isGlobal, isTrue);
 
-        final outputOption =
-            globalOptions.firstWhere((o) => o.name == 'format');
+        final outputOption = globalOptions.firstWhere(
+          (o) => o.name == 'format',
+        );
         expect(outputOption.type, equals(FlagType.singleValue));
         expect(outputOption.allowedValues, equals(['human', 'json', 'ai']));
         expect(outputOption.isGlobal, isTrue);
@@ -261,8 +284,9 @@ void main() {
         final globalOptions = json['global_options'] as List<dynamic>;
         expect(globalOptions.length, greaterThanOrEqualTo(3));
 
-        final verboseOption = globalOptions
-            .firstWhere((o) => o['name'] == 'verbose') as Map<String, dynamic>;
+        final verboseOption =
+            globalOptions.firstWhere((o) => o['name'] == 'verbose')
+                as Map<String, dynamic>;
         expect(verboseOption['name'], equals('verbose'));
         expect(verboseOption['abbreviation'], equals('v'));
       });

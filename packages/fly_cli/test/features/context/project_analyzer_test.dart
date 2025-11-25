@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -128,8 +128,10 @@ void main() {
           includeArchitecture: true,
         );
 
-        final projectInfo =
-            await analyzer.analyze(projectDir, configWithArchitecture);
+        final projectInfo = await analyzer.analyze(
+          projectDir,
+          configWithArchitecture,
+        );
 
         expect(projectInfo.name, equals('complex_test'));
         expect(projectInfo.type, equals('flutter'));

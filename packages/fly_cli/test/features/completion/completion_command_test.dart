@@ -29,7 +29,9 @@ void main() {
 
       test('should have correct description', () {
         expect(
-            command.description, equals('Generate shell completion scripts'));
+          command.description,
+          equals('Generate shell completion scripts'),
+        );
       });
 
       test('should not have subcommands', () {

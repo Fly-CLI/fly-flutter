@@ -2,7 +2,8 @@
 
 ## Overview
 
-The commands module provides the core abstractions, base classes, and metadata for all CLI commands. It
+The commands module provides the core abstractions, base classes, and metadata for all CLI commands.
+It
 follows clean architecture principles with clear separation of concerns across three layers.
 
 ## Architecture

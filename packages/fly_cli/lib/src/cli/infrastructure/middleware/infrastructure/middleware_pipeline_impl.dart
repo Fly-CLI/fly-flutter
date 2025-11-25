@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_pipeline.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 
 /// Concrete implementation of MiddlewarePipeline.
 ///

@@ -1,8 +1,7 @@
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_core/fly_core_dart.dart';
-import 'package:fly_mcp/fly_mcp.dart';
 
 /// Optional middleware for cancellation support during command execution
 ///
@@ -71,4 +70,3 @@ class CancellationMiddleware implements CommandMiddleware {
     }
   }
 }
-

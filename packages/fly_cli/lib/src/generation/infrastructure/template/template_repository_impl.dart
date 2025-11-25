@@ -14,10 +14,9 @@ class TemplateRepositoryImpl implements ITemplateRepository {
     required TemplateManager templateManager,
     ICacheManager<TemplateInfo>? templateCache,
     ITemplateValidator? templateValidator,
-  })
-      : _templateManager = templateManager,
-        _templateCache = templateCache,
-        _templateValidator = templateValidator;
+  }) : _templateManager = templateManager,
+       _templateCache = templateCache,
+       _templateValidator = templateValidator;
 
   final TemplateManager _templateManager;
   final ICacheManager<TemplateInfo>? _templateCache;
@@ -45,7 +44,9 @@ class TemplateRepositoryImpl implements ITemplateRepository {
   }
 
   @override
-  Future<List<TemplateInfo>> discoverTemplates({bool forceRefresh = false}) async {
+  Future<List<TemplateInfo>> discoverTemplates({
+    bool forceRefresh = false,
+  }) async {
     if (forceRefresh && _templateCache != null) {
       await _templateCache.clear();
     }
@@ -88,4 +89,3 @@ class TemplateRepositoryImpl implements ITemplateRepository {
     return template?.path;
   }
 }
-

@@ -91,9 +91,11 @@ packages: [test_package]
         final result = await cacheManager.getTemplate('test_template');
         expect(result, isA<CacheSuccess>());
         expect(
-            Directory(path.join(cacheManager.cacheDirectory, 'test_template'))
-                .existsSync(),
-            isTrue);
+          Directory(
+            path.join(cacheManager.cacheDirectory, 'test_template'),
+          ).existsSync(),
+          isTrue,
+        );
       });
 
       test('should load cached template successfully', () async {
@@ -101,7 +103,9 @@ packages: [test_package]
 
         // Cache the template first
         await cacheManager.cacheTemplate(
-            'test_template', testTemplate.toJson());
+          'test_template',
+          testTemplate.toJson(),
+        );
 
         // Load it back
         final result = await cacheManager.getTemplate('test_template');
@@ -128,14 +132,17 @@ packages: [test_package]
         final shortCacheManager = TemplateCacheManager(
           cacheDirectory: tempDir.path,
           logger: logger,
-          cacheDuration:
-              const Duration(milliseconds: 100), // Very short duration
+          cacheDuration: const Duration(
+            milliseconds: 100,
+          ), // Very short duration
         );
         await shortCacheManager.initialize();
 
         // Cache the template
         await shortCacheManager.cacheTemplate(
-            'test_template', testTemplate.toJson());
+          'test_template',
+          testTemplate.toJson(),
+        );
 
         // Wait for expiration
         await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -149,8 +156,9 @@ packages: [test_package]
         await cacheManager.initialize();
 
         // Write invalid JSON file directly in cache directory
-        final invalidFile =
-            File(path.join(cacheManager.cacheDirectory, 'test_template.json'));
+        final invalidFile = File(
+          path.join(cacheManager.cacheDirectory, 'test_template.json'),
+        );
         invalidFile.writeAsStringSync('invalid json');
 
         final result = await cacheManager.getTemplate('test_template');
@@ -163,11 +171,14 @@ packages: [test_package]
 
         // Cache the template
         await cacheManager.cacheTemplate(
-            'test_template', testTemplate.toJson());
+          'test_template',
+          testTemplate.toJson(),
+        );
 
         // Modify the cached template data to change checksum
-        final entryFile =
-            File(path.join(cacheManager.cacheDirectory, 'test_template.json'));
+        final entryFile = File(
+          path.join(cacheManager.cacheDirectory, 'test_template.json'),
+        );
         final content = await entryFile.readAsString();
         final json = jsonDecode(content) as Map<String, dynamic>;
 
@@ -238,17 +249,21 @@ packages: [test_package]
             )
             .toList();
         expect(remainingTemplates.length, equals(1));
-        expect(path.basename(remainingTemplates.first.path),
-            equals('template2.json'));
+        expect(
+          path.basename(remainingTemplates.first.path),
+          equals('template2.json'),
+        );
       });
 
-      test('should handle deletion of non-existent template gracefully',
-          () async {
-        await cacheManager.initialize();
+      test(
+        'should handle deletion of non-existent template gracefully',
+        () async {
+          await cacheManager.initialize();
 
-        // Should not throw
-        await cacheManager.invalidate('non_existent');
-      });
+          // Should not throw
+          await cacheManager.invalidate('non_existent');
+        },
+      );
     });
 
     group('cache validation', () {
@@ -273,8 +288,9 @@ packages: [test_package]
         expect(result, isA<CacheSuccess>());
 
         // Verify cache entry structure
-        final cacheFile =
-            File(path.join(cacheManager.cacheDirectory, 'test_template.json'));
+        final cacheFile = File(
+          path.join(cacheManager.cacheDirectory, 'test_template.json'),
+        );
         expect(cacheFile.existsSync(), isTrue);
 
         // Verify cache file contains valid JSON
@@ -296,20 +312,22 @@ packages: [test_package]
     });
 
     group('error handling', () {
-      test('should handle cache directory creation failure gracefully',
-          () async {
-        // Use a path that exists but is not writable
-        final invalidCacheManager = TemplateCacheManager(
-          cacheDirectory: '/dev/null', // This exists but is not a directory
-          logger: logger,
-        );
+      test(
+        'should handle cache directory creation failure gracefully',
+        () async {
+          // Use a path that exists but is not writable
+          final invalidCacheManager = TemplateCacheManager(
+            cacheDirectory: '/dev/null', // This exists but is not a directory
+            logger: logger,
+          );
 
-        // Should throw during initialization
-        expect(
-          invalidCacheManager.initialize,
-          throwsException,
-        );
-      });
+          // Should throw during initialization
+          expect(
+            invalidCacheManager.initialize,
+            throwsException,
+          );
+        },
+      );
 
       test('should handle template caching failure gracefully', () async {
         await cacheManager.initialize();

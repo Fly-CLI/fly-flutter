@@ -31,19 +31,18 @@ class CommandResult {
     ExecutionPhase? executionPhase,
     bool? wasCancelled,
     Map<String, dynamic>? progress,
-  }) =>
-      CommandResult(
-        success: true,
-        command: command,
-        message: message,
-        data: data,
-        nextSteps: nextSteps,
-        metadata: metadata,
-        executionDurationMs: executionDurationMs,
-        executionPhase: executionPhase,
-        wasCancelled: wasCancelled,
-        progress: progress,
-      );
+  }) => CommandResult(
+    success: true,
+    command: command,
+    message: message,
+    data: data,
+    nextSteps: nextSteps,
+    metadata: metadata,
+    executionDurationMs: executionDurationMs,
+    executionPhase: executionPhase,
+    wasCancelled: wasCancelled,
+    progress: progress,
+  );
 
   factory CommandResult.error({
     required String message,
@@ -55,20 +54,19 @@ class CommandResult {
     ExecutionPhase? executionPhase,
     bool? wasCancelled,
     Map<String, dynamic>? progress,
-  }) =>
-      CommandResult(
-        success: false,
-        command: 'error',
-        message: message,
-        suggestion: suggestion,
-        metadata: metadata,
-        errorCode: errorCode,
-        errorContext: context,
-        executionDurationMs: executionDurationMs,
-        executionPhase: executionPhase,
-        wasCancelled: wasCancelled,
-        progress: progress,
-      );
+  }) => CommandResult(
+    success: false,
+    command: 'error',
+    message: message,
+    suggestion: suggestion,
+    metadata: metadata,
+    errorCode: errorCode,
+    errorContext: context,
+    executionDurationMs: executionDurationMs,
+    executionPhase: executionPhase,
+    wasCancelled: wasCancelled,
+    progress: progress,
+  );
 
   final bool success;
   final String command;
@@ -97,69 +95,69 @@ class CommandResult {
 
   /// Convert to JSON for AI integration
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'command': command,
-        'message': message,
-        if (data != null) 'data': data,
-        if (nextSteps != null)
-          'next_steps': nextSteps?.map((e) => e.toJson()).toList(),
-        if (suggestion != null) 'suggestion': suggestion,
-        if (errorCode != null) 'error_code': errorCode!.code,
-        if (errorContext != null) 'error_context': errorContext,
-        'metadata': {
-          'cli_version': VersionUtils.getCurrentVersion(),
-          'timestamp': DateTime.now().toIso8601String(),
-          ...?metadata,
-        },
-        if (executionDurationMs != null ||
-            executionPhase != null ||
-            wasCancelled != null ||
-            progress != null)
-          'execution_metadata': {
-            if (executionDurationMs != null)
-              'duration_ms': executionDurationMs,
-            if (executionPhase != null) 'phase': executionPhase!.name,
-            if (wasCancelled != null) 'cancelled': wasCancelled,
-            if (progress != null) 'progress': progress,
-          },
-      };
+    'success': success,
+    'command': command,
+    'message': message,
+    if (data != null) 'data': data,
+    if (nextSteps != null)
+      'next_steps': nextSteps?.map((e) => e.toJson()).toList(),
+    if (suggestion != null) 'suggestion': suggestion,
+    if (errorCode != null) 'error_code': errorCode!.code,
+    if (errorContext != null) 'error_context': errorContext,
+    'metadata': {
+      'cli_version': VersionUtils.getCurrentVersion(),
+      'timestamp': DateTime.now().toIso8601String(),
+      ...?metadata,
+    },
+    if (executionDurationMs != null ||
+        executionPhase != null ||
+        wasCancelled != null ||
+        progress != null)
+      'execution_metadata': {
+        if (executionDurationMs != null) 'duration_ms': executionDurationMs,
+        if (executionPhase != null) 'phase': executionPhase!.name,
+        if (wasCancelled != null) 'cancelled': wasCancelled,
+        if (progress != null) 'progress': progress,
+      },
+  };
 
   /// Convert to AI-optimized JSON format with enhanced structure
   Map<String, dynamic> toAiJson() => {
-        'status': success ? 'success' : 'error',
-        'command': command,
-        'summary': message,
-        if (data != null) 'details': data,
-        if (nextSteps != null)
-          'actions': nextSteps
-              ?.map((e) => {
-                    'command': e.command,
-                    'description': e.description,
-                    'type': 'terminal_command',
-                  })
-              .toList(),
-        if (suggestion != null) 'recommendation': suggestion,
-        if (errorCode != null) 'error_code': errorCode!.code,
-        if (errorContext != null) 'error_context': errorContext,
-        'context': {
-          'tool': 'fly_cli',
-          'version': VersionUtils.getCurrentVersion(),
-          'timestamp': DateTime.now().toIso8601String(),
-          'format': 'ai_optimized',
-          ...?metadata,
-        },
-        if (executionDurationMs != null ||
-            executionPhase != null ||
-            wasCancelled != null ||
-            progress != null)
-          'execution_metadata': {
-            if (executionDurationMs != null)
-              'duration_ms': executionDurationMs,
-            if (executionPhase != null) 'phase': executionPhase!.name,
-            if (wasCancelled != null) 'cancelled': wasCancelled,
-            if (progress != null) 'progress': progress,
-          },
-      };
+    'status': success ? 'success' : 'error',
+    'command': command,
+    'summary': message,
+    if (data != null) 'details': data,
+    if (nextSteps != null)
+      'actions': nextSteps
+          ?.map(
+            (e) => {
+              'command': e.command,
+              'description': e.description,
+              'type': 'terminal_command',
+            },
+          )
+          .toList(),
+    if (suggestion != null) 'recommendation': suggestion,
+    if (errorCode != null) 'error_code': errorCode!.code,
+    if (errorContext != null) 'error_context': errorContext,
+    'context': {
+      'tool': 'fly_cli',
+      'version': VersionUtils.getCurrentVersion(),
+      'timestamp': DateTime.now().toIso8601String(),
+      'format': 'ai_optimized',
+      ...?metadata,
+    },
+    if (executionDurationMs != null ||
+        executionPhase != null ||
+        wasCancelled != null ||
+        progress != null)
+      'execution_metadata': {
+        if (executionDurationMs != null) 'duration_ms': executionDurationMs,
+        if (executionPhase != null) 'phase': executionPhase!.name,
+        if (wasCancelled != null) 'cancelled': wasCancelled,
+        if (progress != null) 'progress': progress,
+      },
+  };
 
   /// Display human-readable output
   void displayHuman() {
@@ -208,22 +206,21 @@ class CommandResult {
     ExecutionPhase? executionPhase,
     bool? wasCancelled,
     Map<String, dynamic>? progress,
-  }) =>
-      CommandResult(
-        success: success ?? this.success,
-        command: command ?? this.command,
-        message: message ?? this.message,
-        data: data ?? this.data,
-        nextSteps: nextSteps ?? this.nextSteps,
-        suggestion: suggestion ?? this.suggestion,
-        metadata: metadata ?? this.metadata,
-        errorCode: errorCode ?? this.errorCode,
-        errorContext: errorContext ?? this.errorContext,
-        executionDurationMs: executionDurationMs ?? this.executionDurationMs,
-        executionPhase: executionPhase ?? this.executionPhase,
-        wasCancelled: wasCancelled ?? this.wasCancelled,
-        progress: progress ?? this.progress,
-      );
+  }) => CommandResult(
+    success: success ?? this.success,
+    command: command ?? this.command,
+    message: message ?? this.message,
+    data: data ?? this.data,
+    nextSteps: nextSteps ?? this.nextSteps,
+    suggestion: suggestion ?? this.suggestion,
+    metadata: metadata ?? this.metadata,
+    errorCode: errorCode ?? this.errorCode,
+    errorContext: errorContext ?? this.errorContext,
+    executionDurationMs: executionDurationMs ?? this.executionDurationMs,
+    executionPhase: executionPhase ?? this.executionPhase,
+    wasCancelled: wasCancelled ?? this.wasCancelled,
+    progress: progress ?? this.progress,
+  );
 }
 
 /// Represents a next step for the user
@@ -237,7 +234,7 @@ class NextStep {
   final String description;
 
   Map<String, dynamic> toJson() => {
-        'command': command,
-        'description': description,
-      };
+    'command': command,
+    'description': description,
+  };
 }

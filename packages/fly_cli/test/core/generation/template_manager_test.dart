@@ -231,7 +231,6 @@ packages: []
     });
   });
 
-
   group('TemplateInfo', () {
     test('parses YAML correctly', () {
       final yaml = <String, dynamic>{

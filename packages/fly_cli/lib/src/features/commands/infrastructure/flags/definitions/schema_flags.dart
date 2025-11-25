@@ -6,7 +6,8 @@ part of '../cli_flags.dart';
 
 /// Schema export format flag
 class SchemaFormatFlag extends CliFlag {
-  const SchemaFormatFlag() : super(
+  const SchemaFormatFlag()
+    : super(
         name: 'format',
         description: 'Export format',
         isGlobal: false,
@@ -19,7 +20,8 @@ class SchemaFormatFlag extends CliFlag {
 
 /// Schema command filter flag (-c, --command)
 class SchemaCommandFilterFlag extends CliFlag {
-  const SchemaCommandFilterFlag() : super(
+  const SchemaCommandFilterFlag()
+    : super(
         name: 'command',
         abbreviation: 'c',
         description: 'Export schema for specific command only',
@@ -31,7 +33,8 @@ class SchemaCommandFilterFlag extends CliFlag {
 
 /// Schema include examples flag
 class SchemaIncludeExamplesFlag extends CliFlag {
-  const SchemaIncludeExamplesFlag() : super(
+  const SchemaIncludeExamplesFlag()
+    : super(
         name: 'include-examples',
         description: 'Include command examples in schema',
         isGlobal: false,
@@ -44,7 +47,8 @@ class SchemaIncludeExamplesFlag extends CliFlag {
 
 /// Schema include validation flag
 class SchemaIncludeValidationFlag extends CliFlag {
-  const SchemaIncludeValidationFlag() : super(
+  const SchemaIncludeValidationFlag()
+    : super(
         name: 'include-validation',
         description: 'Include validation rules in schema',
         isGlobal: false,
@@ -57,7 +61,8 @@ class SchemaIncludeValidationFlag extends CliFlag {
 
 /// Schema include global options flag
 class SchemaIncludeGlobalOptionsFlag extends CliFlag {
-  const SchemaIncludeGlobalOptionsFlag() : super(
+  const SchemaIncludeGlobalOptionsFlag()
+    : super(
         name: 'include-global-options',
         description: 'Include global options in schema',
         isGlobal: false,
@@ -70,7 +75,8 @@ class SchemaIncludeGlobalOptionsFlag extends CliFlag {
 
 /// Schema pretty print flag
 class SchemaPrettyPrintFlag extends CliFlag {
-  const SchemaPrettyPrintFlag() : super(
+  const SchemaPrettyPrintFlag()
+    : super(
         name: 'pretty-print',
         description: 'Pretty print the output',
         isGlobal: false,

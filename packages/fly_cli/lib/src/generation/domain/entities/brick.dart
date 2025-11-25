@@ -1,6 +1,8 @@
-import 'package:fly_cli/src/generation/brick/brick_metadata.dart' show BrickCategory, BrickType;
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart'
+    show BrickCategory, BrickType;
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart';
-import 'package:fly_cli/src/generation/template/template_compatibility.dart' show NonNullableVersionConverter, VersionConverter;
+import 'package:fly_cli/src/generation/template/template_compatibility.dart'
+    show NonNullableVersionConverter, VersionConverter;
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pub_semver/pub_semver.dart';
 
@@ -29,8 +31,7 @@ class Brick {
   });
 
   /// Create Brick from JSON.
-  factory Brick.fromJson(Map<String, dynamic> json) =>
-      _$BrickFromJson(json);
+  factory Brick.fromJson(Map<String, dynamic> json) => _$BrickFromJson(json);
 
   /// Create Brick directly from YAML data.
   ///
@@ -258,7 +259,5 @@ class Brick {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(name, type, category, version, path);
+  int get hashCode => Object.hash(name, type, category, version, path);
 }
-

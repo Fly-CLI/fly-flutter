@@ -48,4 +48,3 @@ class UnsupportedToolException implements Exception {
   @override
   String toString() => 'Unsupported tool type: $toolType';
 }
-

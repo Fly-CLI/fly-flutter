@@ -1,6 +1,6 @@
 import 'package:fly_cli/src/command_runner.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
@@ -53,8 +53,9 @@ void main() {
 
     group('Schema Export Integration', () {
       test('exports CLI spec format', () {
-        final exporter =
-            SchemaExporterFactory.getExporter(ExportFormat.cliSpec);
+        final exporter = SchemaExporterFactory.getExporter(
+          ExportFormat.cliSpec,
+        );
         final schema = exporter.export(registry, const ExportConfig());
 
         expect(schema, contains('"name": "fly"'));
@@ -64,8 +65,9 @@ void main() {
       });
 
       test('exports JSON Schema format', () {
-        final exporter =
-            SchemaExporterFactory.getExporter(ExportFormat.jsonSchema);
+        final exporter = SchemaExporterFactory.getExporter(
+          ExportFormat.jsonSchema,
+        );
         final schema = exporter.export(registry, const ExportConfig());
 
         expect(schema, contains(r'"$schema"'));
@@ -74,8 +76,9 @@ void main() {
       });
 
       test('exports OpenAPI format', () {
-        final exporter =
-            SchemaExporterFactory.getExporter(ExportFormat.openApi);
+        final exporter = SchemaExporterFactory.getExporter(
+          ExportFormat.openApi,
+        );
         final schema = exporter.export(registry, const ExportConfig());
 
         expect(schema, contains('openapi'));
@@ -84,14 +87,17 @@ void main() {
       });
 
       test('filters commands by name', () {
-        final exporter =
-            SchemaExporterFactory.getExporter(ExportFormat.cliSpec);
+        final exporter = SchemaExporterFactory.getExporter(
+          ExportFormat.cliSpec,
+        );
         const config = ExportConfig(commandFilter: 'create');
         final schema = exporter.export(registry, config);
 
         expect(schema, contains('"create"'));
-        expect(schema,
-            isNot(contains('"doctor"'))); // Should not contain other commands
+        expect(
+          schema,
+          isNot(contains('"doctor"')),
+        ); // Should not contain other commands
       });
     });
 
@@ -202,12 +208,18 @@ void main() {
         expect(completionCommand!.options, isNotEmpty);
 
         // Check for specific options
-        expect(completionCommand.options.any((opt) => opt.name == 'shell'),
-            isTrue);
-        expect(completionCommand.options.any((opt) => opt.name == 'install'),
-            isTrue);
         expect(
-            completionCommand.options.any((opt) => opt.name == 'file'), isTrue);
+          completionCommand.options.any((opt) => opt.name == 'shell'),
+          isTrue,
+        );
+        expect(
+          completionCommand.options.any((opt) => opt.name == 'install'),
+          isTrue,
+        );
+        expect(
+          completionCommand.options.any((opt) => opt.name == 'file'),
+          isTrue,
+        );
       });
     });
 

@@ -1,14 +1,10 @@
 import 'package:args/args.dart';
-import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_types.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
-import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 /// Base class for building generation variables from various input sources.
 ///
@@ -49,18 +45,22 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
   @override
   Map<String, dynamic> buildFromMap(Map<String, dynamic> input) {
-    final componentName = input['name'] as String? ?? input['component_name'] as String?;
+    final componentName =
+        input['name'] as String? ?? input['component_name'] as String?;
     if (componentName == null) {
       throw ArgumentError('Feature name is required');
     }
 
     final feature = input['feature'] as String? ?? 'home';
     final screenTypeStr = input['screen_type'] as String? ?? 'list';
-    final screenType = ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ?? ScreenType.list;
+    final screenType =
+        ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ??
+        ScreenType.list;
 
     return {
       'name': componentName,
-      'component_name': componentName, // Required by validation - feature names are already snake_case
+      'component_name': componentName,
+      // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
       'screen_type': screenType.key,
@@ -141,7 +141,8 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName, // Required by validation - feature names are already snake_case
+      'component_name': componentName,
+      // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
       'screen_type': screenType.key,
@@ -169,7 +170,9 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
       const GenerateScreenTypeFlag(),
       ScreenType.list.key,
     );
-    final screenType = ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ?? ScreenType.list;
+    final screenType =
+        ScreenType.tryFromKey(screenTypeStr, defaultValue: ScreenType.list) ??
+        ScreenType.list;
     final withViewModel = FlagAccessor.getBool(
       argResults,
       const GenerateScreenWithViewModelFlag(),
@@ -189,7 +192,8 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName, // Required by validation - feature names are already snake_case
+      'component_name': componentName,
+      // Required by validation - feature names are already snake_case
       'generation_mode': 'feature',
       'feature': feature,
       'screen_type': screenType.key,
@@ -221,28 +225,37 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
   @override
   Map<String, dynamic> buildFromMap(Map<String, dynamic> input) {
-    final serviceName = input['name'] as String? ?? input['service_name'] as String?;
+    final serviceName =
+        input['name'] as String? ?? input['service_name'] as String?;
     if (serviceName == null) {
       throw ArgumentError('Service name is required');
     }
 
     final feature = input['feature'] as String? ?? 'core';
     final serviceTypeStr = input['service_type'] as String? ?? 'api';
-    final serviceType = ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ?? ServiceType.api;
+    final serviceType =
+        ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ??
+        ServiceType.api;
     final isApiService = serviceType == ServiceType.api;
 
     return {
       'name': serviceName,
-      'component_name': serviceName, // Required by validation - service names are already snake_case
+      'component_name': serviceName,
+      // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
       'service_type': serviceType.key,
       'with_tests': input['with_tests'] as bool? ?? true,
       'with_mocks': input['with_mocks'] as bool? ?? false,
-      'with_interceptors': input['with_interceptors'] as bool? ?? (isApiService ? false : false),
+      'with_interceptors':
+          input['with_interceptors'] as bool? ?? (isApiService ? false : false),
       'with_retry_logic': isApiService,
       'with_caching': serviceType == ServiceType.cache,
-      if (isApiService) 'api_base_url': input['api_base_url'] as String? ?? input['base_url'] as String? ?? 'https://api.example.com',
+      if (isApiService)
+        'api_base_url':
+            input['api_base_url'] as String? ??
+            input['base_url'] as String? ??
+            'https://api.example.com',
       'preset': input['preset'] as String? ?? 'starter',
     };
   }
@@ -321,7 +334,8 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': componentName,
-      'component_name': componentName, // Required by validation - service names are already snake_case
+      'component_name': componentName,
+      // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
       'service_type': serviceType.key,
@@ -351,7 +365,9 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
       const GenerateServiceTypeFlag(),
       ServiceType.api.key,
     );
-    final serviceType = ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ?? ServiceType.api;
+    final serviceType =
+        ServiceType.tryFromKey(serviceTypeStr, defaultValue: ServiceType.api) ??
+        ServiceType.api;
     final withTests = FlagAccessor.getBool(
       argResults,
       const GenerateServiceWithTestsFlag(),
@@ -375,7 +391,8 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': serviceName,
-      'component_name': serviceName, // Required by validation - service names are already snake_case
+      'component_name': serviceName,
+      // Required by validation - service names are already snake_case
       'generation_mode': 'service',
       'feature': feature,
       'service_type': serviceType.key,
@@ -409,14 +426,17 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
   @override
   Map<String, dynamic> buildFromMap(Map<String, dynamic> input) {
-    final projectName = input['name'] as String? ?? input['project_name'] as String?;
+    final projectName =
+        input['name'] as String? ?? input['project_name'] as String?;
     if (projectName == null) {
       throw ArgumentError('Project name is required');
     }
 
     final organization = input['organization'] as String? ?? 'com.example';
-    final description = input['description'] as String? ?? 'A new Flutter project';
-    final platforms = input['platforms'] as List<dynamic>? ?? ['ios', 'android'];
+    final description =
+        input['description'] as String? ?? 'A new Flutter project';
+    final platforms =
+        input['platforms'] as List<dynamic>? ?? ['ios', 'android'];
     final template = input['template'] as String? ?? 'fly_foundation';
     final preset = input['preset'] as String? ?? 'starter';
 
@@ -424,7 +444,9 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
     final featuresInput = input['features'] as List<dynamic>? ?? [];
     final featureInstances = featuresInput.map((featureName) {
       return {
-        'name': featureName is String ? featureName : (featureName as Map)['name'],
+        'name': featureName is String
+            ? featureName
+            : (featureName as Map)['name'],
         'type': 'feature',
         'params': featureName is Map
             ? featureName['params'] as Map<String, dynamic>?
@@ -466,7 +488,8 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': projectName,
-      'project_name': projectName, // Required by validation - project names are already snake_case
+      'project_name': projectName,
+      // Required by validation - project names are already snake_case
       'organization': organization,
       'description': description,
       'platforms': platforms,
@@ -502,7 +525,8 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
     final projectName = await prompter.promptString(
       prompt: 'Project name',
       validator: NameValidationRule.isValidProjectName,
-      validationError: 'Project name must contain only lowercase letters, '
+      validationError:
+          'Project name must contain only lowercase letters, '
           'numbers, and underscores',
     );
 
@@ -551,7 +575,8 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': projectName,
-      'project_name': projectName, // Required by validation - project names are already snake_case
+      'project_name': projectName,
+      // Required by validation - project names are already snake_case
       'template': template,
       'organization': organization,
       'description': 'A new Flutter project',
@@ -580,10 +605,12 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
       const CreateOrganizationFlag(),
       'com.example',
     );
-    final description = FlagAccessor.getString(
-      argResults,
-      const CreateDescriptionFlag(),
-    ) ?? 'A new Flutter project';
+    final description =
+        FlagAccessor.getString(
+          argResults,
+          const CreateDescriptionFlag(),
+        ) ??
+        'A new Flutter project';
     final platforms = FlagAccessor.getStringList(
       argResults,
       CreatePlatformsFlag(),
@@ -611,7 +638,8 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
     return {
       'name': projectName,
-      'project_name': projectName, // Required by validation - project names are already snake_case
+      'project_name': projectName,
+      // Required by validation - project names are already snake_case
       'template': template,
       'organization': organization,
       'description': description,
@@ -623,4 +651,3 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
     };
   }
 }
-

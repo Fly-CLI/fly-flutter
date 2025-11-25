@@ -35,36 +35,45 @@ class StructuredSchemaValidator {
       schema,
       path: path,
       onTypeMismatch: (errorPath, expectedType, actualValue) {
-        errors.add(ValidationError(
-          path: errorPath,
-          type: ValidationErrorType.typeMismatch,
-          expected: expectedType,
-          actual: _getTypeName(actualValue),
-          message:
-              _buildTypeMismatchMessage(errorPath, expectedType, actualValue),
-          hint: _getTypeMismatchHint(expectedType, actualValue),
-        ));
+        errors.add(
+          ValidationError(
+            path: errorPath,
+            type: ValidationErrorType.typeMismatch,
+            expected: expectedType,
+            actual: _getTypeName(actualValue),
+            message: _buildTypeMismatchMessage(
+              errorPath,
+              expectedType,
+              actualValue,
+            ),
+            hint: _getTypeMismatchHint(expectedType, actualValue),
+          ),
+        );
         return _buildTypeMismatchMessage(errorPath, expectedType, actualValue);
       },
       onMissingRequired: (field, errorPath) {
-        errors.add(ValidationError(
-          path: errorPath,
-          type: ValidationErrorType.missingRequired,
-          expected: 'required field',
-          message: _buildMissingFieldMessage(errorPath, field),
-          hint: _getMissingFieldHint(field, schema),
-        ));
+        errors.add(
+          ValidationError(
+            path: errorPath,
+            type: ValidationErrorType.missingRequired,
+            expected: 'required field',
+            message: _buildMissingFieldMessage(errorPath, field),
+            hint: _getMissingFieldHint(field, schema),
+          ),
+        );
         return _buildMissingFieldMessage(errorPath, field);
       },
       onAdditionalProperty: (field, errorPath) {
-        errors.add(ValidationError(
-          path: errorPath,
-          type: ValidationErrorType.additionalPropertyNotAllowed,
-          expected: 'no additional properties',
-          message: 'Additional property not allowed: $errorPath',
-          hint:
-              'Remove this property or check tool schema for allowed properties',
-        ));
+        errors.add(
+          ValidationError(
+            path: errorPath,
+            type: ValidationErrorType.additionalPropertyNotAllowed,
+            expected: 'no additional properties',
+            message: 'Additional property not allowed: $errorPath',
+            hint:
+                'Remove this property or check tool schema for allowed properties',
+          ),
+        );
         return 'Additional property not allowed: $errorPath';
       },
       onNestedError: (errorPath, error) {
@@ -115,8 +124,9 @@ class StructuredSchemaValidator {
             if (props.containsKey(fieldName)) {
               final fieldSchema = props[fieldName] as Map<String, Object?>?;
               if (fieldSchema != null) {
-                errors
-                    .addAll(_validateEnum(fieldValue, fieldSchema, fieldPath));
+                errors.addAll(
+                  _validateEnum(fieldValue, fieldSchema, fieldPath),
+                );
               }
             }
           }
@@ -139,14 +149,16 @@ class StructuredSchemaValidator {
     if (enumValues != null && !enumValues.contains(value)) {
       final allowedValues = enumValues.map((e) => e.toString()).toList();
 
-      errors.add(ValidationError(
-        path: path,
-        type: ValidationErrorType.invalidEnum,
-        expected: 'one of: ${allowedValues.join(", ")}',
-        actual: value,
-        message: _buildEnumErrorMessage(path, value, allowedValues),
-        hint: _getEnumHint(path, value, allowedValues),
-      ));
+      errors.add(
+        ValidationError(
+          path: path,
+          type: ValidationErrorType.invalidEnum,
+          expected: 'one of: ${allowedValues.join(", ")}',
+          actual: value,
+          message: _buildEnumErrorMessage(path, value, allowedValues),
+          hint: _getEnumHint(path, value, allowedValues),
+        ),
+      );
     }
 
     return errors;
@@ -219,7 +231,9 @@ class StructuredSchemaValidator {
   }
 
   static String? _getMissingFieldHint(
-      String field, Map<String, Object?> schema) {
+    String field,
+    Map<String, Object?> schema,
+  ) {
     final properties = schema['properties'] as Map<String, Object?>?;
     final fieldSchema = properties?[field] as Map<String, Object?>?;
     final description = fieldSchema?['description'] as String?;

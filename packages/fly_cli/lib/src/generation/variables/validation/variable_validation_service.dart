@@ -1,23 +1,27 @@
-import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
-import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
 
 /// Unified validation service for generation variables.
 ///
 class VariableValidationService {
-  static final _allowedModeKeys =
-      GenerationMode.values.map((e) => e.key).toSet();
-  static final _allowedPlatformKeys =
-      PlatformType.values.map((e) => e.key).toSet();
-  static final _allowedScreenTypeKeys =
-      ScreenType.values.map((e) => e.key).toSet();
-  static final _allowedServiceTypeKeys =
-      ServiceType.values.map((e) => e.key).toSet();
+  static final _allowedModeKeys = GenerationMode.values
+      .map((e) => e.key)
+      .toSet();
+  static final _allowedPlatformKeys = PlatformType.values
+      .map((e) => e.key)
+      .toSet();
+  static final _allowedScreenTypeKeys = ScreenType.values
+      .map((e) => e.key)
+      .toSet();
+  static final _allowedServiceTypeKeys = ServiceType.values
+      .map((e) => e.key)
+      .toSet();
 
-  static final _organizationPattern =
-      RegExp(r'^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$');
+  static final _organizationPattern = RegExp(
+    r'^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$',
+  );
 
   /// Validate all aspects of variables: brick-level and business rules.
   ///
@@ -97,7 +101,8 @@ class VariableValidationService {
         if (brickVar.choices != null && brickVar.choices!.isNotEmpty) {
           if (value is String && !brickVar.choices!.contains(value)) {
             errors.add(
-                'Variable "$variableName" value "$value" is not in allowed choices: ${brickVar.choices!.join(', ')}');
+              'Variable "$variableName" value "$value" is not in allowed choices: ${brickVar.choices!.join(', ')}',
+            );
           }
         }
       }
@@ -125,7 +130,8 @@ class VariableValidationService {
   }
 
   static List<String> _validateProjectVariables(
-      Map<String, dynamic> variables) {
+    Map<String, dynamic> variables,
+  ) {
     final errors = <String>[];
     final projectName = variables.getVar<String>(MasonVarKey.projectName);
     final organization = variables.getVar<String>(MasonVarKey.organization);
@@ -134,15 +140,17 @@ class VariableValidationService {
     if (projectName == null || projectName.isEmpty) {
       errors.add('project_name is required for project generation');
     } else if (!NameValidationRule.isValidProjectName(projectName)) {
-      errors
-          .add('project_name "$projectName" is not a valid Dart package name');
+      errors.add(
+        'project_name "$projectName" is not a valid Dart package name',
+      );
     }
 
     if (organization == null || organization.isEmpty) {
       errors.add('organization is required for project generation');
     } else if (!_organizationPattern.hasMatch(organization)) {
       errors.add(
-          'organization "$organization" must be reverse-domain (e.g. com.example.app)');
+        'organization "$organization" must be reverse-domain (e.g. com.example.app)',
+      );
     }
 
     if (platforms is! List || platforms.isEmpty) {
@@ -155,7 +163,8 @@ class VariableValidationService {
           final platformKey = platform.toLowerCase().trim();
           if (!_allowedPlatformKeys.contains(platformKey)) {
             errors.add(
-                'platform "$platform" is not supported. Valid: ${_allowedPlatformKeys.join(', ')}');
+              'platform "$platform" is not supported. Valid: ${_allowedPlatformKeys.join(', ')}',
+            );
           }
         }
       }
@@ -165,7 +174,8 @@ class VariableValidationService {
   }
 
   static List<String> _validateFeatureVariables(
-      Map<String, dynamic> variables) {
+    Map<String, dynamic> variables,
+  ) {
     final errors = <String>[];
     final componentName = variables.getVar<String>(MasonVarKey.componentName);
     final feature = variables.getVar<String>(MasonVarKey.feature);
@@ -201,7 +211,8 @@ class VariableValidationService {
   }
 
   static List<String> _validateServiceVariables(
-      Map<String, dynamic> variables) {
+    Map<String, dynamic> variables,
+  ) {
     final errors = <String>[];
     final componentName = variables.getVar<String>(MasonVarKey.componentName);
     final feature = variables.getVar<String>(MasonVarKey.feature);
@@ -235,7 +246,8 @@ class VariableValidationService {
     }
 
     if (serviceType == ServiceType.api) {
-      final baseUrl = variables.getVar<String>(MasonVarKey.baseUrl) ??
+      final baseUrl =
+          variables.getVar<String>(MasonVarKey.baseUrl) ??
           variables.getVar<String>(MasonVarKey.apiBaseUrl);
       if (baseUrl == null || baseUrl.isEmpty) {
         errors.add('api_base_url is required when service_type is "api"');
@@ -245,4 +257,3 @@ class VariableValidationService {
     return errors;
   }
 }
-

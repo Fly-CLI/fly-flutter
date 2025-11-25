@@ -38,10 +38,10 @@ class TemplateApplyParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        'templateId': templateId,
-        'outputDirectory': outputDirectory,
-        if (variables != null) 'variables': variables,
-        if (dryRun != null) 'dryRun': dryRun,
-        if (confirm != null) 'confirm': confirm,
-      };
+    'templateId': templateId,
+    'outputDirectory': outputDirectory,
+    if (variables != null) 'variables': variables,
+    if (dryRun != null) 'dryRun': dryRun,
+    if (confirm != null) 'confirm': confirm,
+  };
 }

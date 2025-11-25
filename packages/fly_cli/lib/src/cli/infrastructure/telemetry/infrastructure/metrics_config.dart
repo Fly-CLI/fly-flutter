@@ -1,5 +1,4 @@
-import 'package:fly_core/src/environment/env_var.dart';
-import 'package:fly_core/src/environment/environment_manager.dart';
+
 
 /// Configuration for metrics collection
 class MetricsConfig {
@@ -23,7 +22,7 @@ class MetricsConfig {
   final bool clearAfterCommand;
 
   /// Create configuration from environment variables
-  /// 
+  ///
   /// Note: Metrics-specific environment variables are not yet defined in EnvVar enum.
   /// Currently uses sensible defaults. To add env var support, add constants to EnvVar enum.
   factory MetricsConfig.fromEnvironment({required bool isProd}) {
@@ -32,7 +31,7 @@ class MetricsConfig {
     // - FLY_METRICS_EXPORT_ON_SHUTDOWN
     // - FLY_METRICS_MAX_COUNT
     // - FLY_METRICS_CLEAR_AFTER_COMMAND
-    
+
     return MetricsConfig(
       enabled: !isProd, // Disabled in production by default
       exportOnShutdown: false,
@@ -47,12 +46,10 @@ class MetricsConfig {
     bool? exportOnShutdown,
     int? maxMetricsCount,
     bool? clearAfterCommand,
-  }) =>
-      MetricsConfig(
-        enabled: enabled ?? this.enabled,
-        exportOnShutdown: exportOnShutdown ?? this.exportOnShutdown,
-        maxMetricsCount: maxMetricsCount ?? this.maxMetricsCount,
-        clearAfterCommand: clearAfterCommand ?? this.clearAfterCommand,
-      );
+  }) => MetricsConfig(
+    enabled: enabled ?? this.enabled,
+    exportOnShutdown: exportOnShutdown ?? this.exportOnShutdown,
+    maxMetricsCount: maxMetricsCount ?? this.maxMetricsCount,
+    clearAfterCommand: clearAfterCommand ?? this.clearAfterCommand,
+  );
 }
-

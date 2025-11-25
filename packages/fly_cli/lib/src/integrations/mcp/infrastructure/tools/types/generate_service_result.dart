@@ -33,10 +33,9 @@ class GenerateServiceResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (filesGenerated != null) 'filesGenerated': filesGenerated,
-        if (servicePath != null) 'servicePath': servicePath,
-      };
+    'success': success,
+    'message': message,
+    if (filesGenerated != null) 'filesGenerated': filesGenerated,
+    if (servicePath != null) 'servicePath': servicePath,
+  };
 }
-

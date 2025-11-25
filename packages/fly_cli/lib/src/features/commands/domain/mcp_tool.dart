@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/categories.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy_registry.dart';
 import 'package:fly_mcp/fly_mcp.dart';
@@ -118,11 +118,8 @@ extension McpToolExtension on McpTool {
   ///
   /// Returns the Tool, handler, and requiresConfirmation separately,
   /// since Tool doesn't include the handler or confirmation requirement.
-  ({
-    Tool tool,
-    ToolHandler handler,
-    bool requiresConfirmation,
-  }) createToolAndHandler(
+  ({Tool tool, ToolHandler handler, bool requiresConfirmation})
+  createToolAndHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {

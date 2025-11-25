@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/generate/service/generate_service_command.dart';
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
 import '../../helpers/mock_logger.dart';
 import '../../helpers/test_fixtures.dart';
-import 'package:mason/mason.dart';
 
 void main() {
   group('GenerateServiceCommand', () {
@@ -46,8 +46,10 @@ void main() {
       });
 
       test('should have correct description', () {
-        expect(command.description,
-            equals('Generate a new service component to the current project'));
+        expect(
+          command.description,
+          equals('Generate a new service component to the current project'),
+        );
       });
 
       test('should have required arguments', () {
@@ -103,18 +105,30 @@ void main() {
         }
         // Additional invalid names
         expect(NameValidationRule.isValidServiceName(''), isFalse);
-        expect(NameValidationRule.isValidServiceName('ApiService'),
-            isFalse); // uppercase
-        expect(NameValidationRule.isValidServiceName('api-service'),
-            isFalse); // hyphen
-        expect(NameValidationRule.isValidServiceName('api.service'),
-            isFalse); // dot
-        expect(NameValidationRule.isValidServiceName('123service'),
-            isFalse); // starts with number
         expect(
-            NameValidationRule.isValidServiceName('a'), isFalse); // too short
-        expect(NameValidationRule.isValidServiceName('a' * 51),
-            isFalse); // too long
+          NameValidationRule.isValidServiceName('ApiService'),
+          isFalse,
+        ); // uppercase
+        expect(
+          NameValidationRule.isValidServiceName('api-service'),
+          isFalse,
+        ); // hyphen
+        expect(
+          NameValidationRule.isValidServiceName('api.service'),
+          isFalse,
+        ); // dot
+        expect(
+          NameValidationRule.isValidServiceName('123service'),
+          isFalse,
+        ); // starts with number
+        expect(
+          NameValidationRule.isValidServiceName('a'),
+          isFalse,
+        ); // too short
+        expect(
+          NameValidationRule.isValidServiceName('a' * 51),
+          isFalse,
+        ); // too long
       });
 
       test('should reject empty service name', () {
@@ -155,7 +169,7 @@ void main() {
       test('should reject invalid service types', () {
         final parser = command.argParser;
         expect(
-              () => parser.parse(['--type', 'invalid']),
+          () => parser.parse(['--type', 'invalid']),
           throwsA(isA<FormatException>()),
         );
       });
@@ -287,8 +301,7 @@ void main() {
     group('API Service Options', () {
       test('should have with-interceptors flag', () {
         final parser = command.argParser;
-        expect(
-            parser.options.containsKey('with-interceptors'), isTrue);
+        expect(parser.options.containsKey('with-interceptors'), isTrue);
       });
 
       test('should have base-url option', () {
@@ -316,8 +329,7 @@ void main() {
 
       test('should accept custom base-url', () {
         final parser = command.argParser;
-        final args =
-        parser.parse(['--base-url', 'https://api.custom.com']);
+        final args = parser.parse(['--base-url', 'https://api.custom.com']);
         expect(args['base-url'], equals('https://api.custom.com'));
       });
     });
@@ -350,8 +362,7 @@ void main() {
 
       test('should handle service with custom feature with separate flag', () {
         final parser = command.argParser;
-        final args =
-        parser.parse(['--feature', 'auth', 'auth_service']);
+        final args = parser.parse(['--feature', 'auth', 'auth_service']);
         expect(args['feature'], equals('auth'));
         expect(args.rest, equals(['auth_service']));
       });
@@ -405,24 +416,21 @@ void main() {
 
       test('should handle cache service', () {
         final parser = command.argParser;
-        final args =
-        parser.parse(['--type', 'cache', 'cache_service']);
+        final args = parser.parse(['--type', 'cache', 'cache_service']);
         expect(args['type'], equals('cache'));
         expect(args.rest, equals(['cache_service']));
       });
 
       test('should handle analytics service', () {
         final parser = command.argParser;
-        final args = parser
-            .parse(['--type', 'analytics', 'analytics_service']);
+        final args = parser.parse(['--type', 'analytics', 'analytics_service']);
         expect(args['type'], equals('analytics'));
         expect(args.rest, equals(['analytics_service']));
       });
 
       test('should handle storage service', () {
         final parser = command.argParser;
-        final args =
-        parser.parse(['--type', 'storage', 'storage_service']);
+        final args = parser.parse(['--type', 'storage', 'storage_service']);
         expect(args['type'], equals('storage'));
         expect(args.rest, equals(['storage_service']));
       });
@@ -500,7 +508,7 @@ void main() {
         final parser = command.argParser;
 
         expect(
-              () => parser.parse(['auth', '--type=invalid']),
+          () => parser.parse(['auth', '--type=invalid']),
           throwsA(isA<FormatException>()),
         );
       });
@@ -632,11 +640,14 @@ void main() {
         expect(result.rest, equals(['user_management_service']));
       });
 
-      test('should handle service name with underscores with separate flag', () {
-        final parser = command.argParser;
-        final args = parser.parse(['user_profile_service']);
-        expect(args.rest, equals(['user_profile_service']));
-      });
+      test(
+        'should handle service name with underscores with separate flag',
+        () {
+          final parser = command.argParser;
+          final args = parser.parse(['user_profile_service']);
+          expect(args.rest, equals(['user_profile_service']));
+        },
+      );
 
       test('should handle single character service name', () {
         final parser = command.argParser;
@@ -645,11 +656,14 @@ void main() {
         expect(result.rest, equals(['a']));
       });
 
-      test('should handle single character service name with separate flag', () {
-        final parser = command.argParser;
-        final args = parser.parse(['a']);
-        expect(args.rest, equals(['a']));
-      });
+      test(
+        'should handle single character service name with separate flag',
+        () {
+          final parser = command.argParser;
+          final args = parser.parse(['a']);
+          expect(args.rest, equals(['a']));
+        },
+      );
     });
 
     group('Command Result Structure', () {
@@ -677,16 +691,19 @@ void main() {
         }
       });
 
-      test('should handle repeated parsing efficiently with different syntax', () {
-        expect(
-              () {
-            for (var i = 0; i < 100; i++) {
-              command.argParser.parse(['test_service_$i']);
-            }
-          },
-          returnsNormally,
-        );
-      });
+      test(
+        'should handle repeated parsing efficiently with different syntax',
+        () {
+          expect(
+            () {
+              for (var i = 0; i < 100; i++) {
+                command.argParser.parse(['test_service_$i']);
+              }
+            },
+            returnsNormally,
+          );
+        },
+      );
     });
   });
 }

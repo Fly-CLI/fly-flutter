@@ -28,4 +28,3 @@ abstract class ITemplateRepository {
   /// Returns the absolute path to the template directory.
   Future<String?> getTemplatePath(String name);
 }
-

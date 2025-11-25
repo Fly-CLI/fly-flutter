@@ -198,25 +198,35 @@ void main() {
         final bashScript = const BashCompletionGenerator().generate(registry);
         final zshScript = const ZshCompletionGenerator().generate(registry);
         final fishScript = const FishCompletionGenerator().generate(registry);
-        final powershellScript =
-            const PowerShellCompletionGenerator().generate(registry);
+        final powershellScript = const PowerShellCompletionGenerator().generate(
+          registry,
+        );
 
         final commands = [
           'create',
           'doctor',
           'version',
           'schema',
-          'completion'
+          'completion',
         ];
 
         for (final command in commands) {
-          expect(bashScript, contains(command),
-              reason: 'Bash missing $command');
+          expect(
+            bashScript,
+            contains(command),
+            reason: 'Bash missing $command',
+          );
           expect(zshScript, contains(command), reason: 'Zsh missing $command');
-          expect(fishScript, contains(command),
-              reason: 'Fish missing $command');
-          expect(powershellScript, contains(command),
-              reason: 'PowerShell missing $command');
+          expect(
+            fishScript,
+            contains(command),
+            reason: 'Fish missing $command',
+          );
+          expect(
+            powershellScript,
+            contains(command),
+            reason: 'PowerShell missing $command',
+          );
         }
       });
 
@@ -224,20 +234,33 @@ void main() {
         final bashScript = const BashCompletionGenerator().generate(registry);
         final zshScript = const ZshCompletionGenerator().generate(registry);
         final fishScript = const FishCompletionGenerator().generate(registry);
-        final powershellScript =
-            const PowerShellCompletionGenerator().generate(registry);
+        final powershellScript = const PowerShellCompletionGenerator().generate(
+          registry,
+        );
 
         final globalOptions = ['verbose', 'output', 'help'];
 
         for (final option in globalOptions) {
-          expect(bashScript, contains('--$option'),
-              reason: 'Bash missing --$option');
-          expect(zshScript, contains('--$option'),
-              reason: 'Zsh missing --$option');
-          expect(fishScript, contains('-l $option'),
-              reason: 'Fish missing -l $option');
-          expect(powershellScript, contains('--$option'),
-              reason: 'PowerShell missing --$option');
+          expect(
+            bashScript,
+            contains('--$option'),
+            reason: 'Bash missing --$option',
+          );
+          expect(
+            zshScript,
+            contains('--$option'),
+            reason: 'Zsh missing --$option',
+          );
+          expect(
+            fishScript,
+            contains('-l $option'),
+            reason: 'Fish missing -l $option',
+          );
+          expect(
+            powershellScript,
+            contains('--$option'),
+            reason: 'PowerShell missing --$option',
+          );
         }
       });
     });

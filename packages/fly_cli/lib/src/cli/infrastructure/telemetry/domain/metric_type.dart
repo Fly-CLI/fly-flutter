@@ -9,4 +9,3 @@ enum MetricType {
   /// Histogram: distribution of values (e.g., execution time distribution)
   histogram,
 }
-

@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 
 /// Abstract base class for shell-specific completion generators
 abstract class CompletionGenerator {
@@ -43,6 +43,5 @@ class CompletionUtils {
   /// Filter non-hidden commands
   static List<CommandDefinition> visibleCommands(
     Map<String, CommandDefinition> allCommands,
-  ) =>
-      allCommands.values.where((c) => !c.isHidden).toList();
+  ) => allCommands.values.where((c) => !c.isHidden).toList();
 }

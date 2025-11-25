@@ -6,7 +6,8 @@ part of '../cli_flags.dart';
 
 /// Create template flag (-t, --template)
 class CreateTemplateFlag extends CliFlag {
-  const CreateTemplateFlag() : super(
+  const CreateTemplateFlag()
+    : super(
         name: 'template',
         abbreviation: 't',
         description: 'Project template to use',
@@ -20,7 +21,8 @@ class CreateTemplateFlag extends CliFlag {
 
 /// Create organization flag
 class CreateOrganizationFlag extends CliFlag {
-  const CreateOrganizationFlag() : super(
+  const CreateOrganizationFlag()
+    : super(
         name: 'organization',
         description: 'Organization identifier',
         isGlobal: false,
@@ -32,7 +34,8 @@ class CreateOrganizationFlag extends CliFlag {
 
 /// Create description flag
 class CreateDescriptionFlag extends CliFlag {
-  const CreateDescriptionFlag() : super(
+  const CreateDescriptionFlag()
+    : super(
         name: 'description',
         description: 'Project description',
         isGlobal: false,
@@ -44,20 +47,29 @@ class CreateDescriptionFlag extends CliFlag {
 /// Create platforms flag (multi-value)
 /// Note: Cannot be const because defaultValue is a non-const list
 class CreatePlatformsFlag extends CliFlag {
-  CreatePlatformsFlag() : super(
+  CreatePlatformsFlag()
+    : super(
         name: 'platforms',
         description: 'Target platforms',
         isGlobal: false,
         category: CliFlagCategory.execution,
         type: FlagType.multiValue,
-        allowedValues: const ['ios', 'android', 'web', 'macos', 'windows', 'linux'],
+        allowedValues: const [
+          'ios',
+          'android',
+          'web',
+          'macos',
+          'windows',
+          'linux',
+        ],
         defaultValue: const ['ios', 'android'],
       );
 }
 
 /// Create features flag (multi-value)
 class CreateFeaturesFlag extends CliFlag {
-  CreateFeaturesFlag() : super(
+  CreateFeaturesFlag()
+    : super(
         name: 'features',
         description: 'Initial feature modules to generate',
         isGlobal: false,
@@ -69,7 +81,8 @@ class CreateFeaturesFlag extends CliFlag {
 
 /// Create from manifest flag
 class CreateFromManifestFlag extends CliFlag {
-  const CreateFromManifestFlag() : super(
+  const CreateFromManifestFlag()
+    : super(
         name: 'from-manifest',
         description: 'Create project from manifest file',
         isGlobal: false,

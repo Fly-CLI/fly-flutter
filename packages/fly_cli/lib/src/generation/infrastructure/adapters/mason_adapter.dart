@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:mason/mason.dart';
-import 'package:mason_logger/mason_logger.dart';
-
 import 'package:fly_cli/src/generation/infrastructure/adapters/imason_adapter.dart';
+import 'package:mason/mason.dart';
 
 /// Implementation of IMasonAdapter using Mason package.
 class MasonAdapter implements IMasonAdapter {
@@ -19,14 +17,14 @@ class MasonAdapter implements IMasonAdapter {
     final generator = await MasonGenerator.fromBrick(brick);
     final targetDir = Directory(target);
     final target_ = DirectoryGeneratorTarget(targetDir);
-    
+
     // Generate and return the list of generated files
     final files = await generator.generate(
       target_,
       vars: vars,
       fileConflictResolution: FileConflictResolution.overwrite,
     );
-    
+
     return files;
   }
 
@@ -47,4 +45,3 @@ class MasonAdapter implements IMasonAdapter {
     }
   }
 }
-

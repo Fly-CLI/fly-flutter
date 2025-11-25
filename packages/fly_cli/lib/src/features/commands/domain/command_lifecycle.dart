@@ -16,7 +16,10 @@ abstract class CommandLifecycle {
   /// Called when an error occurs during execution
   /// Use for error handling, cleanup, or recovery
   Future<void> onError(
-      CommandContext context, Object error, StackTrace stackTrace);
+    CommandContext context,
+    Object error,
+    StackTrace stackTrace,
+  );
 
   /// Called during validation phase
   /// Use for custom validation logic

@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command_strategy.dart';
-import 'package:fly_cli/src/features/commands/domain/categories.dart';
 import 'package:fly_cli/src/features/context/application/context_command.dart';
 
 /// Strategy for context command
@@ -17,9 +17,9 @@ class ContextCommandDescriptor extends FlyCommandDescriptor {
 
   @override
   CommandGroup? get group => const CommandGroup(
-        name: 'ai',
-        description: 'AI integration commands for coding assistants',
-      );
+    name: 'ai',
+    description: 'AI integration commands for coding assistants',
+  );
 
   @override
   CommandCategory get category => CommandCategory.information;

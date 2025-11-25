@@ -35,7 +35,9 @@ class TemplateInfo {
   /// optional compatibility requirements. Compatibility parsing is handled internally
   /// and includes compatibility data when present in the YAML.
   factory TemplateInfo.fromYaml(
-      Map<dynamic, dynamic> yaml, String templatePath) {
+    Map<dynamic, dynamic> yaml,
+    String templatePath,
+  ) {
     // Helper to treat empty strings as null
     String? nonEmptyString(dynamic value) {
       final str = value as String?;
@@ -104,20 +106,19 @@ class TemplateInfo {
 
   static List<TemplateVariable> _parseVariables(
     Map<String, dynamic> variables,
-  ) =>
-      variables.entries.map((entry) {
-        final key = entry.key;
-        final value = entry.value as Map<dynamic, dynamic>;
+  ) => variables.entries.map((entry) {
+    final key = entry.key;
+    final value = entry.value as Map<dynamic, dynamic>;
 
-        return TemplateVariable(
-          name: key,
-          type: value['type'] as String? ?? 'string',
-          required: value['required'] as bool? ?? false,
-          defaultValue: value['default']?.toString(),
-          choices: (value['choices'] as List<dynamic>?)?.cast<String>(),
-          description: value['description'] as String?,
-        );
-      }).toList();
+    return TemplateVariable(
+      name: key,
+      type: value['type'] as String? ?? 'string',
+      required: value['required'] as bool? ?? false,
+      defaultValue: value['default']?.toString(),
+      choices: (value['choices'] as List<dynamic>?)?.cast<String>(),
+      description: value['description'] as String?,
+    );
+  }).toList();
 
   /// Convert TemplateInfo to JSON for caching
   Map<String, dynamic> toJson() => _$TemplateInfoToJson(this);
@@ -138,9 +139,9 @@ class TemplateInfo {
 
   @override
   int get hashCode => Object.hash(
-        name.hashCode,
-        description.hashCode,
-        version.hashCode,
-        compatibility,
-      );
+    name.hashCode,
+    description.hashCode,
+    version.hashCode,
+    compatibility,
+  );
 }

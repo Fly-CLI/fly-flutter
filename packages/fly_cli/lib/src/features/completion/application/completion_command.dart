@@ -1,19 +1,19 @@
 import 'dart:io';
 
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/zsh_generator.dart';
+import 'package:fly_cli/src/shared/utils/version_utils.dart';
 
 /// CompletionCommand using new architecture
 class CompletionCommand extends FlyCommand {
@@ -31,18 +31,17 @@ class CompletionCommand extends FlyCommand {
 
   @override
   List<CliFlag> get flags => [
-        const CompletionShellFlag(),
-        const OutputFileFlag(),
-        const CompletionInstallFlag(),
-        const CompletionUninstallFlag(),
-      ];
+    const CompletionShellFlag(),
+    const OutputFileFlag(),
+    const CompletionInstallFlag(),
+    const CompletionUninstallFlag(),
+  ];
 
   @override
   List<CommandValidator> get validators => [EnvironmentValidator()];
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {
@@ -64,8 +63,10 @@ class CompletionCommand extends FlyCommand {
       );
       final outputFile = FlagAccessor.getString(args, const OutputFileFlag());
       final install = FlagAccessor.getBool(args, const CompletionInstallFlag());
-      final uninstall =
-          FlagAccessor.getBool(args, const CompletionUninstallFlag());
+      final uninstall = FlagAccessor.getBool(
+        args,
+        const CompletionUninstallFlag(),
+      );
 
       logger.info('🔧 Generating $shell completion script...');
 
@@ -202,7 +203,10 @@ class CompletionCommand extends FlyCommand {
 
   /// Handle installation of completion script
   Future<CommandResult> _handleInstall(
-      String shell, String script, Map<String, dynamic> data) async {
+    String shell,
+    String script,
+    Map<String, dynamic> data,
+  ) async {
     try {
       logger.info('📦 Installing $shell completion script...');
 
@@ -238,7 +242,9 @@ class CompletionCommand extends FlyCommand {
 
   /// Handle uninstallation of completion script
   Future<CommandResult> _handleUninstall(
-      String shell, Map<String, dynamic> data) async {
+    String shell,
+    Map<String, dynamic> data,
+  ) async {
     try {
       logger.info('🗑️ Removing $shell completion script...');
 

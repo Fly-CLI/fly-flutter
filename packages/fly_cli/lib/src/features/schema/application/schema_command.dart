@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter.dart';
 import 'package:fly_cli/src/features/schema/infrastructure/exporters/schema_exporter_factory.dart';
+import 'package:fly_cli/src/shared/utils/version_utils.dart';
 
 /// SchemaCommand using new architecture
 class SchemaCommand extends FlyCommand {
@@ -30,23 +30,22 @@ class SchemaCommand extends FlyCommand {
 
   @override
   List<CliFlag> get flags => [
-        const SchemaFormatFlag(),
-        const SchemaCommandFilterFlag(),
-        const OutputFileFlag(),
-        const SchemaIncludeExamplesFlag(),
-        const SchemaIncludeValidationFlag(),
-        const SchemaIncludeGlobalOptionsFlag(),
-        const SchemaPrettyPrintFlag(),
-      ];
+    const SchemaFormatFlag(),
+    const SchemaCommandFilterFlag(),
+    const OutputFileFlag(),
+    const SchemaIncludeExamplesFlag(),
+    const SchemaIncludeValidationFlag(),
+    const SchemaIncludeGlobalOptionsFlag(),
+    const SchemaPrettyPrintFlag(),
+  ];
 
   @override
   List<CommandValidator> get validators => [
-        EnvironmentValidator(),
-      ];
+    EnvironmentValidator(),
+  ];
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {
@@ -60,8 +59,10 @@ class SchemaCommand extends FlyCommand {
         argResults,
         const SchemaCommandFilterFlag(),
       );
-      final outputFile =
-          FlagAccessor.getString(argResults, const OutputFileFlag());
+      final outputFile = FlagAccessor.getString(
+        argResults,
+        const OutputFileFlag(),
+      );
       final includeExamples = FlagAccessor.getBool(
         argResults,
         const SchemaIncludeExamplesFlag(),

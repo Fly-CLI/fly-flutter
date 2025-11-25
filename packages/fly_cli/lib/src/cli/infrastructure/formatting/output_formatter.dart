@@ -1,9 +1,9 @@
 import 'dart:convert';
 
+import 'package:fly_cli/src/cli/domain/interfaces/i_output_formatter.dart';
 import 'package:fly_cli/src/cli/domain/output_format.dart';
 import 'package:fly_cli/src/cli/infrastructure/formatting/error_formatter.dart';
 import 'package:fly_cli/src/cli/infrastructure/formatting/version_formatter.dart';
-import 'package:fly_cli/src/cli/domain/interfaces/i_output_formatter.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 
 /// Unified output formatter for all output types

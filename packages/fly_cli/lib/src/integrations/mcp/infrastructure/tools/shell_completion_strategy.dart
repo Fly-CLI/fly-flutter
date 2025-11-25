@@ -24,26 +24,25 @@ class ShellCompletionStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {
-          'shell':
-              Schema.string(enumValues: ['bash', 'zsh', 'fish', 'powershell']),
-          'outputFile': Schema.string(),
-          'install': Schema.bool(),
-        },
-        additionalProperties: false,
-      );
+    properties: {
+      'shell': Schema.string(enumValues: ['bash', 'zsh', 'fish', 'powershell']),
+      'outputFile': Schema.string(),
+      'install': Schema.bool(),
+    },
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'success': Schema.bool(),
-          'message': Schema.string(),
-          'shell': Schema.string(),
-          'outputFile': Schema.string(),
-          'installPath': Schema.string(),
-        },
-        required: ['success', 'message'],
-      );
+    properties: {
+      'success': Schema.bool(),
+      'message': Schema.string(),
+      'shell': Schema.string(),
+      'outputFile': Schema.string(),
+      'installPath': Schema.string(),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => true;
@@ -78,7 +77,9 @@ class ShellCompletionStrategy
       final install = params.install ?? false;
 
       await progressNotifier?.notify(
-          message: 'Generating $shell completion script...', percent: 10);
+        message: 'Generating $shell completion script...',
+        percent: 10,
+      );
 
       // Get command registry
       final registry = CommandMetadataRegistry.instance;
@@ -87,7 +88,9 @@ class ShellCompletionStrategy
       final generator = _getGenerator(shell);
 
       await progressNotifier?.notify(
-          message: 'Generating script...', percent: 50);
+        message: 'Generating script...',
+        percent: 50,
+      );
 
       // Generate completion script
       final script = generator.generate(registry);
@@ -144,12 +147,13 @@ class ShellCompletionStrategy
   }
 
   String _getInstallPath(String shell) {
-    final homeDir = Platform.environment['HOME'] ??
+    final homeDir =
+        Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         '';
     switch (shell) {
       case 'bash':
-      // Try .bashrc first, then .bash_profile
+        // Try .bashrc first, then .bash_profile
         final bashrc = path.join(homeDir, '.bashrc');
         final bashProfile = path.join(homeDir, '.bash_profile');
         if (File(bashrc).existsSync()) {
@@ -161,7 +165,7 @@ class ShellCompletionStrategy
       case 'fish':
         return path.join(homeDir, '.config', 'fish', 'completions', 'fly.fish');
       case 'powershell':
-      // PowerShell profile location varies by platform
+        // PowerShell profile location varies by platform
         if (Platform.isWindows) {
           return path.join(
             Platform.environment['USERPROFILE'] ?? '',
@@ -179,7 +183,8 @@ class ShellCompletionStrategy
 
   /// Install completion script to the appropriate location
   Future<String> _installCompletion(String shell, String script) async {
-    final homeDir = Platform.environment['HOME'] ??
+    final homeDir =
+        Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         '';
 
@@ -213,11 +218,16 @@ class ShellCompletionStrategy
     if (existingContent.contains('fly completion')) {
       // Already installed, update it
       final lines = existingContent.split('\n');
-      final updatedLines = lines.where((line) =>
-      !line.contains('fly completion') &&
-          !line.contains('source <(fly completion')).toList()
-      ..add('# Fly CLI completion')
-      ..add('source <(fly completion bash)');
+      final updatedLines =
+          lines
+              .where(
+                (line) =>
+                    !line.contains('fly completion') &&
+                    !line.contains('source <(fly completion'),
+              )
+              .toList()
+            ..add('# Fly CLI completion')
+            ..add('source <(fly completion bash)');
       await configFile.writeAsString(updatedLines.join('\n'));
     } else {
       // Append installation
@@ -241,11 +251,16 @@ class ShellCompletionStrategy
     if (existingContent.contains('fly completion')) {
       // Already installed, update it
       final lines = existingContent.split('\n');
-      final updatedLines = lines.where((line) =>
-      !line.contains('fly completion') &&
-          !line.contains('source <(fly completion')).toList()
-      ..add('# Fly CLI completion')
-      ..add('source <(fly completion zsh)');
+      final updatedLines =
+          lines
+              .where(
+                (line) =>
+                    !line.contains('fly completion') &&
+                    !line.contains('source <(fly completion'),
+              )
+              .toList()
+            ..add('# Fly CLI completion')
+            ..add('source <(fly completion zsh)');
       await zshrc.writeAsString(updatedLines.join('\n'));
     } else {
       await zshrc.writeAsString(
@@ -300,11 +315,16 @@ class ShellCompletionStrategy
     if (existingContent.contains('fly completion')) {
       // Already installed, update it
       final lines = existingContent.split('\n');
-      final updatedLines = lines.where((line) =>
-      !line.contains('fly completion') &&
-          !line.contains('fly_Completion')).toList()
-      ..add('# Fly CLI completion')
-      ..add(script);
+      final updatedLines =
+          lines
+              .where(
+                (line) =>
+                    !line.contains('fly completion') &&
+                    !line.contains('fly_Completion'),
+              )
+              .toList()
+            ..add('# Fly CLI completion')
+            ..add(script);
       await profileFile.writeAsString(updatedLines.join('\n'));
     } else {
       await profileFile.writeAsString(
@@ -316,4 +336,3 @@ class ShellCompletionStrategy
     return profileFile.path;
   }
 }
-

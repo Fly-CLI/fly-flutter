@@ -8,16 +8,16 @@ class MockTemplateManager extends TemplateManager {
   bool _shouldFail = false;
 
   MockTemplateManager()
-      : super(
-          templatesDirectory: '/test/templates',
-          logger: Logger(),
-        );
+    : super(
+        templatesDirectory: '/test/templates',
+        logger: Logger(),
+      );
 
   void setFailure(bool shouldFail) {
     _shouldFail = shouldFail;
   }
 
-// Add mock methods as needed
+  // Add mock methods as needed
 }
 
 /// Mock SystemChecker for testing
@@ -30,7 +30,7 @@ class MockSystemChecker extends SystemChecker {
     _isHealthy = isHealthy;
   }
 
-// Add mock methods as needed
+  // Add mock methods as needed
 }
 
 /// Mock InteractivePrompt for testing
@@ -58,5 +58,5 @@ class MockInteractivePrompt extends InteractivePrompt {
     _multiChoiceResponses = responses;
   }
 
-// Add mock methods as needed
+  // Add mock methods as needed
 }

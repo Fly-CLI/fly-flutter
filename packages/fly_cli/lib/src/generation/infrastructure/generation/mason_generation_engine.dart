@@ -3,7 +3,6 @@ import 'package:fly_cli/src/generation/domain/entities/brick.dart' as domain;
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/imason_adapter.dart';
-import 'package:mason/mason.dart' as mason;
 import 'package:mason_logger/mason_logger.dart';
 
 /// Implementation of IGenerationEngine using Mason.
@@ -11,8 +10,8 @@ class MasonGenerationEngine implements IGenerationEngine {
   MasonGenerationEngine({
     required IMasonAdapter masonAdapter,
     Logger? logger,
-  })  : _masonAdapter = masonAdapter,
-        _logger = logger;
+  }) : _masonAdapter = masonAdapter,
+       _logger = logger;
 
   final IMasonAdapter _masonAdapter;
   final Logger? _logger;
@@ -86,4 +85,3 @@ class MasonGenerationEngine implements IGenerationEngine {
     }
   }
 }
-

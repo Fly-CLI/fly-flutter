@@ -1,5 +1,4 @@
 import 'package:mason/mason.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 /// Interface for Mason operations adapter.
 ///
@@ -29,4 +28,3 @@ abstract class IMasonAdapter {
   /// Check if a brick path is valid.
   Future<bool> isValidBrickPath(String path);
 }
-

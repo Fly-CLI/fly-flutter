@@ -39,13 +39,13 @@ class CommandExecutionContext {
     ExecutionPhase? currentPhase,
     Map<String, dynamic>? metadata,
     ProgressIndicator? progressTracker,
-  })  : _startTime = startTime ?? DateTime.now(),
-        _cancellationToken = cancellationToken ?? CancellationToken(),
-        _currentPhase = currentPhase ?? ExecutionPhase.initialization,
-        _metadata = Map<String, dynamic>.from(metadata ?? {}),
-        _phaseDurations = <ExecutionPhase, Duration>{},
-        _phaseStartTimes = <ExecutionPhase, DateTime>{},
-        _progressTracker = progressTracker;
+  }) : _startTime = startTime ?? DateTime.now(),
+       _cancellationToken = cancellationToken ?? CancellationToken(),
+       _currentPhase = currentPhase ?? ExecutionPhase.initialization,
+       _metadata = Map<String, dynamic>.from(metadata ?? {}),
+       _phaseDurations = <ExecutionPhase, Duration>{},
+       _phaseStartTimes = <ExecutionPhase, DateTime>{},
+       _progressTracker = progressTracker;
 
   /// Name of the command being executed
   final String commandName;

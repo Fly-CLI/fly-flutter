@@ -49,7 +49,11 @@ class FlagAccessor {
   /// Get a flag value with a default fallback
   ///
   /// Returns the flag value if set, otherwise returns the provided default
-  static T getValueOrDefault<T>(ArgResults? args, CliFlag flag, T defaultValue) {
+  static T getValueOrDefault<T>(
+    ArgResults? args,
+    CliFlag flag,
+    T defaultValue,
+  ) {
     final value = getValue<T>(args, flag);
     return value ?? defaultValue;
   }
@@ -90,7 +94,11 @@ class FlagAccessor {
   /// Get a string flag value with default (convenience method)
   ///
   /// Returns the string value or the default if not set
-  static String getStringOrDefault(ArgResults? args, CliFlag flag, String defaultValue) {
+  static String getStringOrDefault(
+    ArgResults? args,
+    CliFlag flag,
+    String defaultValue,
+  ) {
     return getValueOrDefault<String>(args, flag, defaultValue);
   }
 
@@ -110,4 +118,3 @@ class FlagAccessor {
     }
   }
 }
-

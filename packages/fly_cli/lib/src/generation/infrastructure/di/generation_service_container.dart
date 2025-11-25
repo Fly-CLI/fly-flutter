@@ -100,4 +100,3 @@ class GenerationServiceContainer {
   /// Check if a service is registered.
   bool isRegistered<T>() => _baseContainer.isRegistered<T>();
 }
-

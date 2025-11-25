@@ -1,5 +1,4 @@
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
@@ -53,4 +52,3 @@ abstract class ITemplateManager {
     String? projectName,
   });
 }
-

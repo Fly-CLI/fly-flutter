@@ -1,13 +1,12 @@
-import 'package:mason/mason.dart' hide Logger;
 import 'package:fly_brick_composer/fly_brick_composer.dart';
-import 'package:mason_logger/mason_logger.dart';
-
 import 'package:fly_cli/src/generation/foundation/foundation_brick_executor.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_planner_factory.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
-import 'package:fly_cli/src/generation/utils/planning_logger_adapter.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
+import 'package:fly_cli/src/generation/utils/planning_logger_adapter.dart';
 import 'package:fly_cli/src/generation/workflows/foundation_workflow_inference.dart';
+import 'package:mason/mason.dart' hide Logger;
+import 'package:mason_logger/mason_logger.dart';
 
 /// CLI wrapper for Fly foundation generation orchestration.
 ///
@@ -15,7 +14,6 @@ import 'package:fly_cli/src/generation/workflows/foundation_workflow_inference.d
 /// library's generic orchestrator. The actual orchestration logic lives
 /// in the `fly_brick_composer` package.
 class TemplateGenerationOrchestrator {
-
   /// Creates a foundation orchestrator with CLI-specific dependencies.
   ///
   /// [templateManager] is used to find and execute bricks.
@@ -25,9 +23,9 @@ class TemplateGenerationOrchestrator {
     required TemplateManager templateManager,
     required Logger logger,
     BrickComposer? composer,
-  })  : _templateManager = templateManager,
-        _logger = logger,
-        _composer = composer;
+  }) : _templateManager = templateManager,
+       _logger = logger,
+       _composer = composer;
   final TemplateManager _templateManager;
   final Logger _logger;
   final BrickComposer? _composer;
@@ -51,9 +49,11 @@ class TemplateGenerationOrchestrator {
     );
 
     // Create the composer if not provided using the foundation factory
-    final composer = _composer ?? BrickComposerFactory.createComposer(
-      logger: composerLogger,
-    );
+    final composer =
+        _composer ??
+        BrickComposerFactory.createComposer(
+          logger: composerLogger,
+        );
 
     // Create the orchestrator from the composer package
     final orchestrator = BrickOrchestrator<GeneratedFile>(
@@ -86,5 +86,3 @@ class TemplateGenerationOrchestrator {
     }
   }
 }
-
-

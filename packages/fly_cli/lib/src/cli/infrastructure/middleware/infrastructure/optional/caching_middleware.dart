@@ -1,7 +1,7 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 
 /// Optional middleware for caching command results.
 ///
@@ -25,7 +25,8 @@ class CachingMiddleware implements CommandMiddleware {
     // Check if result is cached
     if (_cache.containsKey(cacheKey)) {
       context.logger.detail(
-          'Using cached result for command: ${context.argResults.command?.name}');
+        'Using cached result for command: ${context.argResults.command?.name}',
+      );
       return _cache[cacheKey]!;
     }
 

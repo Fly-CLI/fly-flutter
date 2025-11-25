@@ -38,10 +38,10 @@ class ContextExportResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (outputFile != null) 'outputFile': outputFile,
-        if (fileSizeBytes != null) 'fileSizeBytes': fileSizeBytes,
-        if (sectionsIncluded != null) 'sectionsIncluded': sectionsIncluded,
-      };
+    'success': success,
+    'message': message,
+    if (outputFile != null) 'outputFile': outputFile,
+    if (fileSizeBytes != null) 'fileSizeBytes': fileSizeBytes,
+    if (sectionsIncluded != null) 'sectionsIncluded': sectionsIncluded,
+  };
 }

@@ -1,8 +1,8 @@
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
 
 /// Mandatory dry-run middleware that always runs first.
 ///
@@ -25,7 +25,8 @@ class DryRunMiddleware implements CommandMiddleware {
 
     if (planMode || hasPlanFlag) {
       // Get command name from argResults or fallback
-      final cmdName = context.argResults.command?.name ??
+      final cmdName =
+          context.argResults.command?.name ??
           (context is CommandContextImpl ? context.commandName : null) ??
           'unknown';
 

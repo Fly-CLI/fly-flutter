@@ -20,8 +20,8 @@ class BrickComposerFactory {
     WorkflowRegistry? workflowRegistry,
   }) {
     final registry = brickRegistry ?? FoundationBrickRegistryFactory.create();
-    final finalWorkflowRegistry = workflowRegistry ??
-        FoundationWorkflowRegistryFactory.create(registry);
+    final finalWorkflowRegistry =
+        workflowRegistry ?? FoundationWorkflowRegistryFactory.create(registry);
     return BrickComposer(
       variablePipeline: createFoundationPipeline(),
       workflowRegistry: finalWorkflowRegistry,
@@ -48,4 +48,3 @@ class BrickComposerFactory {
     );
   }
 }
-

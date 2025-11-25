@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
-import 'package:fly_cli/src/shared/utils/version_utils.dart';
-import 'package:fly_cli/src/features/context/domain/models.dart';
 import 'package:fly_cli/src/features/context/domain/analyzer_interface.dart';
-import 'package:fly_cli/src/features/context/infrastructure/utils.dart';
-import 'package:fly_cli/src/features/context/infrastructure/dependency_health_analyzer.dart';
+import 'package:fly_cli/src/features/context/domain/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analyzers/ast_analyzer.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
+import 'package:fly_cli/src/features/context/infrastructure/dependency_health_analyzer.dart';
+import 'package:fly_cli/src/features/context/infrastructure/utils.dart';
+import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:fly_core/src/retry/retry.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
@@ -41,7 +41,8 @@ class ContextGenerator {
     final results = await retryExecutor.retryAll(
       analyzers
           .map(
-            (analyzer) => () => analyzer.analyze(projectDir, config),
+            (analyzer) =>
+                () => analyzer.analyze(projectDir, config),
           )
           .toList(),
     );
@@ -328,8 +329,9 @@ class ContextGenerator {
 
     if (architecturePatterns != null && architecturePatterns.isNotEmpty) {
       // Prioritize state management and framework patterns over structural patterns
-      final priorityPatterns = architecturePatterns.where((p) =>
-          ['riverpod', 'bloc', 'provider', 'get', 'fly'].contains(p.name));
+      final priorityPatterns = architecturePatterns.where(
+        (p) => ['riverpod', 'bloc', 'provider', 'get', 'fly'].contains(p.name),
+      );
 
       // Use priority pattern if available, otherwise use highest confidence
       final bestPattern = priorityPatterns.isNotEmpty
@@ -382,7 +384,9 @@ class ContextGenerator {
       suggestions.add(
         'This is a Fly CLI project. Use "fly generate screen <name>" to generate new screens',
       );
-      suggestions.add('Use "fly generate service <name>" to generate new API services');
+      suggestions.add(
+        'Use "fly generate service <name>" to generate new API services',
+      );
 
       if (projectInfo?.hasManifest == false) {
         suggestions.add(
@@ -437,8 +441,9 @@ class ContextGenerator {
     if (codeInfo != null) {
       // Check for missing tests
       final testFiles = codeInfo.keyFiles.where((f) => f.type == 'test').length;
-      final screenFiles =
-          codeInfo.keyFiles.where((f) => f.type == 'screen').length;
+      final screenFiles = codeInfo.keyFiles
+          .where((f) => f.type == 'screen')
+          .length;
 
       if (screenFiles > 0 && testFiles == 0) {
         suggestions.add(
@@ -447,8 +452,9 @@ class ContextGenerator {
       }
 
       // Check for missing services
-      final serviceFiles =
-          codeInfo.keyFiles.where((f) => f.type == 'service').length;
+      final serviceFiles = codeInfo.keyFiles
+          .where((f) => f.type == 'service')
+          .length;
       if (screenFiles > 0 && serviceFiles == 0) {
         suggestions.add('Consider adding API services for data management');
       }

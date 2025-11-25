@@ -138,12 +138,14 @@ class BrickMetadata {
           (yaml['packages'] as List<dynamic>?)?.cast<String>() ?? [];
 
       final minFlutterSdkStr = yaml['min_flutter_sdk'] as String?;
-      final minFlutterSdk =
-          minFlutterSdkStr != null ? Version.parse(minFlutterSdkStr) : null;
+      final minFlutterSdk = minFlutterSdkStr != null
+          ? Version.parse(minFlutterSdkStr)
+          : null;
 
       final minDartSdkStr = yaml['min_dart_sdk'] as String?;
-      final minDartSdk =
-          minDartSdkStr != null ? Version.parse(minDartSdkStr) : null;
+      final minDartSdk = minDartSdkStr != null
+          ? Version.parse(minDartSdkStr)
+          : null;
 
       return BrickMetadata(
         name: yaml['name'] as String? ?? '',
@@ -249,10 +251,14 @@ class BrickMetadata {
         }
         break;
       case BrickCategory.component:
-        if (![BrickType.feature, BrickType.service, BrickType.component]
-            .contains(type)) {
+        if (![
+          BrickType.feature,
+          BrickType.service,
+          BrickType.component,
+        ].contains(type)) {
           errors.add(
-              'Component category must have feature, service, or component type');
+            'Component category must have feature, service, or component type',
+          );
         }
         break;
       case BrickCategory.addon:
@@ -310,13 +316,14 @@ class BrickValidationResult {
   );
 
   /// Create a failed validation result
-  factory BrickValidationResult.failure(List<String> errors,
-      [List<String>? warnings]) =>
-      BrickValidationResult(
-        isValid: false,
-        errors: errors,
-        warnings: warnings ?? [],
-      );
+  factory BrickValidationResult.failure(
+    List<String> errors, [
+    List<String>? warnings,
+  ]) => BrickValidationResult(
+    isValid: false,
+    errors: errors,
+    warnings: warnings ?? [],
+  );
 
   @override
   String toString() =>

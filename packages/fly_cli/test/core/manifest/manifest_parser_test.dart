@@ -106,7 +106,7 @@ void main() {
         };
 
         expect(
-              () => ProjectManifest.fromYaml(yaml),
+          () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
         );
       });
@@ -117,7 +117,7 @@ void main() {
         };
 
         expect(
-              () => ProjectManifest.fromYaml(yaml),
+          () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
         );
       });
@@ -129,7 +129,7 @@ void main() {
         };
 
         expect(
-              () => ProjectManifest.fromYaml(yaml),
+          () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
         );
       });
@@ -141,7 +141,7 @@ void main() {
         };
 
         expect(
-              () => ProjectManifest.fromYaml(yaml),
+          () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
         );
       });
@@ -154,12 +154,11 @@ void main() {
         };
 
         expect(
-              () => ProjectManifest.fromYaml(yaml),
+          () => ProjectManifest.fromYaml(yaml),
           throwsA(isA<ManifestException>()),
         );
       });
     });
-
 
     group('fromFile', () {
       late Directory tempDir;
@@ -191,7 +190,7 @@ platforms: [ios, android]
 
       test('should throw exception for non-existent file', () async {
         expect(
-              () => ProjectManifest.fromFile('non_existent.yaml'),
+          () => ProjectManifest.fromFile('non_existent.yaml'),
           throwsA(isA<ManifestException>()),
         );
       });
@@ -200,7 +199,7 @@ platforms: [ios, android]
         await manifestFile.writeAsString('invalid: yaml: content: [');
 
         expect(
-              () => ProjectManifest.fromFile(manifestFile.path),
+          () => ProjectManifest.fromFile(manifestFile.path),
           throwsA(isA<ManifestException>()),
         );
       });
@@ -240,7 +239,7 @@ platforms: [ios, android]
       };
 
       expect(
-            () => ScreenConfig.fromYaml(yaml),
+        () => ScreenConfig.fromYaml(yaml),
         throwsA(isA<ManifestException>()),
       );
     });
@@ -251,7 +250,7 @@ platforms: [ios, android]
       };
 
       expect(
-            () => ScreenConfig.fromYaml(yaml),
+        () => ScreenConfig.fromYaml(yaml),
         throwsA(isA<ManifestException>()),
       );
     });
@@ -293,7 +292,7 @@ platforms: [ios, android]
       };
 
       expect(
-            () => ServiceConfig.fromYaml(yaml),
+        () => ServiceConfig.fromYaml(yaml),
         throwsA(isA<ManifestException>()),
       );
     });

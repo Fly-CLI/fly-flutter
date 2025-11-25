@@ -59,4 +59,3 @@ class BrickVariable {
   @override
   int get hashCode => name.hashCode ^ type.hashCode ^ required.hashCode;
 }
-

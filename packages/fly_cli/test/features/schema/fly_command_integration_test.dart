@@ -1,12 +1,13 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:fly_cli/src/features/commands/application/command_base.dart'
+    as base
+    show FlyCommand;
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
-import 'package:fly_cli/src/features/commands/application/command_base.dart'
-    as base show FlyCommand;
-import 'package:fly_cli/src/features/commands/domain/command_result.dart';
-import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
-import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -15,7 +16,8 @@ import '../../helpers/command_test_helper.dart';
 ({
   Map<FlyCommand, Command<int>> commandInstances,
   Map<String, Command<int>> commandGroups,
-}) _createCommandInstances() {
+})
+_createCommandInstances() {
   final context = CommandTestHelper.createMockCommandContext();
   final commandInstances = <FlyCommand, Command<int>>{};
 
@@ -83,8 +85,11 @@ void main() {
           ],
         );
 
-        final command =
-            _TestFlyCommandWithMetadata('test', 'Test command', metadata);
+        final command = _TestFlyCommandWithMetadata(
+          'test',
+          'Test command',
+          metadata,
+        );
         expect(command.metadata, isNotNull);
         expect(command.metadata!.name, equals('test'));
         expect(command.metadata!.examples, hasLength(1));
@@ -169,7 +174,10 @@ void main() {
         expect(metadata.description, equals('Create a new Flutter project'));
         expect(metadata.examples, hasLength(1));
         expect(metadata.options, hasLength(2));
-        expect(metadata.options.where((o) => o.name == 'template'), hasLength(1));
+        expect(
+          metadata.options.where((o) => o.name == 'template'),
+          hasLength(1),
+        );
         expect(metadata.options.any((o) => o.name == 'organization'), isTrue);
       });
     });
@@ -191,7 +199,9 @@ void main() {
         expect(createCommand, isNotNull);
         expect(createCommand!.name, equals('create'));
         expect(
-            createCommand.description, equals('Create a new Flutter project'));
+          createCommand.description,
+          equals('Create a new Flutter project'),
+        );
       });
 
       test('registers FlyCommand with manual metadata', () {
@@ -235,10 +245,16 @@ void main() {
 
     group('subcommand handling', () {
       test('extracts subcommands from FlyCommand', () {
-        final parentCommand = _TestFlyCommand('generate', 'Generate components');
-        parentCommand.addSubcommand(_TestFlyCommand('screen', 'Generate a screen'));
-        parentCommand
-            .addSubcommand(_TestFlyCommand('service', 'Generate a service'));
+        final parentCommand = _TestFlyCommand(
+          'generate',
+          'Generate components',
+        );
+        parentCommand.addSubcommand(
+          _TestFlyCommand('screen', 'Generate a screen'),
+        );
+        parentCommand.addSubcommand(
+          _TestFlyCommand('service', 'Generate a service'),
+        );
 
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(parentCommand);
@@ -302,7 +318,10 @@ void main() {
         );
 
         final command = _TestFlyCommandWithMetadata(
-            'valid-name', 'Valid command', invalidMetadata);
+          'valid-name',
+          'Valid command',
+          invalidMetadata,
+        );
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
@@ -328,7 +347,10 @@ void main() {
         );
 
         final command = _TestFlyCommandWithMetadata(
-            'create', 'Create command', mixedMetadata);
+          'create',
+          'Create command',
+          mixedMetadata,
+        );
         const extractor = MetadataExtractor();
         final metadata = extractor.extractMetadata(command);
 
@@ -346,8 +368,8 @@ class _TestFlyCommand extends base.FlyCommand {
     this._name,
     this._description, {
     List<CliFlag>? flags,
-  })  : _flags = flags ?? const [],
-        super(CommandTestHelper.createMockCommandContext());
+  }) : _flags = flags ?? const [],
+       super(CommandTestHelper.createMockCommandContext());
 
   final String _name;
   final String _description;
@@ -364,9 +386,9 @@ class _TestFlyCommand extends base.FlyCommand {
 
   @override
   Future<CommandResult> execute() async => CommandResult.success(
-        command: _name,
-        message: 'Test command executed',
-      );
+    command: _name,
+    message: 'Test command executed',
+  );
 
   /// Add a subcommand for testing
   @override

@@ -141,8 +141,9 @@ class AstAnalyzer {
     final parts2 = path2.split('/');
 
     final commonParts = <String>[];
-    final minLength =
-        parts1.length < parts2.length ? parts1.length : parts2.length;
+    final minLength = parts1.length < parts2.length
+        ? parts1.length
+        : parts2.length;
 
     for (int i = 0; i < minLength; i++) {
       if (parts1[i] == parts2[i]) {
@@ -299,9 +300,11 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     node.accept(functionVisitor);
 
     complexityMetrics = ComplexityMetrics(
-      cyclomaticComplexity: complexityMetrics.cyclomaticComplexity +
+      cyclomaticComplexity:
+          complexityMetrics.cyclomaticComplexity +
           functionVisitor.cyclomaticComplexity,
-      cognitiveComplexity: complexityMetrics.cognitiveComplexity +
+      cognitiveComplexity:
+          complexityMetrics.cognitiveComplexity +
           functionVisitor.cognitiveComplexity,
       maintainabilityIndex: complexityMetrics.maintainabilityIndex,
     );
@@ -321,9 +324,11 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     node.accept(methodVisitor);
 
     complexityMetrics = ComplexityMetrics(
-      cyclomaticComplexity: complexityMetrics.cyclomaticComplexity +
+      cyclomaticComplexity:
+          complexityMetrics.cyclomaticComplexity +
           methodVisitor.cyclomaticComplexity,
-      cognitiveComplexity: complexityMetrics.cognitiveComplexity +
+      cognitiveComplexity:
+          complexityMetrics.cognitiveComplexity +
           methodVisitor.cognitiveComplexity,
       maintainabilityIndex: complexityMetrics.maintainabilityIndex,
     );
@@ -361,13 +366,15 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   void visitIfStatement(IfStatement node) {
     // Check for empty if statements
     if (node.thenStatement is EmptyStatement) {
-      qualityIssues.add(QualityIssue(
-        type: 'empty_if',
-        message: 'Empty if statement',
-        severity: 'low',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'empty_if',
+          message: 'Empty if statement',
+          severity: 'low',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
 
     super.visitIfStatement(node);
@@ -377,13 +384,15 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   void visitForStatement(ForStatement node) {
     // Check for empty for loops
     if (node.body is EmptyStatement) {
-      qualityIssues.add(QualityIssue(
-        type: 'empty_for',
-        message: 'Empty for loop',
-        severity: 'low',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'empty_for',
+          message: 'Empty for loop',
+          severity: 'low',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
 
     super.visitForStatement(node);
@@ -393,13 +402,15 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   void visitWhileStatement(WhileStatement node) {
     // Check for empty while loops
     if (node.body is EmptyStatement) {
-      qualityIssues.add(QualityIssue(
-        type: 'empty_while',
-        message: 'Empty while loop',
-        severity: 'low',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'empty_while',
+          message: 'Empty while loop',
+          severity: 'low',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
 
     super.visitWhileStatement(node);
@@ -409,13 +420,15 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   void visitTryStatement(TryStatement node) {
     // Check for empty try blocks
     if (node.body is EmptyStatement) {
-      qualityIssues.add(QualityIssue(
-        type: 'empty_try',
-        message: 'Empty try block',
-        severity: 'medium',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'empty_try',
+          message: 'Empty try block',
+          severity: 'medium',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
 
     super.visitTryStatement(node);
@@ -425,13 +438,15 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
   void visitCatchClause(CatchClause node) {
     // Check for empty catch blocks
     if (node.body is EmptyStatement) {
-      qualityIssues.add(QualityIssue(
-        type: 'empty_catch',
-        message: 'Empty catch block',
-        severity: 'medium',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'empty_catch',
+          message: 'Empty catch block',
+          severity: 'medium',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
 
     super.visitCatchClause(node);
@@ -509,44 +524,54 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     for (final symbol in _declaredSymbols) {
       if (!_usedSymbols.contains(symbol)) {
         deadCode.add(symbol);
-        qualityIssues.add(QualityIssue(
-          type: 'dead_code',
-          message: 'Unused symbol: $symbol',
-          severity: 'low',
-          line: 0,
-          file: filePath,
-        ));
+        qualityIssues.add(
+          QualityIssue(
+            type: 'dead_code',
+            message: 'Unused symbol: $symbol',
+            severity: 'low',
+            line: 0,
+            file: filePath,
+          ),
+        );
       }
     }
   }
 
   /// Check function quality
   void _checkFunctionQuality(
-      FunctionDeclaration node, _FunctionComplexityVisitor visitor) {
+    FunctionDeclaration node,
+    _FunctionComplexityVisitor visitor,
+  ) {
     if (visitor.cyclomaticComplexity > 10) {
-      qualityIssues.add(QualityIssue(
-        type: 'high_complexity',
-        message:
-            'Function ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
-        severity: 'medium',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'high_complexity',
+          message:
+              'Function ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
+          severity: 'medium',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
   }
 
   /// Check method quality
   void _checkMethodQuality(
-      MethodDeclaration node, _FunctionComplexityVisitor visitor) {
+    MethodDeclaration node,
+    _FunctionComplexityVisitor visitor,
+  ) {
     if (visitor.cyclomaticComplexity > 10) {
-      qualityIssues.add(QualityIssue(
-        type: 'high_complexity',
-        message:
-            'Method ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
-        severity: 'medium',
-        line: 0,
-        file: filePath,
-      ));
+      qualityIssues.add(
+        QualityIssue(
+          type: 'high_complexity',
+          message:
+              'Method ${node.name.lexeme} has high cyclomatic complexity (${visitor.cyclomaticComplexity})',
+          severity: 'medium',
+          line: 0,
+          file: filePath,
+        ),
+      );
     }
   }
 
@@ -567,7 +592,8 @@ class _UnifiedAstVisitor extends RecursiveAstVisitor<void> {
     final commentRatio =
         0.1; // Placeholder - would need actual comment analysis
 
-    final maintainabilityIndex = 171 -
+    final maintainabilityIndex =
+        171 -
         5.2 * halsteadVolume -
         0.23 * cyclomaticComplexityFactor -
         16.2 * cognitiveComplexityFactor +

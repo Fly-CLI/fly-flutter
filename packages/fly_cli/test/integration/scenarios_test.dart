@@ -12,18 +12,22 @@ void main() {
     late Directory tempDir;
     late MockLogger mockLogger;
     // Use encapsulated scenario root under tool/integration_scenarios
-    final scenariosDir = Directory(path.join(
-      Directory.current.path,
-      'tool',
-      'integration_scenarios',
-      'scenarios',
-    ));
-    final goldensDir = Directory(path.join(
-      Directory.current.path,
-      'tool',
-      'integration_scenarios',
-      'goldens',
-    ));
+    final scenariosDir = Directory(
+      path.join(
+        Directory.current.path,
+        'tool',
+        'integration_scenarios',
+        'scenarios',
+      ),
+    );
+    final goldensDir = Directory(
+      path.join(
+        Directory.current.path,
+        'tool',
+        'integration_scenarios',
+        'goldens',
+      ),
+    );
 
     setUp(() {
       mockLogger = MockLogger();
@@ -58,9 +62,9 @@ void main() {
       final jsonContent = jsonDynamic as Map<String, dynamic>;
       final scenarioName = path.basenameWithoutExtension(scenarioFile.path);
       final generationMode = jsonContent['generation_mode'] as String;
-      
+
       print('Executing scenario: $scenarioName ($generationMode)');
-      
+
       if (generationMode == 'project') {
         await _executeProjectScenario(jsonContent, tempDir, scenarioName);
       } else if (generationMode == 'feature') {
@@ -68,21 +72,18 @@ void main() {
       } else if (generationMode == 'service') {
         await _executeServiceScenario(jsonContent, tempDir, scenarioName);
       }
-      
+
       // Define golden directory for this scenario
-      final goldenDir = Directory(path.join(
-        'tool',
-        'integration_scenarios',
-        'goldens',
-        scenarioName
-      ));
-      
+      final goldenDir = Directory(
+        path.join('tool', 'integration_scenarios', 'goldens', scenarioName),
+      );
+
       // Define actual output directory
       String projectName = jsonContent['name'] as String? ?? 'test_project';
       if (generationMode == 'project') {
         projectName = jsonContent['name'] as String;
       }
-      
+
       final actualDir = Directory(path.join(tempDir.path, projectName));
 
       // If goldens don't exist, generate them
@@ -96,16 +97,20 @@ void main() {
 
     final scenarioFiles = findScenarioFiles();
     for (final file in scenarioFiles) {
-      test('Scenario: ${path.basenameWithoutExtension(file.path)}', () async {
-        await executeScenario(file);
-      }, timeout: const Timeout(Duration(minutes: 10)));
+      test(
+        'Scenario: ${path.basenameWithoutExtension(file.path)}',
+        () async {
+          await executeScenario(file);
+        },
+        timeout: const Timeout(Duration(minutes: 10)),
+      );
     }
   });
 }
 
 Future<void> _updateGoldens(Directory actualDir, Directory goldenDir) async {
   print('Updating goldens from ${actualDir.path} to ${goldenDir.path}');
-  
+
   // Debug: list parent directory
   if (actualDir.parent.existsSync()) {
     print('Listing parent directory: ${actualDir.parent.path}');
@@ -118,11 +123,11 @@ Future<void> _updateGoldens(Directory actualDir, Directory goldenDir) async {
     print('Actual directory does not exist!');
     return;
   }
-  
+
   if (!goldenDir.existsSync()) {
     goldenDir.createSync(recursive: true);
   }
-  
+
   // Copy files recursively
   await _copyDirectory(actualDir, goldenDir);
 }
@@ -132,7 +137,9 @@ Future<void> _copyDirectory(Directory source, Directory destination) async {
   await for (final entity in source.list(recursive: false)) {
     print('Found entity: ${entity.path}');
     if (entity is Directory) {
-      final newDirectory = Directory(path.join(destination.path, path.basename(entity.path)));
+      final newDirectory = Directory(
+        path.join(destination.path, path.basename(entity.path)),
+      );
       await newDirectory.create();
       await _copyDirectory(entity, newDirectory);
     } else if (entity is File) {
@@ -141,9 +148,11 @@ Future<void> _copyDirectory(Directory source, Directory destination) async {
         print('Skipping file: ${entity.path}');
         continue;
       }
-      
+
       print('Copying file: ${entity.path}');
-      await entity.copy(path.join(destination.path, path.basename(entity.path)));
+      await entity.copy(
+        path.join(destination.path, path.basename(entity.path)),
+      );
     }
   }
 }
@@ -153,14 +162,18 @@ bool _shouldSkipFile(String filePath) {
   if (filename.startsWith('.')) return true; // Skip hidden files
   if (filename == 'pubspec.lock') return true; // Skip lock file
   if (filename.endsWith('.log')) return true;
-  if (path.basename(path.dirname(filePath)) == 'build') return true; // Skip build dir
+  if (path.basename(path.dirname(filePath)) == 'build')
+    return true; // Skip build dir
   return false;
 }
 
-Future<void> _compareWithGolden(Directory actualDir, Directory goldenDir) async {
+Future<void> _compareWithGolden(
+  Directory actualDir,
+  Directory goldenDir,
+) async {
   // 1. Check that all files in golden exist in actual and match content
   await _compareDirectory(goldenDir, actualDir);
-  
+
   // 2. Check that actual doesn't have extra files (optional, but good for strictness)
   // For now, let's just ensure goldens match.
 }
@@ -169,29 +182,44 @@ Future<void> _compareDirectory(Directory goldenDir, Directory actualDir) async {
   await for (final entity in goldenDir.list(recursive: false)) {
     final relativePath = path.relative(entity.path, from: goldenDir.path);
     final actualEntityPath = path.join(actualDir.path, relativePath);
-    
+
     if (entity is Directory) {
       final actualSubDir = Directory(actualEntityPath);
-      expect(actualSubDir.existsSync(), isTrue, reason: 'Directory missing: $relativePath');
+      expect(
+        actualSubDir.existsSync(),
+        isTrue,
+        reason: 'Directory missing: $relativePath',
+      );
       await _compareDirectory(entity, actualSubDir);
     } else if (entity is File) {
       final actualFile = File(actualEntityPath);
-      expect(actualFile.existsSync(), isTrue, reason: 'File missing: $relativePath');
-      
+      expect(
+        actualFile.existsSync(),
+        isTrue,
+        reason: 'File missing: $relativePath',
+      );
+
       final goldenContent = await entity.readAsString();
       final actualContent = await actualFile.readAsString();
-      
+
       // Normalize line endings
       final normalizedGolden = goldenContent.replaceAll('\r\n', '\n');
       final normalizedActual = actualContent.replaceAll('\r\n', '\n');
-      
-      expect(normalizedActual, equals(normalizedGolden), reason: 'Content mismatch: $relativePath');
+
+      expect(
+        normalizedActual,
+        equals(normalizedGolden),
+        reason: 'Content mismatch: $relativePath',
+      );
     }
   }
 }
 
-
-Future<void> _executeProjectScenario(Map<String, dynamic> json, Directory tempDir, String scenarioName) async {
+Future<void> _executeProjectScenario(
+  Map<String, dynamic> json,
+  Directory tempDir,
+  String scenarioName,
+) async {
   final name = json['name'] as String;
   final args = <String>[
     'generate',
@@ -212,23 +240,32 @@ Future<void> _executeProjectScenario(Map<String, dynamic> json, Directory tempDi
   }
   if (json.containsKey('preset')) {
     args.add('--template');
-    args.add('fly_foundation'); 
+    args.add('fly_foundation');
   }
-  
+
   final result = await CommandTestHelper.runCommand(args);
   if (!result.success) {
     print('Project creation failed: ${result.message}');
-    if (result.suggestion != null) print('Suggestion/Error: ${result.suggestion}');
+    if (result.suggestion != null)
+      print('Suggestion/Error: ${result.suggestion}');
   }
-  expect(result.success, isTrue, reason: 'Project creation failed: ${result.message}');
+  expect(
+    result.success,
+    isTrue,
+    reason: 'Project creation failed: ${result.message}',
+  );
 }
 
-Future<void> _executeFeatureScenario(Map<String, dynamic> json, Directory tempDir, String scenarioName) async {
+Future<void> _executeFeatureScenario(
+  Map<String, dynamic> json,
+  Directory tempDir,
+  String scenarioName,
+) async {
   final projectName = 'test_project';
   final projectDir = Directory(path.join(tempDir.path, projectName));
-  
+
   if (!projectDir.existsSync()) {
-     final result = await CommandTestHelper.runCommand([
+    final result = await CommandTestHelper.runCommand([
       'generate',
       'project',
       projectName,
@@ -238,14 +275,20 @@ Future<void> _executeFeatureScenario(Map<String, dynamic> json, Directory tempDi
     ]);
     print('Create result: ${result.message}');
     if (result.data != null) print('Create data: ${result.data}');
-    if (!result.success && result.suggestion != null) print('Create error: ${result.suggestion}');
-    expect(result.success, isTrue, reason: 'Base project creation failed: ${result.message}');
+    if (!result.success && result.suggestion != null)
+      print('Create error: ${result.suggestion}');
+    expect(
+      result.success,
+      isTrue,
+      reason: 'Base project creation failed: ${result.message}',
+    );
   }
 
   final name = json['name'] as String;
   final args = <String>[
     'generate',
-    'feature', // Corrected from 'screen' to 'feature' based on context, or should check JSON?
+    'feature',
+    // Corrected from 'screen' to 'feature' based on context, or should check JSON?
     // Legacy JSON had 'generate screen' mapped to 'feature' brick?
     // Wait, legacy JSONs are:
     // features/auth_screen.json -> "generation_mode": "feature"
@@ -256,28 +299,37 @@ Future<void> _executeFeatureScenario(Map<String, dynamic> json, Directory tempDi
     name,
     '--output-dir=${projectDir.path}',
   ];
-  
+
   if (json.containsKey('feature_name')) {
-     // args.add('--feature=${json['feature_name']}');
-     // If generating a screen, it might need a feature name.
-     // If generating a feature, 'name' IS the feature name.
-     // Let's check the JSON content in a bit.
+    // args.add('--feature=${json['feature_name']}');
+    // If generating a screen, it might need a feature name.
+    // If generating a feature, 'name' IS the feature name.
+    // Let's check the JSON content in a bit.
   }
-  
+
   final result = await CommandTestHelper.runCommand(args);
   if (!result.success) {
     print('Feature generation failed: ${result.message}');
-    if (result.suggestion != null) print('Suggestion/Error: ${result.suggestion}');
+    if (result.suggestion != null)
+      print('Suggestion/Error: ${result.suggestion}');
   }
-  expect(result.success, isTrue, reason: 'Feature generation failed: ${result.message}');
+  expect(
+    result.success,
+    isTrue,
+    reason: 'Feature generation failed: ${result.message}',
+  );
 }
 
-Future<void> _executeServiceScenario(Map<String, dynamic> json, Directory tempDir, String scenarioName) async {
+Future<void> _executeServiceScenario(
+  Map<String, dynamic> json,
+  Directory tempDir,
+  String scenarioName,
+) async {
   final projectName = 'test_project';
   final projectDir = Directory(path.join(tempDir.path, projectName));
-  
+
   if (!projectDir.existsSync()) {
-     final result = await CommandTestHelper.runCommand([
+    final result = await CommandTestHelper.runCommand([
       'generate',
       'project',
       projectName,
@@ -287,8 +339,13 @@ Future<void> _executeServiceScenario(Map<String, dynamic> json, Directory tempDi
     ]);
     print('Create result: ${result.message}');
     if (result.data != null) print('Create data: ${result.data}');
-    if (!result.success && result.suggestion != null) print('Create error: ${result.suggestion}');
-    expect(result.success, isTrue, reason: 'Base project creation failed: ${result.message}');
+    if (!result.success && result.suggestion != null)
+      print('Create error: ${result.suggestion}');
+    expect(
+      result.success,
+      isTrue,
+      reason: 'Base project creation failed: ${result.message}',
+    );
   }
 
   final name = json['name'] as String;
@@ -298,11 +355,16 @@ Future<void> _executeServiceScenario(Map<String, dynamic> json, Directory tempDi
     name,
     '--output-dir=${projectDir.path}',
   ];
-  
+
   final result = await CommandTestHelper.runCommand(args);
   if (!result.success) {
     print('Service generation failed: ${result.message}');
-    if (result.suggestion != null) print('Suggestion/Error: ${result.suggestion}');
+    if (result.suggestion != null)
+      print('Suggestion/Error: ${result.suggestion}');
   }
-  expect(result.success, isTrue, reason: 'Service generation failed: ${result.message}');
+  expect(
+    result.success,
+    isTrue,
+    reason: 'Service generation failed: ${result.message}',
+  );
 }

@@ -1,10 +1,10 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/bash_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/fish_generator.dart';
 import 'package:fly_cli/src/features/completion/infrastructure/generators/powershell_generator.dart';
@@ -17,7 +17,8 @@ import '../../helpers/command_test_helper.dart';
 ({
   Map<FlyCommand, Command<int>> commandInstances,
   Map<String, Command<int>> commandGroups,
-}) _createCommandInstances() {
+})
+_createCommandInstances() {
   final context = CommandTestHelper.createMockCommandContext();
   final commandInstances = <FlyCommand, Command<int>>{};
 
@@ -272,7 +273,9 @@ void main() {
 
       test('escape handles special characters', () {
         expect(
-            generator.escape('text with spaces'), equals('text with spaces'));
+          generator.escape('text with spaces'),
+          equals('text with spaces'),
+        );
       });
 
       test('quote wraps text in double quotes', () {
@@ -472,15 +475,15 @@ class _TestCommandMetadataRegistry implements CommandMetadataRegistry {
   }
 
   @override
-  List<CliFlag> getGlobalOptions() =>
-      List.unmodifiable(_globalOptions);
+  List<CliFlag> getGlobalOptions() => List.unmodifiable(_globalOptions);
 
   @override
   Map<String, dynamic> toJson() => {
-        'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
-        'global_options':
-            _globalOptions.map((o) => o.toJson(isGlobalOverride: true)).toList(),
-      };
+    'commands': _commands.map((k, v) => MapEntry(k, v.toJson())),
+    'global_options': _globalOptions
+        .map((o) => o.toJson(isGlobalOverride: true))
+        .toList(),
+  };
 
   @override
   void clear() {
@@ -512,11 +515,15 @@ class _TestCommand extends Command<int> {
 
 class _TestCommandWithSubcommands extends Command<int> {
   _TestCommandWithSubcommands(
-      this._name, this._description, this._subcommands) {
+    this._name,
+    this._description,
+    this._subcommands,
+  ) {
     // Add subcommands to the command
     for (final subcommandDef in _subcommands) {
       addSubcommand(
-          _TestCommand(subcommandDef.name, subcommandDef.description));
+        _TestCommand(subcommandDef.name, subcommandDef.description),
+      );
     }
   }
 

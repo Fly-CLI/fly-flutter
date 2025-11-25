@@ -1,4 +1,3 @@
-
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
@@ -48,12 +47,11 @@ abstract class GenerationCommandBase extends FlyCommand {
 
   @override
   List<CommandValidator> get validators => [
-        RequiredArgumentValidator('component_name'),
-        FlutterProjectValidator(),
-        DirectoryWritableValidator(),
-      ];
+    RequiredArgumentValidator('component_name'),
+    FlutterProjectValidator(),
+    DirectoryWritableValidator(),
+  ];
 
   @override
   List<CommandMiddleware> get middleware => [];
 }
-

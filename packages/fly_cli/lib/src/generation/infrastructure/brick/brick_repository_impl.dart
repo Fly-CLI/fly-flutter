@@ -2,7 +2,6 @@ import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 /// Implementation of IBrickRepository using BrickRegistry.
 ///
@@ -46,4 +45,3 @@ class BrickRepositoryImpl implements IBrickRepository {
     _brickRegistry.clearCache();
   }
 }
-

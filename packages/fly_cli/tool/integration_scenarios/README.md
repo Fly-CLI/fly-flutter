@@ -18,7 +18,9 @@ integration_scenarios/
 ## Purpose
 
 This directory provides a self-contained location for:
-- **Scenario definitions**: JSON files that describe test scenarios for project, feature, and service generation
+
+- **Scenario definitions**: JSON files that describe test scenarios for project, feature, and
+  service generation
 - **Golden outputs**: Expected output directories used for comparison during testing
 - **Test runner**: Bash script that executes scenarios using either Fly CLI or Mason
 
@@ -58,7 +60,8 @@ Each scenario JSON file contains:
 
 ## Golden Files
 
-Golden directories in `goldens/` contain the expected output for each scenario. When a scenario runs:
+Golden directories in `goldens/` contain the expected output for each scenario. When a scenario
+runs:
 
 1. If a golden exists, the generated output is compared against it using `diff -ru`
 2. If no golden exists, the script prints instructions to accept the output as a new golden
@@ -71,11 +74,14 @@ cp -R .scenario_out/<scenario_id>/<project_name> goldens/<scenario_id>/
 
 ## Integration with Dart Tests
 
-The Dart test file `packages/fly_cli/test/integration/scenarios_test.dart` also uses these scenarios and goldens, ensuring consistency between Bash and Dart test runners.
+The Dart test file `packages/fly_cli/test/integration/scenarios_test.dart` also uses these scenarios
+and goldens, ensuring consistency between Bash and Dart test runners.
 
 ## Migration Notes
 
-This directory was created to encapsulate scenario testing infrastructure that was previously located in:
+This directory was created to encapsulate scenario testing infrastructure that was previously
+located in:
+
 - `packages/fly_cli/test/integration/scenarios/` → `tool/integration_scenarios/scenarios/`
 - `packages/fly_cli/test/integration/goldens/` → `tool/integration_scenarios/goldens/`
 

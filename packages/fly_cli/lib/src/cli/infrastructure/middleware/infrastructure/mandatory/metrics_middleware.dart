@@ -1,8 +1,8 @@
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_execution_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
 
 /// Mandatory metrics middleware that always runs.
 ///
@@ -45,21 +45,22 @@ class MetricsMiddleware implements CommandMiddleware {
           tags['phase'] = executionContext.currentPhase.name;
         }
 
-        metricsCollector..recordDuration(
-          'command.execution',
-          stopwatch.elapsedMilliseconds,
-          tags: tags,
-        )
-
-        ..incrementCounter(
-          'command.executions',
-          tags: {'command': commandName},
-        );
+        metricsCollector
+          ..recordDuration(
+            'command.execution',
+            stopwatch.elapsedMilliseconds,
+            tags: tags,
+          )
+          ..incrementCounter(
+            'command.executions',
+            tags: {'command': commandName},
+          );
 
         // Store in context for backward compatibility
-        context..setData('execution_time_ms', stopwatch.elapsedMilliseconds)
-        ..setData('command_name', commandName)
-        ..setData('success', result.success);
+        context
+          ..setData('execution_time_ms', stopwatch.elapsedMilliseconds)
+          ..setData('command_name', commandName)
+          ..setData('success', result.success);
       }
 
       return result;

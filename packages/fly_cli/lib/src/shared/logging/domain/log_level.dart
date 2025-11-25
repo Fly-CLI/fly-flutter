@@ -23,8 +23,10 @@ enum LogLevel {
   @override
   String toString() => name;
 
-  static LogLevel fromString(String value,
-      {LogLevel fallback = LogLevel.info}) {
+  static LogLevel fromString(
+    String value, {
+    LogLevel fallback = LogLevel.info,
+  }) {
     switch (value.toLowerCase().trim()) {
       case 'trace':
         return LogLevel.trace;

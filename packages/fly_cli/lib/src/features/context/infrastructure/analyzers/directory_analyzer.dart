@@ -53,8 +53,9 @@ class DirectoryAnalysisResult {
   Map<String, dynamic> toJson() {
     return {
       'files': files.map((key, value) => MapEntry(key, value.toJson())),
-      'directories':
-          directories.map((key, value) => MapEntry(key, value.toJson())),
+      'directories': directories.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
       'dart_files': dartFiles,
       'test_files': testFiles,
       'generated_files': generatedFiles,
@@ -153,8 +154,10 @@ class UnifiedDirectoryAnalyzer {
 
         if (entity is File) {
           try {
-            final relativePath =
-                path.relative(entity.path, from: projectDir.path);
+            final relativePath = path.relative(
+              entity.path,
+              from: projectDir.path,
+            );
             final fileName = path.basename(entity.path);
             final extension = path.extension(entity.path);
 
@@ -202,8 +205,10 @@ class UnifiedDirectoryAnalyzer {
           }
         } else if (entity is Directory) {
           try {
-            final relativePath =
-                path.relative(entity.path, from: projectDir.path);
+            final relativePath = path.relative(
+              entity.path,
+              from: projectDir.path,
+            );
             final dirInfo = await _analyzeDirectory(entity);
             directories[relativePath] = dirInfo;
           } catch (e) {

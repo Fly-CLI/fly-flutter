@@ -1,4 +1,5 @@
-import 'package:fly_cli/src/generation/brick/brick_metadata.dart' show BrickType, BrickCategory;
+import 'package:fly_cli/src/generation/brick/brick_metadata.dart'
+    show BrickType, BrickCategory;
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/domain/services/brick_validator.dart';
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart';
@@ -88,7 +89,8 @@ void main() {
           description: 'Test description',
           path: '/test/path',
           type: BrickType.feature,
-          category: BrickCategory.project, // Mismatch
+          category: BrickCategory.project,
+          // Mismatch
           variables: {},
           features: [],
           packages: [],
@@ -180,5 +182,3 @@ void main() {
     });
   });
 }
-
-

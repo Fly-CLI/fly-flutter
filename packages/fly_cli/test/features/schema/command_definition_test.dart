@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -114,8 +114,10 @@ void main() {
 
       final optJson = json['options'][0];
       expect(optJson['name'], equals('format'));
-      expect(optJson['description'],
-          equals('Output format (human, json, or ai)'));
+      expect(
+        optJson['description'],
+        equals('Output format (human, json, or ai)'),
+      );
       expect(optJson['abbreviation'], equals('f'));
       expect(optJson['category'], equals('output'));
       expect(optJson['type'], equals('value'));
@@ -156,8 +158,10 @@ void main() {
         description: 'Test command',
       );
 
-      expect(command.toString(),
-          equals('CommandDefinition(name: test, description: Test command)'));
+      expect(
+        command.toString(),
+        equals('CommandDefinition(name: test, description: Test command)'),
+      );
     });
   });
 
@@ -250,8 +254,10 @@ void main() {
         description: 'Description',
       );
 
-      expect(argument.toString(),
-          equals('ArgumentDefinition(name: name, required: true)'));
+      expect(
+        argument.toString(),
+        equals('ArgumentDefinition(name: name, required: true)'),
+      );
     });
   });
 
@@ -262,8 +268,7 @@ void main() {
       final json = flag.toJson();
 
       expect(json['name'], equals('format'));
-      expect(json['description'],
-          equals('Output format (human, json, or ai)'));
+      expect(json['description'], equals('Output format (human, json, or ai)'));
       expect(json['abbreviation'], equals('f'));
       expect(json['category'], equals('output'));
       expect(json['type'], equals('value'));
@@ -362,7 +367,9 @@ void main() {
       );
 
       expect(
-          subcommand.toString(), equals('SubcommandDefinition(name: screen)'));
+        subcommand.toString(),
+        equals('SubcommandDefinition(name: screen)'),
+      );
     });
   });
 
@@ -385,7 +392,10 @@ void main() {
 
       final json = example.toJson();
 
-      expect(json['command'], equals('fly create my_app --template=fly_foundation'));
+      expect(
+        json['command'],
+        equals('fly create my_app --template=fly_foundation'),
+      );
       expect(json['description'], equals('Create a fly_foundation app'));
     });
 
@@ -395,9 +405,10 @@ void main() {
         description: 'Create a new app',
       );
 
-      expect(example.toString(),
-          equals('CommandExample(command: fly create my_app)'));
+      expect(
+        example.toString(),
+        equals('CommandExample(command: fly create my_app)'),
+      );
     });
   });
-
 }

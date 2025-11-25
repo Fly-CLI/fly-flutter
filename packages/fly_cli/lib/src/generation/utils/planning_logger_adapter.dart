@@ -23,4 +23,3 @@ class ComposerLoggerAdapter implements ComposerLogger {
   @override
   void detail(String message) => _logger.warn(message);
 }
-

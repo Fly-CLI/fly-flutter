@@ -9,8 +9,7 @@ class ProjectModeDeriver implements VariableDeriver {
   String get id => 'project_mode';
 
   @override
-  bool supports(GenerationContext ctx) =>
-      ctx.mode == GenerationMode.project;
+  bool supports(GenerationContext ctx) => ctx.mode == GenerationMode.project;
 
   @override
   VariableBag derive(
@@ -21,4 +20,3 @@ class ProjectModeDeriver implements VariableDeriver {
     return current.set(MasonVarKey.isProject.key, true);
   }
 }
-

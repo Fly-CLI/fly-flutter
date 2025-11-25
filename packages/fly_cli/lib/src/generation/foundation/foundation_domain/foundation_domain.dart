@@ -9,4 +9,3 @@ export 'foundation_instance_configs.dart';
 export 'foundation_presets.dart';
 export 'foundation_template_variables.dart';
 export 'foundation_types.dart';
-

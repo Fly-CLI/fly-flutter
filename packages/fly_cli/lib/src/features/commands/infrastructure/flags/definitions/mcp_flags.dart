@@ -4,10 +4,10 @@ part of '../cli_flags.dart';
 // MCP Serve Command Flags
 // ============================================================================
 
-
 /// MCP serve stdio flag
 class McpServeStdioFlag extends CliFlag {
-  const McpServeStdioFlag() : super(
+  const McpServeStdioFlag()
+    : super(
         name: 'stdio',
         description: 'Use stdio transport (required for MCP desktop clients)',
         isGlobal: false,
@@ -20,7 +20,8 @@ class McpServeStdioFlag extends CliFlag {
 
 /// MCP serve max message MB flag
 class McpServeMaxMessageMbFlag extends CliFlag {
-  const McpServeMaxMessageMbFlag() : super(
+  const McpServeMaxMessageMbFlag()
+    : super(
         name: 'max-message-mb',
         description: 'Max message size in MB',
         isGlobal: false,
@@ -32,9 +33,11 @@ class McpServeMaxMessageMbFlag extends CliFlag {
 
 /// MCP serve default timeout seconds flag
 class McpServeDefaultTimeoutSecondsFlag extends CliFlag {
-  const McpServeDefaultTimeoutSecondsFlag() : super(
+  const McpServeDefaultTimeoutSecondsFlag()
+    : super(
         name: 'default-timeout-seconds',
-        description: 'Default timeout for tools in seconds (default: 5 minutes)',
+        description:
+            'Default timeout for tools in seconds (default: 5 minutes)',
         isGlobal: false,
         category: CliFlagCategory.execution,
         type: FlagType.singleValue,
@@ -44,7 +47,8 @@ class McpServeDefaultTimeoutSecondsFlag extends CliFlag {
 
 /// MCP serve max concurrency flag
 class McpServeMaxConcurrencyFlag extends CliFlag {
-  const McpServeMaxConcurrencyFlag() : super(
+  const McpServeMaxConcurrencyFlag()
+    : super(
         name: 'max-concurrency',
         description: 'Maximum concurrent tool executions',
         isGlobal: false,

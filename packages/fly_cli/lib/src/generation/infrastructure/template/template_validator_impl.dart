@@ -16,16 +16,16 @@ class TemplateValidatorImpl implements ITemplateValidator {
   TemplateValidatorImpl({
     required CompatibilityChecker compatibilityChecker,
     Logger? logger,
-  })
-      : _compatibilityChecker = compatibilityChecker,
-        _logger = logger ?? Logger();
+  }) : _compatibilityChecker = compatibilityChecker,
+       _logger = logger ?? Logger();
 
   final CompatibilityChecker _compatibilityChecker;
   final Logger _logger;
 
   @override
   Future<TemplateValidationResult> validateTemplate(
-      TemplateInfo template,) async {
+    TemplateInfo template,
+  ) async {
     final issues = <String>[];
 
     // Basic structure validation
@@ -46,11 +46,12 @@ class TemplateValidatorImpl implements ITemplateValidator {
     } else {
       // Validate version format
       final parsedVersion = VersionParser.parseTemplateVersion(
-          template.version);
+        template.version,
+      );
       if (parsedVersion == null) {
         issues.add(
           'Invalid version format: "${template.version}". '
-              'Expected SemVer format (MAJOR.MINOR.PATCH)',
+          'Expected SemVer format (MAJOR.MINOR.PATCH)',
         );
       }
     }
@@ -74,17 +75,13 @@ class TemplateValidatorImpl implements ITemplateValidator {
 
         // Check if description is missing or empty in original YAML
         final description = yaml['description'] as String?;
-        if (description == null || description
-            .trim()
-            .isEmpty) {
+        if (description == null || description.trim().isEmpty) {
           issues.add('Missing template description in template.yaml');
         }
 
         // Check if version is missing or empty in original YAML
         final version = yaml['version'] as String?;
-        if (version == null || version
-            .trim()
-            .isEmpty) {
+        if (version == null || version.trim().isEmpty) {
           issues.add('Missing template version in template.yaml');
         }
       } catch (e) {
@@ -113,8 +110,9 @@ class TemplateValidatorImpl implements ITemplateValidator {
   }
 
   @override
-  Future<CompatibilityResult> checkCompatibility(TemplateInfo template,) async {
+  Future<CompatibilityResult> checkCompatibility(
+    TemplateInfo template,
+  ) async {
     return _compatibilityChecker.checkTemplateCompatibility(template);
   }
 }
-

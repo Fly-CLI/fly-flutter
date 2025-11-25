@@ -48,13 +48,12 @@ class GenerateScreenParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        'screenName': screenName,
-        if (feature != null) 'feature': feature,
-        if (screenType != null) 'screenType': screenType,
-        if (withViewModel != null) 'withViewModel': withViewModel,
-        if (withTests != null) 'withTests': withTests,
-        if (withValidation != null) 'withValidation': withValidation,
-        if (withNavigation != null) 'withNavigation': withNavigation,
-      };
+    'screenName': screenName,
+    if (feature != null) 'feature': feature,
+    if (screenType != null) 'screenType': screenType,
+    if (withViewModel != null) 'withViewModel': withViewModel,
+    if (withTests != null) 'withTests': withTests,
+    if (withValidation != null) 'withValidation': withValidation,
+    if (withNavigation != null) 'withNavigation': withNavigation,
+  };
 }
-

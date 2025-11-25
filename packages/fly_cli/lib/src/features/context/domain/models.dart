@@ -52,17 +52,16 @@ class ContextGeneratorConfig {
     bool? includeSuggestions,
     bool? includeTests,
     bool? includeGenerated,
-  }) =>
-      ContextGeneratorConfig(
-        includeCode: includeCode ?? this.includeCode,
-        includeDependencies: includeDependencies ?? this.includeDependencies,
-        maxFileSize: maxFileSize ?? this.maxFileSize,
-        maxFiles: maxFiles ?? this.maxFiles,
-        includeArchitecture: includeArchitecture ?? this.includeArchitecture,
-        includeSuggestions: includeSuggestions ?? this.includeSuggestions,
-        includeTests: includeTests ?? this.includeTests,
-        includeGenerated: includeGenerated ?? this.includeGenerated,
-      );
+  }) => ContextGeneratorConfig(
+    includeCode: includeCode ?? this.includeCode,
+    includeDependencies: includeDependencies ?? this.includeDependencies,
+    maxFileSize: maxFileSize ?? this.maxFileSize,
+    maxFiles: maxFiles ?? this.maxFiles,
+    includeArchitecture: includeArchitecture ?? this.includeArchitecture,
+    includeSuggestions: includeSuggestions ?? this.includeSuggestions,
+    includeTests: includeTests ?? this.includeTests,
+    includeGenerated: includeGenerated ?? this.includeGenerated,
+  );
 }
 
 /// Project metadata and information

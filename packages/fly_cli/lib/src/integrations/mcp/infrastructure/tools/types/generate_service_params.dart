@@ -48,13 +48,12 @@ class GenerateServiceParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        'serviceName': serviceName,
-        if (feature != null) 'feature': feature,
-        if (serviceType != null) 'serviceType': serviceType,
-        if (withTests != null) 'withTests': withTests,
-        if (withMocks != null) 'withMocks': withMocks,
-        if (withInterceptors != null) 'withInterceptors': withInterceptors,
-        if (baseUrl != null) 'baseUrl': baseUrl,
-      };
+    'serviceName': serviceName,
+    if (feature != null) 'feature': feature,
+    if (serviceType != null) 'serviceType': serviceType,
+    if (withTests != null) 'withTests': withTests,
+    if (withMocks != null) 'withMocks': withMocks,
+    if (withInterceptors != null) 'withInterceptors': withInterceptors,
+    if (baseUrl != null) 'baseUrl': baseUrl,
+  };
 }
-

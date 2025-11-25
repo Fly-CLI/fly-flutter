@@ -485,10 +485,10 @@ Fly automatically creates:
 
 1. **Screen Widget** (`UserProfileScreen`) that extends `BaseScreen` from `fly_core`
 2. **ViewModel** (`UserProfileViewModel`) that extends `BaseViewModel` and integrates with:
-   - `fly_state` for state management
-   - `fly_networking` for API calls
-   - `fly_errors` for error handling
-   - `fly_logger` for logging
+    - `fly_state` for state management
+    - `fly_networking` for API calls
+    - `fly_errors` for error handling
+    - `fly_logger` for logging
 3. **Service Integration** – Connects to user API service with automatic state synchronization
 4. **Navigation Integration** – Routing that understands state and flow guards
 5. **Form Integration** (if applicable) – Form validation connected to error handling
@@ -522,7 +522,8 @@ together.**
 
 ### Project Templates
 
-- **fly_foundation** – Unified Fly architecture with MVVM, navigation, accessibility, AI scaffolding,
+- **fly_foundation** – Unified Fly architecture with MVVM, navigation, accessibility, AI
+  scaffolding,
   and build configuration baked in
 
 ### Declarative Manifests
@@ -632,7 +633,8 @@ fly generate project my_app --from-manifest=fly_project.yaml
   details
 - **[MCP Integration](/packages/fly_cli/lib/src/integrations/README.md)** – Model Context Protocol
   implementation
-- **[Performance Improvements](./PERFORMANCE_IMPROVEMENTS.md)** – Performance optimizations and benchmarks
+- **[Performance Improvements](./PERFORMANCE_IMPROVEMENTS.md)** – Performance optimizations and
+  benchmarks
 - **[Development Workflow](./DEVELOPMENT_WORKFLOW.md)** – Development guidelines and best practices
 
 ---

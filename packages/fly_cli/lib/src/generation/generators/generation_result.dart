@@ -1,7 +1,6 @@
-import 'package:mason/mason.dart';
-
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
+import 'package:mason/mason.dart';
 
 /// Standardized result type for all generators.
 ///
@@ -113,4 +112,3 @@ class GenerationResult {
     };
   }
 }
-

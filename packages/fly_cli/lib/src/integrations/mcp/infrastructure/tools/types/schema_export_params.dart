@@ -48,13 +48,13 @@ class SchemaExportParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        if (format != null) 'format': format,
-        if (command != null) 'command': command,
-        if (outputFile != null) 'outputFile': outputFile,
-        if (includeExamples != null) 'includeExamples': includeExamples,
-        if (includeValidation != null) 'includeValidation': includeValidation,
-        if (includeGlobalOptions != null)
-          'includeGlobalOptions': includeGlobalOptions,
-        if (prettyPrint != null) 'prettyPrint': prettyPrint,
-      };
+    if (format != null) 'format': format,
+    if (command != null) 'command': command,
+    if (outputFile != null) 'outputFile': outputFile,
+    if (includeExamples != null) 'includeExamples': includeExamples,
+    if (includeValidation != null) 'includeValidation': includeValidation,
+    if (includeGlobalOptions != null)
+      'includeGlobalOptions': includeGlobalOptions,
+    if (prettyPrint != null) 'prettyPrint': prettyPrint,
+  };
 }

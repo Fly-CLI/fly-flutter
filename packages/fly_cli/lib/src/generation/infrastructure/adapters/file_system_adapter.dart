@@ -33,18 +33,17 @@ class FileSystemAdapter implements IFileSystemAdapter {
   }
 
   @override
-  Future<List<String>> listDirectory(String dirPath,
-      {bool recursive = false}) async {
+  Future<List<String>> listDirectory(
+    String dirPath, {
+    bool recursive = false,
+  }) async {
     final dir = Directory(dirPath);
     if (!await dir.exists()) {
       return [];
     }
 
     if (!recursive) {
-      return dir
-          .list()
-          .map((entity) => entity.path)
-          .toList();
+      return dir.list().map((entity) => entity.path).toList();
     }
 
     final files = <String>[];
@@ -89,4 +88,3 @@ class FileSystemAdapter implements IFileSystemAdapter {
     return path.isAbsolute(filePath);
   }
 }
-

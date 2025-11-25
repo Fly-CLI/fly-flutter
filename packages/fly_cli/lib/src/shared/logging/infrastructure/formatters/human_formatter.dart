@@ -19,8 +19,9 @@ class HumanFormatter implements LogFormatter {
     final level = _colorize(_pad(event.level), _colorFor(event.level));
     final logger = event.loggerName != null ? '${event.loggerName} ' : '';
     final ctx = event.context?.toJson() ?? const {};
-    final fields =
-        event.fields.isNotEmpty ? ' ${jsonEncode(event.fields)}' : '';
+    final fields = event.fields.isNotEmpty
+        ? ' ${jsonEncode(event.fields)}'
+        : '';
     final ctxStr = ctx.isNotEmpty ? ' ${jsonEncode(ctx)}' : '';
     final base = '[$ts] $level $logger- ${event.message}$fields$ctxStr';
 

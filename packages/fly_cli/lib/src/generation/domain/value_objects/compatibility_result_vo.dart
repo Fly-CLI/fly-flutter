@@ -27,4 +27,3 @@ extension CompatibilityResultExtension on CompatibilityResult {
     }
   }
 }
-

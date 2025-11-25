@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:args/args.dart' as args;
+import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/diagnostic_echo_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/template_apply_strategy.dart';
@@ -79,9 +79,11 @@ void main() {
         final strategy = DiagnosticEchoStrategy();
         final handler = strategy.createHandler(context, resourceRegistry);
 
-        final result = await handler(
-          {'message': 'Test message'},
-        ) as Map<String, Object?>;
+        final result =
+            await handler(
+                  {'message': 'Test message'},
+                )
+                as Map<String, Object?>;
 
         expect(result['message'], 'Test message');
       });
@@ -124,17 +126,19 @@ void main() {
     });
 
     group('progress notifications', () {
-      test('should emit progress notifications for template application',
-          () async {
-        final progressNotifications = <String, int>{};
+      test(
+        'should emit progress notifications for template application',
+        () async {
+          final progressNotifications = <String, int>{};
 
-        // Create a strategy and get handler with progress tracking
-        final strategy = TemplateApplyStrategy();
+          // Create a strategy and get handler with progress tracking
+          final strategy = TemplateApplyStrategy();
 
-        // Note: Progress notifications are handled by MCP server middleware
-        // In integration tests, we'd test through the MCP protocol
-        expect(true, isTrue); // Placeholder for progress notification test
-      });
+          // Note: Progress notifications are handled by MCP server middleware
+          // In integration tests, we'd test through the MCP protocol
+          expect(true, isTrue); // Placeholder for progress notification test
+        },
+      );
     });
 
     group('correlation ID tracking', () {

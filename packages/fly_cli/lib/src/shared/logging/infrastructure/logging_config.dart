@@ -58,12 +58,14 @@ class LoggingConfig {
 
   factory LoggingConfig.fromEnvironment({required bool isProd}) {
     const manager = EnvironmentManager();
-    final levelStr = manager.getString(
+    final levelStr =
+        manager.getString(
           EnvVar.flyLogLevel,
           defaultValue: isProd ? 'info' : 'debug',
         ) ??
         (isProd ? 'info' : 'debug');
-    final formatStr = manager.getString(
+    final formatStr =
+        manager.getString(
           EnvVar.flyLogFormat,
           defaultValue: isProd ? 'json' : 'human',
         ) ??
@@ -77,8 +79,9 @@ class LoggingConfig {
 
     return LoggingConfig(
       level: LogLevel.fromString(levelStr, fallback: LogLevel.info),
-      format:
-          formatStr.toLowerCase() == 'json' ? LogFormat.json : LogFormat.human,
+      format: formatStr.toLowerCase() == 'json'
+          ? LogFormat.json
+          : LogFormat.human,
       logFile: manager.getString(EnvVar.flyLogFile),
       color: !noColor && !isProd,
       trace: manager.getBool(EnvVar.flyLogTrace, defaultValue: false),

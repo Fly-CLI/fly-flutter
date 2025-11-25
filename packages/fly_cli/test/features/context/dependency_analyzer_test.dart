@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -30,14 +30,20 @@ void main() {
 
         final dependencyInfo = await analyzer.analyze(projectDir, config);
 
-        expect(dependencyInfo.dependencies.containsKey('flutter_riverpod'),
-            isTrue);
+        expect(
+          dependencyInfo.dependencies.containsKey('flutter_riverpod'),
+          isTrue,
+        );
         expect(dependencyInfo.dependencies.containsKey('go_router'), isTrue);
         expect(dependencyInfo.dependencies.containsKey('dio'), isTrue);
         expect(
-            dependencyInfo.devDependencies.containsKey('flutter_test'), isTrue);
+          dependencyInfo.devDependencies.containsKey('flutter_test'),
+          isTrue,
+        );
         expect(
-            dependencyInfo.devDependencies.containsKey('build_runner'), isTrue);
+          dependencyInfo.devDependencies.containsKey('build_runner'),
+          isTrue,
+        );
       });
 
       test('should categorize dependencies correctly', () async {
@@ -47,7 +53,9 @@ void main() {
         final dependencyInfo = await analyzer.analyze(projectDir, config);
 
         expect(
-            dependencyInfo.categories.containsKey('state_management'), isTrue);
+          dependencyInfo.categories.containsKey('state_management'),
+          isTrue,
+        );
         expect(dependencyInfo.categories.containsKey('networking'), isTrue);
         expect(dependencyInfo.categories.containsKey('development'), isTrue);
 
@@ -96,7 +104,9 @@ void main() {
 
         expect(dependencyInfo.dependencies.containsKey('flutter'), isTrue);
         expect(
-            dependencyInfo.devDependencies.containsKey('flutter_test'), isTrue);
+          dependencyInfo.devDependencies.containsKey('flutter_test'),
+          isTrue,
+        );
         expect(dependencyInfo.categories, isA<Map<String, List<String>>>());
         expect(dependencyInfo.flyPackages, isA<List<String>>());
         expect(dependencyInfo.conflicts, isA<List<String>>());
@@ -163,8 +173,10 @@ void main() {
           includeDependencies: true,
         );
 
-        final dependencyInfo =
-            await analyzer.analyze(projectDir, configWithDeps);
+        final dependencyInfo = await analyzer.analyze(
+          projectDir,
+          configWithDeps,
+        );
 
         expect(dependencyInfo.dependencies.isNotEmpty, isTrue);
         expect(dependencyInfo.categories.isNotEmpty, isTrue);

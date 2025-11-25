@@ -301,8 +301,8 @@ class DirectoryValidationRule implements ValidationRule<String> {
     // Check if directory is writable by trying to create a temporary file
     try {
       File(
-        '${directory.path}/.fly_temp_${DateTime.now().millisecondsSinceEpoch}',
-      )
+          '${directory.path}/.fly_temp_${DateTime.now().millisecondsSinceEpoch}',
+        )
         ..createSync()
         ..deleteSync();
       return ValidationResult.success();
@@ -368,7 +368,7 @@ class PlatformValidationRule implements ValidationRule<List<String>> {
       'web',
       'macos',
       'windows',
-      'linux'
+      'linux',
     ];
 
     for (final platform in platforms) {

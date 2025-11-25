@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/completion/domain/completion_generator.dart';
 
 /// Zsh shell completion generator
@@ -25,8 +25,9 @@ class ZshCompletionGenerator extends CompletionGenerator {
     // Add global options
     final globalOptions = registry.getGlobalOptions();
     for (final option in globalOptions) {
-      final desc =
-          option.description.replaceAll('[', r'\[').replaceAll(']', r'\]');
+      final desc = option.description
+          .replaceAll('[', r'\[')
+          .replaceAll(']', r'\]');
       buffer.writeln(
         "        '--${option.name}${option.abbreviation != null ? "(-${option.abbreviation})" : ""}[$desc]' \\",
       );
@@ -97,8 +98,9 @@ class ZshCompletionGenerator extends CompletionGenerator {
 
     // Add command options
     for (final option in command.options) {
-      final desc =
-          option.description.replaceAll('[', r'\[').replaceAll(']', r'\]');
+      final desc = option.description
+          .replaceAll('[', r'\[')
+          .replaceAll(']', r'\]');
       if (option.allowedValues != null && option.allowedValues!.isNotEmpty) {
         final values = option.allowedValues!.map((v) => '"$v"').join(' ');
         buffer.writeln("        '--${option.name}[$desc]: :($values)' \\");
@@ -146,8 +148,7 @@ class ZshCompletionGenerator extends CompletionGenerator {
   @override
   String generateSubcommandsCompletion(
     List<SubcommandDefinition> subcommands,
-  ) =>
-      subcommands.map((s) => s.name).join(' ');
+  ) => subcommands.map((s) => s.name).join(' ');
 
   @override
   String generateOptionValuesCompletion(CliFlag option) {

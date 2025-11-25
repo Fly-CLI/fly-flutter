@@ -1,7 +1,7 @@
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
-import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
@@ -41,13 +41,15 @@ void main() {
         expect(metadata.description, equals('Test command'));
         expect(metadata.options, hasLength(2));
 
-        final verboseFlag =
-            metadata.options.firstWhere((flag) => flag.name == 'verbose');
+        final verboseFlag = metadata.options.firstWhere(
+          (flag) => flag.name == 'verbose',
+        );
         expect(verboseFlag.description, contains('Verbose'));
         expect(verboseFlag.abbreviation, equals('v'));
 
-        final formatFlag =
-            metadata.options.firstWhere((flag) => flag.name == 'format');
+        final formatFlag = metadata.options.firstWhere(
+          (flag) => flag.name == 'format',
+        );
         expect(formatFlag.description, contains('Output format'));
         expect(formatFlag.abbreviation, equals('f'));
         expect(formatFlag.allowedValues, equals(['human', 'json', 'ai']));
@@ -95,8 +97,11 @@ void main() {
           ],
         );
 
-        final command =
-            _TestCommandWithMetadata('test', 'Test command', manualMetadata);
+        final command = _TestCommandWithMetadata(
+          'test',
+          'Test command',
+          manualMetadata,
+        );
         final metadata = extractor.extractMetadata(command);
 
         expect(metadata.name, equals('test'));
@@ -143,7 +148,6 @@ void main() {
         expect(subcommands, isEmpty);
       });
     });
-
   });
 }
 
@@ -153,8 +157,8 @@ class _TestCommand extends FlyCommand {
     this._name,
     this._description, {
     List<CliFlag>? flags,
-  })  : _flags = flags ?? const [],
-        super(CommandTestHelper.createMockCommandContext());
+  }) : _flags = flags ?? const [],
+       super(CommandTestHelper.createMockCommandContext());
 
   final String _name;
   final String _description;
@@ -171,9 +175,9 @@ class _TestCommand extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async => CommandResult.success(
-        command: _name,
-        message: 'Test command executed',
-      );
+    command: _name,
+    message: 'Test command executed',
+  );
 }
 
 /// Test command with manual metadata for testing
@@ -183,8 +187,8 @@ class _TestCommandWithMetadata extends FlyCommand {
     this._description,
     this._metadata, {
     List<CliFlag>? flags,
-  })  : _flags = flags ?? const [],
-        super(CommandTestHelper.createMockCommandContext());
+  }) : _flags = flags ?? const [],
+       super(CommandTestHelper.createMockCommandContext());
 
   final String _name;
   final String _description;
@@ -205,7 +209,7 @@ class _TestCommandWithMetadata extends FlyCommand {
 
   @override
   Future<CommandResult> execute() async => CommandResult.success(
-        command: _name,
-        message: 'Test command executed',
-      );
+    command: _name,
+    message: 'Test command executed',
+  );
 }

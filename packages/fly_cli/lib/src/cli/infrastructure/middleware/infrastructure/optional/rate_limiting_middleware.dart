@@ -1,14 +1,14 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/cli/infrastructure/middleware/domain/middleware_priority.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 
 /// Optional middleware for rate limiting commands.
 ///
 /// Can be added to commands that need rate limiting protection.
 class RateLimitingMiddleware implements CommandMiddleware {
   RateLimitingMiddleware({Duration? rateLimit})
-      : _rateLimit = rateLimit ?? const Duration(seconds: 1);
+    : _rateLimit = rateLimit ?? const Duration(seconds: 1);
 
   final Map<String, DateTime> _lastExecution = {};
   final Duration _rateLimit;

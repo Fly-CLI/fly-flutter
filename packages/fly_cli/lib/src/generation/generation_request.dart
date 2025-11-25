@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_brick_composer/src/core/composer_model.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 
 /// Request model for code generation operations.
 ///
@@ -88,7 +88,8 @@ sealed class GenerationRequest {
     required String outputDirectory,
     CommandContext? context,
   }) {
-    final componentName = input['name'] as String? ??
+    final componentName =
+        input['name'] as String? ??
         input['component_name'] as String? ??
         input['service_name'] as String? ??
         input['screen_name'] as String?;
@@ -117,8 +118,8 @@ sealed class GenerationRequest {
           withTests: input['with_tests'] as bool?,
           withMocks: input['with_mocks'] as bool?,
           withInterceptors: input['with_interceptors'] as bool?,
-          baseUrl: input['api_base_url'] as String? ??
-              input['base_url'] as String?,
+          baseUrl:
+              input['api_base_url'] as String? ?? input['base_url'] as String?,
           outputDirectory: outputDirectory,
           context: context,
         );
@@ -270,7 +271,8 @@ final class ServiceGenerationRequest extends GenerationRequest {
 final class ProjectGenerationRequest extends GenerationRequest {
   const ProjectGenerationRequest({
     required this.projectName,
-    required super.outputDirectory, this.organization,
+    required super.outputDirectory,
+    this.organization,
     this.description,
     this.platforms,
     this.template,
@@ -319,5 +321,3 @@ final class ProjectGenerationRequest extends GenerationRequest {
     };
   }
 }
-
-

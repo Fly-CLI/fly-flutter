@@ -1,5 +1,4 @@
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
-import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 
 /// Repository interface for brick discovery and access.
@@ -31,4 +30,3 @@ abstract class IBrickRepository {
   /// Clear the brick cache.
   Future<void> clearCache();
 }
-

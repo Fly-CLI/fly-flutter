@@ -45,11 +45,11 @@ class GenerationService {
     required Logger logger,
     TemplateGenerationOrchestrator? orchestrator,
     GenerationPreviewService? previewService,
-  })  : _templateManager = templateManager,
-        _logger = logger,
-        _orchestrator = orchestrator,
-        _previewService = previewService ??
-            GenerationPreviewService(logger: logger);
+  }) : _templateManager = templateManager,
+       _logger = logger,
+       _orchestrator = orchestrator,
+       _previewService =
+           previewService ?? GenerationPreviewService(logger: logger);
 
   /// Generate code using the unified service.
   ///
@@ -309,18 +309,19 @@ class GenerationService {
       minFlutterSdk: brick.minFlutterSdk?.toString() ?? '3.10.0',
       minDartSdk: brick.minDartSdk?.toString() ?? '3.0.0',
       variables: brick.variables.values
-          .map((brickVar) => TemplateVariable(
-                name: brickVar.name,
-                type: brickVar.type,
-                required: brickVar.required,
-                defaultValue: brickVar.defaultValue,
-                choices: brickVar.choices,
-                description: brickVar.description,
-              ))
+          .map(
+            (brickVar) => TemplateVariable(
+              name: brickVar.name,
+              type: brickVar.type,
+              required: brickVar.required,
+              defaultValue: brickVar.defaultValue,
+              choices: brickVar.choices,
+              description: brickVar.description,
+            ),
+          )
           .toList(),
       features: brick.features,
       packages: brick.packages,
     );
   }
 }
-

@@ -18,6 +18,7 @@ class FeatureInstanceConfig {
       withNavigation: params['with_navigation'] as bool? ?? false,
     );
   }
+
   const FeatureInstanceConfig({
     required this.name,
     required this.featureKey,
@@ -73,6 +74,7 @@ class ServiceInstanceConfig {
           params['base_url'] as String? ?? params['api_base_url'] as String?,
     );
   }
+
   const ServiceInstanceConfig({
     required this.name,
     required this.featureKey,
@@ -113,4 +115,3 @@ class ServiceInstanceConfig {
     );
   }
 }
-

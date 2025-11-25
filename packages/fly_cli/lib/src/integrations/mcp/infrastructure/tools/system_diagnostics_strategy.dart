@@ -19,26 +19,25 @@ class SystemDiagnosticsStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {
-          'fix': Schema.bool(),
-        },
-        additionalProperties: false,
-      );
+    properties: {
+      'fix': Schema.bool(),
+    },
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'success': Schema.bool(),
-          'message': Schema.string(),
-          'totalChecks': Schema.int(),
-          'healthyChecks': Schema.int(),
-          'issuesFound': Schema.int(),
-          'overallStatus': Schema.string(),
-          'checks':
-              Schema.list(items: ObjectSchema(additionalProperties: true)),
-        },
-        required: ['success', 'message'],
-      );
+    properties: {
+      'success': Schema.bool(),
+      'message': Schema.string(),
+      'totalChecks': Schema.int(),
+      'healthyChecks': Schema.int(),
+      'issuesFound': Schema.int(),
+      'overallStatus': Schema.string(),
+      'checks': Schema.list(items: ObjectSchema(additionalProperties: true)),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => true;
@@ -69,13 +68,17 @@ class SystemDiagnosticsStrategy
       cancelToken?.throwIfCancelled();
 
       await progressNotifier?.notify(
-          message: 'Running system diagnostics...', percent: 10);
+        message: 'Running system diagnostics...',
+        percent: 10,
+      );
 
       // Get system checks
       final checks = await _getSystemChecks(context);
 
       await progressNotifier?.notify(
-          message: 'Executing checks...', percent: 50);
+        message: 'Executing checks...',
+        percent: 50,
+      );
 
       // Run checks
       final systemChecker = context.systemChecker;
@@ -115,4 +118,3 @@ class SystemDiagnosticsStrategy
     ];
   }
 }
-

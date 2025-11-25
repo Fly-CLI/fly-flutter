@@ -44,19 +44,19 @@ extension GlobalFlagTypeExtension on GlobalFlagType {
   /// Uses an exhaustive switch to ensure compile-time checking.
   /// Adding a new flag type requires adding a case here.
   CliFlag createFlag() => switch (this) {
-        GlobalFlagType.help => const GlobalHelpFlag(),
-        GlobalFlagType.version => const GlobalVersionFlag(),
-        GlobalFlagType.verbose => const GlobalVerboseFlag(),
-        GlobalFlagType.quiet => const GlobalQuietFlag(),
-        GlobalFlagType.debug => const GlobalDebugFlag(),
-        GlobalFlagType.trace => const GlobalTraceFlag(),
-        GlobalFlagType.format => GlobalFormatFlag(),
-        GlobalFlagType.plan => const GlobalPlanFlag(),
-        GlobalFlagType.logLevel => GlobalLogLevelFlag(),
-        GlobalFlagType.logFormat => GlobalLogFormatFlag(),
-        GlobalFlagType.logFile => const GlobalLogFileFlag(),
-        GlobalFlagType.noColor => const GlobalNoColorFlag(),
-      };
+    GlobalFlagType.help => const GlobalHelpFlag(),
+    GlobalFlagType.version => const GlobalVersionFlag(),
+    GlobalFlagType.verbose => const GlobalVerboseFlag(),
+    GlobalFlagType.quiet => const GlobalQuietFlag(),
+    GlobalFlagType.debug => const GlobalDebugFlag(),
+    GlobalFlagType.trace => const GlobalTraceFlag(),
+    GlobalFlagType.format => GlobalFormatFlag(),
+    GlobalFlagType.plan => const GlobalPlanFlag(),
+    GlobalFlagType.logLevel => GlobalLogLevelFlag(),
+    GlobalFlagType.logFormat => GlobalLogFormatFlag(),
+    GlobalFlagType.logFile => const GlobalLogFileFlag(),
+    GlobalFlagType.noColor => const GlobalNoColorFlag(),
+  };
 }
 
 /// Registry for global flags available to all commands
@@ -161,4 +161,3 @@ class GlobalFlagsRegistry {
     }
   }
 }
-

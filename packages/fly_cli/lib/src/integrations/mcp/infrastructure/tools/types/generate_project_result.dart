@@ -33,10 +33,9 @@ class GenerateProjectResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'success': success,
-        'message': message,
-        if (filesGenerated != null) 'filesGenerated': filesGenerated,
-        if (projectPath != null) 'projectPath': projectPath,
-      };
+    'success': success,
+    'message': message,
+    if (filesGenerated != null) 'filesGenerated': filesGenerated,
+    if (projectPath != null) 'projectPath': projectPath,
+  };
 }
-

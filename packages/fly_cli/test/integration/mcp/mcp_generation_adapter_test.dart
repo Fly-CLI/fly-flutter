@@ -1,16 +1,14 @@
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
-import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:test/test.dart';
 
 // Mock implementations for testing
 class MockFeatureUseCase extends GenerateFeatureUseCase {
-  MockFeatureUseCase() : super(
-    brickRepository: throw UnimplementedError(),
-    variableProcessor: throw UnimplementedError(),
-    generationEngine: throw UnimplementedError(),
-  );
+  MockFeatureUseCase()
+    : super(
+        brickRepository: throw UnimplementedError(),
+        variableProcessor: throw UnimplementedError(),
+        generationEngine: throw UnimplementedError(),
+      );
 }
 
 void main() {
@@ -25,7 +23,7 @@ void main() {
         // 2. Set up adapter
         // 3. Call generateFeature
         // 4. Verify result
-        
+
         expect(true, isTrue); // Placeholder
       });
     });
@@ -43,4 +41,3 @@ void main() {
     });
   });
 }
-

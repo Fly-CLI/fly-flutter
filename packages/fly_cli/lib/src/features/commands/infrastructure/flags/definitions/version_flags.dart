@@ -6,7 +6,8 @@ part of '../cli_flags.dart';
 
 /// Version check updates flag
 class VersionCheckUpdatesFlag extends CliFlag {
-  const VersionCheckUpdatesFlag() : super(
+  const VersionCheckUpdatesFlag()
+    : super(
         name: 'check-updates',
         description: 'Check for available updates',
         isGlobal: false,

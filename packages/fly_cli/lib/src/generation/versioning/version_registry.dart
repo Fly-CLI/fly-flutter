@@ -185,8 +185,9 @@ class VersionRegistry {
 
     // Map back to strings, preserving invalid versions at the end
     final sorted = parsedVersions.map((v) => v.versionString).toList();
-    final invalidVersions =
-        versions.where((v) => TemplateVersion.tryParse(v) == null).toList();
+    final invalidVersions = versions
+        .where((v) => TemplateVersion.tryParse(v) == null)
+        .toList();
 
     return [...sorted, ...invalidVersions];
   }
@@ -202,7 +203,8 @@ class VersionRegistry {
     // Validate version format
     if (TemplateVersion.tryParse(version) == null) {
       logger.warn(
-          'Invalid version format: "$version" for template $sanitizedName');
+        'Invalid version format: "$version" for template $sanitizedName',
+      );
       return null;
     }
 
@@ -212,8 +214,10 @@ class VersionRegistry {
       // Check in bricks directory
       final bricksDirectory = BrickRegistry.findBricksDirectory();
       if (bricksDirectory != null) {
-        final templateVersionPath =
-            path.join(bricksDirectory, '$sanitizedName@$version');
+        final templateVersionPath = path.join(
+          bricksDirectory,
+          '$sanitizedName@$version',
+        );
         final templateVersionDir = Directory(templateVersionPath);
         if (await templateVersionDir.exists()) {
           return await loadTemplateInfo(templateVersionPath);
@@ -287,7 +291,9 @@ class VersionRegistry {
 
   /// Get the next version after the specified version
   Future<String?> getNextVersion(
-      String templateName, String currentVersion) async {
+    String templateName,
+    String currentVersion,
+  ) async {
     final versions = await getVersions(templateName);
     if (versions.isEmpty) return null;
 
@@ -307,7 +313,9 @@ class VersionRegistry {
 
   /// Get the previous version before the specified version
   Future<String?> getPreviousVersion(
-      String templateName, String currentVersion) async {
+    String templateName,
+    String currentVersion,
+  ) async {
     final versions = await getVersions(templateName);
     if (versions.isEmpty) return null;
 

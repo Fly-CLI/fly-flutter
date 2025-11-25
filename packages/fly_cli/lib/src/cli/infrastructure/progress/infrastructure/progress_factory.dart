@@ -1,8 +1,8 @@
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/cli/infrastructure/progress/domain/progress_indicator.dart';
 import 'package:fly_cli/src/cli/infrastructure/progress/infrastructure/bar_progress_indicator.dart';
 import 'package:fly_cli/src/cli/infrastructure/progress/infrastructure/silent_progress_indicator.dart';
 import 'package:fly_cli/src/cli/infrastructure/progress/infrastructure/spinner_progress_indicator.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// Factory for creating appropriate progress indicators based on context
@@ -11,7 +11,10 @@ class ProgressFactory {
   ///
   /// - JSON/AI output mode or quiet mode: [SilentProgressIndicator]
   /// - Otherwise: [SpinnerProgressIndicator] or [BarProgressIndicator]
-  static ProgressIndicator create(CommandContext context, {bool useBar = false}) {
+  static ProgressIndicator create(
+    CommandContext context, {
+    bool useBar = false,
+  }) {
     // Silent mode for JSON/AI output or quiet mode
     if (context.jsonOutput || context.aiOutput || context.quiet) {
       return SilentProgressIndicator();
@@ -36,4 +39,3 @@ class ProgressFactory {
   static ProgressIndicator createBar({Logger? logger}) =>
       BarProgressIndicator(logger: logger);
 }
-

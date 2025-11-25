@@ -54,8 +54,12 @@ class McpErrorHints {
       if (current != null) 'current': current,
       if (limit != null) 'limit': limit,
       'hint': _getPermissionDeniedHint(tool, reason, current, limit),
-      'remediation':
-          _getPermissionDeniedRemediation(tool, reason, current, limit),
+      'remediation': _getPermissionDeniedRemediation(
+        tool,
+        reason,
+        current,
+        limit,
+      ),
       'documentation': 'Check tool requirements and limits',
       if (context != null) ...context,
     };

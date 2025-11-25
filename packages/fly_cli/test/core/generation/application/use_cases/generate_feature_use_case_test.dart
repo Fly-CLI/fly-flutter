@@ -73,13 +73,16 @@ class MockVariableProcessor implements IVariableProcessor {
     if (_shouldFail) {
       return ProcessedVariables(
         values: rawVars,
-        validationResult: VariableValidationResult.failure(['Validation error']),
+        validationResult: VariableValidationResult.failure([
+          'Validation error',
+        ]),
       );
     }
-    return _result ?? ProcessedVariables(
-      values: rawVars,
-      validationResult: VariableValidationResult.success(),
-    );
+    return _result ??
+        ProcessedVariables(
+          values: rawVars,
+          validationResult: VariableValidationResult.success(),
+        );
   }
 }
 
@@ -103,10 +106,11 @@ class MockGenerationEngine implements IGenerationEngine {
     bool dryRun = false,
   }) async {
     if (_shouldThrow) throw Exception('Generation error');
-    return _result ?? GenerationResult.success(
-      files: [],
-      targetDirectory: outputDirectory,
-    );
+    return _result ??
+        GenerationResult.success(
+          files: [],
+          targetDirectory: outputDirectory,
+        );
   }
 
   @override
@@ -135,7 +139,7 @@ void main() {
       mockRepository = MockBrickRepository();
       mockProcessor = MockVariableProcessor();
       mockEngine = MockGenerationEngine();
-      
+
       useCase = GenerateFeatureUseCase(
         brickRepository: mockRepository,
         variableProcessor: mockProcessor,
@@ -157,16 +161,20 @@ void main() {
           features: [],
           packages: [],
         );
-        
+
         mockRepository.setBrick(brick);
-        mockProcessor.setResult(ProcessedVariables(
-          values: {'name': 'test_screen'},
-          validationResult: VariableValidationResult.success(),
-        ));
-        mockEngine.setResult(GenerationResult.success(
-          files: [],
-          targetDirectory: '/test/output',
-        ));
+        mockProcessor.setResult(
+          ProcessedVariables(
+            values: {'name': 'test_screen'},
+            validationResult: VariableValidationResult.success(),
+          ),
+        );
+        mockEngine.setResult(
+          GenerationResult.success(
+            files: [],
+            targetDirectory: '/test/output',
+          ),
+        );
 
         final request = GenerationRequestDto(
           mode: GenerationMode.feature,
@@ -195,12 +203,14 @@ void main() {
           features: [],
           packages: [],
         );
-        
+
         mockRepository.setBrick(brick);
-        mockProcessor.setResult(ProcessedVariables(
-          values: {'name': 'test_screen'},
-          validationResult: VariableValidationResult.success(),
-        ));
+        mockProcessor.setResult(
+          ProcessedVariables(
+            values: {'name': 'test_screen'},
+            validationResult: VariableValidationResult.success(),
+          ),
+        );
 
         final request = GenerationRequestDto(
           mode: GenerationMode.feature,
@@ -249,7 +259,7 @@ void main() {
           features: [],
           packages: [],
         );
-        
+
         mockRepository.setBrick(brick);
         mockProcessor.setShouldFail(true);
 
@@ -280,12 +290,14 @@ void main() {
           features: [],
           packages: [],
         );
-        
+
         mockRepository.setBrick(brick);
-        mockProcessor.setResult(ProcessedVariables(
-          values: {'name': 'test_screen'},
-          validationResult: VariableValidationResult.success(),
-        ));
+        mockProcessor.setResult(
+          ProcessedVariables(
+            values: {'name': 'test_screen'},
+            validationResult: VariableValidationResult.success(),
+          ),
+        );
         mockEngine.setShouldThrow(true);
 
         final request = GenerationRequestDto(
@@ -304,4 +316,3 @@ void main() {
     });
   });
 }
-

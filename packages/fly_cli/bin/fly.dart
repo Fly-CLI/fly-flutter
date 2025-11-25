@@ -3,8 +3,8 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/command_runner.dart';
 import 'package:fly_cli/src/cli/domain/cli_exit_code.dart';
+import 'package:fly_cli/src/command_runner.dart';
 
 /// Fly CLI - AI-Native Flutter Development Tool
 ///

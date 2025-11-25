@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
-import 'package:fly_cli/src/shared/utils/version_utils.dart';
-import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/context_generator.dart';
+import 'package:fly_cli/src/shared/utils/version_utils.dart';
 
 /// ContextCommand using new architecture
 class ContextCommand extends FlyCommand {
@@ -28,30 +28,31 @@ class ContextCommand extends FlyCommand {
 
   @override
   List<CliFlag> get flags => [
-        const OutputFileFlag(),
-        const ContextIncludeCodeFlag(),
-        const ContextIncludeDependenciesFlag(),
-        const ContextIncludeArchitectureFlag(),
-        const ContextIncludeSuggestionsFlag(),
-        const ContextMaxFilesFlag(),
-        const ContextMaxFileSizeFlag(),
-      ];
+    const OutputFileFlag(),
+    const ContextIncludeCodeFlag(),
+    const ContextIncludeDependenciesFlag(),
+    const ContextIncludeArchitectureFlag(),
+    const ContextIncludeSuggestionsFlag(),
+    const ContextMaxFilesFlag(),
+    const ContextMaxFileSizeFlag(),
+  ];
 
   @override
   List<CommandValidator> get validators => [
-        FlutterProjectValidator(),
-        DirectoryWritableValidator(),
-      ];
+    FlutterProjectValidator(),
+    DirectoryWritableValidator(),
+  ];
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {
     try {
-      final outputFile =
-          FlagAccessor.getString(argResults, const OutputFileFlag());
+      final outputFile = FlagAccessor.getString(
+        argResults,
+        const OutputFileFlag(),
+      );
       final includeCode = FlagAccessor.getBool(
         argResults,
         const ContextIncludeCodeFlag(),
@@ -68,7 +69,8 @@ class ContextCommand extends FlyCommand {
         argResults,
         const ContextIncludeSuggestionsFlag(),
       );
-      final maxFiles = int.tryParse(
+      final maxFiles =
+          int.tryParse(
             FlagAccessor.getStringOrDefault(
               argResults,
               const ContextMaxFilesFlag(),
@@ -76,7 +78,8 @@ class ContextCommand extends FlyCommand {
             ),
           ) ??
           50;
-      final maxFileSize = int.tryParse(
+      final maxFileSize =
+          int.tryParse(
             FlagAccessor.getStringOrDefault(
               argResults,
               const ContextMaxFileSizeFlag(),
@@ -127,11 +130,13 @@ class ContextCommand extends FlyCommand {
       // Write to file if specified
       if (outputFile != null) {
         final file = File(outputFile);
-        await file.writeAsString(isJsonOutputFormat
-            ? json.encode(enrichedData)
-            : isAiOutputFormat
-                ? json.encode(enrichedData)
-                : _formatHumanOutput(enrichedData));
+        await file.writeAsString(
+          isJsonOutputFormat
+              ? json.encode(enrichedData)
+              : isAiOutputFormat
+              ? json.encode(enrichedData)
+              : _formatHumanOutput(enrichedData),
+        );
 
         return CommandResult.success(
           command: 'context',
@@ -206,7 +211,8 @@ class ContextCommand extends FlyCommand {
       ..writeln('📊 Export Summary:')
       ..writeln('  - Sections: ${data.keys.length}')
       ..writeln(
-          '  - Exported: ${data['export_metadata']?['exported_at'] ?? 'Unknown'}')
+        '  - Exported: ${data['export_metadata']?['exported_at'] ?? 'Unknown'}',
+      )
       ..writeln();
 
     return buffer.toString();

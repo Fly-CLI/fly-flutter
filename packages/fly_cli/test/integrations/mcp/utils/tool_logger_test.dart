@@ -1,7 +1,8 @@
+import 'package:fly_cli/src/integrations/mcp/infrastructure/utils/tool_logger.dart';
 import 'package:fly_cli/src/shared/logging/domain/log_level.dart';
 import 'package:fly_cli/src/shared/logging/domain/logger.dart' as flylog;
-import 'package:fly_cli/src/shared/logging/infrastructure/logger_impl.dart' as flylog_impl;
-import 'package:fly_cli/src/integrations/mcp/infrastructure/utils/tool_logger.dart';
+import 'package:fly_cli/src/shared/logging/infrastructure/logger_impl.dart'
+    as flylog_impl;
 import 'package:test/test.dart';
 
 void main() {
@@ -320,8 +321,9 @@ void main() {
     });
 
     test('should get all metrics', () {
-      final testLogger =
-          TestLogger(onLog: (level, message, {error, stackTrace, fields}) {});
+      final testLogger = TestLogger(
+        onLog: (level, message, {error, stackTrace, fields}) {},
+      );
 
       final toolLogger = ToolLogger(
         logger: testLogger,
@@ -359,7 +361,8 @@ class TestLogger implements flylog.Logger {
     Object? error,
     StackTrace? stackTrace,
     Map<String, Object?>? fields,
-  }) onLog;
+  })
+  onLog;
 
   @override
   String get name => 'test';
@@ -382,44 +385,98 @@ class TestLogger implements flylog.Logger {
   }
 
   @override
-  void trace(String message,
-      {Object? error, StackTrace? stackTrace, Map<String, Object?>? fields}) {
-    log(LogLevel.trace, message,
-        error: error, stackTrace: stackTrace, fields: fields);
+  void trace(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, Object?>? fields,
+  }) {
+    log(
+      LogLevel.trace,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void debug(String message,
-      {Object? error, StackTrace? stackTrace, Map<String, Object?>? fields}) {
-    log(LogLevel.debug, message,
-        error: error, stackTrace: stackTrace, fields: fields);
+  void debug(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, Object?>? fields,
+  }) {
+    log(
+      LogLevel.debug,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void info(String message,
-      {Object? error, StackTrace? stackTrace, Map<String, Object?>? fields}) {
-    log(LogLevel.info, message,
-        error: error, stackTrace: stackTrace, fields: fields);
+  void info(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, Object?>? fields,
+  }) {
+    log(
+      LogLevel.info,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void warn(String message,
-      {Object? error, StackTrace? stackTrace, Map<String, Object?>? fields}) {
-    log(LogLevel.warn, message,
-        error: error, stackTrace: stackTrace, fields: fields);
+  void warn(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, Object?>? fields,
+  }) {
+    log(
+      LogLevel.warn,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void error(String message,
-      {Object? error, StackTrace? stackTrace, Map<String, Object?>? fields}) {
-    log(LogLevel.error, message,
-        error: error, stackTrace: stackTrace, fields: fields);
+  void error(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, Object?>? fields,
+  }) {
+    log(
+      LogLevel.error,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void fatal(String message,
-      {Object? error, StackTrace? stackTrace, Map<String, Object?>? fields}) {
-    log(LogLevel.fatal, message,
-        error: error, stackTrace: stackTrace, fields: fields);
+  void fatal(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, Object?>? fields,
+  }) {
+    log(
+      LogLevel.fatal,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 }

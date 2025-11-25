@@ -1,6 +1,5 @@
-import 'package:fly_brick_composer/fly_brick_composer.dart';
-import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_exception.dart';
+import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 
 /// Alias for Mason variables map (using the same typedef name as planning package).
 typedef FoundationVars = Map<String, dynamic>;
@@ -52,8 +51,9 @@ enum ScreenType {
 
   /// Parses screen_type from vars using MasonVarKey.
   static ScreenType? fromVars(FoundationVars vars) {
-    final screenTypeStr =
-        vars.getVar<String>(MasonVarKey.screenType)?.toLowerCase();
+    final screenTypeStr = vars
+        .getVar<String>(MasonVarKey.screenType)
+        ?.toLowerCase();
     if (screenTypeStr == null || screenTypeStr.isEmpty) {
       return null;
     }
@@ -119,8 +119,9 @@ enum ServiceType {
 
   /// Parses service_type from vars using MasonVarKey.
   static ServiceType? fromVars(FoundationVars vars) {
-    final serviceTypeStr =
-        vars.getVar<String>(MasonVarKey.serviceType)?.toLowerCase();
+    final serviceTypeStr = vars
+        .getVar<String>(MasonVarKey.serviceType)
+        ?.toLowerCase();
     if (serviceTypeStr == null || serviceTypeStr.isEmpty) {
       return null;
     }
@@ -176,8 +177,9 @@ enum StateManagement {
 
   /// Parses state_mgmt from vars using MasonVarKey.
   static StateManagement fromVars(FoundationVars vars) {
-    final stateMgmtStr =
-        vars.getVar<String>(MasonVarKey.stateMgmt)?.toLowerCase();
+    final stateMgmtStr = vars
+        .getVar<String>(MasonVarKey.stateMgmt)
+        ?.toLowerCase();
     if (stateMgmtStr == null || stateMgmtStr.isEmpty) {
       return StateManagement.riverpod; // Default
     }
@@ -216,4 +218,3 @@ class ProjectName {
   /// Project name in PascalCase format.
   final String pascal;
 }
-

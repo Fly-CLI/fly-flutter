@@ -16,15 +16,16 @@ class TemplateCacheManager {
     int? expirationDays,
     Duration? cacheDuration,
     int? maxSizeBytes,
-  })  : _logger = logger ?? Logger(),
-        _cacheDirectory =
-            cacheDirectory ?? PlatformUtils.getDefaultCacheDirectory(),
-        _expirationDays = expirationDays ??
-            (cacheDuration != null
-                ? (cacheDuration.inDays > 0 ? cacheDuration.inDays : 1)
-                : 7),
-        _cacheDuration = cacheDuration ?? const Duration(days: 7),
-        _maxSizeBytes = maxSizeBytes ?? 100 * 1024 * 1024; // 100MB
+  }) : _logger = logger ?? Logger(),
+       _cacheDirectory =
+           cacheDirectory ?? PlatformUtils.getDefaultCacheDirectory(),
+       _expirationDays =
+           expirationDays ??
+           (cacheDuration != null
+               ? (cacheDuration.inDays > 0 ? cacheDuration.inDays : 1)
+               : 7),
+       _cacheDuration = cacheDuration ?? const Duration(days: 7),
+       _maxSizeBytes = maxSizeBytes ?? 100 * 1024 * 1024; // 100MB
 
   final Logger _logger;
   final String _cacheDirectory;
@@ -72,7 +73,9 @@ class TemplateCacheManager {
 
   /// Cache a template with metadata
   Future<void> cacheTemplate(
-      String name, Map<String, dynamic> templateData) async {
+    String name,
+    Map<String, dynamic> templateData,
+  ) async {
     await _ensureInitialized();
 
     try {
@@ -150,7 +153,8 @@ class TemplateCacheManager {
       // Validate checksum
       if (!await _validateChecksum(entry.template)) {
         _logger.warn(
-            'Template $name checksum validation failed, removing from cache');
+          'Template $name checksum validation failed, removing from cache',
+        );
         await invalidate(name);
         return const CacheCorrupted(error: 'Checksum validation failed');
       }
@@ -265,11 +269,13 @@ class TemplateCacheManager {
 
       if (expiredKeys.isNotEmpty) {
         _logger.info(
-            'Cleaned up ${expiredKeys.length} expired templates during initialization');
+          'Cleaned up ${expiredKeys.length} expired templates during initialization',
+        );
       }
     } catch (e) {
-      _logger
-          .warn('Failed to cleanup expired entries during initialization: $e');
+      _logger.warn(
+        'Failed to cleanup expired entries during initialization: $e',
+      );
       // Don't rethrow during initialization
     }
   }
@@ -485,8 +491,9 @@ class TemplateCacheManager {
   Future<bool> _validateChecksum(CachedTemplate template) async {
     try {
       final jsonString = json.encode(template.templateData);
-      final currentChecksum =
-          sha256.convert(utf8.encode(jsonString)).toString();
+      final currentChecksum = sha256
+          .convert(utf8.encode(jsonString))
+          .toString();
       return currentChecksum == template.checksum;
     } catch (e) {
       _logger.warn('Checksum validation failed for ${template.name}: $e');
@@ -504,11 +511,11 @@ class TemplateCacheManager {
   }
 
   CacheMetadata _createDefaultMetadata() => CacheMetadata(
-        cacheVersion: _cacheVersion,
-        totalEntries: 0,
-        totalSizeBytes: 0,
-        lastCleanup: DateTime.now(),
-        defaultExpirationDays: _expirationDays,
-        maxSizeBytes: _maxSizeBytes,
-      );
+    cacheVersion: _cacheVersion,
+    totalEntries: 0,
+    totalSizeBytes: 0,
+    lastCleanup: DateTime.now(),
+    defaultExpirationDays: _expirationDays,
+    maxSizeBytes: _maxSizeBytes,
+  );
 }

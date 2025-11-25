@@ -1,7 +1,7 @@
-import 'package:pub_semver/pub_semver.dart' hide VersionRange;
-
 import 'package:fly_cli/src/generation/domain/value_objects/compatibility_result_vo.dart';
-import 'package:fly_cli/src/generation/domain/value_objects/version_range.dart' as vo;
+import 'package:fly_cli/src/generation/domain/value_objects/version_range.dart'
+    as vo;
+import 'package:pub_semver/pub_semver.dart' hide VersionRange;
 
 /// Domain service for compatibility checking.
 ///
@@ -86,4 +86,3 @@ class CompatibilityService implements ICompatibilityService {
     );
   }
 }
-

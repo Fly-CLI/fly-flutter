@@ -14,8 +14,10 @@ void main() {
         };
 
         final data = {'name': 'test'};
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, isEmpty);
       });
@@ -30,8 +32,10 @@ void main() {
         };
 
         final data = <String, dynamic>{};
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'name');
@@ -49,8 +53,10 @@ void main() {
         };
 
         final data = {'count': 'not a number'};
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'count');
@@ -72,8 +78,10 @@ void main() {
         };
 
         final data = {'type': 'invalid'};
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'type');
@@ -96,8 +104,10 @@ void main() {
         };
 
         final data = {'state': 'riverpdo'}; // Typo
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'state');
@@ -120,8 +130,10 @@ void main() {
         };
 
         final data = {'config': <String, dynamic>{}};
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'config.name');
@@ -143,10 +155,12 @@ void main() {
         };
 
         final data = {
-          'platforms': ['ios', 'invalid', 'android']
+          'platforms': ['ios', 'invalid', 'android'],
         };
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'platforms[1]');
@@ -166,13 +180,17 @@ void main() {
           'name': 'test',
           'extra': 'field',
         };
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.path, 'extra');
-        expect(errors.first.type,
-            ValidationErrorType.additionalPropertyNotAllowed);
+        expect(
+          errors.first.type,
+          ValidationErrorType.additionalPropertyNotAllowed,
+        );
       });
 
       test('should provide helpful hints for type mismatches', () {
@@ -184,8 +202,10 @@ void main() {
         };
 
         final data = {'enabled': 'true'};
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors, hasLength(1));
         expect(errors.first.hint, contains('boolean'));
@@ -208,31 +228,41 @@ void main() {
           'count': 'not a number',
           'enabled': 'not a boolean',
         };
-        final errors =
-            StructuredSchemaValidator.validateWithDetails(data, schema);
+        final errors = StructuredSchemaValidator.validateWithDetails(
+          data,
+          schema,
+        );
 
         expect(errors.length, greaterThan(1));
 
         // Check for missing name
         expect(
-            errors.any((e) =>
+          errors.any(
+            (e) =>
                 e.path == 'name' &&
-                e.type == ValidationErrorType.missingRequired),
-            isTrue);
+                e.type == ValidationErrorType.missingRequired,
+          ),
+          isTrue,
+        );
 
         // Check for invalid count
         expect(
-            errors.any((e) =>
-                e.path == 'count' &&
-                e.type == ValidationErrorType.typeMismatch),
-            isTrue);
+          errors.any(
+            (e) =>
+                e.path == 'count' && e.type == ValidationErrorType.typeMismatch,
+          ),
+          isTrue,
+        );
 
         // Check for invalid enabled
         expect(
-            errors.any((e) =>
+          errors.any(
+            (e) =>
                 e.path == 'enabled' &&
-                e.type == ValidationErrorType.typeMismatch),
-            isTrue);
+                e.type == ValidationErrorType.typeMismatch,
+          ),
+          isTrue,
+        );
       });
     });
   });

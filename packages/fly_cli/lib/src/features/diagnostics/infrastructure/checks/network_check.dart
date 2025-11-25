@@ -85,8 +85,11 @@ class NetworkCheck extends SystemCheck {
   Future<CheckResult> _checkBasicConnectivity() async {
     try {
       // Try to connect to a reliable service
-      final socket = await Socket.connect('google.com', 80,
-          timeout: const Duration(seconds: 10));
+      final socket = await Socket.connect(
+        'google.com',
+        80,
+        timeout: const Duration(seconds: 10),
+      );
       await socket.close();
 
       return CheckResult.success(
@@ -108,8 +111,9 @@ class NetworkCheck extends SystemCheck {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 10);
 
-      final request = await client
-          .getUrl(Uri.parse('https://pub.dev/api/packages/flutter'));
+      final request = await client.getUrl(
+        Uri.parse('https://pub.dev/api/packages/flutter'),
+      );
       final response = await request.close();
 
       if (response.statusCode == 200) {

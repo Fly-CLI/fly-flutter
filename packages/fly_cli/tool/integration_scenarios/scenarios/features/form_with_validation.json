@@ -3,7 +3,10 @@
   "name": "signin",
   "description": "Form with validation feature scenario",
   "organization": "com.example",
-  "platforms": ["ios", "android"],
+  "platforms": [
+    "ios",
+    "android"
+  ],
   "preset": "batteries_included",
   "screen_type": "form"
 }

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/analyzers/unified_analyzers.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -54,8 +54,9 @@ void main() {
       test('should not extract file contents when disabled', () async {
         final projectDir =
             await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
-        final configWithoutCode =
-            const ContextGeneratorConfig(includeCode: false);
+        final configWithoutCode = const ContextGeneratorConfig(
+          includeCode: false,
+        );
 
         final codeInfo = await analyzer.analyze(projectDir, configWithoutCode);
 
@@ -191,8 +192,9 @@ dependencies:
       test('should be faster without code extraction', () async {
         final projectDir =
             await AnalysisTestFixtures.createComplexFlutterProject(tempDir);
-        final configWithoutCode =
-            const ContextGeneratorConfig(includeCode: false);
+        final configWithoutCode = const ContextGeneratorConfig(
+          includeCode: false,
+        );
 
         final stopwatch = Stopwatch()..start();
         final codeInfo = await analyzer.analyze(projectDir, configWithoutCode);

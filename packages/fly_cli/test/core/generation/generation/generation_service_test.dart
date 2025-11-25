@@ -1,12 +1,11 @@
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/generation/generation_service.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_adapter.dart';
 import 'package:fly_cli/src/generation/generation_request.dart';
+import 'package:fly_cli/src/generation/generation_service.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_screen_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_service_params.dart';
@@ -147,7 +146,10 @@ void main() {
         // TODO: Add progress notification support to GenerationService
 
         expect(progressMessages, isNotEmpty);
-        expect(progressMessages.any((m) => m.contains('progress_test')), isTrue);
+        expect(
+          progressMessages.any((m) => m.contains('progress_test')),
+          isTrue,
+        );
       });
     });
 
@@ -232,92 +234,101 @@ void main() {
         // TODO: Add progress notification support to GenerationService
 
         expect(progressMessages, isNotEmpty);
-        expect(progressMessages.any((m) => m.contains('progress_service')), isTrue);
+        expect(
+          progressMessages.any((m) => m.contains('progress_service')),
+          isTrue,
+        );
       });
     });
 
     group('consistent behavior between CLI and MCP', () {
-      test('should produce same results for equivalent feature requests', () async {
-        // CLI-style request (with context)
-        final cliRequest = GenerationRequest.feature(
-          componentName: 'comparison_screen',
-          feature: 'test_feature',
-          screenType: 'list',
-          withViewModel: true,
-          withTests: true,
-          outputDirectory: tempDir.path,
-          context: context,
-        );
+      test(
+        'should produce same results for equivalent feature requests',
+        () async {
+          // CLI-style request (with context)
+          final cliRequest = GenerationRequest.feature(
+            componentName: 'comparison_screen',
+            feature: 'test_feature',
+            screenType: 'list',
+            withViewModel: true,
+            withTests: true,
+            outputDirectory: tempDir.path,
+            context: context,
+          );
 
-        // MCP-style request with same parameters (no context)
-        final mcpParams = GenerateScreenParams(
-          screenName: 'comparison_screen',
-          feature: 'test_feature',
-          screenType: 'list',
-          withViewModel: true,
-          withTests: true,
-        );
-        final mcpRequest = GenerationAdapter.fromMcpFeatureParams(
-          params: mcpParams,
-          outputDirectory: tempDir.path,
-        );
+          // MCP-style request with same parameters (no context)
+          final mcpParams = GenerateScreenParams(
+            screenName: 'comparison_screen',
+            feature: 'test_feature',
+            screenType: 'list',
+            withViewModel: true,
+            withTests: true,
+          );
+          final mcpRequest = GenerationAdapter.fromMcpFeatureParams(
+            params: mcpParams,
+            outputDirectory: tempDir.path,
+          );
 
-        final cliResult = await _generateFeature(service, cliRequest);
-        final mcpResult = await _generateFeature(service, mcpRequest);
+          final cliResult = await _generateFeature(service, cliRequest);
+          final mcpResult = await _generateFeature(service, mcpRequest);
 
-        // Both should succeed
-        expect(cliResult.success, isTrue);
-        expect(mcpResult.success, isTrue);
+          // Both should succeed
+          expect(cliResult.success, isTrue);
+          expect(mcpResult.success, isTrue);
 
-        // Both should generate the same number of files
-        expect(cliResult.filesGenerated, equals(mcpResult.filesGenerated));
+          // Both should generate the same number of files
+          expect(cliResult.filesGenerated, equals(mcpResult.filesGenerated));
 
-        // Both should have the same target directory structure
-        expect(cliResult.targetDirectory, isNotNull);
-        expect(mcpResult.targetDirectory, isNotNull);
-      });
+          // Both should have the same target directory structure
+          expect(cliResult.targetDirectory, isNotNull);
+          expect(mcpResult.targetDirectory, isNotNull);
+        },
+      );
 
-      test('should produce same results for equivalent service requests', () async {
-        // CLI-style request (with context)
-        final cliRequest = GenerationRequest.service(
-          componentName: 'comparison_service',
-          feature: 'test_feature',
-          serviceType: 'api',
-          withTests: true,
-          withMocks: true,
-          baseUrl: 'https://api.test.com',
-          outputDirectory: tempDir.path,
-          context: context,
-        );
+      test(
+        'should produce same results for equivalent service requests',
+        () async {
+          // CLI-style request (with context)
+          final cliRequest = GenerationRequest.service(
+            componentName: 'comparison_service',
+            feature: 'test_feature',
+            serviceType: 'api',
+            withTests: true,
+            withMocks: true,
+            baseUrl: 'https://api.test.com',
+            outputDirectory: tempDir.path,
+            context: context,
+          );
 
-        // MCP-style request with same parameters (no context)
-        final mcpParams = GenerateServiceParams(
-          serviceName: 'comparison_service',
-          feature: 'test_feature',
-          serviceType: 'api',
-          withTests: true,
-          withMocks: true,
-          baseUrl: 'https://api.test.com',
-        );
-        final mcpRequest = GenerationAdapter.fromMcpServiceParams(
-          params: mcpParams,
-          outputDirectory: tempDir.path,
-        );
+          // MCP-style request with same parameters (no context)
+          final mcpParams = GenerateServiceParams(
+            serviceName: 'comparison_service',
+            feature: 'test_feature',
+            serviceType: 'api',
+            withTests: true,
+            withMocks: true,
+            baseUrl: 'https://api.test.com',
+          );
+          final mcpRequest = GenerationAdapter.fromMcpServiceParams(
+            params: mcpParams,
+            outputDirectory: tempDir.path,
+          );
 
-        final cliResult = await _generateService(service, cliRequest);
-        final mcpResult = await _generateService(service, mcpRequest);
+          final cliResult = await _generateService(service, cliRequest);
+          final mcpResult = await _generateService(service, mcpRequest);
 
-        // Both should succeed
-        expect(cliResult.success, isTrue);
-        expect(mcpResult.success, isTrue);
+          // Both should succeed
+          expect(cliResult.success, isTrue);
+          expect(mcpResult.success, isTrue);
 
-        // Both should generate the same number of files
-        expect(cliResult.filesGenerated, equals(mcpResult.filesGenerated));
+          // Both should generate the same number of files
+          expect(cliResult.filesGenerated, equals(mcpResult.filesGenerated));
 
-        // Both should have the same target directory structure
-        expect(cliResult.targetDirectory, isNotNull);
-        expect(mcpResult.targetDirectory, isNotNull);
-      });
+          // Both should have the same target directory structure
+          expect(cliResult.targetDirectory, isNotNull);
+          expect(mcpResult.targetDirectory, isNotNull);
+        },
+      );
 
       test('should handle default values consistently', () async {
         // CLI request with minimal params
@@ -437,4 +448,3 @@ class MockProgressNotifier extends ProgressNotifier {
     onNotify(message, percent);
   }
 }
-

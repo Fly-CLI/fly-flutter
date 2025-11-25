@@ -10,7 +10,10 @@ void main() {
         final required = [
           PromptArgument(name: 'name', description: 'Name', required: true),
           PromptArgument(
-              name: 'optional', description: 'Optional', required: false),
+            name: 'optional',
+            description: 'Optional',
+            required: false,
+          ),
         ];
 
         expect(
@@ -31,11 +34,20 @@ void main() {
         };
         final definitions = [
           PromptArgument(
-              name: 'name', description: 'Name (string)', required: false),
+            name: 'name',
+            description: 'Name (string)',
+            required: false,
+          ),
           PromptArgument(
-              name: 'count', description: 'Count (number)', required: false),
+            name: 'count',
+            description: 'Count (number)',
+            required: false,
+          ),
           PromptArgument(
-              name: 'items', description: 'Items (array)', required: false),
+            name: 'items',
+            description: 'Items (array)',
+            required: false,
+          ),
         ];
 
         expect(

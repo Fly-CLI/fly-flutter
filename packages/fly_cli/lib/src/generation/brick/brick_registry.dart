@@ -6,7 +6,6 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-
 /// Unified registry for managing all Mason bricks
 class BrickRegistry {
   BrickRegistry({
@@ -28,20 +27,20 @@ class BrickRegistry {
   /// Returns the absolute path to the bricks directory if it exists.
   static String? findBricksDirectory() {
     final currentDir = Directory.current.path;
-    
+
     // Try workspace root/bricks
     final bricksPath = path.join(currentDir, 'bricks');
     if (Directory(bricksPath).existsSync()) {
       return path.normalize(bricksPath);
     }
-    
+
     // Try from packages/fly_cli location (monorepo)
     final monorepoBricksPath = path.join(currentDir, '..', '..', 'bricks');
     final normalizedMonorepoPath = path.normalize(monorepoBricksPath);
     if (Directory(normalizedMonorepoPath).existsSync()) {
       return normalizedMonorepoPath;
     }
-    
+
     return null;
   }
 
@@ -64,7 +63,9 @@ class BrickRegistry {
       final workspaceBricks = await _discoverBricksInPath(bricksDirectory);
       bricks.addAll(workspaceBricks);
     } else {
-      logger.warn('Bricks directory not found. Expected at workspace root/bricks/');
+      logger.warn(
+        'Bricks directory not found. Expected at workspace root/bricks/',
+      );
     }
 
     // Search in custom paths if provided
@@ -101,7 +102,8 @@ class BrickRegistry {
           if (brickInfo != null) {
             bricks.add(brickInfo);
             logger.detail(
-                'Found brick: ${brickInfo.name} (${brickInfo.type.name})');
+              'Found brick: ${brickInfo.name} (${brickInfo.type.name})',
+            );
           }
         }
       }
@@ -146,9 +148,13 @@ class BrickRegistry {
         try {
           final metadataContent = await flyMetadataFile.readAsString();
           flyMetadata = loadYaml(metadataContent) as Map<dynamic, dynamic>?;
-          logger.detail('Loaded fly_metadata.yaml for brick $brickPath: $flyMetadata');
+          logger.detail(
+            'Loaded fly_metadata.yaml for brick $brickPath: $flyMetadata',
+          );
         } catch (e) {
-          logger.warn('Failed to parse fly_metadata.yaml for brick $brickPath: $e');
+          logger.warn(
+            'Failed to parse fly_metadata.yaml for brick $brickPath: $e',
+          );
         }
       } else {
         logger.warn(
@@ -161,7 +167,9 @@ class BrickRegistry {
       final mergedYaml = Map<dynamic, dynamic>.from(yaml);
       if (flyMetadata != null) {
         mergedYaml.addAll(flyMetadata);
-        logger.detail('Merged metadata into YAML for brick $brickPath. Type: ${mergedYaml['type']}');
+        logger.detail(
+          'Merged metadata into YAML for brick $brickPath. Type: ${mergedYaml['type']}',
+        );
       } else {
         // Type is required - throw a clear error if fly_metadata.yaml is missing
         throw ArgumentError(
@@ -185,7 +193,8 @@ class BrickRegistry {
       final validationResult = await validateBrick(brick);
       if (!validationResult.isValid) {
         logger.warn(
-            'Brick ${brick.name} failed validation: ${validationResult.errors.join(', ')}');
+          'Brick ${brick.name} failed validation: ${validationResult.errors.join(', ')}',
+        );
         return Brick(
           name: brick.name,
           version: brick.version,
@@ -270,8 +279,9 @@ class BrickRegistry {
     return _brickCache.values.where((brick) {
       return brick.name.toLowerCase().contains(lowercaseQuery) ||
           brick.description.toLowerCase().contains(lowercaseQuery) ||
-          brick.features
-              .any((feature) => feature.toLowerCase().contains(lowercaseQuery));
+          brick.features.any(
+            (feature) => feature.toLowerCase().contains(lowercaseQuery),
+          );
     }).toList();
   }
 
@@ -296,7 +306,8 @@ class BrickRegistry {
       final brickContentDir = Directory(brick.brickContentPath);
       if (!await brickContentDir.exists()) {
         errors.add(
-            'Brick content directory does not exist: ${brick.brickContentPath}');
+          'Brick content directory does not exist: ${brick.brickContentPath}',
+        );
       }
 
       // Check if brick.yaml or template.yaml exists and is valid
@@ -351,8 +362,9 @@ class BrickRegistry {
 
       // Check brick content structure
       if (await brickContentDir.exists()) {
-        final hasFiles =
-            await brickContentDir.list().any((entity) => entity is File);
+        final hasFiles = await brickContentDir.list().any(
+          (entity) => entity is File,
+        );
         if (!hasFiles) {
           warnings.add('Brick content directory is empty');
         }
@@ -390,9 +402,9 @@ class BrickRegistry {
 
   /// Get cache statistics
   Map<String, int> getCacheStats() => {
-        'bricks': _brickCache.length,
-        'validations': _validationCache.length,
-      };
+    'bricks': _brickCache.length,
+    'validations': _validationCache.length,
+  };
 
   /// Add custom brick path
   void addCustomBrickPath(String path) {

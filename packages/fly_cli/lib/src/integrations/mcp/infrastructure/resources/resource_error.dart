@@ -1,5 +1,3 @@
-
-
 /// Resource access error for MCP resources
 ///
 /// Provides structured error information with hints and remediation
@@ -15,8 +13,8 @@ class ResourceError extends StateError {
     this.hints = const [],
     this.remediation,
     Map<String, Object?>? context,
-  })  : _context = context ?? <String, Object?>{},
-        super(message);
+  }) : _context = context ?? <String, Object?>{},
+       super(message);
 
   /// Error code identifying the specific error type
   final String code;
@@ -94,7 +92,8 @@ class ResourceError extends StateError {
         'Use relative paths from the workspace root',
         'Do not use absolute paths outside the workspace',
       ],
-      remediation: 'Ensure the path is within the workspace root directory. '
+      remediation:
+          'Ensure the path is within the workspace root directory. '
           'Use relative paths only. Avoid ../ or absolute paths.',
       context: {
         'path': path,
@@ -156,7 +155,8 @@ class ResourceError extends StateError {
         if (reason != null) reason,
         'Contact workspace administrator if you need access',
       ],
-      remediation: 'Verify file permissions allow the requested operation. '
+      remediation:
+          'Verify file permissions allow the requested operation. '
           'Check file system permissions and workspace security settings.',
       context: {
         'path': path,
@@ -185,7 +185,8 @@ class ResourceError extends StateError {
         'Do not use absolute paths outside the workspace',
         'Check path resolution and ensure it stays within workspace',
       ],
-      remediation: 'Ensure the path is within the workspace root directory. '
+      remediation:
+          'Ensure the path is within the workspace root directory. '
           'Use relative paths only. The workspace root is: $workspaceRoot',
       context: {
         'path': path,
@@ -215,7 +216,8 @@ class ResourceError extends StateError {
       severity: 'error',
       resourceUri: 'manifest://$fileName',
       hints: hintsList,
-      remediation: 'Use one of the allowed manifest file names. '
+      remediation:
+          'Use one of the allowed manifest file names. '
           'Use resources/list to see available manifest resources.',
       context: {
         'file_name': fileName,

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-01-XX
 
 ### Added
+
 - Initial release of fly_cli package
 - AI-native Flutter CLI tool for rapid project generation and development
 - Command system with extensible architecture
@@ -23,17 +24,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation and guides
 
 ### Changed
+
 - (None in initial release)
 
 ### Deprecated
+
 - (None in initial release)
 
 ### Removed
+
 - (None in initial release)
 
 ### Fixed
+
 - (None in initial release)
 
 ### Security
+
 - (None in initial release)
 

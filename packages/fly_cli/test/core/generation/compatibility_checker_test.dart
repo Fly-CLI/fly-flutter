@@ -1,8 +1,8 @@
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/generation/versioning/compatibility_checker.dart';
 import 'package:fly_cli/src/generation/template/template_compatibility.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
+import 'package:fly_cli/src/generation/versioning/compatibility_checker.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
@@ -215,7 +215,8 @@ void main() {
           variables: const {},
           features: const [],
           packages: const [],
-          minFlutterSdk: null, // Invalid version would be null
+          minFlutterSdk: null,
+          // Invalid version would be null
           minDartSdk: Version.parse('3.0.0'),
         );
 
@@ -235,7 +236,8 @@ void main() {
           variables: const {},
           features: const [],
           packages: const [],
-          minFlutterSdk: null, // Empty strings become null
+          minFlutterSdk: null,
+          // Empty strings become null
           minDartSdk: null,
         );
 

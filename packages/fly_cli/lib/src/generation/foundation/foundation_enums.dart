@@ -7,9 +7,10 @@
 /// and generic types from fly_brick_composer for backward compatibility.
 /// New code should import directly from foundation_domain or fly_brick_composer.
 
-// Re-export domain-specific types from foundation_domain
-export 'foundation_domain/foundation_types.dart' show ScreenType, ServiceType, StateManagement, ProjectName;
-
 // Re-export generic types from fly_brick_composer
-export 'package:fly_brick_composer/fly_brick_composer.dart' show GenerationMode, PlatformType;
+export 'package:fly_brick_composer/fly_brick_composer.dart'
+    show GenerationMode, PlatformType;
 
+// Re-export domain-specific types from foundation_domain
+export 'foundation_domain/foundation_types.dart'
+    show ScreenType, ServiceType, StateManagement, ProjectName;

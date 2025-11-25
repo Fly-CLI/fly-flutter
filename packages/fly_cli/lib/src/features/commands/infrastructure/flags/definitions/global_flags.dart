@@ -6,9 +6,11 @@ part of '../cli_flags.dart';
 
 /// POSIX standard help flag (-h, --help)
 class GlobalHelpFlag extends CliFlag {
-  const GlobalHelpFlag() : super(
+  const GlobalHelpFlag()
+    : super(
         name: 'help',
-        abbreviation: 'h', // POSIX standard
+        abbreviation: 'h',
+        // POSIX standard
         description: 'Display help information',
         isGlobal: true,
         category: CliFlagCategory.helpVersion,
@@ -20,7 +22,8 @@ class GlobalHelpFlag extends CliFlag {
 /// Standard version flag (--version)
 /// Note: No -v abbreviation to avoid conflict with --verbose
 class GlobalVersionFlag extends CliFlag {
-  const GlobalVersionFlag() : super(
+  const GlobalVersionFlag()
+    : super(
         name: 'version',
         description: 'Show version information',
         isGlobal: true,
@@ -36,9 +39,11 @@ class GlobalVersionFlag extends CliFlag {
 
 /// Standard verbose flag (-v, --verbose)
 class GlobalVerboseFlag extends CliFlag {
-  const GlobalVerboseFlag() : super(
+  const GlobalVerboseFlag()
+    : super(
         name: 'verbose',
-        abbreviation: 'v', // Industry standard
+        abbreviation: 'v',
+        // Industry standard
         description: 'Enable verbose output',
         isGlobal: true,
         category: CliFlagCategory.verbosity,
@@ -49,9 +54,11 @@ class GlobalVerboseFlag extends CliFlag {
 
 /// Standard quiet flag (-q, --quiet)
 class GlobalQuietFlag extends CliFlag {
-  const GlobalQuietFlag() : super(
+  const GlobalQuietFlag()
+    : super(
         name: 'quiet',
-        abbreviation: 'q', // Industry standard
+        abbreviation: 'q',
+        // Industry standard
         description: 'Suppress output',
         isGlobal: true,
         category: CliFlagCategory.verbosity,
@@ -62,9 +69,11 @@ class GlobalQuietFlag extends CliFlag {
 
 /// Standard debug flag (-d, --debug)
 class GlobalDebugFlag extends CliFlag {
-  const GlobalDebugFlag() : super(
+  const GlobalDebugFlag()
+    : super(
         name: 'debug',
-        abbreviation: 'd', // Industry standard
+        abbreviation: 'd',
+        // Industry standard
         description: 'Enable debug mode with verbose error output',
         isGlobal: true,
         category: CliFlagCategory.verbosity,
@@ -75,7 +84,8 @@ class GlobalDebugFlag extends CliFlag {
 
 /// Trace flag for extra diagnostic tracing
 class GlobalTraceFlag extends CliFlag {
-  const GlobalTraceFlag() : super(
+  const GlobalTraceFlag()
+    : super(
         name: 'trace',
         description: 'Enable extra diagnostic tracing in logs',
         isGlobal: true,
@@ -91,7 +101,8 @@ class GlobalTraceFlag extends CliFlag {
 
 /// Output format flag (-f, --format)
 class GlobalFormatFlag extends CliFlag {
-  GlobalFormatFlag() : super(
+  GlobalFormatFlag()
+    : super(
         name: 'format',
         abbreviation: 'f',
         description: 'Output format (human, json, or ai)',
@@ -109,7 +120,8 @@ class GlobalFormatFlag extends CliFlag {
 
 /// Plan mode flag (dry-run)
 class GlobalPlanFlag extends CliFlag {
-  const GlobalPlanFlag() : super(
+  const GlobalPlanFlag()
+    : super(
         name: 'plan',
         description: 'Run in plan mode (dry-run)',
         isGlobal: true,
@@ -125,19 +137,28 @@ class GlobalPlanFlag extends CliFlag {
 
 /// Log level flag
 class GlobalLogLevelFlag extends CliFlag {
-  GlobalLogLevelFlag() : super(
+  GlobalLogLevelFlag()
+    : super(
         name: 'log-level',
         description: 'Logging level (trace, debug, info, warn, error, fatal)',
         isGlobal: true,
         category: CliFlagCategory.logging,
         type: FlagType.singleValue,
-        allowedValues: const ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+        allowedValues: const [
+          'trace',
+          'debug',
+          'info',
+          'warn',
+          'error',
+          'fatal',
+        ],
       );
 }
 
 /// Log format flag
 class GlobalLogFormatFlag extends CliFlag {
-  GlobalLogFormatFlag() : super(
+  GlobalLogFormatFlag()
+    : super(
         name: 'log-format',
         description: 'Logging format (human or json)',
         isGlobal: true,
@@ -149,7 +170,8 @@ class GlobalLogFormatFlag extends CliFlag {
 
 /// Log file flag
 class GlobalLogFileFlag extends CliFlag {
-  const GlobalLogFileFlag() : super(
+  const GlobalLogFileFlag()
+    : super(
         name: 'log-file',
         description: 'Write logs to file (in addition to console)',
         isGlobal: true,
@@ -164,7 +186,8 @@ class GlobalLogFileFlag extends CliFlag {
 
 /// No color flag (--no-color)
 class GlobalNoColorFlag extends CliFlag {
-  const GlobalNoColorFlag() : super(
+  const GlobalNoColorFlag()
+    : super(
         name: 'no-color',
         description: 'Disable color output for human logs',
         isGlobal: true,

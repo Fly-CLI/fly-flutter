@@ -87,8 +87,9 @@ class TemplateCheck extends SystemCheck {
         }
 
         if (missingFiles.isNotEmpty) {
-          invalidTemplates
-              .add('${template.name}: missing ${missingFiles.join(', ')}');
+          invalidTemplates.add(
+            '${template.name}: missing ${missingFiles.join(', ')}',
+          );
         }
 
         templateData[template.name] = {

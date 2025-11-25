@@ -36,4 +36,3 @@ abstract class IFileSystemAdapter {
   /// Check if path is absolute.
   bool isAbsolute(String path);
 }
-

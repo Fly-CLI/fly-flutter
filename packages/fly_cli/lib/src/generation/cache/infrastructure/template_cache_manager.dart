@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fly_core/fly_core_dart.dart';
-import 'package:fly_core/src/file_operations/file_operations.dart';
 import 'package:path/path.dart' as path;
 
 /// Cache metadata structure
@@ -14,19 +13,19 @@ class CacheInfo {
   });
 
   factory CacheInfo.fromJson(Map<String, dynamic> json) => CacheInfo(
-        downloadedAt: DateTime.parse(json['downloaded_at'] as String),
-        version: json['version'] as String,
-        checksum: json['checksum'] as String,
-      );
+    downloadedAt: DateTime.parse(json['downloaded_at'] as String),
+    version: json['version'] as String,
+    checksum: json['checksum'] as String,
+  );
   final DateTime downloadedAt;
   final String version;
   final String checksum;
 
   Map<String, dynamic> toJson() => {
-        'downloaded_at': downloadedAt.toIso8601String(),
-        'version': version,
-        'checksum': checksum,
-      };
+    'downloaded_at': downloadedAt.toIso8601String(),
+    'version': version,
+    'checksum': checksum,
+  };
 }
 
 /// Template structure (placeholder)
@@ -38,19 +37,19 @@ class Template {
   });
 
   factory Template.fromJson(Map<String, dynamic> json) => Template(
-        name: json['name'] as String,
-        version: json['version'] as String,
-        content: json['content'] as Map<String, dynamic>,
-      );
+    name: json['name'] as String,
+    version: json['version'] as String,
+    content: json['content'] as Map<String, dynamic>,
+  );
   final String name;
   final String version;
   final Map<String, dynamic> content;
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'version': version,
-        'content': content,
-      };
+    'name': name,
+    'version': version,
+    'content': content,
+  };
 }
 
 /// Manages template caching for offline mode
@@ -61,11 +60,11 @@ class TemplateCacheManager {
     ChecksumCalculator? checksumCalculator,
     DirectoryManager? directoryManager,
     FileCache? fileCache,
-  })  : _fileReader = fileReader ?? const FileReader(),
-        _fileWriter = fileWriter ?? const FileWriter(),
-        _checksumCalculator = checksumCalculator ?? const ChecksumCalculator(),
-        _directoryManager = directoryManager ?? const DirectoryManager(),
-        _fileCache = fileCache ?? FileCache();
+  }) : _fileReader = fileReader ?? const FileReader(),
+       _fileWriter = fileWriter ?? const FileWriter(),
+       _checksumCalculator = checksumCalculator ?? const ChecksumCalculator(),
+       _directoryManager = directoryManager ?? const DirectoryManager(),
+       _fileCache = fileCache ?? FileCache();
 
   static const cacheDuration = Duration(days: 7);
 

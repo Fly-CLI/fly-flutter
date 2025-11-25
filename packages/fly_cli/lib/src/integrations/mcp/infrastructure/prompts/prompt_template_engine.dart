@@ -19,8 +19,11 @@ class PromptTemplateEngine {
   /// [template] - The template string with Mustache syntax
   /// [variables] - Map of variable names to values
   /// Returns the rendered template string
-  static String render(String template, Map<String, dynamic> variables,
-      {String? templateName}) {
+  static String render(
+    String template,
+    Map<String, dynamic> variables, {
+    String? templateName,
+  }) {
     try {
       // Create a Template instance from the source string
       final t = Template(template, lenient: true);

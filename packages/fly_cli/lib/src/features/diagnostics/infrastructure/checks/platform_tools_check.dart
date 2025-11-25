@@ -93,7 +93,8 @@ class PlatformToolsCheck extends SystemCheck {
     try {
       // Check for ANDROID_HOME/ANDROID_SDK_ROOT via EnvironmentManager
       const env = EnvironmentManager();
-      final androidHome = env.getString(EnvVar.androidHome) ??
+      final androidHome =
+          env.getString(EnvVar.androidHome) ??
           env.getString(EnvVar.androidSdkRoot);
 
       if (androidHome == null) {
@@ -143,8 +144,11 @@ class PlatformToolsCheck extends SystemCheck {
       }
 
       // Check for adb
-      final adbPath = path.join(androidHome, 'platform-tools',
-          Platform.isWindows ? 'adb.exe' : 'adb');
+      final adbPath = path.join(
+        androidHome,
+        'platform-tools',
+        Platform.isWindows ? 'adb.exe' : 'adb',
+      );
       final adbFile = File(adbPath);
       if (!await adbFile.exists()) {
         return CheckResult.warning(
@@ -174,15 +178,20 @@ class PlatformToolsCheck extends SystemCheck {
   Future<CheckResult> _checkXcode() async {
     try {
       // Check if xcodebuild is available with timeout
-      final xcodeResult = await Process.run(
-        'xcodebuild',
-        ['-version'],
-        runInShell: true,
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () =>
-            ProcessResult(0, 1, '', 'xcodebuild timed out after 10 seconds'),
-      );
+      final xcodeResult =
+          await Process.run(
+            'xcodebuild',
+            ['-version'],
+            runInShell: true,
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => ProcessResult(
+              0,
+              1,
+              '',
+              'xcodebuild timed out after 10 seconds',
+            ),
+          );
 
       if (xcodeResult.exitCode != 0) {
         return CheckResult.error(
@@ -197,8 +206,9 @@ class PlatformToolsCheck extends SystemCheck {
       }
 
       final versionOutput = xcodeResult.stdout as String;
-      final versionMatch =
-          RegExp(r'Xcode (\d+\.\d+)').firstMatch(versionOutput);
+      final versionMatch = RegExp(
+        r'Xcode (\d+\.\d+)',
+      ).firstMatch(versionOutput);
 
       if (versionMatch == null) {
         return CheckResult.warning(
@@ -211,15 +221,20 @@ class PlatformToolsCheck extends SystemCheck {
       final xcodeVersion = versionMatch.group(1)!;
 
       // Check for iOS Simulator with timeout
-      final simulatorResult = await Process.run(
-        'xcrun',
-        ['simctl', 'list'],
-        runInShell: true,
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => ProcessResult(
-            0, 1, '', 'xcrun simctl list timed out after 10 seconds'),
-      );
+      final simulatorResult =
+          await Process.run(
+            'xcrun',
+            ['simctl', 'list'],
+            runInShell: true,
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => ProcessResult(
+              0,
+              1,
+              '',
+              'xcrun simctl list timed out after 10 seconds',
+            ),
+          );
       if (simulatorResult.exitCode != 0) {
         return CheckResult.warning(
           message: 'iOS Simulator not available',
@@ -278,15 +293,16 @@ class PlatformToolsCheck extends SystemCheck {
       }
 
       // Check for MSBuild with timeout
-      final msbuildResult = await Process.run(
-        'msbuild',
-        ['-version'],
-        runInShell: true,
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () =>
-            ProcessResult(0, 1, '', 'msbuild timed out after 10 seconds'),
-      );
+      final msbuildResult =
+          await Process.run(
+            'msbuild',
+            ['-version'],
+            runInShell: true,
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () =>
+                ProcessResult(0, 1, '', 'msbuild timed out after 10 seconds'),
+          );
       if (msbuildResult.exitCode != 0) {
         return CheckResult.warning(
           message: 'MSBuild not found in PATH',

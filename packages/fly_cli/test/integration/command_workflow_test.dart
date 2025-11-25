@@ -37,152 +37,227 @@ void main() {
     });
 
     group('Workflow 1: Full Project Setup', () {
-      test('create project → generate screen → generate service → build', () async {
-        // This test simulates a complete project setup workflow
-        // Performance optimized: reduced complexity while maintaining coverage
-        final projectName = TestFixtures.createTestProjectName();
-        final projectDir = Directory(path.join(tempDir.path, projectName));
+      test(
+        'create project → generate screen → generate service → build',
+        () async {
+          // This test simulates a complete project setup workflow
+          // Performance optimized: reduced complexity while maintaining coverage
+          final projectName = TestFixtures.createTestProjectName();
+          final projectDir = Directory(path.join(tempDir.path, projectName));
 
-        // Step 1: Create project
-        await CommandTestHelper.runCommand([
-          'create',
-          projectName,
-          '--template=fly_foundation',
-          '--organization=com.test',
-          '--platforms=ios,android',
-          '--output-dir=${tempDir.path}',
-        ]);
+          // Step 1: Create project
+          await CommandTestHelper.runCommand([
+            'create',
+            projectName,
+            '--template=fly_foundation',
+            '--organization=com.test',
+            '--platforms=ios,android',
+            '--output-dir=${tempDir.path}',
+          ]);
 
-        // Verify project was created
-        expect(projectDir.existsSync(), isTrue);
-        expect(File(path.join(projectDir.path, 'pubspec.yaml')).existsSync(),
-            isTrue);
-        expect(
+          // Verify project was created
+          expect(projectDir.existsSync(), isTrue);
+          expect(
+            File(path.join(projectDir.path, 'pubspec.yaml')).existsSync(),
+            isTrue,
+          );
+          expect(
             File(path.join(projectDir.path, 'lib', 'main.dart')).existsSync(),
-            isTrue);
+            isTrue,
+          );
 
-        // Step 2: Generate screen
-        await CommandTestHelper.runCommand([
-          'generate',
-          'screen',
-          'login',
-          '--feature=auth',
-          '--with-viewmodel',
-          '--with-tests',
-          '--output-dir=${projectDir.path}',
-        ]);
-
-        // Verify screen was added
-        expect(
-            File(path.join(projectDir.path, 'lib', 'features', 'auth',
-                    'presentation', 'login_screen.dart'))
-                .existsSync(),
-            isTrue);
-        expect(
-            File(path.join(projectDir.path, 'lib', 'features', 'auth',
-                    'providers', 'login_provider.dart'))
-                .existsSync(),
-            isTrue);
-        expect(
-            File(path.join(projectDir.path, 'test', 'features', 'auth',
-                    'login_screen_test.dart'))
-                .existsSync(),
-            isTrue);
-
-        // Step 3: Generate service
-        await CommandTestHelper.runCommand([
-          'generate',
-          'service',
-          'auth',
-          '--feature=auth',
-          '--type=api',
-          '--with-tests',
-          '--with-mocks',
-          '--output-dir=${projectDir.path}',
-        ]);
-
-        // Verify service was added
-        expect(
-            File(path.join(projectDir.path, 'lib', 'features', 'auth',
-                    'services', 'auth_service.dart'))
-                .existsSync(),
-            isTrue);
-        expect(
-            File(path.join(projectDir.path, 'test', 'features', 'auth',
-                    'services', 'auth_service_test.dart'))
-                .existsSync(),
-            isTrue);
-        expect(
-            File(path.join(
-                    projectDir.path, 'test', 'mocks', 'auth_service_mock.dart'))
-                .existsSync(),
-            isTrue);
-
-        // Step 4: Skip flutter analyze in CI to avoid environment-related flakiness
-
-        // Verify project structure is complete
-        expect(await CommandTestHelper.verifyProjectStructure(projectDir.path),
-            isTrue);
-      }, timeout: Timeout(Duration(minutes: 2)));
-
-      test('create fly_foundation project → generate multiple screens → generate services',
-          () async {
-        final projectName = TestFixtures.createTestProjectName();
-        final projectDir = Directory(path.join(tempDir.path, projectName));
-
-        // Create fly_foundation project
-        await CommandTestHelper.runCommand([
-          'create',
-          projectName,
-          '--template=fly_foundation',
-          '--organization=com.fly_foundation',
-          '--output-dir=${tempDir.path}',
-        ]);
-
-        expect(projectDir.existsSync(), isTrue);
-
-        // Generate multiple screens - reduce to 2 screens for performance
-        final screens = ['home', 'profile'];
-        for (final screen in screens) {
+          // Step 2: Generate screen
           await CommandTestHelper.runCommand([
             'generate',
             'screen',
-            screen,
-            '--feature=main',
+            'login',
+            '--feature=auth',
             '--with-viewmodel',
+            '--with-tests',
             '--output-dir=${projectDir.path}',
           ]);
 
+          // Verify screen was added
           expect(
-              File(path.join(projectDir.path, 'lib', 'features', 'main',
-                      'presentation', '${screen}_screen.dart'))
-                  .existsSync(),
-              isTrue);
-        }
+            File(
+              path.join(
+                projectDir.path,
+                'lib',
+                'features',
+                'auth',
+                'presentation',
+                'login_screen.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
+          expect(
+            File(
+              path.join(
+                projectDir.path,
+                'lib',
+                'features',
+                'auth',
+                'providers',
+                'login_provider.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
+          expect(
+            File(
+              path.join(
+                projectDir.path,
+                'test',
+                'features',
+                'auth',
+                'login_screen_test.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
 
-        // Generate multiple services - reduce to 2 services for performance
-        final services = ['api', 'storage'];
-        for (final service in services) {
+          // Step 3: Generate service
           await CommandTestHelper.runCommand([
             'generate',
             'service',
-            service,
-            '--feature=core',
+            'auth',
+            '--feature=auth',
             '--type=api',
+            '--with-tests',
+            '--with-mocks',
             '--output-dir=${projectDir.path}',
           ]);
 
+          // Verify service was added
           expect(
-              File(path.join(projectDir.path, 'lib', 'features', 'core',
-                      'services', '${service}_service.dart'))
-                  .existsSync(),
-              isTrue);
-        }
+            File(
+              path.join(
+                projectDir.path,
+                'lib',
+                'features',
+                'auth',
+                'services',
+                'auth_service.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
+          expect(
+            File(
+              path.join(
+                projectDir.path,
+                'test',
+                'features',
+                'auth',
+                'services',
+                'auth_service_test.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
+          expect(
+            File(
+              path.join(
+                projectDir.path,
+                'test',
+                'mocks',
+                'auth_service_mock.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
 
-        // Verify final structure
-        expect(await CommandTestHelper.verifyProjectStructure(projectDir.path),
-            isTrue);
-      }, timeout: Timeout(Duration(minutes: 3)));
+          // Step 4: Skip flutter analyze in CI to avoid environment-related flakiness
+
+          // Verify project structure is complete
+          expect(
+            await CommandTestHelper.verifyProjectStructure(projectDir.path),
+            isTrue,
+          );
+        },
+        timeout: Timeout(Duration(minutes: 2)),
+      );
+
+      test(
+        'create fly_foundation project → generate multiple screens → generate services',
+        () async {
+          final projectName = TestFixtures.createTestProjectName();
+          final projectDir = Directory(path.join(tempDir.path, projectName));
+
+          // Create fly_foundation project
+          await CommandTestHelper.runCommand([
+            'create',
+            projectName,
+            '--template=fly_foundation',
+            '--organization=com.fly_foundation',
+            '--output-dir=${tempDir.path}',
+          ]);
+
+          expect(projectDir.existsSync(), isTrue);
+
+          // Generate multiple screens - reduce to 2 screens for performance
+          final screens = ['home', 'profile'];
+          for (final screen in screens) {
+            await CommandTestHelper.runCommand([
+              'generate',
+              'screen',
+              screen,
+              '--feature=main',
+              '--with-viewmodel',
+              '--output-dir=${projectDir.path}',
+            ]);
+
+            expect(
+              File(
+                path.join(
+                  projectDir.path,
+                  'lib',
+                  'features',
+                  'main',
+                  'presentation',
+                  '${screen}_screen.dart',
+                ),
+              ).existsSync(),
+              isTrue,
+            );
+          }
+
+          // Generate multiple services - reduce to 2 services for performance
+          final services = ['api', 'storage'];
+          for (final service in services) {
+            await CommandTestHelper.runCommand([
+              'generate',
+              'service',
+              service,
+              '--feature=core',
+              '--type=api',
+              '--output-dir=${projectDir.path}',
+            ]);
+
+            expect(
+              File(
+                path.join(
+                  projectDir.path,
+                  'lib',
+                  'features',
+                  'core',
+                  'services',
+                  '${service}_service.dart',
+                ),
+              ).existsSync(),
+              isTrue,
+            );
+          }
+
+          // Verify final structure
+          expect(
+            await CommandTestHelper.verifyProjectStructure(projectDir.path),
+            isTrue,
+          );
+        },
+        timeout: Timeout(Duration(minutes: 3)),
+      );
     });
 
     group('Workflow 2: JSON Output Chain', () {
@@ -239,7 +314,7 @@ void main() {
           'create',
           projectName,
           '--template=fly_foundation',
-          '--output-dir=${tempDir.path}'
+          '--output-dir=${tempDir.path}',
         ]);
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
@@ -271,7 +346,7 @@ void main() {
           'create',
           projectName,
           '--template=fly_foundation',
-          '--output-dir=${tempDir.path}'
+          '--output-dir=${tempDir.path}',
         ]);
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
@@ -302,8 +377,10 @@ void main() {
     group('Workflow 3: Error Handling and Recovery', () {
       test('commands provide helpful errors and suggestions', () async {
         // Test invalid project name
-        final result =
-            await CommandTestHelper.runCommand(['create', 'Invalid-Name']);
+        final result = await CommandTestHelper.runCommand([
+          'create',
+          'Invalid-Name',
+        ]);
 
         expect(result.success, isFalse);
         expect(result.message, contains('Project name'));
@@ -334,7 +411,7 @@ void main() {
           'create',
           projectName,
           '--template=fly_foundation',
-          '--output-dir=${tempDir.path}'
+          '--output-dir=${tempDir.path}',
         ]);
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
@@ -425,7 +502,7 @@ void main() {
           'create',
           projectName,
           '--template=fly_foundation',
-          '--output-dir=${tempDir.path}'
+          '--output-dir=${tempDir.path}',
         ]);
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
@@ -458,10 +535,18 @@ void main() {
 
         // Verify screen was generated
         expect(
-            File(path.join(projectDir.path, 'lib', 'features', 'auth',
-                    'presentation', 'login_screen.dart'))
-                .existsSync(),
-            isTrue);
+          File(
+            path.join(
+              projectDir.path,
+              'lib',
+              'features',
+              'auth',
+              'presentation',
+              'login_screen.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
       });
     });
 
@@ -506,15 +591,19 @@ void main() {
         expect(doctorResult2, isNotNull);
 
         // Verify project structure
-        expect(await CommandTestHelper.verifyProjectStructure(projectDir.path),
-            isTrue);
+        expect(
+          await CommandTestHelper.verifyProjectStructure(projectDir.path),
+          isTrue,
+        );
       });
     });
 
     group('Workflow 6: Performance and Scalability', () {
       test('create multiple projects efficiently', () async {
         final projectNames = List.generate(
-            5, (i) => TestFixtures.createTestProjectName(prefix: 'perf_$i'));
+          5,
+          (i) => TestFixtures.createTestProjectName(prefix: 'perf_$i'),
+        );
 
         final stopwatch = Stopwatch()..start();
 
@@ -546,7 +635,7 @@ void main() {
           'create',
           projectName,
           '--template=fly_foundation',
-          '--output-dir=${tempDir.path}'
+          '--output-dir=${tempDir.path}',
         ]);
 
         final projectDir = Directory(path.join(tempDir.path, projectName));
@@ -572,10 +661,18 @@ void main() {
         // Verify all screens were added
         for (final screenName in screenNames) {
           expect(
-              File(path.join(projectDir.path, 'lib', 'features', 'main',
-                      'presentation', '${screenName}_screen.dart'))
-                  .existsSync(),
-              isTrue);
+            File(
+              path.join(
+                projectDir.path,
+                'lib',
+                'features',
+                'main',
+                'presentation',
+                '${screenName}_screen.dart',
+              ),
+            ).existsSync(),
+            isTrue,
+          );
         }
       });
     });
@@ -607,22 +704,35 @@ void main() {
 
         // Should be able to continue
         expect(
-            File(path.join(projectDir.path, 'lib', 'features', 'main',
-                    'presentation', 'home_screen.dart'))
-                .existsSync(),
-            isTrue);
+          File(
+            path.join(
+              projectDir.path,
+              'lib',
+              'features',
+              'main',
+              'presentation',
+              'home_screen.dart',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
       });
 
       test('handle partial failures gracefully', () async {
         // Try to create project with invalid name
-        final invalidResult =
-            await CommandTestHelper.runCommand(['create', 'Invalid-Name']);
+        final invalidResult = await CommandTestHelper.runCommand([
+          'create',
+          'Invalid-Name',
+        ]);
         expect(invalidResult.success, isFalse);
 
         // Try to create project with valid name
         final projectName = TestFixtures.createTestProjectName();
-        final validResult = await CommandTestHelper.runCommand(
-            ['create', projectName, '--output-dir=${tempDir.path}']);
+        final validResult = await CommandTestHelper.runCommand([
+          'create',
+          projectName,
+          '--output-dir=${tempDir.path}',
+        ]);
         expect(validResult.success, isTrue);
 
         // Should be able to recover

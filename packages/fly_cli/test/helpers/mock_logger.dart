@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/shared/logging/domain/logger.dart';
 import 'package:fly_cli/src/shared/logging/domain/log_level.dart';
+import 'package:fly_cli/src/shared/logging/domain/logger.dart';
 
 /// Mock logger for testing that captures log messages
 class MockLogger implements Logger {
@@ -39,12 +39,12 @@ class MockLogger implements Logger {
 
   /// Check if a specific message was logged
   bool hasMessage(String message, {LogLevel? level}) => _entries.any((e) {
-        final messageMatch = e.message.contains(message);
-        if (level != null) {
-          return messageMatch && e.level == level;
-        }
-        return messageMatch;
-      });
+    final messageMatch = e.message.contains(message);
+    if (level != null) {
+      return messageMatch && e.level == level;
+    }
+    return messageMatch;
+  });
 
   @override
   String get name => 'MockLogger';
@@ -56,46 +56,111 @@ class MockLogger implements Logger {
   Logger withFields(JsonMap fields) => this;
 
   @override
-  void log(LogLevel level, String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
+  void log(
+    LogLevel level,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
     _entries.add(_LogEntry(level, message, error, stackTrace));
   }
 
   // Implement all the convenience methods from Logger interface
   @override
-  void trace(String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
-    log(LogLevel.trace, message, error: error, stackTrace: stackTrace, fields: fields);
+  void trace(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
+    log(
+      LogLevel.trace,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void debug(String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
-    log(LogLevel.debug, message, error: error, stackTrace: stackTrace, fields: fields);
+  void debug(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
+    log(
+      LogLevel.debug,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void info(String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
-    log(LogLevel.info, message, error: error, stackTrace: stackTrace, fields: fields);
+  void info(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
+    log(
+      LogLevel.info,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void warn(String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
-    log(LogLevel.warn, message, error: error, stackTrace: stackTrace, fields: fields);
+  void warn(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
+    log(
+      LogLevel.warn,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void error(String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
-    log(LogLevel.error, message, error: error, stackTrace: stackTrace, fields: fields);
+  void error(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
+    log(
+      LogLevel.error,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 
   @override
-  void fatal(String message,
-      {Object? error, StackTrace? stackTrace, JsonMap? fields}) {
-    log(LogLevel.fatal, message, error: error, stackTrace: stackTrace, fields: fields);
+  void fatal(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    JsonMap? fields,
+  }) {
+    log(
+      LogLevel.fatal,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      fields: fields,
+    );
   }
 }
 

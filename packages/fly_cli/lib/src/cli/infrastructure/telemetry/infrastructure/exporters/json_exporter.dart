@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metric.dart';
+
 import 'metric_exporter.dart';
 
 /// JSON exporter that writes metrics to a file
@@ -46,4 +47,3 @@ class JsonExporter implements MetricExporter {
     _metrics.clear();
   }
 }
-

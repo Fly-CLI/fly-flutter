@@ -9,10 +9,10 @@ import 'package:fly_cli/src/features/diagnostics/application/doctor_command_desc
 import 'package:fly_cli/src/features/generate/feature/feature_command_descriptor.dart';
 import 'package:fly_cli/src/features/generate/project/project_command_descriptor.dart';
 import 'package:fly_cli/src/features/generate/service/service_command_descriptor.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_doctor_command_descriptor.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_serve_command_descriptor.dart';
 import 'package:fly_cli/src/features/schema/application/schema_command_descriptor.dart';
 import 'package:fly_cli/src/features/version/version/version_command_descriptor.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_doctor_command_descriptor.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_serve_command_descriptor.dart';
 
 /// Enum representing all available Fly CLI commands
 ///

@@ -16,6 +16,6 @@ class EchoResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'message': message,
-      };
+    'message': message,
+  };
 }

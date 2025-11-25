@@ -13,7 +13,7 @@ class PromptTemplateRegistry {
 
   /// Creates a new registry with the specified templates directory
   PromptTemplateRegistry({required String templatesDirectory})
-      : _templatesDirectory = templatesDirectory;
+    : _templatesDirectory = templatesDirectory;
 
   /// Finds the templates directory using fallback strategy
   /// Similar to TemplateManager.findTemplatesDirectory()
@@ -125,8 +125,11 @@ class PromptTemplateRegistry {
     Map<String, dynamic> variables,
   ) async {
     final template = await getTemplate(templateId);
-    return PromptTemplateEngine.render(template, variables,
-        templateName: templateId);
+    return PromptTemplateEngine.render(
+      template,
+      variables,
+      templateName: templateId,
+    );
   }
 
   /// Clears the template cache

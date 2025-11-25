@@ -15,8 +15,7 @@ class SdkVersionCache {
   SdkVersionCache({
     required this.logger,
     String? cacheDirectory,
-  }) : _cacheDirectory =
-            cacheDirectory ?? _getDefaultCacheDirectory();
+  }) : _cacheDirectory = cacheDirectory ?? _getDefaultCacheDirectory();
 
   final Logger logger;
   final String _cacheDirectory;
@@ -80,8 +79,9 @@ class SdkVersionCache {
   /// Detect Flutter version via Process.run()
   Future<Version> _detectFlutterVersion() async {
     try {
-      final result =
-          await Process.run('flutter', ['--version'], runInShell: true);
+      final result = await Process.run('flutter', [
+        '--version',
+      ], runInShell: true);
       if (result.exitCode == 0) {
         final output = result.stdout as String;
         final match = RegExp(r'Flutter (\d+\.\d+\.\d+)').firstMatch(output);
@@ -107,8 +107,9 @@ class SdkVersionCache {
       final result = await Process.run('dart', ['--version'], runInShell: true);
       if (result.exitCode == 0) {
         final output = result.stdout as String;
-        final match =
-            RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(output);
+        final match = RegExp(
+          r'Dart SDK version: (\d+\.\d+\.\d+)',
+        ).firstMatch(output);
         if (match != null) {
           final versionStr = match.group(1)!;
           try {
@@ -158,7 +159,7 @@ class SdkVersionCache {
       }
 
       final cacheFile = File(path.join(_cacheDirectory, _cacheFileName));
-      
+
       // Read existing cache or create new map
       Map<String, dynamic> cacheData;
       if (await cacheFile.exists()) {
@@ -249,4 +250,3 @@ class SdkVersionCache {
     };
   }
 }
-

@@ -28,16 +28,18 @@ class ProgressInfo {
   final String? stage;
 
   /// Whether progress is complete
-  bool get isComplete => percent == 100 || (current != null && total != null && current! >= total!);
+  bool get isComplete =>
+      percent == 100 ||
+      (current != null && total != null && current! >= total!);
 
   /// Convert to JSON
   Map<String, dynamic> toJson() => {
-        'message': message,
-        if (percent != null) 'percent': percent,
-        if (current != null) 'current': current,
-        if (total != null) 'total': total,
-        if (stage != null) 'stage': stage,
-      };
+    'message': message,
+    if (percent != null) 'percent': percent,
+    if (current != null) 'current': current,
+    if (total != null) 'total': total,
+    if (stage != null) 'stage': stage,
+  };
 }
 
 /// Abstract interface for displaying progress indicators
@@ -83,4 +85,3 @@ abstract class ProgressIndicator {
   /// Get current progress info
   ProgressInfo? get currentProgress;
 }
-

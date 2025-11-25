@@ -30,4 +30,3 @@ abstract class IGenerationEngine {
     required String outputDirectory,
   });
 }
-

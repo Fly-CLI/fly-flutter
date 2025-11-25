@@ -1,6 +1,7 @@
 # Fly CLI Development Workflow
 
-This guide explains the development workflow for the Fly CLI, including when to use compiled binaries vs. `dart run`, and best practices for efficient development.
+This guide explains the development workflow for the Fly CLI, including when to use compiled
+binaries vs. `dart run`, and best practices for efficient development.
 
 ---
 
@@ -18,6 +19,7 @@ dart run packages/fly_cli/bin/fly.dart generate feature home
 ```
 
 **Benefits**:
+
 - ✅ No compilation step required
 - ✅ Always uses latest code
 - ✅ Fast iteration cycle
@@ -36,6 +38,7 @@ packages/fly_cli/bin/fly --version
 ```
 
 **Benefits**:
+
 - ✅ 37x faster startup (0.6s vs 20-26s)
 - ✅ Accurate performance measurements
 - ✅ Production-like execution
@@ -49,17 +52,20 @@ packages/fly_cli/bin/fly --version
 **When**: Writing code, debugging, testing features
 
 **Command**:
+
 ```bash
 dart run packages/fly_cli/bin/fly.dart <command>
 ```
 
 **Workflow**:
+
 1. Make code changes
 2. Run command directly with `dart run`
 3. See results immediately
 4. Repeat
 
 **Example**:
+
 ```bash
 # Edit code in template_manager.dart
 vim packages/fly_cli/lib/src/core/scaffolding/template_manager.dart
@@ -77,6 +83,7 @@ dart run packages/fly_cli/bin/fly.dart generate project test
 **When**: Measuring performance, running benchmarks, CI/CD
 
 **Command**:
+
 ```bash
 # Compile first
 ./scripts/development/build-cli.sh
@@ -86,12 +93,14 @@ packages/fly_cli/bin/fly <command>
 ```
 
 **Workflow**:
+
 1. Compile binary: `./scripts/development/build-cli.sh`
 2. Run performance tests
 3. Measure results
 4. Recompile if code changes
 
 **Example**:
+
 ```bash
 # Compile
 ./scripts/development/build-cli.sh
@@ -108,16 +117,19 @@ time packages/fly_cli/bin/fly --version
 **When**: Running integration test suite
 
 **Command**:
+
 ```bash
 ./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh
 ```
 
 **Behavior**:
+
 - Script automatically detects compiled binary
 - Uses binary if available (fast)
 - Falls back to `dart run` if binary missing (convenient)
 
 **Example**:
+
 ```bash
 # Option 1: With compiled binary (recommended for CI)
 ./scripts/development/build-cli.sh
@@ -140,6 +152,7 @@ Use the build script to compile the CLI to a native binary:
 ```
 
 **Options**:
+
 ```bash
 # Basic compilation
 ./scripts/development/build-cli.sh
@@ -155,6 +168,7 @@ Use the build script to compile the CLI to a native binary:
 ```
 
 **Output**:
+
 - Binary: `packages/fly_cli/bin/fly` (Unix) or `bin/fly.exe` (Windows)
 - Size: ~15-20 MB (platform-dependent)
 - Git-ignored: Binary is excluded from version control
@@ -162,6 +176,7 @@ Use the build script to compile the CLI to a native binary:
 ### When to Recompile
 
 Recompile the binary when:
+
 - ✅ Before running performance benchmarks
 - ✅ Before running integration tests (for speed)
 - ✅ Before CI/CD pipeline execution
@@ -169,6 +184,7 @@ Recompile the binary when:
 - ✅ After significant code changes (if using binary)
 
 **Don't recompile**:
+
 - ❌ During active development (use `dart run` instead)
 - ❌ For every small code change
 - ❌ When just testing features
@@ -242,17 +258,17 @@ packages/fly_cli/bin/fly --version
 
 ### Startup Time
 
-| Method | Time | Use Case |
-|--------|------|----------|
-| `dart run` | 20-26s | Development, iteration |
-| Compiled binary | 0.6s | Performance testing, CI, production |
+| Method          | Time   | Use Case                            |
+|-----------------|--------|-------------------------------------|
+| `dart run`      | 20-26s | Development, iteration              |
+| Compiled binary | 0.6s   | Performance testing, CI, production |
 
 ### Integration Tests (14 scenarios)
 
-| Method | Time | Use Case |
-|--------|------|----------|
-| `dart run` | ~336s (5.6 min) | Development |
-| Compiled binary | ~21s | CI, performance testing |
+| Method          | Time            | Use Case                |
+|-----------------|-----------------|-------------------------|
+| `dart run`      | ~336s (5.6 min) | Development             |
+| Compiled binary | ~21s            | CI, performance testing |
 
 ---
 
@@ -317,16 +333,19 @@ packages/fly_cli/bin/fly <command>
 **Location**: `scripts/development/build-cli.sh`
 
 **Usage**:
+
 ```bash
 ./scripts/development/build-cli.sh [OPTIONS]
 ```
 
 **Options**:
+
 - `-v, --verbose`: Enable verbose output
 - `-f, --force`: Force recompilation even if binary exists
 - `-h, --help`: Show help message
 
 **Output**:
+
 - Creates `packages/fly_cli/bin/fly` (Unix) or `bin/fly.exe` (Windows)
 - Binary is executable and ready to use
 
@@ -335,11 +354,13 @@ packages/fly_cli/bin/fly <command>
 **Location**: `packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh`
 
 **Usage**:
+
 ```bash
 ./packages/fly_cli/tool/integration_scenarios/run-integration-scenarios.sh
 ```
 
 **Behavior**:
+
 - Automatically detects compiled binary
 - Uses binary if available (fast)
 - Falls back to `dart run` if binary missing

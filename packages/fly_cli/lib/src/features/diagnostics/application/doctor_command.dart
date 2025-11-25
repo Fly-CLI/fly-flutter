@@ -1,18 +1,18 @@
+import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_metadata.dart'
+    show CommandDefinition, CommandExample;
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/commands/domain/command_metadata.dart'
-    show CommandDefinition, CommandExample;
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
-import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
-import 'package:fly_cli/src/cli/infrastructure/middleware/domain/command_middleware.dart';
 import 'package:fly_cli/src/features/diagnostics/infrastructure/checks/dart_sdk_check.dart';
 import 'package:fly_cli/src/features/diagnostics/infrastructure/checks/flutter_sdk_check.dart';
 import 'package:fly_cli/src/features/diagnostics/infrastructure/checks/platform_tools_check.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
+import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
 
 /// DoctorCommand using new architecture
 class DoctorCommand extends FlyCommand {
@@ -30,33 +30,32 @@ class DoctorCommand extends FlyCommand {
 
   @override
   CommandDefinition? get metadata => CommandDefinition(
-        name: name,
-        description: description,
-        options: flags,
-        examples: [
-          const CommandExample(
-            command: 'fly doctor',
-            description: 'Check system setup and show status',
-          ),
-          const CommandExample(
-            command: 'fly doctor --fix',
-            description: 'Check system setup and attempt to fix issues',
-          ),
-        ],
-      );
+    name: name,
+    description: description,
+    options: flags,
+    examples: [
+      const CommandExample(
+        command: 'fly doctor',
+        description: 'Check system setup and show status',
+      ),
+      const CommandExample(
+        command: 'fly doctor --fix',
+        description: 'Check system setup and attempt to fix issues',
+      ),
+    ],
+  );
 
   @override
   List<CliFlag> get flags => [const DoctorFixFlag()];
 
   @override
   List<CommandValidator> get validators => [
-        EnvironmentValidator(),
-        NetworkValidator(['pub.dev', 'flutter.dev']),
-      ];
+    EnvironmentValidator(),
+    NetworkValidator(['pub.dev', 'flutter.dev']),
+  ];
 
   @override
-  List<CommandMiddleware> get middleware => [
-      ];
+  List<CommandMiddleware> get middleware => [];
 
   @override
   Future<CommandResult> execute() async {
@@ -152,7 +151,9 @@ class DoctorCommand extends FlyCommand {
 
   @override
   Future<void> onAfterExecute(
-      CommandContext context, CommandResult result) async {
+    CommandContext context,
+    CommandResult result,
+  ) async {
     if (result.success) {
       logger.info('🎉 All system checks passed!');
     } else {
@@ -162,7 +163,10 @@ class DoctorCommand extends FlyCommand {
 
   @override
   Future<void> onError(
-      CommandContext context, Object error, StackTrace stackTrace) async {
+    CommandContext context,
+    Object error,
+    StackTrace stackTrace,
+  ) async {
     logger.err('💥 System check failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');

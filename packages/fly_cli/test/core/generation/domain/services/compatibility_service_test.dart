@@ -1,5 +1,6 @@
 import 'package:fly_cli/src/generation/domain/services/compatibility_service.dart';
-import 'package:fly_cli/src/generation/domain/value_objects/version_range.dart' as vo;
+import 'package:fly_cli/src/generation/domain/value_objects/version_range.dart'
+    as vo;
 import 'package:pub_semver/pub_semver.dart' hide VersionRange;
 import 'package:test/test.dart';
 
@@ -149,5 +150,3 @@ void main() {
     });
   });
 }
-
-

@@ -82,15 +82,25 @@ void main() {
         };
         final definitions = [
           PromptArgument(
-              name: 'name', description: 'Name (string)', required: false),
+            name: 'name',
+            description: 'Name (string)',
+            required: false,
+          ),
           PromptArgument(
-              name: 'count', description: 'Count (number)', required: false),
+            name: 'count',
+            description: 'Count (number)',
+            required: false,
+          ),
           PromptArgument(
-              name: 'enabled',
-              description: 'Enabled (boolean)',
-              required: false),
+            name: 'enabled',
+            description: 'Enabled (boolean)',
+            required: false,
+          ),
           PromptArgument(
-              name: 'items', description: 'Items (array)', required: false),
+            name: 'items',
+            description: 'Items (array)',
+            required: false,
+          ),
         ];
 
         expect(
@@ -107,7 +117,10 @@ void main() {
         final variables = {'count': 'not a number'};
         final definitions = [
           PromptArgument(
-              name: 'count', description: 'Count (number)', required: false),
+            name: 'count',
+            description: 'Count (number)',
+            required: false,
+          ),
         ];
 
         expect(
@@ -124,7 +137,10 @@ void main() {
         final variables = {'items': 'not an array'};
         final definitions = [
           PromptArgument(
-              name: 'items', description: 'Items (array)', required: false),
+            name: 'items',
+            description: 'Items (array)',
+            required: false,
+          ),
         ];
 
         expect(
@@ -204,22 +220,28 @@ void main() {
 
     group('validateArgumentsFormat', () {
       test('should return empty map when arguments is null', () {
-        final result =
-            PromptValidator.validateArgumentsFormat(null, 'test.prompt');
+        final result = PromptValidator.validateArgumentsFormat(
+          null,
+          'test.prompt',
+        );
         expect(result, isEmpty);
       });
 
       test('should return map when arguments is valid map', () {
         final arguments = {'name': 'test', 'count': 5};
-        final result =
-            PromptValidator.validateArgumentsFormat(arguments, 'test.prompt');
+        final result = PromptValidator.validateArgumentsFormat(
+          arguments,
+          'test.prompt',
+        );
         expect(result, equals(arguments));
       });
 
       test('should throw when arguments is not a map', () {
         expect(
           () => PromptValidator.validateArgumentsFormat(
-              'not a map', 'test.prompt'),
+            'not a map',
+            'test.prompt',
+          ),
           throwsA(isA<PromptError>()),
         );
       });

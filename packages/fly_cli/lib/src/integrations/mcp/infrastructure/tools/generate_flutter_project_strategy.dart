@@ -1,17 +1,17 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/cli/infrastructure/validation/validation_rules.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
-import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_project_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_project_result.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
 /// Strategy for fly.generate.project tool
-class GenerateFlutterProjectStrategy extends McpToolStrategy<
-    GenerateProjectParams, GenerateProjectResult> {
+class GenerateFlutterProjectStrategy
+    extends McpToolStrategy<GenerateProjectParams, GenerateProjectResult> {
   @override
   String get name => 'fly.generate.project';
 
@@ -23,71 +23,68 @@ class GenerateFlutterProjectStrategy extends McpToolStrategy<
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
+    description:
+        'Parameters for generating a Flutter project. Project names must be valid Dart package names.',
+    properties: {
+      'projectName': Schema.string(
         description:
-            'Parameters for generating a Flutter project. Project names must be valid Dart package names.',
-        properties: {
-          'projectName': Schema.string(
-            description:
-                'The name of the project to create. Must be a valid Dart package name: '
-                'lowercase, start with a letter, and contain only letters, numbers, and underscores. '
-                'Examples: "my_app", "flutter_project", "user_dashboard".',
-          ),
-          'template': Schema.string(
-            description:
-                'The template to use for project generation. Defaults to "fly_foundation".',
-          ),
-          'organization': Schema.string(
-            description:
-                'Organization identifier (e.g., "com.example"). Defaults to "com.example".',
-          ),
-          'description': Schema.string(
-            description: 'Project description. Optional.',
-          ),
-          'platforms': Schema.list(
-            items: Schema.string(),
-            description:
-                'Target platforms for the project. Valid values: ios, android, web, macos, windows, linux. '
-                'Defaults to ["ios", "android"].',
-          ),
-          'features': Schema.list(
-            items: Schema.string(),
-            description:
-                'Initial features to generate in the project. Optional list of feature names.',
-          ),
-          'outputDir': Schema.string(
-            description:
-                'Output directory where the project will be created. '
-                'If not specified, uses the current working directory. '
-                'The project will be created in a subdirectory named after the project name.',
-          ),
-        },
-        required: ['projectName'],
-        additionalProperties: false,
-      );
+            'The name of the project to create. Must be a valid Dart package name: '
+            'lowercase, start with a letter, and contain only letters, numbers, and underscores. '
+            'Examples: "my_app", "flutter_project", "user_dashboard".',
+      ),
+      'template': Schema.string(
+        description:
+            'The template to use for project generation. Defaults to "fly_foundation".',
+      ),
+      'organization': Schema.string(
+        description:
+            'Organization identifier (e.g., "com.example"). Defaults to "com.example".',
+      ),
+      'description': Schema.string(
+        description: 'Project description. Optional.',
+      ),
+      'platforms': Schema.list(
+        items: Schema.string(),
+        description:
+            'Target platforms for the project. Valid values: ios, android, web, macos, windows, linux. '
+            'Defaults to ["ios", "android"].',
+      ),
+      'features': Schema.list(
+        items: Schema.string(),
+        description:
+            'Initial features to generate in the project. Optional list of feature names.',
+      ),
+      'outputDir': Schema.string(
+        description:
+            'Output directory where the project will be created. '
+            'If not specified, uses the current working directory. '
+            'The project will be created in a subdirectory named after the project name.',
+      ),
+    },
+    required: ['projectName'],
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        description:
-            'Result from generating a project. Contains success status, generated files count, and project path.',
-        properties: {
-          'success': Schema.bool(
-            description: 'Whether the project was generated successfully',
-          ),
-          'message': Schema.string(
-            description:
-                'Human-readable message describing the operation result',
-          ),
-          'filesGenerated': Schema.int(
-            description:
-                'Number of files generated for the project',
-          ),
-          'projectPath': Schema.string(
-            description:
-                'Path to the generated project directory',
-          ),
-        },
-        required: ['success', 'message'],
-      );
+    description:
+        'Result from generating a project. Contains success status, generated files count, and project path.',
+    properties: {
+      'success': Schema.bool(
+        description: 'Whether the project was generated successfully',
+      ),
+      'message': Schema.string(
+        description: 'Human-readable message describing the operation result',
+      ),
+      'filesGenerated': Schema.int(
+        description: 'Number of files generated for the project',
+      ),
+      'projectPath': Schema.string(
+        description: 'Path to the generated project directory',
+      ),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => false;
@@ -111,7 +108,7 @@ class GenerateFlutterProjectStrategy extends McpToolStrategy<
 
   @override
   TypedToolHandler<GenerateProjectParams, GenerateProjectResult>
-      createTypedHandler(
+  createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -253,5 +250,3 @@ class GenerateFlutterProjectStrategy extends McpToolStrategy<
     };
   }
 }
-
-

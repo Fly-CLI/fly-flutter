@@ -10,8 +10,7 @@ class ServiceModeDeriver implements VariableDeriver {
   String get id => 'service_mode';
 
   @override
-  bool supports(GenerationContext ctx) =>
-      ctx.mode == GenerationMode.service;
+  bool supports(GenerationContext ctx) => ctx.mode == GenerationMode.service;
 
   @override
   VariableBag derive(
@@ -19,36 +18,42 @@ class ServiceModeDeriver implements VariableDeriver {
     VariableBag current,
     ComposerLogger logger,
   ) {
-    final serviceTypeStr = ctx.rawVars[MasonVarKey.serviceType.key] as String? ??
+    final serviceTypeStr =
+        ctx.rawVars[MasonVarKey.serviceType.key] as String? ??
         ctx.rawVars['service_type'] as String?;
     final serviceType = serviceTypeStr != null
         ? ServiceType.fromKey(serviceTypeStr)
         : ServiceType.api;
 
-    final withRetry = ctx.rawVars[MasonVarKey.withRetryLogic.key] as bool? ??
+    final withRetry =
+        ctx.rawVars[MasonVarKey.withRetryLogic.key] as bool? ??
         ctx.rawVars['with_retry_logic'] as bool? ??
         false;
 
-    final withCaching = ctx.rawVars[MasonVarKey.withCaching.key] as bool? ??
+    final withCaching =
+        ctx.rawVars[MasonVarKey.withCaching.key] as bool? ??
         ctx.rawVars['with_caching'] as bool? ??
         false;
 
     final withInterceptors =
         ctx.rawVars[MasonVarKey.withInterceptors.key] as bool? ??
-            ctx.rawVars['with_interceptors'] as bool? ??
-            false;
+        ctx.rawVars['with_interceptors'] as bool? ??
+        false;
 
-    final withMocks = ctx.rawVars[MasonVarKey.withMocks.key] as bool? ??
+    final withMocks =
+        ctx.rawVars[MasonVarKey.withMocks.key] as bool? ??
         ctx.rawVars['with_mocks'] as bool? ??
         false;
 
-    final name = ctx.rawVars[MasonVarKey.name.key] as String? ??
+    final name =
+        ctx.rawVars[MasonVarKey.name.key] as String? ??
         ctx.rawVars['name'] as String? ??
         'unnamed';
     final snakeName = NamingUtils.toSnakeCase(name);
 
     // Get feature from input vars or current bag, defaulting to 'core' if not provided
-    final feature = ctx.rawVars[MasonVarKey.feature.key] as String? ??
+    final feature =
+        ctx.rawVars[MasonVarKey.feature.key] as String? ??
         ctx.rawVars['feature'] as String? ??
         current.get<String>(MasonVarKey.feature.key) ??
         'core';
@@ -75,8 +80,8 @@ class ServiceModeDeriver implements VariableDeriver {
       MasonVarKey.isAnalyticsService.key: isAnalyticsService,
       MasonVarKey.isStorageService.key: isStorageService,
       MasonVarKey.supportsRetry.key: withRetry && isApiService,
-      MasonVarKey.supportsCaching.key: withCaching &&
-          (isApiService || isLocalService || isCacheService),
+      MasonVarKey.supportsCaching.key:
+          withCaching && (isApiService || isLocalService || isCacheService),
       MasonVarKey.supportsInterceptors.key: withInterceptors && isApiService,
       MasonVarKey.generateMocks.key: withMocks,
       MasonVarKey.feature.key: feature,
@@ -84,4 +89,3 @@ class ServiceModeDeriver implements VariableDeriver {
     });
   }
 }
-

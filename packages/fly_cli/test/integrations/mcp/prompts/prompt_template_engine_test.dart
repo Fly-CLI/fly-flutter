@@ -129,7 +129,7 @@ void main() {
         test('should iterate over lists', () {
           final template = '{{#items}}{{.}}, {{/items}}';
           final variables = {
-            'items': ['a', 'b', 'c']
+            'items': ['a', 'b', 'c'],
           };
 
           final result = PromptTemplateEngine.render(template, variables);

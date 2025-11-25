@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/features/context/domain/analyzer_interface.dart';
+import 'package:fly_cli/src/features/context/domain/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/analyzers/directory_analyzer.dart';
 import 'package:fly_cli/src/features/context/infrastructure/architecture_detector.dart';
-import 'package:fly_cli/src/features/context/domain/models.dart';
 import 'package:fly_cli/src/features/context/infrastructure/utils.dart';
 import 'package:fly_core/src/retry/retry.dart';
 import 'package:path/path.dart' as path;
@@ -221,8 +221,10 @@ class UnifiedProjectAnalyzer extends ProjectAnalyzer<ProjectInfo> {
   /// Check if project uses Fly packages via pubspec content
   bool _pubspecContainsFlyPackages(String pubspecContent) {
     // Look for common Fly packages in dependencies section
-    final flyDepPattern =
-        RegExp(r'(^|\n)\s*fly_(core|state|networking)\s*:', multiLine: true);
+    final flyDepPattern = RegExp(
+      r'(^|\n)\s*fly_(core|state|networking)\s*:',
+      multiLine: true,
+    );
     return flyDepPattern.hasMatch(pubspecContent);
   }
 

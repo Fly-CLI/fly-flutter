@@ -13,8 +13,8 @@ class PromptError extends StateError {
     this.hints = const [],
     this.remediation,
     Map<String, Object?>? context,
-  })  : _context = context ?? <String, Object?>{},
-        super(message);
+  }) : _context = context ?? <String, Object?>{},
+       super(message);
 
   /// Error code identifying the specific error type
   final String code;
@@ -95,7 +95,8 @@ class PromptError extends StateError {
       promptId: promptId,
       variableName: variableName,
       hints: hintsList,
-      remediation: 'Ensure variable "$variableName" has type $expectedType. '
+      remediation:
+          'Ensure variable "$variableName" has type $expectedType. '
           'Convert or validate the value before passing it to the prompt.',
       context: {
         'variable_name': variableName,
@@ -126,7 +127,8 @@ class PromptError extends StateError {
     final remediationAllowed = allowedValues != null && allowedValues.isNotEmpty
         ? 'Allowed values: ${allowedValues.join(", ")}. '
         : '';
-    final remediation = remediationBase +
+    final remediation =
+        remediationBase +
         remediationAllowed +
         'Check the variable constraints and requirements.';
 
@@ -169,7 +171,8 @@ class PromptError extends StateError {
       category: 'template',
       severity: 'error',
       hints: hintsList,
-      remediation: 'Fix the template syntax errors in "$templateName". '
+      remediation:
+          'Fix the template syntax errors in "$templateName". '
           'Ensure all Mustache tags are properly formatted and closed. '
           'Check for unmatched {{#section}} and {{/section}} tags.',
       context: {
@@ -205,7 +208,8 @@ class PromptError extends StateError {
       category: 'template',
       severity: 'error',
       hints: hintsList,
-      remediation: 'Ensure all required template variables are provided. '
+      remediation:
+          'Ensure all required template variables are provided. '
           '${missingVariable != null ? 'Provide the missing variable: $missingVariable. ' : ''}'
           'Check template variable names and values.',
       context: {
@@ -239,7 +243,8 @@ class PromptError extends StateError {
       severity: 'error',
       promptId: promptId,
       hints: hintsList,
-      remediation: 'Verify the prompt ID is correct. '
+      remediation:
+          'Verify the prompt ID is correct. '
           'Use prompts/list to see all available prompts.',
       context: {
         'prompt_id': promptId,

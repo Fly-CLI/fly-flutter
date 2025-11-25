@@ -1,20 +1,19 @@
 import 'package:args/args.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
-import 'package:fly_cli/src/shared/di/service_container.dart';
-import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
 import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
 import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
 import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
+import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
+import 'package:fly_cli/src/shared/di/service_container.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'command_test_helper.dart';
 import 'mock_classes.dart';
-import 'mock_logger.dart';
 
 /// Test harness for command testing
 class CommandTestHarness {
@@ -28,10 +27,12 @@ class CommandTestHarness {
       ..registerSingleton<TemplateManager>(MockTemplateManager())
       ..registerSingleton<SystemChecker>(MockSystemChecker())
       ..registerSingleton<InteractivePrompt>(MockInteractivePrompt())
-      ..registerSingleton<PathResolver>(PathResolver(
-        logger: container.get<Logger>(),
-        isDevelopment: true,
-      ));
+      ..registerSingleton<PathResolver>(
+        PathResolver(
+          logger: container.get<Logger>(),
+          isDevelopment: true,
+        ),
+      );
   }
 
   /// Create a mock command context

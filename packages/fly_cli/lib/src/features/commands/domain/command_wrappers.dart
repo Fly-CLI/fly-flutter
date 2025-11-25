@@ -10,8 +10,8 @@ class GroupCommand extends Command<int> {
   /// [groupName] - The name of the command group
   /// [description] - Optional description for the group (defaults to generic description)
   GroupCommand(this.groupName, {String? description})
-      : _description = description ?? 'Group of related commands',
-        super();
+    : _description = description ?? 'Group of related commands',
+      super();
 
   /// The name of the command group
   final String groupName;
@@ -46,8 +46,8 @@ class AliasCommand extends Command<int> {
   /// [aliasName] - The alias name for the command
   /// [targetCommand] - The command instance to delegate to
   AliasCommand(String aliasName, this._targetCommand)
-      : _aliasName = aliasName,
-        super();
+    : _aliasName = aliasName,
+      super();
 
   /// The command instance to delegate execution to
   final Command<int> _targetCommand;

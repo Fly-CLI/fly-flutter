@@ -46,4 +46,3 @@ abstract class ITemplateValidator {
   /// Returns a [CompatibilityResult] with compatibility status.
   Future<CompatibilityResult> checkCompatibility(TemplateInfo template);
 }
-

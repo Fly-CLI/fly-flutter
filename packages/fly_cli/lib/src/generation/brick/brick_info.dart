@@ -30,8 +30,7 @@ class BrickInfo {
   });
 
   /// Create BrickInfo from brick.yaml content
-  factory BrickInfo.fromYaml(
-      Map<dynamic, dynamic> yaml, String brickPath) {
+  factory BrickInfo.fromYaml(Map<dynamic, dynamic> yaml, String brickPath) {
     // Helper to treat empty strings as null
     String? nonEmptyString(dynamic value) {
       final str = value as String?;

@@ -16,6 +16,6 @@ class EchoParams extends ToolParameter {
 
   @override
   Map<String, Object?> toJson() => {
-        'message': message,
-      };
+    'message': message,
+  };
 }

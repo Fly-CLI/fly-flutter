@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/domain/command_metadata.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/schema/domain/export_format.dart';
 
 import 'schema_exporter.dart';
@@ -34,7 +34,7 @@ class OpenApiExporter extends SchemaExporter {
         {
           'url': 'cli://fly',
           'description': 'Fly CLI Commands',
-        }
+        },
       ],
       'paths': <String, dynamic>{},
       'components': {
@@ -81,51 +81,54 @@ class OpenApiExporter extends SchemaExporter {
 
   /// Build OpenAPI path for a command
   Map<String, dynamic> _buildCommandPath(
-          CommandDefinition command, ExportConfig config) =>
-      {
-        'post': {
-          'summary': command.description,
-          'description': command.description,
-          'operationId': command.name,
-          'parameters': _buildParameters(command, config),
-          'requestBody': _buildRequestBody(command),
-          'responses': {
-            '200': {
-              'description': 'Command executed successfully',
-              'content': {
-                'application/json': {
-                  'schema': {
-                    'type': 'object',
-                    'properties': {
-                      'success': {'type': 'boolean'},
-                      'message': {'type': 'string'},
-                      'data': {'type': 'object'},
-                    },
-                  },
-                },
-              },
-            },
-            '400': {
-              'description': 'Invalid command arguments',
-              'content': {
-                'application/json': {
-                  'schema': {
-                    'type': 'object',
-                    'properties': {
-                      'error': {'type': 'string'},
-                      'details': {'type': 'string'},
-                    },
-                  },
+    CommandDefinition command,
+    ExportConfig config,
+  ) => {
+    'post': {
+      'summary': command.description,
+      'description': command.description,
+      'operationId': command.name,
+      'parameters': _buildParameters(command, config),
+      'requestBody': _buildRequestBody(command),
+      'responses': {
+        '200': {
+          'description': 'Command executed successfully',
+          'content': {
+            'application/json': {
+              'schema': {
+                'type': 'object',
+                'properties': {
+                  'success': {'type': 'boolean'},
+                  'message': {'type': 'string'},
+                  'data': {'type': 'object'},
                 },
               },
             },
           },
         },
-      };
+        '400': {
+          'description': 'Invalid command arguments',
+          'content': {
+            'application/json': {
+              'schema': {
+                'type': 'object',
+                'properties': {
+                  'error': {'type': 'string'},
+                  'details': {'type': 'string'},
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
 
   /// Build parameters for a command
   List<Map<String, dynamic>> _buildParameters(
-      CommandDefinition command, ExportConfig config) {
+    CommandDefinition command,
+    ExportConfig config,
+  ) {
     final parameters = <Map<String, dynamic>>[];
 
     // Add command-specific options

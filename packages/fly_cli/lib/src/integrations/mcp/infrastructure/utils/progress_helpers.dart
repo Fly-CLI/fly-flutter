@@ -95,7 +95,7 @@ enum TemplateProgressStage {
   final String message;
 
   ProgressStage toProgressStage() => ProgressStage(
-        percent: percent,
-        message: message,
-      );
+    percent: percent,
+    message: message,
+  );
 }

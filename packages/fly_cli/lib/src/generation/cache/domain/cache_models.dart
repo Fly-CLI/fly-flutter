@@ -44,14 +44,14 @@ class CachedTemplate {
 
   /// Create a new CachedTemplate with updated expiration
   CachedTemplate withNewExpiration(int daysFromNow) => CachedTemplate(
-        name: name,
-        version: version,
-        cachedAt: cachedAt,
-        expiresAt: DateTime.now().add(Duration(days: daysFromNow)),
-        checksum: checksum,
-        templateData: templateData,
-        cacheVersion: cacheVersion,
-      );
+    name: name,
+    version: version,
+    cachedAt: cachedAt,
+    expiresAt: DateTime.now().add(Duration(days: daysFromNow)),
+    checksum: checksum,
+    templateData: templateData,
+    cacheVersion: cacheVersion,
+  );
 }
 
 /// Metadata about the cache system
@@ -100,16 +100,14 @@ class CacheMetadata {
     DateTime? lastCleanup,
     int? defaultExpirationDays,
     int? maxSizeBytes,
-  }) =>
-      CacheMetadata(
-        cacheVersion: cacheVersion ?? this.cacheVersion,
-        totalEntries: totalEntries ?? this.totalEntries,
-        totalSizeBytes: totalSizeBytes ?? this.totalSizeBytes,
-        lastCleanup: lastCleanup ?? this.lastCleanup,
-        defaultExpirationDays:
-            defaultExpirationDays ?? this.defaultExpirationDays,
-        maxSizeBytes: maxSizeBytes ?? this.maxSizeBytes,
-      );
+  }) => CacheMetadata(
+    cacheVersion: cacheVersion ?? this.cacheVersion,
+    totalEntries: totalEntries ?? this.totalEntries,
+    totalSizeBytes: totalSizeBytes ?? this.totalSizeBytes,
+    lastCleanup: lastCleanup ?? this.lastCleanup,
+    defaultExpirationDays: defaultExpirationDays ?? this.defaultExpirationDays,
+    maxSizeBytes: maxSizeBytes ?? this.maxSizeBytes,
+  );
 }
 
 /// Individual cache entry with expiration tracking
@@ -133,11 +131,11 @@ class CacheEntry {
 
   /// Update access tracking
   CacheEntry markAccessed() => CacheEntry(
-        key: key,
-        template: template,
-        lastAccessed: DateTime.now(),
-        accessCount: accessCount + 1,
-      );
+    key: key,
+    template: template,
+    lastAccessed: DateTime.now(),
+    accessCount: accessCount + 1,
+  );
 
   /// Check if entry is stale (not accessed recently)
   bool get isStale => DateTime.now().difference(lastAccessed).inDays > 30;

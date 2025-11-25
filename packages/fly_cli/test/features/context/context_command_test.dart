@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/context/application/context_command.dart';
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../../helpers/command_test_helper.dart';
 import '../../helpers/mock_logger.dart';
 import '../../helpers/test_fixtures.dart';
-import 'package:mason/mason.dart';
 
 void main() {
   group('ContextCommand', () {
@@ -83,8 +83,10 @@ class MyHomePage extends StatelessWidget {
       });
 
       test('should have correct description', () {
-        expect(command.description,
-            equals('Export project context for AI integration'));
+        expect(
+          command.description,
+          equals('Export project context for AI integration'),
+        );
       });
 
       test('should have required arguments', () {
@@ -102,10 +104,14 @@ class MyHomePage extends StatelessWidget {
 
         expect(parser.options['include-code']!.defaultsTo, equals(false));
         expect(
-            parser.options['include-dependencies']!.defaultsTo, equals(false));
+          parser.options['include-dependencies']!.defaultsTo,
+          equals(false),
+        );
         expect(parser.options['include-code']!.negatable, equals(false));
         expect(
-            parser.options['include-dependencies']!.negatable, equals(false));
+          parser.options['include-dependencies']!.negatable,
+          equals(false),
+        );
       });
     });
 
@@ -167,7 +173,10 @@ class MyHomePage extends StatelessWidget {
 
         // Should not throw for valid arguments
         expect(() => parser.parse([]), returnsNormally);
-        expect(() => parser.parse(['--output-file=test.json']), returnsNormally);
+        expect(
+          () => parser.parse(['--output-file=test.json']),
+          returnsNormally,
+        );
         expect(() => parser.parse(['--include-code']), returnsNormally);
         expect(() => parser.parse(['--include-dependencies']), returnsNormally);
       });
@@ -214,8 +223,10 @@ class MyHomePage extends StatelessWidget {
         expect(depsResult['include-dependencies'], equals(true));
 
         // Full export
-        final fullResult =
-            parser.parse(['--include-code', '--include-dependencies']);
+        final fullResult = parser.parse([
+          '--include-code',
+          '--include-dependencies',
+        ]);
         expect(fullResult['include-code'], equals(true));
         expect(fullResult['include-dependencies'], equals(true));
       });

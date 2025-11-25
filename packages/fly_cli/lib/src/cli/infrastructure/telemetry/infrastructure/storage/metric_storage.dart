@@ -1,5 +1,4 @@
 import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metric.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metric_type.dart';
 
 /// Storage strategy for metrics
 abstract class MetricStorage {
@@ -135,4 +134,3 @@ class InMemoryMetricStorage implements MetricStorage {
     return action();
   }
 }
-

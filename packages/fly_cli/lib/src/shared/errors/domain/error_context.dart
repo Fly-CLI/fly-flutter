@@ -154,7 +154,8 @@ class ErrorContext {
       'validation_errors': validationErrors,
       'hint':
           hint ?? 'Check tool schema with tools/list for correct parameters',
-      'remediation': remediation ??
+      'remediation':
+          remediation ??
           [
             'Call tools/list to see available tools',
             'Read tool schema to understand parameters',
@@ -179,7 +180,8 @@ class ErrorContext {
       'resource_type': resourceType,
       'error': error,
       'hint': hint ?? 'Verify resource URI is correct',
-      'remediation': remediation ??
+      'remediation':
+          remediation ??
           [
             'Use resources/list to discover available resources',
             'Verify resource URI prefix (workspace://, logs://, etc.)',

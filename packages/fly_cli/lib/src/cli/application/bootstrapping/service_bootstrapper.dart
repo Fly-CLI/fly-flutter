@@ -58,11 +58,11 @@ class ServiceBootstrapper {
   /// [loggerFactory] - Optional logger factory (uses default if not provided)
   /// [metricsFactory] - Optional metrics factory (uses default if not provided)
   ServiceBootstrapper(
-      this.config, {
-        ILoggerFactory? loggerFactory,
-        IMetricsCollectorFactory? metricsFactory,
-      })  : _loggerFactory = loggerFactory ?? _DefaultLoggerFactory(),
-        _metricsFactory = metricsFactory ?? _DefaultMetricsCollectorFactory();
+    this.config, {
+    ILoggerFactory? loggerFactory,
+    IMetricsCollectorFactory? metricsFactory,
+  }) : _loggerFactory = loggerFactory ?? _DefaultLoggerFactory(),
+       _metricsFactory = metricsFactory ?? _DefaultMetricsCollectorFactory();
 
   final ServiceBootstrapperConfig config;
   final ILoggerFactory _loggerFactory;
@@ -106,8 +106,9 @@ class ServiceBootstrapper {
 
     // Initialize metrics collector if enabled
     if (config.enableMetrics) {
-      final metricsConfig =
-      MetricsConfig.fromEnvironment(isProd: !config.isDevelopment);
+      final metricsConfig = MetricsConfig.fromEnvironment(
+        isProd: !config.isDevelopment,
+      );
       _metrics = _metricsFactory.create(metricsConfig);
     } else {
       // Create a no-op metrics collector
@@ -119,21 +120,28 @@ class ServiceBootstrapper {
       ..registerSingleton<Logger>(structuredLogger)
       ..registerSingleton<flylog.Logger>(_appLogger)
       ..registerSingleton<MetricsCollector>(_metrics)
-      ..registerSingleton<PathResolver>(PathResolver(
-        logger: structuredLogger,
-        isDevelopment: config.isDevelopment,
-      ))
-    // Register TemplateManager as factory (lazy initialization)
-    // This avoids expensive initialization for simple commands like --version
-      ..registerFactory<TemplateManager>(() => TemplateManager(
-        templatesDirectory: config.templatesDirectory ??
-            TemplateManager.findTemplatesDirectory(),
-        logger: structuredLogger,
-      ))
+      ..registerSingleton<PathResolver>(
+        PathResolver(
+          logger: structuredLogger,
+          isDevelopment: config.isDevelopment,
+        ),
+      )
+      // Register TemplateManager as factory (lazy initialization)
+      // This avoids expensive initialization for simple commands like --version
+      ..registerFactory<TemplateManager>(
+        () => TemplateManager(
+          templatesDirectory:
+              config.templatesDirectory ??
+              TemplateManager.findTemplatesDirectory(),
+          logger: structuredLogger,
+        ),
+      )
       ..registerSingleton<SystemChecker>(
-          SystemChecker(logger: structuredLogger))
+        SystemChecker(logger: structuredLogger),
+      )
       ..registerSingleton<InteractivePrompt>(
-          InteractivePrompt(structuredLogger));
+        InteractivePrompt(structuredLogger),
+      );
 
     // Register architecture components
     _registerArchitectureComponents(structuredLogger, config);
@@ -156,8 +164,9 @@ class ServiceBootstrapper {
     );
 
     // Update logger in service container
-    (_container as ServiceContainer)
-        .registerSingleton<flylog.Logger>(_appLogger);
+    (_container as ServiceContainer).registerSingleton<flylog.Logger>(
+      _appLogger,
+    );
   }
 
   /// Register all architecture components.
@@ -165,9 +174,9 @@ class ServiceBootstrapper {
   /// This method registers repositories, services, use cases, handlers,
   /// and adapters following Clean Architecture principles.
   void _registerArchitectureComponents(
-      StructuredMasonLogger structuredLogger,
-      ServiceBootstrapperConfig config,
-      ) {
+    StructuredMasonLogger structuredLogger,
+    ServiceBootstrapperConfig config,
+  ) {
     final container = _container as ServiceContainer;
 
     // Register infrastructure adapters
@@ -175,29 +184,25 @@ class ServiceBootstrapper {
     container
       ..registerSingleton<IFileSystemAdapter>(const FileSystemAdapter())
       ..registerSingleton<IMasonAdapter>(const MasonAdapter())
-
-    // Register repositories
-    // Create BrickRegistry with logger
+      // Register repositories
+      // Create BrickRegistry with logger
       ..registerFactory<BrickRegistry>(
-            () => BrickRegistry(
+        () => BrickRegistry(
           logger: structuredLogger,
         ),
       )
-
-    // Register BrickRepository implementation
+      // Register BrickRepository implementation
       ..registerFactory<IBrickRepository>(() {
         final brickRegistry = container.get<BrickRegistry>();
         return BrickRepositoryImpl(brickRegistry: brickRegistry);
       })
-
-    // Register TemplateCache
+      // Register TemplateCache
       ..registerSingleton<ICacheManager<TemplateInfo>>(
         TemplateCacheImpl(),
       )
-
-    // Register CompatibilityChecker (lazy initialization)
-    // Note: CompatibilityChecker requires async SDK version detection,
-    // so we create it lazily when first needed
+      // Register CompatibilityChecker (lazy initialization)
+      // Note: CompatibilityChecker requires async SDK version detection,
+      // so we create it lazily when first needed
       ..registerFactory<CompatibilityChecker>(() {
         // This will be initialized lazily when first used
         // For now, use default versions - actual versions will be detected on first use
@@ -208,11 +213,11 @@ class ServiceBootstrapper {
           currentFlutterVersion: Version.parse('3.10.0'),
           // Default, will be updated
           currentDartVersion: Version.parse(
-              '3.0.0'), // Default, will be updated
+            '3.0.0',
+          ), // Default, will be updated
         );
       })
-
-    // Register TemplateValidator
+      // Register TemplateValidator
       ..registerFactory<ITemplateValidator>(() {
         final compatibilityChecker = container.get<CompatibilityChecker>();
         return TemplateValidatorImpl(
@@ -220,8 +225,7 @@ class ServiceBootstrapper {
           logger: structuredLogger,
         );
       })
-
-    // Register TemplateRepository implementation
+      // Register TemplateRepository implementation
       ..registerFactory<ITemplateRepository>(() {
         final templateManager = container.get<TemplateManager>();
         final templateCache = container.get<ICacheManager<TemplateInfo>>();
@@ -232,9 +236,7 @@ class ServiceBootstrapper {
           templateValidator: templateValidator,
         );
       })
-
-    // Register services
-
+      // Register services
       ..registerSingleton<IVariableProcessor>(
         VariableProcessingService(),
       )
@@ -244,8 +246,7 @@ class ServiceBootstrapper {
           logger: structuredLogger,
         ),
       )
-
-    // Register workflow orchestrator
+      // Register workflow orchestrator
       ..registerFactory<IWorkflowOrchestrator>(() {
         final templateManager = container.get<TemplateManager>();
         return WorkflowOrchestratorImpl(
@@ -253,9 +254,7 @@ class ServiceBootstrapper {
           logger: structuredLogger,
         );
       })
-
-    // Register use cases
-
+      // Register use cases
       ..registerSingleton<GenerateFeatureUseCase>(
         GenerateFeatureUseCase(
           brickRepository: container.get<IBrickRepository>(),
@@ -275,8 +274,7 @@ class ServiceBootstrapper {
           workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
         ),
       )
-
-    // Register command handler
+      // Register command handler
       ..registerSingleton<GenerationCommandHandler>(
         GenerationCommandHandler(
           generateFeatureUseCase: container.get<GenerateFeatureUseCase>(),
@@ -284,8 +282,7 @@ class ServiceBootstrapper {
           generateProjectUseCase: container.get<GenerateProjectUseCase>(),
         ),
       )
-
-    // Register MCP adapter
+      // Register MCP adapter
       ..registerSingleton<GenerationMcpAdapter>(
         GenerationMcpAdapter(
           generateFeatureUseCase: container.get<GenerateFeatureUseCase>(),
@@ -324,41 +321,41 @@ class _DefaultMetricsCollectorFactory implements IMetricsCollectorFactory {
 class _NoOpMetricsCollector implements MetricsCollector {
   @override
   void recordDuration(
-      String operation,
-      int milliseconds, {
-        Map<String, String>? tags,
-      }) {}
+    String operation,
+    int milliseconds, {
+    Map<String, String>? tags,
+  }) {}
 
   @override
   void recordError(
-      String operation,
-      String error, {
-        Map<String, String>? tags,
-      }) {}
+    String operation,
+    String error, {
+    Map<String, String>? tags,
+  }) {}
 
   @override
   void incrementCounter(
-      String name, {
-        int amount = 1,
-        Map<String, String>? tags,
-      }) {}
+    String name, {
+    int amount = 1,
+    Map<String, String>? tags,
+  }) {}
 
   @override
   void recordGauge(
-      String name,
-      num value, {
-        String? unit,
-        Map<String, String>? tags,
-      }) {}
+    String name,
+    num value, {
+    String? unit,
+    Map<String, String>? tags,
+  }) {}
 
   @override
   void startTimer(String name) {}
 
   @override
   void stopTimer(
-      String name, {
-        Map<String, String>? tags,
-      }) {}
+    String name, {
+    Map<String, String>? tags,
+  }) {}
 
   @override
   MetricSnapshot? getMetric(String name) => null;

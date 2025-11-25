@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fly_cli/src/generation/cache/infrastructure/sdk_version_cache.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/shared/utils/version_utils.dart';
+import 'package:fly_cli/src/generation/cache/infrastructure/sdk_version_cache.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/version_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/version_result.dart';
+import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 import 'package:pub_semver/pub_semver.dart';
 
@@ -21,24 +21,24 @@ class VersionInfoStrategy
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {
-          'checkUpdates': Schema.bool(),
-        },
-        additionalProperties: false,
-      );
+    properties: {
+      'checkUpdates': Schema.bool(),
+    },
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'success': Schema.bool(),
-          'message': Schema.string(),
-          'version': Schema.string(),
-          'sdkVersion': Schema.string(),
-          'latestVersion': Schema.string(),
-          'updateAvailable': Schema.bool(),
-        },
-        required: ['success', 'message'],
-      );
+    properties: {
+      'success': Schema.bool(),
+      'message': Schema.string(),
+      'version': Schema.string(),
+      'sdkVersion': Schema.string(),
+      'latestVersion': Schema.string(),
+      'updateAvailable': Schema.bool(),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => true;
@@ -83,10 +83,14 @@ class VersionInfoStrategy
         context.logger.warn('Failed to get Dart SDK version: $e');
         // Try fallback method
         try {
-          final result = await Process.run('dart', ['--version'], runInShell: true);
+          final result = await Process.run('dart', [
+            '--version',
+          ], runInShell: true);
           if (result.exitCode == 0) {
             final output = result.stdout as String;
-            final match = RegExp(r'Dart SDK version: (\d+\.\d+\.\d+)').firstMatch(output);
+            final match = RegExp(
+              r'Dart SDK version: (\d+\.\d+\.\d+)',
+            ).firstMatch(output);
             if (match != null) {
               sdkVersion = match.group(1)!;
             }
@@ -101,7 +105,9 @@ class VersionInfoStrategy
 
       if (checkUpdates) {
         await progressNotifier?.notify(
-            message: 'Checking for updates...', percent: 50);
+          message: 'Checking for updates...',
+          percent: 50,
+        );
         try {
           latestVersion = await _checkLatestVersion();
           if (latestVersion != null) {
@@ -135,17 +141,17 @@ class VersionInfoStrategy
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 5);
-      
+
       try {
         final request = await client.getUrl(
           Uri.parse('https://pub.dev/api/packages/fly_cli'),
         );
         final response = await request.close();
-        
+
         if (response.statusCode == 200) {
           final responseBody = await response.transform(utf8.decoder).join();
           final data = json.decode(responseBody) as Map<String, dynamic>;
-          
+
           // Get latest version from pub.dev API
           final latest = data['latest'] as Map<String, dynamic>?;
           if (latest != null) {
@@ -160,8 +166,7 @@ class VersionInfoStrategy
       // Network error or parsing error - return null to indicate failure
       return null;
     }
-    
+
     return null;
   }
 }
-

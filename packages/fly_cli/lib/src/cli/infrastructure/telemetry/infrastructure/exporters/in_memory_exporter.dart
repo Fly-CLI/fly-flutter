@@ -1,4 +1,5 @@
 import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metric.dart';
+
 import 'metric_exporter.dart';
 
 /// In-memory exporter that stores metrics for querying
@@ -28,4 +29,3 @@ class InMemoryExporter implements MetricExporter {
     _exportedMetrics.clear();
   }
 }
-

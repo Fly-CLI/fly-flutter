@@ -1,10 +1,10 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
-import 'package:fly_cli/src/features/commands/domain/command_definition.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/command_wrappers.dart';
 import 'package:fly_cli/src/features/commands/application/metadata_extractor.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/domain/command_definition.dart';
 import 'package:fly_cli/src/features/commands/domain/fly_command.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/command_wrappers.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 
 /// Registration data returned to CommandRunner for command registration
 class CommandRegistrationData {
@@ -267,10 +267,12 @@ class CommandMetadataRegistry {
     final globalOptions = _extractGlobalOptions();
 
     return {
-      'commands':
-          allCommands.map((key, value) => MapEntry(key, value.toJson())),
-      'global_options':
-          globalOptions.map((o) => o.toJson(isGlobalOverride: true)).toList(),
+      'commands': allCommands.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
+      'global_options': globalOptions
+          .map((o) => o.toJson(isGlobalOverride: true))
+          .toList(),
     };
   }
 

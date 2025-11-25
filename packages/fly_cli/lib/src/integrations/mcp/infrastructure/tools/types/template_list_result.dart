@@ -30,13 +30,13 @@ class TemplateInfo {
   final String? minDartSdk;
 
   Map<String, Object?> toJson() => {
-        'name': name,
-        'description': description,
-        'version': version,
-        'features': features,
-        if (minFlutterSdk != null) 'minFlutterSdk': minFlutterSdk,
-        if (minDartSdk != null) 'minDartSdk': minDartSdk,
-      };
+    'name': name,
+    'description': description,
+    'version': version,
+    'features': features,
+    if (minFlutterSdk != null) 'minFlutterSdk': minFlutterSdk,
+    if (minDartSdk != null) 'minDartSdk': minDartSdk,
+  };
 }
 
 /// Typed result for fly.template.list tool
@@ -49,8 +49,8 @@ class TemplateListResult extends ToolResult {
     return TemplateListResult(
       templates: templatesList != null
           ? templatesList
-              .map((t) => TemplateInfo.fromJson(t as Map<String, Object?>))
-              .toList()
+                .map((t) => TemplateInfo.fromJson(t as Map<String, Object?>))
+                .toList()
           : [],
     );
   }
@@ -60,6 +60,6 @@ class TemplateListResult extends ToolResult {
 
   @override
   Map<String, Object?> toJson() => {
-        'templates': templates.map((t) => t.toJson()).toList(),
-      };
+    'templates': templates.map((t) => t.toJson()).toList(),
+  };
 }

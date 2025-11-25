@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fly_cli/src/features/context/infrastructure/analyzers/directory_analyzer.dart';
 import 'package:fly_cli/src/features/context/domain/models.dart';
+import 'package:fly_cli/src/features/context/infrastructure/analyzers/directory_analyzer.dart';
 import 'package:fly_cli/src/features/context/infrastructure/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -17,18 +17,23 @@ class ArchitectureDetector {
     final patterns = <ArchitecturePattern>[];
 
     // Analyze project structure with context
-    final structurePatterns =
-        await _analyzeStructureWithContext(projectDir, directoryResult);
+    final structurePatterns = await _analyzeStructureWithContext(
+      projectDir,
+      directoryResult,
+    );
     patterns.addAll(structurePatterns);
 
     // Analyze dependencies with enhanced detection
-    final dependencyPatterns =
-        await _analyzeDependenciesWithContext(projectDir);
+    final dependencyPatterns = await _analyzeDependenciesWithContext(
+      projectDir,
+    );
     patterns.addAll(dependencyPatterns);
 
     // Analyze code patterns with AST context
-    final codePatterns =
-        await _analyzeCodePatternsWithContext(projectDir, directoryResult);
+    final codePatterns = await _analyzeCodePatternsWithContext(
+      projectDir,
+      directoryResult,
+    );
     patterns.addAll(codePatterns);
 
     // Analyze configuration files
@@ -51,58 +56,69 @@ class ArchitectureDetector {
       if (!await libDir.exists()) return patterns;
 
       // Use directory result if available, otherwise analyze
-      final result = directoryResult ??
+      final result =
+          directoryResult ??
           await const UnifiedDirectoryAnalyzer().analyze(projectDir);
 
       // Detect feature-first architecture with enhanced heuristics
       if (_hasFeatureFirstStructure(result)) {
         final confidence = _calculateFeatureFirstConfidence(result);
-        patterns.add(ArchitecturePattern(
-          name: 'feature-first',
-          confidence: confidence,
-          indicators: _getFeatureFirstIndicators(result),
-          metadata: {
-            'structure_type': 'feature-first',
-            'feature_count':
-                result.files.values.where((f) => f.type == 'screen').length,
-            'has_domain_layer': _hasDomainLayer(result),
-            'has_data_layer': _hasDataLayer(result),
-          },
-        ));
+        patterns.add(
+          ArchitecturePattern(
+            name: 'feature-first',
+            confidence: confidence,
+            indicators: _getFeatureFirstIndicators(result),
+            metadata: {
+              'structure_type': 'feature-first',
+              'feature_count': result.files.values
+                  .where((f) => f.type == 'screen')
+                  .length,
+              'has_domain_layer': _hasDomainLayer(result),
+              'has_data_layer': _hasDataLayer(result),
+            },
+          ),
+        );
       }
 
       // Detect layer-first architecture with enhanced heuristics
       if (_hasLayerFirstStructure(result)) {
         final confidence = _calculateLayerFirstConfidence(result);
-        patterns.add(ArchitecturePattern(
-          name: 'layer-first',
-          confidence: confidence,
-          indicators: _getLayerFirstIndicators(result),
-          metadata: {
-            'structure_type': 'layer-first',
-            'layer_count': _countLayers(result),
-            'has_clean_architecture': _hasCleanArchitectureStructure(result),
-          },
-        ));
+        patterns.add(
+          ArchitecturePattern(
+            name: 'layer-first',
+            confidence: confidence,
+            indicators: _getLayerFirstIndicators(result),
+            metadata: {
+              'structure_type': 'layer-first',
+              'layer_count': _countLayers(result),
+              'has_clean_architecture': _hasCleanArchitectureStructure(result),
+            },
+          ),
+        );
       }
 
       // Detect clean architecture with enhanced detection
       if (_hasCleanArchitectureStructure(result)) {
         final confidence = _calculateCleanArchitectureConfidence(result);
-        patterns.add(ArchitecturePattern(
-          name: 'clean-architecture',
-          confidence: confidence,
-          indicators: _getCleanArchitectureIndicators(result),
-          metadata: {
-            'structure_type': 'clean-architecture',
-            'layer_completeness': _calculateLayerCompleteness(result),
-            'dependency_direction': _analyzeDependencyDirection(result),
-          },
-        ));
+        patterns.add(
+          ArchitecturePattern(
+            name: 'clean-architecture',
+            confidence: confidence,
+            indicators: _getCleanArchitectureIndicators(result),
+            metadata: {
+              'structure_type': 'clean-architecture',
+              'layer_completeness': _calculateLayerCompleteness(result),
+              'dependency_direction': _analyzeDependencyDirection(result),
+            },
+          ),
+        );
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
-          defaultValue: null);
+      ErrorHandler.handleAnalyzerError<void>(
+        'ArchitectureDetector',
+        e,
+        defaultValue: null,
+      );
     }
 
     return patterns;
@@ -110,7 +126,8 @@ class ArchitectureDetector {
 
   /// Analyze dependencies with enhanced pattern detection
   Future<List<ArchitecturePattern>> _analyzeDependenciesWithContext(
-      Directory projectDir) async {
+    Directory projectDir,
+  ) async {
     final patterns = <ArchitecturePattern>[];
 
     try {
@@ -136,8 +153,11 @@ class ArchitectureDetector {
       final testPatterns = _detectTestingPatterns(content);
       patterns.addAll(testPatterns);
     } catch (e) {
-      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
-          defaultValue: null);
+      ErrorHandler.handleAnalyzerError<void>(
+        'ArchitectureDetector',
+        e,
+        defaultValue: null,
+      );
     }
 
     return patterns;
@@ -151,7 +171,8 @@ class ArchitectureDetector {
     final patterns = <ArchitecturePattern>[];
 
     try {
-      final result = directoryResult ??
+      final result =
+          directoryResult ??
           await const UnifiedDirectoryAnalyzer().analyze(projectDir);
 
       // Analyze key files for patterns
@@ -167,8 +188,11 @@ class ArchitectureDetector {
         }
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
-          defaultValue: null);
+      ErrorHandler.handleAnalyzerError<void>(
+        'ArchitectureDetector',
+        e,
+        defaultValue: null,
+      );
     }
 
     return patterns;
@@ -176,7 +200,8 @@ class ArchitectureDetector {
 
   /// Analyze configuration files with enhanced detection
   Future<List<ArchitecturePattern>> _analyzeConfigurationWithContext(
-      Directory projectDir) async {
+    Directory projectDir,
+  ) async {
     final patterns = <ArchitecturePattern>[];
 
     try {
@@ -185,36 +210,43 @@ class ArchitectureDetector {
       if (await flyManifest.exists()) {
         final content = await FileUtils.readFile(flyManifest);
         if (content != null) {
-          patterns.add(ArchitecturePattern(
-            name: 'flutter',
-            confidence: 0.95,
-            indicators: ['fly_project.yaml', 'Fly framework'],
-            metadata: {
-              'framework': 'fly',
-              'manifest': 'fly_project.yaml',
-              'has_screens': content.contains('screens:'),
-              'has_services': content.contains('services:'),
-            },
-          ));
+          patterns.add(
+            ArchitecturePattern(
+              name: 'flutter',
+              confidence: 0.95,
+              indicators: ['fly_project.yaml', 'Fly framework'],
+              metadata: {
+                'framework': 'fly',
+                'manifest': 'fly_project.yaml',
+                'has_screens': content.contains('screens:'),
+                'has_services': content.contains('services:'),
+              },
+            ),
+          );
         }
       }
 
       // Check for build configuration
       final buildYaml = File(path.join(projectDir.path, 'build.yaml'));
       if (await buildYaml.exists()) {
-        patterns.add(const ArchitecturePattern(
-          name: 'code-generation',
-          confidence: 0.80,
-          indicators: ['build.yaml', 'code generation'],
-          metadata: {
-            'build_system': 'build_runner',
-            'config': 'build.yaml',
-          },
-        ));
+        patterns.add(
+          const ArchitecturePattern(
+            name: 'code-generation',
+            confidence: 0.80,
+            indicators: ['build.yaml', 'code generation'],
+            metadata: {
+              'build_system': 'build_runner',
+              'config': 'build.yaml',
+            },
+          ),
+        );
       }
     } catch (e) {
-      ErrorHandler.handleAnalyzerError<void>('ArchitectureDetector', e,
-          defaultValue: null);
+      ErrorHandler.handleAnalyzerError<void>(
+        'ArchitectureDetector',
+        e,
+        defaultValue: null,
+      );
     }
 
     return patterns;
@@ -231,16 +263,21 @@ class ArchitectureDetector {
     ];
 
     // Check directory structure
-    final hasFeatureDir = result.directories.keys.any((dir) => featureIndicators
-        .any((indicator) => dir.toLowerCase().contains(indicator)));
+    final hasFeatureDir = result.directories.keys.any(
+      (dir) => featureIndicators.any(
+        (indicator) => dir.toLowerCase().contains(indicator),
+      ),
+    );
 
     // Check file organization
     final screenFiles = result.getFilesByType('screen');
     final hasScreenFiles = screenFiles.isNotEmpty;
 
     // Check for feature-based organization
-    final hasFeatureOrganization = result.files.values.any((file) =>
-        file.path.contains('features/') || file.path.contains('feature/'));
+    final hasFeatureOrganization = result.files.values.any(
+      (file) =>
+          file.path.contains('features/') || file.path.contains('feature/'),
+    );
 
     return hasFeatureDir || (hasScreenFiles && hasFeatureOrganization);
   }
@@ -255,8 +292,11 @@ class ArchitectureDetector {
       'application',
     ];
 
-    return layerIndicators.any((indicator) => result.directories.keys
-        .any((dir) => dir.toLowerCase().contains(indicator)));
+    return layerIndicators.any(
+      (indicator) => result.directories.keys.any(
+        (dir) => dir.toLowerCase().contains(indicator),
+      ),
+    );
   }
 
   /// Enhanced clean architecture structure detection
@@ -269,8 +309,11 @@ class ArchitectureDetector {
     ];
 
     final matches = cleanArchIndicators
-        .where((indicator) => result.directories.keys
-            .any((dir) => dir.toLowerCase().contains(indicator)))
+        .where(
+          (indicator) => result.directories.keys.any(
+            (dir) => dir.toLowerCase().contains(indicator),
+          ),
+        )
         .length;
 
     return matches >= 3; // Need at least 3 layers
@@ -292,8 +335,9 @@ class ArchitectureDetector {
     }
 
     // Confidence for feature organization
-    final featureFiles =
-        result.files.values.where((f) => f.path.contains('features/')).length;
+    final featureFiles = result.files.values
+        .where((f) => f.path.contains('features/'))
+        .length;
     if (featureFiles > 0) {
       confidence += 0.3;
     }
@@ -309,11 +353,14 @@ class ArchitectureDetector {
       'presentation',
       'domain',
       'data',
-      'infrastructure'
+      'infrastructure',
     ];
     final layerCount = layerIndicators
-        .where((indicator) => result.directories.keys
-            .any((dir) => dir.toLowerCase().contains(indicator)))
+        .where(
+          (indicator) => result.directories.keys.any(
+            (dir) => dir.toLowerCase().contains(indicator),
+          ),
+        )
         .length;
 
     confidence = layerCount / layerIndicators.length;
@@ -329,11 +376,14 @@ class ArchitectureDetector {
       'domain',
       'data',
       'presentation',
-      'infrastructure'
+      'infrastructure',
     ];
     final layerCount = cleanArchIndicators
-        .where((indicator) => result.directories.keys
-            .any((dir) => dir.toLowerCase().contains(indicator)))
+        .where(
+          (indicator) => result.directories.keys.any(
+            (dir) => dir.toLowerCase().contains(indicator),
+          ),
+        )
         .length;
 
     // Base confidence from layer count
@@ -357,20 +407,22 @@ class ArchitectureDetector {
       if (content.contains('hooks_riverpod')) confidence += 0.05;
       if (content.contains('riverpod_annotation')) confidence += 0.05;
 
-      patterns.add(ArchitecturePattern(
-        name: 'riverpod',
-        confidence: confidence.clamp(0.0, 1.0),
-        indicators: [
-          'flutter_riverpod dependency',
-          'riverpod state management'
-        ],
-        metadata: {
-          'state_management': 'riverpod',
-          'dependency': 'flutter_riverpod',
-          'has_hooks': content.contains('hooks_riverpod'),
-          'has_annotations': content.contains('riverpod_annotation'),
-        },
-      ));
+      patterns.add(
+        ArchitecturePattern(
+          name: 'riverpod',
+          confidence: confidence.clamp(0.0, 1.0),
+          indicators: [
+            'flutter_riverpod dependency',
+            'riverpod state management',
+          ],
+          metadata: {
+            'state_management': 'riverpod',
+            'dependency': 'flutter_riverpod',
+            'has_hooks': content.contains('hooks_riverpod'),
+            'has_annotations': content.contains('riverpod_annotation'),
+          },
+        ),
+      );
     }
 
     // BLoC detection with enhanced confidence
@@ -378,29 +430,33 @@ class ArchitectureDetector {
       double confidence = 0.95;
       if (content.contains('bloc_test')) confidence += 0.05;
 
-      patterns.add(ArchitecturePattern(
-        name: 'bloc',
-        confidence: confidence.clamp(0.0, 1.0),
-        indicators: ['flutter_bloc dependency', 'bloc state management'],
-        metadata: {
-          'state_management': 'bloc',
-          'dependency': 'flutter_bloc',
-          'has_testing': content.contains('bloc_test'),
-        },
-      ));
+      patterns.add(
+        ArchitecturePattern(
+          name: 'bloc',
+          confidence: confidence.clamp(0.0, 1.0),
+          indicators: ['flutter_bloc dependency', 'bloc state management'],
+          metadata: {
+            'state_management': 'bloc',
+            'dependency': 'flutter_bloc',
+            'has_testing': content.contains('bloc_test'),
+          },
+        ),
+      );
     }
 
     // Provider detection
     if (content.contains('provider:')) {
-      patterns.add(const ArchitecturePattern(
-        name: 'provider',
-        confidence: 0.90,
-        indicators: ['provider dependency', 'provider state management'],
-        metadata: {
-          'state_management': 'provider',
-          'dependency': 'provider',
-        },
-      ));
+      patterns.add(
+        const ArchitecturePattern(
+          name: 'provider',
+          confidence: 0.90,
+          indicators: ['provider dependency', 'provider state management'],
+          metadata: {
+            'state_management': 'provider',
+            'dependency': 'provider',
+          },
+        ),
+      );
     }
 
     return patterns;
@@ -411,27 +467,31 @@ class ArchitectureDetector {
     final patterns = <ArchitecturePattern>[];
 
     if (content.contains('go_router')) {
-      patterns.add(const ArchitecturePattern(
-        name: 'go-router',
-        confidence: 0.90,
-        indicators: ['go_router dependency', 'declarative routing'],
-        metadata: {
-          'navigation': 'go-router',
-          'dependency': 'go_router',
-        },
-      ));
+      patterns.add(
+        const ArchitecturePattern(
+          name: 'go-router',
+          confidence: 0.90,
+          indicators: ['go_router dependency', 'declarative routing'],
+          metadata: {
+            'navigation': 'go-router',
+            'dependency': 'go_router',
+          },
+        ),
+      );
     }
 
     if (content.contains('auto_route')) {
-      patterns.add(const ArchitecturePattern(
-        name: 'auto-route',
-        confidence: 0.90,
-        indicators: ['auto_route dependency', 'code generation routing'],
-        metadata: {
-          'navigation': 'auto-route',
-          'dependency': 'auto_route',
-        },
-      ));
+      patterns.add(
+        const ArchitecturePattern(
+          name: 'auto-route',
+          confidence: 0.90,
+          indicators: ['auto_route dependency', 'code generation routing'],
+          metadata: {
+            'navigation': 'auto-route',
+            'dependency': 'auto_route',
+          },
+        ),
+      );
     }
 
     return patterns;
@@ -442,27 +502,31 @@ class ArchitectureDetector {
     final patterns = <ArchitecturePattern>[];
 
     if (content.contains('get_it')) {
-      patterns.add(const ArchitecturePattern(
-        name: 'get-it',
-        confidence: 0.85,
-        indicators: ['get_it dependency', 'service locator pattern'],
-        metadata: {
-          'dependency_injection': 'get-it',
-          'dependency': 'get_it',
-        },
-      ));
+      patterns.add(
+        const ArchitecturePattern(
+          name: 'get-it',
+          confidence: 0.85,
+          indicators: ['get_it dependency', 'service locator pattern'],
+          metadata: {
+            'dependency_injection': 'get-it',
+            'dependency': 'get_it',
+          },
+        ),
+      );
     }
 
     if (content.contains('injectable')) {
-      patterns.add(const ArchitecturePattern(
-        name: 'injectable',
-        confidence: 0.90,
-        indicators: ['injectable dependency', 'code generation DI'],
-        metadata: {
-          'dependency_injection': 'injectable',
-          'dependency': 'injectable',
-        },
-      ));
+      patterns.add(
+        const ArchitecturePattern(
+          name: 'injectable',
+          confidence: 0.90,
+          indicators: ['injectable dependency', 'code generation DI'],
+          metadata: {
+            'dependency_injection': 'injectable',
+            'dependency': 'injectable',
+          },
+        ),
+      );
     }
 
     return patterns;
@@ -473,27 +537,31 @@ class ArchitectureDetector {
     final patterns = <ArchitecturePattern>[];
 
     if (content.contains('mockito') || content.contains('mocktail')) {
-      patterns.add(ArchitecturePattern(
-        name: 'mocking',
-        confidence: 0.80,
-        indicators: ['mocking framework', 'test doubles'],
-        metadata: {
-          'testing': 'mocking',
-          'framework': content.contains('mockito') ? 'mockito' : 'mocktail',
-        },
-      ));
+      patterns.add(
+        ArchitecturePattern(
+          name: 'mocking',
+          confidence: 0.80,
+          indicators: ['mocking framework', 'test doubles'],
+          metadata: {
+            'testing': 'mocking',
+            'framework': content.contains('mockito') ? 'mockito' : 'mocktail',
+          },
+        ),
+      );
     }
 
     if (content.contains('integration_test')) {
-      patterns.add(const ArchitecturePattern(
-        name: 'integration-testing',
-        confidence: 0.85,
-        indicators: ['integration_test dependency', 'end-to-end testing'],
-        metadata: {
-          'testing': 'integration',
-          'dependency': 'integration_test',
-        },
-      ));
+      patterns.add(
+        const ArchitecturePattern(
+          name: 'integration-testing',
+          confidence: 0.85,
+          indicators: ['integration_test dependency', 'end-to-end testing'],
+          metadata: {
+            'testing': 'integration',
+            'dependency': 'integration_test',
+          },
+        ),
+      );
     }
 
     return patterns;
@@ -501,37 +569,43 @@ class ArchitectureDetector {
 
   /// Analyze file patterns with enhanced detection
   List<ArchitecturePattern> _analyzeFilePatterns(
-      String content, String filePath) {
+    String content,
+    String filePath,
+  ) {
     final patterns = <ArchitecturePattern>[];
 
     // Enhanced MVVM pattern detection
     if (_hasEnhancedMVVMPattern(content)) {
-      patterns.add(ArchitecturePattern(
-        name: 'mvvm',
-        confidence: 0.85,
-        indicators: ['ViewModel', 'View', 'Model separation'],
-        metadata: {
-          'pattern': 'mvvm',
-          'file': filePath,
-          'has_viewmodel': content.contains('ViewModel'),
-          'has_view': content.contains('View'),
-        },
-      ));
+      patterns.add(
+        ArchitecturePattern(
+          name: 'mvvm',
+          confidence: 0.85,
+          indicators: ['ViewModel', 'View', 'Model separation'],
+          metadata: {
+            'pattern': 'mvvm',
+            'file': filePath,
+            'has_viewmodel': content.contains('ViewModel'),
+            'has_view': content.contains('View'),
+          },
+        ),
+      );
     }
 
     // Enhanced Repository pattern detection
     if (_hasEnhancedRepositoryPattern(content)) {
-      patterns.add(ArchitecturePattern(
-        name: 'repository',
-        confidence: 0.90,
-        indicators: ['Repository', 'data abstraction'],
-        metadata: {
-          'pattern': 'repository',
-          'file': filePath,
-          'is_abstract': content.contains('abstract class'),
-          'has_implementation': content.contains('implements'),
-        },
-      ));
+      patterns.add(
+        ArchitecturePattern(
+          name: 'repository',
+          confidence: 0.90,
+          indicators: ['Repository', 'data abstraction'],
+          metadata: {
+            'pattern': 'repository',
+            'file': filePath,
+            'is_abstract': content.contains('abstract class'),
+            'has_implementation': content.contains('implements'),
+          },
+        ),
+      );
     }
 
     return patterns;
@@ -548,8 +622,9 @@ class ArchitectureDetector {
       'class.*ViewModel',
     ];
 
-    return mvvmIndicators.any((indicator) =>
-        RegExp(indicator, caseSensitive: false).hasMatch(content));
+    return mvvmIndicators.any(
+      (indicator) => RegExp(indicator, caseSensitive: false).hasMatch(content),
+    );
   }
 
   /// Enhanced Repository pattern detection
@@ -561,14 +636,16 @@ class ArchitectureDetector {
       'implements.*Repository',
     ];
 
-    return repoIndicators.any((indicator) =>
-        RegExp(indicator, caseSensitive: false).hasMatch(content));
+    return repoIndicators.any(
+      (indicator) => RegExp(indicator, caseSensitive: false).hasMatch(content),
+    );
   }
 
   /// Helper methods for structure analysis
-  bool _hasDomainLayer(DirectoryAnalysisResult result) =>
-      result.directories.keys
-          .any((dir) => dir.toLowerCase().contains('domain'));
+  bool _hasDomainLayer(DirectoryAnalysisResult result) => result
+      .directories
+      .keys
+      .any((dir) => dir.toLowerCase().contains('domain'));
 
   bool _hasDataLayer(DirectoryAnalysisResult result) =>
       result.directories.keys.any((dir) => dir.toLowerCase().contains('data'));
@@ -578,11 +655,14 @@ class ArchitectureDetector {
       'presentation',
       'domain',
       'data',
-      'infrastructure'
+      'infrastructure',
     ];
     return layerIndicators
-        .where((indicator) => result.directories.keys
-            .any((dir) => dir.toLowerCase().contains(indicator)))
+        .where(
+          (indicator) => result.directories.keys.any(
+            (dir) => dir.toLowerCase().contains(indicator),
+          ),
+        )
         .length;
   }
 
@@ -591,11 +671,14 @@ class ArchitectureDetector {
       'domain',
       'data',
       'presentation',
-      'infrastructure'
+      'infrastructure',
     ];
     final layerCount = cleanArchIndicators
-        .where((indicator) => result.directories.keys
-            .any((dir) => dir.toLowerCase().contains(indicator)))
+        .where(
+          (indicator) => result.directories.keys.any(
+            (dir) => dir.toLowerCase().contains(indicator),
+          ),
+        )
         .length;
     return layerCount / cleanArchIndicators.length;
   }
@@ -623,11 +706,12 @@ class ArchitectureDetector {
       'presentation',
       'domain',
       'data',
-      'infrastructure'
+      'infrastructure',
     ];
     for (final layer in layerIndicators) {
-      if (result.directories.keys
-          .any((dir) => dir.toLowerCase().contains(layer))) {
+      if (result.directories.keys.any(
+        (dir) => dir.toLowerCase().contains(layer),
+      )) {
         indicators.add('$layer/ layer');
       }
     }
@@ -640,11 +724,12 @@ class ArchitectureDetector {
       'domain',
       'data',
       'presentation',
-      'infrastructure'
+      'infrastructure',
     ];
     for (final layer in cleanArchIndicators) {
-      if (result.directories.keys
-          .any((dir) => dir.toLowerCase().contains(layer))) {
+      if (result.directories.keys.any(
+        (dir) => dir.toLowerCase().contains(layer),
+      )) {
         indicators.add('$layer/ layer');
       }
     }
@@ -653,7 +738,8 @@ class ArchitectureDetector {
 
   /// Merge similar patterns to avoid duplicates
   List<ArchitecturePattern> _mergeSimilarPatterns(
-      List<ArchitecturePattern> patterns) {
+    List<ArchitecturePattern> patterns,
+  ) {
     final merged = <String, ArchitecturePattern>{};
 
     for (final pattern in patterns) {

@@ -163,8 +163,10 @@ class DependenciesResourceStrategy extends ResourceStrategy {
       if (lockFile.existsSync()) {
         try {
           final lockContent = lockFile.readAsStringSync();
-          transitiveDeps =
-              _extractTransitiveFromLock(lockContent, dependencies);
+          transitiveDeps = _extractTransitiveFromLock(
+            lockContent,
+            dependencies,
+          );
         } catch (_) {
           // If parsing fails, return empty
         }

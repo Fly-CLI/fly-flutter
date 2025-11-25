@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fly_cli/src/cli/domain/interfaces/i_output_formatter.dart';
 import 'package:fly_cli/src/cli/domain/output_format.dart';
 import 'package:fly_cli/src/cli/infrastructure/error_handling/exit_code_mapper.dart';
 import 'package:fly_cli/src/cli/infrastructure/formatting/output_format_parser.dart';
-import 'package:fly_cli/src/cli/domain/interfaces/i_output_formatter.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/utils/version_utils.dart';
@@ -22,8 +22,8 @@ class ErrorHandler {
   ErrorHandler({
     required IOutputFormatter formatter,
     Logger? logger,
-  })  : _formatter = formatter,
-        _logger = logger;
+  }) : _formatter = formatter,
+       _logger = logger;
 
   final IOutputFormatter _formatter;
   final Logger? _logger;

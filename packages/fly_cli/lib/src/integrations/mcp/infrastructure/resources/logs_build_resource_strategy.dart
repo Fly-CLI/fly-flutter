@@ -3,7 +3,7 @@ import 'package:fly_mcp/fly_mcp.dart';
 /// Strategy for logs://build/* resources
 class LogsBuildResourceStrategy extends ResourceStrategy {
   LogsBuildResourceStrategy({LogResourceProvider? logProvider})
-      : _logProvider = logProvider;
+    : _logProvider = logProvider;
 
   @override
   String get uriPrefix => 'logs://build/';

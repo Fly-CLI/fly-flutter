@@ -2,17 +2,17 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/global_flags_registry.dart';
-import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
-import 'package:fly_cli/src/shared/di/service_container.dart';
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
+import 'package:fly_cli/src/shared/di/service_container.dart';
 import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:fly_core/src/environment/env_var.dart';
 import 'package:fly_core/src/environment/environment_manager.dart';
@@ -45,8 +45,8 @@ class ContextFactory implements IContextFactory {
     this.services, {
     Map<String, dynamic>? config,
     String? workingDirectory,
-  })  : _config = config,
-        _workingDirectory = workingDirectory;
+  }) : _config = config,
+       _workingDirectory = workingDirectory;
 
   /// Service container providing all required dependencies
   final ServiceContainer services;
@@ -155,9 +155,8 @@ class ContextFactory implements IContextFactory {
 
   /// Gets default configuration map
   Map<String, dynamic> _getDefaultConfig() => {
-        'cli_version': VersionUtils.getCurrentVersion(),
-        'templates_directory': TemplateManager.findTemplatesDirectory(),
-        'plugins_enabled': true,
-      };
+    'cli_version': VersionUtils.getCurrentVersion(),
+    'templates_directory': TemplateManager.findTemplatesDirectory(),
+    'plugins_enabled': true,
+  };
 }
-

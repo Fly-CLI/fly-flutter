@@ -1,6 +1,6 @@
 import 'package:args/command_runner.dart';
-import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/categories.dart';
+import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 
 /// Represents a command group with name and description
 class CommandGroup {

@@ -1,9 +1,12 @@
+import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/shared/logging/domain/logger.dart' as flylog;
-import 'package:fly_cli/src/shared/logging/infrastructure/logger_factory.dart' as flylog_factory;
-import 'package:fly_cli/src/shared/logging/infrastructure/logging_config.dart' as flylog_cfg;
-import 'package:fly_cli/src/shared/logging/domain/logging_context.dart' as flylog_ctx;
-import 'package:fly_cli/src/cli/infrastructure/telemetry/domain/metrics_collector.dart';
+import 'package:fly_cli/src/shared/logging/domain/logging_context.dart'
+    as flylog_ctx;
+import 'package:fly_cli/src/shared/logging/infrastructure/logger_factory.dart'
+    as flylog_factory;
+import 'package:fly_cli/src/shared/logging/infrastructure/logging_config.dart'
+    as flylog_cfg;
 
 /// Structured logger for MCP tool execution
 ///
@@ -16,9 +19,9 @@ class ToolLogger {
     required this.correlationId,
     String? spanId,
     Map<String, Object?>? initialFields,
-  })  : _spanId = spanId ?? _generateSpanId(),
-        _startTime = DateTime.now(),
-        _initialFields = Map<String, Object?>.from(initialFields ?? {}) {
+  }) : _spanId = spanId ?? _generateSpanId(),
+       _startTime = DateTime.now(),
+       _initialFields = Map<String, Object?>.from(initialFields ?? {}) {
     _toolLogger = logger.child({
       'tool': toolName,
       'correlation_id': correlationId,
@@ -309,7 +312,7 @@ extension ToolLoggerFromContext on CommandContext {
 }
 
 /// Performance metrics tracker for tool operations
-/// 
+///
 /// @deprecated Use MetricsCollector directly for new code.
 /// This class is maintained for backward compatibility.
 class ToolPerformanceMetrics {
@@ -336,13 +339,13 @@ class ToolPerformanceMetrics {
     final startTime = _timers.remove(timerName);
     if (startTime != null) {
       final durationMs = DateTime.now().difference(startTime).inMilliseconds;
-      
+
       // Record using MetricsCollector if available
       _metricsCollector?.stopTimer(
         timerName,
         tags: {'tool': toolName},
       );
-      
+
       // Also record locally for backward compatibility
       recordMetric('${timerName}_duration_ms', durationMs, unit: 'ms');
     }
@@ -351,7 +354,7 @@ class ToolPerformanceMetrics {
   /// Record a performance metric
   void recordMetric(String metricName, Object value, {String? unit}) {
     _metrics[metricName] = value;
-    
+
     // Record using MetricsCollector if available
     if (_metricsCollector != null && value is num) {
       _metricsCollector.recordGauge(
@@ -361,7 +364,7 @@ class ToolPerformanceMetrics {
         tags: {'tool': toolName},
       );
     }
-    
+
     // Also log to logger for backward compatibility
     logger.logMetric(
       metricName: metricName,
@@ -375,14 +378,14 @@ class ToolPerformanceMetrics {
     final current = (_metrics[counterName] as int?) ?? 0;
     final newValue = current + amount;
     _metrics[counterName] = newValue;
-    
+
     // Record using MetricsCollector if available
     _metricsCollector?.incrementCounter(
       counterName,
       amount: amount,
       tags: {'tool': toolName},
     );
-    
+
     // Also log to logger for backward compatibility
     logger.logMetric(
       metricName: counterName,

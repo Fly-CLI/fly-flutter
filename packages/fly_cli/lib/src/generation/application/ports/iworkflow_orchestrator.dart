@@ -1,5 +1,4 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 
 /// Interface for workflow orchestration.
@@ -27,4 +26,3 @@ abstract class IWorkflowOrchestrator {
   /// Returns the workflow ID that should be used.
   Future<WorkflowId> inferWorkflow(GenerationMode mode);
 }
-

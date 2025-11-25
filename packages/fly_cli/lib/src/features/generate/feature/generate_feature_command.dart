@@ -30,23 +30,23 @@ class GenerateFeatureCommand extends FlyCommand {
 
   @override
   List<CliFlag> get flags => [
-        const GenerateScreenFeatureFlag(),
-        const GenerateScreenTypeFlag(),
-        const GenerateScreenWithViewModelFlag(),
-        const GenerateScreenWithTestsFlag(),
-        const InteractiveFlag(),
-        const GenerateScreenWithValidationFlag(),
-        const GenerateScreenWithNavigationFlag(),
-        const OutputDirFlag(),
-      ];
+    const GenerateScreenFeatureFlag(),
+    const GenerateScreenTypeFlag(),
+    const GenerateScreenWithViewModelFlag(),
+    const GenerateScreenWithTestsFlag(),
+    const InteractiveFlag(),
+    const GenerateScreenWithValidationFlag(),
+    const GenerateScreenWithNavigationFlag(),
+    const OutputDirFlag(),
+  ];
 
   @override
   List<CommandValidator> get validators => [
-        RequiredArgumentValidator('screen_name'),
-        ScreenNameValidator(),
-        FlutterProjectValidator(),
-        DirectoryWritableValidator(),
-      ];
+    RequiredArgumentValidator('screen_name'),
+    ScreenNameValidator(),
+    FlutterProjectValidator(),
+    DirectoryWritableValidator(),
+  ];
 
   @override
   List<CommandMiddleware> get middleware => [];
@@ -55,13 +55,20 @@ class GenerateFeatureCommand extends FlyCommand {
   Future<CommandResult> execute() async {
     try {
       final stopwatch = Stopwatch()..start();
-      final interactive =
-          FlagAccessor.getBool(argResults, const InteractiveFlag());
-      final outputDir = FlagAccessor.getString(argResults, const OutputDirFlag());
+      final interactive = FlagAccessor.getBool(
+        argResults,
+        const InteractiveFlag(),
+      );
+      final outputDir = FlagAccessor.getString(
+        argResults,
+        const OutputDirFlag(),
+      );
 
       // Build variables using FeatureVariableBuilder
       // Use execution context's argResults (set by CommandRunner) instead of registration context
-      final executionContext = context.factory.createExecutionContext(argResults!);
+      final executionContext = context.factory.createExecutionContext(
+        argResults!,
+      );
       const variableBuilder = FeatureVariableBuilder();
       final rawVars = await variableBuilder.buildFromContext(
         context: executionContext,
@@ -132,7 +139,9 @@ class GenerateFeatureCommand extends FlyCommand {
 
   @override
   Future<void> onAfterExecute(
-      CommandContext context, CommandResult result) async {
+    CommandContext context,
+    CommandResult result,
+  ) async {
     if (result.success) {
       logger.info('🎉 Feature component generated successfully!');
     }
@@ -140,7 +149,10 @@ class GenerateFeatureCommand extends FlyCommand {
 
   @override
   Future<void> onError(
-      CommandContext context, Object error, StackTrace stackTrace) async {
+    CommandContext context,
+    Object error,
+    StackTrace stackTrace,
+  ) async {
     logger.err('💥 Feature generation failed: $error');
     if (context.verbose) {
       logger.err('Stack trace: $stackTrace');

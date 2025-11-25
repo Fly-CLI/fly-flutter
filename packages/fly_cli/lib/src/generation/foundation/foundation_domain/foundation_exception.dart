@@ -7,5 +7,3 @@ class FoundationDomainException implements Exception {
   @override
   String toString() => 'FoundationDomainException: $message';
 }
-
-

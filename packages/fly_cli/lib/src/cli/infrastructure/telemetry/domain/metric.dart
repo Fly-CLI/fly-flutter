@@ -37,25 +37,24 @@ class Metric {
     DateTime? timestamp,
     String? unit,
     Map<String, String>? tags,
-  }) =>
-      Metric(
-        name: name ?? this.name,
-        type: type ?? this.type,
-        value: value ?? this.value,
-        timestamp: timestamp ?? this.timestamp,
-        unit: unit ?? this.unit,
-        tags: tags ?? this.tags,
-      );
+  }) => Metric(
+    name: name ?? this.name,
+    type: type ?? this.type,
+    value: value ?? this.value,
+    timestamp: timestamp ?? this.timestamp,
+    unit: unit ?? this.unit,
+    tags: tags ?? this.tags,
+  );
 
   /// Convert to JSON for serialization
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'type': type.name,
-        'value': value,
-        'timestamp': timestamp.toIso8601String(),
-        if (unit != null) 'unit': unit,
-        'tags': tags,
-      };
+    'name': name,
+    'type': type.name,
+    'value': value,
+    'timestamp': timestamp.toIso8601String(),
+    if (unit != null) 'unit': unit,
+    'tags': tags,
+  };
 }
 
 /// Snapshot of aggregated metric data
@@ -101,15 +100,14 @@ class MetricSnapshot {
 
   /// Convert to JSON for serialization
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'type': type.name,
-        'count': count,
-        'sum': sum,
-        if (value != null) 'value': value,
-        if (min != null) 'min': min,
-        if (max != null) 'max': max,
-        if (average != null) 'average': average,
-        'tags': tags,
-      };
+    'name': name,
+    'type': type.name,
+    'count': count,
+    'sum': sum,
+    if (value != null) 'value': value,
+    if (min != null) 'min': min,
+    if (max != null) 'max': max,
+    if (average != null) 'average': average,
+    'tags': tags,
+  };
 }
-

@@ -1,4 +1,6 @@
 import 'package:fly_cli/src/shared/logging/domain/appender.dart';
+import 'package:fly_cli/src/shared/logging/domain/logger.dart';
+import 'package:fly_cli/src/shared/logging/domain/logging_context.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/appenders/console_appender.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/appenders/datadog_appender.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/appenders/file_appender.dart';
@@ -6,10 +8,8 @@ import 'package:fly_cli/src/shared/logging/infrastructure/appenders/http_appende
 import 'package:fly_cli/src/shared/logging/infrastructure/appenders/sentry_appender.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/formatters/human_formatter.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/formatters/json_formatter.dart';
-import 'package:fly_cli/src/shared/logging/domain/logger.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/logger_impl.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/logging_config.dart';
-import 'package:fly_cli/src/shared/logging/domain/logging_context.dart';
 
 class LoggerFactory {
   LoggerFactory(this.config, {this.baseContext, this.name});

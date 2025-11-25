@@ -3,14 +3,14 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
+import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
+import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/command_context_impl.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/cli/infrastructure/path_management/path_resolver.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_config.dart';
-import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_factory.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
@@ -152,8 +152,13 @@ class CommandTestHelper {
     var current = Directory.current;
     while (current.path != current.parent.path) {
       // Check if this directory contains packages/fly_cli/bin/fly.dart
-      final flyDartPath =
-          path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
+      final flyDartPath = path.join(
+        current.path,
+        'packages',
+        'fly_cli',
+        'bin',
+        'fly.dart',
+      );
       if (File(flyDartPath).existsSync()) {
         workspaceRoot = current.path;
         break;
@@ -166,8 +171,13 @@ class CommandTestHelper {
       current = Directory.current;
       while (current.path != current.parent.path) {
         if (File(path.join(current.path, 'melos.yaml')).existsSync()) {
-          final flyDartPath =
-              path.join(current.path, 'packages', 'fly_cli', 'bin', 'fly.dart');
+          final flyDartPath = path.join(
+            current.path,
+            'packages',
+            'fly_cli',
+            'bin',
+            'fly.dart',
+          );
           if (File(flyDartPath).existsSync()) {
             workspaceRoot = current.path;
             break;
@@ -182,11 +192,33 @@ class CommandTestHelper {
       // Try relative to current directory
       final possiblePaths = [
         path.join(
-            Directory.current.path, 'packages', 'fly_cli', 'bin', 'fly.dart'),
-        path.normalize(path.join(Directory.current.path, '..', '..', 'packages',
-            'fly_cli', 'bin', 'fly.dart')),
-        path.normalize(path.join(Directory.current.path, '..', 'packages',
-            'fly_cli', 'bin', 'fly.dart')),
+          Directory.current.path,
+          'packages',
+          'fly_cli',
+          'bin',
+          'fly.dart',
+        ),
+        path.normalize(
+          path.join(
+            Directory.current.path,
+            '..',
+            '..',
+            'packages',
+            'fly_cli',
+            'bin',
+            'fly.dart',
+          ),
+        ),
+        path.normalize(
+          path.join(
+            Directory.current.path,
+            '..',
+            'packages',
+            'fly_cli',
+            'bin',
+            'fly.dart',
+          ),
+        ),
       ];
 
       for (final flyPath in possiblePaths) {
@@ -204,11 +236,21 @@ class CommandTestHelper {
     workspaceRoot ??= Directory.current.path;
 
     // Set templates directory environment variable so template validation works
-    final templatesDir = path.join(workspaceRoot, 'packages', 'fly_cli', 'templates');
+    final templatesDir = path.join(
+      workspaceRoot,
+      'packages',
+      'fly_cli',
+      'templates',
+    );
     testEnvironment['FLY_TEMPLATES_DIR'] = templatesDir;
 
-    final flyDartPath =
-        path.join(workspaceRoot, 'packages', 'fly_cli', 'bin', 'fly.dart');
+    final flyDartPath = path.join(
+      workspaceRoot,
+      'packages',
+      'fly_cli',
+      'bin',
+      'fly.dart',
+    );
     final flyDartFile = File(flyDartPath);
 
     if (!flyDartFile.existsSync()) {
@@ -274,7 +316,8 @@ class CommandTestHelper {
               final candidate = json.decode(line) as Map<String, dynamic>;
               // Heuristic: prefer JSON objects that look like CommandResult
               final hasSuccess = candidate.containsKey('success');
-              final hasMessage = candidate.containsKey('message') ||
+              final hasMessage =
+                  candidate.containsKey('message') ||
                   candidate.containsKey('summary');
               if (hasSuccess && hasMessage) {
                 // Keep the last valid JSON object encountered
@@ -291,14 +334,18 @@ class CommandTestHelper {
               success: jsonOutput['success'] as bool? ?? (exitCode == 0),
               command:
                   jsonOutput['command'] as String? ?? _extractCommandName(args),
-              message: (jsonOutput['message'] as String?) ??
+              message:
+                  (jsonOutput['message'] as String?) ??
                   (jsonOutput['summary'] as String?) ??
                   'Command executed',
-              data: (jsonOutput['data'] as Map<String, dynamic>?) ??
+              data:
+                  (jsonOutput['data'] as Map<String, dynamic>?) ??
                   (jsonOutput['details'] as Map<String, dynamic>?),
-              suggestion: jsonOutput['suggestion'] as String? ??
+              suggestion:
+                  jsonOutput['suggestion'] as String? ??
                   jsonOutput['recommendation'] as String?,
-              metadata: (jsonOutput['metadata'] as Map<String, dynamic>?) ??
+              metadata:
+                  (jsonOutput['metadata'] as Map<String, dynamic>?) ??
                   (jsonOutput['context'] as Map<String, dynamic>?),
             );
           }
@@ -314,7 +361,8 @@ class CommandTestHelper {
               success: false,
               command:
                   errorJson['command'] as String? ?? _extractCommandName(args),
-              message: errorJson['message'] as String? ??
+              message:
+                  errorJson['message'] as String? ??
                   (errorJson['error'] as Map<String, dynamic>?)?['message']
                       as String? ??
                   'Command failed',
@@ -346,7 +394,8 @@ class CommandTestHelper {
             success: false,
             command:
                 errorJson['command'] as String? ?? _extractCommandName(args),
-            message: errorJson['message'] as String? ??
+            message:
+                errorJson['message'] as String? ??
                 (errorJson['error'] as Map<String, dynamic>?)?['message']
                     as String? ??
                 'Command failed',
@@ -362,8 +411,9 @@ class CommandTestHelper {
       return CommandResult(
         success: exitCode == 0,
         command: _extractCommandName(args),
-        message:
-            exitCode == 0 ? 'Command executed successfully' : 'Command failed',
+        message: exitCode == 0
+            ? 'Command executed successfully'
+            : 'Command failed',
         suggestion: exitCode != 0 && stderrStr.isNotEmpty ? stderrStr : null,
       );
     }
@@ -406,7 +456,8 @@ class CommandTestHelper {
     }
     final id = DateTime.now().millisecondsSinceEpoch;
     final dir = Directory(
-        path.join(root.path, (prefix ?? 'fly_test_') + id.toString()));
+      path.join(root.path, (prefix ?? 'fly_test_') + id.toString()),
+    );
     dir.createSync(recursive: true);
     return dir;
   }
@@ -620,8 +671,11 @@ void main() {
     List<String> requiredKeys,
   ) {
     for (final key in requiredKeys) {
-      expect(json.containsKey(key), isTrue,
-          reason: 'Missing required key: $key');
+      expect(
+        json.containsKey(key),
+        isTrue,
+        reason: 'Missing required key: $key',
+      );
     }
   }
 

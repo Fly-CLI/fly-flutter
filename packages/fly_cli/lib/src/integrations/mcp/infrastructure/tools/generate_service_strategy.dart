@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
+import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_service_params.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/generate_service_result.dart';
 import 'package:fly_mcp/fly_mcp.dart';
 
 /// Strategy for fly.generate.service tool
-class GenerateServiceStrategy extends McpToolStrategy<
-    GenerateServiceParams, GenerateServiceResult> {
+class GenerateServiceStrategy
+    extends McpToolStrategy<GenerateServiceParams, GenerateServiceResult> {
   @override
   String get name => 'fly.generate.service';
 
@@ -19,30 +19,31 @@ class GenerateServiceStrategy extends McpToolStrategy<
 
   @override
   ObjectSchema get paramsSchema => ObjectSchema(
-        properties: {
-          'serviceName': Schema.string(),
-          'feature': Schema.string(),
-          'serviceType': Schema.string(
-              enumValues: ['api', 'local', 'cache', 'analytics', 'storage']),
-          'withTests': Schema.bool(),
-          'withMocks': Schema.bool(),
-          'withInterceptors': Schema.bool(),
-          'baseUrl': Schema.string(),
-        },
-        required: ['serviceName'],
-        additionalProperties: false,
-      );
+    properties: {
+      'serviceName': Schema.string(),
+      'feature': Schema.string(),
+      'serviceType': Schema.string(
+        enumValues: ['api', 'local', 'cache', 'analytics', 'storage'],
+      ),
+      'withTests': Schema.bool(),
+      'withMocks': Schema.bool(),
+      'withInterceptors': Schema.bool(),
+      'baseUrl': Schema.string(),
+    },
+    required: ['serviceName'],
+    additionalProperties: false,
+  );
 
   @override
   ObjectSchema get resultSchema => ObjectSchema(
-        properties: {
-          'success': Schema.bool(),
-          'message': Schema.string(),
-          'filesGenerated': Schema.int(),
-          'servicePath': Schema.string(),
-        },
-        required: ['success', 'message'],
-      );
+    properties: {
+      'success': Schema.bool(),
+      'message': Schema.string(),
+      'filesGenerated': Schema.int(),
+      'servicePath': Schema.string(),
+    },
+    required: ['success', 'message'],
+  );
 
   @override
   bool get readOnly => false;
@@ -66,7 +67,7 @@ class GenerateServiceStrategy extends McpToolStrategy<
 
   @override
   TypedToolHandler<GenerateServiceParams, GenerateServiceResult>
-      createTypedHandler(
+  createTypedHandler(
     CommandContext context,
     ResourceRegistry resourceRegistry,
   ) {
@@ -112,7 +113,8 @@ class GenerateServiceStrategy extends McpToolStrategy<
       if (!result.success) {
         return GenerateServiceResult(
           success: false,
-          message: 'Failed to generate service: ${result.error ?? 'Unknown error'}',
+          message:
+              'Failed to generate service: ${result.error ?? 'Unknown error'}',
         );
       }
 
@@ -125,5 +127,3 @@ class GenerateServiceStrategy extends McpToolStrategy<
     };
   }
 }
-
-

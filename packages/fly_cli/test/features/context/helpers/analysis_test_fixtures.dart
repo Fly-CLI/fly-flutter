@@ -6,7 +6,8 @@ import 'package:path/path.dart' as path;
 class AnalysisTestFixtures {
   /// Create a minimal Flutter project for testing
   static Future<Directory> createMinimalFlutterProject(
-      Directory tempDir) async {
+    Directory tempDir,
+  ) async {
     final projectDir = Directory(path.join(tempDir.path, 'minimal_project'));
     await projectDir.create(recursive: true);
 
@@ -27,7 +28,8 @@ class AnalysisTestFixtures {
 
   /// Create a complex Flutter project for testing
   static Future<Directory> createComplexFlutterProject(
-      Directory tempDir) async {
+    Directory tempDir,
+  ) async {
     final projectDir = Directory(path.join(tempDir.path, 'complex_project'));
     await projectDir.create(recursive: true);
 
@@ -74,7 +76,8 @@ class AnalysisTestFixtures {
 
     // Create README.md for documented convention
     await File(path.join(projectDir.path, 'README.md')).writeAsString(
-        '# Complex Test Project\n\nA complex Flutter project for testing.');
+      '# Complex Test Project\n\nA complex Flutter project for testing.',
+    );
 
     return projectDir;
   }
@@ -89,8 +92,9 @@ class AnalysisTestFixtures {
     await pubspecFile.writeAsString(flyPubspecContent);
 
     // Create fly_project.yaml
-    final flyManifestFile =
-        File(path.join(projectDir.path, 'fly_project.yaml'));
+    final flyManifestFile = File(
+      path.join(projectDir.path, 'fly_project.yaml'),
+    );
     await flyManifestFile.writeAsString(flyManifestContent);
 
     // Create lib directory
@@ -106,8 +110,9 @@ class AnalysisTestFixtures {
 
   /// Create a problematic project for error testing
   static Future<Directory> createProblematicProject(Directory tempDir) async {
-    final projectDir =
-        Directory(path.join(tempDir.path, 'problematic_project'));
+    final projectDir = Directory(
+      path.join(tempDir.path, 'problematic_project'),
+    );
     await projectDir.create(recursive: true);
 
     // Create pubspec.yaml with conflicts
@@ -182,7 +187,8 @@ class ProviderWidget extends StatelessWidget {
     for (int i = 0; i < 50; i++) {
       final file = File(path.join(libDir.path, 'file_$i.dart'));
       await file.writeAsString(
-          '// File $i\nclass File${i}Class {\n  void method$i() {\n    print("File $i");\n  }\n}');
+        '// File $i\nclass File${i}Class {\n  void method$i() {\n    print("File $i");\n  }\n}',
+      );
     }
 
     return projectDir;

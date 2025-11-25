@@ -47,10 +47,10 @@ class ScreenConfig {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        if (type != null) 'type': type,
-        'features': features,
-      };
+    'name': name,
+    if (type != null) 'type': type,
+    'features': features,
+  };
 }
 
 /// Configuration for a service in the manifest
@@ -91,11 +91,11 @@ class ServiceConfig {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        if (apiBase != null) 'api_base': apiBase,
-        if (type != null) 'type': type,
-        'features': features,
-      };
+    'name': name,
+    if (apiBase != null) 'api_base': apiBase,
+    if (type != null) 'type': type,
+    'features': features,
+  };
 }
 
 /// Configuration map for service generation with Mason brick
@@ -151,14 +151,14 @@ class ServiceConfigMap {
 
   /// Convert to JSON map
   Map<String, dynamic> toJson() => {
-        'service_name': serviceName,
-        'feature': feature,
-        'service_type': serviceType,
-        'with_tests': withTests,
-        'with_mocks': withMocks,
-        'with_interceptors': withInterceptors,
-        'base_url': baseUrl,
-      };
+    'service_name': serviceName,
+    'feature': feature,
+    'service_type': serviceType,
+    'with_tests': withTests,
+    'with_mocks': withMocks,
+    'with_interceptors': withInterceptors,
+    'base_url': baseUrl,
+  };
 
   /// Convert to JSON string
   String toJsonString() => jsonEncode(toJson());
@@ -232,19 +232,19 @@ class ManifestConfig {
   }
 
   Map<String, dynamic> toJson() => {
-        if (minSdkVersion != null) 'min_sdk_version': minSdkVersion,
-        if (targetSdkVersion != null) 'target_sdk_version': targetSdkVersion,
-        if (iosDeploymentTarget != null)
-          'ios_deployment_target': iosDeploymentTarget,
-        'code_generation': {
-          'generate_tests': generateTests,
-          'generate_docs': generateDocs,
-        },
-        'ai_integration': {
-          'generate_context': generateContext,
-          'include_examples': includeExamples,
-        },
-      };
+    if (minSdkVersion != null) 'min_sdk_version': minSdkVersion,
+    if (targetSdkVersion != null) 'target_sdk_version': targetSdkVersion,
+    if (iosDeploymentTarget != null)
+      'ios_deployment_target': iosDeploymentTarget,
+    'code_generation': {
+      'generate_tests': generateTests,
+      'generate_docs': generateDocs,
+    },
+    'ai_integration': {
+      'generate_context': generateContext,
+      'include_examples': includeExamples,
+    },
+  };
 }
 
 /// Main project manifest class
@@ -324,12 +324,13 @@ class ProjectManifest {
       'web',
       'macos',
       'windows',
-      'linux'
+      'linux',
     ];
     for (final platform in platforms) {
       if (!validPlatforms.contains(platform)) {
         throw ManifestException(
-            'Invalid platform: $platform. Must be one of: ${validPlatforms.join(', ')}');
+          'Invalid platform: $platform. Must be one of: ${validPlatforms.join(', ')}',
+        );
       }
     }
 
@@ -359,7 +360,9 @@ class ProjectManifest {
     final packages = (yaml['packages'] as List?)?.cast<String>() ?? [];
 
     // Parse config
-    final config = ManifestConfig.fromYaml(yaml['config'] as Map<dynamic, dynamic>?);
+    final config = ManifestConfig.fromYaml(
+      yaml['config'] as Map<dynamic, dynamic>?,
+    );
 
     return ProjectManifest(
       name: name,
@@ -391,16 +394,16 @@ class ProjectManifest {
 
   /// Convert to JSON for debugging/testing
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'template': template,
-        'organization': organization,
-        if (description != null) 'description': description,
-        'platforms': platforms,
-        'screens': screens.map((s) => s.toJson()).toList(),
-        'services': services.map((s) => s.toJson()).toList(),
-        'packages': packages,
-        'config': config.toJson(),
-      };
+    'name': name,
+    'template': template,
+    'organization': organization,
+    if (description != null) 'description': description,
+    'platforms': platforms,
+    'screens': screens.map((s) => s.toJson()).toList(),
+    'services': services.map((s) => s.toJson()).toList(),
+    'packages': packages,
+    'config': config.toJson(),
+  };
 
   /// Validate project name format
   static bool _isValidProjectName(String name) {
