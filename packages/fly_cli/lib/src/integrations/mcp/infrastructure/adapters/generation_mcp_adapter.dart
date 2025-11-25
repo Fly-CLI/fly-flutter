@@ -33,21 +33,16 @@ class GenerationMcpAdapter {
     bool? withNavigation,
     required String outputDirectory,
   }) async {
-    final variables = <String, dynamic>{
-      'name': screenName,
-      'component_name': screenName,
-      'generation_mode': 'feature',
-      if (feature != null) 'feature': feature,
-      if (screenType != null) 'screen_type': screenType,
-      if (withViewModel != null) 'with_viewmodel': withViewModel,
-      if (withTests != null) 'with_tests': withTests,
-      if (withValidation != null) 'with_validation': withValidation,
-      if (withNavigation != null) 'with_navigation': withNavigation,
-      'preset': 'starter',
-    };
-
     final request = FeatureGenerationRequest(
-      variables: variables,
+      name: screenName,
+      feature: feature ?? 'home',
+      screenType: screenType != null
+          ? ScreenType.fromKey(screenType)
+          : ScreenType.list,
+      withViewModel: withViewModel ?? false,
+      withTests: withTests ?? true,
+      withValidation: withValidation ?? false,
+      withNavigation: withNavigation ?? false,
       outputDirectory: outputDirectory,
     );
 
@@ -65,20 +60,16 @@ class GenerationMcpAdapter {
     String? baseUrl,
     required String outputDirectory,
   }) async {
-    final variables = <String, dynamic>{
-      'name': serviceName,
-      'generation_mode': 'service',
-      if (feature != null) 'feature': feature,
-      if (serviceType != null) 'service_type': serviceType,
-      if (withTests != null) 'with_tests': withTests,
-      if (withMocks != null) 'with_mocks': withMocks,
-      if (withInterceptors != null) 'with_interceptors': withInterceptors,
-      if (baseUrl != null) 'api_base_url': baseUrl,
-      'preset': 'starter',
-    };
-
     final request = ServiceGenerationRequest(
-      variables: variables,
+      name: serviceName,
+      feature: feature ?? 'core',
+      serviceType: serviceType != null
+          ? ServiceType.fromKey(serviceType)
+          : ServiceType.api,
+      withTests: withTests ?? true,
+      withMocks: withMocks ?? false,
+      withInterceptors: withInterceptors ?? false,
+      apiBaseUrl: baseUrl,
       outputDirectory: outputDirectory,
     );
 
@@ -95,20 +86,30 @@ class GenerationMcpAdapter {
     List<String>? features,
     required String outputDirectory,
   }) async {
-    final variables = <String, dynamic>{
-      'name': projectName,
-      'project_name': projectName,
-      'generation_mode': 'project',
-      if (template != null) 'template': template,
-      if (organization != null) 'organization': organization,
-      if (description != null) 'description': description,
-      if (platforms != null) 'platforms': platforms,
-      if (features != null) 'features': features,
-      'preset': 'starter',
-    };
+    // Convert features list to feature instances format
+    final featureInstances = (features ?? []).map((featureName) {
+      return {
+        'name': featureName,
+        'type': 'feature',
+        'params': {
+          'feature': featureName,
+          'screen_type': 'list',
+          'with_viewmodel': true,
+          'with_tests': true,
+          'with_validation': false,
+          'with_navigation': false,
+        },
+      };
+    }).toList();
 
     final request = ProjectGenerationRequest(
-      variables: variables,
+      name: projectName,
+      template: template ?? 'fly_foundation',
+      organization: organization ?? 'com.example',
+      description: description,
+      platforms: platforms ?? ['ios', 'android'],
+      features: featureInstances,
+      services: [],
       outputDirectory: outputDirectory,
     );
 

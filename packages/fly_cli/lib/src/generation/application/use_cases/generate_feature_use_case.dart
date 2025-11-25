@@ -42,7 +42,7 @@ class GenerateFeatureUseCase {
 
       // 2. Process variables
       final processed = await _variableProcessor.process(
-        rawVars: request.variables,
+        rawVars: request.toVariablesMap(),
         mode: GenerationMode.feature,
         brick: brick,
       );

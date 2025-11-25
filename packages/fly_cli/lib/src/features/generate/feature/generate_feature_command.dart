@@ -7,6 +7,7 @@ import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dar
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
@@ -109,9 +110,19 @@ class GenerateFeatureCommand extends FlyCommand {
       // Get generation handler from service container
       final handler = context.getService<GenerationCommandHandler>();
 
-      // Construct request
+      // Extract properties from rawVars and construct request
       final request = FeatureGenerationRequest(
-        variables: rawVars,
+        name: rawVars['name'] as String,
+        feature: rawVars['feature'] as String? ?? 'home',
+        screenType: ScreenType.tryFromKey(
+          rawVars['screen_type'] as String?,
+          defaultValue: ScreenType.empty,
+        ) ?? ScreenType.empty,
+        withViewModel: rawVars['with_viewmodel'] as bool? ?? false,
+        withTests: rawVars['with_tests'] as bool? ?? true,
+        withValidation: rawVars['with_validation'] as bool? ?? false,
+        withNavigation: rawVars['with_navigation'] as bool? ?? false,
+        preset: rawVars['preset'] as String? ?? 'starter',
         outputDirectory: targetDir,
         dryRun: context.planMode,
       );

@@ -176,8 +176,8 @@ void main() {
           ),
         );
 
-        final request = FeatureGenerationRequest(
-          variables: {'name': 'test_screen'},
+        const request = FeatureGenerationRequest(
+          name: 'test_screen',
           outputDirectory: '/test/output',
         );
 
@@ -211,8 +211,8 @@ void main() {
           ),
         );
 
-        final request = FeatureGenerationRequest(
-          variables: {'name': 'test_screen'},
+        const request = FeatureGenerationRequest(
+          name: 'test_screen',
           outputDirectory: '/test/output',
           dryRun: true,
         );
@@ -230,8 +230,8 @@ void main() {
         // Arrange
         mockRepository.setBrick(null);
 
-        final request = FeatureGenerationRequest(
-          variables: {'name': 'test_screen'},
+        const request = FeatureGenerationRequest(
+          name: 'test_screen',
           outputDirectory: '/test/output',
         );
 
@@ -260,8 +260,8 @@ void main() {
         mockRepository.setBrick(brick);
         mockProcessor.setShouldFail(true);
 
-        final request = FeatureGenerationRequest(
-          variables: {'name': 'test_screen'},
+        const request = FeatureGenerationRequest(
+          name: 'test_screen',
           outputDirectory: '/test/output',
         );
 
@@ -296,8 +296,8 @@ void main() {
         );
         mockEngine.setShouldThrow(true);
 
-        final request = FeatureGenerationRequest(
-          variables: {'name': 'test_screen'},
+        const request = FeatureGenerationRequest(
+          name: 'test_screen',
           outputDirectory: '/test/output',
         );
 

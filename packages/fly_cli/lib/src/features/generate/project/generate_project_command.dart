@@ -597,9 +597,16 @@ class GenerateProjectCommand extends FlyCommand {
       // Get generation handler from service container
       final handler = context.getService<GenerationCommandHandler>();
 
-      // Construct request
+      // Extract properties and construct request
       final request = ProjectGenerationRequest(
-        variables: projectRawVars,
+        name: projectName,
+        template: template,
+        organization: organization,
+        description: description,
+        platforms: platforms,
+        features: featureInstances,
+        services: serviceInstances,
+        preset: projectRawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
         outputDirectory: projectPath,
         dryRun: context.planMode,
       );

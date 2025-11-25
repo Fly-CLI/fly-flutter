@@ -7,6 +7,7 @@ import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dar
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
@@ -106,9 +107,19 @@ class GenerateServiceCommand extends FlyCommand {
       // Get generation handler from service container
       final handler = context.getService<GenerationCommandHandler>();
 
-      // Construct request
+      // Extract properties from rawVars and construct request
       final request = ServiceGenerationRequest(
-        variables: rawVars,
+        name: rawVars['name'] as String,
+        feature: rawVars['feature'] as String? ?? 'core',
+        serviceType: ServiceType.tryFromKey(
+          rawVars['service_type'] as String?,
+          defaultValue: ServiceType.api,
+        ) ?? ServiceType.api,
+        withTests: rawVars['with_tests'] as bool? ?? true,
+        withMocks: rawVars['with_mocks'] as bool? ?? false,
+        withInterceptors: rawVars['with_interceptors'] as bool? ?? false,
+        apiBaseUrl: rawVars['api_base_url'] as String?,
+        preset: rawVars['preset'] as String? ?? 'starter',
         outputDirectory: targetDir,
         dryRun: context.planMode,
       );

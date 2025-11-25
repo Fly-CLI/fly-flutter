@@ -6,6 +6,7 @@ typedef FoundationVars = Map<String, dynamic>;
 
 /// Screen type enum for feature generation.
 enum ScreenType {
+  empty,
   list,
   detail,
   form,
@@ -15,6 +16,8 @@ enum ScreenType {
   /// Returns the canonical string key used in Mason variables.
   String get key {
     switch (this) {
+      case ScreenType.empty:
+        return 'empty';
       case ScreenType.list:
         return 'list';
       case ScreenType.detail:
