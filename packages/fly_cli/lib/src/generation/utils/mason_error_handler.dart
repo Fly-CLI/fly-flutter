@@ -32,8 +32,8 @@ class MasonErrorHandler {
     final suggestion = getSuggestion(errorType, context);
 
     // Log detailed error information
-    final logger = Logger();
-    logger.err('Mason $operation error for brick "$brickName": $error');
+    final logger = Logger()
+      ..err('Mason $operation error for brick "$brickName": $error');
 
     if (context != null) {
       logger.detail('Error context: $context');

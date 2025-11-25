@@ -27,6 +27,6 @@ class PresetDeriver implements VariableDeriver {
       preset = FoundationPreset.starter;
     }
 
-    return current.set(MasonVarKey.flyPackages.key, preset.flyPackages);
+    return current.set(BaseVarKey.flyPackages.key, preset.flyPackages);
   }
 }

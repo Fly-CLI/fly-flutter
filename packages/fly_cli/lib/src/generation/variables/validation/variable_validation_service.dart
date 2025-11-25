@@ -48,7 +48,7 @@ class VariableValidationService {
     } else {
       // Try to infer mode from variables
       final modeStr =
-          (variables.getVar<String>(MasonVarKey.generationMode) ?? 'project')
+          (variables.getVar<String>(BaseVarKey.generationMode) ?? 'project')
               .toLowerCase();
       try {
         final inferredMode = GenerationMode.fromKey(modeStr);
@@ -133,9 +133,9 @@ class VariableValidationService {
     Map<String, dynamic> variables,
   ) {
     final errors = <String>[];
-    final projectName = variables.getVar<String>(MasonVarKey.projectName);
-    final organization = variables.getVar<String>(MasonVarKey.organization);
-    final platforms = variables.getVar(MasonVarKey.platforms);
+    final projectName = variables.getVar<String>(BaseVarKey.projectName);
+    final organization = variables.getVar<String>(BaseVarKey.organization);
+    final platforms = variables.getVar(BaseVarKey.platforms);
 
     if (projectName == null || projectName.isEmpty) {
       errors.add('project_name is required for project generation');
@@ -177,9 +177,9 @@ class VariableValidationService {
     Map<String, dynamic> variables,
   ) {
     final errors = <String>[];
-    final componentName = variables.getVar<String>(MasonVarKey.componentName);
-    final feature = variables.getVar<String>(MasonVarKey.feature);
-    final screenTypeStr = variables.getVar<String>(MasonVarKey.screenType);
+    final componentName = variables.getVar<String>(BaseVarKey.componentName);
+    final feature = variables.getVar<String>(BaseVarKey.feature);
+    final screenTypeStr = variables.getVar<String>(FeatureVarKey.screenType);
 
     if (componentName == null || componentName.isEmpty) {
       errors.add('component_name is required for feature generation');
@@ -214,9 +214,9 @@ class VariableValidationService {
     Map<String, dynamic> variables,
   ) {
     final errors = <String>[];
-    final componentName = variables.getVar<String>(MasonVarKey.componentName);
-    final feature = variables.getVar<String>(MasonVarKey.feature);
-    final serviceTypeStr = variables.getVar<String>(MasonVarKey.serviceType);
+    final componentName = variables.getVar<String>(BaseVarKey.componentName);
+    final feature = variables.getVar<String>(BaseVarKey.feature);
+    final serviceTypeStr = variables.getVar<String>(ServiceVarKey.serviceType);
 
     if (componentName == null || componentName.isEmpty) {
       errors.add('component_name is required for service generation');
@@ -247,8 +247,8 @@ class VariableValidationService {
 
     if (serviceType == ServiceType.api) {
       final baseUrl =
-          variables.getVar<String>(MasonVarKey.baseUrl) ??
-          variables.getVar<String>(MasonVarKey.apiBaseUrl);
+          variables.getVar<String>(ServiceVarKey.baseUrl) ??
+          variables.getVar<String>(ServiceVarKey.apiBaseUrl);
       if (baseUrl == null || baseUrl.isEmpty) {
         errors.add('api_base_url is required when service_type is "api"');
       }

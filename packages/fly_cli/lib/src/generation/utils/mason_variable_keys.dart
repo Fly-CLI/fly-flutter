@@ -1,13 +1,20 @@
 /// Centralized type-safe constants for all Mason variable keys.
 ///
-/// This enum provides a single source of truth for all variable keys used
-/// throughout the Fly CLI codebase and Mason templates. Using this enum instead
-/// of hardcoded string literals ensures:
+/// This module provides specialized enums for different generation modes,
+/// following SOLID principles by separating concerns:
+///
+/// - **BaseVarKey**: Shared variables used across all generation modes
+/// - **ProjectVarKey**: Project-specific variables
+/// - **FeatureVarKey**: Feature-specific variables
+/// - **ServiceVarKey**: Service-specific variables
+///
+/// Using these enums instead of hardcoded string literals ensures:
 ///
 /// - **Type Safety**: Compile-time validation prevents typos and incorrect key usage
 /// - **Maintainability**: Key name changes require updates in only one place
 /// - **IDE Support**: Autocomplete and refactoring support for all keys
 /// - **Consistency**: Guaranteed consistency across all variable access points
+/// - **Separation of Concerns**: Each enum contains only relevant variables
 ///
 /// ## Usage
 ///
@@ -15,8 +22,8 @@
 /// ```dart
 /// Map<String, dynamic> toMasonVars() {
 ///   return {
-///     MasonVarKey.projectName.key: projectName,
-///     MasonVarKey.organization.key: organization,
+///     BaseVarKey.projectName.key: projectName,
+///     BaseVarKey.organization.key: organization,
 ///     // ...
 ///   };
 /// }
@@ -25,29 +32,40 @@
 /// ### In `fromMasonVars()` / `fromVars()` methods:
 /// ```dart
 /// factory MyClass.fromMasonVars(Map<String, dynamic> vars) {
-///   final name = vars[MasonVarKey.name.key] as String?;
+///   final name = vars[BaseVarKey.name.key] as String?;
 ///   // or using the helper extension:
-///   final name = vars.getVar<String>(MasonVarKey.name);
+///   final name = vars.getVar<String>(BaseVarKey.name);
 /// }
 /// ```
 ///
 /// ### Direct map access:
 /// ```dart
-/// final value = vars[MasonVarKey.projectName.key];
+/// final value = vars[BaseVarKey.projectName.key];
 /// // or using the helper extension:
-/// final value = vars.getVar<String>(MasonVarKey.projectName);
+/// final value = vars.getVar<String>(BaseVarKey.projectName);
 /// ```
 ///
 /// ## Adding New Keys
 ///
 /// When adding a new Mason variable key:
-/// 1. Add it to this enum in the appropriate section
+/// 1. Add it to the appropriate enum (BaseVarKey, ProjectVarKey, FeatureVarKey, or ServiceVarKey)
 /// 2. Use the exact string value that Mason templates expect
 /// 3. Add documentation explaining the key's purpose
 /// 4. Update all usages to use the enum instead of string literals
-enum MasonVarKey {
+library;
+
+// ============================================================================
+// Base Variables - Shared across all generation modes
+// ============================================================================
+
+/// Base variable keys used across all generation modes (project, feature, service).
+///
+/// Contains shared variables that are used regardless of the generation mode,
+/// including basic project information, platform flags, mode flags, and
+/// cross-cutting feature flags.
+enum BaseVarKey {
   // ============================================================================
-  // Base Variables
+  // Basic Variables
   // ============================================================================
 
   /// Project/component name provided by the user.
@@ -97,59 +115,11 @@ enum MasonVarKey {
   flyPackages('fly_packages'),
 
   // ============================================================================
-  // Service Flags
-  // ============================================================================
-
-  /// Whether to include retry logic for services.
-  withRetryLogic('with_retry_logic'),
-
-  /// Whether to include caching for services.
-  withCaching('with_caching'),
-
-  /// Whether to include interceptors for services.
-  withInterceptors('with_interceptors'),
-
-  /// Whether to include mocks for services.
-  withMocks('with_mocks'),
-
-  // ============================================================================
-  // Feature-Specific Flags
-  // ============================================================================
-
-  /// Whether to include view model for features.
-  withViewModel('with_viewmodel'),
-
-  /// Whether to include validation for features.
-  withValidation('with_validation'),
-
-  /// Whether to include navigation for features.
-  withNavigation('with_navigation'),
-
-  // ============================================================================
   // State Management
   // ============================================================================
 
   /// State management approach: 'riverpod', 'bloc', or 'cubit'.
   stateMgmt('state_mgmt'),
-
-  // ============================================================================
-  // Mode-Specific Variables
-  // ============================================================================
-
-  /// Screen type for feature generation: 'list', 'detail', 'form', 'auth', or 'settings'.
-  screenType('screen_type'),
-
-  /// Service type for service generation: 'api', 'local', 'cache', 'analytics', or 'storage'.
-  serviceType('service_type'),
-
-  /// API base URL for API service type.
-  apiBaseUrl('api_base_url'),
-
-  /// Alternative key for API base URL (legacy support).
-  baseUrl('base_url'),
-
-  /// Preset identifier (e.g., 'starter', 'batteries_included', 'minimal').
-  preset('preset'),
 
   // ============================================================================
   // Derived Naming Variables
@@ -171,23 +141,11 @@ enum MasonVarKey {
   // Mode Flags
   // ============================================================================
 
-  /// Whether the generation mode is 'project'.
-  isProject('is_project'),
-
-  /// Whether the generation mode is 'feature'.
-  isFeature('is_feature'),
-
   /// Whether the generation mode is 'service'.
   isService('is_service'),
 
   /// Active generation mode key (derived from generation_mode).
   activeMode('active_mode'),
-
-  /// Whether the component is a screen (legacy flag).
-  isScreen('is_screen'),
-
-  /// Whether the component is a provider (legacy flag).
-  isProvider('is_provider'),
 
   // ============================================================================
   // Platform Flags
@@ -215,6 +173,66 @@ enum MasonVarKey {
   supportsDesktop('supports_desktop'),
 
   // ============================================================================
+  // Component Naming
+  // ============================================================================
+
+  /// Feature name (for feature/service generation).
+  feature('feature'),
+
+  /// Component name (screen name or service name).
+  componentName('component_name'),
+
+  /// List of features (for project generation with multiple features).
+  features('features');
+
+  /// The string key used in Mason variable maps.
+  final String key;
+
+  const BaseVarKey(this.key);
+}
+
+// ============================================================================
+// Project Variables - Project-specific
+// ============================================================================
+
+/// Project-specific variable keys used only in project generation mode.
+enum ProjectVarKey {
+  /// Preset identifier (e.g., 'starter', 'batteries_included', 'minimal').
+  preset('preset');
+
+  /// The string key used in Mason variable maps.
+  final String key;
+
+  const ProjectVarKey(this.key);
+}
+
+// ============================================================================
+// Feature Variables - Feature-specific
+// ============================================================================
+
+/// Feature-specific variable keys used only in feature generation mode.
+enum FeatureVarKey {
+  // ============================================================================
+  // Feature-Specific Flags
+  // ============================================================================
+
+  /// Whether to include view model for features.
+  withViewModel('with_viewmodel'),
+
+  /// Whether to include validation for features.
+  withValidation('with_validation'),
+
+  /// Whether to include navigation for features.
+  withNavigation('with_navigation'),
+
+  // ============================================================================
+  // Mode-Specific Variables
+  // ============================================================================
+
+  /// Screen type for feature generation: 'list', 'detail', 'form', 'auth', or 'settings'.
+  screenType('screen_type'),
+
+  // ============================================================================
   // Feature Screen Flags
   // ============================================================================
 
@@ -239,6 +257,10 @@ enum MasonVarKey {
   /// Whether Cubit state management is used.
   useCubit('use_cubit'),
 
+  // ============================================================================
+  // Legacy Flags
+  // ============================================================================
+
   /// Whether screen type is 'list' (legacy flag).
   screenTypeList('screen_type_list'),
 
@@ -252,7 +274,48 @@ enum MasonVarKey {
   screenTypeAuth('screen_type_auth'),
 
   /// Whether screen type is 'settings' (legacy flag).
-  screenTypeSettings('screen_type_settings'),
+  screenTypeSettings('screen_type_settings');
+
+  /// The string key used in Mason variable maps.
+  final String key;
+
+  const FeatureVarKey(this.key);
+}
+
+// ============================================================================
+// Service Variables - Service-specific
+// ============================================================================
+
+/// Service-specific variable keys used only in service generation mode.
+enum ServiceVarKey {
+  // ============================================================================
+  // Service Flags
+  // ============================================================================
+
+  /// Whether to include retry logic for services.
+  withRetryLogic('with_retry_logic'),
+
+  /// Whether to include caching for services.
+  withCaching('with_caching'),
+
+  /// Whether to include interceptors for services.
+  withInterceptors('with_interceptors'),
+
+  /// Whether to include mocks for services.
+  withMocks('with_mocks'),
+
+  // ============================================================================
+  // Mode-Specific Variables
+  // ============================================================================
+
+  /// Service type for service generation: 'api', 'local', 'cache', 'analytics', or 'storage'.
+  serviceType('service_type'),
+
+  /// API base URL for API service type.
+  apiBaseUrl('api_base_url'),
+
+  /// Alternative key for API base URL (legacy support).
+  baseUrl('base_url'),
 
   // ============================================================================
   // Service Type Flags
@@ -285,6 +348,10 @@ enum MasonVarKey {
   /// Whether mocks should be generated (derived flag).
   generateMocks('generate_mocks'),
 
+  // ============================================================================
+  // Legacy Flags
+  // ============================================================================
+
   /// Whether service type is 'api' (legacy flag).
   serviceTypeApi('service_type_api'),
 
@@ -298,45 +365,118 @@ enum MasonVarKey {
   serviceTypeAnalytics('service_type_analytics'),
 
   /// Whether service type is 'storage' (legacy flag).
-  serviceTypeStorage('service_type_storage'),
-
-  // ============================================================================
-  // Component Naming
-  // ============================================================================
-
-  /// Feature name (for feature/service generation).
-  feature('feature'),
-
-  /// Component name (screen name or service name).
-  componentName('component_name'),
-
-  /// List of features (for project generation with multiple features).
-  features('features');
+  serviceTypeStorage('service_type_storage');
 
   /// The string key used in Mason variable maps.
   final String key;
 
-  const MasonVarKey(this.key);
+  const ServiceVarKey(this.key);
 }
 
-/// Extension on [MasonVarKey] for convenient access to the key string.
-extension MasonVarKeyExtension on MasonVarKey {
+// ============================================================================
+// Unified Type System
+// ============================================================================
+
+/// Sealed class providing a unified type for all variable key enums.
+///
+/// This allows extension methods and type-safe operations to work with
+/// any of the specialized enum types (BaseVarKey, ProjectVarKey, FeatureVarKey, ServiceVarKey).
+sealed class MasonVarKey {
+  /// The string key used in Mason variable maps.
+  String get key;
+
+  const MasonVarKey();
+
+  /// Creates a MasonVarKey from a BaseVarKey.
+  const factory MasonVarKey.base(BaseVarKey key) = _BaseVarKeyWrapper;
+
+  /// Creates a MasonVarKey from a ProjectVarKey.
+  const factory MasonVarKey.project(ProjectVarKey key) = _ProjectVarKeyWrapper;
+
+  /// Creates a MasonVarKey from a FeatureVarKey.
+  const factory MasonVarKey.feature(FeatureVarKey key) = _FeatureVarKeyWrapper;
+
+  /// Creates a MasonVarKey from a ServiceVarKey.
+  const factory MasonVarKey.service(ServiceVarKey key) = _ServiceVarKeyWrapper;
+}
+
+/// Internal wrapper for BaseVarKey.
+final class _BaseVarKeyWrapper extends MasonVarKey {
+  final BaseVarKey _key;
+
+  const _BaseVarKeyWrapper(this._key);
+
+  @override
+  String get key => _key.key;
+}
+
+/// Internal wrapper for ProjectVarKey.
+final class _ProjectVarKeyWrapper extends MasonVarKey {
+  final ProjectVarKey _key;
+
+  const _ProjectVarKeyWrapper(this._key);
+
+  @override
+  String get key => _key.key;
+}
+
+/// Internal wrapper for FeatureVarKey.
+final class _FeatureVarKeyWrapper extends MasonVarKey {
+  final FeatureVarKey _key;
+
+  const _FeatureVarKeyWrapper(this._key);
+
+  @override
+  String get key => _key.key;
+}
+
+/// Internal wrapper for ServiceVarKey.
+final class _ServiceVarKeyWrapper extends MasonVarKey {
+  final ServiceVarKey _key;
+
+  const _ServiceVarKeyWrapper(this._key);
+
+  @override
+  String get key => _key.key;
+}
+
+// ============================================================================
+// Extension Methods
+// ============================================================================
+
+/// Extension on variable key types for convenient access to the key string.
+///
+/// Works with BaseVarKey, ProjectVarKey, FeatureVarKey, ServiceVarKey, and MasonVarKey.
+extension MasonVarKeyExtension on Object {
   /// Returns the string key value.
   ///
   /// This is a convenience getter that provides a shorter syntax:
   /// ```dart
-  /// vars[MasonVarKey.projectName.key]  // Standard
-  /// vars[MasonVarKey.projectName.s]    // Shorter
+  /// vars[BaseVarKey.projectName.key]  // Standard
+  /// vars[BaseVarKey.projectName.s]    // Shorter
   /// ```
-  String get s => key;
+  String get s {
+    if (this is BaseVarKey) {
+      return (this as BaseVarKey).key;
+    } else if (this is ProjectVarKey) {
+      return (this as ProjectVarKey).key;
+    } else if (this is FeatureVarKey) {
+      return (this as FeatureVarKey).key;
+    } else if (this is ServiceVarKey) {
+      return (this as ServiceVarKey).key;
+    } else if (this is MasonVarKey) {
+      return (this as MasonVarKey).key;
+    }
+    throw ArgumentError('Invalid variable key type: ${this.runtimeType}');
+  }
 }
 
 /// Extension on [Map<String, dynamic>] for type-safe variable access.
 ///
 /// Provides a convenient way to access Mason variables with type safety:
 /// ```dart
-/// final name = vars.getVar<String>(MasonVarKey.projectName);
-/// final count = vars.getVar<int>(MasonVarKey.someCount) ?? 0;
+/// final name = vars.getVar<String>(BaseVarKey.projectName);
+/// final count = vars.getVar<int>(BaseVarKey.someCount) ?? 0;
 /// ```
 extension MasonVarsExtension on Map<String, dynamic> {
   /// Gets a variable value by key with type casting.
@@ -344,13 +484,30 @@ extension MasonVarsExtension on Map<String, dynamic> {
   /// Returns `null` if the key doesn't exist or if the value cannot be cast
   /// to the requested type.
   ///
+  /// Works with BaseVarKey, ProjectVarKey, FeatureVarKey, ServiceVarKey, and MasonVarKey.
+  ///
   /// Example:
   /// ```dart
-  /// final name = vars.getVar<String>(MasonVarKey.projectName);
-  /// final platforms = vars.getVar<List>(MasonVarKey.platforms);
+  /// final name = vars.getVar<String>(BaseVarKey.projectName);
+  /// final platforms = vars.getVar<List>(BaseVarKey.platforms);
   /// ```
-  T? getVar<T>(MasonVarKey key) {
-    final value = this[key.key];
+  T? getVar<T>(Object key) {
+    String keyString;
+    if (key is BaseVarKey) {
+      keyString = key.key;
+    } else if (key is ProjectVarKey) {
+      keyString = key.key;
+    } else if (key is FeatureVarKey) {
+      keyString = key.key;
+    } else if (key is ServiceVarKey) {
+      keyString = key.key;
+    } else if (key is MasonVarKey) {
+      keyString = key.key;
+    } else {
+      throw ArgumentError('Invalid variable key type: ${key.runtimeType}');
+    }
+
+    final value = this[keyString];
     if (value == null) return null;
     try {
       return value as T;

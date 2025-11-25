@@ -18,7 +18,7 @@ class PlatformDeriver implements VariableDeriver {
     ComposerLogger logger,
   ) {
     final platformsRaw =
-        ctx.rawVars[MasonVarKey.platforms.key] as List? ??
+        ctx.rawVars[BaseVarKey.platforms.key] as List? ??
         ctx.rawVars['platforms'] as List? ??
         ['ios', 'android'];
 
@@ -39,14 +39,14 @@ class PlatformDeriver implements VariableDeriver {
         .isNotEmpty;
 
     return current.setAll({
-      MasonVarKey.platforms.key: platformKeys, // Set platforms field itself
-      MasonVarKey.supportsIos.key: platforms.contains(PlatformType.ios),
-      MasonVarKey.supportsAndroid.key: platforms.contains(PlatformType.android),
-      MasonVarKey.supportsWeb.key: platforms.contains(PlatformType.web),
-      MasonVarKey.supportsMacos.key: platforms.contains(PlatformType.macos),
-      MasonVarKey.supportsWindows.key: platforms.contains(PlatformType.windows),
-      MasonVarKey.supportsLinux.key: platforms.contains(PlatformType.linux),
-      MasonVarKey.supportsDesktop.key: supportsDesktop,
+      BaseVarKey.platforms.key: platformKeys, // Set platforms field itself
+      BaseVarKey.supportsIos.key: platforms.contains(PlatformType.ios),
+      BaseVarKey.supportsAndroid.key: platforms.contains(PlatformType.android),
+      BaseVarKey.supportsWeb.key: platforms.contains(PlatformType.web),
+      BaseVarKey.supportsMacos.key: platforms.contains(PlatformType.macos),
+      BaseVarKey.supportsWindows.key: platforms.contains(PlatformType.windows),
+      BaseVarKey.supportsLinux.key: platforms.contains(PlatformType.linux),
+      BaseVarKey.supportsDesktop.key: supportsDesktop,
     });
   }
 }

@@ -213,7 +213,7 @@ enum FoundationPreset {
   /// Parses preset from vars and returns the corresponding enum.
   /// Defaults to starter if not specified.
   static FoundationPreset fromVars(FoundationVars vars) {
-    final presetStr = vars.getVar<String>(MasonVarKey.preset)?.toLowerCase();
+    final presetStr = vars.getVar<String>(ProjectVarKey.preset)?.toLowerCase();
     if (presetStr == null || presetStr.isEmpty) {
       return FoundationPreset.starter; // Default
     }
