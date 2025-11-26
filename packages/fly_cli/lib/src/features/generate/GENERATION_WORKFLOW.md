@@ -1034,10 +1034,158 @@ sealed class CommandResult {
 
 ---
 
+## Mode Strategy Pattern
+
+The generation system uses a **Mode Strategy Pattern** to decouple command handling from
+mode-specific logic. This allows new generation modes to be added without modifying central
+components like `GenerationCommandHandler`.
+
+### Architecture
+
+**GenerationModeStrategy** (`lib/src/generation/application/strategies/generation_mode_strategy.dart`):
+- Abstract interface that encapsulates mode-specific behavior
+- Each strategy knows how to:
+  - Execute generation for its mode (delegates to use case)
+  - Provide next-step suggestions for successful generation
+
+**GenerationModeRegistry** (`lib/src/generation/application/strategies/generation_mode_registry.dart`):
+- Central registry mapping `GenerationMode` → `GenerationModeStrategy`
+- Enables mode-agnostic command handling
+
+**Benefits**:
+- **Reduced coupling**: Adding a new mode only requires:
+  - Creating a new strategy
+  - Registering it in DI
+  - Adding a command/DTO
+- **No central switch statements**: Handler uses registry lookup instead
+- **Easier testing**: Strategies can be tested independently
+
+### Example Strategy
+
+```dart
+class FeatureGenerationModeStrategy implements GenerationModeStrategy {
+  FeatureGenerationModeStrategy({
+    required GenerateFeatureUseCase useCase,
+  }) : _useCase = useCase;
+
+  final GenerateFeatureUseCase _useCase;
+
+  @override
+  GenerationMode get mode => GenerationMode.feature;
+
+  @override
+  Future<GenerationResultDto> execute(GenerationRequestDto request) async {
+    if (request is! FeatureGenerationRequest) {
+      throw ArgumentError('Expected FeatureGenerationRequest');
+    }
+    return await _useCase.execute(request);
+  }
+
+  @override
+  List<NextStep> getNextSteps(GenerationResultDto result) {
+    return [
+      const NextStep(
+        command: 'flutter run',
+        description: 'Run the application to see the new screen',
+      ),
+    ];
+  }
+}
+```
+
+## Error Modeling
+
+The generation system uses structured error types for better error handling and user guidance.
+
+### GenerationErrorType
+
+**Location**: `lib/src/generation/domain/generation_error_type.dart`
+
+```dart
+enum GenerationErrorType {
+  brickNotFound,      // Brick was not found
+  variableValidation, // Variable validation failed
+  generationFailure,  // Generation operation failed
+  infrastructure,     // Infrastructure error (file system, Mason, etc.)
+  unknown,            // Unknown or unclassified error
+}
+```
+
+### Error Mapping
+
+**GenerationErrorMapper** (`lib/src/generation/domain/generation_error_mapper.dart`):
+- Maps exceptions and error conditions to `GenerationErrorType`
+- Provides consistent error categorization across the pipeline
+- Used in use cases and workflow orchestrator to tag errors
+
+### Error Flow
+
+1. **Domain/Infrastructure**: Exceptions or error conditions occur
+2. **Use Cases/Orchestrator**: Map to `GenerationErrorType` using `GenerationErrorMapper`
+3. **GenerationResult**: Includes `errorType` field
+4. **GenerationResultDto**: Carries `errorType` to presentation layer
+5. **CommandResult**: Uses `errorType` for contextual suggestions
+
+### Benefits
+
+- **Better user guidance**: Error-specific suggestions (e.g., "Verify brick name" for `brickNotFound`)
+- **Analytics**: Structured error data for monitoring and improvement
+- **Consistent handling**: All errors follow the same categorization pattern
+
+## Validation Boundaries
+
+The system maintains clear boundaries between CLI-level and business-level validation:
+
+### CLI-Level Validation (Presentation Layer)
+
+**Location**: Command validators (`*Command.validators`)
+
+**Responsibility**:
+- Check presence of required positional arguments
+- Validate basic format (e.g., file paths, directory existence)
+- Provide immediate feedback for CLI usage errors
+
+**Example**:
+```dart
+@override
+List<CommandValidator> get validators => [
+  RequiredArgumentValidator('screen_name'),
+  ScreenNameValidator(),  // Basic format check
+  FlutterProjectValidator(),
+];
+```
+
+### Business-Level Validation (Application Layer)
+
+**Location**: Variable processors and validators
+
+**Responsibility**:
+- Validate business rules (naming conventions, compatibility)
+- Cross-variable validation
+- Brick schema conformance
+
+**Example**:
+```dart
+// In FeatureVariableValidator
+List<String> validateBusinessRules(Map<String, dynamic> variables) {
+  // Business rules: snake_case naming, required fields, etc.
+}
+```
+
+### Key Principle
+
+**Builders** (`*VariableBuilder`) focus on:
+- Reading CLI flags/interactive input
+- Normalizing into variable maps
+- **NOT** performing business rule validation
+
+**Processors/Validators** are the **single source of truth** for business rules.
+
 ## Developer Guide: Adding New Generation Types
 
 This guide walks through adding a new generation type (e.g., `widget`, `model`, `repository`)
-following the existing patterns.
+following the existing patterns. With the mode strategy pattern, adding new types is simpler
+and requires fewer central changes.
 
 ### Step 1: Create Command Descriptor
 
@@ -1470,52 +1618,51 @@ class GenerateWidgetUseCase {
 }
 ```
 
-### Step 9: Update Command Handler
+### Step 9: Create Mode Strategy
 
-**Location**: `lib/src/features/generate/common/generation_command_handler.dart`
+**Location**: `lib/src/generation/application/strategies/widget_generation_mode_strategy.dart`
 
-**Add method**:
+**Create strategy**:
 ```dart
-class GenerationCommandHandler {
-  // ... existing code
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/use_cases/generate_widget_use_case.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
-  final GenerateWidgetUseCase _generateWidgetUseCase;
+class WidgetGenerationModeStrategy implements GenerationModeStrategy {
+  WidgetGenerationModeStrategy({
+    required GenerateWidgetUseCase useCase,
+  }) : _useCase = useCase;
 
-  GenerationCommandHandler({
-    required GenerateFeatureUseCase generateFeatureUseCase,
-    required GenerateServiceUseCase generateServiceUseCase,
-    required GenerateProjectUseCase generateProjectUseCase,
-    required GenerateWidgetUseCase generateWidgetUseCase, // Add
-  }) : _generateFeatureUseCase = generateFeatureUseCase,
-       _generateServiceUseCase = generateServiceUseCase,
-       _generateProjectUseCase = generateProjectUseCase,
-       _generateWidgetUseCase = generateWidgetUseCase; // Add
+  final GenerateWidgetUseCase _useCase;
 
-  Future<CommandResult> executeWidget(WidgetGenerationRequest request) async {
-    final result = await _generateWidgetUseCase.execute(request);
-    return _convertToCommandResult(result, GenerationMode.widget);
+  @override
+  GenerationMode get mode => GenerationMode.widget;
+
+  @override
+  Future<GenerationResultDto> execute(GenerationRequestDto request) async {
+    if (request is! WidgetGenerationRequest) {
+      throw ArgumentError('Expected WidgetGenerationRequest');
+    }
+    return await _useCase.execute(request);
   }
 
-  // Update _getNextSteps to include widget
-  List<NextStep> _getNextSteps(GenerationMode mode) {
-    switch (mode) {
-      case GenerationMode.feature:
-        // ... existing
-      case GenerationMode.service:
-        // ... existing
-      case GenerationMode.project:
-        // ... existing
-      case GenerationMode.widget: // Add
-        return [
-          const NextStep(
-            command: 'flutter run',
-            description: 'Run the application to see the new widget',
-          ),
-        ];
-    }
+  @override
+  List<NextStep> getNextSteps(GenerationResultDto result) {
+    return [
+      const NextStep(
+        command: 'flutter run',
+        description: 'Run the application to see the new widget',
+      ),
+    ];
   }
 }
 ```
+
+**Note**: With the mode strategy pattern, you no longer need to modify `GenerationCommandHandler`
+directly. The handler automatically uses the registry to find the appropriate strategy.
 
 ### Step 10: Register Command Descriptor
 
@@ -1568,28 +1715,36 @@ variables:
 
 ### Step 12: Update Dependency Injection
 
-**Location**: `lib/src/generation/infrastructure/di/generation_service_container.dart`
+**Location**: `lib/src/cli/application/bootstrapping/service_bootstrapper.dart`
 
 **Add services**:
 ```dart
-// Register use case
-container.register<GenerateWidgetUseCase>(
-  (c) => GenerateWidgetUseCase(
-    brickRepository: c.get<IBrickRepository>(),
-    variableProcessor: c.get<IVariableProcessor>(),
-    generationEngine: c.get<IGenerationEngine>(),
+// Register use case (if not already registered)
+..registerSingleton<GenerateWidgetUseCase>(
+  GenerateWidgetUseCase(
+    workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
   ),
-);
+)
 
-// Update handler registration
-container.register<GenerationCommandHandler>(
-  (c) => GenerationCommandHandler(
-    generateFeatureUseCase: c.get<GenerateFeatureUseCase>(),
-    generateServiceUseCase: c.get<GenerateServiceUseCase>(),
-    generateProjectUseCase: c.get<GenerateProjectUseCase>(),
-    generateWidgetUseCase: c.get<GenerateWidgetUseCase>(), // Add
+// Register mode strategy
+..registerSingleton<WidgetGenerationModeStrategy>(
+  WidgetGenerationModeStrategy(
+    useCase: container.get<GenerateWidgetUseCase>(),
   ),
-);
+)
+
+// Update registry registration
+..registerSingleton<GenerationModeRegistry>(
+  GenerationModeRegistry({
+    GenerationMode.feature: container.get<FeatureGenerationModeStrategy>(),
+    GenerationMode.service: container.get<ServiceGenerationModeStrategy>(),
+    GenerationMode.project: container.get<ProjectGenerationModeStrategy>(),
+    GenerationMode.widget: container.get<WidgetGenerationModeStrategy>(), // Add
+  }),
+)
+
+// Note: GenerationCommandHandler is already registered and will automatically
+// use the updated registry. No changes needed to handler registration!
 ```
 
 ### Step 13: Add Tests

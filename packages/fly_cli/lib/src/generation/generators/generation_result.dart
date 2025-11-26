@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/generation/domain/generation_error_type.dart';
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:mason/mason.dart';
@@ -14,6 +15,7 @@ class GenerationResult {
     this.files,
     this.targetDirectory,
     this.error,
+    this.errorType,
     this.data,
     this.isDryRun = false,
     this.preview,
@@ -42,11 +44,13 @@ class GenerationResult {
   /// Create a failed generation result.
   factory GenerationResult.failure({
     required String error,
+    GenerationErrorType? errorType,
     Map<String, dynamic>? data,
   }) {
     return GenerationResult._(
       success: false,
       error: error,
+      errorType: errorType,
       data: data,
     );
   }
@@ -79,6 +83,9 @@ class GenerationResult {
   /// Error message (only present on failure).
   final String? error;
 
+  /// Error type categorization (only present on failure).
+  final GenerationErrorType? errorType;
+
   /// Additional data for the result.
   final Map<String, dynamic>? data;
 
@@ -105,6 +112,7 @@ class GenerationResult {
       if (files != null) 'files_generated': files!.length,
       if (targetDirectory != null) 'target_directory': targetDirectory,
       if (error != null) 'error': error,
+      if (errorType != null) 'error_type': errorType!.name,
       if (duration != null) 'duration_ms': duration!.inMilliseconds,
       if (template != null) 'template_name': template!.name,
       if (preview != null) 'preview': preview!.toJson(),

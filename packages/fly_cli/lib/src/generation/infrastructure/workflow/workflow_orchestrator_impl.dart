@@ -1,6 +1,7 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
+import 'package:fly_cli/src/generation/domain/generation_error_mapper.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
@@ -45,9 +46,11 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
     final brickId = _getBrickIdFromMode(mode);
     final brick = await _templateManager.getBrick(brickId);
     if (brick == null) {
+      final errorData = {'brick_id': brickId, 'mode': mode.key};
       return GenerationResult.failure(
         error: 'Brick "$brickId" not found for mode ${mode.key}',
-        data: {'brick_id': brickId, 'mode': mode.key},
+        errorType: GenerationErrorMapper.fromData(errorData),
+        data: errorData,
       );
     }
 
@@ -61,14 +64,16 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
 
     // 3. Validate variables - fail early if validation fails
     if (!processed.validationResult.isValid) {
+      final errorData = {
+        'validation_errors': processed.validationResult.errors,
+        'brick_id': brickId,
+        'mode': mode.key,
+      };
       return GenerationResult.failure(
         error:
             'Variable validation failed: ${processed.validationResult.errors.join(', ')}',
-        data: {
-          'validation_errors': processed.validationResult.errors,
-          'brick_id': brickId,
-          'mode': mode.key,
-        },
+        errorType: GenerationErrorMapper.fromData(errorData),
+        data: errorData,
       );
     }
 

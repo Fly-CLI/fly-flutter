@@ -78,16 +78,6 @@ class GenerateFeatureCommand extends FlyCommand {
         outputDir: outputDir,
       );
 
-      // Validate variables
-      final validationResult = variableBuilder.validate(rawVars);
-      if (!validationResult.isValid) {
-        return CommandResult.error(
-          message: 'Validation failed: ${validationResult.errors.join(', ')}',
-          suggestion: 'Check your input and try again',
-          errorCode: ErrorCode.invalidArgumentValue,
-        );
-      }
-
       // Resolve output directory
       final outputDirResult = await context.pathResolver.resolveOutputDirectory(
         context,

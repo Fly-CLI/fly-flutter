@@ -1,5 +1,6 @@
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart' as domain;
+import 'package:fly_cli/src/generation/domain/generation_error_mapper.dart';
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/imason_adapter.dart';
@@ -51,9 +52,11 @@ class MasonGenerationEngine implements IGenerationEngine {
         targetDirectory: outputDirectory,
       );
     } catch (e) {
+      final errorData = {'brick_name': brick.name};
       return GenerationResult.failure(
         error: 'Generation failed: $e',
-        data: {'brick_name': brick.name},
+        errorType: GenerationErrorMapper.fromException(e),
+        data: errorData,
       );
     }
   }
@@ -81,9 +84,11 @@ class MasonGenerationEngine implements IGenerationEngine {
         preview: preview,
       );
     } catch (e) {
+      final errorData = {'brick_name': brick.name};
       return GenerationResult.failure(
         error: 'Preview generation failed: $e',
-        data: {'brick_name': brick.name},
+        errorType: GenerationErrorMapper.fromException(e),
+        data: errorData,
       );
     }
   }

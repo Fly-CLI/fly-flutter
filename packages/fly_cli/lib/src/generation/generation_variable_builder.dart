@@ -25,6 +25,11 @@ abstract class GenerationVariableBuilder {
   Map<String, dynamic> buildFromMap(Map<String, dynamic> input);
 
   /// Validate that all required variables are present.
+  ///
+  /// **Note**: This method delegates to validators for business rule validation.
+  /// For CLI-shape checks (presence of required args), use command validators.
+  /// Business rule validation is handled by processors/validators in the
+  /// application layer during workflow orchestration.
   ValidationResult validate(Map<String, dynamic> rawVars);
 }
 

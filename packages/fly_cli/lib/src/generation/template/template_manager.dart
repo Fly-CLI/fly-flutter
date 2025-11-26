@@ -4,27 +4,18 @@ import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/cache/domain/cache_models.dart';
 import 'package:fly_cli/src/generation/cache/domain/template_cache.dart';
-import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
 import 'package:fly_cli/src/generation/cache/infrastructure/sdk_version_cache.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart' as domain;
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart'
     as domain;
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_preview.dart';
-import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/template/template_variable.dart';
-import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
-import 'package:fly_cli/src/generation/variables/validation/feature_variable_validator.dart';
-import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
-import 'package:fly_cli/src/generation/variables/validation/project_variable_validator.dart';
-import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 import 'package:fly_cli/src/generation/versioning/compatibility_checker.dart';
 import 'package:fly_cli/src/generation/versioning/compatibility_result.dart';
 import 'package:fly_cli/src/generation/versioning/version_parser.dart';
 import 'package:fly_cli/src/generation/versioning/version_registry.dart';
 import 'package:fly_cli/src/shared/utils/version_utils.dart';
-import 'package:mason/mason.dart' as mason;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
@@ -35,20 +26,16 @@ import 'package:yaml/yaml.dart';
 /// Handles template discovery, validation, and generation using Mason bricks.
 /// Integrates with brick registry, caching, and comprehensive error handling.
 class TemplateManager {
+  /// Create a new TemplateManager instance.
   TemplateManager({
     required this.templatesDirectory,
     required this.logger,
     TemplateCacheManager? cacheManager,
-    BrickCacheManager? brickCacheManager,
     SdkVersionCache? sdkVersionCache,
   }) : _cacheManager = cacheManager ?? TemplateCacheManager(logger: logger),
-       _brickCacheManager =
-           brickCacheManager ?? BrickCacheManager(logger: logger),
        _brickRegistry = BrickRegistry(logger: logger),
        _previewService = GenerationPreviewService(logger: logger),
        _sdkVersionCache = sdkVersionCache ?? SdkVersionCache(logger: logger);
-
-  static const String _defaultUnifiedTemplate = 'fly_foundation';
 
   /// Cached templates directory (avoids repeated directory existence checks)
   static String? _cachedTemplatesDir;
@@ -145,10 +132,11 @@ class TemplateManager {
     return _cachedTemplatesDir!;
   }
 
+  /// Templates directory (lazy initialized)
   final String templatesDirectory;
+  /// Logger instance
   final Logger logger;
   final TemplateCacheManager _cacheManager;
-  final BrickCacheManager _brickCacheManager;
   final BrickRegistry _brickRegistry;
   final GenerationPreviewService _previewService;
   final SdkVersionCache _sdkVersionCache;
@@ -243,109 +231,6 @@ class TemplateManager {
     }
   }
 
-  /// Generate from any brick type
-  Future<GenerationResult> generateFromBrick({
-    required String brickName,
-    required BrickType brickType,
-    required String outputDirectory,
-    required Map<String, dynamic> variables,
-    bool dryRun = false,
-  }) async {
-    try {
-      // Get brick info
-      final domain.Brick? brick = await getBrick(brickName);
-      if (brick == null) {
-        return GenerationResult.failure(
-          error: 'Brick "$brickName" not found',
-          data: {'brick_name': brickName},
-        );
-      }
-
-      if (brick.type != brickType) {
-        return GenerationResult.failure(
-          error:
-              'Brick "$brickName" is of type ${brick.type.name}, expected ${brickType.name}',
-          data: {
-            'brick_name': brickName,
-            'expected_type': brickType.name,
-            'actual_type': brick.type.name,
-          },
-        );
-      }
-
-      // Determine generation mode from brick type
-      final mode = _brickTypeToGenerationMode(brickType);
-
-      // Validate variables using mode-specific validator
-      if (mode != null) {
-        final validator = _getValidatorForMode(mode);
-        final validationErrors = validator.validateAll(
-          brick: brick,
-          variables: variables,
-        );
-        if (validationErrors.isNotEmpty) {
-          return GenerationResult.failure(
-            error: 'Variable validation failed: ${validationErrors.join(', ')}',
-            data: {
-              'validation_errors': validationErrors,
-              'brick_name': brickName,
-            },
-          );
-        }
-      }
-
-      // Generate preview if dry run
-      if (dryRun) {
-        logger.warn('Generating dry run preview for brick: $brickName');
-        final preview = await _previewService.generatePreview(
-          brickName: brickName,
-          brickType: brickType,
-          outputDirectory: outputDirectory,
-          variables: variables,
-        );
-
-        return GenerationResult.dryRun(
-          preview: preview,
-          template: _brickToTemplateInfo(brick),
-        );
-      }
-
-      // Perform actual generation
-      return await _performGeneration(brick, outputDirectory, variables);
-    } catch (e) {
-      return GenerationResult.failure(
-        error: 'Generation failed: ${e.toString()}',
-        data: {'brick_name': brickName},
-      );
-    }
-  }
-
-  /// Convert BrickType to GenerationMode
-  GenerationMode? _brickTypeToGenerationMode(BrickType brickType) {
-    switch (brickType) {
-      case BrickType.project:
-        return GenerationMode.project;
-      case BrickType.feature:
-        return GenerationMode.feature;
-      case BrickType.service:
-        return GenerationMode.service;
-      default:
-        return null;
-    }
-  }
-
-  /// Get validator for a generation mode.
-  IVariableValidator _getValidatorForMode(GenerationMode mode) {
-    switch (mode) {
-      case GenerationMode.project:
-        return ProjectVariableValidator();
-      case GenerationMode.feature:
-        return FeatureVariableValidator();
-      case GenerationMode.service:
-        return ServiceVariableValidator();
-    }
-  }
-
   /// Generate preview for brick generation
   Future<GenerationPreview> generatePreview({
     required String brickName,
@@ -360,168 +245,6 @@ class TemplateManager {
     variables: variables,
     projectName: projectName,
   );
-
-  /// Perform actual generation using Mason
-  Future<GenerationResult> _performGeneration(
-    domain.Brick brick,
-    String outputDirectory,
-    Map<String, dynamic> variables,
-  ) async {
-    try {
-      final startTime = DateTime.now();
-
-      logger
-        ..info('Generating from brick: ${brick.name}')
-        ..warn('Brick path: ${brick.path}')
-        ..warn('Variables: $variables');
-
-      // Create Brick instance from brick directory
-      final brickInstance = mason.Brick.path(brick.path);
-      logger.warn('Brick loaded: ${brick.path}');
-
-      // Create MasonGenerator from brick
-      final generator = await mason.MasonGenerator.fromBrick(brickInstance);
-      logger.warn('Generator created successfully');
-
-      // Create target directory
-      final targetDir = Directory(outputDirectory);
-      await targetDir.create(recursive: true);
-      logger.warn('Target directory created: $outputDirectory');
-
-      // Create DirectoryGeneratorTarget
-      final target = mason.DirectoryGeneratorTarget(targetDir);
-      logger.warn('Target created: $outputDirectory');
-
-      // Handle feature iteration for project bricks
-      // Mason doesn't automatically iterate over list variables in directory names
-      if (brick.type == BrickType.project &&
-          variables.containsKey(BaseVarKey.features.key)) {
-        final features = variables.getVar<List<dynamic>>(BaseVarKey.features);
-        if (features != null && features.isNotEmpty) {
-          // Convert features to strings and remove duplicates
-          final uniqueFeatures = features
-              .map((f) => f.toString())
-              .toSet()
-              .toList();
-
-          // First, generate base project structure with first feature
-          // This ensures base files are generated
-          final baseVariables = Map<String, dynamic>.from(variables);
-          baseVariables[BaseVarKey.feature.key] = uniqueFeatures.first;
-
-          logger.info(
-            'Generating base project structure with feature: ${uniqueFeatures.first}...',
-          );
-          final baseFiles = await generator.generate(
-            target,
-            vars: baseVariables,
-            logger: logger,
-            fileConflictResolution: mason.FileConflictResolution.overwrite,
-          );
-
-          // Collect all generated files
-          final allFiles = <mason.GeneratedFile>[...baseFiles];
-          var totalFiles = baseFiles.length;
-          logger.info('✓ Base structure generated ($totalFiles files)');
-
-          // Then generate each additional feature separately
-          // Each generation will create the {{feature}}/ directory for that feature
-          if (uniqueFeatures.length > 1) {
-            logger.info(
-              'Generating ${uniqueFeatures.length - 1} additional feature(s)...',
-            );
-            for (int i = 1; i < uniqueFeatures.length; i++) {
-              final featureName = uniqueFeatures[i];
-              logger.warn('Generating feature: $featureName');
-
-              final featureVariables = Map<String, dynamic>.from(variables);
-              featureVariables[BaseVarKey.feature.key] = featureName;
-
-              // Generate with this feature - Mason will create {{feature}}/ directory
-              final featureFiles = await generator.generate(
-                target,
-                vars: featureVariables,
-                logger: logger,
-                fileConflictResolution: mason.FileConflictResolution.overwrite,
-              );
-
-              // Add feature files to the collection
-              allFiles.addAll(featureFiles);
-              totalFiles += featureFiles.length;
-              logger.warn(
-                '✓ Feature "$featureName" generated (${featureFiles.length} files)',
-              );
-            }
-          }
-
-          logger.info(
-            '✓ Generation successful ($totalFiles total files generated)',
-          );
-          logger.info('Generated features: ${uniqueFeatures.join(', ')}');
-
-          final endTime = DateTime.now();
-          final duration = endTime.difference(startTime);
-
-          logger.info('Generation completed in ${duration.inMilliseconds}ms');
-
-          return GenerationResult.success(
-            files: allFiles,
-            targetDirectory: outputDirectory,
-            template: _brickToTemplateInfo(brick),
-            duration: duration,
-          );
-        }
-      }
-
-      // Standard generation for non-project bricks or projects without features
-      final generatedFiles = await generator.generate(
-        target,
-        vars: variables,
-        logger: logger, // Cast to dynamic to avoid Logger type ambiguity
-        fileConflictResolution: mason.FileConflictResolution.overwrite,
-      );
-
-      final fileCount = generatedFiles.length;
-      logger.info('✓ Generation successful ($fileCount files generated)');
-
-      // Debug: Log generated files
-      // Note: Verbose logging removed as CLI Logger doesn't have level property
-
-      final endTime = DateTime.now();
-      final duration = endTime.difference(startTime);
-
-      logger.info('Generation completed in ${duration.inMilliseconds}ms');
-
-      // Use Mason's GeneratedFile directly
-      final files = generatedFiles;
-
-      return GenerationResult.success(
-        files: files,
-        targetDirectory: outputDirectory,
-        template: _brickToTemplateInfo(brick),
-        duration: duration,
-      );
-    } on mason.MasonException catch (e) {
-      logger.err('Mason generation error: $e');
-      return GenerationResult.failure(
-        error: 'Mason generation failed: ${e.message}',
-        data: {'brick_name': brick.name},
-      );
-    } on FileSystemException catch (e) {
-      logger.err('File system error: $e');
-      return GenerationResult.failure(
-        error: 'File system error: ${e.message}',
-        data: {'brick_name': brick.name},
-      );
-    } catch (e, stackTrace) {
-      logger.err('Unexpected error: $e');
-      logger.warn(stackTrace.toString());
-      return GenerationResult.failure(
-        error: 'Generation failed: $e',
-        data: {'brick_name': brick.name},
-      );
-    }
-  }
 
   /// Convert Brick to TemplateInfo
   ///

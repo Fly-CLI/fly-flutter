@@ -280,16 +280,6 @@ class GenerateProjectCommand extends FlyCommand {
         ProjectVarKey.preset.key: _determinePresetFromManifest(manifest.config),
       });
 
-      // Validate variables
-      final validationResult = variableBuilder.validate(rawVars);
-      if (!validationResult.isValid) {
-        return CommandResult.error(
-          message: 'Validation failed: ${validationResult.errors.join(', ')}',
-          suggestion: 'Check your manifest file and try again',
-          errorCode: ErrorCode.invalidArgumentValue,
-        );
-      }
-
       return _createProject(
         rawVars: rawVars,
         projectPath: projectPath.absolute,

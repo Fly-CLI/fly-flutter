@@ -20,6 +20,10 @@ import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
+import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
+import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
@@ -27,6 +31,7 @@ import 'package:fly_cli/src/generation/brick/brick_registry.dart';
 import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dart';
 import 'package:fly_cli/src/generation/domain/repositories/itemplate_repository.dart';
 import 'package:fly_cli/src/generation/domain/repositories/itemplate_validator.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/file_system_adapter.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/ifile_system_adapter.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/imason_adapter.dart';
@@ -293,12 +298,38 @@ class ServiceBootstrapper {
           workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
         ),
       )
+      // Register generation mode strategies
+      ..registerSingleton<FeatureGenerationModeStrategy>(
+        FeatureGenerationModeStrategy(
+          useCase: container.get<GenerateFeatureUseCase>(),
+        ),
+      )
+      ..registerSingleton<ServiceGenerationModeStrategy>(
+        ServiceGenerationModeStrategy(
+          useCase: container.get<GenerateServiceUseCase>(),
+        ),
+      )
+      ..registerSingleton<ProjectGenerationModeStrategy>(
+        ProjectGenerationModeStrategy(
+          useCase: container.get<GenerateProjectUseCase>(),
+        ),
+      )
+      // Register generation mode registry
+      // Cast strategies to base type for type-erased storage in registry
+      ..registerSingleton<GenerationModeRegistry>(
+        GenerationModeRegistry({
+          GenerationMode.feature: container
+              .get<FeatureGenerationModeStrategy>(),
+          GenerationMode.service: container
+              .get<ServiceGenerationModeStrategy>(),
+          GenerationMode.project: container
+              .get<ProjectGenerationModeStrategy>(),
+        }),
+      )
       // Register command handler
       ..registerSingleton<GenerationCommandHandler>(
         GenerationCommandHandler(
-          generateFeatureUseCase: container.get<GenerateFeatureUseCase>(),
-          generateServiceUseCase: container.get<GenerateServiceUseCase>(),
-          generateProjectUseCase: container.get<GenerateProjectUseCase>(),
+          registry: container.get<GenerationModeRegistry>(),
         ),
       )
       // Register MCP adapter

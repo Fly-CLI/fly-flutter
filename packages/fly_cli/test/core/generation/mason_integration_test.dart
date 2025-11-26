@@ -1,6 +1,5 @@
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/cache/infrastructure/brick_cache_manager.dart';
-import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
@@ -16,7 +15,6 @@ void main() {
       templateManager = TemplateManager(
         templatesDirectory: '../../templates',
         logger: logger,
-        brickCacheManager: cacheManager,
       );
     });
 
@@ -203,41 +201,6 @@ void main() {
       expect(preview.variables['service_name'], equals('test_service'));
     });
 
-    test('should handle dry run generation', () async {
-      final bricks = await templateManager.getAvailableBricks();
-
-      // Skip if no bricks available
-      if (bricks.isEmpty) {
-        return;
-      }
-
-      // Use first available project brick
-      final projectBricks = bricks
-          .where((b) => b.type == BrickType.project)
-          .toList();
-      if (projectBricks.isEmpty) {
-        return;
-      }
-
-      final brickName = projectBricks.first.name;
-      final result = await templateManager.generateFromBrick(
-        brickName: brickName,
-        brickType: BrickType.project,
-        outputDirectory: '/tmp/test',
-        variables: {
-          'project_name': 'test_project',
-          'organization': 'com.example',
-          'platforms': ['ios', 'android'],
-          'description': 'Test project',
-        },
-        dryRun: true,
-      );
-
-      expect(result, isNotNull);
-      // Dry run returns a result (may be failure if brick structure is invalid)
-      expect(result, isA<GenerationResult>());
-    });
-
     test('should maintain backward compatibility with legacy methods', () async {
       // Test that the legacy getAvailableTemplates method still works
       final templates = await templateManager.getAvailableTemplates();
@@ -263,22 +226,6 @@ void main() {
       // Test cache clearing
       await cacheManager.clearCache();
       // Should not throw any exceptions
-    });
-
-    test('should handle error scenarios gracefully', () async {
-      // Test with non-existent brick
-      final result = await templateManager.generateFromBrick(
-        brickName: 'non_existent_brick',
-        brickType: BrickType.project,
-        outputDirectory: '/tmp/test',
-        variables: {},
-      );
-
-      expect(result.success, isFalse);
-      expect(
-        result.error,
-        contains('not found'),
-      );
     });
   });
 }

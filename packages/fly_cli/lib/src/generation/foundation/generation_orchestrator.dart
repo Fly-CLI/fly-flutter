@@ -1,4 +1,5 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/generation/domain/generation_error_mapper.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_brick_executor.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_planner_factory.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
@@ -81,9 +82,11 @@ class GenerationOrchestrator {
         targetDirectory: result.targetDirectory ?? outputDirectory,
       );
     } else {
+      final errorData = {'workflow_id': workflowId};
       return GenerationResult.failure(
         error: result.error ?? 'Generation failed',
-        data: {'workflow_id': workflowId},
+        errorType: GenerationErrorMapper.fromData(errorData),
+        data: errorData,
       );
     }
   }

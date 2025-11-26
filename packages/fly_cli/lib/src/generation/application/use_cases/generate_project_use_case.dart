@@ -1,6 +1,7 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
+import 'package:fly_cli/src/generation/domain/generation_error_mapper.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Use case for generating projects.
@@ -39,6 +40,7 @@ class GenerateProjectUseCase {
       return GenerationResultDto(
         success: false,
         error: 'Project generation failed: $e',
+        errorType: GenerationErrorMapper.fromException(e),
         data: {'error_type': e.runtimeType.toString()},
       );
     }
