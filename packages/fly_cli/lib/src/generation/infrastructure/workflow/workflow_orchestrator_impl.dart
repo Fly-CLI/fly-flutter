@@ -1,5 +1,7 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
@@ -15,11 +17,14 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
   /// Creates a new [WorkflowOrchestratorImpl] instance.
   WorkflowOrchestratorImpl({
     required TemplateManager templateManager,
+    required IVariableProcessor variableProcessor,
     required Logger logger,
   }) : _templateManager = templateManager,
+       _variableProcessor = variableProcessor,
        _logger = logger;
 
   final TemplateManager _templateManager;
+  final IVariableProcessor _variableProcessor;
   final Logger _logger;
 
   @override
@@ -36,18 +41,64 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
       'generation_mode': mode.key,
     };
 
-    // Delegate to the foundation GenerationOrchestrator which
+    // 1. Get brick for variable processing and validation
+    final brickId = _getBrickIdFromMode(mode);
+    final brick = await _templateManager.getBrick(brickId);
+    if (brick == null) {
+      return GenerationResult.failure(
+        error: 'Brick "$brickId" not found for mode ${mode.key}',
+        data: {'brick_id': brickId, 'mode': mode.key},
+      );
+    }
+
+    // 2. Process variables through the derivation and validation pipeline
+    final processed = await _variableProcessor.process(
+      rawVars: rawVars,
+      mode: mode,
+      brick: brick,
+    );
+
+    // 3. Validate variables - fail early if validation fails
+    if (!processed.validationResult.isValid) {
+      return GenerationResult.failure(
+        error:
+            'Variable validation failed: ${processed.validationResult.errors.join(', ')}',
+        data: {
+          'validation_errors': processed.validationResult.errors,
+          'brick_id': brickId,
+          'mode': mode.key,
+        },
+      );
+    }
+
+    // 4. Delegate to the foundation GenerationOrchestrator which
     // encapsulates BrickComposer- and BrickOrchestrator-based workflows
     // and fully respects the dryRun flag for all modes.
+    // Use processed variables (which include derived variables and validated values)
     final orchestrator = GenerationOrchestrator(
       templateManager: _templateManager,
       logger: _logger,
     );
 
     return orchestrator.generate(
-      rawVars: rawVars,
+      rawVars: processed.values,
       outputDirectory: outputDirectory,
       dryRun: dryRun,
     );
+  }
+
+  /// Maps a [GenerationMode] to its corresponding brick ID.
+  ///
+  /// Returns the brick ID that should be used for variable processing
+  /// and validation for the given generation mode.
+  String _getBrickIdFromMode(GenerationMode mode) {
+    switch (mode) {
+      case GenerationMode.project:
+        return 'project';
+      case GenerationMode.feature:
+        return 'feature';
+      case GenerationMode.service:
+        return 'service';
+    }
   }
 }

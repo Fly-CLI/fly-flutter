@@ -25,6 +25,14 @@ class VariableValidationResult {
     this.warnings = const [],
   });
 
+  /// Creates a successful validation result.
+  factory VariableValidationResult.success() =>
+      const VariableValidationResult(isValid: true);
+
+  /// Creates a failed validation result.
+  factory VariableValidationResult.failure(List<String> errors) =>
+      VariableValidationResult(isValid: false, errors: errors);
+
   /// Whether validation passed.
   final bool isValid;
 
@@ -33,12 +41,6 @@ class VariableValidationResult {
 
   /// Validation warnings.
   final List<String> warnings;
-
-  factory VariableValidationResult.success() =>
-      const VariableValidationResult(isValid: true);
-
-  factory VariableValidationResult.failure(List<String> errors) =>
-      VariableValidationResult(isValid: false, errors: errors);
 }
 
 /// Interface for variable processing pipeline.
