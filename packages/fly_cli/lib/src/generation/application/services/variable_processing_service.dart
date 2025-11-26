@@ -9,6 +9,7 @@ import 'package:fly_cli/src/generation/variables/variable_derivers/foundation_pi
 /// Implements IVariableProcessor and coordinates variable derivers
 /// and validation services.
 class VariableProcessingService implements IVariableProcessor {
+  /// Creates a new instance of [VariableProcessingService].
   VariableProcessingService({
     VariablePipeline? pipeline,
     ComposerLogger? logger,

@@ -26,7 +26,7 @@ establishing clear architectural boundaries.
 - **Template Layer**: `TemplateManager`, `TemplateInfo`, `TemplateVariable`, `TemplateCompatibility`
 - **Generation Layer**: `GenerationService`, `GenerationAdapter`, `GenerationPreviewService`,
   `GenerationVariableBuilder`
-- **Foundation Layer**: `TemplateGenerationOrchestrator`, `FoundationBrickExecutor`, workflow
+- **Foundation Layer**: `GenerationOrchestrator`, `FoundationBrickExecutor`, workflow
   inference
 - **Variable Layer**: Variable derivers pipeline, `VariableValidationService`
 - **Versioning Layer**: `VersionRegistry`, `CompatibilityChecker`, `VersionParser`

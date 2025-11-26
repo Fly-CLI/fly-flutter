@@ -26,7 +26,7 @@ The Fly CLI is a Flutter development tool that provides scaffolding, code genera
 - **Brick Layer**: `BrickRegistry`, `BrickInfo`, `BrickMetadata`, `BrickDiscoveryService`, `BrickValidationService`
 - **Template Layer**: `TemplateManager` (682+ lines), `TemplateInfo`, `TemplateVariable`, `TemplateCompatibility`
 - **Generation Layer**: `GenerationService`, `GenerationAdapter`, `GenerationPreviewService`, `GenerationVariableBuilder`
-- **Foundation Layer**: `TemplateGenerationOrchestrator`, `FoundationBrickExecutor`, workflow inference
+- **Foundation Layer**: `GenerationOrchestrator`, `FoundationBrickExecutor`, workflow inference
 - **Variable Layer**: Variable derivers pipeline, `VariableValidationService`
 - **Versioning Layer**: `VersionRegistry`, `CompatibilityChecker`, `VersionParser`
 

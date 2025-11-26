@@ -1,6 +1,6 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -36,10 +36,10 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
       'generation_mode': mode.key,
     };
 
-    // Delegate to the foundation TemplateGenerationOrchestrator which
+    // Delegate to the foundation GenerationOrchestrator which
     // encapsulates BrickComposer- and BrickOrchestrator-based workflows
     // and fully respects the dryRun flag for all modes.
-    final orchestrator = TemplateGenerationOrchestrator(
+    final orchestrator = GenerationOrchestrator(
       templateManager: _templateManager,
       logger: _logger,
     );

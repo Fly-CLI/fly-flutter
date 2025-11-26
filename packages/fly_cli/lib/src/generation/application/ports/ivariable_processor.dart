@@ -3,6 +3,7 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Result of variable processing.
 class ProcessedVariables {
+  /// Creates a new instance of [ProcessedVariables].
   const ProcessedVariables({
     required this.values,
     required this.validationResult,
@@ -17,6 +18,7 @@ class ProcessedVariables {
 
 /// Result of variable validation.
 class VariableValidationResult {
+  /// Creates a new instance of [VariableValidationResult].
   const VariableValidationResult({
     required this.isValid,
     this.errors = const [],

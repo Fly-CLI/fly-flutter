@@ -1,5 +1,5 @@
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
 import 'package:fly_cli/src/integrations/mcp/application/mcp_tool_strategy.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/errors/mcp_error.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/tools/types/template_apply_params.dart';
@@ -215,7 +215,7 @@ class TemplateApplyStrategy
       );
 
       // Create orchestrator
-      final orchestrator = TemplateGenerationOrchestrator(
+      final orchestrator = GenerationOrchestrator(
         templateManager: templateManager,
         logger: context.logger,
       );

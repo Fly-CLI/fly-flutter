@@ -13,13 +13,13 @@ import 'package:mason_logger/mason_logger.dart';
 /// This is a thin wrapper that adapts CLI-specific types to the composer
 /// library's generic orchestrator. The actual orchestration logic lives
 /// in the `fly_brick_composer` package.
-class TemplateGenerationOrchestrator {
+class GenerationOrchestrator {
   /// Creates a foundation orchestrator with CLI-specific dependencies.
   ///
   /// [templateManager] is used to find and execute bricks.
   /// [logger] is used for logging orchestration progress.
   /// [composer] is optional; if not provided, a default composer will be created.
-  TemplateGenerationOrchestrator({
+  GenerationOrchestrator({
     required TemplateManager templateManager,
     required Logger logger,
     BrickComposer? composer,

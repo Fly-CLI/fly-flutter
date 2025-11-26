@@ -4,7 +4,7 @@ import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart' as domain;
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_orchestrator.dart';
+import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
 import 'package:fly_cli/src/generation/generation_preview.dart';
 import 'package:fly_cli/src/generation/generation_request.dart'
     show GenerationRequest;
@@ -19,7 +19,7 @@ import 'package:mason_logger/mason_logger.dart';
 /// Unified generation service that consolidates all template generation logic.
 ///
 /// This service provides a single entry point for all generation operations,
-/// consolidating functionality from TemplateManager, TemplateGenerationOrchestrator,
+/// consolidating functionality from TemplateManager, GenerationOrchestrator,
 /// and GenerationPreviewService.
 ///
 /// **Key Features:**
@@ -32,7 +32,7 @@ class GenerationService {
   final TemplateManager _templateManager;
   final Logger _logger;
   final GenerationPreviewService _previewService;
-  final TemplateGenerationOrchestrator? _orchestrator;
+  final GenerationOrchestrator? _orchestrator;
 
   /// Creates a unified generation service.
   ///
@@ -43,7 +43,7 @@ class GenerationService {
   GenerationService({
     required TemplateManager templateManager,
     required Logger logger,
-    TemplateGenerationOrchestrator? orchestrator,
+    GenerationOrchestrator? orchestrator,
     GenerationPreviewService? previewService,
   }) : _templateManager = templateManager,
        _logger = logger,

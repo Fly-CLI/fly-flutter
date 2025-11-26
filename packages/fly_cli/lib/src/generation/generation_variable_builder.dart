@@ -10,7 +10,7 @@ import 'package:fly_cli/src/generation/variables/validation/variable_validation_
 ///
 /// This provides a unified interface for collecting and normalizing variables
 /// from flags, interactive prompts, or manifest data into the rawVars format
-/// expected by TemplateGenerationOrchestrator.
+/// expected by GenerationOrchestrator.
 abstract class GenerationVariableBuilder {
   /// Build variables from command context (flags or interactive mode).
   Future<Map<String, dynamic>> buildFromContext({
