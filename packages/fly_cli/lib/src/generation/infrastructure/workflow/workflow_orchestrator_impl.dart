@@ -37,13 +37,4 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
       outputDirectory: outputDirectory,
     );
   }
-
-  @override
-  Future<WorkflowId> inferWorkflow(GenerationMode mode) async {
-    // Create a minimal variable set for inference
-    final vars = <String, dynamic>{
-      'generation_mode': mode.name,
-    };
-    return FoundationWorkflowInference.inferFromVars(vars);
-  }
 }

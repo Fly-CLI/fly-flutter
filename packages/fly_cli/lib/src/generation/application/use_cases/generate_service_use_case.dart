@@ -33,7 +33,7 @@ class GenerateServiceUseCase {
       const brickName = 'service';
       final brick = await _brickRepository.getBrick(brickName);
       if (brick == null) {
-        return GenerationResultDto(
+        return const GenerationResultDto(
           success: false,
           error: 'Brick "$brickName" not found',
           data: {'brick_name': brickName},

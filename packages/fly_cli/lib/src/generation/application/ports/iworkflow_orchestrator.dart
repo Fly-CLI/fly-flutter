@@ -20,9 +20,4 @@ abstract class IWorkflowOrchestrator {
     required String outputDirectory,
     bool dryRun = false,
   });
-
-  /// Infer the workflow for a given mode.
-  ///
-  /// Returns the workflow ID that should be used.
-  Future<WorkflowId> inferWorkflow(GenerationMode mode);
 }

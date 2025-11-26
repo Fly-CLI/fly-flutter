@@ -7,6 +7,9 @@ import 'package:mason_logger/mason_logger.dart';
 
 /// Implementation of IGenerationEngine using Mason.
 class MasonGenerationEngine implements IGenerationEngine {
+  /// Creates a Mason-based generation engine.
+  ///
+  /// [masonAdapter] is used to interact with Mason.
   MasonGenerationEngine({
     required IMasonAdapter masonAdapter,
     Logger? logger,
