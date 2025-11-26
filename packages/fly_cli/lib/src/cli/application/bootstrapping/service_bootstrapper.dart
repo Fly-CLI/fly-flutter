@@ -15,9 +15,11 @@ import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
-import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
-import 'package:fly_cli/src/generation/application/services/variable_processing_service.dart';
+import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
+import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
+import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
@@ -34,9 +36,11 @@ import 'package:fly_cli/src/generation/infrastructure/generation/mason_generatio
 import 'package:fly_cli/src/generation/infrastructure/template/template_cache_impl.dart';
 import 'package:fly_cli/src/generation/infrastructure/template/template_repository_impl.dart';
 import 'package:fly_cli/src/generation/infrastructure/template/template_validator_impl.dart';
+import 'package:fly_cli/src/generation/infrastructure/variable_processing/variable_processor_factory.dart';
 import 'package:fly_cli/src/generation/infrastructure/workflow/workflow_orchestrator_impl.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
+import 'package:fly_cli/src/generation/utils/planning_logger_adapter.dart';
 import 'package:fly_cli/src/generation/versioning/compatibility_checker.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/shared/di/service_container.dart';
@@ -235,11 +239,30 @@ class ServiceBootstrapper {
           templateCache: templateCache,
           templateValidator: templateValidator,
         );
-      })
-      // Register services
-      ..registerSingleton<IVariableProcessor>(
-        VariableProcessingService(),
+      });
+
+    // Register mode-specific variable processors
+    // Wrap StructuredMasonLogger with ComposerLoggerAdapter for compatibility
+    final composerLogger = ComposerLoggerAdapter(structuredLogger);
+    container
+      ..registerSingleton<ProjectVariableProcessor>(
+        ProjectVariableProcessor(logger: composerLogger),
       )
+      ..registerSingleton<FeatureVariableProcessor>(
+        FeatureVariableProcessor(logger: composerLogger),
+      )
+      ..registerSingleton<ServiceVariableProcessor>(
+        ServiceVariableProcessor(logger: composerLogger),
+      )
+      // Register variable processor factory
+      ..registerSingleton<IVariableProcessorFactory>(
+        VariableProcessorFactory(
+          projectProcessor: container.get<ProjectVariableProcessor>(),
+          featureProcessor: container.get<FeatureVariableProcessor>(),
+          serviceProcessor: container.get<ServiceVariableProcessor>(),
+        ),
+      )
+      // Register services
       ..registerSingleton<IGenerationEngine>(
         MasonGenerationEngine(
           masonAdapter: container.get<IMasonAdapter>(),
@@ -250,7 +273,7 @@ class ServiceBootstrapper {
       ..registerFactory<IWorkflowOrchestrator>(() {
         return WorkflowOrchestratorImpl(
           templateManager: container.get<TemplateManager>(),
-          variableProcessor: container.get<IVariableProcessor>(),
+          variableProcessorFactory: container.get<IVariableProcessorFactory>(),
           logger: structuredLogger,
         );
       })

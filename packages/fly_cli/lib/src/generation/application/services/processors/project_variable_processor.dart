@@ -2,18 +2,31 @@ import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
-import 'package:fly_cli/src/generation/variables/variable_derivers/foundation_pipeline.dart';
+import 'package:fly_cli/src/generation/variables/variable_derivers/naming_deriver.dart';
+import 'package:fly_cli/src/generation/variables/variable_derivers/platform_deriver.dart';
+import 'package:fly_cli/src/generation/variables/variable_derivers/preset_deriver.dart';
+import 'package:fly_cli/src/generation/variables/variable_derivers/project_mode_deriver.dart';
 
-/// Service for processing variables through the derivation and validation pipeline.
+/// Default project variable pipeline.
 ///
-/// Implements IVariableProcessor and coordinates variable derivers
-/// and validation services.
-class VariableProcessingService implements IVariableProcessor {
-  /// Creates a new instance of [VariableProcessingService].
-  VariableProcessingService({
+/// This is the standard pipeline used for project generation.
+const projectPipeline = VariablePipeline([
+  NamingDeriver(),
+  PlatformDeriver(),
+  PresetDeriver(),
+  ProjectModeDeriver(),
+]);
+
+/// Processor for project generation mode variables.
+///
+/// Handles variable derivation and validation specifically for project generation.
+/// Uses a project-specific pipeline that includes platform support derivation.
+class ProjectVariableProcessor implements IVariableProcessor {
+  /// Creates a new instance of [ProjectVariableProcessor].
+  ProjectVariableProcessor({
     VariablePipeline? pipeline,
     ComposerLogger? logger,
-  }) : _pipeline = pipeline ?? foundationPipeline,
+  }) : _pipeline = pipeline ?? projectPipeline,
        _logger = logger ?? const NoOpLogger();
 
   final VariablePipeline _pipeline;
@@ -25,8 +38,15 @@ class VariableProcessingService implements IVariableProcessor {
     required GenerationMode mode,
     required Brick brick,
   }) async {
+    // Validate that this processor handles project mode
+    if (mode != GenerationMode.project) {
+      throw ArgumentError(
+        'ProjectVariableProcessor only handles GenerationMode.project, '
+        'but received ${mode.key}',
+      );
+    }
+
     // 1. Create GenerationContext from raw variables and mode
-    // GenerationMode is re-exported from fly_brick_composer, so types match
     final context = GenerationContext.fromVars(
       rawVars,
       mode: mode,
@@ -35,12 +55,12 @@ class VariableProcessingService implements IVariableProcessor {
     // 2. Start with raw variables in the bag
     var bag = VariableBag.fromMap(rawVars);
 
-    // 3. Run the pipeline to derive additional variables
+    // 3. Run the project-specific pipeline to derive additional variables
     try {
       bag = _pipeline.run(context, _logger);
     } catch (e) {
       // If pipeline fails, log and continue with raw vars
-      _logger.warn('Variable pipeline failed: $e');
+      _logger.warn('Project variable pipeline failed: $e');
       // Continue with raw variables
     }
 
@@ -51,7 +71,7 @@ class VariableProcessingService implements IVariableProcessor {
       ...bag.toMap(),
     };
 
-    // 5. Validate variables
+    // 5. Validate variables using project-specific validation
     final validationErrors = VariableValidationService.validateAll(
       brick: brick,
       mode: mode,

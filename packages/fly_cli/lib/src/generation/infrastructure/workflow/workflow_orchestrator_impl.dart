@@ -1,5 +1,5 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
-import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
@@ -17,14 +17,14 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
   /// Creates a new [WorkflowOrchestratorImpl] instance.
   WorkflowOrchestratorImpl({
     required TemplateManager templateManager,
-    required IVariableProcessor variableProcessor,
+    required IVariableProcessorFactory variableProcessorFactory,
     required Logger logger,
   }) : _templateManager = templateManager,
-       _variableProcessor = variableProcessor,
+       _variableProcessorFactory = variableProcessorFactory,
        _logger = logger;
 
   final TemplateManager _templateManager;
-  final IVariableProcessor _variableProcessor;
+  final IVariableProcessorFactory _variableProcessorFactory;
   final Logger _logger;
 
   @override
@@ -51,8 +51,9 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
       );
     }
 
-    // 2. Process variables through the derivation and validation pipeline
-    final processed = await _variableProcessor.process(
+    // 2. Get the appropriate processor for the mode and process variables
+    final processor = _variableProcessorFactory.getProcessor(mode);
+    final processed = await processor.process(
       rawVars: rawVars,
       mode: mode,
       brick: brick,

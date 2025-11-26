@@ -1,35 +1,23 @@
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart'
     as domain;
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/infrastructure/variable_processing/variable_processor_factory.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
-/// Integration tests for the variable processor factory and processors.
-///
-/// Tests the complete flow of variable processing through the factory,
-/// ensuring that the mode-specific processors work correctly.
 void main() {
-  group('VariableProcessorFactory Integration', () {
-    late IVariableProcessorFactory factory;
+  group('FeatureVariableProcessor', () {
+    late FeatureVariableProcessor processor;
 
     setUp(() {
-      factory = VariableProcessorFactory(
-        projectProcessor: ProjectVariableProcessor(),
-        featureProcessor: FeatureVariableProcessor(),
-        serviceProcessor: ServiceVariableProcessor(),
-      );
+      processor = FeatureVariableProcessor();
     });
 
-    group('Feature mode processing', () {
-      test('should process feature variables successfully', () async {
+    group('process', () {
+      test('should process variables successfully', () async {
         // Arrange
         final brick = Brick(
           name: 'test_brick',
@@ -49,7 +37,6 @@ void main() {
         };
 
         // Act
-        final processor = factory.getProcessor(GenerationMode.feature);
         final result = await processor.process(
           rawVars: rawVars,
           mode: GenerationMode.feature,
@@ -82,7 +69,6 @@ void main() {
         };
 
         // Act
-        final processor = factory.getProcessor(GenerationMode.feature);
         final result = await processor.process(
           rawVars: rawVars,
           mode: GenerationMode.feature,
@@ -121,7 +107,6 @@ void main() {
         };
 
         // Act
-        final processor = factory.getProcessor(GenerationMode.feature);
         final result = await processor.process(
           rawVars: rawVars,
           mode: GenerationMode.feature,
@@ -131,6 +116,36 @@ void main() {
         // Assert
         expect(result.validationResult, isA<VariableValidationResult>());
       });
+
+      test('should throw ArgumentError for non-feature mode', () async {
+        // Arrange
+        final brick = Brick(
+          name: 'test_brick',
+          version: Version.parse('1.0.0'),
+          description: 'Test',
+          path: '/test',
+          type: BrickType.project,
+          category: BrickCategory.project,
+          variables: {},
+          features: [],
+          packages: [],
+        );
+
+        final rawVars = {
+          'name': 'test_project',
+        };
+
+        // Act & Assert
+        expect(
+          () => processor.process(
+            rawVars: rawVars,
+            mode: GenerationMode.project,
+            brick: brick,
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
     });
   });
 }
+
