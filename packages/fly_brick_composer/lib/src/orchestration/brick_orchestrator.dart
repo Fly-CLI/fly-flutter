@@ -40,6 +40,7 @@ class BrickOrchestrator<TFile> {
     required Map<String, dynamic> rawVars,
     required WorkflowId workflowId,
     required String outputDirectory,
+    bool dryRun = false,
   }) async {
     try {
       _logger.info('Composing bricks for generation...');
@@ -84,6 +85,7 @@ class BrickOrchestrator<TFile> {
             brickId: invocation.brickId,
             vars: invocation.vars,
             targetDirectory: targetDir,
+            dryRun: dryRun,
           );
 
           if (!result.success) {

@@ -250,9 +250,6 @@ class ServiceBootstrapper {
       ..registerFactory<IWorkflowOrchestrator>(() {
         return WorkflowOrchestratorImpl(
           templateManager: container.get<TemplateManager>(),
-          brickRepository: container.get<IBrickRepository>(),
-          variableProcessor: container.get<IVariableProcessor>(),
-          generationEngine: container.get<IGenerationEngine>(),
           logger: structuredLogger,
         );
       })

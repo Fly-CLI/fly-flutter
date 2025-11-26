@@ -67,7 +67,6 @@ class BrickComposer {
     // Step 2: Create generation context from request
     final ctx = GenerationContext.fromVars(
       request.raw,
-      mode: request.generationMode,
       workflowId: request.workflowId,
     );
 

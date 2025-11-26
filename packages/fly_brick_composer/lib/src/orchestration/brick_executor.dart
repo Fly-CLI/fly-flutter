@@ -8,21 +8,30 @@ class BrickExecutionResult<TFile> {
     required this.success,
     this.files,
     this.error,
+    this.dryRun = false,
   });
 
   /// Creates a successful result with generated files.
-  factory BrickExecutionResult.success({required List<TFile> files}) {
+  factory BrickExecutionResult.success({
+    required List<TFile> files,
+    bool dryRun = false,
+  }) {
     return BrickExecutionResult._(
       success: true,
       files: files,
+      dryRun: dryRun,
     );
   }
 
   /// Creates a failed result with an error message.
-  factory BrickExecutionResult.failure({required String error}) {
+  factory BrickExecutionResult.failure({
+    required String error,
+    bool dryRun = false,
+  }) {
     return BrickExecutionResult._(
       success: false,
       error: error,
+      dryRun: dryRun,
     );
   }
 
@@ -34,6 +43,12 @@ class BrickExecutionResult<TFile> {
 
   /// Error message (if failed).
   final String? error;
+
+  /// Whether this execution was performed in dry-run mode.
+  ///
+  /// When `true`, [files] should represent the files that *would* be generated
+  /// without actually writing them to disk.
+  final bool dryRun;
 }
 
 /// Abstract interface for executing brick generation.
@@ -57,6 +72,7 @@ abstract class BrickExecutor<TFile> {
     required String brickId,
     required Map<String, dynamic> vars,
     required String targetDirectory,
+    bool dryRun = false,
   });
 }
 

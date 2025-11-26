@@ -39,6 +39,7 @@ class TemplateGenerationOrchestrator {
   Future<GenerationResult> generate({
     required Map<String, dynamic> rawVars,
     required String outputDirectory,
+    bool dryRun = false,
   }) async {
     // Create the adapter for composer logger
     final composerLogger = ComposerLoggerAdapter(_logger);
@@ -70,6 +71,7 @@ class TemplateGenerationOrchestrator {
       rawVars: rawVars,
       workflowId: workflowId,
       outputDirectory: outputDirectory,
+      dryRun: dryRun,
     );
 
     // Convert to unified GenerationResult
