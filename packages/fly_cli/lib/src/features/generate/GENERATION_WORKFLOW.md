@@ -81,10 +81,8 @@ The Fly CLI generation system provides a unified, extensible framework for gener
                               │
                               ▼
             ┌────────────────────────────────────┐
-            │   Workflow Orchestrator            │
-            │   (for projects) OR                │
-            │   Direct Generation Engine         │
-            │   (for features/services)          │
+            │      Workflow Orchestrator         │
+            │      (all generation modes)        │
             └────────────────┬───────────────────┘
                              │
                              ▼
@@ -196,46 +194,30 @@ Future<CommandResult> executeFeature(FeatureGenerationRequest request) async {
 
 **Location**: `GenerateFeatureUseCase`, `GenerateServiceUseCase`, or `GenerateProjectUseCase`
 
-**For Features/Services** (Simple Flow):
-1. Get brick from repository
-2. Process variables through pipeline
-3. Validate variables
-4. Generate using engine
+All generation use cases delegate to the `IWorkflowOrchestrator`, which applies
+mode-specific workflows:
 
-**For Projects** (Complex Flow):
-1. Use workflow orchestrator
-2. Orchestrator handles multi-step generation
-3. Supports nested generation (features, services within project)
+- **Features/Services** (Simple Flow inside orchestrator):
+  1. Get brick from repository
+  2. Process variables through pipeline
+  3. Validate variables
+  4. Generate using engine
+- **Projects** (Complex Flow inside orchestrator):
+  1. Use workflow orchestrator
+  2. Orchestrator handles multi-step generation
+  3. Supports nested generation (features, services within project)
 
 **Code Example** (Feature):
 ```dart
 // From GenerateFeatureUseCase.execute()
-// 1. Get brick
-const brickName = 'feature';
-final brick = await _brickRepository.getBrick(brickName);
-
-// 2. Process variables
-final processed = await _variableProcessor.process(
-  rawVars: request.toJson(),
+final result = await _workflowOrchestrator.executeWorkflow(
   mode: GenerationMode.feature,
-  brick: brick,
-);
-
-// 3. Validate
-if (!processed.validationResult.isValid) {
-  return GenerationResultDto(
-    success: false,
-    error: 'Variable validation failed: ...',
-  );
-}
-
-// 4. Generate
-final result = await _generationEngine.generate(
-  brick: brick,
-  variables: processed.values,
+  variables: request.toJson(),
   outputDirectory: request.outputDirectory,
   dryRun: request.dryRun,
 );
+
+return GenerationResultDto.fromResult(result);
 ```
 
 **Code Example** (Project):
@@ -248,6 +230,8 @@ final result = await _workflowOrchestrator.executeWorkflow(
   outputDirectory: request.outputDirectory,
   dryRun: request.dryRun,
 );
+
+return GenerationResultDto.fromResult(result);
 ```
 
 #### 5. Variable Processing
@@ -1532,8 +1516,8 @@ void main() {
 
 ### Key Differences
 
-- **Feature/Service**: Direct generation via use case → engine
-- **Project**: Uses workflow orchestrator for complex multi-step process
+- **Feature/Service**: Simple single-brick workflows implemented inside the workflow orchestrator
+- **Project**: Complex multi-step workflows (including nested feature/service generation) implemented inside the workflow orchestrator
 
 ---
 

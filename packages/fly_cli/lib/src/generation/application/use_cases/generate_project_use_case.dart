@@ -9,6 +9,9 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 /// following Clean Architecture principles.
 /// Uses workflow orchestrator for complex multi-step generation.
 class GenerateProjectUseCase {
+  /// Constructor for [GenerateProjectUseCase].
+  ///
+  /// [workflowOrchestrator] is used to orchestrate the generation process.
   GenerateProjectUseCase({
     required IWorkflowOrchestrator workflowOrchestrator,
   }) : _workflowOrchestrator = workflowOrchestrator;

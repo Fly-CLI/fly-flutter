@@ -1,14 +1,28 @@
+import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:test/test.dart';
 
-// Mock implementations for testing
+// Minimal mock implementations for testing structure/compilation.
+class _DummyWorkflowOrchestrator implements IWorkflowOrchestrator {
+  @override
+  Future<GenerationResult> executeWorkflow({
+    required GenerationMode mode,
+    required Map<String, dynamic> variables,
+    required String outputDirectory,
+    bool dryRun = false,
+  }) async {
+    // Not used in these placeholder tests; throw to catch accidental usage.
+    throw UnimplementedError();
+  }
+}
+
 class MockFeatureUseCase extends GenerateFeatureUseCase {
   MockFeatureUseCase()
-    : super(
-        brickRepository: throw UnimplementedError(),
-        variableProcessor: throw UnimplementedError(),
-        generationEngine: throw UnimplementedError(),
-      );
+      : super(
+          workflowOrchestrator: _DummyWorkflowOrchestrator(),
+        );
 }
 
 void main() {

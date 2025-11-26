@@ -1,8 +1,6 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
-import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dart';
+import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Use case for generating features.
@@ -10,17 +8,14 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 /// Encapsulates the business logic for feature generation,
 /// following Clean Architecture principles.
 class GenerateFeatureUseCase {
+  /// Constructor for [GenerateFeatureUseCase].
+  ///
+  /// [workflowOrchestrator] is used to orchestrate the generation process.
   GenerateFeatureUseCase({
-    required IBrickRepository brickRepository,
-    required IVariableProcessor variableProcessor,
-    required IGenerationEngine generationEngine,
-  }) : _brickRepository = brickRepository,
-       _variableProcessor = variableProcessor,
-       _generationEngine = generationEngine;
+    required IWorkflowOrchestrator workflowOrchestrator,
+  }) : _workflowOrchestrator = workflowOrchestrator;
 
-  final IBrickRepository _brickRepository;
-  final IVariableProcessor _variableProcessor;
-  final IGenerationEngine _generationEngine;
+  final IWorkflowOrchestrator _workflowOrchestrator;
 
   /// Execute feature generation.
   ///
@@ -29,40 +24,11 @@ class GenerateFeatureUseCase {
   /// Returns a [GenerationResultDto] with the generation result.
   Future<GenerationResultDto> execute(FeatureGenerationRequest request) async {
     try {
-      // 1. Get brick
-      const brickName = 'feature';
-      final brick = await _brickRepository.getBrick(brickName);
-      if (brick == null) {
-        return const GenerationResultDto(
-          success: false,
-          error: 'Brick "$brickName" not found',
-          data: {'brick_name': brickName},
-        );
-      }
-
-      // 2. Process variables
-      final processed = await _variableProcessor.process(
-        rawVars: request.toJson(),
+      // Delegate orchestration to the workflow orchestrator, which handles
+      // brick discovery, variable processing, validation, and generation.
+      final result = await _workflowOrchestrator.executeWorkflow(
         mode: GenerationMode.feature,
-        brick: brick,
-      );
-
-      if (!processed.validationResult.isValid) {
-        return GenerationResultDto(
-          success: false,
-          error:
-              'Variable validation failed: ${processed.validationResult.errors.join(', ')}',
-          data: {
-            'validation_errors': processed.validationResult.errors,
-            'brick_name': brickName,
-          },
-        );
-      }
-
-      // 3. Generate
-      final result = await _generationEngine.generate(
-        brick: brick,
-        variables: processed.values,
+        variables: request.toJson(),
         outputDirectory: request.outputDirectory,
         dryRun: request.dryRun,
       );
@@ -71,7 +37,7 @@ class GenerateFeatureUseCase {
     } catch (e) {
       return GenerationResultDto(
         success: false,
-        error: 'Generation failed: $e',
+        error: 'Feature generation failed: $e',
         data: {'error_type': e.runtimeType.toString()},
       );
     }

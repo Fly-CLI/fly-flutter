@@ -248,25 +248,23 @@ class ServiceBootstrapper {
       )
       // Register workflow orchestrator
       ..registerFactory<IWorkflowOrchestrator>(() {
-        final templateManager = container.get<TemplateManager>();
         return WorkflowOrchestratorImpl(
-          templateManager: templateManager,
-          logger: structuredLogger,
-        );
-      })
-      // Register use cases
-      ..registerSingleton<GenerateFeatureUseCase>(
-        GenerateFeatureUseCase(
+          templateManager: container.get<TemplateManager>(),
           brickRepository: container.get<IBrickRepository>(),
           variableProcessor: container.get<IVariableProcessor>(),
           generationEngine: container.get<IGenerationEngine>(),
+          logger: structuredLogger,
+        );
+      })
+      // Register use cases (all delegate to the workflow orchestrator)
+      ..registerSingleton<GenerateFeatureUseCase>(
+        GenerateFeatureUseCase(
+          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
         ),
       )
       ..registerSingleton<GenerateServiceUseCase>(
         GenerateServiceUseCase(
-          brickRepository: container.get<IBrickRepository>(),
-          variableProcessor: container.get<IVariableProcessor>(),
-          generationEngine: container.get<IGenerationEngine>(),
+          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
         ),
       )
       ..registerSingleton<GenerateProjectUseCase>(
