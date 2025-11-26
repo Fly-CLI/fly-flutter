@@ -15,7 +15,9 @@
 
 ## Overview
 
-The Fly CLI generation system provides a unified, extensible framework for generating Flutter project components. It follows Clean Architecture principles with clear separation between presentation, application, domain, and infrastructure layers.
+The Fly CLI generation system provides a unified, extensible framework for generating Flutter
+project components. It follows Clean Architecture principles with clear separation between
+presentation, application, domain, and infrastructure layers.
 
 ### Key Concepts
 
@@ -142,7 +144,8 @@ The Fly CLI generation system provides a unified, extensible framework for gener
 
 #### 2. Command Execution
 
-**Location**: `GenerateFeatureCommand.execute()`, `GenerateServiceCommand.execute()`, or `GenerateProjectCommand.execute()`
+**Location**: `GenerateFeatureCommand.execute()`, `GenerateServiceCommand.execute()`, or
+`GenerateProjectCommand.execute()`
 
 **Steps**:
 1. **Parse Flags**: Extract user inputs (name, feature, screenType, etc.)
@@ -257,10 +260,9 @@ bag = _pipeline.run(context, _logger);
 // 3. Merge
 final processed = {...rawVars, ...bag.toMap()};
 
-// 4. Validate
-final validationErrors = VariableValidationService.validateAll(
+// 4. Validate (using processor-specific validator)
+final validationErrors = _validator.validateAll(
   brick: brick,
-  mode: mode,
   variables: processed,
 );
 ```
@@ -347,8 +349,10 @@ The generation system follows Clean Architecture with four distinct layers:
 **Location**: `lib/src/features/generate/`
 
 **Components**:
+
 - **Commands**: `GenerateFeatureCommand`, `GenerateServiceCommand`, `GenerateProjectCommand`
-- **Command Descriptors**: `FeatureCommandDescriptor`, `ServiceCommandDescriptor`, `ProjectCommandDescriptor`
+- **Command Descriptors**: `FeatureCommandDescriptor`, `ServiceCommandDescriptor`,
+  `ProjectCommandDescriptor`
 - **Handler**: `GenerationCommandHandler`
 
 **Responsibilities**:
@@ -531,7 +535,7 @@ generation/infrastructure/
          ▼
 ┌──────────────────┐
 │ GenerateUseCase  │
-│  (Application)    │
+│  (Application)   │
 └────────┬─────────┘
          │
          │ 3. Coordinates domain services
@@ -692,34 +696,100 @@ class NameDeriver implements VariableDeriver {
 
 ### Variable Validation
 
-**Location**: `lib/src/generation/variables/validation/variable_validation_service.dart`
+**Location**: `lib/src/generation/variables/validation/`
 
 **Purpose**: Validate variables against brick schema and business rules
 
-**Validation Levels**:
-1. **Schema Validation**: Check required variables, types, constraints
-2. **Business Rule Validation**: Check naming conventions, format requirements
-3. **Cross-Variable Validation**: Check relationships between variables
+**Architecture**: Validation follows SOLID principles with processor-specific validators:
 
-**Example**:
+- Each processor (`ProjectVariableProcessor`, `FeatureVariableProcessor`,
+  `ServiceVariableProcessor`) owns its validation logic
+- Validators implement `IVariableValidator` interface
+- Shared brick-level validation is handled by `BrickVariableValidator`
+- Business rule validation is encapsulated per processor
+
+**Validation Components**:
+
+1. **IVariableValidator**: Interface that all validators implement
+2. **BrickVariableValidator**: Shared brick-level validation (required vars, types, choices)
+3. **ProjectVariableValidator**: Project-specific business rules (project name, organization,
+   platforms)
+4. **FeatureVariableValidator**: Feature-specific business rules (component name, feature name,
+   screen type)
+5. **ServiceVariableValidator**: Service-specific business rules (component name, feature name,
+   service type, API URL)
+
+**Validation Levels**:
+
+1. **Brick-Level Validation**: Check required variables, types, constraints (shared across all
+   modes)
+2. **Business Rule Validation**: Check naming conventions, format requirements (mode-specific)
+3. **Cross-Variable Validation**: Check relationships between variables (mode-specific)
+
+**Example** (Processor with Validator):
 ```dart
-class VariableValidationService {
-  static List<String> validateAll({
-    required Brick brick,
+class ProjectVariableProcessor implements IVariableProcessor {
+  ProjectVariableProcessor({
+    IVariableValidator? validator,
+    // ... other dependencies
+  }) : _validator = validator ?? ProjectVariableValidator();
+
+  final IVariableValidator _validator;
+
+  @override
+  Future<ProcessedVariables> process({
+    required Map<String, dynamic> rawVars,
     required GenerationMode mode,
+    required Brick brick,
+  }) async {
+    // ... variable processing ...
+
+    // Validate using processor-specific validator
+    final validationErrors = _validator.validateAll(
+      brick: brick,
+      variables: processed,
+    );
+
+    final validationResult = validationErrors.isEmpty
+        ? VariableValidationResult.success()
+        : VariableValidationResult.failure(validationErrors);
+
+    return ProcessedVariables(
+      values: processed,
+      validationResult: validationResult,
+    );
+  }
+}
+```
+
+**Example** (Validator Implementation):
+```dart
+class ProjectVariableValidator implements IVariableValidator {
+  @override
+  List<String> validateAll({
+    required Brick? brick,
     required Map<String, dynamic> variables,
   }) {
     final errors = <String>[];
-    
-    // 1. Schema validation
-    errors.addAll(_validateSchema(brick, variables));
-    
-    // 2. Business rules
-    errors.addAll(validateBusinessRules(mode, variables));
-    
-    // 3. Cross-variable validation
-    errors.addAll(_validateCrossVariables(mode, variables));
-    
+
+    // 1. Brick-level validation (shared)
+    if (brick != null) {
+      errors.addAll(BrickVariableValidator.validate(brick, variables));
+    }
+
+    // 2. Business rule validation (project-specific)
+    errors.addAll(validateBusinessRules(variables));
+
+    return errors;
+  }
+
+  @override
+  List<String> validateBusinessRules(Map<String, dynamic> variables) {
+    final errors = <String>[];
+    // Project-specific validation logic
+    // - Project name format
+    // - Organization format
+    // - Platform validation
     return errors;
   }
 }
@@ -966,7 +1036,8 @@ sealed class CommandResult {
 
 ## Developer Guide: Adding New Generation Types
 
-This guide walks through adding a new generation type (e.g., `widget`, `model`, `repository`) following the existing patterns.
+This guide walks through adding a new generation type (e.g., `widget`, `model`, `repository`)
+following the existing patterns.
 
 ### Step 1: Create Command Descriptor
 
@@ -1178,7 +1249,49 @@ enum GenerationMode {
 }
 ```
 
-### Step 5: Create Variable Builder
+### Step 5: Create Variable Validator
+
+**Location**: `lib/src/generation/variables/validation/widget_variable_validator.dart`
+
+**Create validator class**:
+```dart
+import 'package:fly_cli/src/generation/domain/entities/brick.dart';
+import 'package:fly_cli/src/generation/variables/validation/brick_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
+
+/// Validator for widget generation mode variables.
+class WidgetVariableValidator implements IVariableValidator {
+  @override
+  List<String> validateAll({
+    required Brick? brick,
+    required Map<String, dynamic> variables,
+  }) {
+    final errors = <String>[];
+
+    // Brick-level validation (if brick is provided)
+    if (brick != null) {
+      errors.addAll(BrickVariableValidator.validate(brick, variables));
+    }
+
+    // Business rule validation
+    errors.addAll(validateBusinessRules(variables));
+
+    return errors;
+  }
+
+  @override
+  List<String> validateBusinessRules(Map<String, dynamic> variables) {
+    final errors = <String>[];
+    // Add widget-specific validation logic here
+    // - Widget name format
+    // - Widget type validation
+    // - Other widget-specific rules
+    return errors;
+  }
+}
+```
+
+### Step 6: Create Variable Builder
 
 **Location**: `lib/src/generation/generation_variable_builder.dart`
 
@@ -1212,10 +1325,9 @@ class WidgetVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    final errors = VariableValidationService.validateBusinessRules(
-      GenerationMode.widget,
-      rawVars,
-    );
+    // Use widget-specific validator
+    final validator = WidgetVariableValidator();
+    final errors = validator.validateBusinessRules(rawVars);
     return errors.isEmpty
         ? ValidationResult.success()
         : ValidationResult.failure(errors);
@@ -1235,7 +1347,52 @@ class WidgetVariableBuilder implements GenerationVariableBuilder {
 }
 ```
 
-### Step 6: Create Use Case
+### Step 7: Create Variable Processor
+
+**Location**: `lib/src/generation/application/services/processors/widget_variable_processor.dart`
+
+**Create processor class**:
+```dart
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
+import 'package:fly_cli/src/generation/domain/entities/brick.dart';
+import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/widget_variable_validator.dart';
+
+class WidgetVariableProcessor implements IVariableProcessor {
+  WidgetVariableProcessor({
+    IVariableValidator? validator,
+    // ... other dependencies
+  }) : _validator = validator ?? WidgetVariableValidator();
+
+  final IVariableValidator _validator;
+
+  @override
+  Future<ProcessedVariables> process({
+    required Map<String, dynamic> rawVars,
+    required GenerationMode mode,
+    required Brick brick,
+  }) async {
+    // ... variable processing ...
+
+    // Validate using processor-specific validator
+    final validationErrors = _validator.validateAll(
+      brick: brick,
+      variables: processed,
+    );
+
+    final validationResult = validationErrors.isEmpty
+        ? VariableValidationResult.success()
+        : VariableValidationResult.failure(validationErrors);
+
+    return ProcessedVariables(
+      values: processed,
+      validationResult: validationResult,
+    );
+  }
+}
+```
+
+### Step 8: Create Use Case
 
 **Location**: `lib/src/generation/application/use_cases/generate_widget_use_case.dart`
 
@@ -1313,7 +1470,7 @@ class GenerateWidgetUseCase {
 }
 ```
 
-### Step 7: Update Command Handler
+### Step 9: Update Command Handler
 
 **Location**: `lib/src/features/generate/common/generation_command_handler.dart`
 
@@ -1360,7 +1517,7 @@ class GenerationCommandHandler {
 }
 ```
 
-### Step 8: Register Command Descriptor
+### Step 10: Register Command Descriptor
 
 **Location**: `lib/src/features/commands/application/command_registration.dart` (or similar)
 
@@ -1373,7 +1530,7 @@ registry.registerStrategy(
 );
 ```
 
-### Step 9: Create Brick Template
+### Step 11: Create Brick Template
 
 **Location**: `templates/bricks/widget/widget/`
 
@@ -1409,7 +1566,7 @@ variables:
       - stateful
 ```
 
-### Step 10: Update Dependency Injection
+### Step 12: Update Dependency Injection
 
 **Location**: `lib/src/generation/infrastructure/di/generation_service_container.dart`
 
@@ -1435,7 +1592,7 @@ container.register<GenerationCommandHandler>(
 );
 ```
 
-### Step 11: Add Tests
+### Step 13: Add Tests
 
 **Location**: `test/features/generate/widget/`
 
@@ -1455,7 +1612,7 @@ void main() {
 }
 ```
 
-### Step 12: Update Documentation
+### Step 14: Update Documentation
 
 - Add new type to this documentation
 - Update command help text
@@ -1470,8 +1627,10 @@ void main() {
 - [ ] Command Descriptor: `features/generate/{type}/{type}_command_descriptor.dart`
 - [ ] Command: `features/generate/{type}/generate_{type}_command.dart`
 - [ ] Request DTO: `generation/application/dto/generation_request_dto.dart` (add variant)
-- [ ] Use Case: `generation/application/use_cases/generate_{type}_use_case.dart`
+- [ ] Variable Validator: `generation/variables/validation/{type}_variable_validator.dart`
 - [ ] Variable Builder: `generation/generation_variable_builder.dart` (add builder)
+- [ ] Variable Processor: `generation/application/services/processors/{type}_variable_processor.dart`
+- [ ] Use Case: `generation/application/use_cases/generate_{type}_use_case.dart`
 - [ ] Handler Method: `features/generate/common/generation_command_handler.dart` (add method)
 - [ ] Enum Update: `generation/foundation/foundation_enums.dart` (add mode)
 - [ ] Brick Template: `templates/bricks/{type}/{type}/`
@@ -1484,7 +1643,8 @@ void main() {
 2. **Use Case Pattern**: Follow `GenerateFeatureUseCase` structure
 3. **Variable Builder**: Follow `FeatureVariableBuilder` structure
 4. **Error Handling**: Always return `GenerationResultDto` with clear error messages
-5. **Validation**: Use `VariableValidationService` for business rules
+5. **Validation**: Create a processor-specific validator implementing `IVariableValidator` (e.g.,
+   `WidgetVariableValidator`)
 
 ### Testing Requirements
 
@@ -1517,7 +1677,8 @@ void main() {
 ### Key Differences
 
 - **Feature/Service**: Simple single-brick workflows implemented inside the workflow orchestrator
-- **Project**: Complex multi-step workflows (including nested feature/service generation) implemented inside the workflow orchestrator
+- **Project**: Complex multi-step workflows (including nested feature/service generation)
+  implemented inside the workflow orchestrator
 
 ---
 

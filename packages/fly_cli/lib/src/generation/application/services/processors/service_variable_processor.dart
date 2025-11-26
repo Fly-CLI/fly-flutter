@@ -1,7 +1,8 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
+import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/naming_deriver.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/preset_deriver.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/service_mode_deriver.dart';
@@ -24,11 +25,14 @@ class ServiceVariableProcessor implements IVariableProcessor {
   ServiceVariableProcessor({
     VariablePipeline? pipeline,
     ComposerLogger? logger,
+    IVariableValidator? validator,
   }) : _pipeline = pipeline ?? servicePipeline,
-       _logger = logger ?? const NoOpLogger();
+       _logger = logger ?? const NoOpLogger(),
+       _validator = validator ?? ServiceVariableValidator();
 
   final VariablePipeline _pipeline;
   final ComposerLogger _logger;
+  final IVariableValidator _validator;
 
   @override
   Future<ProcessedVariables> process({
@@ -70,9 +74,8 @@ class ServiceVariableProcessor implements IVariableProcessor {
     };
 
     // 5. Validate variables using service-specific validation
-    final validationErrors = VariableValidationService.validateAll(
+    final validationErrors = _validator.validateAll(
       brick: brick,
-      mode: mode,
       variables: processed,
     );
 

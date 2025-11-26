@@ -1,7 +1,8 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
-import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
+import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/project_variable_validator.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/naming_deriver.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/platform_deriver.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/preset_deriver.dart';
@@ -26,11 +27,14 @@ class ProjectVariableProcessor implements IVariableProcessor {
   ProjectVariableProcessor({
     VariablePipeline? pipeline,
     ComposerLogger? logger,
+    IVariableValidator? validator,
   }) : _pipeline = pipeline ?? projectPipeline,
-       _logger = logger ?? const NoOpLogger();
+       _logger = logger ?? const NoOpLogger(),
+       _validator = validator ?? ProjectVariableValidator();
 
   final VariablePipeline _pipeline;
   final ComposerLogger _logger;
+  final IVariableValidator _validator;
 
   @override
   Future<ProcessedVariables> process({
@@ -72,9 +76,8 @@ class ProjectVariableProcessor implements IVariableProcessor {
     };
 
     // 5. Validate variables using project-specific validation
-    final validationErrors = VariableValidationService.validateAll(
+    final validationErrors = _validator.validateAll(
       brick: brick,
-      mode: mode,
       variables: processed,
     );
 

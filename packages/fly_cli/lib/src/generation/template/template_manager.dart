@@ -15,7 +15,10 @@ import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/template/template_variable.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
-import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
+import 'package:fly_cli/src/generation/variables/validation/feature_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/project_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 import 'package:fly_cli/src/generation/versioning/compatibility_checker.dart';
 import 'package:fly_cli/src/generation/versioning/compatibility_result.dart';
 import 'package:fly_cli/src/generation/versioning/version_parser.dart';
@@ -273,20 +276,22 @@ class TemplateManager {
       // Determine generation mode from brick type
       final mode = _brickTypeToGenerationMode(brickType);
 
-      // Validate variables using unified validation service
-      final validationErrors = VariableValidationService.validateAll(
-        brick: brick,
-        mode: mode,
-        variables: variables,
-      );
-      if (validationErrors.isNotEmpty) {
-        return GenerationResult.failure(
-          error: 'Variable validation failed: ${validationErrors.join(', ')}',
-          data: {
-            'validation_errors': validationErrors,
-            'brick_name': brickName,
-          },
+      // Validate variables using mode-specific validator
+      if (mode != null) {
+        final validator = _getValidatorForMode(mode);
+        final validationErrors = validator.validateAll(
+          brick: brick,
+          variables: variables,
         );
+        if (validationErrors.isNotEmpty) {
+          return GenerationResult.failure(
+            error: 'Variable validation failed: ${validationErrors.join(', ')}',
+            data: {
+              'validation_errors': validationErrors,
+              'brick_name': brickName,
+            },
+          );
+        }
       }
 
       // Generate preview if dry run
@@ -326,6 +331,18 @@ class TemplateManager {
         return GenerationMode.service;
       default:
         return null;
+    }
+  }
+
+  /// Get validator for a generation mode.
+  IVariableValidator _getValidatorForMode(GenerationMode mode) {
+    switch (mode) {
+      case GenerationMode.project:
+        return ProjectVariableValidator();
+      case GenerationMode.feature:
+        return FeatureVariableValidator();
+      case GenerationMode.service:
+        return ServiceVariableValidator();
     }
   }
 

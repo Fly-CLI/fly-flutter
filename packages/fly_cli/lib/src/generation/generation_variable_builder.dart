@@ -4,7 +4,9 @@ import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
+import 'package:fly_cli/src/generation/variables/validation/feature_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/project_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 
 /// Base class for building generation variables from various input sources.
 ///
@@ -73,11 +75,9 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    // Use unified validation service
-    final errors = VariableValidationService.validateBusinessRules(
-      GenerationMode.feature,
-      rawVars,
-    );
+    // Use feature-specific validator
+    final validator = FeatureVariableValidator();
+    final errors = validator.validateBusinessRules(rawVars);
 
     return errors.isEmpty
         ? ValidationResult.success()
@@ -258,11 +258,9 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    // Use unified validation service
-    final errors = VariableValidationService.validateBusinessRules(
-      GenerationMode.service,
-      rawVars,
-    );
+    // Use service-specific validator
+    final validator = ServiceVariableValidator();
+    final errors = validator.validateBusinessRules(rawVars);
 
     return errors.isEmpty
         ? ValidationResult.success()
@@ -497,11 +495,9 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    // Use unified validation service
-    final errors = VariableValidationService.validateBusinessRules(
-      GenerationMode.project,
-      rawVars,
-    );
+    // Use project-specific validator
+    final validator = ProjectVariableValidator();
+    final errors = validator.validateBusinessRules(rawVars);
 
     return errors.isEmpty
         ? ValidationResult.success()

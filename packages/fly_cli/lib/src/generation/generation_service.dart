@@ -12,7 +12,10 @@ import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
 import 'package:fly_cli/src/generation/template/template_variable.dart';
-import 'package:fly_cli/src/generation/variables/validation/variable_validation_service.dart';
+import 'package:fly_cli/src/generation/variables/validation/feature_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/project_variable_validator.dart';
+import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 import 'package:mason/mason.dart' as mason show MasonException;
 import 'package:mason_logger/mason_logger.dart';
 
@@ -98,9 +101,9 @@ class GenerationService {
       }
 
       // Step 5: Validate variables
-      final validationErrors = VariableValidationService.validateAll(
+      final validator = _getValidatorForMode(mode);
+      final validationErrors = validator.validateAll(
         brick: brick,
-        mode: mode,
         variables: derivedVars,
       );
       if (validationErrors.isNotEmpty) {
@@ -207,6 +210,18 @@ class GenerationService {
         return BrickType.feature;
       case GenerationMode.service:
         return BrickType.service;
+    }
+  }
+
+  /// Get validator for a generation mode.
+  IVariableValidator _getValidatorForMode(GenerationMode mode) {
+    switch (mode) {
+      case GenerationMode.project:
+        return ProjectVariableValidator();
+      case GenerationMode.feature:
+        return FeatureVariableValidator();
+      case GenerationMode.service:
+        return ServiceVariableValidator();
     }
   }
 
