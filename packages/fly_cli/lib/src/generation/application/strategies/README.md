@@ -4,12 +4,20 @@ This directory contains the Strategy pattern implementation for generation modes
 
 ## Architecture
 
-The strategy pattern encapsulates mode-specific generation logic, ensuring:
+The generation mode system uses a **Mode Profile** pattern that centralizes all mode-specific wiring in one place. Each `GenerationModeProfile` contains:
+- The generation mode enum value
+- The brick/template identifier
+- The variable processor for that mode
+- The generation mode strategy
 
-- **Extensibility**: New modes are added by implementing the interface and registering in the registry
-- **Readability**: All mode-specific logic is centralized and discoverable through the strategy interface
-- **Maintainability**: Changes to generation behavior are isolated to their respective strategy implementations
+This ensures:
+
+- **Single source of truth**: All mode-specific components are defined in one profile entry
+- **Extensibility**: New modes are added by implementing the required components and registering **one profile entry**
+- **Readability**: All mode-specific logic is centralized and discoverable through the profile
+- **Maintainability**: Changes to generation behavior are isolated to their respective implementations
 - **Robustness**: Type safety and consistent contracts across all generation modes
+- **No scattered updates**: Adding a new mode requires **zero changes** to existing mode code
 
 ## Core Components
 
@@ -30,14 +38,28 @@ abstract class GenerationModeStrategy<T extends GenerationRequestDto> {
 }
 ```
 
+### `GenerationModeProfile`
+
+Value type that defines all mode-specific components for a generation mode. This is the **single source of truth** for mode wiring.
+
+**Properties:**
+- `mode` - The generation mode enum value
+- `brickId` - The brick/template identifier (e.g., 'project', 'feature', 'service')
+- `variableProcessor` - The variable processor for this mode
+- `strategy` - The generation mode strategy for this mode
+
 ### `GenerationModeRegistry`
 
 Central registry that maps `GenerationMode` enum values to their corresponding strategy implementations. This registry serves as the authoritative mapping and must be used for all generation execution.
+
+The registry must be constructed from mode profiles to ensure a single source of truth for all mode-specific wiring.
 
 **Key methods:**
 - `execute(GenerationRequestDto request)` - Execute generation using the appropriate strategy
 - `getStrategy(GenerationMode mode)` - Get strategy for a mode (throws if not found)
 - `forMode(GenerationMode mode)` - Get strategy for a mode (returns null if not found)
+- `getProfile(GenerationMode mode)` - Get full profile for a mode (if constructed from profiles)
+- `getBrickId(GenerationMode mode)` - Get brick ID for a mode (if constructed from profiles)
 - `isRegistered(GenerationMode mode)` - Check if a mode is registered
 - `registeredModes` - Get all registered modes
 
@@ -135,7 +157,25 @@ class YourNewModeGenerationModeStrategy
 }
 ```
 
-### 5. Register in DI Container
+### 5. Create Variable Processor (if needed)
+
+If your mode requires different variable derivation or validation rules, create a new processor:
+
+```dart
+class YourNewModeVariableProcessor implements IVariableProcessor {
+  // ... implementation
+}
+```
+
+Register it in `_registerVariableProcessing`:
+
+```dart
+..registerSingleton<YourNewModeVariableProcessor>(
+  YourNewModeVariableProcessor(logger: composerLogger),
+)
+```
+
+### 6. Register Mode Profile
 
 All generation-related services are registered through the `GenerationServicesFactory` (`lib/src/cli/application/bootstrapping/generation_services_factory.dart`). This factory serves as the composition root for all generation dependencies.
 
@@ -150,41 +190,58 @@ To add a new generation mode:
 )
 ```
 
-2. Add the strategy to the `_createStrategies` method:
+2. **Add a single profile entry** to the `_createModeProfiles` method:
 ```dart
-Map<GenerationMode, GenerationModeStrategy<GenerationRequestDto>>
-    _createStrategies(ServiceContainer container) {
-  // ... existing strategies ...
+Map<GenerationMode, GenerationModeProfile> _createModeProfiles(
+  ServiceContainer container,
+) {
+  // ... existing profiles ...
+  
+  // Resolve your new processor and use case
+  final yourNewModeProcessor = container.get<YourNewModeVariableProcessor>();
+  final yourNewModeUseCase = container.get<GenerateYourNewModeUseCase>();
+  
+  // Create strategy
   final yourNewModeStrategy = YourNewModeGenerationModeStrategy(
-    useCase: container.get<GenerateYourNewModeUseCase>(),
+    useCase: yourNewModeUseCase,
   );
 
   return {
-    GenerationMode.feature: featureStrategy,
-    GenerationMode.service: serviceStrategy,
-    GenerationMode.project: projectStrategy,
-    GenerationMode.yourNewMode: yourNewModeStrategy, // Add here
+    GenerationMode.feature: featureProfile,
+    GenerationMode.service: serviceProfile,
+    GenerationMode.project: projectProfile,
+    GenerationMode.yourNewMode: GenerationModeProfile(
+      mode: GenerationMode.yourNewMode,
+      brickId: 'your_new_mode', // The brick identifier
+      variableProcessor: yourNewModeProcessor,
+      strategy: yourNewModeStrategy,
+    ), // Add this single entry
   };
 }
 ```
 
-The factory automatically:
+**That's it!** The factory automatically:
 - Registers individual strategies as singletons
-- Creates and registers the `GenerationModeRegistry` with all strategies
+- Creates and registers the `GenerationModeRegistry` from profiles
+- Creates and registers the `VariableProcessorFactory` from the same profiles
 - Registers the `GenerationCommandHandler` and `GenerationMcpAdapter` that use the registry
+
+**Key benefit**: Adding a new mode requires **zero changes** to existing mode code. Only the new profile entry is added.
 
 **Note**: The factory pattern centralizes all generation dependency wiring, making it easier to extend and test. For testing, you can inject a custom `IGenerationServicesFactory` into `ServiceBootstrapper`.
 
-### 6. Create Command (Optional)
+### 7. Create Command (Optional)
 
 If you want a CLI command for the new mode, create a command class similar to `GenerateFeatureCommand`.
 
 ## Important Rules
 
-1. **All generation modes must be registered in `GenerationModeRegistry`** - This is the single source of truth
-2. **No mode-specific generation logic outside strategies** - All generation behavior should be in strategy implementations
-3. **Use the registry for execution** - Always route generation requests through `GenerationModeRegistry.execute()`
-4. **Type safety** - Each strategy should use a specific request type (`GenerationModeStrategy<T>`)
+1. **All generation modes must have a `GenerationModeProfile`** - This is the single source of truth for mode wiring
+2. **Register profiles in `_createModeProfiles`** - This is the **only** place where modes are wired together
+3. **No mode-specific generation logic outside strategies** - All generation behavior should be in strategy implementations
+4. **Use the registry for execution** - Always route generation requests through `GenerationModeRegistry.execute()`
+5. **Type safety** - Each strategy should use a specific request type (`GenerationModeStrategy<T>`)
+6. **No scattered updates** - Adding a new mode should **never** require editing existing mode code
 
 ## Testing
 

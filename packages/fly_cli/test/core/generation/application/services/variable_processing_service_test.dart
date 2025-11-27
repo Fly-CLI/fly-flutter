@@ -1,8 +1,13 @@
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart'
@@ -21,11 +26,33 @@ void main() {
     late IVariableProcessorFactory factory;
 
     setUp(() {
-      factory = VariableProcessorFactory(
-        projectProcessor: ProjectVariableProcessor(),
-        featureProcessor: FeatureVariableProcessor(),
-        serviceProcessor: ServiceVariableProcessor(),
-      );
+      final projectProcessor = ProjectVariableProcessor();
+      final featureProcessor = FeatureVariableProcessor();
+      final serviceProcessor = ServiceVariableProcessor();
+      final mockStrategy = _MockStrategy();
+
+      final profiles = {
+        GenerationMode.project: GenerationModeProfile(
+          mode: GenerationMode.project,
+          brickId: 'project',
+          variableProcessor: projectProcessor,
+          strategy: mockStrategy,
+        ),
+        GenerationMode.feature: GenerationModeProfile(
+          mode: GenerationMode.feature,
+          brickId: 'feature',
+          variableProcessor: featureProcessor,
+          strategy: mockStrategy,
+        ),
+        GenerationMode.service: GenerationModeProfile(
+          mode: GenerationMode.service,
+          brickId: 'service',
+          variableProcessor: serviceProcessor,
+          strategy: mockStrategy,
+        ),
+      };
+
+      factory = VariableProcessorFactory.fromProfiles(profiles);
     });
 
     group('Feature mode processing', () {
@@ -133,4 +160,20 @@ void main() {
       });
     });
   });
+}
+
+/// Mock strategy for testing
+class _MockStrategy implements GenerationModeStrategy<GenerationRequestDto> {
+  @override
+  GenerationMode get mode => GenerationMode.project;
+
+  @override
+  Future<GenerationResultDto> execute(GenerationRequestDto request) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  List<NextStep> getNextSteps(GenerationResultDto result) {
+    throw UnimplementedError();
+  }
 }

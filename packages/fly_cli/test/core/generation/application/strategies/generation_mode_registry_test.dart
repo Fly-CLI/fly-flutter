@@ -1,8 +1,12 @@
+import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:test/test.dart';
 
@@ -52,11 +56,29 @@ void main() {
       serviceStrategy = MockStrategy(mode: GenerationMode.service);
       projectStrategy = MockStrategy(mode: GenerationMode.project);
 
-      registry = GenerationModeRegistry({
-        GenerationMode.feature: featureStrategy,
-        GenerationMode.service: serviceStrategy,
-        GenerationMode.project: projectStrategy,
-      });
+      final mockProcessor = _MockVariableProcessor();
+      final profiles = {
+        GenerationMode.feature: GenerationModeProfile(
+          mode: GenerationMode.feature,
+          brickId: 'feature',
+          variableProcessor: mockProcessor,
+          strategy: featureStrategy,
+        ),
+        GenerationMode.service: GenerationModeProfile(
+          mode: GenerationMode.service,
+          brickId: 'service',
+          variableProcessor: mockProcessor,
+          strategy: serviceStrategy,
+        ),
+        GenerationMode.project: GenerationModeProfile(
+          mode: GenerationMode.project,
+          brickId: 'project',
+          variableProcessor: mockProcessor,
+          strategy: projectStrategy,
+        ),
+      };
+
+      registry = GenerationModeRegistry(profiles);
     });
 
     group('getStrategy', () {
@@ -154,10 +176,16 @@ void main() {
       test('should throw ArgumentError for unregistered mode', () async {
         // Create a request with a mode that's not in the registry
         // This is a defensive test - in practice all modes should be registered
+        final mockProcessor = _MockVariableProcessor();
         final unregisteredStrategy = MockStrategy(mode: GenerationMode.feature);
         final unregisteredRegistry = GenerationModeRegistry({
           // Only register one mode, not all
-          GenerationMode.feature: unregisteredStrategy,
+          GenerationMode.feature: GenerationModeProfile(
+            mode: GenerationMode.feature,
+            brickId: 'feature',
+            variableProcessor: mockProcessor,
+            strategy: unregisteredStrategy,
+          ),
         });
 
         const request = ServiceGenerationRequest(
@@ -216,5 +244,42 @@ void main() {
         // to iterate over all GenerationMode values and verify each is registered
       });
     });
+
+    group('profiles', () {
+      test('should provide access to profiles and brick IDs', () {
+        // Verify profile access
+        final featureProfile = registry.getProfile(GenerationMode.feature);
+        expect(featureProfile, isNotNull);
+        expect(featureProfile!.mode, equals(GenerationMode.feature));
+        expect(featureProfile.brickId, equals('feature'));
+
+        // Verify brick ID access
+        expect(registry.getBrickId(GenerationMode.feature), equals('feature'));
+        expect(registry.getBrickId(GenerationMode.service), equals('service'));
+        expect(registry.getBrickId(GenerationMode.project), equals('project'));
+      });
+
+      test('should throw ArgumentError when constructed with empty profiles', () {
+        expect(
+          () => GenerationModeRegistry({}),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+    });
   });
+}
+
+/// Mock variable processor for testing
+class _MockVariableProcessor implements IVariableProcessor {
+  @override
+  Future<ProcessedVariables> process({
+    required Map<String, dynamic> rawVars,
+    required GenerationMode mode,
+    required Brick brick,
+  }) async {
+    return ProcessedVariables(
+      values: rawVars,
+      validationResult: VariableValidationResult.success(),
+    );
+  }
 }

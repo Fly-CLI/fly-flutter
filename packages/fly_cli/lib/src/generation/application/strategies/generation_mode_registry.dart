@@ -1,5 +1,6 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
@@ -11,23 +12,55 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 ///
 /// All generation modes must be registered here to be available for use.
 /// New modes should be added by implementing [GenerationModeStrategy] and
-/// registering the implementation in the dependency injection container.
+/// registering the implementation via a [GenerationModeProfile] in the
+/// dependency injection container.
+///
+/// **Profiles are mandatory**: This registry must be constructed from mode
+/// profiles to ensure a single source of truth for all mode-specific wiring.
 class GenerationModeRegistry {
-  /// Creates a new [GenerationModeRegistry].
+  /// Creates a new [GenerationModeRegistry] from mode profiles.
   ///
-  /// [strategies] is a map of generation modes to their corresponding strategies.
-  /// Each strategy is stored with type erasure but maintains type safety
-  /// through the [execute] method which performs runtime type checking.
+  /// This constructor uses the centralized mode profiles as the single source
+  /// of truth. The registry extracts strategies from the profiles while
+  /// maintaining access to the full profile data (brick IDs, processors, etc.).
+  ///
+  /// [profiles] is a map of generation modes to their corresponding profiles.
+  /// Each profile contains all mode-specific components (strategy, processor, brick id).
+  ///
+  /// Throws [ArgumentError] if [profiles] is empty.
   GenerationModeRegistry(
-    Map<GenerationMode, GenerationModeStrategy<GenerationRequestDto>>
-    strategies,
-  ) : _strategies = Map.unmodifiable(strategies);
+    Map<GenerationMode, GenerationModeProfile> profiles,
+  ) : _profiles = Map.unmodifiable(profiles) {
+    if (profiles.isEmpty) {
+      throw ArgumentError('Cannot create registry with empty profiles map');
+    }
+
+    // Extract strategies from profiles
+    final strategies = <GenerationMode, GenerationModeStrategy<GenerationRequestDto>>{};
+    for (final entry in profiles.entries) {
+      strategies[entry.key] = entry.value.strategy;
+    }
+    _strategies = Map.unmodifiable(strategies);
+  }
 
   // Type-erased storage to allow different generic types
   // The strategies are stored as base type but each concrete strategy
   // implements GenerationModeStrategy<T> where T is a specific request type
-  final Map<GenerationMode, GenerationModeStrategy<GenerationRequestDto>>
+  late final Map<GenerationMode, GenerationModeStrategy<GenerationRequestDto>>
   _strategies;
+
+  /// Profiles map - the single source of truth for all mode-specific wiring.
+  final Map<GenerationMode, GenerationModeProfile> _profiles;
+
+  /// Get the profile for a given generation mode.
+  ///
+  /// Returns the profile for the mode, or `null` if the mode is not registered.
+  GenerationModeProfile? getProfile(GenerationMode mode) => _profiles[mode];
+
+  /// Get the brick ID for a given generation mode.
+  ///
+  /// Returns the brick ID from the mode profile, or `null` if the mode is not registered.
+  String? getBrickId(GenerationMode mode) => _profiles[mode]?.brickId;
 
   /// Execute generation using the strategy for the request's mode.
   ///

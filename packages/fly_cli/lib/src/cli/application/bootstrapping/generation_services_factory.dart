@@ -3,6 +3,7 @@ import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_c
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
@@ -98,8 +99,10 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     // Register components in dependency order
     _registerInfrastructure(serviceContainer, logger);
     _registerVariableProcessing(serviceContainer, logger);
-    _registerWorkflowAndUseCases(serviceContainer, logger);
+    // Note: Workflow orchestrator and use cases are registered after registry
+    // to allow the orchestrator to access the mode registry
     _registerStrategiesAndRegistry(serviceContainer);
+    _registerWorkflowAndUseCases(serviceContainer, logger);
   }
 
   /// Register infrastructure adapters and repositories.
@@ -175,6 +178,9 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
   /// Registers:
   /// - Project, feature, and service variable processors
   /// - Variable processor factory that maps modes to processors
+  ///
+  /// Note: The variable processor factory is now created from mode profiles
+  /// in `_registerStrategiesAndRegistry` to ensure a single source of truth.
   void _registerVariableProcessing(
     ServiceContainer container,
     StructuredMasonLogger logger,
@@ -190,15 +196,9 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       )
       ..registerSingleton<ServiceVariableProcessor>(
         ServiceVariableProcessor(logger: composerLogger),
-      )
-      // Register variable processor factory
-      ..registerSingleton<IVariableProcessorFactory>(
-        VariableProcessorFactory(
-          projectProcessor: container.get<ProjectVariableProcessor>(),
-          featureProcessor: container.get<FeatureVariableProcessor>(),
-          serviceProcessor: container.get<ServiceVariableProcessor>(),
-        ),
       );
+    // Note: VariableProcessorFactory is now registered in _registerStrategiesAndRegistry
+    // after mode profiles are created, to use the single source of truth.
   }
 
   /// Register workflow orchestrator and use cases.
@@ -207,6 +207,10 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
   /// - Generation engine (Mason-based)
   /// - Workflow orchestrator (factory for lazy initialization)
   /// - Use cases (feature, service, project)
+  ///
+  /// Note: The workflow orchestrator is registered as a factory to allow
+  /// lazy initialization after the mode registry is created. The registry
+  /// is injected to enable brick ID resolution from mode profiles.
   void _registerWorkflowAndUseCases(
     ServiceContainer container,
     StructuredMasonLogger logger,
@@ -219,12 +223,14 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
           logger: logger,
         ),
       )
-      // Register workflow orchestrator
+      // Register workflow orchestrator as factory (lazy initialization)
+      // The registry is now available since _registerStrategiesAndRegistry runs first
       ..registerFactory<IWorkflowOrchestrator>(() {
         return WorkflowOrchestratorImpl(
           templateManager: container.get<TemplateManager>(),
           variableProcessorFactory: container.get<IVariableProcessorFactory>(),
           logger: logger,
+          modeRegistry: container.get<GenerationModeRegistry>(),
         );
       })
       // Register use cases (all delegate to the workflow orchestrator)
@@ -250,69 +256,116 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
   /// Registers:
   /// - Feature, service, and project generation mode strategies
   /// - Generation mode registry mapping modes to strategies
+  /// - Variable processor factory (using mode profiles as single source of truth)
   /// - Command handler and MCP adapter
   void _registerStrategiesAndRegistry(ServiceContainer container) {
-    // Create strategies map - this is the single source of truth for strategy creation
-    final strategies = _createStrategies(container);
+    // Create mode profiles - this is the single source of truth for all mode wiring
+    final profiles = _createModeProfiles(container);
 
     // Register individual strategies as singletons
-    container
-      ..registerSingleton<FeatureGenerationModeStrategy>(
-        strategies[GenerationMode.feature] as FeatureGenerationModeStrategy,
-      )
-      ..registerSingleton<ServiceGenerationModeStrategy>(
-        strategies[GenerationMode.service] as ServiceGenerationModeStrategy,
-      )
-      ..registerSingleton<ProjectGenerationModeStrategy>(
-        strategies[GenerationMode.project] as ProjectGenerationModeStrategy,
-      )
-      // Register generation mode registry
-      // This registry is the authoritative mapping between GenerationMode enum values
-      // and their corresponding strategy implementations. All generation execution
-      // should route through this registry to ensure consistency and extensibility.
-      ..registerSingleton<GenerationModeRegistry>(
-        GenerationModeRegistry(strategies),
-      )
-      // Register command handler
-      ..registerSingleton<GenerationCommandHandler>(
-        GenerationCommandHandler(
-          registry: container.get<GenerationModeRegistry>(),
-        ),
-      )
-      // Register MCP adapter
-      // MCP adapter uses the registry to ensure consistency with CLI behavior
-      ..registerSingleton<GenerationMcpAdapter>(
-        GenerationMcpAdapter(
-          registry: container.get<GenerationModeRegistry>(),
-        ),
-      );
+    for (final entry in profiles.entries) {
+      final mode = entry.key;
+      final profile = entry.value;
+      switch (mode) {
+        case GenerationMode.feature:
+          container.registerSingleton<FeatureGenerationModeStrategy>(
+            profile.strategy as FeatureGenerationModeStrategy,
+          );
+        case GenerationMode.service:
+          container.registerSingleton<ServiceGenerationModeStrategy>(
+            profile.strategy as ServiceGenerationModeStrategy,
+          );
+        case GenerationMode.project:
+          container.registerSingleton<ProjectGenerationModeStrategy>(
+            profile.strategy as ProjectGenerationModeStrategy,
+          );
+      }
+    }
+
+    // Register generation mode registry from profiles
+    // This registry is the authoritative mapping between GenerationMode enum values
+    // and their corresponding strategy implementations. All generation execution
+    // should route through this registry to ensure consistency and extensibility.
+    // Profiles are mandatory to ensure a single source of truth.
+    final registry = GenerationModeRegistry(profiles);
+    container..registerSingleton<GenerationModeRegistry>(registry)
+
+    // Register variable processor factory using the same profiles
+    // This ensures the processor factory and registry share the same configuration
+    ..registerSingleton<IVariableProcessorFactory>(
+      VariableProcessorFactory.fromProfiles(profiles),
+    )
+
+    // Register command handler
+    ..registerSingleton<GenerationCommandHandler>(
+      GenerationCommandHandler(
+        registry: registry,
+      ),
+    )
+
+    // Register MCP adapter
+    // MCP adapter uses the registry to ensure consistency with CLI behavior
+    ..registerSingleton<GenerationMcpAdapter>(
+      GenerationMcpAdapter(
+        registry: registry,
+      ),
+    );
   }
 
-  /// Create all generation mode strategies.
+  /// Create all generation mode profiles.
   ///
-  /// This method centralizes strategy creation and serves as the extension point
-  /// for adding new generation modes. To add a new mode:
+  /// This method centralizes all mode-specific wiring and serves as the single
+  /// source of truth for generation mode configuration. To add a new mode:
   /// 1. Create a new `GenerationModeStrategy<T>` implementation
   /// 2. Create the corresponding use case (if needed) and register it in `_registerWorkflowAndUseCases`
-  /// 3. Add the strategy to this map
+  /// 3. Create a new `IVariableProcessor` if variables/derivation differ from existing modes
+  /// 4. Add a new `GenerationModeProfile` entry to this map
   ///
-  /// Returns a map of generation modes to their corresponding strategies.
-  Map<GenerationMode, GenerationModeStrategy<GenerationRequestDto>>
-  _createStrategies(ServiceContainer container) {
+  /// Returns a map of generation modes to their corresponding profiles.
+  Map<GenerationMode, GenerationModeProfile> _createModeProfiles(
+    ServiceContainer container,
+  ) {
+    // Resolve processors (already registered in _registerVariableProcessing)
+    final projectProcessor = container.get<ProjectVariableProcessor>();
+    final featureProcessor = container.get<FeatureVariableProcessor>();
+    final serviceProcessor = container.get<ServiceVariableProcessor>();
+
+    // Resolve use cases (already registered in _registerWorkflowAndUseCases)
+    final featureUseCase = container.get<GenerateFeatureUseCase>();
+    final serviceUseCase = container.get<GenerateServiceUseCase>();
+    final projectUseCase = container.get<GenerateProjectUseCase>();
+
+    // Create strategies
     final featureStrategy = FeatureGenerationModeStrategy(
-      useCase: container.get<GenerateFeatureUseCase>(),
+      useCase: featureUseCase,
     );
     final serviceStrategy = ServiceGenerationModeStrategy(
-      useCase: container.get<GenerateServiceUseCase>(),
+      useCase: serviceUseCase,
     );
     final projectStrategy = ProjectGenerationModeStrategy(
-      useCase: container.get<GenerateProjectUseCase>(),
+      useCase: projectUseCase,
     );
 
+    // Build profiles - this is the single source of truth
     return {
-      GenerationMode.feature: featureStrategy,
-      GenerationMode.service: serviceStrategy,
-      GenerationMode.project: projectStrategy,
+      GenerationMode.feature: GenerationModeProfile(
+        mode: GenerationMode.feature,
+        brickId: 'feature',
+        variableProcessor: featureProcessor,
+        strategy: featureStrategy,
+      ),
+      GenerationMode.service: GenerationModeProfile(
+        mode: GenerationMode.service,
+        brickId: 'service',
+        variableProcessor: serviceProcessor,
+        strategy: serviceStrategy,
+      ),
+      GenerationMode.project: GenerationModeProfile(
+        mode: GenerationMode.project,
+        brickId: 'project',
+        variableProcessor: projectProcessor,
+        strategy: projectStrategy,
+      ),
     };
   }
 }

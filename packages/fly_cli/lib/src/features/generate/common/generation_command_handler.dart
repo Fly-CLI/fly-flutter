@@ -20,30 +20,6 @@ class GenerationCommandHandler {
 
   final GenerationModeRegistry _registry;
 
-  /// Execute generation for a feature.
-  ///
-  /// This method is kept for backward compatibility. New code should use
-  /// [execute] instead.
-  Future<CommandResult> executeFeature(FeatureGenerationRequest request) async {
-    return execute(request);
-  }
-
-  /// Execute generation for a service.
-  ///
-  /// This method is kept for backward compatibility. New code should use
-  /// [execute] instead.
-  Future<CommandResult> executeService(ServiceGenerationRequest request) async {
-    return execute(request);
-  }
-
-  /// Execute generation for a project.
-  ///
-  /// This method is kept for backward compatibility. New code should use
-  /// [execute] instead.
-  Future<CommandResult> executeProject(ProjectGenerationRequest request) async {
-    return execute(request);
-  }
-
   /// Execute generation using the appropriate strategy for the request's mode.
   ///
   /// This is the preferred method for executing generation. It automatically

@@ -187,9 +187,10 @@ final request = FeatureGenerationRequest(
 **Code Example**:
 ```dart
 // From GenerationCommandHandler
-Future<CommandResult> executeFeature(FeatureGenerationRequest request) async {
-  final result = await _generateFeatureUseCase.execute(request);
-  return _convertToCommandResult(result, GenerationMode.feature);
+Future<CommandResult> execute(GenerationRequestDto request) async {
+  final result = await _registry.execute(request);
+  final strategy = _registry.getStrategy(request.mode);
+  return _convertToCommandResult(result, request.mode, strategy);
 }
 ```
 
@@ -1034,13 +1035,20 @@ sealed class CommandResult {
 
 ---
 
-## Mode Strategy Pattern
+## Mode Strategy Pattern with Mode Profiles
 
-The generation system uses a **Mode Strategy Pattern** to decouple command handling from
-mode-specific logic. This allows new generation modes to be added without modifying central
-components like `GenerationCommandHandler`.
+The generation system uses a **Mode Strategy Pattern** combined with **Mode Profiles** to decouple command handling from mode-specific logic and provide a single source of truth for all mode wiring. This allows new generation modes to be added without modifying central components or existing mode code.
 
 ### Architecture
+
+**GenerationModeProfile** (`lib/src/generation/application/modes/generation_mode_profile.dart`):
+- **Single source of truth** for all mode-specific wiring
+- Value type that encapsulates, per mode:
+  - The `GenerationMode` enum value
+  - The brick/template identifier (e.g., 'project', 'feature', 'service')
+  - The `IVariableProcessor` for variable derivation and validation
+  - The `GenerationModeStrategy<GenerationRequestDto>` for execution
+- All mode profiles are created in one place: `GenerationServicesFactory._createModeProfiles`
 
 **GenerationModeStrategy** (`lib/src/generation/application/strategies/generation_mode_strategy.dart`):
 - Abstract interface that encapsulates mode-specific behavior
@@ -1049,27 +1057,29 @@ components like `GenerationCommandHandler`.
   - Provide next-step suggestions for successful generation
 
 **GenerationModeRegistry** (`lib/src/generation/application/strategies/generation_mode_registry.dart`):
-- **Single source of truth** for all generation mode implementations
 - Central registry mapping `GenerationMode` → `GenerationModeStrategy`
+- Can be constructed from mode profiles (preferred) or directly from strategies
 - Enables mode-agnostic command handling
 - Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the correct strategy
+- Provides `getBrickId(GenerationMode mode)` to get brick IDs from profiles
 - All generation execution must route through this registry to ensure consistency
 
 **GenerationServicesFactory** (`lib/src/cli/application/bootstrapping/generation_services_factory.dart`):
 - **Composition root** for all generation-related dependencies
 - Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and handlers
+- **Single source of truth**: `_createModeProfiles` method creates all mode profiles in one place
+- The registry, variable processor factory, and workflow orchestrator all use the same profiles map
 - Centralizes dependency wiring, making it easier to extend and test
 - Can be injected into `ServiceBootstrapper` for custom configurations (e.g., testing)
 
 **Benefits**:
-- **Reduced coupling**: Adding a new mode only requires:
-  - Creating a new strategy implementing `GenerationModeStrategy<T>`
-  - Updating `GenerationServicesFactory` to register the new use case and strategy
-  - (Optional) Adding a command/DTO
-- **No central switch statements**: Handler uses registry lookup instead
+- **True single source of truth**: All mode wiring (brick ID, processor, strategy) in one profile entry
+- **Zero changes to existing code**: Adding a new mode requires **only** implementing new components and adding one profile entry
+- **No scattered updates**: No need to update multiple files (enum, factory, processor factory, workflow orchestrator)
+- **No central switch statements**: Handler, processor factory, and workflow orchestrator all use the profiles/registry
 - **Easier testing**: Strategies can be tested independently; factory can be mocked/injected
 - **Consistency**: All entry points (CLI, MCP) use the same strategy-based execution path
-- **Maintainability**: All generation wiring is centralized in one factory
+- **Maintainability**: All generation wiring is centralized in one factory method
 
 ### Example Strategy
 
@@ -1104,19 +1114,25 @@ class FeatureGenerationModeStrategy
 
 ### Adding a New Generation Mode
 
-**Important**: All generation modes must be implemented through the strategy pattern and registered in `GenerationModeRegistry`. This ensures consistency and maintainability.
+**Important**: All generation modes must be implemented through the strategy pattern and registered via a `GenerationModeProfile` in `GenerationServicesFactory._createModeProfiles`. This ensures consistency and maintainability.
 
 See `lib/src/generation/application/strategies/README.md` for detailed instructions on adding a new generation mode.
 
 **Quick checklist**:
-1. ✅ Add enum value to `GenerationMode`
+1. ✅ Add enum value to `GenerationMode` (only if it represents a fundamentally new workflow)
 2. ✅ Create `GenerationRequestDto` subtype
-3. ✅ Create use case (if needed)
-4. ✅ Implement `GenerationModeStrategy<T>`
-5. ✅ Update `GenerationServicesFactory` to register the new use case and add strategy to `_createStrategies`
-6. ✅ (Optional) Create CLI command
+3. ✅ Create use case (if distinct behavior is needed)
+4. ✅ Create variable processor (if variables/derivation differ from existing modes)
+5. ✅ Implement `GenerationModeStrategy<T>`
+6. ✅ **Add a single `GenerationModeProfile` entry** in `GenerationServicesFactory._createModeProfiles`
+7. ✅ (Optional) Create CLI command and variable builder
 
-**Note**: The `GenerationServicesFactory` automatically handles registration of strategies, the registry, command handler, and MCP adapter. You only need to update the factory's `_registerWorkflowAndUseCases` and `_createStrategies` methods.
+**Key benefit**: Adding a new mode requires **zero changes** to existing mode code. Only new components are created and one profile entry is added.
+
+**Note**: The `GenerationServicesFactory` automatically handles registration of strategies, the registry (from profiles), variable processor factory (from profiles), command handler, and MCP adapter. You only need to:
+- Register the use case in `_registerWorkflowAndUseCases` (if created)
+- Register the variable processor in `_registerVariableProcessing` (if created)
+- Add the profile entry in `_createModeProfiles`
 
 ## Error Modeling
 
@@ -1758,18 +1774,12 @@ variables:
   ),
 )
 
-// Update registry registration
-..registerSingleton<GenerationModeRegistry>(
-  GenerationModeRegistry({
-    GenerationMode.feature: container.get<FeatureGenerationModeStrategy>(),
-    GenerationMode.service: container.get<ServiceGenerationModeStrategy>(),
-    GenerationMode.project: container.get<ProjectGenerationModeStrategy>(),
-    GenerationMode.widget: container.get<WidgetGenerationModeStrategy>(), // Add
-  }),
-)
-
-// Note: GenerationCommandHandler is already registered and will automatically
-// use the updated registry. No changes needed to handler registration!
+// Note: The registry is automatically created from mode profiles in
+// GenerationServicesFactory._createModeProfiles(). You only need to add
+// a new GenerationModeProfile entry there. The registry, processor factory,
+// and workflow orchestrator all use the same profiles map automatically.
+//
+// No manual registry registration needed - it's handled by the factory!
 ```
 
 ### Step 13: Add Tests

@@ -602,7 +602,7 @@ class GenerateProjectCommand extends FlyCommand {
       );
 
       // Generate project
-      final result = await handler.executeProject(request);
+      final result = await handler.execute(request);
 
       stopwatch.stop();
 

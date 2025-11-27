@@ -115,7 +115,7 @@ class GenerateServiceCommand extends FlyCommand {
       );
 
       // Generate service
-      final result = await handler.executeService(request);
+      final result = await handler.execute(request);
 
       stopwatch.stop();
 

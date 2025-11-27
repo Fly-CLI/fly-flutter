@@ -261,6 +261,40 @@ void main() {
       expect(registry.isRegistered(GenerationMode.project), isTrue);
     });
 
+    test('should use mode profiles as single source of truth', () {
+      factory.registerGenerationServices(
+        container: container,
+        logger: logger,
+        config: config,
+      );
+
+      final registry = container.get<GenerationModeRegistry>();
+      final processorFactory = container.get<IVariableProcessorFactory>();
+
+      // Verify that registry has profiles (constructed from profiles)
+      expect(registry.getProfile(GenerationMode.feature), isNotNull);
+      expect(registry.getProfile(GenerationMode.service), isNotNull);
+      expect(registry.getProfile(GenerationMode.project), isNotNull);
+
+      // Verify brick IDs are accessible from registry
+      expect(registry.getBrickId(GenerationMode.feature), equals('feature'));
+      expect(registry.getBrickId(GenerationMode.service), equals('service'));
+      expect(registry.getBrickId(GenerationMode.project), equals('project'));
+
+      // Verify that processor factory and registry share the same processors
+      final featureProcessorFromFactory = processorFactory.getProcessor(GenerationMode.feature);
+      final featureProcessorFromRegistry = registry.getProfile(GenerationMode.feature)!.variableProcessor;
+      expect(featureProcessorFromFactory, same(featureProcessorFromRegistry));
+
+      final serviceProcessorFromFactory = processorFactory.getProcessor(GenerationMode.service);
+      final serviceProcessorFromRegistry = registry.getProfile(GenerationMode.service)!.variableProcessor;
+      expect(serviceProcessorFromFactory, same(serviceProcessorFromRegistry));
+
+      final projectProcessorFromFactory = processorFactory.getProcessor(GenerationMode.project);
+      final projectProcessorFromRegistry = registry.getProfile(GenerationMode.project)!.variableProcessor;
+      expect(projectProcessorFromFactory, same(projectProcessorFromRegistry));
+    });
+
     test('should register command handler as singleton', () {
       factory.registerGenerationServices(
         container: container,

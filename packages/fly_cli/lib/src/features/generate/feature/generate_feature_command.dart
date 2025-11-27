@@ -118,7 +118,7 @@ class GenerateFeatureCommand extends FlyCommand {
       );
 
       // Generate feature
-      final result = await handler.executeFeature(request);
+      final result = await handler.execute(request);
 
       stopwatch.stop();
 

@@ -1,6 +1,7 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
 import 'package:fly_cli/src/generation/domain/generation_error_mapper.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/foundation/generation_orchestrator.dart';
@@ -16,17 +17,23 @@ import 'package:mason_logger/mason_logger.dart';
 /// composite generation paths consistent and easy to extend.
 class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
   /// Creates a new [WorkflowOrchestratorImpl] instance.
+  ///
+  /// [modeRegistry] is required to access mode profiles for brick ID resolution.
+  /// This ensures consistency with the single source of truth for mode configuration.
   WorkflowOrchestratorImpl({
     required TemplateManager templateManager,
     required IVariableProcessorFactory variableProcessorFactory,
     required Logger logger,
+    required GenerationModeRegistry modeRegistry,
   }) : _templateManager = templateManager,
        _variableProcessorFactory = variableProcessorFactory,
-       _logger = logger;
+       _logger = logger,
+       _modeRegistry = modeRegistry;
 
   final TemplateManager _templateManager;
   final IVariableProcessorFactory _variableProcessorFactory;
   final Logger _logger;
+  final GenerationModeRegistry _modeRegistry;
 
   @override
   Future<GenerationResult> executeWorkflow({
@@ -43,6 +50,7 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
     };
 
     // 1. Get brick for variable processing and validation
+    // Use mode registry to get brick ID from profile (single source of truth)
     final brickId = _getBrickIdFromMode(mode);
     final brick = await _templateManager.getBrick(brickId);
     if (brick == null) {
@@ -97,14 +105,19 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
   ///
   /// Returns the brick ID that should be used for variable processing
   /// and validation for the given generation mode.
+  ///
+  /// Uses the mode registry to get the brick ID from the mode profile,
+  /// ensuring consistency with the single source of truth.
+  ///
+  /// Throws [StateError] if the mode is not registered or has no brick ID.
   String _getBrickIdFromMode(GenerationMode mode) {
-    switch (mode) {
-      case GenerationMode.project:
-        return 'project';
-      case GenerationMode.feature:
-        return 'feature';
-      case GenerationMode.service:
-        return 'service';
+    final brickId = _modeRegistry.getBrickId(mode);
+    if (brickId == null) {
+      throw StateError(
+        'No brick ID found for generation mode: ${mode.key}. '
+        'Mode must be registered with a profile containing a brick ID.',
+      );
     }
+    return brickId;
   }
 }
