@@ -137,9 +137,11 @@ class YourNewModeGenerationModeStrategy
 
 ### 5. Register in DI Container
 
-In `ServiceBootstrapper` (`lib/src/cli/application/bootstrapping/service_bootstrapper.dart`):
+All generation-related services are registered through the `GenerationServicesFactory` (`lib/src/cli/application/bootstrapping/generation_services_factory.dart`). This factory serves as the composition root for all generation dependencies.
 
-1. Register the use case (if created):
+To add a new generation mode:
+
+1. Register the use case in `_registerWorkflowAndUseCases` method (if created):
 ```dart
 ..registerSingleton<GenerateYourNewModeUseCase>(
   GenerateYourNewModeUseCase(
@@ -148,26 +150,30 @@ In `ServiceBootstrapper` (`lib/src/cli/application/bootstrapping/service_bootstr
 )
 ```
 
-2. Register the strategy:
+2. Add the strategy to the `_createStrategies` method:
 ```dart
-final yourNewModeStrategy = YourNewModeGenerationModeStrategy(
-  useCase: container.get<GenerateYourNewModeUseCase>(),
-);
-container
-  ..registerSingleton<YourNewModeGenerationModeStrategy>(yourNewModeStrategy)
-```
+Map<GenerationMode, GenerationModeStrategy<GenerationRequestDto>>
+    _createStrategies(ServiceContainer container) {
+  // ... existing strategies ...
+  final yourNewModeStrategy = YourNewModeGenerationModeStrategy(
+    useCase: container.get<GenerateYourNewModeUseCase>(),
+  );
 
-3. Add to the registry:
-```dart
-..registerSingleton<GenerationModeRegistry>(
-  GenerationModeRegistry({
+  return {
     GenerationMode.feature: featureStrategy,
     GenerationMode.service: serviceStrategy,
     GenerationMode.project: projectStrategy,
     GenerationMode.yourNewMode: yourNewModeStrategy, // Add here
-  }),
-)
+  };
+}
 ```
+
+The factory automatically:
+- Registers individual strategies as singletons
+- Creates and registers the `GenerationModeRegistry` with all strategies
+- Registers the `GenerationCommandHandler` and `GenerationMcpAdapter` that use the registry
+
+**Note**: The factory pattern centralizes all generation dependency wiring, making it easier to extend and test. For testing, you can inject a custom `IGenerationServicesFactory` into `ServiceBootstrapper`.
 
 ### 6. Create Command (Optional)
 

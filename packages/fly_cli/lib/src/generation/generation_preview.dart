@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 /// Preview of what will be generated during dry-run
 class GenerationPreview {
+  /// Create a new [GenerationPreview] instance
   const GenerationPreview({
     required this.brickName,
     required this.brickType,

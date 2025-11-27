@@ -1,4 +1,5 @@
 import 'package:args/args.dart';
+import 'package:fly_cli/src/cli/application/bootstrapping/generation_services_factory.dart';
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_context_factory.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_logger_factory.dart';
@@ -12,49 +13,12 @@ import 'package:fly_cli/src/cli/infrastructure/telemetry/infrastructure/metrics_
 import 'package:fly_cli/src/features/commands/infrastructure/context_factory.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/interactive_prompt.dart';
 import 'package:fly_cli/src/features/diagnostics/domain/system_checker.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
-import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
-import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
-import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
-import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
-import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
-import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
-import 'package:fly_cli/src/generation/brick/brick_registry.dart';
-import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dart';
-import 'package:fly_cli/src/generation/domain/repositories/itemplate_repository.dart';
-import 'package:fly_cli/src/generation/domain/repositories/itemplate_validator.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/infrastructure/adapters/file_system_adapter.dart';
-import 'package:fly_cli/src/generation/infrastructure/adapters/ifile_system_adapter.dart';
-import 'package:fly_cli/src/generation/infrastructure/adapters/imason_adapter.dart';
-import 'package:fly_cli/src/generation/infrastructure/adapters/mason_adapter.dart';
-import 'package:fly_cli/src/generation/infrastructure/brick/brick_repository_impl.dart';
-import 'package:fly_cli/src/generation/infrastructure/generation/mason_generation_engine.dart';
-import 'package:fly_cli/src/generation/infrastructure/template/template_cache_impl.dart';
-import 'package:fly_cli/src/generation/infrastructure/template/template_repository_impl.dart';
-import 'package:fly_cli/src/generation/infrastructure/template/template_validator_impl.dart';
-import 'package:fly_cli/src/generation/infrastructure/variable_processing/variable_processor_factory.dart';
-import 'package:fly_cli/src/generation/infrastructure/workflow/workflow_orchestrator_impl.dart';
-import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
-import 'package:fly_cli/src/generation/utils/planning_logger_adapter.dart';
-import 'package:fly_cli/src/generation/versioning/compatibility_checker.dart';
-import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/shared/di/service_container.dart';
 import 'package:fly_cli/src/shared/logging/domain/logger.dart' as flylog;
 import 'package:fly_cli/src/shared/logging/infrastructure/logging_bootstrap.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/structured_mason_logger.dart';
-import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 /// Bootstraps and initializes all services for the CLI
 ///
@@ -66,16 +30,20 @@ class ServiceBootstrapper {
   /// [config] - Configuration for service initialization
   /// [loggerFactory] - Optional logger factory (uses default if not provided)
   /// [metricsFactory] - Optional metrics factory (uses default if not provided)
+  /// [generationServicesFactory] - Optional generation services factory (uses default if not provided)
   ServiceBootstrapper(
     this.config, {
     ILoggerFactory? loggerFactory,
     IMetricsCollectorFactory? metricsFactory,
+    IGenerationServicesFactory? generationServicesFactory,
   }) : _loggerFactory = loggerFactory ?? _DefaultLoggerFactory(),
-       _metricsFactory = metricsFactory ?? _DefaultMetricsCollectorFactory();
+       _metricsFactory = metricsFactory ?? _DefaultMetricsCollectorFactory(),
+       _generationServicesFactory = generationServicesFactory ?? GenerationServicesFactory();
 
   final ServiceBootstrapperConfig config;
   final ILoggerFactory _loggerFactory;
   final IMetricsCollectorFactory _metricsFactory;
+  final IGenerationServicesFactory _generationServicesFactory;
 
   late final IServiceContainer _container;
   late final MetricsCollector _metrics;
@@ -180,170 +148,18 @@ class ServiceBootstrapper {
 
   /// Register all architecture components.
   ///
-  /// This method registers repositories, services, use cases, handlers,
-  /// and adapters following Clean Architecture principles.
+  /// This method delegates to the generation services factory to register
+  /// all generation-related dependencies (repositories, services, use cases,
+  /// handlers, and adapters) following Clean Architecture principles.
   void _registerArchitectureComponents(
     StructuredMasonLogger structuredLogger,
     ServiceBootstrapperConfig config,
   ) {
-    final container = _container as ServiceContainer;
-
-    // Register infrastructure adapters
-
-    container
-      ..registerSingleton<IFileSystemAdapter>(const FileSystemAdapter())
-      ..registerSingleton<IMasonAdapter>(const MasonAdapter())
-      // Register repositories
-      // Create BrickRegistry with logger
-      ..registerFactory<BrickRegistry>(
-        () => BrickRegistry(
-          logger: structuredLogger,
-        ),
-      )
-      // Register BrickRepository implementation
-      ..registerFactory<IBrickRepository>(() {
-        final brickRegistry = container.get<BrickRegistry>();
-        return BrickRepositoryImpl(brickRegistry: brickRegistry);
-      })
-      // Register TemplateCache
-      ..registerSingleton<ICacheManager<TemplateInfo>>(
-        TemplateCacheImpl(),
-      )
-      // Register CompatibilityChecker (lazy initialization)
-      // Note: CompatibilityChecker requires async SDK version detection,
-      // so we create it lazily when first needed
-      ..registerFactory<CompatibilityChecker>(() {
-        // This will be initialized lazily when first used
-        // For now, use default versions - actual versions will be detected on first use
-        final cliVersion = Version.parse(VersionUtils.getCurrentVersion());
-        // Use safe defaults - actual versions will be detected by SdkVersionCache
-        return CompatibilityChecker(
-          currentCliVersion: cliVersion,
-          currentFlutterVersion: Version.parse('3.10.0'),
-          // Default, will be updated
-          currentDartVersion: Version.parse(
-            '3.0.0',
-          ), // Default, will be updated
-        );
-      })
-      // Register TemplateValidator
-      ..registerFactory<ITemplateValidator>(() {
-        final compatibilityChecker = container.get<CompatibilityChecker>();
-        return TemplateValidatorImpl(
-          compatibilityChecker: compatibilityChecker,
-          logger: structuredLogger,
-        );
-      })
-      // Register TemplateRepository implementation
-      ..registerFactory<ITemplateRepository>(() {
-        final templateManager = container.get<TemplateManager>();
-        final templateCache = container.get<ICacheManager<TemplateInfo>>();
-        final templateValidator = container.get<ITemplateValidator>();
-        return TemplateRepositoryImpl(
-          templateManager: templateManager,
-          templateCache: templateCache,
-          templateValidator: templateValidator,
-        );
-      });
-
-    // Register mode-specific variable processors
-    // Wrap StructuredMasonLogger with ComposerLoggerAdapter for compatibility
-    final composerLogger = ComposerLoggerAdapter(structuredLogger);
-    container
-      ..registerSingleton<ProjectVariableProcessor>(
-        ProjectVariableProcessor(logger: composerLogger),
-      )
-      ..registerSingleton<FeatureVariableProcessor>(
-        FeatureVariableProcessor(logger: composerLogger),
-      )
-      ..registerSingleton<ServiceVariableProcessor>(
-        ServiceVariableProcessor(logger: composerLogger),
-      )
-      // Register variable processor factory
-      ..registerSingleton<IVariableProcessorFactory>(
-        VariableProcessorFactory(
-          projectProcessor: container.get<ProjectVariableProcessor>(),
-          featureProcessor: container.get<FeatureVariableProcessor>(),
-          serviceProcessor: container.get<ServiceVariableProcessor>(),
-        ),
-      )
-      // Register services
-      ..registerSingleton<IGenerationEngine>(
-        MasonGenerationEngine(
-          masonAdapter: container.get<IMasonAdapter>(),
-          logger: structuredLogger,
-        ),
-      )
-      // Register workflow orchestrator
-      ..registerFactory<IWorkflowOrchestrator>(() {
-        return WorkflowOrchestratorImpl(
-          templateManager: container.get<TemplateManager>(),
-          variableProcessorFactory: container.get<IVariableProcessorFactory>(),
-          logger: structuredLogger,
-        );
-      })
-      // Register use cases (all delegate to the workflow orchestrator)
-      ..registerSingleton<GenerateFeatureUseCase>(
-        GenerateFeatureUseCase(
-          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-        ),
-      )
-      ..registerSingleton<GenerateServiceUseCase>(
-        GenerateServiceUseCase(
-          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-        ),
-      )
-      ..registerSingleton<GenerateProjectUseCase>(
-        GenerateProjectUseCase(
-          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-        ),
-      );
-
-      // Register generation mode strategies
-      // These strategies serve as the single source of truth for generation mode logic.
-      // All generation modes must be registered here and in the registry below.
-      // To add a new mode:
-      // 1. Create a GenerationModeStrategy<T> implementation
-      // 2. Register it here as a singleton
-      // 3. Add it to the GenerationModeRegistry map below
-      final featureStrategy = FeatureGenerationModeStrategy(
-        useCase: container.get<GenerateFeatureUseCase>(),
-      );
-      final serviceStrategy = ServiceGenerationModeStrategy(
-        useCase: container.get<GenerateServiceUseCase>(),
-      );
-      final projectStrategy = ProjectGenerationModeStrategy(
-        useCase: container.get<GenerateProjectUseCase>(),
-      );
-
-      container
-        ..registerSingleton<FeatureGenerationModeStrategy>(featureStrategy)
-        ..registerSingleton<ServiceGenerationModeStrategy>(serviceStrategy)
-        ..registerSingleton<ProjectGenerationModeStrategy>(projectStrategy)
-        // Register generation mode registry
-        // This registry is the authoritative mapping between GenerationMode enum values
-        // and their corresponding strategy implementations. All generation execution
-        // should route through this registry to ensure consistency and extensibility.
-        ..registerSingleton<GenerationModeRegistry>(
-          GenerationModeRegistry({
-            GenerationMode.feature: featureStrategy,
-            GenerationMode.service: serviceStrategy,
-            GenerationMode.project: projectStrategy,
-          }),
-        )
-      // Register command handler
-      ..registerSingleton<GenerationCommandHandler>(
-        GenerationCommandHandler(
-          registry: container.get<GenerationModeRegistry>(),
-        ),
-      )
-      // Register MCP adapter
-      // MCP adapter uses the registry to ensure consistency with CLI behavior
-      ..registerSingleton<GenerationMcpAdapter>(
-        GenerationMcpAdapter(
-          registry: container.get<GenerationModeRegistry>(),
-        ),
-      );
+    _generationServicesFactory.registerGenerationServices(
+      container: _container,
+      logger: structuredLogger,
+      config: config,
+    );
   }
 }
 

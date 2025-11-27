@@ -1055,15 +1055,21 @@ components like `GenerationCommandHandler`.
 - Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the correct strategy
 - All generation execution must route through this registry to ensure consistency
 
+**GenerationServicesFactory** (`lib/src/cli/application/bootstrapping/generation_services_factory.dart`):
+- **Composition root** for all generation-related dependencies
+- Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and handlers
+- Centralizes dependency wiring, making it easier to extend and test
+- Can be injected into `ServiceBootstrapper` for custom configurations (e.g., testing)
+
 **Benefits**:
 - **Reduced coupling**: Adding a new mode only requires:
   - Creating a new strategy implementing `GenerationModeStrategy<T>`
-  - Registering it in DI container
-  - Adding it to the `GenerationModeRegistry` map
+  - Updating `GenerationServicesFactory` to register the new use case and strategy
   - (Optional) Adding a command/DTO
 - **No central switch statements**: Handler uses registry lookup instead
-- **Easier testing**: Strategies can be tested independently
+- **Easier testing**: Strategies can be tested independently; factory can be mocked/injected
 - **Consistency**: All entry points (CLI, MCP) use the same strategy-based execution path
+- **Maintainability**: All generation wiring is centralized in one factory
 
 ### Example Strategy
 
@@ -1107,9 +1113,10 @@ See `lib/src/generation/application/strategies/README.md` for detailed instructi
 2. ✅ Create `GenerationRequestDto` subtype
 3. ✅ Create use case (if needed)
 4. ✅ Implement `GenerationModeStrategy<T>`
-5. ✅ Register strategy in DI container (`ServiceBootstrapper`)
-6. ✅ Add strategy to `GenerationModeRegistry` map
-7. ✅ (Optional) Create CLI command
+5. ✅ Update `GenerationServicesFactory` to register the new use case and add strategy to `_createStrategies`
+6. ✅ (Optional) Create CLI command
+
+**Note**: The `GenerationServicesFactory` automatically handles registration of strategies, the registry, command handler, and MCP adapter. You only need to update the factory's `_registerWorkflowAndUseCases` and `_createStrategies` methods.
 
 ## Error Modeling
 

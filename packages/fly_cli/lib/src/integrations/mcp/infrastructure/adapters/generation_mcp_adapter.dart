@@ -46,7 +46,7 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return await _registry.execute(request);
+    return _registry.execute(request);
   }
 
   /// Execute service generation from MCP parameters.
