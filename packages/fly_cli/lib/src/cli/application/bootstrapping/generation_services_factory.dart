@@ -1,6 +1,9 @@
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
+import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
@@ -11,6 +14,7 @@ import 'package:fly_cli/src/generation/application/services/processors/project_v
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
@@ -261,27 +265,11 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     StructuredMasonLogger logger,
   ) {
     // Create mode profiles - this is the single source of truth for all mode wiring
+    // Note: These initial profiles contain stub strategies that will be replaced
     final profiles = _createModeProfiles(container, logger);
 
-    // Register individual strategies as singletons
-    for (final entry in profiles.entries) {
-      final mode = entry.key;
-      final profile = entry.value;
-      switch (mode) {
-        case GenerationMode.feature:
-          container.registerSingleton<FeatureGenerationModeStrategy>(
-            profile.strategy as FeatureGenerationModeStrategy,
-          );
-        case GenerationMode.service:
-          container.registerSingleton<ServiceGenerationModeStrategy>(
-            profile.strategy as ServiceGenerationModeStrategy,
-          );
-        case GenerationMode.project:
-          container.registerSingleton<ProjectGenerationModeStrategy>(
-            profile.strategy as ProjectGenerationModeStrategy,
-          );
-      }
-    }
+    // Skip registering individual stub strategies - they will be replaced with real ones later
+    // and registered at the end of this method
 
     // Register generation mode registry from profiles
     // This registry is the authoritative mapping between GenerationMode enum values
@@ -545,10 +533,8 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
   ///
   /// Returns a map of generation modes to their corresponding profiles.
   ///
-  /// Note: Use cases are created directly here (not from container) because they
-  /// need a workflow orchestrator, which needs a registry, which is created from
-  /// these profiles. We create a temporary workflow orchestrator with a temporary
-  /// registry to break the circular dependency.
+  /// Note: Strategies are created with stub use cases initially to avoid circular
+  /// dependency. The real use cases will be injected later after the registry is created.
   Map<GenerationMode, GenerationModeProfile> _createModeProfiles(
     ServiceContainer container,
     StructuredMasonLogger logger,
@@ -558,64 +544,60 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     final featureProcessor = container.get<FeatureVariableProcessor>();
     final serviceProcessor = container.get<ServiceVariableProcessor>();
 
-    // Create use cases directly (not from container) to avoid circular dependency.
-    // We need a workflow orchestrator, which needs a registry. We'll create a
-    // temporary registry first, then create the real one after profiles are built.
-    // For now, create use cases with a workflow orchestrator that uses a temporary
-    // empty registry. The real registry will be created and registered after this.
-    final tempProfiles = <GenerationMode, GenerationModeProfile>{};
-    final tempRegistry = GenerationModeRegistry(tempProfiles);
-    final tempVariableProcessorFactory =
-        VariableProcessorFactory.fromProfiles(tempProfiles);
-    final tempWorkflowOrchestrator = WorkflowOrchestratorImpl(
-      templateManager: container.get<TemplateManager>(),
-      variableProcessorFactory: tempVariableProcessorFactory,
-      logger: logger,
-      modeRegistry: tempRegistry,
-    );
+    // Create minimal stub strategies without use cases
+    // These will be replaced with real strategies after the registry is created
+    // For now, we just need them to create the initial profiles
+    final stubFeatureStrategy = _StubGenerationStrategy<FeatureGenerationRequest>();
+    final stubServiceStrategy = _StubGenerationStrategy<ServiceGenerationRequest>();
+    final stubProjectStrategy = _StubGenerationStrategy<ProjectGenerationRequest>();
 
-    // Create use cases with the temporary workflow orchestrator
-    final featureUseCase = GenerateFeatureUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator,
-    );
-    final serviceUseCase = GenerateServiceUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator,
-    );
-    final projectUseCase = GenerateProjectUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator,
-    );
-
-    // Create strategies
-    final featureStrategy = FeatureGenerationModeStrategy(
-      useCase: featureUseCase,
-    );
-    final serviceStrategy = ServiceGenerationModeStrategy(
-      useCase: serviceUseCase,
-    );
-    final projectStrategy = ProjectGenerationModeStrategy(
-      useCase: projectUseCase,
-    );
-
-    // Build profiles - this is the single source of truth
+    // Build profiles with stub strategies - this is the single source of truth
     return {
       GenerationMode.feature: GenerationModeProfile(
         mode: GenerationMode.feature,
         brickId: BrickId.feature,
         variableProcessor: featureProcessor,
-        strategy: featureStrategy,
+        strategy: stubFeatureStrategy,
       ),
       GenerationMode.service: GenerationModeProfile(
         mode: GenerationMode.service,
         brickId: BrickId.service,
         variableProcessor: serviceProcessor,
-        strategy: serviceStrategy,
+        strategy: stubServiceStrategy,
       ),
       GenerationMode.project: GenerationModeProfile(
         mode: GenerationMode.project,
         brickId: BrickId.project,
         variableProcessor: projectProcessor,
-        strategy: projectStrategy,
+        strategy: stubProjectStrategy,
       ),
     };
+  }
+}
+
+/// Stub strategy used during initialization to break circular dependency.
+/// This strategy should never be called - it exists only to create initial profiles.
+class _StubGenerationStrategy<T extends GenerationRequestDto>
+    implements GenerationModeStrategy<T> {
+  @override
+  GenerationMode get mode => throw StateError(
+        'Stub strategy should not be called. '
+        'This indicates the registry was not properly initialized with real strategies.',
+      );
+
+  @override
+  Future<GenerationResultDto> execute(T request) async {
+    throw StateError(
+      'Stub strategy should not be called. '
+      'This indicates the registry was not properly initialized with real strategies.',
+    );
+  }
+
+  @override
+  List<NextStep> getNextSteps(GenerationResultDto result) {
+    throw StateError(
+      'Stub strategy should not be called. '
+      'This indicates the registry was not properly initialized with real strategies.',
+    );
   }
 }
