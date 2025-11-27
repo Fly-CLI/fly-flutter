@@ -1,6 +1,7 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_types.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Deriver that sets feature-mode-specific variables.
 class FeatureModeDeriver implements VariableDeriver {

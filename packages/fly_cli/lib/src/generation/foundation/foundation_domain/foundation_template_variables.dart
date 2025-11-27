@@ -1,6 +1,7 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_types.dart'
-    show ScreenType, ServiceType, StateManagement, FoundationVars;
+    show FoundationVars, ScreenType, ServiceType, StateManagement;
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 
 /// Foundation-specific template variables representing all input variables.
@@ -8,6 +9,7 @@ import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 /// This class extends the core planning concepts with Fly foundation-specific
 /// configuration including presets, state management, screen/service types, etc.
 class FoundationTemplateVariables {
+  /// Creates a new instance of [FoundationTemplateVariables].
   const FoundationTemplateVariables({
     required this.name,
     required this.organization,

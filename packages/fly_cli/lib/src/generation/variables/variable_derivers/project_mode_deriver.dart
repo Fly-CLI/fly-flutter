@@ -1,4 +1,5 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Deriver that sets project-mode-specific variables.
 class ProjectModeDeriver implements VariableDeriver {

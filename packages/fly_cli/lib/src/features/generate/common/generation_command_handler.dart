@@ -5,6 +5,7 @@ import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dar
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/domain/generation_error_type.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 
 /// Handler for generation commands that delegates to mode strategies.

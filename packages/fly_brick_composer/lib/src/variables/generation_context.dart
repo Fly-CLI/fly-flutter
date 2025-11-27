@@ -1,4 +1,4 @@
-import 'package:fly_brick_composer/src/core/composer_model.dart';
+import 'package:fly_cli/src/generation/generation_types.dart';
 import 'package:fly_brick_composer/src/registry/workflow_definition.dart';
 
 /// Context representing normalized input for a planning run.

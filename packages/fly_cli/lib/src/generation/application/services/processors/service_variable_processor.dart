@@ -1,6 +1,7 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/variables/validation/ivariable_validator.dart';
 import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 import 'package:fly_cli/src/generation/variables/variable_derivers/naming_deriver.dart';

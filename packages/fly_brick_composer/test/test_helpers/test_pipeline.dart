@@ -1,3 +1,4 @@
+import 'package:fly_cli/src/generation/generation_types.dart';
 import 'package:fly_brick_composer/src/core/composer_model.dart';
 import 'package:fly_brick_composer/src/exceptions/composer_exception.dart';
 import 'package:fly_brick_composer/src/utils/logger.dart';

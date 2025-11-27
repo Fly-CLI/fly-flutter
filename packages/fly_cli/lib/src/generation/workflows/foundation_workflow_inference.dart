@@ -1,4 +1,5 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/workflows/foundation_workflows.dart';
 
 /// Helper for inferring foundation workflow IDs from raw variables.
