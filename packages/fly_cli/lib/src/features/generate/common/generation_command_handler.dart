@@ -48,9 +48,12 @@ class GenerationCommandHandler {
   ///
   /// This is the preferred method for executing generation. It automatically
   /// selects the correct strategy based on the request's generation mode.
+  ///
+  /// Delegates to the registry's execute method, which serves as the single
+  /// source of truth for routing generation requests to their strategies.
   Future<CommandResult> execute(GenerationRequestDto request) async {
+    final result = await _registry.execute(request);
     final strategy = _registry.getStrategy(request.mode);
-    final result = await strategy.execute(request);
     return _convertToCommandResult(result, request.mode, strategy);
   }
 

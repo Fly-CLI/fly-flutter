@@ -297,35 +297,40 @@ class ServiceBootstrapper {
         GenerateProjectUseCase(
           workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
         ),
-      )
+      );
+
       // Register generation mode strategies
-      ..registerSingleton<FeatureGenerationModeStrategy>(
-        FeatureGenerationModeStrategy(
-          useCase: container.get<GenerateFeatureUseCase>(),
-        ),
-      )
-      ..registerSingleton<ServiceGenerationModeStrategy>(
-        ServiceGenerationModeStrategy(
-          useCase: container.get<GenerateServiceUseCase>(),
-        ),
-      )
-      ..registerSingleton<ProjectGenerationModeStrategy>(
-        ProjectGenerationModeStrategy(
-          useCase: container.get<GenerateProjectUseCase>(),
-        ),
-      )
-      // Register generation mode registry
-      // Cast strategies to base type for type-erased storage in registry
-      ..registerSingleton<GenerationModeRegistry>(
-        GenerationModeRegistry({
-          GenerationMode.feature: container
-              .get<FeatureGenerationModeStrategy>(),
-          GenerationMode.service: container
-              .get<ServiceGenerationModeStrategy>(),
-          GenerationMode.project: container
-              .get<ProjectGenerationModeStrategy>(),
-        }),
-      )
+      // These strategies serve as the single source of truth for generation mode logic.
+      // All generation modes must be registered here and in the registry below.
+      // To add a new mode:
+      // 1. Create a GenerationModeStrategy<T> implementation
+      // 2. Register it here as a singleton
+      // 3. Add it to the GenerationModeRegistry map below
+      final featureStrategy = FeatureGenerationModeStrategy(
+        useCase: container.get<GenerateFeatureUseCase>(),
+      );
+      final serviceStrategy = ServiceGenerationModeStrategy(
+        useCase: container.get<GenerateServiceUseCase>(),
+      );
+      final projectStrategy = ProjectGenerationModeStrategy(
+        useCase: container.get<GenerateProjectUseCase>(),
+      );
+
+      container
+        ..registerSingleton<FeatureGenerationModeStrategy>(featureStrategy)
+        ..registerSingleton<ServiceGenerationModeStrategy>(serviceStrategy)
+        ..registerSingleton<ProjectGenerationModeStrategy>(projectStrategy)
+        // Register generation mode registry
+        // This registry is the authoritative mapping between GenerationMode enum values
+        // and their corresponding strategy implementations. All generation execution
+        // should route through this registry to ensure consistency and extensibility.
+        ..registerSingleton<GenerationModeRegistry>(
+          GenerationModeRegistry({
+            GenerationMode.feature: featureStrategy,
+            GenerationMode.service: serviceStrategy,
+            GenerationMode.project: projectStrategy,
+          }),
+        )
       // Register command handler
       ..registerSingleton<GenerationCommandHandler>(
         GenerationCommandHandler(
@@ -333,11 +338,10 @@ class ServiceBootstrapper {
         ),
       )
       // Register MCP adapter
+      // MCP adapter uses the registry to ensure consistency with CLI behavior
       ..registerSingleton<GenerationMcpAdapter>(
         GenerationMcpAdapter(
-          generateFeatureUseCase: container.get<GenerateFeatureUseCase>(),
-          generateServiceUseCase: container.get<GenerateServiceUseCase>(),
-          generateProjectUseCase: container.get<GenerateProjectUseCase>(),
+          registry: container.get<GenerationModeRegistry>(),
         ),
       );
   }

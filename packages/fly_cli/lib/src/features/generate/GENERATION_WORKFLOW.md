@@ -1049,21 +1049,27 @@ components like `GenerationCommandHandler`.
   - Provide next-step suggestions for successful generation
 
 **GenerationModeRegistry** (`lib/src/generation/application/strategies/generation_mode_registry.dart`):
+- **Single source of truth** for all generation mode implementations
 - Central registry mapping `GenerationMode` → `GenerationModeStrategy`
 - Enables mode-agnostic command handling
+- Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the correct strategy
+- All generation execution must route through this registry to ensure consistency
 
 **Benefits**:
 - **Reduced coupling**: Adding a new mode only requires:
-  - Creating a new strategy
-  - Registering it in DI
-  - Adding a command/DTO
+  - Creating a new strategy implementing `GenerationModeStrategy<T>`
+  - Registering it in DI container
+  - Adding it to the `GenerationModeRegistry` map
+  - (Optional) Adding a command/DTO
 - **No central switch statements**: Handler uses registry lookup instead
 - **Easier testing**: Strategies can be tested independently
+- **Consistency**: All entry points (CLI, MCP) use the same strategy-based execution path
 
 ### Example Strategy
 
 ```dart
-class FeatureGenerationModeStrategy implements GenerationModeStrategy {
+class FeatureGenerationModeStrategy 
+    implements GenerationModeStrategy<FeatureGenerationRequest> {
   FeatureGenerationModeStrategy({
     required GenerateFeatureUseCase useCase,
   }) : _useCase = useCase;
@@ -1074,11 +1080,8 @@ class FeatureGenerationModeStrategy implements GenerationModeStrategy {
   GenerationMode get mode => GenerationMode.feature;
 
   @override
-  Future<GenerationResultDto> execute(GenerationRequestDto request) async {
-    if (request is! FeatureGenerationRequest) {
-      throw ArgumentError('Expected FeatureGenerationRequest');
-    }
-    return await _useCase.execute(request);
+  Future<GenerationResultDto> execute(FeatureGenerationRequest request) {
+    return _useCase.execute(request);
   }
 
   @override
@@ -1092,6 +1095,21 @@ class FeatureGenerationModeStrategy implements GenerationModeStrategy {
   }
 }
 ```
+
+### Adding a New Generation Mode
+
+**Important**: All generation modes must be implemented through the strategy pattern and registered in `GenerationModeRegistry`. This ensures consistency and maintainability.
+
+See `lib/src/generation/application/strategies/README.md` for detailed instructions on adding a new generation mode.
+
+**Quick checklist**:
+1. ✅ Add enum value to `GenerationMode`
+2. ✅ Create `GenerationRequestDto` subtype
+3. ✅ Create use case (if needed)
+4. ✅ Implement `GenerationModeStrategy<T>`
+5. ✅ Register strategy in DI container (`ServiceBootstrapper`)
+6. ✅ Add strategy to `GenerationModeRegistry` map
+7. ✅ (Optional) Create CLI command
 
 ## Error Modeling
 

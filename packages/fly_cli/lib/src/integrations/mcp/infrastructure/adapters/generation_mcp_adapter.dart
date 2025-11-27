@@ -1,28 +1,28 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
-import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
-/// Adapter for MCP tools to use generation use cases.
+/// Adapter for MCP tools to use generation strategies.
 ///
 /// Provides a unified interface for MCP tools to execute generation
-/// operations through use cases, ensuring consistency with CLI commands.
+/// operations through the generation mode registry, ensuring consistency
+/// with CLI commands and benefiting from the same strategy-based architecture.
+///
+/// This adapter translates MCP-specific parameters into GenerationRequestDto
+/// objects and delegates execution to the GenerationModeRegistry, which routes
+/// requests to the appropriate strategy implementation.
 class GenerationMcpAdapter {
+  /// Creates a new instance of [GenerationMcpAdapter].
   GenerationMcpAdapter({
-    required GenerateFeatureUseCase generateFeatureUseCase,
-    required GenerateServiceUseCase generateServiceUseCase,
-    required GenerateProjectUseCase generateProjectUseCase,
-  }) : _generateFeatureUseCase = generateFeatureUseCase,
-       _generateServiceUseCase = generateServiceUseCase,
-       _generateProjectUseCase = generateProjectUseCase;
+    required GenerationModeRegistry registry,
+  }) : _registry = registry;
 
-  final GenerateFeatureUseCase _generateFeatureUseCase;
-  final GenerateServiceUseCase _generateServiceUseCase;
-  final GenerateProjectUseCase _generateProjectUseCase;
+  final GenerationModeRegistry _registry;
 
   /// Execute feature generation from MCP parameters.
+  ///
+  /// Delegates to the generation mode registry to ensure consistency with CLI behavior.
   Future<GenerationResultDto> generateFeature({
     required String screenName,
     String? feature,
@@ -46,10 +46,12 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return await _generateFeatureUseCase.execute(request);
+    return await _registry.execute(request);
   }
 
   /// Execute service generation from MCP parameters.
+  ///
+  /// Delegates to the generation mode registry to ensure consistency with CLI behavior.
   Future<GenerationResultDto> generateService({
     required String serviceName,
     String? feature,
@@ -73,10 +75,12 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return await _generateServiceUseCase.execute(request);
+    return _registry.execute(request);
   }
 
   /// Execute project generation from MCP parameters.
+  ///
+  /// Delegates to the generation mode registry to ensure consistency with CLI behavior.
   Future<GenerationResultDto> generateProject({
     required String projectName,
     String? template,
@@ -113,6 +117,6 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return await _generateProjectUseCase.execute(request);
+    return _registry.execute(request);
   }
 }
