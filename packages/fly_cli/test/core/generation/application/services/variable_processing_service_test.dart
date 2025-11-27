@@ -34,19 +34,19 @@ void main() {
       final profiles = {
         GenerationMode.project: GenerationModeProfile(
           mode: GenerationMode.project,
-          brickId: 'project',
+          brickId: BrickId.project,
           variableProcessor: projectProcessor,
           strategy: mockStrategy,
         ),
         GenerationMode.feature: GenerationModeProfile(
           mode: GenerationMode.feature,
-          brickId: 'feature',
+          brickId: BrickId.feature,
           variableProcessor: featureProcessor,
           strategy: mockStrategy,
         ),
         GenerationMode.service: GenerationModeProfile(
           mode: GenerationMode.service,
-          brickId: 'service',
+          brickId: BrickId.service,
           variableProcessor: serviceProcessor,
           strategy: mockStrategy,
         ),

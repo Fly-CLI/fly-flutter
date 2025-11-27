@@ -118,6 +118,6 @@ class WorkflowOrchestratorImpl implements IWorkflowOrchestrator {
         'Mode must be registered with a profile containing a brick ID.',
       );
     }
-    return brickId;
+    return brickId.key;
   }
 }

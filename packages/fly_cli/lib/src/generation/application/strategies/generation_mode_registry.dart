@@ -60,7 +60,7 @@ class GenerationModeRegistry {
   /// Get the brick ID for a given generation mode.
   ///
   /// Returns the brick ID from the mode profile, or `null` if the mode is not registered.
-  String? getBrickId(GenerationMode mode) => _profiles[mode]?.brickId;
+  BrickId? getBrickId(GenerationMode mode) => _profiles[mode]?.brickId;
 
   /// Execute generation using the strategy for the request's mode.
   ///

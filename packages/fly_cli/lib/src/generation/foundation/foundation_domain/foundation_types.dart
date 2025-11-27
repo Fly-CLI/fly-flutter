@@ -204,6 +204,53 @@ enum StateManagement {
   }
 }
 
+/// Brick identifier enum for generation modes.
+enum BrickId {
+  project,
+  feature,
+  service;
+
+  /// Returns the canonical string key used for brick lookup.
+  String get key {
+    switch (this) {
+      case BrickId.project:
+        return 'project';
+      case BrickId.feature:
+        return 'feature';
+      case BrickId.service:
+        return 'service';
+    }
+  }
+
+  /// Parses brick ID from a string value.
+  static BrickId fromKey(String key) {
+    final normalized = key.toLowerCase().trim();
+    switch (normalized) {
+      case 'project':
+        return BrickId.project;
+      case 'feature':
+        return BrickId.feature;
+      case 'service':
+        return BrickId.service;
+      default:
+        throw FoundationDomainException(
+          'Invalid brick_id: "$key". Must be one of: project, feature, service.',
+        );
+    }
+  }
+
+  /// Parses brick ID from a nullable string value.
+  ///
+  /// Returns the corresponding enum value, or `null` if null/empty.
+  /// Throws [FoundationDomainException] if the value is non-empty but invalid.
+  static BrickId? tryFromKey(String? key) {
+    if (key == null || key.trim().isEmpty) {
+      return null;
+    }
+    return fromKey(key);
+  }
+}
+
 /// Model representing project name in different naming conventions.
 class ProjectName {
   const ProjectName({

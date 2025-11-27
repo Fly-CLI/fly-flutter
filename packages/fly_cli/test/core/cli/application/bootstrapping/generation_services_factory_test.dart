@@ -277,21 +277,42 @@ void main() {
       expect(registry.getProfile(GenerationMode.project), isNotNull);
 
       // Verify brick IDs are accessible from registry
-      expect(registry.getBrickId(GenerationMode.feature), equals('feature'));
-      expect(registry.getBrickId(GenerationMode.service), equals('service'));
-      expect(registry.getBrickId(GenerationMode.project), equals('project'));
+      expect(
+        registry.getBrickId(GenerationMode.feature),
+        equals(BrickId.feature),
+      );
+      expect(
+        registry.getBrickId(GenerationMode.service),
+        equals(BrickId.service),
+      );
+      expect(
+        registry.getBrickId(GenerationMode.project),
+        equals(BrickId.project),
+      );
 
       // Verify that processor factory and registry share the same processors
-      final featureProcessorFromFactory = processorFactory.getProcessor(GenerationMode.feature);
-      final featureProcessorFromRegistry = registry.getProfile(GenerationMode.feature)!.variableProcessor;
+      final featureProcessorFromFactory = processorFactory.getProcessor(
+        GenerationMode.feature,
+      );
+      final featureProcessorFromRegistry = registry
+          .getProfile(GenerationMode.feature)!
+          .variableProcessor;
       expect(featureProcessorFromFactory, same(featureProcessorFromRegistry));
 
-      final serviceProcessorFromFactory = processorFactory.getProcessor(GenerationMode.service);
-      final serviceProcessorFromRegistry = registry.getProfile(GenerationMode.service)!.variableProcessor;
+      final serviceProcessorFromFactory = processorFactory.getProcessor(
+        GenerationMode.service,
+      );
+      final serviceProcessorFromRegistry = registry
+          .getProfile(GenerationMode.service)!
+          .variableProcessor;
       expect(serviceProcessorFromFactory, same(serviceProcessorFromRegistry));
 
-      final projectProcessorFromFactory = processorFactory.getProcessor(GenerationMode.project);
-      final projectProcessorFromRegistry = registry.getProfile(GenerationMode.project)!.variableProcessor;
+      final projectProcessorFromFactory = processorFactory.getProcessor(
+        GenerationMode.project,
+      );
+      final projectProcessorFromRegistry = registry
+          .getProfile(GenerationMode.project)!
+          .variableProcessor;
       expect(projectProcessorFromFactory, same(projectProcessorFromRegistry));
     });
 

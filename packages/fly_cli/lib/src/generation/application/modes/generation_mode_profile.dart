@@ -1,7 +1,8 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart'
+    show BrickId, GenerationMode;
 
 /// Profile defining all mode-specific components for a generation mode.
 ///
@@ -32,7 +33,7 @@ class GenerationModeProfile {
   ///
   /// This is the key used to look up the brick in the brick repository
   /// (e.g., 'project', 'feature', 'service').
-  final String brickId;
+  final BrickId brickId;
 
   /// The variable processor for this mode.
   ///

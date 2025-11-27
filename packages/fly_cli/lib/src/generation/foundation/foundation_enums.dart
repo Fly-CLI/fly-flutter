@@ -13,4 +13,4 @@ export 'package:fly_brick_composer/fly_brick_composer.dart'
 
 // Re-export domain-specific types from foundation_domain
 export 'foundation_domain/foundation_types.dart'
-    show ScreenType, ServiceType, StateManagement, ProjectName;
+    show BrickId, ProjectName, ScreenType, ServiceType, StateManagement;

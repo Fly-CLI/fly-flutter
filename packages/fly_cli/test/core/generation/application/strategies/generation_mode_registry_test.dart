@@ -60,19 +60,19 @@ void main() {
       final profiles = {
         GenerationMode.feature: GenerationModeProfile(
           mode: GenerationMode.feature,
-          brickId: 'feature',
+          brickId: BrickId.feature,
           variableProcessor: mockProcessor,
           strategy: featureStrategy,
         ),
         GenerationMode.service: GenerationModeProfile(
           mode: GenerationMode.service,
-          brickId: 'service',
+          brickId: BrickId.service,
           variableProcessor: mockProcessor,
           strategy: serviceStrategy,
         ),
         GenerationMode.project: GenerationModeProfile(
           mode: GenerationMode.project,
-          brickId: 'project',
+          brickId: BrickId.project,
           variableProcessor: mockProcessor,
           strategy: projectStrategy,
         ),
@@ -182,7 +182,7 @@ void main() {
           // Only register one mode, not all
           GenerationMode.feature: GenerationModeProfile(
             mode: GenerationMode.feature,
-            brickId: 'feature',
+            brickId: BrickId.feature,
             variableProcessor: mockProcessor,
             strategy: unregisteredStrategy,
           ),
@@ -251,12 +251,12 @@ void main() {
         final featureProfile = registry.getProfile(GenerationMode.feature);
         expect(featureProfile, isNotNull);
         expect(featureProfile!.mode, equals(GenerationMode.feature));
-        expect(featureProfile.brickId, equals('feature'));
+        expect(featureProfile.brickId, equals(BrickId.feature));
 
         // Verify brick ID access
-        expect(registry.getBrickId(GenerationMode.feature), equals('feature'));
-        expect(registry.getBrickId(GenerationMode.service), equals('service'));
-        expect(registry.getBrickId(GenerationMode.project), equals('project'));
+        expect(registry.getBrickId(GenerationMode.feature), equals(BrickId.feature));
+        expect(registry.getBrickId(GenerationMode.service), equals(BrickId.service));
+        expect(registry.getBrickId(GenerationMode.project), equals(BrickId.project));
       });
 
       test('should throw ArgumentError when constructed with empty profiles', () {
