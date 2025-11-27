@@ -1,7 +1,7 @@
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/domain/generation_error_type.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
@@ -12,25 +12,39 @@ import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 /// Provides a unified, mode-agnostic interface for executing generation
 /// operations through registered strategies, following Clean Architecture
 /// principles and reducing coupling when adding new generation modes.
+///
+/// All mode-specific behavior is obtained directly from the profiles map,
+/// which is the single source of truth for generation mode configuration.
 class GenerationCommandHandler {
   /// Creates a new instance of [GenerationCommandHandler].
+  ///
+  /// [profiles] provides access to all generation mode profiles, which contain
+  /// all mode-specific logic and dependencies (including strategies).
   GenerationCommandHandler({
-    required GenerationModeRegistry registry,
-  }) : _registry = registry;
+    required Map<GenerationMode, GenerationModeProfile> profiles,
+  }) : _profiles = profiles;
 
-  final GenerationModeRegistry _registry;
+  final Map<GenerationMode, GenerationModeProfile> _profiles;
 
   /// Execute generation using the appropriate strategy for the request's mode.
   ///
   /// This is the preferred method for executing generation. It automatically
   /// selects the correct strategy based on the request's generation mode.
   ///
-  /// Delegates to the registry's execute method, which serves as the single
-  /// source of truth for routing generation requests to their strategies.
+  /// All mode-specific behavior comes directly from the profile's strategy.
   Future<CommandResult> execute(GenerationRequestDto request) async {
-    final result = await _registry.execute(request);
-    final strategy = _registry.getStrategy(request.mode);
-    return _convertToCommandResult(result, request.mode, strategy);
+    final profile = _profiles[request.mode];
+    if (profile == null) {
+      return CommandResult.error(
+        message: 'No profile found for generation mode: ${request.mode.key}',
+        suggestion: 'Verify that the generation mode is properly registered',
+        errorCode: ErrorCode.invalidArgumentValue,
+      );
+    }
+
+    // Execute using the strategy from the profile (single source of truth)
+    final result = await profile.strategy.execute(request);
+    return _convertToCommandResult(result, request.mode, profile.strategy);
   }
 
   /// Convert GenerationResultDto to CommandResult.

@@ -8,14 +8,13 @@ import 'package:fly_cli/src/generation/application/modes/generation_mode_profile
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
@@ -35,7 +34,6 @@ import 'package:fly_cli/src/generation/infrastructure/generation/mason_generatio
 import 'package:fly_cli/src/generation/infrastructure/template/template_cache_impl.dart';
 import 'package:fly_cli/src/generation/infrastructure/template/template_repository_impl.dart';
 import 'package:fly_cli/src/generation/infrastructure/template/template_validator_impl.dart';
-import 'package:fly_cli/src/generation/infrastructure/variable_processing/variable_processor_factory.dart';
 import 'package:fly_cli/src/generation/infrastructure/workflow/workflow_orchestrator_impl.dart';
 import 'package:fly_cli/src/generation/template/template_info.dart';
 import 'package:fly_cli/src/generation/template/template_manager.dart';
@@ -46,6 +44,9 @@ import 'package:fly_cli/src/shared/di/service_container.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/structured_mason_logger.dart';
 import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:pub_semver/pub_semver.dart';
+
+/// Type alias for the profiles map - the single source of truth for generation modes.
+typedef GenerationProfiles = Map<GenerationMode, GenerationModeProfile>;
 
 /// Factory interface for creating and registering generation-related services.
 abstract class IGenerationServicesFactory {
@@ -58,9 +59,19 @@ abstract class IGenerationServicesFactory {
 
 /// Factory for creating and registering generation-related services.
 ///
-/// Creates all components in dependency order without using stub dependencies.
-/// Components are built bottom-up: infrastructure -> processors -> orchestrator -> use cases -> strategies -> registry.
+/// Creates all components in dependency order with GenerationModeProfile as the
+/// single source of truth. All mode-specific logic and dependencies flow from
+/// the profiles map, which is built once and injected everywhere.
+///
+/// Initialization flow:
+/// 1. Infrastructure (adapters, repositories)
+/// 2. Variable processors
+/// 3. Generation engine
+/// 4. Workflow orchestrator (mode-agnostic at construction)
+/// 5. Use cases, strategies, and profiles (built together for each mode)
+/// 6. Registry and handlers (consume profiles directly)
 class GenerationServicesFactory implements IGenerationServicesFactory {
+  /// Creates a new GenerationServicesFactory instance.
   GenerationServicesFactory();
 
   @override
@@ -74,7 +85,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     _registerInfrastructure(serviceContainer, logger);
     _registerVariableProcessing(serviceContainer, logger);
     _registerGenerationEngine(serviceContainer, logger);
-    _registerStrategiesAndRegistry(serviceContainer, logger);
+    _registerStrategiesAndProfiles(serviceContainer, logger);
   }
 
   void _registerInfrastructure(
@@ -147,7 +158,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     );
   }
 
-  void _registerStrategiesAndRegistry(
+  void _registerStrategiesAndProfiles(
     ServiceContainer container,
     StructuredMasonLogger logger,
   ) {
@@ -156,145 +167,218 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     final featureProcessor = container.get<FeatureVariableProcessor>();
     final serviceProcessor = container.get<ServiceVariableProcessor>();
 
-    // Create mode configuration
-    final modeConfig = {
-      GenerationMode.feature: (BrickId.feature, featureProcessor),
-      GenerationMode.service: (BrickId.service, serviceProcessor),
-      GenerationMode.project: (BrickId.project, projectProcessor),
-    };
-
-    // Create processors map for variable processor factory
-    final processorsMap = <GenerationMode, IVariableProcessor>{
-      for (final entry in modeConfig.entries)
-        entry.key: entry.value.$2,
-    };
-
-    // Create profiles for variable processor factory (strategies will be added later)
-    final profilesForFactory = <GenerationMode, GenerationModeProfile>{};
-    for (final entry in modeConfig.entries) {
-      // Create a minimal profile with a no-op strategy just for the factory
-      // The factory only uses variableProcessor, not strategy
-      profilesForFactory[entry.key] = GenerationModeProfile(
-        mode: entry.key,
-        brickId: entry.value.$1,
-        variableProcessor: entry.value.$2,
-        strategy: _NoOpStrategy(entry.key),
-      );
-    }
-
-    // Create variable processor factory
-    final variableProcessorFactory =
-        VariableProcessorFactory.fromProfiles(profilesForFactory);
-
-    // Create initial registry with no-op strategies (only needed for brick ID lookup)
-    final initialRegistry = GenerationModeRegistry(profilesForFactory);
-
-    // Create workflow orchestrator
+    // Step 1: Create workflow orchestrator (mode-agnostic, no profile dependencies)
     final workflowOrchestrator = WorkflowOrchestratorImpl(
       templateManager: templateManager,
-      variableProcessorFactory: variableProcessorFactory,
       logger: logger,
-      modeRegistry: initialRegistry,
     );
 
-    // Create use cases
-    final featureUseCase =
-        GenerateFeatureUseCase(workflowOrchestrator: workflowOrchestrator);
-    final serviceUseCase =
-        GenerateServiceUseCase(workflowOrchestrator: workflowOrchestrator);
-    final projectUseCase =
-        GenerateProjectUseCase(workflowOrchestrator: workflowOrchestrator);
+    // Step 2: Build mode-specific components for each mode
+    // Each mode's components (use case, strategy, profile) are built together
+    // to ensure proper wiring without circular dependencies
 
-    // Create strategies
-    final featureStrategy =
-        FeatureGenerationModeStrategy(useCase: featureUseCase);
-    final serviceStrategy =
-        ServiceGenerationModeStrategy(useCase: serviceUseCase);
-    final projectStrategy =
-        ProjectGenerationModeStrategy(useCase: projectUseCase);
+    final featureComponents = _buildModeComponents(
+      mode: GenerationMode.feature,
+      brickId: BrickId.feature,
+      processor: featureProcessor,
+      orchestrator: workflowOrchestrator,
+    );
 
-    // Create final profiles with real strategies
-    final finalProfiles = <GenerationMode, GenerationModeProfile>{
-      GenerationMode.feature: GenerationModeProfile(
-        mode: GenerationMode.feature,
-        brickId: modeConfig[GenerationMode.feature]!.$1,
-        variableProcessor: modeConfig[GenerationMode.feature]!.$2,
-        strategy: featureStrategy,
-      ),
-      GenerationMode.service: GenerationModeProfile(
-        mode: GenerationMode.service,
-        brickId: modeConfig[GenerationMode.service]!.$1,
-        variableProcessor: modeConfig[GenerationMode.service]!.$2,
-        strategy: serviceStrategy,
-      ),
-      GenerationMode.project: GenerationModeProfile(
-        mode: GenerationMode.project,
-        brickId: modeConfig[GenerationMode.project]!.$1,
-        variableProcessor: modeConfig[GenerationMode.project]!.$2,
-        strategy: projectStrategy,
-      ),
+    final serviceComponents = _buildModeComponents(
+      mode: GenerationMode.service,
+      brickId: BrickId.service,
+      processor: serviceProcessor,
+      orchestrator: workflowOrchestrator,
+    );
+
+    final projectComponents = _buildModeComponents(
+      mode: GenerationMode.project,
+      brickId: BrickId.project,
+      processor: projectProcessor,
+      orchestrator: workflowOrchestrator,
+    );
+
+    // Step 3: Build the canonical profiles map - single source of truth
+    final profiles = <GenerationMode, GenerationModeProfile>{
+      GenerationMode.feature: featureComponents.profile,
+      GenerationMode.service: serviceComponents.profile,
+      GenerationMode.project: projectComponents.profile,
     };
 
-    // Create final registry and factory
-    final finalRegistry = GenerationModeRegistry(finalProfiles);
-    final finalVariableProcessorFactory =
-        VariableProcessorFactory.fromProfiles(finalProfiles);
+    // Step 4: Create registry as a thin view over profiles
+    final registry = GenerationModeRegistry(profiles);
 
-    // Create final workflow orchestrator
-    final finalWorkflowOrchestrator = WorkflowOrchestratorImpl(
-      templateManager: templateManager,
-      variableProcessorFactory: finalVariableProcessorFactory,
-      logger: logger,
-      modeRegistry: finalRegistry,
-    );
-
-    // Create final use cases
-    final finalFeatureUseCase = GenerateFeatureUseCase(
-      workflowOrchestrator: finalWorkflowOrchestrator,
-    );
-    final finalServiceUseCase = GenerateServiceUseCase(
-      workflowOrchestrator: finalWorkflowOrchestrator,
-    );
-    final finalProjectUseCase = GenerateProjectUseCase(
-      workflowOrchestrator: finalWorkflowOrchestrator,
-    );
-
-    // Create final strategies
-    final finalFeatureStrategy =
-        FeatureGenerationModeStrategy(useCase: finalFeatureUseCase);
-    final finalServiceStrategy =
-        ServiceGenerationModeStrategy(useCase: finalServiceUseCase);
-    final finalProjectStrategy =
-        ProjectGenerationModeStrategy(useCase: finalProjectUseCase);
-
-    // Register all services
+    // Step 5: Register all services
     container
-      ..registerSingleton<GenerationModeRegistry>(finalRegistry)
-      ..registerSingleton<IVariableProcessorFactory>(finalVariableProcessorFactory)
-      ..registerSingleton<IWorkflowOrchestrator>(finalWorkflowOrchestrator)
-      ..registerSingleton<GenerateFeatureUseCase>(finalFeatureUseCase)
-      ..registerSingleton<GenerateServiceUseCase>(finalServiceUseCase)
-      ..registerSingleton<GenerateProjectUseCase>(finalProjectUseCase)
-      ..registerSingleton<FeatureGenerationModeStrategy>(finalFeatureStrategy)
-      ..registerSingleton<ServiceGenerationModeStrategy>(finalServiceStrategy)
-      ..registerSingleton<ProjectGenerationModeStrategy>(finalProjectStrategy)
+      ..registerSingleton<GenerationProfiles>(profiles)
+      ..registerSingleton<IWorkflowOrchestrator>(workflowOrchestrator)
+      ..registerSingleton<GenerateFeatureUseCase>(
+        featureComponents.useCase as GenerateFeatureUseCase,
+      )
+      ..registerSingleton<GenerateServiceUseCase>(
+        serviceComponents.useCase as GenerateServiceUseCase,
+      )
+      ..registerSingleton<GenerateProjectUseCase>(
+        projectComponents.useCase as GenerateProjectUseCase,
+      )
+      ..registerSingleton<FeatureGenerationModeStrategy>(
+        featureComponents.strategy as FeatureGenerationModeStrategy,
+      )
+      ..registerSingleton<ServiceGenerationModeStrategy>(
+        serviceComponents.strategy as ServiceGenerationModeStrategy,
+      )
+      ..registerSingleton<ProjectGenerationModeStrategy>(
+        projectComponents.strategy as ProjectGenerationModeStrategy,
+      )
+      ..registerSingleton<GenerationModeRegistry>(registry)
       ..registerSingleton<GenerationCommandHandler>(
-        GenerationCommandHandler(registry: finalRegistry),
+        GenerationCommandHandler(profiles: profiles),
       )
       ..registerSingleton<GenerationMcpAdapter>(
-        GenerationMcpAdapter(registry: finalRegistry),
+        GenerationMcpAdapter(profiles: profiles),
       );
+  }
+
+  /// Builds all components for a single generation mode.
+  ///
+  /// Creates use case, strategy, and profile together. Since profiles need strategies,
+  /// strategies need use cases, and use cases need profiles, we break the circular
+  /// dependency by building them together atomically.
+  ///
+  /// The solution: create temporary components only during construction (they're never executed),
+  /// then create the final components with everything properly wired.
+  _ModeComponents _buildModeComponents({
+    required GenerationMode mode,
+    required BrickId brickId,
+    required IVariableProcessor processor,
+    required IWorkflowOrchestrator orchestrator,
+  }) {
+    // Phase 1: Create temporary components to break circular dependency
+    // These are only used during construction, never executed in production
+    final tempStrategy = _ConstructionStrategy(mode);
+    final tempProfile = GenerationModeProfile(
+      mode: mode,
+      brickId: brickId,
+      variableProcessor: processor,
+      strategy: tempStrategy,
+    );
+
+    // Phase 2: Create use case with temporary profile
+    final tempUseCase = _createUseCase(mode, orchestrator, tempProfile);
+
+    // Phase 3: Create strategy with use case
+    final strategy =
+        _createStrategy(
+              mode,
+              tempUseCase,
+            );
+
+    // Phase 4: Create final profile with real strategy
+    final profile = GenerationModeProfile(
+      mode: mode,
+      brickId: brickId,
+      variableProcessor: processor,
+      strategy: strategy,
+    );
+
+    // Phase 5: Create final use case with final profile
+    final finalUseCase = _createUseCase(mode, orchestrator, profile);
+
+    // Phase 6: Create final strategy with final use case
+    final finalStrategy =
+        _createStrategy(
+              mode,
+              finalUseCase,
+            );
+
+    // Phase 7: Create ultimate final profile with final strategy
+    final finalProfile = GenerationModeProfile(
+      mode: mode,
+      brickId: brickId,
+      variableProcessor: processor,
+      strategy: finalStrategy,
+    );
+
+    return _ModeComponents(
+      mode: mode,
+      useCase: finalUseCase,
+      strategy: finalStrategy,
+      profile: finalProfile,
+    );
+  }
+
+  dynamic _createUseCase(
+    GenerationMode mode,
+    IWorkflowOrchestrator orchestrator,
+    GenerationModeProfile profile,
+  ) {
+    switch (mode) {
+      case GenerationMode.feature:
+        return GenerateFeatureUseCase(
+          workflowOrchestrator: orchestrator,
+          profile: profile,
+        );
+      case GenerationMode.service:
+        return GenerateServiceUseCase(
+          workflowOrchestrator: orchestrator,
+          profile: profile,
+        );
+      case GenerationMode.project:
+        return GenerateProjectUseCase(
+          workflowOrchestrator: orchestrator,
+          profile: profile,
+        );
+    }
+  }
+
+  GenerationModeStrategy<GenerationRequestDto> _createStrategy(
+    GenerationMode mode,
+    dynamic useCase,
+  ) {
+    switch (mode) {
+      case GenerationMode.feature:
+        return FeatureGenerationModeStrategy(
+          useCase: useCase as GenerateFeatureUseCase,
+        );
+      case GenerationMode.service:
+        return ServiceGenerationModeStrategy(
+          useCase: useCase as GenerateServiceUseCase,
+        );
+      case GenerationMode.project:
+        return ProjectGenerationModeStrategy(
+          useCase: useCase as GenerateProjectUseCase,
+        );
+    }
   }
 }
 
-/// No-op strategy used only during initialization.
+/// Helper class to hold mode components during construction.
+class _ModeComponents {
+  _ModeComponents({
+    required this.mode,
+    required this.useCase,
+    required this.strategy,
+    required this.profile,
+  });
+
+  final GenerationMode mode;
+  final dynamic useCase;
+  final GenerationModeStrategy<GenerationRequestDto> strategy;
+  final GenerationModeProfile profile;
+}
+
+/// Strategy used only during construction to break circular dependency.
 ///
-/// This strategy is never executed - it's only used to satisfy type requirements
-/// when creating initial profiles for the variable processor factory and registry.
-/// The workflow orchestrator only uses the registry for brick ID lookup, not
-/// strategy execution.
-class _NoOpStrategy implements GenerationModeStrategy<GenerationRequestDto> {
-  _NoOpStrategy(this._mode);
+/// This strategy is never executed - it exists only to satisfy type requirements
+/// when creating profiles during the initialization process. Once the real strategies
+/// are created, this is replaced and discarded.
+///
+/// Note: This is the minimal necessary workaround to break the circular dependency
+/// between profiles, use cases, and strategies. It is only used during factory
+/// initialization and is never exposed or executed in production code.
+class _ConstructionStrategy
+    implements GenerationModeStrategy<GenerationRequestDto> {
+  _ConstructionStrategy(this._mode);
 
   final GenerationMode _mode;
 
@@ -304,7 +388,7 @@ class _NoOpStrategy implements GenerationModeStrategy<GenerationRequestDto> {
   @override
   Future<GenerationResultDto> execute(GenerationRequestDto request) {
     throw StateError(
-      'No-op strategy should never be executed. '
+      'Construction strategy should never be executed. '
       'This indicates a bug in factory initialization.',
     );
   }
@@ -312,7 +396,7 @@ class _NoOpStrategy implements GenerationModeStrategy<GenerationRequestDto> {
   @override
   List<NextStep> getNextSteps(GenerationResultDto result) {
     throw StateError(
-      'No-op strategy should never be executed. '
+      'Construction strategy should never be executed. '
       'This indicates a bug in factory initialization.',
     );
   }

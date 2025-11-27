@@ -6,9 +6,17 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart'
 
 /// Profile defining all mode-specific components for a generation mode.
 ///
-/// This serves as the single source of truth for wiring generation modes,
-/// encapsulating all mode-specific dependencies in one place. When adding
-/// a new generation mode, only a new profile entry needs to be registered.
+/// **This is the single source of truth for all mode-specific logic and dependencies.**
+///
+/// This profile encapsulates everything needed for a generation mode:
+/// - Mode identification and configuration (mode, brickId)
+/// - Mode-specific dependencies (variableProcessor)
+/// - Mode-specific behavior (strategy, which internally uses the appropriate use case)
+///
+/// When adding a new generation mode, create a new profile instance with the correct
+/// brick, processor, and strategy. All other components obtain their mode-specific
+/// logic and dependencies directly from profiles - there are no alternative
+/// configuration structures or wrappers.
 ///
 /// This is a pure value type with no business logic, making it safe to use
 /// at the application layer as it only references existing abstractions.

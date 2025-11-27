@@ -1,28 +1,31 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Adapter for MCP tools to use generation strategies.
 ///
 /// Provides a unified interface for MCP tools to execute generation
-/// operations through the generation mode registry, ensuring consistency
-/// with CLI commands and benefiting from the same strategy-based architecture.
+/// operations, ensuring consistency with CLI commands and benefiting
+/// from the same strategy-based architecture.
 ///
 /// This adapter translates MCP-specific parameters into GenerationRequestDto
-/// objects and delegates execution to the GenerationModeRegistry, which routes
-/// requests to the appropriate strategy implementation.
+/// objects and delegates execution to strategies from the profiles map,
+/// which is the single source of truth for all mode-specific logic.
 class GenerationMcpAdapter {
   /// Creates a new instance of [GenerationMcpAdapter].
+  ///
+  /// [profiles] provides access to all generation mode profiles, which contain
+  /// all mode-specific logic and dependencies (including strategies).
   GenerationMcpAdapter({
-    required GenerationModeRegistry registry,
-  }) : _registry = registry;
+    required Map<GenerationMode, GenerationModeProfile> profiles,
+  }) : _profiles = profiles;
 
-  final GenerationModeRegistry _registry;
+  final Map<GenerationMode, GenerationModeProfile> _profiles;
 
   /// Execute feature generation from MCP parameters.
   ///
-  /// Delegates to the generation mode registry to ensure consistency with CLI behavior.
+  /// Delegates to the strategy from the profiles map to ensure consistency with CLI behavior.
   Future<GenerationResultDto> generateFeature({
     required String screenName,
     String? feature,
@@ -46,12 +49,19 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return _registry.execute(request);
+    final profile = _profiles[GenerationMode.feature];
+    if (profile == null) {
+      throw StateError(
+        'No profile found for generation mode: ${GenerationMode.feature.key}',
+      );
+    }
+
+    return profile.strategy.execute(request);
   }
 
   /// Execute service generation from MCP parameters.
   ///
-  /// Delegates to the generation mode registry to ensure consistency with CLI behavior.
+  /// Delegates to the strategy from the profiles map to ensure consistency with CLI behavior.
   Future<GenerationResultDto> generateService({
     required String serviceName,
     String? feature,
@@ -75,12 +85,19 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return _registry.execute(request);
+    final profile = _profiles[GenerationMode.service];
+    if (profile == null) {
+      throw StateError(
+        'No profile found for generation mode: ${GenerationMode.service.key}',
+      );
+    }
+
+    return profile.strategy.execute(request);
   }
 
   /// Execute project generation from MCP parameters.
   ///
-  /// Delegates to the generation mode registry to ensure consistency with CLI behavior.
+  /// Delegates to the strategy from the profiles map to ensure consistency with CLI behavior.
   Future<GenerationResultDto> generateProject({
     required String projectName,
     String? template,
@@ -117,6 +134,13 @@ class GenerationMcpAdapter {
       outputDirectory: outputDirectory,
     );
 
-    return _registry.execute(request);
+    final profile = _profiles[GenerationMode.project];
+    if (profile == null) {
+      throw StateError(
+        'No profile found for generation mode: ${GenerationMode.project.key}',
+      );
+    }
+
+    return profile.strategy.execute(request);
   }
 }
