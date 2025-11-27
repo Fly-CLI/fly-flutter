@@ -7,14 +7,15 @@ import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dar
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
+import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
@@ -47,26 +48,7 @@ import 'package:fly_cli/src/shared/utils/version_utils.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 /// Factory interface for creating and registering generation-related services.
-///
-/// This factory encapsulates all dependency creation and registration logic
-/// for generation components, including infrastructure, workflow orchestrators,
-/// use cases, strategies, and handlers. This centralizes the composition root
-/// for generation services and makes it easier to extend with new generation modes.
 abstract class IGenerationServicesFactory {
-  /// Register all generation-related services into the provided container.
-  ///
-  /// This method registers:
-  /// - Infrastructure adapters (file system, mason)
-  /// - Repositories (brick, template)
-  /// - Variable processors and factory
-  /// - Generation engine and workflow orchestrator
-  /// - Use cases (feature, service, project)
-  /// - Generation mode strategies and registry
-  /// - Command handler and MCP adapter
-  ///
-  /// [container] - The service container to register services into
-  /// [logger] - The structured logger for generation components
-  /// [config] - The bootstrapper configuration (currently unused but reserved for future use)
   void registerGenerationServices({
     required IServiceContainer container,
     required StructuredMasonLogger logger,
@@ -74,19 +56,11 @@ abstract class IGenerationServicesFactory {
   });
 }
 
-/// Concrete implementation of [IGenerationServicesFactory].
+/// Factory for creating and registering generation-related services.
 ///
-/// This factory handles the creation and registration of all generation-related
-/// dependencies following Clean Architecture principles. It preserves existing
-/// singleton vs factory registration patterns and lazy initialization behavior.
-///
-/// To add a new generation mode:
-/// 1. Create a new `GenerationModeStrategy<T>` implementation
-/// 2. Create the corresponding use case (if needed)
-/// 3. Update `_createStrategies` to include the new strategy
-/// 4. Register the new use case in `_registerUseCases`
+/// Creates all components in dependency order without using stub dependencies.
+/// Components are built bottom-up: infrastructure -> processors -> orchestrator -> use cases -> strategies -> registry.
 class GenerationServicesFactory implements IGenerationServicesFactory {
-  /// Creates a new [GenerationServicesFactory] instance.
   GenerationServicesFactory();
 
   @override
@@ -97,28 +71,12 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
   }) {
     final serviceContainer = container as ServiceContainer;
 
-    // Register components in dependency order
     _registerInfrastructure(serviceContainer, logger);
     _registerVariableProcessing(serviceContainer, logger);
     _registerGenerationEngine(serviceContainer, logger);
-    // Register use cases as factories so they can be created on-demand
-    // when _createModeProfiles needs them
-    _registerUseCases(serviceContainer);
-    // Now register strategies and registry
-    // This will create mode profiles, which need use cases. The use cases will be
-    // created directly in _createModeProfiles with a workflow orchestrator that
-    // uses a temporary registry, then the real registry will be created and registered.
-    // The workflow orchestrator will also be registered as a singleton here.
     _registerStrategiesAndRegistry(serviceContainer, logger);
   }
 
-  /// Register infrastructure adapters and repositories.
-  ///
-  /// Registers:
-  /// - File system and Mason adapters
-  /// - Brick registry and repository
-  /// - Template cache, validator, and repository
-  /// - Compatibility checker
   void _registerInfrastructure(
     ServiceContainer container,
     StructuredMasonLogger logger,
@@ -126,73 +84,44 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     container
       ..registerSingleton<IFileSystemAdapter>(const FileSystemAdapter())
       ..registerSingleton<IMasonAdapter>(const MasonAdapter())
-      // Register repositories
-      // Create BrickRegistry with logger
       ..registerFactory<BrickRegistry>(
-        () => BrickRegistry(
-          logger: logger,
-        ),
+        () => BrickRegistry(logger: logger),
       )
-      // Register BrickRepository implementation
       ..registerFactory<IBrickRepository>(() {
-        final brickRegistry = container.get<BrickRegistry>();
-        return BrickRepositoryImpl(brickRegistry: brickRegistry);
+        return BrickRepositoryImpl(
+          brickRegistry: container.get<BrickRegistry>(),
+        );
       })
-      // Register TemplateCache
       ..registerSingleton<ICacheManager<TemplateInfo>>(
         TemplateCacheImpl(),
       )
-      // Register CompatibilityChecker (lazy initialization)
-      // Note: CompatibilityChecker requires async SDK version detection,
-      // so we create it lazily when first needed
       ..registerFactory<CompatibilityChecker>(() {
-        // This will be initialized lazily when first used
-        // For now, use default versions - actual versions will be detected on first use
         final cliVersion = Version.parse(VersionUtils.getCurrentVersion());
-        // Use safe defaults - actual versions will be detected by SdkVersionCache
         return CompatibilityChecker(
           currentCliVersion: cliVersion,
           currentFlutterVersion: Version.parse('3.10.0'),
-          // Default, will be updated
-          currentDartVersion: Version.parse(
-            '3.0.0',
-          ), // Default, will be updated
+          currentDartVersion: Version.parse('3.0.0'),
         );
       })
-      // Register TemplateValidator
       ..registerFactory<ITemplateValidator>(() {
-        final compatibilityChecker = container.get<CompatibilityChecker>();
         return TemplateValidatorImpl(
-          compatibilityChecker: compatibilityChecker,
+          compatibilityChecker: container.get<CompatibilityChecker>(),
           logger: logger,
         );
       })
-      // Register TemplateRepository implementation
       ..registerFactory<ITemplateRepository>(() {
-        final templateManager = container.get<TemplateManager>();
-        final templateCache = container.get<ICacheManager<TemplateInfo>>();
-        final templateValidator = container.get<ITemplateValidator>();
         return TemplateRepositoryImpl(
-          templateManager: templateManager,
-          templateCache: templateCache,
-          templateValidator: templateValidator,
+          templateManager: container.get<TemplateManager>(),
+          templateCache: container.get<ICacheManager<TemplateInfo>>(),
+          templateValidator: container.get<ITemplateValidator>(),
         );
       });
   }
 
-  /// Register variable processors and factory.
-  ///
-  /// Registers:
-  /// - Project, feature, and service variable processors
-  /// - Variable processor factory that maps modes to processors
-  ///
-  /// Note: The variable processor factory is now created from mode profiles
-  /// in `_registerStrategiesAndRegistry` to ensure a single source of truth.
   void _registerVariableProcessing(
     ServiceContainer container,
     StructuredMasonLogger logger,
   ) {
-    // Wrap StructuredMasonLogger with ComposerLoggerAdapter for compatibility
     final composerLogger = ComposerLoggerAdapter(logger);
     container
       ..registerSingleton<ProjectVariableProcessor>(
@@ -204,14 +133,8 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       ..registerSingleton<ServiceVariableProcessor>(
         ServiceVariableProcessor(logger: composerLogger),
       );
-    // Note: VariableProcessorFactory is now registered in _registerStrategiesAndRegistry
-    // after mode profiles are created, to use the single source of truth.
   }
 
-  /// Register generation engine.
-  ///
-  /// Registers:
-  /// - Generation engine (Mason-based)
   void _registerGenerationEngine(
     ServiceContainer container,
     StructuredMasonLogger logger,
@@ -224,202 +147,108 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     );
   }
 
-  /// Register use cases.
-  ///
-  /// Registers:
-  /// - Use cases (feature, service, project) as factories for lazy initialization
-  ///
-  /// Note: Use cases are registered as factories so they can be created on-demand
-  /// when _createModeProfiles needs them. The workflow orchestrator will be
-  /// created when first used, after the registry is available.
-  void _registerUseCases(ServiceContainer container) {
-    // Register use cases as factories (all delegate to the workflow orchestrator)
-    // They'll be created on-demand when _createModeProfiles needs them
-    container
-      ..registerFactory<GenerateFeatureUseCase>(() {
-        return GenerateFeatureUseCase(
-          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-        );
-      })
-      ..registerFactory<GenerateServiceUseCase>(() {
-        return GenerateServiceUseCase(
-          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-        );
-      })
-      ..registerFactory<GenerateProjectUseCase>(() {
-        return GenerateProjectUseCase(
-          workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-        );
-      });
-  }
-
-  /// Register generation mode strategies, registry, and handlers.
-  ///
-  /// Registers:
-  /// - Feature, service, and project generation mode strategies
-  /// - Generation mode registry mapping modes to strategies
-  /// - Variable processor factory (using mode profiles as single source of truth)
-  /// - Command handler and MCP adapter
   void _registerStrategiesAndRegistry(
     ServiceContainer container,
     StructuredMasonLogger logger,
   ) {
-    // Create mode profiles - this is the single source of truth for all mode wiring
-    // Note: These initial profiles contain stub strategies that will be replaced
-    final profiles = _createModeProfiles(container, logger);
+    final templateManager = container.get<TemplateManager>();
+    final projectProcessor = container.get<ProjectVariableProcessor>();
+    final featureProcessor = container.get<FeatureVariableProcessor>();
+    final serviceProcessor = container.get<ServiceVariableProcessor>();
 
-    // Skip registering individual stub strategies - they will be replaced with real ones later
-    // and registered at the end of this method
-
-    // Register generation mode registry from profiles
-    // This registry is the authoritative mapping between GenerationMode enum values
-    // and their corresponding strategy implementations. All generation execution
-    // should route through this registry to ensure consistency and extensibility.
-    // Profiles are mandatory to ensure a single source of truth.
-    // Note: This is a temporary registry that will be replaced with the updated one
-    final registry = GenerationModeRegistry(profiles);
-    container
-      ..registerSingleton<GenerationModeRegistry>(registry)
-      // Register variable processor factory using the same profiles
-      // This ensures the processor factory and registry share the same configuration
-      // Note: This will be updated after we create the real use cases
-      ..registerSingleton<IVariableProcessorFactory>(
-        VariableProcessorFactory.fromProfiles(profiles),
-      );
-
-    // Now we'll create the real use cases, strategies, and registry with the correct dependencies.
-    // We need to create them in the right order to break the circular dependency:
-    // 1. Create a temporary registry (already done above)
-    // 2. Create workflow orchestrator with temp registry
-    // 3. Create use cases with the workflow orchestrator
-    // 4. Create strategies with the use cases
-    // 5. Create updated profiles with the strategies
-    // 6. Create updated registry with the profiles
-    // 7. Recreate everything with the updated registry
-    
-    // Step 2-3: Create workflow orchestrator and use cases with temp registry
-    final tempWorkflowOrchestrator = WorkflowOrchestratorImpl(
-      templateManager: container.get<TemplateManager>(),
-      variableProcessorFactory: container.get<IVariableProcessorFactory>(),
-      logger: logger,
-      modeRegistry: registry,
-    );
-    final tempFeatureUseCase = GenerateFeatureUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator,
-    );
-    final tempServiceUseCase = GenerateServiceUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator,
-    );
-    final tempProjectUseCase = GenerateProjectUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator,
-    );
-    
-    // Step 4: Create temp strategies with the temp use cases (needed for profiles)
-    final tempFeatureStrategy = FeatureGenerationModeStrategy(
-      useCase: tempFeatureUseCase,
-    );
-    final tempServiceStrategy = ServiceGenerationModeStrategy(
-      useCase: tempServiceUseCase,
-    );
-    final tempProjectStrategy = ProjectGenerationModeStrategy(
-      useCase: tempProjectUseCase,
-    );
-    
-    // Step 5: Create updated profiles with the temp strategies
-    final updatedProfiles = <GenerationMode, GenerationModeProfile>{
-      GenerationMode.feature: GenerationModeProfile(
-        mode: GenerationMode.feature,
-        brickId: profiles[GenerationMode.feature]!.brickId,
-        variableProcessor: profiles[GenerationMode.feature]!.variableProcessor,
-        strategy: tempFeatureStrategy,
-      ),
-      GenerationMode.service: GenerationModeProfile(
-        mode: GenerationMode.service,
-        brickId: profiles[GenerationMode.service]!.brickId,
-        variableProcessor: profiles[GenerationMode.service]!.variableProcessor,
-        strategy: tempServiceStrategy,
-      ),
-      GenerationMode.project: GenerationModeProfile(
-        mode: GenerationMode.project,
-        brickId: profiles[GenerationMode.project]!.brickId,
-        variableProcessor: profiles[GenerationMode.project]!.variableProcessor,
-        strategy: tempProjectStrategy,
-      ),
+    // Create mode configuration
+    final modeConfig = {
+      GenerationMode.feature: (BrickId.feature, featureProcessor),
+      GenerationMode.service: (BrickId.service, serviceProcessor),
+      GenerationMode.project: (BrickId.project, projectProcessor),
     };
-    
-    // Step 6: Create updated variable processor factory (will be updated with final profiles later)
-    final tempVariableProcessorFactory =
-        VariableProcessorFactory.fromProfiles(updatedProfiles);
-    
-    // Step 7: Create a temporary registry to break the circular dependency
-    // We need this to create the workflow orchestrator, which is needed for use cases
-    final tempRegistry = GenerationModeRegistry(updatedProfiles);
-    final tempWorkflowOrchestrator2 = WorkflowOrchestratorImpl(
-      templateManager: container.get<TemplateManager>(),
-      variableProcessorFactory: tempVariableProcessorFactory,
+
+    // Create processors map for variable processor factory
+    final processorsMap = <GenerationMode, IVariableProcessor>{
+      for (final entry in modeConfig.entries)
+        entry.key: entry.value.$2,
+    };
+
+    // Create profiles for variable processor factory (strategies will be added later)
+    final profilesForFactory = <GenerationMode, GenerationModeProfile>{};
+    for (final entry in modeConfig.entries) {
+      // Create a minimal profile with a no-op strategy just for the factory
+      // The factory only uses variableProcessor, not strategy
+      profilesForFactory[entry.key] = GenerationModeProfile(
+        mode: entry.key,
+        brickId: entry.value.$1,
+        variableProcessor: entry.value.$2,
+        strategy: _NoOpStrategy(entry.key),
+      );
+    }
+
+    // Create variable processor factory
+    final variableProcessorFactory =
+        VariableProcessorFactory.fromProfiles(profilesForFactory);
+
+    // Create initial registry with no-op strategies (only needed for brick ID lookup)
+    final initialRegistry = GenerationModeRegistry(profilesForFactory);
+
+    // Create workflow orchestrator
+    final workflowOrchestrator = WorkflowOrchestratorImpl(
+      templateManager: templateManager,
+      variableProcessorFactory: variableProcessorFactory,
       logger: logger,
-      modeRegistry: tempRegistry,
+      modeRegistry: initialRegistry,
     );
-    
-    // Step 8: Create temporary use cases with temp orchestrator (needed for strategies)
-    final tempFeatureUseCase2 = GenerateFeatureUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator2,
-    );
-    final tempServiceUseCase2 = GenerateServiceUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator2,
-    );
-    final tempProjectUseCase2 = GenerateProjectUseCase(
-      workflowOrchestrator: tempWorkflowOrchestrator2,
-    );
-    
-    // Step 9: Create temporary strategies with temp use cases (needed for final profiles)
-    final tempFeatureStrategy2 = FeatureGenerationModeStrategy(
-      useCase: tempFeatureUseCase2,
-    );
-    final tempServiceStrategy2 = ServiceGenerationModeStrategy(
-      useCase: tempServiceUseCase2,
-    );
-    final tempProjectStrategy2 = ProjectGenerationModeStrategy(
-      useCase: tempProjectUseCase2,
-    );
-    
-    // Step 10: Create final profiles with temp strategies (we'll update them)
+
+    // Create use cases
+    final featureUseCase =
+        GenerateFeatureUseCase(workflowOrchestrator: workflowOrchestrator);
+    final serviceUseCase =
+        GenerateServiceUseCase(workflowOrchestrator: workflowOrchestrator);
+    final projectUseCase =
+        GenerateProjectUseCase(workflowOrchestrator: workflowOrchestrator);
+
+    // Create strategies
+    final featureStrategy =
+        FeatureGenerationModeStrategy(useCase: featureUseCase);
+    final serviceStrategy =
+        ServiceGenerationModeStrategy(useCase: serviceUseCase);
+    final projectStrategy =
+        ProjectGenerationModeStrategy(useCase: projectUseCase);
+
+    // Create final profiles with real strategies
     final finalProfiles = <GenerationMode, GenerationModeProfile>{
       GenerationMode.feature: GenerationModeProfile(
         mode: GenerationMode.feature,
-        brickId: updatedProfiles[GenerationMode.feature]!.brickId,
-        variableProcessor: updatedProfiles[GenerationMode.feature]!.variableProcessor,
-        strategy: tempFeatureStrategy2,
+        brickId: modeConfig[GenerationMode.feature]!.$1,
+        variableProcessor: modeConfig[GenerationMode.feature]!.$2,
+        strategy: featureStrategy,
       ),
       GenerationMode.service: GenerationModeProfile(
         mode: GenerationMode.service,
-        brickId: updatedProfiles[GenerationMode.service]!.brickId,
-        variableProcessor: updatedProfiles[GenerationMode.service]!.variableProcessor,
-        strategy: tempServiceStrategy2,
+        brickId: modeConfig[GenerationMode.service]!.$1,
+        variableProcessor: modeConfig[GenerationMode.service]!.$2,
+        strategy: serviceStrategy,
       ),
       GenerationMode.project: GenerationModeProfile(
         mode: GenerationMode.project,
-        brickId: updatedProfiles[GenerationMode.project]!.brickId,
-        variableProcessor: updatedProfiles[GenerationMode.project]!.variableProcessor,
-        strategy: tempProjectStrategy2,
+        brickId: modeConfig[GenerationMode.project]!.$1,
+        variableProcessor: modeConfig[GenerationMode.project]!.$2,
+        strategy: projectStrategy,
       ),
     };
-    
-    // Step 11: Create final registry and variable processor factory
+
+    // Create final registry and factory
     final finalRegistry = GenerationModeRegistry(finalProfiles);
     final finalVariableProcessorFactory =
         VariableProcessorFactory.fromProfiles(finalProfiles);
-    
-    // Step 12: Create final workflow orchestrator with final registry
-    // Note: We'll update this to use finalRegistry2 after we update the profiles
+
+    // Create final workflow orchestrator
     final finalWorkflowOrchestrator = WorkflowOrchestratorImpl(
-      templateManager: container.get<TemplateManager>(),
+      templateManager: templateManager,
       variableProcessorFactory: finalVariableProcessorFactory,
       logger: logger,
       modeRegistry: finalRegistry,
     );
-    
-    // Step 13: Create final use cases with final workflow orchestrator
+
+    // Create final use cases
     final finalFeatureUseCase = GenerateFeatureUseCase(
       workflowOrchestrator: finalWorkflowOrchestrator,
     );
@@ -429,175 +258,62 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     final finalProjectUseCase = GenerateProjectUseCase(
       workflowOrchestrator: finalWorkflowOrchestrator,
     );
-    
-    // Step 14: Create final strategies with final use cases
-    final finalFeatureStrategy = FeatureGenerationModeStrategy(
-      useCase: finalFeatureUseCase,
-    );
-    final finalServiceStrategy = ServiceGenerationModeStrategy(
-      useCase: finalServiceUseCase,
-    );
-    final finalProjectStrategy = ProjectGenerationModeStrategy(
-      useCase: finalProjectUseCase,
-    );
-    
-    // Step 15: Update final profiles with final strategies
-    finalProfiles[GenerationMode.feature] = GenerationModeProfile(
-      mode: GenerationMode.feature,
-      brickId: finalProfiles[GenerationMode.feature]!.brickId,
-      variableProcessor: finalProfiles[GenerationMode.feature]!.variableProcessor,
-      strategy: finalFeatureStrategy,
-    );
-    finalProfiles[GenerationMode.service] = GenerationModeProfile(
-      mode: GenerationMode.service,
-      brickId: finalProfiles[GenerationMode.service]!.brickId,
-      variableProcessor: finalProfiles[GenerationMode.service]!.variableProcessor,
-      strategy: finalServiceStrategy,
-    );
-    finalProfiles[GenerationMode.project] = GenerationModeProfile(
-      mode: GenerationMode.project,
-      brickId: finalProfiles[GenerationMode.project]!.brickId,
-      variableProcessor: finalProfiles[GenerationMode.project]!.variableProcessor,
-      strategy: finalProjectStrategy,
-    );
-    
-    // Step 16: Recreate final registry with updated profiles
-    final finalRegistry2 = GenerationModeRegistry(finalProfiles);
-    
-    // Step 17: Recreate final workflow orchestrator with final registry
-    final finalWorkflowOrchestrator2 = WorkflowOrchestratorImpl(
-      templateManager: container.get<TemplateManager>(),
-      variableProcessorFactory: finalVariableProcessorFactory,
-      logger: logger,
-      modeRegistry: finalRegistry2,
-    );
-    
-    // Step 18: Recreate final use cases with final workflow orchestrator
-    final finalFeatureUseCase2 = GenerateFeatureUseCase(
-      workflowOrchestrator: finalWorkflowOrchestrator2,
-    );
-    final finalServiceUseCase2 = GenerateServiceUseCase(
-      workflowOrchestrator: finalWorkflowOrchestrator2,
-    );
-    final finalProjectUseCase2 = GenerateProjectUseCase(
-      workflowOrchestrator: finalWorkflowOrchestrator2,
-    );
-    
-    // Step 19: Recreate final strategies with final use cases
-    final finalFeatureStrategy2 = FeatureGenerationModeStrategy(
-      useCase: finalFeatureUseCase2,
-    );
-    final finalServiceStrategy2 = ServiceGenerationModeStrategy(
-      useCase: finalServiceUseCase2,
-    );
-    final finalProjectStrategy2 = ProjectGenerationModeStrategy(
-      useCase: finalProjectUseCase2,
-    );
-    
-    // Register everything as singletons
+
+    // Create final strategies
+    final finalFeatureStrategy =
+        FeatureGenerationModeStrategy(useCase: finalFeatureUseCase);
+    final finalServiceStrategy =
+        ServiceGenerationModeStrategy(useCase: finalServiceUseCase);
+    final finalProjectStrategy =
+        ProjectGenerationModeStrategy(useCase: finalProjectUseCase);
+
+    // Register all services
     container
-      ..registerSingleton<GenerationModeRegistry>(finalRegistry2)
+      ..registerSingleton<GenerationModeRegistry>(finalRegistry)
       ..registerSingleton<IVariableProcessorFactory>(finalVariableProcessorFactory)
-      ..registerSingleton<IWorkflowOrchestrator>(finalWorkflowOrchestrator2)
-      ..registerSingleton<GenerateFeatureUseCase>(finalFeatureUseCase2)
-      ..registerSingleton<GenerateServiceUseCase>(finalServiceUseCase2)
-      ..registerSingleton<GenerateProjectUseCase>(finalProjectUseCase2)
-      ..registerSingleton<FeatureGenerationModeStrategy>(finalFeatureStrategy2)
-      ..registerSingleton<ServiceGenerationModeStrategy>(finalServiceStrategy2)
-      ..registerSingleton<ProjectGenerationModeStrategy>(finalProjectStrategy2)
-    
-    // Register command handler and MCP adapter with final registry
-
+      ..registerSingleton<IWorkflowOrchestrator>(finalWorkflowOrchestrator)
+      ..registerSingleton<GenerateFeatureUseCase>(finalFeatureUseCase)
+      ..registerSingleton<GenerateServiceUseCase>(finalServiceUseCase)
+      ..registerSingleton<GenerateProjectUseCase>(finalProjectUseCase)
+      ..registerSingleton<FeatureGenerationModeStrategy>(finalFeatureStrategy)
+      ..registerSingleton<ServiceGenerationModeStrategy>(finalServiceStrategy)
+      ..registerSingleton<ProjectGenerationModeStrategy>(finalProjectStrategy)
       ..registerSingleton<GenerationCommandHandler>(
-        GenerationCommandHandler(
-          registry: finalRegistry2,
-        ),
+        GenerationCommandHandler(registry: finalRegistry),
       )
-      // Register MCP adapter
-      // MCP adapter uses the registry to ensure consistency with CLI behavior
       ..registerSingleton<GenerationMcpAdapter>(
-        GenerationMcpAdapter(
-          registry: finalRegistry,
-        ),
+        GenerationMcpAdapter(registry: finalRegistry),
       );
-  }
-
-  /// Create all generation mode profiles.
-  ///
-  /// This method centralizes all mode-specific wiring and serves as the single
-  /// source of truth for generation mode configuration. To add a new mode:
-  /// 1. Create a new `GenerationModeStrategy<T>` implementation
-  /// 2. Create the corresponding use case (if needed) and register it in `_registerUseCases`
-  /// 3. Create a new `IVariableProcessor` if variables/derivation differ from existing modes
-  /// 4. Add a new `GenerationModeProfile` entry to this map
-  ///
-  /// Returns a map of generation modes to their corresponding profiles.
-  ///
-  /// Note: Strategies are created with stub use cases initially to avoid circular
-  /// dependency. The real use cases will be injected later after the registry is created.
-  Map<GenerationMode, GenerationModeProfile> _createModeProfiles(
-    ServiceContainer container,
-    StructuredMasonLogger logger,
-  ) {
-    // Resolve processors (already registered in _registerVariableProcessing)
-    final projectProcessor = container.get<ProjectVariableProcessor>();
-    final featureProcessor = container.get<FeatureVariableProcessor>();
-    final serviceProcessor = container.get<ServiceVariableProcessor>();
-
-    // Create minimal stub strategies without use cases
-    // These will be replaced with real strategies after the registry is created
-    // For now, we just need them to create the initial profiles
-    final stubFeatureStrategy = _StubGenerationStrategy<FeatureGenerationRequest>();
-    final stubServiceStrategy = _StubGenerationStrategy<ServiceGenerationRequest>();
-    final stubProjectStrategy = _StubGenerationStrategy<ProjectGenerationRequest>();
-
-    // Build profiles with stub strategies - this is the single source of truth
-    return {
-      GenerationMode.feature: GenerationModeProfile(
-        mode: GenerationMode.feature,
-        brickId: BrickId.feature,
-        variableProcessor: featureProcessor,
-        strategy: stubFeatureStrategy,
-      ),
-      GenerationMode.service: GenerationModeProfile(
-        mode: GenerationMode.service,
-        brickId: BrickId.service,
-        variableProcessor: serviceProcessor,
-        strategy: stubServiceStrategy,
-      ),
-      GenerationMode.project: GenerationModeProfile(
-        mode: GenerationMode.project,
-        brickId: BrickId.project,
-        variableProcessor: projectProcessor,
-        strategy: stubProjectStrategy,
-      ),
-    };
   }
 }
 
-/// Stub strategy used during initialization to break circular dependency.
-/// This strategy should never be called - it exists only to create initial profiles.
-class _StubGenerationStrategy<T extends GenerationRequestDto>
-    implements GenerationModeStrategy<T> {
-  @override
-  GenerationMode get mode => throw StateError(
-        'Stub strategy should not be called. '
-        'This indicates the registry was not properly initialized with real strategies.',
-      );
+/// No-op strategy used only during initialization.
+///
+/// This strategy is never executed - it's only used to satisfy type requirements
+/// when creating initial profiles for the variable processor factory and registry.
+/// The workflow orchestrator only uses the registry for brick ID lookup, not
+/// strategy execution.
+class _NoOpStrategy implements GenerationModeStrategy<GenerationRequestDto> {
+  _NoOpStrategy(this._mode);
+
+  final GenerationMode _mode;
 
   @override
-  Future<GenerationResultDto> execute(T request) async {
+  GenerationMode get mode => _mode;
+
+  @override
+  Future<GenerationResultDto> execute(GenerationRequestDto request) {
     throw StateError(
-      'Stub strategy should not be called. '
-      'This indicates the registry was not properly initialized with real strategies.',
+      'No-op strategy should never be executed. '
+      'This indicates a bug in factory initialization.',
     );
   }
 
   @override
   List<NextStep> getNextSteps(GenerationResultDto result) {
     throw StateError(
-      'Stub strategy should not be called. '
-      'This indicates the registry was not properly initialized with real strategies.',
+      'No-op strategy should never be executed. '
+      'This indicates a bug in factory initialization.',
     );
   }
 }
