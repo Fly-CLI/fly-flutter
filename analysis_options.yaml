@@ -13,3 +13,5 @@ analyzer:
     - "**/coverage/**"
     - "**/templates/**"
     - "**/__brick__/**"
+    - "packages/fly_cli/tool/integration_scenarios/**"
+    - "tool/integration_scenarios/**"
