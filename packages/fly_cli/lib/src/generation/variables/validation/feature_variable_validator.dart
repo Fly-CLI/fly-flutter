@@ -66,4 +66,3 @@ class FeatureVariableValidator implements IVariableValidator {
     return errors;
   }
 }
-

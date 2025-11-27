@@ -25,4 +25,3 @@ abstract class IVariableValidator {
   /// Returns a list of error messages. Empty list means validation passed.
   List<String> validateBusinessRules(Map<String, dynamic> variables);
 }
-

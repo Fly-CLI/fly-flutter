@@ -52,8 +52,7 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
   @override
   Map<String, dynamic> buildFromMap(Map<String, dynamic> input) {
-    final componentName =
-        input['name'] as String?;
+    final componentName = input['name'] as String?;
     if (componentName == null) {
       throw ArgumentError('Feature name is required');
     }

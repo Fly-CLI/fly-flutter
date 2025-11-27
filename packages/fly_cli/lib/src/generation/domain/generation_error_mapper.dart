@@ -67,7 +67,8 @@ class GenerationErrorMapper {
       return GenerationErrorType.infrastructure;
     }
 
-    if (lowerMessage.contains('generation') && lowerMessage.contains('failed')) {
+    if (lowerMessage.contains('generation') &&
+        lowerMessage.contains('failed')) {
       return GenerationErrorType.generationFailure;
     }
 
@@ -106,4 +107,3 @@ class GenerationErrorMapper {
     return GenerationErrorType.unknown;
   }
 }
-

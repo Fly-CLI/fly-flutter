@@ -104,10 +104,12 @@ class GenerateFeatureCommand extends FlyCommand {
       final request = FeatureGenerationRequest(
         name: rawVars['name'] as String,
         feature: rawVars['feature'] as String? ?? 'home',
-        screenType: ScreenType.tryFromKey(
-          rawVars['screen_type'] as String?,
-          defaultValue: ScreenType.empty,
-        ) ?? ScreenType.empty,
+        screenType:
+            ScreenType.tryFromKey(
+              rawVars['screen_type'] as String?,
+              defaultValue: ScreenType.empty,
+            ) ??
+            ScreenType.empty,
         withViewModel: rawVars['with_viewmodel'] as bool? ?? false,
         withTests: rawVars['with_tests'] as bool? ?? true,
         withValidation: rawVars['with_validation'] as bool? ?? false,

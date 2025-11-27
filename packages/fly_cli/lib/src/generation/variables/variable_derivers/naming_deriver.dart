@@ -1,6 +1,6 @@
 import 'package:fly_brick_composer/fly_brick_composer.dart';
-import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 
 /// Deriver that sets naming-related variables (snake_case, camelCase, PascalCase).
 class NamingDeriver implements VariableDeriver {

@@ -20,9 +20,9 @@ class _DummyWorkflowOrchestrator implements IWorkflowOrchestrator {
 
 class MockFeatureUseCase extends GenerateFeatureUseCase {
   MockFeatureUseCase()
-      : super(
-          workflowOrchestrator: _DummyWorkflowOrchestrator(),
-        );
+    : super(
+        workflowOrchestrator: _DummyWorkflowOrchestrator(),
+      );
 }
 
 void main() {

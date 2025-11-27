@@ -104,12 +104,15 @@ void main() {
     });
 
     group('fromProfiles', () {
-      test('should throw ArgumentError when constructed with empty profiles', () {
-        expect(
-          () => VariableProcessorFactory.fromProfiles({}),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      test(
+        'should throw ArgumentError when constructed with empty profiles',
+        () {
+          expect(
+            () => VariableProcessorFactory.fromProfiles({}),
+            throwsA(isA<ArgumentError>()),
+          );
+        },
+      );
     });
   });
 }

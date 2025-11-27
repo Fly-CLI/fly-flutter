@@ -81,4 +81,3 @@ class ProjectVariableValidator implements IVariableValidator {
     return errors;
   }
 }
-

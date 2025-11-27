@@ -38,7 +38,8 @@ class ServiceBootstrapper {
     IGenerationServicesFactory? generationServicesFactory,
   }) : _loggerFactory = loggerFactory ?? _DefaultLoggerFactory(),
        _metricsFactory = metricsFactory ?? _DefaultMetricsCollectorFactory(),
-       _generationServicesFactory = generationServicesFactory ?? GenerationServicesFactory();
+       _generationServicesFactory =
+           generationServicesFactory ?? GenerationServicesFactory();
 
   final ServiceBootstrapperConfig config;
   final ILoggerFactory _loggerFactory;

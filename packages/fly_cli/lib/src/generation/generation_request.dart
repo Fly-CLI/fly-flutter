@@ -1,5 +1,5 @@
-import 'package:fly_cli/src/generation/generation_types.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
+import 'package:fly_cli/src/generation/generation_types.dart';
 
 /// Request model for code generation operations.
 ///

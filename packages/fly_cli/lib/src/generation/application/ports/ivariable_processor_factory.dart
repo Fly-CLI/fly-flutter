@@ -22,4 +22,3 @@ abstract class IVariableProcessorFactory {
   /// Returns the appropriate processor for the mode, or null if not registered.
   IVariableProcessor? getProcessorOrNull(GenerationMode mode);
 }
-

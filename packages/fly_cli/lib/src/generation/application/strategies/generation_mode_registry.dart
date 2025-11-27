@@ -36,7 +36,8 @@ class GenerationModeRegistry {
     }
 
     // Extract strategies from profiles
-    final strategies = <GenerationMode, GenerationModeStrategy<GenerationRequestDto>>{};
+    final strategies =
+        <GenerationMode, GenerationModeStrategy<GenerationRequestDto>>{};
     for (final entry in profiles.entries) {
       strategies[entry.key] = entry.value.strategy;
     }

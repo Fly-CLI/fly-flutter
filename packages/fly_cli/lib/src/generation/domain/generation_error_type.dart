@@ -18,4 +18,3 @@ enum GenerationErrorType {
   /// Unknown or unclassified error
   unknown,
 }
-

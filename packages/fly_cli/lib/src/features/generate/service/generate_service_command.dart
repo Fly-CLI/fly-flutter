@@ -101,10 +101,12 @@ class GenerateServiceCommand extends FlyCommand {
       final request = ServiceGenerationRequest(
         name: rawVars['name'] as String,
         feature: rawVars['feature'] as String? ?? 'core',
-        serviceType: ServiceType.tryFromKey(
-          rawVars['service_type'] as String?,
-          defaultValue: ServiceType.api,
-        ) ?? ServiceType.api,
+        serviceType:
+            ServiceType.tryFromKey(
+              rawVars['service_type'] as String?,
+              defaultValue: ServiceType.api,
+            ) ??
+            ServiceType.api,
         withTests: rawVars['with_tests'] as bool? ?? true,
         withMocks: rawVars['with_mocks'] as bool? ?? false,
         withInterceptors: rawVars['with_interceptors'] as bool? ?? false,

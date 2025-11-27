@@ -85,4 +85,3 @@ class _TestGenerationServicesFactory implements IGenerationServicesFactory {
     // Don't register anything - just verify the call
   }
 }
-

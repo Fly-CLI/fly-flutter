@@ -1,4 +1,3 @@
-import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
@@ -254,17 +253,29 @@ void main() {
         expect(featureProfile.brickId, equals(BrickId.feature));
 
         // Verify brick ID access
-        expect(registry.getBrickId(GenerationMode.feature), equals(BrickId.feature));
-        expect(registry.getBrickId(GenerationMode.service), equals(BrickId.service));
-        expect(registry.getBrickId(GenerationMode.project), equals(BrickId.project));
-      });
-
-      test('should throw ArgumentError when constructed with empty profiles', () {
         expect(
-          () => GenerationModeRegistry({}),
-          throwsA(isA<ArgumentError>()),
+          registry.getBrickId(GenerationMode.feature),
+          equals(BrickId.feature),
+        );
+        expect(
+          registry.getBrickId(GenerationMode.service),
+          equals(BrickId.service),
+        );
+        expect(
+          registry.getBrickId(GenerationMode.project),
+          equals(BrickId.project),
         );
       });
+
+      test(
+        'should throw ArgumentError when constructed with empty profiles',
+        () {
+          expect(
+            () => GenerationModeRegistry({}),
+            throwsA(isA<ArgumentError>()),
+          );
+        },
+      );
     });
   });
 }

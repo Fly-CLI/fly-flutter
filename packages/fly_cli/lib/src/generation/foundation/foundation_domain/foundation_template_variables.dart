@@ -1,4 +1,3 @@
-import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_domain/foundation_types.dart'
     show FoundationVars, ScreenType, ServiceType, StateManagement;
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
@@ -95,8 +94,10 @@ class FoundationTemplateVariables {
           vars.getVar<bool>(ServiceVarKey.withInterceptors) ?? false,
       serviceMocks: vars.getVar<bool>(ServiceVarKey.withMocks) ?? false,
       featureViewModel: vars.getVar<bool>(FeatureVarKey.withViewModel) ?? true,
-      featureValidation: vars.getVar<bool>(FeatureVarKey.withValidation) ?? false,
-      featureNavigation: vars.getVar<bool>(FeatureVarKey.withNavigation) ?? false,
+      featureValidation:
+          vars.getVar<bool>(FeatureVarKey.withValidation) ?? false,
+      featureNavigation:
+          vars.getVar<bool>(FeatureVarKey.withNavigation) ?? false,
       stateManagement: StateManagement.fromVars(vars),
       screenType: ScreenType.fromVars(vars),
       serviceType: ServiceType.fromVars(vars),

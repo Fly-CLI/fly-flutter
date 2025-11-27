@@ -1,8 +1,6 @@
-import 'package:fly_brick_composer/fly_brick_composer.dart' hide BrickRegistry;
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
-import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
@@ -13,7 +11,6 @@ import 'package:fly_cli/src/generation/application/services/processors/project_v
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
@@ -288,28 +285,26 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     // should route through this registry to ensure consistency and extensibility.
     // Profiles are mandatory to ensure a single source of truth.
     final registry = GenerationModeRegistry(profiles);
-    container..registerSingleton<GenerationModeRegistry>(registry)
-
-    // Register variable processor factory using the same profiles
-    // This ensures the processor factory and registry share the same configuration
-    ..registerSingleton<IVariableProcessorFactory>(
-      VariableProcessorFactory.fromProfiles(profiles),
-    )
-
-    // Register command handler
-    ..registerSingleton<GenerationCommandHandler>(
-      GenerationCommandHandler(
-        registry: registry,
-      ),
-    )
-
-    // Register MCP adapter
-    // MCP adapter uses the registry to ensure consistency with CLI behavior
-    ..registerSingleton<GenerationMcpAdapter>(
-      GenerationMcpAdapter(
-        registry: registry,
-      ),
-    );
+    container
+      ..registerSingleton<GenerationModeRegistry>(registry)
+      // Register variable processor factory using the same profiles
+      // This ensures the processor factory and registry share the same configuration
+      ..registerSingleton<IVariableProcessorFactory>(
+        VariableProcessorFactory.fromProfiles(profiles),
+      )
+      // Register command handler
+      ..registerSingleton<GenerationCommandHandler>(
+        GenerationCommandHandler(
+          registry: registry,
+        ),
+      )
+      // Register MCP adapter
+      // MCP adapter uses the registry to ensure consistency with CLI behavior
+      ..registerSingleton<GenerationMcpAdapter>(
+        GenerationMcpAdapter(
+          registry: registry,
+        ),
+      );
   }
 
   /// Create all generation mode profiles.

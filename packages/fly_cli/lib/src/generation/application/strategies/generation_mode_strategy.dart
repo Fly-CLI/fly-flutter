@@ -1,4 +1,3 @@
-import 'package:fly_brick_composer/fly_brick_composer.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
@@ -30,4 +29,3 @@ abstract class GenerationModeStrategy<T extends GenerationRequestDto> {
   /// Returns a list of suggested next steps for the user.
   List<NextStep> getNextSteps(GenerationResultDto result);
 }
-

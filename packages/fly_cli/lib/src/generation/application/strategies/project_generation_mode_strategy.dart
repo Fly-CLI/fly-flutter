@@ -26,7 +26,8 @@ class ProjectGenerationModeStrategy
   @override
   List<NextStep> getNextSteps(GenerationResultDto result) {
     // Extract project name from result data if available
-    final projectName = result.data['project_name'] as String? ?? '<project_name>';
+    final projectName =
+        result.data['project_name'] as String? ?? '<project_name>';
     return [
       NextStep(
         command: 'cd $projectName',
@@ -39,4 +40,3 @@ class ProjectGenerationModeStrategy
     ];
   }
 }
-

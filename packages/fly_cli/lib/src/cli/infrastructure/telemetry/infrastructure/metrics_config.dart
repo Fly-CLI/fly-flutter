@@ -1,5 +1,3 @@
-
-
 /// Configuration for metrics collection
 class MetricsConfig {
   const MetricsConfig({

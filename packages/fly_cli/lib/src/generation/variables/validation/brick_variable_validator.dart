@@ -57,4 +57,3 @@ class BrickVariableValidator {
     return errors;
   }
 }
-

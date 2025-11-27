@@ -77,4 +77,3 @@ class ServiceVariableValidator implements IVariableValidator {
     return errors;
   }
 }
-

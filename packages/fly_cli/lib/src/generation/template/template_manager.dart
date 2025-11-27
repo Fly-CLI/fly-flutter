@@ -134,6 +134,7 @@ class TemplateManager {
 
   /// Templates directory (lazy initialized)
   final String templatesDirectory;
+
   /// Logger instance
   final Logger logger;
   final TemplateCacheManager _cacheManager;

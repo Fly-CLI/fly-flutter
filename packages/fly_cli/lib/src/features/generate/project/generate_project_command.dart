@@ -273,7 +273,8 @@ class GenerateProjectCommand extends FlyCommand {
         BaseVarKey.name.key: projectName,
         'template': manifest.template,
         BaseVarKey.organization.key: manifest.organization,
-        BaseVarKey.description.key: manifest.description ?? 'A new Flutter project',
+        BaseVarKey.description.key:
+            manifest.description ?? 'A new Flutter project',
         BaseVarKey.platforms.key: manifest.platforms,
         BaseVarKey.features.key: featureInstances,
         'services': serviceInstances,
@@ -324,7 +325,8 @@ class GenerateProjectCommand extends FlyCommand {
           BaseVarKey.feature.key: feature,
           FeatureVarKey.screenType.key: screen.type ?? 'list',
           FeatureVarKey.withViewModel.key: true,
-          BaseVarKey.withTests.key: true, // Will be overridden by preset if needed
+          BaseVarKey.withTests.key: true,
+          // Will be overridden by preset if needed
           FeatureVarKey.withValidation.key: screen.type == 'form',
           FeatureVarKey.withNavigation.key: false,
         },
@@ -527,13 +529,17 @@ class GenerateProjectCommand extends FlyCommand {
       final stopwatch = Stopwatch()..start();
       final projectName = rawVars[BaseVarKey.name.key] as String;
       final template = rawVars['template'] as String? ?? 'fly_foundation';
-      final organization = rawVars[BaseVarKey.organization.key] as String? ?? 'com.example';
+      final organization =
+          rawVars[BaseVarKey.organization.key] as String? ?? 'com.example';
       final description =
-          rawVars[BaseVarKey.description.key] as String? ?? 'A new Flutter project';
+          rawVars[BaseVarKey.description.key] as String? ??
+          'A new Flutter project';
       final platforms =
-          (rawVars[BaseVarKey.platforms.key] as List<dynamic>?)?.cast<String>() ??
+          (rawVars[BaseVarKey.platforms.key] as List<dynamic>?)
+              ?.cast<String>() ??
           ['ios', 'android'];
-      final features = (rawVars[BaseVarKey.features.key] as List<dynamic>?) ?? [];
+      final features =
+          (rawVars[BaseVarKey.features.key] as List<dynamic>?) ?? [];
       final featureNames = features.map((f) {
         if (f is Map) return f[BaseVarKey.name.key] as String;
         return f.toString();
@@ -579,7 +585,8 @@ class GenerateProjectCommand extends FlyCommand {
         BaseVarKey.platforms.key: platforms,
         BaseVarKey.generationMode.key: 'project',
         'template': template,
-        ProjectVarKey.preset.key: rawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
+        ProjectVarKey.preset.key:
+            rawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
         BaseVarKey.features.key: featureInstances,
         'services': serviceInstances,
       };
@@ -596,7 +603,8 @@ class GenerateProjectCommand extends FlyCommand {
         platforms: platforms,
         features: featureInstances,
         services: serviceInstances,
-        preset: projectRawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
+        preset:
+            projectRawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
         outputDirectory: projectPath,
         dryRun: context.planMode,
       );

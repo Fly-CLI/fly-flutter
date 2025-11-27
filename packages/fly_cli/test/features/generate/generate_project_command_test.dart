@@ -1,5 +1,3 @@
-
-
 void main() {
   // TODO: Skip this test until GenerateProjectCommand is implemented
   // The command class doesn't exist in the current codebase

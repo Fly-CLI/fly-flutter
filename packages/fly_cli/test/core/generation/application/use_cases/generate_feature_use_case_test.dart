@@ -133,7 +133,9 @@ void main() {
         mockOrchestrator.setResult(
           GenerationResult.failure(
             error: 'Variable validation failed: Validation error',
-            data: const {'validation_errors': ['Validation error']},
+            data: const {
+              'validation_errors': ['Validation error'],
+            },
           ),
         );
 

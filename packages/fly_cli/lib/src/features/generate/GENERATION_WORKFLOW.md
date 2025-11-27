@@ -131,11 +131,13 @@ presentation, application, domain, and infrastructure layers.
 **Entry Point**: User runs `fly generate feature <name>` or similar command
 
 **Process**:
+
 - `CommandRunner` parses arguments
 - `CommandRegistrar` looks up command descriptor
 - Command instance created via `CommandDescriptor.createInstance()`
 
 **Example**:
+
 ```dart
 // User command: fly generate feature home_screen
 // CommandDescriptor: FeatureCommandDescriptor
@@ -148,6 +150,7 @@ presentation, application, domain, and infrastructure layers.
 `GenerateProjectCommand.execute()`
 
 **Steps**:
+
 1. **Parse Flags**: Extract user inputs (name, feature, screenType, etc.)
 2. **Build Variables**: Use `VariableBuilder` to construct variable map
 3. **Validate**: Run validators (required args, format checks, etc.)
@@ -155,23 +158,27 @@ presentation, application, domain, and infrastructure layers.
 5. **Create Request DTO**: Build type-safe `GenerationRequestDto`
 
 **Code Example**:
+
 ```dart
 // From GenerateFeatureCommand.execute()
 final executionContext = context.factory.createExecutionContext(argResults!);
 const variableBuilder = FeatureVariableBuilder();
-final rawVars = await variableBuilder.buildFromContext(
-  context: executionContext,
-  interactive: interactive,
-  outputDir: outputDir,
+final rawVars = await
+variableBuilder.buildFromContext
+(
+context: executionContext,
+interactive: interactive,
+outputDir: outputDir,
 );
 
 final request = FeatureGenerationRequest(
-  name: rawVars['name'] as String,
-  feature: rawVars['feature'] as String? ?? 'home',
-  screenType: ScreenType.tryFromKey(rawVars['screen_type'] as String?),
-  // ... other properties
-  outputDirectory: targetDir,
-  dryRun: context.planMode,
+name: rawVars['name'] as String,
+feature: rawVars['feature'] as String? ?? 'home',
+screenType: ScreenType.tryFromKey(rawVars['screen_type'] as String?),
+// ... other properties
+outputDirectory: targetDir,
+dryRun: context.planMode
+,
 );
 ```
 
@@ -180,11 +187,13 @@ final request = FeatureGenerationRequest(
 **Location**: `GenerationCommandHandler`
 
 **Process**:
+
 - Receives `GenerationRequestDto`
 - Routes to appropriate use case based on `mode` property
 - Converts `GenerationResultDto` to `CommandResult`
 
 **Code Example**:
+
 ```dart
 // From GenerationCommandHandler
 Future<CommandResult> execute(GenerationRequestDto request) async {
@@ -202,40 +211,52 @@ All generation use cases delegate to the `IWorkflowOrchestrator`, which applies
 mode-specific workflows:
 
 - **Features/Services** (Simple Flow inside orchestrator):
-  1. Get brick from repository
-  2. Process variables through pipeline
-  3. Validate variables
-  4. Generate using engine
+    1. Get brick from repository
+    2. Process variables through pipeline
+    3. Validate variables
+    4. Generate using engine
 - **Projects** (Complex Flow inside orchestrator):
-  1. Use workflow orchestrator
-  2. Orchestrator handles multi-step generation
-  3. Supports nested generation (features, services within project)
+    1. Use workflow orchestrator
+    2. Orchestrator handles multi-step generation
+    3. Supports nested generation (features, services within project)
 
 **Code Example** (Feature):
+
 ```dart
 // From GenerateFeatureUseCase.execute()
-final result = await _workflowOrchestrator.executeWorkflow(
-  mode: GenerationMode.feature,
-  variables: request.toJson(),
-  outputDirectory: request.outputDirectory,
-  dryRun: request.dryRun,
+final result = await
+_workflowOrchestrator.executeWorkflow
+(
+mode: GenerationMode.feature,
+variables: request.toJson(),
+outputDirectory: request.outputDirectory,
+dryRun: request.dryRun,
 );
 
-return GenerationResultDto.fromResult(result);
+return GenerationResultDto.fromResult
+(
+result
+);
 ```
 
 **Code Example** (Project):
+
 ```dart
 // From GenerateProjectUseCase.execute()
 // Uses workflow orchestrator for complex multi-step generation
-final result = await _workflowOrchestrator.executeWorkflow(
-  mode: GenerationMode.project,
-  variables: request.toJson(),
-  outputDirectory: request.outputDirectory,
-  dryRun: request.dryRun,
+final result = await
+_workflowOrchestrator.executeWorkflow
+(
+mode: GenerationMode.project,
+variables: request.toJson(),
+outputDirectory: request.outputDirectory,
+dryRun: request.dryRun,
 );
 
-return GenerationResultDto.fromResult(result);
+return GenerationResultDto.fromResult
+(
+result
+);
 ```
 
 #### 5. Variable Processing
@@ -243,12 +264,14 @@ return GenerationResultDto.fromResult(result);
 **Location**: `VariableProcessingService`
 
 **Process**:
+
 1. Create `GenerationContext` from raw variables
 2. Run variable derivation pipeline
 3. Merge derived variables with raw variables
 4. Validate against brick schema
 
 **Code Example**:
+
 ```dart
 // From VariableProcessingService.process()
 // 1. Create context
@@ -256,7 +279,8 @@ final context = GenerationContext.fromVars(rawVars, mode: mode);
 
 // 2. Run pipeline
 var bag = VariableBag.fromMap(rawVars);
-bag = _pipeline.run(context, _logger);
+bag = _pipeline.run
+(context, _logger);
 
 // 3. Merge
 final processed = {...rawVars, ...bag.toMap()};
@@ -273,6 +297,7 @@ final validationErrors = _validator.validateAll(
 **Location**: `BrickRepository`, `BrickDiscoveryService`
 
 **Process**:
+
 1. Scan `templates/bricks/` directory
 2. Load `brick.yaml` or `template.yaml` metadata
 3. Parse brick variables and requirements
@@ -280,10 +305,14 @@ final validationErrors = _validator.validateAll(
 5. Cache brick metadata
 
 **Code Example**:
+
 ```dart
 // From BrickDiscoveryService.loadBrickMetadata()
 final brickYamlFile = File(path.join(brickPath, 'brick.yaml'));
-final yamlContent = await brickYamlFile.readAsString();
+final yamlContent = await
+brickYamlFile.readAsString
+();
+
 final yaml = loadYaml(yamlContent) as Map<dynamic, dynamic>;
 
 final brick = Brick.fromYaml(mergedYaml, brickPath);
@@ -294,6 +323,7 @@ final brick = Brick.fromYaml(mergedYaml, brickPath);
 **Location**: `MasonGenerationEngine` or `TemplateManager`
 
 **Process**:
+
 1. Create Mason brick instance from brick path
 2. Create `MasonGenerator` from brick
 3. Create target directory
@@ -301,18 +331,27 @@ final brick = Brick.fromYaml(mergedYaml, brickPath);
 5. Return list of generated files
 
 **Code Example**:
+
 ```dart
 // From TemplateManager._performGeneration()
 final brickInstance = mason.Brick.path(brick.path);
-final generator = await mason.MasonGenerator.fromBrick(brickInstance);
+final generator = await
+mason.MasonGenerator.fromBrick
+(
+brickInstance);
 final targetDir = Directory(outputDirectory);
 final target = mason.DirectoryGeneratorTarget(targetDir);
 
 final generatedFiles = await generator.generate(
-  target,
-  vars: variables,
-  logger: logger,
-  fileConflictResolution: mason.FileConflictResolution.overwrite,
+target,
+vars: variables,
+logger: logger,
+fileConflictResolution: mason
+.
+FileConflictResolution
+.
+overwrite
+,
 );
 ```
 
@@ -321,21 +360,23 @@ final generatedFiles = await generator.generate(
 **Location**: All layers
 
 **Flow**:
+
 - `GenerationResult` (domain) → `GenerationResultDto` (application) → `CommandResult` (presentation)
 
 **Code Example**:
+
 ```dart
 // Use case returns GenerationResultDto
 return GenerationResultDto.fromResult(result);
 
 // Handler converts to CommandResult
 return CommandResult.success(
-  command: 'generate ${mode.key}',
-  message: '${mode.key.capitalize()} generated successfully',
-  data: {
-    ...result.data,
-    'files_generated': result.generatedFiles.length,
-  },
+command: 'generate ${mode.key}',
+message: '${mode.key.capitalize()} generated successfully',
+data: {
+...result.data,
+'files_generated': result.generatedFiles.length,
+},
 );
 ```
 
@@ -357,6 +398,7 @@ The generation system follows Clean Architecture with four distinct layers:
 - **Handler**: `GenerationCommandHandler`
 
 **Responsibilities**:
+
 - Parse CLI arguments and flags
 - Build variable maps from user input
 - Create type-safe request DTOs
@@ -364,6 +406,7 @@ The generation system follows Clean Architecture with four distinct layers:
 - Handle interactive prompts
 
 **Key Files**:
+
 ```
 features/generate/
 ├── common/
@@ -385,12 +428,14 @@ features/generate/
 **Location**: `lib/src/generation/application/`
 
 **Components**:
+
 - **Use Cases**: `GenerateFeatureUseCase`, `GenerateServiceUseCase`, `GenerateProjectUseCase`
 - **DTOs**: `GenerationRequestDto`, `GenerationResultDto`
 - **Ports**: `IGenerationEngine`, `IVariableProcessor`, `IWorkflowOrchestrator`
 - **Services**: `VariableProcessingService`
 
 **Responsibilities**:
+
 - Orchestrate business logic
 - Coordinate between domain and infrastructure
 - Process variables through pipelines
@@ -398,6 +443,7 @@ features/generate/
 - Transform domain results to DTOs
 
 **Key Files**:
+
 ```
 generation/application/
 ├── dto/
@@ -420,18 +466,21 @@ generation/application/
 **Location**: `lib/src/generation/domain/`
 
 **Components**:
+
 - **Entities**: `Brick`
 - **Repositories**: `IBrickRepository`, `ITemplateRepository`
 - **Value Objects**: `BrickVariable`, `VersionRange`
 - **Services**: `BrickValidator`, `CompatibilityService`
 
 **Responsibilities**:
+
 - Define core business entities
 - Enforce business rules
 - Provide repository interfaces
 - Define value objects
 
 **Key Files**:
+
 ```
 generation/domain/
 ├── entities/
@@ -448,18 +497,21 @@ generation/domain/
 **Location**: `lib/src/generation/infrastructure/`
 
 **Components**:
+
 - **Generation Engine**: `MasonGenerationEngine`
 - **Brick Repository**: `BrickRepositoryImpl`
 - **Workflow Orchestrator**: `WorkflowOrchestratorImpl`
 - **Adapters**: `MasonAdapter`, `FileSystemAdapter`
 
 **Responsibilities**:
+
 - Implement domain interfaces
 - Interact with external systems (Mason, file system)
 - Handle platform-specific concerns
 - Provide concrete implementations
 
 **Key Files**:
+
 ```
 generation/infrastructure/
 ├── generation/
@@ -620,11 +672,13 @@ generation/infrastructure/
 **Purpose**: Convert CLI flags and user input into normalized variable maps
 
 **Types**:
+
 - `FeatureVariableBuilder`: Builds variables for feature generation
 - `ServiceVariableBuilder`: Builds variables for service generation
 - `ProjectVariableBuilder`: Builds variables for project generation
 
 **Example**:
+
 ```dart
 class FeatureVariableBuilder implements GenerationVariableBuilder {
   @override
@@ -656,9 +710,11 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
 **Location**: `lib/src/generation/variables/variable_derivers/`
 
-**Purpose**: Derive additional variables from raw inputs (e.g., `snake_name`, `pascal_name` from `name`)
+**Purpose**: Derive additional variables from raw inputs (e.g., `snake_name`, `pascal_name` from
+`name`)
 
 **Pipeline Structure**:
+
 ```dart
 // Foundation pipeline for projects
 final foundationPipeline = VariablePipeline([
@@ -680,6 +736,7 @@ final featurePipeline = VariablePipeline([
 ```
 
 **Example Deriver**:
+
 ```dart
 class NameDeriver implements VariableDeriver {
   @override
@@ -728,6 +785,7 @@ class NameDeriver implements VariableDeriver {
 3. **Cross-Variable Validation**: Check relationships between variables (mode-specific)
 
 **Example** (Processor with Validator):
+
 ```dart
 class ProjectVariableProcessor implements IVariableProcessor {
   ProjectVariableProcessor({
@@ -764,6 +822,7 @@ class ProjectVariableProcessor implements IVariableProcessor {
 ```
 
 **Example** (Validator Implementation):
+
 ```dart
 class ProjectVariableValidator implements IVariableValidator {
   @override
@@ -805,6 +864,7 @@ class ProjectVariableValidator implements IVariableValidator {
 **Location**: `lib/src/generation/brick/brick_discovery_service.dart`
 
 **Process**:
+
 1. Scan `templates/bricks/` directory structure
 2. Load `brick.yaml` or `template.yaml` metadata
 3. Parse brick variables and requirements
@@ -812,6 +872,7 @@ class ProjectVariableValidator implements IVariableValidator {
 5. Cache results
 
 **Directory Structure**:
+
 ```
 templates/
 └── bricks/
@@ -832,6 +893,7 @@ templates/
 ```
 
 **Brick Metadata Example**:
+
 ```yaml
 # brick.yaml
 name: feature
@@ -865,6 +927,7 @@ variables:
 **Location**: `lib/src/generation/template/template_manager.dart`
 
 **Process**:
+
 1. Load brick from repository
 2. Create Mason brick instance
 3. Create Mason generator
@@ -872,9 +935,14 @@ variables:
 5. Return generated file list
 
 **Code Flow**:
+
 ```dart
 // 1. Get brick
-final brick = await _brickRepository.getBrick('feature');
+final brick = await
+_brickRepository.getBrick
+('feature
+'
+);
 
 // 2. Create Mason brick
 final masonBrick = mason.Brick.path(brick.path);
@@ -885,9 +953,14 @@ final generator = await mason.MasonGenerator.fromBrick(masonBrick);
 // 4. Generate
 final target = mason.DirectoryGeneratorTarget(Directory(outputDirectory));
 final files = await generator.generate(
-  target,
-  vars: variables,
-  logger: logger,
+target,
+vars:
+variables
+,
+logger
+:
+logger
+,
 );
 ```
 
@@ -897,21 +970,21 @@ For project generation, the system handles nested feature generation:
 
 ```dart
 // From TemplateManager._performGeneration()
-if (brick.type == BrickType.project && 
-    variables.containsKey('features')) {
-  final features = variables['features'] as List<dynamic>;
-  
-  // Generate base project with first feature
-  final baseVariables = Map<String, dynamic>.from(variables);
-  baseVariables['feature'] = features.first;
-  await generator.generate(target, vars: baseVariables);
-  
-  // Generate each additional feature
-  for (int i = 1; i < features.length; i++) {
-    final featureVariables = Map<String, dynamic>.from(variables);
-    featureVariables['feature'] = features[i];
-    await generator.generate(target, vars: featureVariables);
-  }
+if (brick.type == BrickType.project &&
+variables.containsKey('features')) {
+final features = variables['features'] as List<dynamic>;
+
+// Generate base project with first feature
+final baseVariables = Map<String, dynamic>.from(variables);
+baseVariables['feature'] = features.first;
+await generator.generate(target, vars: baseVariables);
+
+// Generate each additional feature
+for (int i = 1; i < features.length; i++) {
+final featureVariables = Map<String, dynamic>.from(variables);
+featureVariables['feature'] = features[i];
+await generator.generate(target, vars: featureVariables);
+}
 }
 ```
 
@@ -922,11 +995,13 @@ if (brick.type == BrickType.project &&
 ### Error Types
 
 **Domain Errors**:
+
 - `BrickNotFoundException`: Brick not found in repository
 - `VariableValidationError`: Variable validation failed
 - `GenerationError`: File generation failed
 
 **Infrastructure Errors**:
+
 - `MasonException`: Mason generation error
 - `FileSystemException`: File system operation failed
 
@@ -968,43 +1043,44 @@ if (brick.type == BrickType.project &&
 ```dart
 // In Use Case
 try {
-  final brick = await _brickRepository.getBrick(brickName);
-  if (brick == null) {
-    return GenerationResultDto(
-      success: false,
-      error: 'Brick "$brickName" not found',
-      data: {'brick_name': brickName},
-    );
-  }
-  
-  // ... generation logic
+final brick = await _brickRepository.getBrick(brickName);
+if (brick == null) {
+return GenerationResultDto(
+success: false,
+error: 'Brick "$brickName" not found',
+data: {'brick_name': brickName},
+);
+}
+
+// ... generation logic
 } catch (e) {
-  return GenerationResultDto(
-    success: false,
-    error: 'Generation failed: $e',
-    data: {'error_type': e.runtimeType.toString()},
-  );
+return GenerationResultDto(
+success: false,
+error: 'Generation failed: $e',
+data: {'error_type': e.runtimeType.toString()},
+);
 }
 
 // In Handler
 CommandResult _convertToCommandResult(
-  GenerationResultDto result,
-  GenerationMode mode,
+GenerationResultDto result,
+GenerationMode mode,
 ) {
-  if (!result.success) {
-    return CommandResult.error(
-      message: result.error ?? 'Generation failed',
-      suggestion: 'Check your input and try again',
-      errorCode: ErrorCode.templateGenerationFailed,
-    );
-  }
-  // ... success case
+if (!result.success) {
+return CommandResult.error(
+message: result.error ?? 'Generation failed',
+suggestion: 'Check your input and try again',
+errorCode: ErrorCode.templateGenerationFailed,
+);
+}
+// ... success case
 }
 ```
 
 ### Result Types
 
 **GenerationResult** (Domain):
+
 ```dart
 sealed class GenerationResult {
   final bool success;
@@ -1014,6 +1090,7 @@ sealed class GenerationResult {
 ```
 
 **GenerationResultDto** (Application):
+
 ```dart
 class GenerationResultDto {
   final bool success;
@@ -1024,6 +1101,7 @@ class GenerationResultDto {
 ```
 
 **CommandResult** (Presentation):
+
 ```dart
 sealed class CommandResult {
   final bool success;
@@ -1037,46 +1115,63 @@ sealed class CommandResult {
 
 ## Mode Strategy Pattern with Mode Profiles
 
-The generation system uses a **Mode Strategy Pattern** combined with **Mode Profiles** to decouple command handling from mode-specific logic and provide a single source of truth for all mode wiring. This allows new generation modes to be added without modifying central components or existing mode code.
+The generation system uses a **Mode Strategy Pattern** combined with **Mode Profiles** to decouple
+command handling from mode-specific logic and provide a single source of truth for all mode wiring.
+This allows new generation modes to be added without modifying central components or existing mode
+code.
 
 ### Architecture
 
 **GenerationModeProfile** (`lib/src/generation/application/modes/generation_mode_profile.dart`):
+
 - **Single source of truth** for all mode-specific wiring
 - Value type that encapsulates, per mode:
-  - The `GenerationMode` enum value
-  - The brick/template identifier (e.g., 'project', 'feature', 'service')
-  - The `IVariableProcessor` for variable derivation and validation
-  - The `GenerationModeStrategy<GenerationRequestDto>` for execution
+    - The `GenerationMode` enum value
+    - The brick/template identifier (e.g., 'project', 'feature', 'service')
+    - The `IVariableProcessor` for variable derivation and validation
+    - The `GenerationModeStrategy<GenerationRequestDto>` for execution
 - All mode profiles are created in one place: `GenerationServicesFactory._createModeProfiles`
 
-**GenerationModeStrategy** (`lib/src/generation/application/strategies/generation_mode_strategy.dart`):
+**GenerationModeStrategy** (
+`lib/src/generation/application/strategies/generation_mode_strategy.dart`):
+
 - Abstract interface that encapsulates mode-specific behavior
 - Each strategy knows how to:
-  - Execute generation for its mode (delegates to use case)
-  - Provide next-step suggestions for successful generation
+    - Execute generation for its mode (delegates to use case)
+    - Provide next-step suggestions for successful generation
 
-**GenerationModeRegistry** (`lib/src/generation/application/strategies/generation_mode_registry.dart`):
+**GenerationModeRegistry** (
+`lib/src/generation/application/strategies/generation_mode_registry.dart`):
+
 - Central registry mapping `GenerationMode` → `GenerationModeStrategy`
 - Can be constructed from mode profiles (preferred) or directly from strategies
 - Enables mode-agnostic command handling
-- Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the correct strategy
+- Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the
+  correct strategy
 - Provides `getBrickId(GenerationMode mode)` to get brick IDs from profiles
 - All generation execution must route through this registry to ensure consistency
 
-**GenerationServicesFactory** (`lib/src/cli/application/bootstrapping/generation_services_factory.dart`):
+**GenerationServicesFactory** (
+`lib/src/cli/application/bootstrapping/generation_services_factory.dart`):
+
 - **Composition root** for all generation-related dependencies
-- Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and handlers
+- Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and
+  handlers
 - **Single source of truth**: `_createModeProfiles` method creates all mode profiles in one place
 - The registry, variable processor factory, and workflow orchestrator all use the same profiles map
 - Centralizes dependency wiring, making it easier to extend and test
 - Can be injected into `ServiceBootstrapper` for custom configurations (e.g., testing)
 
 **Benefits**:
-- **True single source of truth**: All mode wiring (brick ID, processor, strategy) in one profile entry
-- **Zero changes to existing code**: Adding a new mode requires **only** implementing new components and adding one profile entry
-- **No scattered updates**: No need to update multiple files (enum, factory, processor factory, workflow orchestrator)
-- **No central switch statements**: Handler, processor factory, and workflow orchestrator all use the profiles/registry
+
+- **True single source of truth**: All mode wiring (brick ID, processor, strategy) in one profile
+  entry
+- **Zero changes to existing code**: Adding a new mode requires **only** implementing new components
+  and adding one profile entry
+- **No scattered updates**: No need to update multiple files (enum, factory, processor factory,
+  workflow orchestrator)
+- **No central switch statements**: Handler, processor factory, and workflow orchestrator all use
+  the profiles/registry
 - **Easier testing**: Strategies can be tested independently; factory can be mocked/injected
 - **Consistency**: All entry points (CLI, MCP) use the same strategy-based execution path
 - **Maintainability**: All generation wiring is centralized in one factory method
@@ -1084,7 +1179,7 @@ The generation system uses a **Mode Strategy Pattern** combined with **Mode Prof
 ### Example Strategy
 
 ```dart
-class FeatureGenerationModeStrategy 
+class FeatureGenerationModeStrategy
     implements GenerationModeStrategy<FeatureGenerationRequest> {
   FeatureGenerationModeStrategy({
     required GenerateFeatureUseCase useCase,
@@ -1114,22 +1209,31 @@ class FeatureGenerationModeStrategy
 
 ### Adding a New Generation Mode
 
-**Important**: All generation modes must be implemented through the strategy pattern and registered via a `GenerationModeProfile` in `GenerationServicesFactory._createModeProfiles`. This ensures consistency and maintainability.
+**Important**: All generation modes must be implemented through the strategy pattern and registered
+via a `GenerationModeProfile` in `GenerationServicesFactory._createModeProfiles`. This ensures
+consistency and maintainability.
 
-See `lib/src/generation/application/strategies/README.md` for detailed instructions on adding a new generation mode.
+See `lib/src/generation/application/strategies/README.md` for detailed instructions on adding a new
+generation mode.
 
 **Quick checklist**:
+
 1. ✅ Add enum value to `GenerationMode` (only if it represents a fundamentally new workflow)
 2. ✅ Create `GenerationRequestDto` subtype
 3. ✅ Create use case (if distinct behavior is needed)
 4. ✅ Create variable processor (if variables/derivation differ from existing modes)
 5. ✅ Implement `GenerationModeStrategy<T>`
-6. ✅ **Add a single `GenerationModeProfile` entry** in `GenerationServicesFactory._createModeProfiles`
+6. ✅ **Add a single `GenerationModeProfile` entry** in
+   `GenerationServicesFactory._createModeProfiles`
 7. ✅ (Optional) Create CLI command and variable builder
 
-**Key benefit**: Adding a new mode requires **zero changes** to existing mode code. Only new components are created and one profile entry is added.
+**Key benefit**: Adding a new mode requires **zero changes** to existing mode code. Only new
+components are created and one profile entry is added.
 
-**Note**: The `GenerationServicesFactory` automatically handles registration of strategies, the registry (from profiles), variable processor factory (from profiles), command handler, and MCP adapter. You only need to:
+**Note**: The `GenerationServicesFactory` automatically handles registration of strategies, the
+registry (from profiles), variable processor factory (from profiles), command handler, and MCP
+adapter. You only need to:
+
 - Register the use case in `_registerWorkflowAndUseCases` (if created)
 - Register the variable processor in `_registerVariableProcessing` (if created)
 - Add the profile entry in `_createModeProfiles`
@@ -1144,17 +1248,18 @@ The generation system uses structured error types for better error handling and 
 
 ```dart
 enum GenerationErrorType {
-  brickNotFound,      // Brick was not found
+  brickNotFound, // Brick was not found
   variableValidation, // Variable validation failed
-  generationFailure,  // Generation operation failed
-  infrastructure,     // Infrastructure error (file system, Mason, etc.)
-  unknown,            // Unknown or unclassified error
+  generationFailure, // Generation operation failed
+  infrastructure, // Infrastructure error (file system, Mason, etc.)
+  unknown, // Unknown or unclassified error
 }
 ```
 
 ### Error Mapping
 
 **GenerationErrorMapper** (`lib/src/generation/domain/generation_error_mapper.dart`):
+
 - Maps exceptions and error conditions to `GenerationErrorType`
 - Provides consistent error categorization across the pipeline
 - Used in use cases and workflow orchestrator to tag errors
@@ -1169,7 +1274,8 @@ enum GenerationErrorType {
 
 ### Benefits
 
-- **Better user guidance**: Error-specific suggestions (e.g., "Verify brick name" for `brickNotFound`)
+- **Better user guidance**: Error-specific suggestions (e.g., "Verify brick name" for
+  `brickNotFound`)
 - **Analytics**: Structured error data for monitoring and improvement
 - **Consistent handling**: All errors follow the same categorization pattern
 
@@ -1182,18 +1288,21 @@ The system maintains clear boundaries between CLI-level and business-level valid
 **Location**: Command validators (`*Command.validators`)
 
 **Responsibility**:
+
 - Check presence of required positional arguments
 - Validate basic format (e.g., file paths, directory existence)
 - Provide immediate feedback for CLI usage errors
 
 **Example**:
+
 ```dart
 @override
-List<CommandValidator> get validators => [
-  RequiredArgumentValidator('screen_name'),
-  ScreenNameValidator(),  // Basic format check
-  FlutterProjectValidator(),
-];
+List<CommandValidator> get validators =>
+    [
+      RequiredArgumentValidator('screen_name'),
+      ScreenNameValidator(), // Basic format check
+      FlutterProjectValidator(),
+    ];
 ```
 
 ### Business-Level Validation (Application Layer)
@@ -1201,11 +1310,13 @@ List<CommandValidator> get validators => [
 **Location**: Variable processors and validators
 
 **Responsibility**:
+
 - Validate business rules (naming conventions, compatibility)
 - Cross-variable validation
 - Brick schema conformance
 
 **Example**:
+
 ```dart
 // In FeatureVariableValidator
 List<String> validateBusinessRules(Map<String, dynamic> variables) {
@@ -1216,6 +1327,7 @@ List<String> validateBusinessRules(Map<String, dynamic> variables) {
 ### Key Principle
 
 **Builders** (`*VariableBuilder`) focus on:
+
 - Reading CLI flags/interactive input
 - Normalizing into variable maps
 - **NOT** performing business rule validation
@@ -1233,6 +1345,7 @@ and requires fewer central changes.
 **Location**: `lib/src/features/generate/{type}/{type}_command_descriptor.dart`
 
 **Example** (for a `widget` type):
+
 ```dart
 import 'package:args/command_runner.dart';
 import 'package:fly_cli/src/features/commands/domain/categories.dart';
@@ -1250,18 +1363,20 @@ class WidgetCommandDescriptor extends FlyCommandDescriptor {
       'Generate a new widget component to the current project';
 
   @override
-  List<String> get aliases => [
-    'generate-widget',
-    'add-widget',
-    'new-widget',
-    'make-widget',
-  ];
+  List<String> get aliases =>
+      [
+        'generate-widget',
+        'add-widget',
+        'new-widget',
+        'make-widget',
+      ];
 
   @override
-  CommandGroup? get group => const CommandGroup(
-    name: 'generate',
-    description: 'Generate new components for the current project',
-  );
+  CommandGroup? get group =>
+      const CommandGroup(
+        name: 'generate',
+        description: 'Generate new components for the current project',
+      );
 
   @override
   CommandCategory get category => CommandCategory.generation;
@@ -1278,6 +1393,7 @@ class WidgetCommandDescriptor extends FlyCommandDescriptor {
 **Location**: `lib/src/features/generate/{type}/generate_{type}_command.dart`
 
 **Example**:
+
 ```dart
 import 'package:fly_cli/src/features/commands/application/command_base.dart';
 import 'package:fly_cli/src/features/commands/domain/command_context.dart';
@@ -1303,18 +1419,20 @@ class GenerateWidgetCommand extends FlyCommand {
       'Generate a new widget component for the current project';
 
   @override
-  List<CliFlag> get flags => [
-    const NameFlag(),
-    const OutputDirFlag(),
-    const InteractiveFlag(),
-    // Add type-specific flags here
-  ];
+  List<CliFlag> get flags =>
+      [
+        const NameFlag(),
+        const OutputDirFlag(),
+        const InteractiveFlag(),
+        // Add type-specific flags here
+      ];
 
   @override
-  List<CommandValidator> get validators => [
-    RequiredArgumentValidator('widget_name'),
-    // Add validators here
-  ];
+  List<CommandValidator> get validators =>
+      [
+        RequiredArgumentValidator('widget_name'),
+        // Add validators here
+      ];
 
   @override
   Future<CommandResult> execute() async {
@@ -1386,6 +1504,7 @@ class GenerateWidgetCommand extends FlyCommand {
 **Location**: `lib/src/generation/application/dto/generation_request_dto.dart`
 
 **Add to existing file**:
+
 ```dart
 /// Request for widget generation.
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
@@ -1414,6 +1533,7 @@ final class WidgetGenerationRequest extends GenerationRequestDto {
 ```
 
 **Update sealed class** (if needed):
+
 ```dart
 sealed class GenerationRequestDto {
   // ... existing code
@@ -1425,6 +1545,7 @@ sealed class GenerationRequestDto {
 **Location**: `lib/src/generation/foundation/foundation_enums.dart`
 
 **Add to enum**:
+
 ```dart
 enum GenerationMode {
   project('project'),
@@ -1434,6 +1555,7 @@ enum GenerationMode {
   ;
 
   final String key;
+
   const GenerationMode(this.key);
 }
 ```
@@ -1443,6 +1565,7 @@ enum GenerationMode {
 **Location**: `lib/src/generation/variables/validation/widget_variable_validator.dart`
 
 **Create validator class**:
+
 ```dart
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/variables/validation/brick_variable_validator.dart';
@@ -1485,6 +1608,7 @@ class WidgetVariableValidator implements IVariableValidator {
 **Location**: `lib/src/generation/generation_variable_builder.dart`
 
 **Add new builder class**:
+
 ```dart
 /// Builder for widget generation variables.
 class WidgetVariableBuilder implements GenerationVariableBuilder {
@@ -1541,6 +1665,7 @@ class WidgetVariableBuilder implements GenerationVariableBuilder {
 **Location**: `lib/src/generation/application/services/processors/widget_variable_processor.dart`
 
 **Create processor class**:
+
 ```dart
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
@@ -1586,6 +1711,7 @@ class WidgetVariableProcessor implements IVariableProcessor {
 **Location**: `lib/src/generation/application/use_cases/generate_widget_use_case.dart`
 
 **Example**:
+
 ```dart
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
@@ -1600,9 +1726,10 @@ class GenerateWidgetUseCase {
     required IBrickRepository brickRepository,
     required IVariableProcessor variableProcessor,
     required IGenerationEngine generationEngine,
-  }) : _brickRepository = brickRepository,
-       _variableProcessor = variableProcessor,
-       _generationEngine = generationEngine;
+  })
+      : _brickRepository = brickRepository,
+        _variableProcessor = variableProcessor,
+        _generationEngine = generationEngine;
 
   final IBrickRepository _brickRepository;
   final IVariableProcessor _variableProcessor;
@@ -1664,6 +1791,7 @@ class GenerateWidgetUseCase {
 **Location**: `lib/src/generation/application/strategies/widget_generation_mode_strategy.dart`
 
 **Create strategy**:
+
 ```dart
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
@@ -1710,11 +1838,18 @@ directly. The handler automatically uses the registry to find the appropriate st
 **Location**: `lib/src/features/commands/application/command_registration.dart` (or similar)
 
 **Add registration**:
+
 ```dart
 // In command registration
-registry.registerStrategy(
-  'widget',
-  () => WidgetCommandDescriptor(),
+registry.registerStrategy
+('widget
+'
+,()
+=>
+WidgetCommandDescriptor
+(
+)
+,
 );
 ```
 
@@ -1723,6 +1858,7 @@ registry.registerStrategy(
 **Location**: `templates/bricks/widget/widget/`
 
 **Structure**:
+
 ```
 templates/bricks/widget/widget/
 ├── brick.yaml
@@ -1734,6 +1870,7 @@ templates/bricks/widget/widget/
 ```
 
 **brick.yaml**:
+
 ```yaml
 name: widget
 version: 1.0.0
@@ -1759,19 +1896,20 @@ variables:
 **Location**: `lib/src/cli/application/bootstrapping/service_bootstrapper.dart`
 
 **Add services**:
+
 ```dart
 // Register use case (if not already registered)
 ..registerSingleton<GenerateWidgetUseCase>(
-  GenerateWidgetUseCase(
-    workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-  ),
+GenerateWidgetUseCase(
+workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
+),
 )
 
 // Register mode strategy
 ..registerSingleton<WidgetGenerationModeStrategy>(
-  WidgetGenerationModeStrategy(
-    useCase: container.get<GenerateWidgetUseCase>(),
-  ),
+WidgetGenerationModeStrategy(
+useCase: container.get<GenerateWidgetUseCase>(),
+),
 )
 
 // Note: The registry is automatically created from mode profiles in
@@ -1787,6 +1925,7 @@ variables:
 **Location**: `test/features/generate/widget/`
 
 **Example test structure**:
+
 ```dart
 // test/features/generate/widget/generate_widget_command_test.dart
 void main() {
@@ -1819,7 +1958,8 @@ void main() {
 - [ ] Request DTO: `generation/application/dto/generation_request_dto.dart` (add variant)
 - [ ] Variable Validator: `generation/variables/validation/{type}_variable_validator.dart`
 - [ ] Variable Builder: `generation/generation_variable_builder.dart` (add builder)
-- [ ] Variable Processor: `generation/application/services/processors/{type}_variable_processor.dart`
+- [ ] Variable Processor:
+  `generation/application/services/processors/{type}_variable_processor.dart`
 - [ ] Use Case: `generation/application/use_cases/generate_{type}_use_case.dart`
 - [ ] Handler Method: `features/generate/common/generation_command_handler.dart` (add method)
 - [ ] Enum Update: `generation/foundation/foundation_enums.dart` (add mode)
@@ -1850,19 +1990,19 @@ void main() {
 ### Existing Implementations
 
 1. **Feature Generation** (`feature/`):
-   - Simple single-brick generation
-   - Interactive and flag-based modes
-   - Variable derivation pipeline
+    - Simple single-brick generation
+    - Interactive and flag-based modes
+    - Variable derivation pipeline
 
 2. **Service Generation** (`service/`):
-   - Similar to feature but for services
-   - Service type selection
-   - API configuration
+    - Similar to feature but for services
+    - Service type selection
+    - API configuration
 
 3. **Project Generation** (`project/`):
-   - Complex multi-step workflow
-   - Nested generation (features, services)
-   - Manifest file support
+    - Complex multi-step workflow
+    - Nested generation (features, services)
+    - Manifest file support
 
 ### Key Differences
 
@@ -1877,24 +2017,24 @@ void main() {
 ### Common Issues
 
 1. **Brick Not Found**
-   - Check brick exists in `templates/bricks/{type}/{name}/`
-   - Verify `brick.yaml` is valid
-   - Check brick registry discovery
+    - Check brick exists in `templates/bricks/{type}/{name}/`
+    - Verify `brick.yaml` is valid
+    - Check brick registry discovery
 
 2. **Variable Validation Fails**
-   - Check variable names match brick schema
-   - Verify required variables are provided
-   - Check variable types match
+    - Check variable names match brick schema
+    - Verify required variables are provided
+    - Check variable types match
 
 3. **Generation Fails**
-   - Check Mason brick structure
-   - Verify template files in `__brick__/`
-   - Check file permissions
+    - Check Mason brick structure
+    - Verify template files in `__brick__/`
+    - Check file permissions
 
 4. **Command Not Registered**
-   - Verify command descriptor is registered
-   - Check command runner initialization
-   - Verify factory method exists
+    - Verify command descriptor is registered
+    - Check command runner initialization
+    - Verify factory method exists
 
 ---
 
