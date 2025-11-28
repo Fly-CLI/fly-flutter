@@ -3,7 +3,7 @@ import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper.d
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
 import 'package:fly_cli/src/shared/logging/infrastructure/structured_mason_logger.dart';
@@ -19,7 +19,7 @@ void main() {
 
       // Verify that generation services are registered
       expect(
-        bootstrapper.container.isRegistered<GenerationModeRegistry>(),
+        bootstrapper.container.isRegistered<GenerationExecutorRegistry>(),
         isTrue,
       );
       expect(
@@ -56,12 +56,12 @@ void main() {
       final container = bootstrapper.container;
 
       // Verify core generation services are registered
-      expect(container.isRegistered<GenerationModeRegistry>(), isTrue);
+      expect(container.isRegistered<GenerationExecutorRegistry>(), isTrue);
       expect(container.isRegistered<GenerationCommandHandler>(), isTrue);
       expect(container.isRegistered<GenerationMcpAdapter>(), isTrue);
 
       // Verify registry contains expected modes
-      final registry = container.get<GenerationModeRegistry>();
+      final registry = container.get<GenerationExecutorRegistry>();
       expect(registry.isRegistered(GenerationMode.feature), isTrue);
       expect(registry.isRegistered(GenerationMode.service), isTrue);
       expect(registry.isRegistered(GenerationMode.project), isTrue);

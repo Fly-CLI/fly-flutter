@@ -1,15 +1,15 @@
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Strategy for service generation mode.
-class ServiceGenerationModeStrategy
-    implements GenerationModeStrategy<ServiceGenerationRequest> {
-  /// Creates a new [ServiceGenerationModeStrategy].
-  ServiceGenerationModeStrategy({
+class ServiceGenerationExecutor
+    implements GenerationExecutor<ServiceGenerationRequest> {
+  /// Creates a new [ServiceGenerationExecutor].
+  ServiceGenerationExecutor({
     required GenerateServiceUseCase useCase,
   }) : _useCase = useCase;
 

@@ -9,10 +9,10 @@ import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
-import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/feature_generation_executor.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
+import 'package:fly_cli/src/generation/application/strategies/project_generation_executor.dart';
+import 'package:fly_cli/src/generation/application/strategies/service_generation_executor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
@@ -210,28 +210,28 @@ void main() {
       );
 
       expect(
-        container.isRegistered<FeatureGenerationModeStrategy>(),
+        container.isRegistered<FeatureGenerationExecutor>(),
         isTrue,
       );
       expect(
-        container.isRegistered<ServiceGenerationModeStrategy>(),
+        container.isRegistered<ServiceGenerationExecutor>(),
         isTrue,
       );
       expect(
-        container.isRegistered<ProjectGenerationModeStrategy>(),
+        container.isRegistered<ProjectGenerationExecutor>(),
         isTrue,
       );
 
-      final featureStrategy1 = container.get<FeatureGenerationModeStrategy>();
-      final featureStrategy2 = container.get<FeatureGenerationModeStrategy>();
+      final featureStrategy1 = container.get<FeatureGenerationExecutor>();
+      final featureStrategy2 = container.get<FeatureGenerationExecutor>();
       expect(featureStrategy1, same(featureStrategy2));
 
-      final serviceStrategy1 = container.get<ServiceGenerationModeStrategy>();
-      final serviceStrategy2 = container.get<ServiceGenerationModeStrategy>();
+      final serviceStrategy1 = container.get<ServiceGenerationExecutor>();
+      final serviceStrategy2 = container.get<ServiceGenerationExecutor>();
       expect(serviceStrategy1, same(serviceStrategy2));
 
-      final projectStrategy1 = container.get<ProjectGenerationModeStrategy>();
-      final projectStrategy2 = container.get<ProjectGenerationModeStrategy>();
+      final projectStrategy1 = container.get<ProjectGenerationExecutor>();
+      final projectStrategy2 = container.get<ProjectGenerationExecutor>();
       expect(projectStrategy1, same(projectStrategy2));
     });
 
@@ -242,9 +242,9 @@ void main() {
         config: config,
       );
 
-      expect(container.isRegistered<GenerationModeRegistry>(), isTrue);
-      final registry1 = container.get<GenerationModeRegistry>();
-      final registry2 = container.get<GenerationModeRegistry>();
+      expect(container.isRegistered<GenerationExecutorRegistry>(), isTrue);
+      final registry1 = container.get<GenerationExecutorRegistry>();
+      final registry2 = container.get<GenerationExecutorRegistry>();
       expect(registry1, same(registry2));
     });
 
@@ -255,7 +255,7 @@ void main() {
         config: config,
       );
 
-      final registry = container.get<GenerationModeRegistry>();
+      final registry = container.get<GenerationExecutorRegistry>();
       expect(registry.isRegistered(GenerationMode.feature), isTrue);
       expect(registry.isRegistered(GenerationMode.service), isTrue);
       expect(registry.isRegistered(GenerationMode.project), isTrue);
@@ -268,7 +268,7 @@ void main() {
         config: config,
       );
 
-      final registry = container.get<GenerationModeRegistry>();
+      final registry = container.get<GenerationExecutorRegistry>();
       final processorFactory = container.get<IVariableProcessorFactory>();
 
       // Verify that registry has profiles (constructed from profiles)

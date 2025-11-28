@@ -8,7 +8,7 @@ import 'package:fly_cli/src/generation/application/ports/ivariable_processor_fac
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/brick/brick_metadata.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart'
@@ -31,7 +31,7 @@ void main() {
       final projectProcessor = ProjectVariableProcessor();
       final featureProcessor = FeatureVariableProcessor();
       final serviceProcessor = ServiceVariableProcessor();
-      final mockStrategy = _MockStrategy();
+      final mockStrategy = _MockGenerationExecutor();
 
       final profiles = {
         GenerationMode.project: GenerationModeProfile(
@@ -171,7 +171,7 @@ void main() {
 }
 
 /// Mock strategy for testing
-class _MockStrategy implements GenerationModeStrategy<GenerationRequestDto> {
+class _MockGenerationExecutor implements GenerationExecutor<GenerationRequestDto> {
   @override
   GenerationMode get mode => GenerationMode.project;
 

@@ -1,7 +1,7 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart'
     show BrickId, GenerationMode;
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
@@ -59,7 +59,7 @@ class GenerationModeProfile {
   ///
   /// Encapsulates mode-specific generation execution logic and
   /// next-step suggestions.
-  final GenerationModeStrategy<GenerationRequestDto> strategy;
+  final GenerationExecutor<GenerationRequestDto> strategy;
 
   /// The variable builder for this mode.
   ///

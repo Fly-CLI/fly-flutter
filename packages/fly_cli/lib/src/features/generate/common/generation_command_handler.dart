@@ -2,7 +2,7 @@ import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/domain/generation_error_type.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
@@ -58,7 +58,7 @@ class GenerationCommandHandler {
   CommandResult _convertToCommandResult(
     GenerationResultDto result,
     GenerationMode mode,
-    GenerationModeStrategy strategy,
+    GenerationExecutor strategy,
   ) {
     if (!result.success) {
       // Provide more specific suggestions based on error type

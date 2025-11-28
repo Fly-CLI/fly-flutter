@@ -5,7 +5,7 @@ import 'package:fly_cli/src/generation/application/modes/generation_mode_profile
 import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
@@ -72,7 +72,7 @@ class _MockVariableProcessor implements IVariableProcessor {
 }
 
 /// Mock strategy for testing
-class _MockFeatureStrategy implements GenerationModeStrategy<FeatureGenerationRequest> {
+class _MockFeatureGenerationExecutor implements GenerationExecutor<FeatureGenerationRequest> {
   @override
   GenerationMode get mode => GenerationMode.feature;
 
@@ -104,7 +104,7 @@ void main() {
         mode: GenerationMode.feature,
         brickId: BrickId.feature,
         variableProcessor: _MockVariableProcessor(),
-        strategy: _MockFeatureStrategy(),
+        strategy: _MockFeatureGenerationExecutor(),
         variableBuilder: const FeatureVariableBuilder(),
         requestFactory: const FeatureRequestFactory(),
       );

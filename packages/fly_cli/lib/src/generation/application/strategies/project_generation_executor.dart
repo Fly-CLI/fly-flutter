@@ -1,15 +1,15 @@
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
 /// Strategy for project generation mode.
-class ProjectGenerationModeStrategy
-    implements GenerationModeStrategy<ProjectGenerationRequest> {
-  /// Creates a new [ProjectGenerationModeStrategy].
-  ProjectGenerationModeStrategy({
+class ProjectGenerationExecutor
+    implements GenerationExecutor<ProjectGenerationRequest> {
+  /// Creates a new [ProjectGenerationExecutor].
+  ProjectGenerationExecutor({
     required GenerateProjectUseCase useCase,
   }) : _useCase = useCase;
 

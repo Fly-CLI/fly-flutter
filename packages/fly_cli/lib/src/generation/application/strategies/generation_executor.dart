@@ -10,7 +10,7 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 /// mode-agnostic and reduces coupling when adding new generation modes.
 ///
 /// [T] is the specific request type for this strategy (e.g., FeatureGenerationRequest).
-abstract class GenerationModeStrategy<T extends GenerationRequestDto> {
+abstract class GenerationExecutor<T extends GenerationRequestDto> {
   /// The generation mode this strategy handles.
   GenerationMode get mode;
 

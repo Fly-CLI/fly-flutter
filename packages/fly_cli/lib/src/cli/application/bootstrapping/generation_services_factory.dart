@@ -13,11 +13,11 @@ import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/feature_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/project_generation_mode_strategy.dart';
-import 'package:fly_cli/src/generation/application/strategies/service_generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/feature_generation_executor.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
+import 'package:fly_cli/src/generation/application/strategies/project_generation_executor.dart';
+import 'package:fly_cli/src/generation/application/strategies/service_generation_executor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_project_use_case.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_service_use_case.dart';
@@ -208,7 +208,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     };
 
     // Step 4: Create registry as a thin view over profiles
-    final registry = GenerationModeRegistry(profiles);
+    final registry = GenerationExecutorRegistry(profiles);
 
     // Step 5: Register all services
     container
@@ -223,16 +223,16 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       ..registerSingleton<GenerateProjectUseCase>(
         projectComponents.useCase as GenerateProjectUseCase,
       )
-      ..registerSingleton<FeatureGenerationModeStrategy>(
-        featureComponents.strategy as FeatureGenerationModeStrategy,
+      ..registerSingleton<FeatureGenerationExecutor>(
+        featureComponents.strategy as FeatureGenerationExecutor,
       )
-      ..registerSingleton<ServiceGenerationModeStrategy>(
-        serviceComponents.strategy as ServiceGenerationModeStrategy,
+      ..registerSingleton<ServiceGenerationExecutor>(
+        serviceComponents.strategy as ServiceGenerationExecutor,
       )
-      ..registerSingleton<ProjectGenerationModeStrategy>(
-        projectComponents.strategy as ProjectGenerationModeStrategy,
+      ..registerSingleton<ProjectGenerationExecutor>(
+        projectComponents.strategy as ProjectGenerationExecutor,
       )
-      ..registerSingleton<GenerationModeRegistry>(registry)
+      ..registerSingleton<GenerationExecutorRegistry>(registry)
       ..registerSingleton<GenerationCommandHandler>(
         GenerationCommandHandler(profiles: profiles),
       )
@@ -261,7 +261,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
 
     // Phase 1: Create temporary components to break circular dependency
     // These are only used during construction, never executed in production
-    final tempStrategy = _ConstructionStrategy(mode);
+    final tempStrategy = _GenerationExecutor(mode);
     final tempProfile = GenerationModeProfile(
       mode: mode,
       brickId: brickId,
@@ -367,21 +367,21 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     }
   }
 
-  GenerationModeStrategy<GenerationRequestDto> _createStrategy(
+  GenerationExecutor<GenerationRequestDto> _createStrategy(
     GenerationMode mode,
     dynamic useCase,
   ) {
     switch (mode) {
       case GenerationMode.feature:
-        return FeatureGenerationModeStrategy(
+        return FeatureGenerationExecutor(
           useCase: useCase as GenerateFeatureUseCase,
         );
       case GenerationMode.service:
-        return ServiceGenerationModeStrategy(
+        return ServiceGenerationExecutor(
           useCase: useCase as GenerateServiceUseCase,
         );
       case GenerationMode.project:
-        return ProjectGenerationModeStrategy(
+        return ProjectGenerationExecutor(
           useCase: useCase as GenerateProjectUseCase,
         );
     }
@@ -399,7 +399,7 @@ class _ModeComponents {
 
   final GenerationMode mode;
   final dynamic useCase;
-  final GenerationModeStrategy<GenerationRequestDto> strategy;
+  final GenerationExecutor<GenerationRequestDto> strategy;
   final GenerationModeProfile profile;
 }
 
@@ -412,9 +412,9 @@ class _ModeComponents {
 /// Note: This is the minimal necessary workaround to break the circular dependency
 /// between profiles, use cases, and strategies. It is only used during factory
 /// initialization and is never exposed or executed in production code.
-class _ConstructionStrategy
-    implements GenerationModeStrategy<GenerationRequestDto> {
-  _ConstructionStrategy(this._mode);
+class _GenerationExecutor
+    implements GenerationExecutor<GenerationRequestDto> {
+  _GenerationExecutor(this._mode);
 
   final GenerationMode _mode;
 

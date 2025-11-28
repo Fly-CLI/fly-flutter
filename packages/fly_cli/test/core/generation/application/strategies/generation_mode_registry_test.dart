@@ -4,16 +4,17 @@ import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dar
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:test/test.dart';
 
 /// Mock strategy for testing
-class MockStrategy implements GenerationModeStrategy<GenerationRequestDto> {
-  MockStrategy({
+class MockGenerationExecutor
+    implements GenerationExecutor<GenerationRequestDto> {
+  MockGenerationExecutor({
     required this.mode,
     GenerationResultDto? result,
   }) : _result =
@@ -47,15 +48,15 @@ class MockStrategy implements GenerationModeStrategy<GenerationRequestDto> {
 
 void main() {
   group('GenerationModeRegistry', () {
-    late MockStrategy featureStrategy;
-    late MockStrategy serviceStrategy;
-    late MockStrategy projectStrategy;
-    late GenerationModeRegistry registry;
+    late MockGenerationExecutor featureStrategy;
+    late MockGenerationExecutor serviceStrategy;
+    late MockGenerationExecutor projectStrategy;
+    late GenerationExecutorRegistry registry;
 
     setUp(() {
-      featureStrategy = MockStrategy(mode: GenerationMode.feature);
-      serviceStrategy = MockStrategy(mode: GenerationMode.service);
-      projectStrategy = MockStrategy(mode: GenerationMode.project);
+      featureStrategy = MockGenerationExecutor(mode: GenerationMode.feature);
+      serviceStrategy = MockGenerationExecutor(mode: GenerationMode.service);
+      projectStrategy = MockGenerationExecutor(mode: GenerationMode.project);
 
       final mockProcessor = _MockVariableProcessor();
       final profiles = {
@@ -85,7 +86,7 @@ void main() {
         ),
       };
 
-      registry = GenerationModeRegistry(profiles);
+      registry = GenerationExecutorRegistry(profiles);
     });
 
     group('getStrategy', () {
@@ -184,8 +185,10 @@ void main() {
         // Create a request with a mode that's not in the registry
         // This is a defensive test - in practice all modes should be registered
         final mockProcessor = _MockVariableProcessor();
-        final unregisteredStrategy = MockStrategy(mode: GenerationMode.feature);
-        final unregisteredRegistry = GenerationModeRegistry({
+        final unregisteredStrategy = MockGenerationExecutor(
+          mode: GenerationMode.feature,
+        );
+        final unregisteredRegistry = GenerationExecutorRegistry({
           // Only register one mode, not all
           GenerationMode.feature: GenerationModeProfile(
             mode: GenerationMode.feature,
@@ -281,7 +284,7 @@ void main() {
         'should throw ArgumentError when constructed with empty profiles',
         () {
           expect(
-            () => GenerationModeRegistry({}),
+            () => GenerationExecutorRegistry({}),
             throwsA(isA<ArgumentError>()),
           );
         },

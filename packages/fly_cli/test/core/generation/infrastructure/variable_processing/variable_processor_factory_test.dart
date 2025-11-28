@@ -6,7 +6,7 @@ import 'package:fly_cli/src/generation/application/modes/generation_request_fact
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/project_variable_processor.dart';
 import 'package:fly_cli/src/generation/application/services/processors/service_variable_processor.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/generation/infrastructure/variable_processing/variable_processor_factory.dart';
@@ -18,13 +18,13 @@ void main() {
     late ProjectVariableProcessor projectProcessor;
     late FeatureVariableProcessor featureProcessor;
     late ServiceVariableProcessor serviceProcessor;
-    late _MockStrategy mockStrategy;
+    late _MockGenerationExecutor mockStrategy;
 
     setUp(() {
       projectProcessor = ProjectVariableProcessor();
       featureProcessor = FeatureVariableProcessor();
       serviceProcessor = ServiceVariableProcessor();
-      mockStrategy = _MockStrategy();
+      mockStrategy = _MockGenerationExecutor();
 
       final profiles = {
         GenerationMode.project: GenerationModeProfile(
@@ -126,7 +126,7 @@ void main() {
 }
 
 /// Mock strategy for testing
-class _MockStrategy implements GenerationModeStrategy<GenerationRequestDto> {
+class _MockGenerationExecutor implements GenerationExecutor<GenerationRequestDto> {
   @override
   GenerationMode get mode => GenerationMode.project;
 

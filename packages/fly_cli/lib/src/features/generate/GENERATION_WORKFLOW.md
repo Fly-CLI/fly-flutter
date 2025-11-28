@@ -1378,7 +1378,7 @@ final profiles = <GenerationMode, GenerationModeProfile>{
 ### Example Strategy
 
 ```dart
-// From feature_generation_mode_strategy.dart
+// From feature_generation_executor.dart
 class FeatureGenerationModeStrategy
     implements GenerationModeStrategy<FeatureGenerationRequest> {
   FeatureGenerationModeStrategy({
@@ -1967,7 +1967,7 @@ class GenerateWidgetUseCase {
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_widget_use_case.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 
