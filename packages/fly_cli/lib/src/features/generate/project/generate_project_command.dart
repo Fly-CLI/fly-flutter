@@ -10,15 +10,16 @@ import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dar
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/domain/entities/manifest_parser.dart';
-import 'package:fly_cli/src/generation/generation_variable_builder.dart';
+import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
 
 /// GenerateProjectCommand using new architecture
 class GenerateProjectCommand extends FlyCommand {
-  /// Creates a new GenerateProjectCommand instance
+  /// Creates a new [GenerateProjectCommand] instance
   GenerateProjectCommand(super.context);
 
   /// Factory constructor for enum-based command creation
@@ -158,20 +159,34 @@ class GenerateProjectCommand extends FlyCommand {
       );
     }
 
-    // Build variables using ProjectVariableBuilder
+    // Get generation handler from service container
+    final handler = context.getService<GenerationCommandHandler>();
+
+    // Get profile for project mode (single source of truth)
+    final profile = handler.getProfile(GenerationMode.project);
+    if (profile == null) {
+      return CommandResult.error(
+        message: 'No profile found for generation mode: project',
+        suggestion: 'Verify that the generation mode is properly registered',
+        errorCode: ErrorCode.invalidArgumentValue,
+      );
+    }
+
+    // Build variables using builder from profile
     // Use execution context's argResults (set by CommandRunner) instead of registration context
     final executionContext = context.factory.createExecutionContext(
       argResults!,
     );
-    const variableBuilder = ProjectVariableBuilder();
-    final rawVars = variableBuilder.buildFromContext(
+    final rawVars = await profile.variableBuilder.buildFromContext(
       context: executionContext,
       interactive: false,
       outputDir: null,
     );
 
-    // Validate variables
-    final validationResult = variableBuilder.validate(await rawVars);
+    // Validate variables using processor from profile
+    // Note: Variable builders still have validate() for CLI-level checks,
+    // but business rule validation happens in the processor
+    final validationResult = profile.variableBuilder.validate(rawVars);
     if (!validationResult.isValid) {
       return CommandResult.error(
         message: 'Validation failed: ${validationResult.errors.join(', ')}',
@@ -181,8 +196,9 @@ class GenerateProjectCommand extends FlyCommand {
     }
 
     return _createProject(
-      rawVars: await rawVars,
+      rawVars: rawVars,
       projectPath: projectPath.absolute,
+      profile: profile,
     );
   }
 
@@ -267,9 +283,21 @@ class GenerateProjectCommand extends FlyCommand {
         manifest.services,
       );
 
-      // Convert manifest to rawVars format using ProjectVariableBuilder
-      const variableBuilder = ProjectVariableBuilder();
-      final rawVars = variableBuilder.buildFromMap({
+      // Get generation handler from service container
+      final handler = context.getService<GenerationCommandHandler>();
+
+      // Get profile for project mode (single source of truth)
+      final profile = handler.getProfile(GenerationMode.project);
+      if (profile == null) {
+        return CommandResult.error(
+          message: 'No profile found for generation mode: project',
+          suggestion: 'Verify that the generation mode is properly registered',
+          errorCode: ErrorCode.invalidArgumentValue,
+        );
+      }
+
+      // Convert manifest to rawVars format using builder from profile
+      final rawVars = profile.variableBuilder.buildFromMap({
         BaseVarKey.name.key: projectName,
         'template': manifest.template,
         BaseVarKey.organization.key: manifest.organization,
@@ -284,6 +312,7 @@ class GenerateProjectCommand extends FlyCommand {
       return _createProject(
         rawVars: rawVars,
         projectPath: projectPath.absolute,
+        profile: profile,
       );
     } on ManifestException catch (e) {
       return CommandResult.error(
@@ -460,9 +489,21 @@ class GenerateProjectCommand extends FlyCommand {
 
       logger.info('\nGenerating project...\n');
 
-      // Build variables using ProjectVariableBuilder
-      const variableBuilder = ProjectVariableBuilder();
-      final rawVars = await variableBuilder.buildFromContext(
+      // Get generation handler from service container
+      final handler = context.getService<GenerationCommandHandler>();
+
+      // Get profile for project mode (single source of truth)
+      final profile = handler.getProfile(GenerationMode.project);
+      if (profile == null) {
+        return CommandResult.error(
+          message: 'No profile found for generation mode: project',
+          suggestion: 'Verify that the generation mode is properly registered',
+          errorCode: ErrorCode.invalidArgumentValue,
+        );
+      }
+
+      // Build variables using builder from profile
+      final rawVars = await profile.variableBuilder.buildFromContext(
         context: context,
         interactive: true,
         outputDir: null,
@@ -492,8 +533,8 @@ class GenerateProjectCommand extends FlyCommand {
       }).toList();
       rawVars['services'] = [];
 
-      // Validate variables
-      final validationResult = variableBuilder.validate(rawVars);
+      // Validate variables using builder from profile
+      final validationResult = profile.variableBuilder.validate(rawVars);
       if (!validationResult.isValid) {
         return CommandResult.error(
           message: 'Validation failed: ${validationResult.errors.join(', ')}',
@@ -505,6 +546,7 @@ class GenerateProjectCommand extends FlyCommand {
       return _createProject(
         rawVars: rawVars,
         projectPath: projectPath,
+        profile: profile,
       );
     } catch (e) {
       return CommandResult.error(
@@ -524,6 +566,7 @@ class GenerateProjectCommand extends FlyCommand {
   Future<CommandResult> _createProject({
     required Map<String, dynamic> rawVars,
     required String projectPath,
+    required GenerationModeProfile profile,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -594,20 +637,12 @@ class GenerateProjectCommand extends FlyCommand {
       // Get generation handler from service container
       final handler = context.getService<GenerationCommandHandler>();
 
-      // Extract properties and construct request
-      final request = ProjectGenerationRequest(
-        name: projectName,
-        template: template,
-        organization: organization,
-        description: description,
-        platforms: platforms,
-        features: featureInstances,
-        services: serviceInstances,
-        preset:
-            projectRawVars[ProjectVarKey.preset.key] as String? ?? 'starter',
+      // Construct request using factory from profile
+      final request = profile.requestFactory.createRequest(
+        variables: projectRawVars,
         outputDirectory: projectPath,
         dryRun: context.planMode,
-      );
+      ) as ProjectGenerationRequest;
 
       // Generate project
       final result = await handler.execute(request);

@@ -2,11 +2,13 @@ import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_registry.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:test/test.dart';
 
 /// Mock strategy for testing
@@ -62,18 +64,24 @@ void main() {
           brickId: BrickId.feature,
           variableProcessor: mockProcessor,
           strategy: featureStrategy,
+          variableBuilder: const FeatureVariableBuilder(),
+          requestFactory: const FeatureRequestFactory(),
         ),
         GenerationMode.service: GenerationModeProfile(
           mode: GenerationMode.service,
           brickId: BrickId.service,
           variableProcessor: mockProcessor,
           strategy: serviceStrategy,
+          variableBuilder: const ServiceVariableBuilder(),
+          requestFactory: const ServiceRequestFactory(),
         ),
         GenerationMode.project: GenerationModeProfile(
           mode: GenerationMode.project,
           brickId: BrickId.project,
           variableProcessor: mockProcessor,
           strategy: projectStrategy,
+          variableBuilder: const ProjectVariableBuilder(),
+          requestFactory: const ProjectRequestFactory(),
         ),
       };
 
@@ -184,6 +192,8 @@ void main() {
             brickId: BrickId.feature,
             variableProcessor: mockProcessor,
             strategy: unregisteredStrategy,
+            variableBuilder: const FeatureVariableBuilder(),
+            requestFactory: const FeatureRequestFactory(),
           ),
         });
 

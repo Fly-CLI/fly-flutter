@@ -7,6 +7,7 @@ import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 /// Provides common functionality for all generation commands,
 /// including variable building, validation, and result handling.
 abstract class GenerationCommandBase extends FlyCommand {
+  /// Creates a new [GenerationCommandBase] instance
   GenerationCommandBase(super.context);
 
   /// Get the generation mode (feature, service, project).

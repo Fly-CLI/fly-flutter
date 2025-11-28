@@ -1,8 +1,10 @@
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart'
     show BrickId, GenerationMode;
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 
 /// Profile defining all mode-specific components for a generation mode.
 ///
@@ -10,12 +12,12 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart'
 ///
 /// This profile encapsulates everything needed for a generation mode:
 /// - Mode identification and configuration (mode, brickId)
-/// - Mode-specific dependencies (variableProcessor)
-/// - Mode-specific behavior (strategy, which internally uses the appropriate use case)
+/// - Mode-specific dependencies (variableProcessor, variableBuilder)
+/// - Mode-specific behavior (strategy, requestFactory)
 ///
 /// When adding a new generation mode, create a new profile instance with the correct
-/// brick, processor, and strategy. All other components obtain their mode-specific
-/// logic and dependencies directly from profiles - there are no alternative
+/// brick, processor, builder, factory, and strategy. All other components obtain their
+/// mode-specific logic and dependencies directly from profiles - there are no alternative
 /// configuration structures or wrappers.
 ///
 /// This is a pure value type with no business logic, making it safe to use
@@ -27,11 +29,15 @@ class GenerationModeProfile {
   /// [brickId] - The brick/template identifier (e.g., 'project', 'feature', 'service')
   /// [variableProcessor] - The variable processor for this mode
   /// [strategy] - The generation mode strategy for this mode
+  /// [variableBuilder] - The variable builder for this mode
+  /// [requestFactory] - The request factory for this mode
   const GenerationModeProfile({
     required this.mode,
     required this.brickId,
     required this.variableProcessor,
     required this.strategy,
+    required this.variableBuilder,
+    required this.requestFactory,
   });
 
   /// The generation mode this profile represents.
@@ -54,4 +60,16 @@ class GenerationModeProfile {
   /// Encapsulates mode-specific generation execution logic and
   /// next-step suggestions.
   final GenerationModeStrategy<GenerationRequestDto> strategy;
+
+  /// The variable builder for this mode.
+  ///
+  /// Handles collecting and normalizing variables from CLI flags,
+  /// interactive prompts, or manifest data.
+  final GenerationVariableBuilder variableBuilder;
+
+  /// The request factory for this mode.
+  ///
+  /// Handles constructing request DTOs from variable maps with
+  /// mode-specific defaults and type conversions.
+  final GenerationRequestFactory requestFactory;
 }

@@ -166,9 +166,15 @@ presentation, application, domain, and infrastructure layers.
 
 ```dart
 // From GenerateFeatureCommand.execute()
+// Get generation handler from service container
+final handler = context.getService<GenerationCommandHandler>();
+
+// Get profile for feature mode (single source of truth)
+final profile = handler.getProfile(GenerationMode.feature);
+
+// Build variables using builder from profile
 final executionContext = context.factory.createExecutionContext(argResults!);
-const variableBuilder = FeatureVariableBuilder();
-final rawVars = await variableBuilder.buildFromContext(
+final rawVars = await profile.variableBuilder.buildFromContext(
   context: executionContext,
   interactive: interactive,
   outputDir: outputDir,
@@ -181,22 +187,9 @@ final outputDirResult = await context.pathResolver.resolveOutputDirectory(
 );
 final targetDir = outputDirResult.path!.absolute;
 
-// Get generation handler from service container
-final handler = context.getService<GenerationCommandHandler>();
-
-// Extract properties from rawVars and construct request
-final request = FeatureGenerationRequest(
-  name: rawVars['name'] as String,
-  feature: rawVars['feature'] as String? ?? 'home',
-  screenType: ScreenType.tryFromKey(
-    rawVars['screen_type'] as String?,
-    defaultValue: ScreenType.empty,
-  ) ?? ScreenType.empty,
-  withViewModel: rawVars['with_viewmodel'] as bool? ?? false,
-  withTests: rawVars['with_tests'] as bool? ?? true,
-  withValidation: rawVars['with_validation'] as bool? ?? false,
-  withNavigation: rawVars['with_navigation'] as bool? ?? false,
-  preset: rawVars['preset'] as String? ?? 'starter',
+// Construct request using factory from profile (defaults applied automatically)
+final request = profile.requestFactory.createRequest(
+  variables: rawVars,
   outputDirectory: targetDir,
   dryRun: context.planMode,
 );
@@ -1180,7 +1173,9 @@ code.
     - The brick/template identifier (e.g., 'project', 'feature', 'service')
     - The `IVariableProcessor` for variable derivation and validation
     - The `GenerationModeStrategy<GenerationRequestDto>` for execution
-- All mode profiles are created in one place: `GenerationServicesFactory._createModeProfiles`
+    - The `GenerationVariableBuilder` for collecting variables from CLI/manifest
+    - The `GenerationRequestFactory` for constructing request DTOs with defaults
+- All mode profiles are created in one place: `GenerationServicesFactory._registerStrategiesAndProfiles`
 
 #### GenerationModeProfile: Detailed Structure and Role
 
@@ -1199,6 +1194,8 @@ class GenerationModeProfile {
     required this.brickId,
     required this.variableProcessor,
     required this.strategy,
+    required this.variableBuilder,
+    required this.requestFactory,
   });
 
   /// The generation mode this profile represents
@@ -1215,6 +1212,16 @@ class GenerationModeProfile {
   /// The generation mode strategy for this mode
   /// Encapsulates mode-specific generation execution logic
   final GenerationModeStrategy<GenerationRequestDto> strategy;
+
+  /// The variable builder for this mode
+  /// Handles collecting and normalizing variables from CLI flags,
+  /// interactive prompts, or manifest data
+  final GenerationVariableBuilder variableBuilder;
+
+  /// The request factory for this mode
+  /// Handles constructing request DTOs from variable maps with
+  /// mode-specific defaults and type conversions
+  final GenerationRequestFactory requestFactory;
 }
 ```
 
@@ -1242,6 +1249,22 @@ class GenerationModeProfile {
     - Provides mode-specific next-step suggestions after successful generation
     - Each mode has its own strategy implementation
 
+5. **`variableBuilder`** (`GenerationVariableBuilder`):
+    - Mode-specific builder that handles:
+        - Collecting variables from CLI flags
+        - Interactive prompt handling
+        - Building variables from manifest data
+        - Basic validation (required fields)
+    - Each mode has its own builder (e.g., `FeatureVariableBuilder`, `ProjectVariableBuilder`)
+    - Note: Detailed business rule validation happens in the processor
+
+6. **`requestFactory`** (`GenerationRequestFactory`):
+    - Mode-specific factory that handles:
+        - Constructing request DTOs from variable maps
+        - Applying mode-specific defaults
+        - Type conversions (e.g., string to enum)
+    - Each mode has its own factory (e.g., `FeatureRequestFactory`, `ProjectRequestFactory`)
+
 **Role in Architecture**:
 
 1. **Composition Root**: All mode profiles are created in
@@ -1252,10 +1275,13 @@ class GenerationModeProfile {
     - `GenerationModeRegistry`: Uses profiles to build the strategy registry
     - `VariableProcessorFactory`: Uses profiles to provide mode-specific processors
     - `WorkflowOrchestrator`: Uses profiles to get brick IDs and processors
+    - `GenerationCommandHandler`: Uses profiles to get strategies
+    - Commands: Use profiles to get variable builders and request factories
 
 3. **Decoupling**: By encapsulating mode-specific components in a profile, the system achieves:
-    - **No scattered configuration**: All mode wiring is in one place
+    - **No scattered configuration**: All mode wiring (builder, processor, factory, strategy) is in one place
     - **No switch statements**: Components use the registry/profile map instead
+    - **No hardcoded defaults**: Defaults are centralized in request factories
     - **Easy extension**: Adding a new mode only requires creating a new profile entry
 
 4. **Type Safety**: As a value type with no business logic, `GenerationModeProfile` is safe to use
@@ -1396,10 +1422,12 @@ generation mode.
 2. ✅ Create `GenerationRequestDto` subtype
 3. ✅ Create use case (if distinct behavior is needed)
 4. ✅ Create variable processor (if variables/derivation differ from existing modes)
-5. ✅ Implement `GenerationModeStrategy<T>`
-6. ✅ **Add a single `GenerationModeProfile` entry** in
-   `GenerationServicesFactory._createModeProfiles`
-7. ✅ (Optional) Create CLI command and variable builder
+5. ✅ Create variable builder (if variable collection differs from existing modes)
+6. ✅ Create request factory (if request construction differs from existing modes)
+7. ✅ Implement `GenerationModeStrategy<T>`
+8. ✅ **Add a single `GenerationModeProfile` entry** in
+   `GenerationServicesFactory._registerStrategiesAndProfiles`
+9. ✅ (Optional) Create CLI command
 
 **Key benefit**: Adding a new mode requires **zero changes** to existing mode code. Only new
 components are created and one profile entry is added.
@@ -1409,7 +1437,7 @@ registry (from profiles), command handler, and MCP adapter. You only need to:
 
 - Register the variable processor in `_registerVariableProcessing` (if created)
 - Add a `_buildModeComponents` call in `_registerStrategiesAndProfiles` to create the profile
-- The factory automatically registers the use case, strategy, and profile
+- The factory automatically creates and registers the variable builder, request factory, use case, strategy, and profile
 
 ## Error Modeling
 

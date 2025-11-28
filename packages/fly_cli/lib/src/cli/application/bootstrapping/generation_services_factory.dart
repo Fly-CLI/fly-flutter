@@ -5,6 +5,7 @@ import 'package:fly_cli/src/features/generate/common/generation_command_handler.
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
@@ -25,6 +26,7 @@ import 'package:fly_cli/src/generation/domain/repositories/ibrick_repository.dar
 import 'package:fly_cli/src/generation/domain/repositories/itemplate_repository.dart';
 import 'package:fly_cli/src/generation/domain/repositories/itemplate_validator.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/file_system_adapter.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/ifile_system_adapter.dart';
 import 'package:fly_cli/src/generation/infrastructure/adapters/imason_adapter.dart';
@@ -241,9 +243,9 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
 
   /// Builds all components for a single generation mode.
   ///
-  /// Creates use case, strategy, and profile together. Since profiles need strategies,
-  /// strategies need use cases, and use cases need profiles, we break the circular
-  /// dependency by building them together atomically.
+  /// Creates use case, strategy, variable builder, request factory, and profile together.
+  /// Since profiles need strategies, strategies need use cases, and use cases need profiles,
+  /// we break the circular dependency by building them together atomically.
   ///
   /// The solution: create temporary components only during construction (they're never executed),
   /// then create the final components with everything properly wired.
@@ -253,6 +255,10 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
     required IVariableProcessor processor,
     required IWorkflowOrchestrator orchestrator,
   }) {
+    // Create mode-specific variable builder and request factory
+    final variableBuilder = _createVariableBuilder(mode);
+    final requestFactory = _createRequestFactory(mode);
+
     // Phase 1: Create temporary components to break circular dependency
     // These are only used during construction, never executed in production
     final tempStrategy = _ConstructionStrategy(mode);
@@ -261,6 +267,8 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       brickId: brickId,
       variableProcessor: processor,
       strategy: tempStrategy,
+      variableBuilder: variableBuilder,
+      requestFactory: requestFactory,
     );
 
     // Phase 2: Create use case with temporary profile
@@ -279,6 +287,8 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       brickId: brickId,
       variableProcessor: processor,
       strategy: strategy,
+      variableBuilder: variableBuilder,
+      requestFactory: requestFactory,
     );
 
     // Phase 5: Create final use case with final profile
@@ -297,6 +307,8 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       brickId: brickId,
       variableProcessor: processor,
       strategy: finalStrategy,
+      variableBuilder: variableBuilder,
+      requestFactory: requestFactory,
     );
 
     return _ModeComponents(
@@ -305,6 +317,30 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       strategy: finalStrategy,
       profile: finalProfile,
     );
+  }
+
+  /// Creates a variable builder for the given mode.
+  GenerationVariableBuilder _createVariableBuilder(GenerationMode mode) {
+    switch (mode) {
+      case GenerationMode.feature:
+        return const FeatureVariableBuilder();
+      case GenerationMode.service:
+        return const ServiceVariableBuilder();
+      case GenerationMode.project:
+        return const ProjectVariableBuilder();
+    }
+  }
+
+  /// Creates a request factory for the given mode.
+  GenerationRequestFactory _createRequestFactory(GenerationMode mode) {
+    switch (mode) {
+      case GenerationMode.feature:
+        return const FeatureRequestFactory();
+      case GenerationMode.service:
+        return const ServiceRequestFactory();
+      case GenerationMode.project:
+        return const ProjectRequestFactory();
+    }
   }
 
   dynamic _createUseCase(

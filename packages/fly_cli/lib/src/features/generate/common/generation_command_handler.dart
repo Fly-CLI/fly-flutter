@@ -26,6 +26,13 @@ class GenerationCommandHandler {
 
   final Map<GenerationMode, GenerationModeProfile> _profiles;
 
+  /// Get the profile for a specific generation mode.
+  ///
+  /// Returns null if no profile is registered for the given mode.
+  GenerationModeProfile? getProfile(GenerationMode mode) {
+    return _profiles[mode];
+  }
+
   /// Execute generation using the appropriate strategy for the request's mode.
   ///
   /// This is the preferred method for executing generation. It automatically

@@ -6,14 +6,13 @@ import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
-import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
 
 /// GenerateFeatureCommand using new architecture
 class GenerateFeatureCommand extends FlyCommand {
+  /// Creates a new [GenerateFeatureCommand] instance
   GenerateFeatureCommand(super.context);
 
   /// Factory constructor for enum-based command creation
@@ -66,13 +65,25 @@ class GenerateFeatureCommand extends FlyCommand {
         const OutputDirFlag(),
       );
 
-      // Build variables using FeatureVariableBuilder
+      // Get generation handler from service container
+      final handler = context.getService<GenerationCommandHandler>();
+
+      // Get profile for feature mode (single source of truth)
+      final profile = handler.getProfile(GenerationMode.feature);
+      if (profile == null) {
+        return CommandResult.error(
+          message: 'No profile found for generation mode: feature',
+          suggestion: 'Verify that the generation mode is properly registered',
+          errorCode: ErrorCode.invalidArgumentValue,
+        );
+      }
+
+      // Build variables using builder from profile
       // Use execution context's argResults (set by CommandRunner) instead of registration context
       final executionContext = context.factory.createExecutionContext(
         argResults!,
       );
-      const variableBuilder = FeatureVariableBuilder();
-      final rawVars = await variableBuilder.buildFromContext(
+      final rawVars = await profile.variableBuilder.buildFromContext(
         context: executionContext,
         interactive: interactive,
         outputDir: outputDir,
@@ -97,24 +108,9 @@ class GenerateFeatureCommand extends FlyCommand {
       }
       final targetDir = outputDirResult.path!.absolute;
 
-      // Get generation handler from service container
-      final handler = context.getService<GenerationCommandHandler>();
-
-      // Extract properties from rawVars and construct request
-      final request = FeatureGenerationRequest(
-        name: rawVars['name'] as String,
-        feature: rawVars['feature'] as String? ?? 'home',
-        screenType:
-            ScreenType.tryFromKey(
-              rawVars['screen_type'] as String?,
-              defaultValue: ScreenType.empty,
-            ) ??
-            ScreenType.empty,
-        withViewModel: rawVars['with_viewmodel'] as bool? ?? false,
-        withTests: rawVars['with_tests'] as bool? ?? true,
-        withValidation: rawVars['with_validation'] as bool? ?? false,
-        withNavigation: rawVars['with_navigation'] as bool? ?? false,
-        preset: rawVars['preset'] as String? ?? 'starter',
+      // Construct request using factory from profile
+      final request = profile.requestFactory.createRequest(
+        variables: rawVars,
         outputDirectory: targetDir,
         dryRun: context.planMode,
       );

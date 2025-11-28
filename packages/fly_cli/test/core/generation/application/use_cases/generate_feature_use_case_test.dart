@@ -2,12 +2,14 @@ import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/iworkflow_orchestrator.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_mode_strategy.dart';
 import 'package:fly_cli/src/generation/application/use_cases/generate_feature_use_case.dart';
 import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/generation/generators/generation_result.dart';
 import 'package:test/test.dart';
 
@@ -103,6 +105,8 @@ void main() {
         brickId: BrickId.feature,
         variableProcessor: _MockVariableProcessor(),
         strategy: _MockFeatureStrategy(),
+        variableBuilder: const FeatureVariableBuilder(),
+        requestFactory: const FeatureRequestFactory(),
       );
 
       useCase = GenerateFeatureUseCase(

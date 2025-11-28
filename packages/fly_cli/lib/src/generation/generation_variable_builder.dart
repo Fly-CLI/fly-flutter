@@ -4,9 +4,6 @@ import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
-import 'package:fly_cli/src/generation/variables/validation/feature_variable_validator.dart';
-import 'package:fly_cli/src/generation/variables/validation/project_variable_validator.dart';
-import 'package:fly_cli/src/generation/variables/validation/service_variable_validator.dart';
 
 /// Base class for building generation variables from various input sources.
 ///
@@ -26,10 +23,11 @@ abstract class GenerationVariableBuilder {
 
   /// Validate that all required variables are present.
   ///
-  /// **Note**: This method delegates to validators for business rule validation.
+  /// **Note**: This method performs basic validation (required fields, basic format).
   /// For CLI-shape checks (presence of required args), use command validators.
-  /// Business rule validation is handled by processors/validators in the
-  /// application layer during workflow orchestration.
+  /// Detailed business rule validation is handled by processors/validators in the
+  /// application layer during workflow orchestration. The processor's validator
+  /// (accessed via GenerationModeProfile) is the authoritative source for business rules.
   ValidationResult validate(Map<String, dynamic> rawVars);
 }
 
@@ -79,10 +77,13 @@ class FeatureVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    // Use feature-specific validator
-    final validator = FeatureVariableValidator();
-    final errors = validator.validateBusinessRules(rawVars);
-
+    // Basic validation: check required fields
+    // Note: Detailed business rule validation happens in the processor
+    // (accessed via GenerationModeProfile.variableProcessor)
+    final errors = <String>[];
+    if (rawVars['name'] == null || (rawVars['name'] as String).isEmpty) {
+      errors.add('Feature name is required');
+    }
     return errors.isEmpty
         ? ValidationResult.success()
         : ValidationResult.failure(errors);
@@ -262,10 +263,13 @@ class ServiceVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    // Use service-specific validator
-    final validator = ServiceVariableValidator();
-    final errors = validator.validateBusinessRules(rawVars);
-
+    // Basic validation: check required fields
+    // Note: Detailed business rule validation happens in the processor
+    // (accessed via GenerationModeProfile.variableProcessor)
+    final errors = <String>[];
+    if (rawVars['name'] == null || (rawVars['name'] as String).isEmpty) {
+      errors.add('Service name is required');
+    }
     return errors.isEmpty
         ? ValidationResult.success()
         : ValidationResult.failure(errors);
@@ -499,10 +503,13 @@ class ProjectVariableBuilder implements GenerationVariableBuilder {
 
   @override
   ValidationResult validate(Map<String, dynamic> rawVars) {
-    // Use project-specific validator
-    final validator = ProjectVariableValidator();
-    final errors = validator.validateBusinessRules(rawVars);
-
+    // Basic validation: check required fields
+    // Note: Detailed business rule validation happens in the processor
+    // (accessed via GenerationModeProfile.variableProcessor)
+    final errors = <String>[];
+    if (rawVars['name'] == null && rawVars['project_name'] == null) {
+      errors.add('Project name is required');
+    }
     return errors.isEmpty
         ? ValidationResult.success()
         : ValidationResult.failure(errors);

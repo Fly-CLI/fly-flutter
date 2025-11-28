@@ -2,6 +2,7 @@ import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
+import 'package:fly_cli/src/generation/application/modes/generation_request_factory.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
 import 'package:fly_cli/src/generation/application/services/processors/feature_variable_processor.dart';
@@ -13,6 +14,7 @@ import 'package:fly_cli/src/generation/domain/entities/brick.dart';
 import 'package:fly_cli/src/generation/domain/value_objects/brick_variable.dart'
     as domain;
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
+import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 import 'package:fly_cli/src/generation/infrastructure/variable_processing/variable_processor_factory.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
@@ -37,18 +39,24 @@ void main() {
           brickId: BrickId.project,
           variableProcessor: projectProcessor,
           strategy: mockStrategy,
+          variableBuilder: const ProjectVariableBuilder(),
+          requestFactory: const ProjectRequestFactory(),
         ),
         GenerationMode.feature: GenerationModeProfile(
           mode: GenerationMode.feature,
           brickId: BrickId.feature,
           variableProcessor: featureProcessor,
           strategy: mockStrategy,
+          variableBuilder: const FeatureVariableBuilder(),
+          requestFactory: const FeatureRequestFactory(),
         ),
         GenerationMode.service: GenerationModeProfile(
           mode: GenerationMode.service,
           brickId: BrickId.service,
           variableProcessor: serviceProcessor,
           strategy: mockStrategy,
+          variableBuilder: const ServiceVariableBuilder(),
+          requestFactory: const ServiceRequestFactory(),
         ),
       };
 
