@@ -2,7 +2,6 @@ import 'package:fly_cli/src/cli/application/bootstrapping/generation_services_fa
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper.dart';
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/integrations/mcp/infrastructure/adapters/generation_mcp_adapter.dart';
@@ -20,10 +19,6 @@ void main() {
       // Verify that generation services are registered
       expect(
         bootstrapper.container.isRegistered<GenerationExecutorRegistry>(),
-        isTrue,
-      );
-      expect(
-        bootstrapper.container.isRegistered<GenerationCommandHandler>(),
         isTrue,
       );
       expect(
@@ -57,7 +52,6 @@ void main() {
 
       // Verify core generation services are registered
       expect(container.isRegistered<GenerationExecutorRegistry>(), isTrue);
-      expect(container.isRegistered<GenerationCommandHandler>(), isTrue);
       expect(container.isRegistered<GenerationMcpAdapter>(), isTrue);
 
       // Verify registry contains expected modes

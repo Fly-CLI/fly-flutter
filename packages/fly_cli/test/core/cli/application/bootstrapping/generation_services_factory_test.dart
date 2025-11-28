@@ -1,7 +1,6 @@
 import 'package:fly_cli/src/cli/application/bootstrapping/generation_services_factory.dart';
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/ports/icache_manager.dart';
 import 'package:fly_cli/src/generation/application/ports/igeneration_engine.dart';
 import 'package:fly_cli/src/generation/application/ports/ivariable_processor_factory.dart';
@@ -316,17 +315,17 @@ void main() {
       expect(projectProcessorFromFactory, same(projectProcessorFromRegistry));
     });
 
-    test('should register command handler as singleton', () {
+    test('should register executor registry as singleton', () {
       factory.registerGenerationServices(
         container: container,
         logger: logger,
         config: config,
       );
 
-      expect(container.isRegistered<GenerationCommandHandler>(), isTrue);
-      final handler1 = container.get<GenerationCommandHandler>();
-      final handler2 = container.get<GenerationCommandHandler>();
-      expect(handler1, same(handler2));
+      expect(container.isRegistered<GenerationExecutorRegistry>(), isTrue);
+      final registry1 = container.get<GenerationExecutorRegistry>();
+      final registry2 = container.get<GenerationExecutorRegistry>();
+      expect(registry1, same(registry2));
     });
 
     test('should register MCP adapter as singleton', () {

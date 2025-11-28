@@ -63,16 +63,27 @@ presentation, application, domain, and infrastructure layers.
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              GenerationCommandHandler                           │
+│              GenerationExecutorRegistry                         │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │  - Routes to appropriate use case                        │   │
-│  │  - Converts results to CommandResult                     │   │
+│  │  - Routes requests to appropriate executor strategy      │   │
+│  │  - Provides access to generation mode profiles          │   │
 │  └──────────────────────────────────────────────────────────┘   │
 └────────────────────────────┬────────────────────────────────────┘
                              │
         ┌────────────────────┼────────────────────┐
         │                    │                    │
         ▼                    ▼                    ▼
+    ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+    │ Feature      │   │ Service      │   │ Project      │
+    │ Generation   │   │ Generation   │   │ Generation   │
+    │ Executor     │   │ Executor     │   │ Executor     │
+    └──────┬───────┘   └──────┬───────┘   └──────┬───────┘
+           │                  │                  │
+           └──────────────────┼──────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
     ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
     │ Generate     │   │ Generate     │   │ Generate     │
     │ Feature      │   │ Service      │   │ Project      │
@@ -166,11 +177,11 @@ presentation, application, domain, and infrastructure layers.
 
 ```dart
 // From GenerateFeatureCommand.execute()
-// Get generation handler from service container
-final handler = context.getService<GenerationCommandHandler>();
+// Get generation registry from service container
+final registry = context.getService<GenerationExecutorRegistry>();
 
 // Get profile for feature mode (single source of truth)
-final profile = handler.getProfile(GenerationMode.feature);
+final profile = registry.getProfile(GenerationMode.feature);
 
 // Build variables using builder from profile
 final executionContext = context.factory.createExecutionContext(argResults!);
@@ -198,24 +209,32 @@ final request = profile.requestFactory.createRequest(
 final result = await handler.execute(request);
 ```
 
-#### 3. Handler Routing
+#### 3. Registry Execution
 
-**Location**: `GenerationCommandHandler`
+**Location**: CLI commands (e.g., `GenerateFeatureCommand`)
 
 **Process**:
 
 - Receives `GenerationRequestDto`
-- Looks up the mode profile from the profiles map (single source of truth)
-- Executes using the strategy from the profile
-- Converts `GenerationResultDto` to `CommandResult`
+- Uses `GenerationExecutorRegistry` to execute the request
+- Registry routes to the appropriate executor strategy based on mode
+- Converts `GenerationResultDto` to `CommandResult` using `GenerationResultMapper`
 
 **Code Example**:
 
 ```dart
-// From GenerationCommandHandler
-Future<CommandResult> execute(GenerationRequestDto request) async {
-  final profile = _profiles[request.mode];
-  if (profile == null) {
+// From GenerateFeatureCommand.execute()
+// Execute generation via registry
+final generationResult = await registry.execute(request);
+
+// Convert generation result to command result
+final strategy = registry.getStrategy(GenerationMode.feature);
+final result = GenerationResultMapper.toCommandResult(
+  generationResult,
+  GenerationMode.feature,
+  strategy,
+);
+// ... error handling ...
     return CommandResult.error(
       message: 'No profile found for generation mode: ${request.mode.key}',
       suggestion: 'Verify that the generation mode is properly registered',
@@ -373,27 +392,15 @@ final brick = Brick.fromYaml(mergedYaml, brickPath);
 **Code Example**:
 
 ```dart
-// Use case returns GenerationResultDto
+// Executor strategy returns GenerationResultDto
 return GenerationResultDto.fromResult(result);
 
-// Handler converts to CommandResult (from GenerationCommandHandler._convertToCommandResult)
-if (!result.success) {
-  final suggestion = _getErrorSuggestion(result.errorType, result.error);
-  return CommandResult.error(
-    message: result.error ?? 'Generation failed',
-    suggestion: suggestion,
-    errorCode: ErrorCode.templateGenerationFailed,
-  );
-}
-
-return CommandResult.success(
-  command: 'generate ${mode.key}',
-  message: '${mode.key.capitalize()} generated successfully',
-  data: {
-    ...result.data,
-    'files_generated': result.generatedFiles.length,
-  },
-  nextSteps: strategy.getNextSteps(result),  // Mode-specific next steps from strategy
+// CLI command converts to CommandResult using GenerationResultMapper
+final strategy = registry.getStrategy(GenerationMode.feature);
+final result = GenerationResultMapper.toCommandResult(
+  generationResult,
+  GenerationMode.feature,
+  strategy,
 );
 ```
 
@@ -412,7 +419,7 @@ The generation system follows Clean Architecture with four distinct layers:
 - **Commands**: `GenerateFeatureCommand`, `GenerateServiceCommand`, `GenerateProjectCommand`
 - **Command Descriptors**: `FeatureCommandDescriptor`, `ServiceCommandDescriptor`,
   `ProjectCommandDescriptor`
-- **Handler**: `GenerationCommandHandler`
+- **Result Mapper**: `GenerationResultMapper` (converts generation results to command results)
 
 **Responsibilities**:
 
@@ -427,8 +434,7 @@ The generation system follows Clean Architecture with four distinct layers:
 ```
 features/generate/
 ├── common/
-│   ├── generation_command_base.dart
-│   └── generation_command_handler.dart
+│   └── generation_result_mapper.dart
 ├── feature/
 │   ├── generate_feature_command.dart
 │   └── feature_command_descriptor.dart
@@ -1272,11 +1278,11 @@ class GenerationModeProfile {
    is defined.
 
 2. **Dependency Injection**: The profile provides all mode-specific dependencies to:
-    - `GenerationModeRegistry`: Uses profiles to build the strategy registry
+    - `GenerationExecutorRegistry`: Uses profiles to build the strategy registry
     - `VariableProcessorFactory`: Uses profiles to provide mode-specific processors
     - `WorkflowOrchestrator`: Uses profiles to get brick IDs and processors
-    - `GenerationCommandHandler`: Uses profiles to get strategies
-    - Commands: Use profiles to get variable builders and request factories
+    - CLI Commands: Use registry to get profiles (for builders/factories) and execute generation
+    - MCP Adapter: Uses registry to execute generation requests
 
 3. **Decoupling**: By encapsulating mode-specific components in a profile, the system achieves:
     - **No scattered configuration**: All mode wiring (builder, processor, factory, strategy) is in one place
@@ -1340,23 +1346,23 @@ final profiles = <GenerationMode, GenerationModeProfile>{
 **GenerationModeRegistry** (
 `lib/src/generation/application/strategies/generation_mode_registry.dart`):
 
-- Central registry mapping `GenerationMode` → `GenerationModeStrategy`
+- Central registry mapping `GenerationMode` → `GenerationExecutor`
 - **Must be constructed from mode profiles** (single source of truth)
 - Enables mode-agnostic command handling
 - Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the
-  correct strategy
+  correct executor strategy
 - Provides `getBrickId(GenerationMode mode)` to get brick IDs from profiles
 - Provides `getProfile(GenerationMode mode)` to access full profile data
-- Note: The `GenerationCommandHandler` uses profiles directly, not the registry, for execution
+- Provides `getStrategy(GenerationMode mode)` to get executor strategies
+- **Single source of truth**: All generation execution goes through `GenerationExecutorRegistry.execute()`
 
 **GenerationServicesFactory** (
 `lib/src/cli/application/bootstrapping/generation_services_factory.dart`):
 
 - **Composition root** for all generation-related dependencies
-- Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and
-  handlers
+- Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and adapters
 - **Single source of truth**: `_registerStrategiesAndProfiles` method creates all mode profiles in one place
-- The handler, registry, and workflow orchestrator all use the same profiles map
+- The registry, CLI commands, MCP adapter, and workflow orchestrator all use the same profiles map
 - Centralizes dependency wiring, making it easier to extend and test
 - Can be injected into `ServiceBootstrapper` for custom configurations (e.g., testing)
 - Uses `_buildModeComponents` to create use cases, strategies, and profiles together, breaking circular dependencies
@@ -1601,8 +1607,9 @@ import 'package:fly_cli/src/features/commands/domain/command_context.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/features/generate/common/generation_result_mapper.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 
@@ -1686,9 +1693,17 @@ class GenerateWidgetCommand extends FlyCommand {
         dryRun: context.planMode,
       );
 
-      // Get handler and execute
-      final handler = context.getService<GenerationCommandHandler>();
-      final result = await handler.executeWidget(request);
+      // Get registry and execute
+      final registry = context.getService<GenerationExecutorRegistry>();
+      final generationResult = await registry.execute(request);
+      
+      // Convert to CommandResult
+      final strategy = registry.getStrategy(GenerationMode.widget);
+      final result = GenerationResultMapper.toCommandResult(
+        generationResult,
+        GenerationMode.widget,
+        strategy,
+      );
 
       return result;
     } catch (e) {
@@ -2001,8 +2016,9 @@ class WidgetGenerationModeStrategy implements GenerationModeStrategy {
 }
 ```
 
-**Note**: With the mode strategy pattern, you no longer need to modify `GenerationCommandHandler`
-directly. The handler automatically uses the profiles map to find the appropriate strategy.
+**Note**: With the mode strategy pattern, CLI commands use `GenerationExecutorRegistry` directly
+to execute generation. The registry routes requests to the appropriate executor strategy based on
+the request's mode.
 
 ### Step 10: Register Command Descriptor
 
@@ -2143,7 +2159,7 @@ void main() {
 - [ ] DI Registration: `cli/application/bootstrapping/generation_services_factory.dart` (add to `_registerStrategiesAndProfiles`)
 - [ ] Tests: `test/features/generate/{type}/`
 
-**Note**: The handler (`GenerationCommandHandler`) does not need modification - it automatically uses the profiles map.
+**Note**: CLI commands use `GenerationExecutorRegistry` directly to execute generation, so no additional handler modifications are needed.
 
 ### Code Patterns to Follow
 

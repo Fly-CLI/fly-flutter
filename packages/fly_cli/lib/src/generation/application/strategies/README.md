@@ -26,13 +26,13 @@ This ensures:
 
 ## Core Components
 
-### `GenerationModeStrategy<T>`
+### `GenerationExecutor<T>`
 
-Abstract interface that all generation mode strategies must implement:
+Abstract interface that all generation executor strategies must implement:
 
 ```dart
-abstract class GenerationModeStrategy<T extends GenerationRequestDto> {
-  /// The generation mode this strategy handles
+abstract class GenerationExecutor<T extends GenerationRequestDto> {
+  /// The generation mode this executor handles
   GenerationMode get mode;
 
   /// Execute generation for this mode
@@ -55,24 +55,26 @@ source of truth** for mode wiring.
 - `variableProcessor` - The variable processor for this mode
 - `strategy` - The generation mode strategy for this mode
 
-### `GenerationModeRegistry`
+### `GenerationExecutorRegistry`
 
-Central registry that maps `GenerationMode` enum values to their corresponding strategy
-implementations. This registry serves as the authoritative mapping and must be used for all
-generation execution.
+Central registry that maps `GenerationMode` enum values to their corresponding executor strategy
+implementations. This registry serves as the **single source of truth for all generation execution**
+and must be used for all generation requests.
 
 The registry must be constructed from mode profiles to ensure a single source of truth for all
 mode-specific wiring.
 
 **Key methods:**
 
-- `execute(GenerationRequestDto request)` - Execute generation using the appropriate strategy
-- `getStrategy(GenerationMode mode)` - Get strategy for a mode (throws if not found)
-- `forMode(GenerationMode mode)` - Get strategy for a mode (returns null if not found)
+- `execute(GenerationRequestDto request)` - **Execute generation using the appropriate executor strategy** (preferred method)
+- `getStrategy(GenerationMode mode)` - Get executor strategy for a mode (throws if not found)
+- `forMode(GenerationMode mode)` - Get executor strategy for a mode (returns null if not found)
 - `getProfile(GenerationMode mode)` - Get full profile for a mode (if constructed from profiles)
 - `getBrickId(GenerationMode mode)` - Get brick ID for a mode (if constructed from profiles)
 - `isRegistered(GenerationMode mode)` - Check if a mode is registered
 - `registeredModes` - Get all registered modes
+
+**Important**: All generation execution must go through `GenerationExecutorRegistry.execute()`. CLI commands and MCP adapters delegate to the registry rather than calling executor strategies directly.
 
 ## Adding a New Generation Mode
 
@@ -136,14 +138,14 @@ class GenerateYourNewModeUseCase {
 }
 ```
 
-### 4. Implement Strategy
+### 4. Implement Executor Strategy
 
-Create a new strategy class in this directory:
+Create a new executor strategy class in this directory:
 
 ```dart
-class YourNewModeGenerationModeStrategy
-    implements GenerationModeStrategy<YourNewModeGenerationRequest> {
-  YourNewModeGenerationModeStrategy({
+class YourNewModeGenerationExecutor
+    implements GenerationExecutor<YourNewModeGenerationRequest> {
+  YourNewModeGenerationExecutor({
     required GenerateYourNewModeUseCase useCase,
   }) : _useCase = useCase;
 
@@ -215,8 +217,8 @@ Map<GenerationMode, GenerationModeProfile> _createModeProfiles(ServiceContainer 
   final yourNewModeProcessor = container.get<YourNewModeVariableProcessor>();
   final yourNewModeUseCase = container.get<GenerateYourNewModeUseCase>();
 
-  // Create strategy
-  final yourNewModeStrategy = YourNewModeGenerationModeStrategy(
+  // Create executor strategy
+  final yourNewModeExecutor = YourNewModeGenerationExecutor(
     useCase: yourNewModeUseCase,
   );
 
@@ -228,7 +230,7 @@ Map<GenerationMode, GenerationModeProfile> _createModeProfiles(ServiceContainer 
       mode: GenerationMode.yourNewMode,
       brickId: 'your_new_mode', // The brick identifier
       variableProcessor: yourNewModeProcessor,
-      strategy: yourNewModeStrategy,
+      strategy: yourNewModeExecutor,
     ), // Add this single entry
   };
 }
@@ -236,10 +238,11 @@ Map<GenerationMode, GenerationModeProfile> _createModeProfiles(ServiceContainer 
 
 **That's it!** The factory automatically:
 
-- Registers individual strategies as singletons
-- Creates and registers the `GenerationModeRegistry` from profiles
+- Registers individual executor strategies as singletons
+- Creates and registers the `GenerationExecutorRegistry` from profiles
 - Creates and registers the `VariableProcessorFactory` from the same profiles
-- Registers the `GenerationCommandHandler` and `GenerationMcpAdapter` that use the registry
+- Registers the `GenerationMcpAdapter` that uses the registry
+- CLI commands use `GenerationExecutorRegistry` directly for execution
 
 **Key benefit**: Adding a new mode requires **zero changes** to existing mode code. Only the new
 profile entry is added.
@@ -259,25 +262,26 @@ If you want a CLI command for the new mode, create a command class similar to
    for mode wiring
 2. **Register profiles in `_createModeProfiles`** - This is the **only** place where modes are wired
    together
-3. **No mode-specific generation logic outside strategies** - All generation behavior should be in
-   strategy implementations
+3. **No mode-specific generation logic outside executor strategies** - All generation behavior should be in
+   executor strategy implementations
 4. **Use the registry for execution** - Always route generation requests through
-   `GenerationModeRegistry.execute()`
-5. **Type safety** - Each strategy should use a specific request type (`GenerationModeStrategy<T>`)
+   `GenerationExecutorRegistry.execute()` - this is the single source of truth for generation execution
+5. **Type safety** - Each executor strategy should use a specific request type (`GenerationExecutor<T>`)
 6. **No scattered updates** - Adding a new mode should **never** require editing existing mode code
+7. **CLI commands delegate to registry** - CLI commands use the registry directly, not through an intermediate handler
 
 ## Testing
 
 When adding a new mode, ensure:
 
-1. The strategy is registered in the registry
-2. The registry's `execute()` method correctly routes requests to your strategy
-3. The strategy's `getNextSteps()` returns appropriate suggestions
+1. The executor strategy is registered in the registry
+2. The registry's `execute()` method correctly routes requests to your executor strategy
+3. The executor strategy's `getNextSteps()` returns appropriate suggestions
 4. All CLI-used `GenerationMode` values are represented in the registry
 
-## Current Strategies
+## Current Executor Strategies
 
-- `FeatureGenerationModeStrategy` - Handles feature/screen generation
-- `ServiceGenerationModeStrategy` - Handles service generation
-- `ProjectGenerationModeStrategy` - Handles project generation
+- `FeatureGenerationExecutor` - Handles feature/screen generation
+- `ServiceGenerationExecutor` - Handles service generation
+- `ProjectGenerationExecutor` - Handles project generation
 

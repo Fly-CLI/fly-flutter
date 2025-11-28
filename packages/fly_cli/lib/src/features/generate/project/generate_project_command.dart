@@ -8,9 +8,10 @@ import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/features/generate/common/generation_result_mapper.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
 import 'package:fly_cli/src/generation/domain/entities/manifest_parser.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/generation/utils/mason_variable_keys.dart';
@@ -159,11 +160,11 @@ class GenerateProjectCommand extends FlyCommand {
       );
     }
 
-    // Get generation handler from service container
-    final handler = context.getService<GenerationCommandHandler>();
+    // Get generation registry from service container
+    final registry = context.getService<GenerationExecutorRegistry>();
 
     // Get profile for project mode (single source of truth)
-    final profile = handler.getProfile(GenerationMode.project);
+    final profile = registry.getProfile(GenerationMode.project);
     if (profile == null) {
       return CommandResult.error(
         message: 'No profile found for generation mode: project',
@@ -199,6 +200,7 @@ class GenerateProjectCommand extends FlyCommand {
       rawVars: rawVars,
       projectPath: projectPath.absolute,
       profile: profile,
+      registry: registry,
     );
   }
 
@@ -283,11 +285,11 @@ class GenerateProjectCommand extends FlyCommand {
         manifest.services,
       );
 
-      // Get generation handler from service container
-      final handler = context.getService<GenerationCommandHandler>();
+      // Get generation registry from service container
+      final registry = context.getService<GenerationExecutorRegistry>();
 
       // Get profile for project mode (single source of truth)
-      final profile = handler.getProfile(GenerationMode.project);
+      final profile = registry.getProfile(GenerationMode.project);
       if (profile == null) {
         return CommandResult.error(
           message: 'No profile found for generation mode: project',
@@ -313,6 +315,7 @@ class GenerateProjectCommand extends FlyCommand {
         rawVars: rawVars,
         projectPath: projectPath.absolute,
         profile: profile,
+        registry: registry,
       );
     } on ManifestException catch (e) {
       return CommandResult.error(
@@ -489,11 +492,11 @@ class GenerateProjectCommand extends FlyCommand {
 
       logger.info('\nGenerating project...\n');
 
-      // Get generation handler from service container
-      final handler = context.getService<GenerationCommandHandler>();
+      // Get generation registry from service container
+      final registry = context.getService<GenerationExecutorRegistry>();
 
       // Get profile for project mode (single source of truth)
-      final profile = handler.getProfile(GenerationMode.project);
+      final profile = registry.getProfile(GenerationMode.project);
       if (profile == null) {
         return CommandResult.error(
           message: 'No profile found for generation mode: project',
@@ -547,6 +550,7 @@ class GenerateProjectCommand extends FlyCommand {
         rawVars: rawVars,
         projectPath: projectPath,
         profile: profile,
+        registry: registry,
       );
     } catch (e) {
       return CommandResult.error(
@@ -567,6 +571,7 @@ class GenerateProjectCommand extends FlyCommand {
     required Map<String, dynamic> rawVars,
     required String projectPath,
     required GenerationModeProfile profile,
+    required GenerationExecutorRegistry registry,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -634,9 +639,6 @@ class GenerateProjectCommand extends FlyCommand {
         'services': serviceInstances,
       };
 
-      // Get generation handler from service container
-      final handler = context.getService<GenerationCommandHandler>();
-
       // Construct request using factory from profile
       final request = profile.requestFactory.createRequest(
         variables: projectRawVars,
@@ -644,8 +646,16 @@ class GenerateProjectCommand extends FlyCommand {
         dryRun: context.planMode,
       ) as ProjectGenerationRequest;
 
-      // Generate project
-      final result = await handler.execute(request);
+      // Execute generation via registry
+      final generationResult = await registry.execute(request);
+
+      // Convert generation result to command result
+      final strategy = registry.getStrategy(GenerationMode.project);
+      final result = GenerationResultMapper.toCommandResult(
+        generationResult,
+        GenerationMode.project,
+        strategy,
+      );
 
       stopwatch.stop();
 

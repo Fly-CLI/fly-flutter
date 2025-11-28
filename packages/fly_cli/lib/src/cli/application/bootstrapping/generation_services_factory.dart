@@ -1,7 +1,6 @@
 import 'package:fly_cli/src/cli/application/bootstrapping/service_bootstrapper_config.dart';
 import 'package:fly_cli/src/cli/domain/interfaces/i_service_container.dart';
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
 import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
@@ -233,11 +232,8 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
         projectComponents.strategy as ProjectGenerationExecutor,
       )
       ..registerSingleton<GenerationExecutorRegistry>(registry)
-      ..registerSingleton<GenerationCommandHandler>(
-        GenerationCommandHandler(profiles: profiles),
-      )
       ..registerSingleton<GenerationMcpAdapter>(
-        GenerationMcpAdapter(profiles: profiles),
+        GenerationMcpAdapter(registry: registry),
       );
   }
 

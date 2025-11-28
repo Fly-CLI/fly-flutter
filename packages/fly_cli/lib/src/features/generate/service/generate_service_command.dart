@@ -5,7 +5,8 @@ import 'package:fly_cli/src/features/commands/domain/command_result.dart';
 import 'package:fly_cli/src/features/commands/domain/command_validator.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/cli_flags.dart';
 import 'package:fly_cli/src/features/commands/infrastructure/flags/flag_accessor.dart';
-import 'package:fly_cli/src/features/generate/common/generation_command_handler.dart';
+import 'package:fly_cli/src/features/generate/common/generation_result_mapper.dart';
+import 'package:fly_cli/src/generation/application/strategies/generation_executor_registry.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_context.dart';
@@ -61,11 +62,11 @@ class GenerateServiceCommand extends FlyCommand {
         const OutputDirFlag(),
       );
 
-      // Get generation handler from service container
-      final handler = context.getService<GenerationCommandHandler>();
+      // Get generation registry from service container
+      final registry = context.getService<GenerationExecutorRegistry>();
 
       // Get profile for service mode (single source of truth)
-      final profile = handler.getProfile(GenerationMode.service);
+      final profile = registry.getProfile(GenerationMode.service);
       if (profile == null) {
         return CommandResult.error(
           message: 'No profile found for generation mode: service',
@@ -111,12 +112,19 @@ class GenerateServiceCommand extends FlyCommand {
         dryRun: context.planMode,
       );
 
-      // Generate service
-      final result = await handler.execute(request);
+      // Execute generation via registry
+      final generationResult = await registry.execute(request);
 
       stopwatch.stop();
 
-      // Result is already a CommandResult from the handler
+      // Convert generation result to command result
+      final strategy = registry.getStrategy(GenerationMode.service);
+      final result = GenerationResultMapper.toCommandResult(
+        generationResult,
+        GenerationMode.service,
+        strategy,
+      );
+
       // Add timing information
       if (result.success && result.data != null) {
         result.data!['duration_ms'] = stopwatch.elapsedMilliseconds;

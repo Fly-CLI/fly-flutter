@@ -1,61 +1,24 @@
 import 'package:fly_cli/src/features/commands/domain/command_result.dart';
-import 'package:fly_cli/src/generation/application/dto/generation_request_dto.dart';
 import 'package:fly_cli/src/generation/application/dto/generation_result_dto.dart';
-import 'package:fly_cli/src/generation/application/modes/generation_mode_profile.dart';
 import 'package:fly_cli/src/generation/application/strategies/generation_executor.dart';
 import 'package:fly_cli/src/generation/domain/generation_error_type.dart';
 import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 import 'package:fly_cli/src/shared/errors/domain/error_codes.dart';
 
-/// Handler for generation commands that delegates to mode strategies.
+/// Helper for converting generation results to command results.
 ///
-/// Provides a unified, mode-agnostic interface for executing generation
-/// operations through registered strategies, following Clean Architecture
-/// principles and reducing coupling when adding new generation modes.
-///
-/// All mode-specific behavior is obtained directly from the profiles map,
-/// which is the single source of truth for generation mode configuration.
-class GenerationCommandHandler {
-  /// Creates a new instance of [GenerationCommandHandler].
+/// Provides consistent conversion logic from [GenerationResultDto] to
+/// [CommandResult], including error handling, suggestions, and next steps.
+class GenerationResultMapper {
+  /// Convert a [GenerationResultDto] to a [CommandResult].
   ///
-  /// [profiles] provides access to all generation mode profiles, which contain
-  /// all mode-specific logic and dependencies (including strategies).
-  GenerationCommandHandler({
-    required Map<GenerationMode, GenerationModeProfile> profiles,
-  }) : _profiles = profiles;
-
-  final Map<GenerationMode, GenerationModeProfile> _profiles;
-
-  /// Get the profile for a specific generation mode.
+  /// [result] - The generation result to convert
+  /// [mode] - The generation mode that was executed
+  /// [strategy] - The executor strategy used, for getting next steps
   ///
-  /// Returns null if no profile is registered for the given mode.
-  GenerationModeProfile? getProfile(GenerationMode mode) {
-    return _profiles[mode];
-  }
-
-  /// Execute generation using the appropriate strategy for the request's mode.
-  ///
-  /// This is the preferred method for executing generation. It automatically
-  /// selects the correct strategy based on the request's generation mode.
-  ///
-  /// All mode-specific behavior comes directly from the profile's strategy.
-  Future<CommandResult> execute(GenerationRequestDto request) async {
-    final profile = _profiles[request.mode];
-    if (profile == null) {
-      return CommandResult.error(
-        message: 'No profile found for generation mode: ${request.mode.key}',
-        suggestion: 'Verify that the generation mode is properly registered',
-        errorCode: ErrorCode.invalidArgumentValue,
-      );
-    }
-
-    // Execute using the strategy from the profile (single source of truth)
-    final result = await profile.strategy.execute(request);
-    return _convertToCommandResult(result, request.mode, profile.strategy);
-  }
-
-  /// Convert GenerationResultDto to CommandResult.
-  CommandResult _convertToCommandResult(
+  /// Returns a [CommandResult] with appropriate success/error state,
+  /// messages, suggestions, and next steps.
+  static CommandResult toCommandResult(
     GenerationResultDto result,
     GenerationMode mode,
     GenerationExecutor strategy,
@@ -82,7 +45,7 @@ class GenerationCommandHandler {
   }
 
   /// Get a contextual suggestion based on error type.
-  String _getErrorSuggestion(
+  static String _getErrorSuggestion(
     GenerationErrorType? errorType,
     String? errorMessage,
   ) {
@@ -112,3 +75,4 @@ extension StringExtension on String {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 }
+
