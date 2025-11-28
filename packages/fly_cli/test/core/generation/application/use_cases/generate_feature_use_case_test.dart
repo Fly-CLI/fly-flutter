@@ -104,7 +104,7 @@ void main() {
         mode: GenerationMode.feature,
         brickId: BrickId.feature,
         variableProcessor: _MockVariableProcessor(),
-        strategy: _MockFeatureGenerationExecutor(),
+        executor: _MockFeatureGenerationExecutor(),
         variableBuilder: const FeatureVariableBuilder(),
         requestFactory: const FeatureRequestFactory(),
       );

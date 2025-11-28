@@ -262,7 +262,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       mode: mode,
       brickId: brickId,
       variableProcessor: processor,
-      strategy: tempStrategy,
+      executor: tempStrategy,
       variableBuilder: variableBuilder,
       requestFactory: requestFactory,
     );
@@ -282,7 +282,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       mode: mode,
       brickId: brickId,
       variableProcessor: processor,
-      strategy: strategy,
+      executor: strategy,
       variableBuilder: variableBuilder,
       requestFactory: requestFactory,
     );
@@ -302,7 +302,7 @@ class GenerationServicesFactory implements IGenerationServicesFactory {
       mode: mode,
       brickId: brickId,
       variableProcessor: processor,
-      strategy: finalStrategy,
+      executor: finalStrategy,
       variableBuilder: variableBuilder,
       requestFactory: requestFactory,
     );

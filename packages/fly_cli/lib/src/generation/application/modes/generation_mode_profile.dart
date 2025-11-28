@@ -13,10 +13,10 @@ import 'package:fly_cli/src/generation/generation_variable_builder.dart';
 /// This profile encapsulates everything needed for a generation mode:
 /// - Mode identification and configuration (mode, brickId)
 /// - Mode-specific dependencies (variableProcessor, variableBuilder)
-/// - Mode-specific behavior (strategy, requestFactory)
+/// - Mode-specific behavior (executor, requestFactory)
 ///
 /// When adding a new generation mode, create a new profile instance with the correct
-/// brick, processor, builder, factory, and strategy. All other components obtain their
+/// brick, processor, builder, factory, and executor. All other components obtain their
 /// mode-specific logic and dependencies directly from profiles - there are no alternative
 /// configuration structures or wrappers.
 ///
@@ -28,14 +28,14 @@ class GenerationModeProfile {
   /// [mode] - The generation mode this profile represents
   /// [brickId] - The brick/template identifier (e.g., 'project', 'feature', 'service')
   /// [variableProcessor] - The variable processor for this mode
-  /// [strategy] - The generation mode strategy for this mode
+  /// [executor] - The generation mode executor for this mode
   /// [variableBuilder] - The variable builder for this mode
   /// [requestFactory] - The request factory for this mode
   const GenerationModeProfile({
     required this.mode,
     required this.brickId,
     required this.variableProcessor,
-    required this.strategy,
+    required this.executor,
     required this.variableBuilder,
     required this.requestFactory,
   });
@@ -55,11 +55,11 @@ class GenerationModeProfile {
   /// specific to this generation mode.
   final IVariableProcessor variableProcessor;
 
-  /// The generation mode strategy for this mode.
+  /// The generation mode executor for this mode.
   ///
   /// Encapsulates mode-specific generation execution logic and
   /// next-step suggestions.
-  final GenerationExecutor<GenerationRequestDto> strategy;
+  final GenerationExecutor<GenerationRequestDto> executor;
 
   /// The variable builder for this mode.
   ///

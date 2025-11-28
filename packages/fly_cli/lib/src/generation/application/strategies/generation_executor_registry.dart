@@ -39,7 +39,7 @@ class GenerationExecutorRegistry {
     final strategies =
         <GenerationMode, GenerationExecutor<GenerationRequestDto>>{};
     for (final entry in profiles.entries) {
-      strategies[entry.key] = entry.value.strategy;
+      strategies[entry.key] = entry.value.executor;
     }
     _strategies = Map.unmodifiable(strategies);
   }

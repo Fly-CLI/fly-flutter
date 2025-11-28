@@ -31,14 +31,14 @@ void main() {
       final projectProcessor = ProjectVariableProcessor();
       final featureProcessor = FeatureVariableProcessor();
       final serviceProcessor = ServiceVariableProcessor();
-      final mockStrategy = _MockGenerationExecutor();
+      final mockExecutor = _MockGenerationExecutor();
 
       final profiles = {
         GenerationMode.project: GenerationModeProfile(
           mode: GenerationMode.project,
           brickId: BrickId.project,
           variableProcessor: projectProcessor,
-          strategy: mockStrategy,
+          executor: mockExecutor,
           variableBuilder: const ProjectVariableBuilder(),
           requestFactory: const ProjectRequestFactory(),
         ),
@@ -46,7 +46,7 @@ void main() {
           mode: GenerationMode.feature,
           brickId: BrickId.feature,
           variableProcessor: featureProcessor,
-          strategy: mockStrategy,
+          executor: mockExecutor,
           variableBuilder: const FeatureVariableBuilder(),
           requestFactory: const FeatureRequestFactory(),
         ),
@@ -54,7 +54,7 @@ void main() {
           mode: GenerationMode.service,
           brickId: BrickId.service,
           variableProcessor: serviceProcessor,
-          strategy: mockStrategy,
+          executor: mockExecutor,
           variableBuilder: const ServiceVariableBuilder(),
           requestFactory: const ServiceRequestFactory(),
         ),

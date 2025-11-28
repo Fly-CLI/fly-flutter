@@ -70,7 +70,7 @@ class MockFeatureUseCase extends GenerateFeatureUseCase {
           mode: GenerationMode.feature,
           brickId: BrickId.feature,
           variableProcessor: _DummyVariableProcessor(),
-          strategy: _DummyFeatureGenerationExecutor(),
+          executor: _DummyFeatureGenerationExecutor(),
           variableBuilder: const FeatureVariableBuilder(),
           requestFactory: const FeatureRequestFactory(),
         ),
