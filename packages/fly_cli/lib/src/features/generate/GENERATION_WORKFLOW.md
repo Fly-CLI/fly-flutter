@@ -85,19 +85,24 @@ presentation, application, domain, and infrastructure layers.
             ┌────────────────────────────────────┐
             │      Workflow Orchestrator         │
             │      (all generation modes)        │
+            │      - Receives GenerationModeProfile│
+            │      - Gets brick ID from profile   │
+            │      - Gets processor from profile  │
             └────────────────┬───────────────────┘
                              │
                              ▼
             ┌────────────────────────────────────┐
-            │   Variable Processing Service      │
-            │   - Derive additional variables    │
+            │   Variable Processor (from profile) │
+            │   - Derive additional variables     │
             │   - Validate against brick schema  │
+            │   - Validate business rules         │
             └────────────────┬───────────────────┘
                             │
                             ▼
             ┌────────────────────────────────────┐
             │   Brick Repository                 │
-            │   - Discover bricks                │
+            │   - Discover bricks (using brick ID│
+            │     from profile)                  │
             │   - Load brick metadata            │
             └────────────────┬───────────────────┘
                             │
@@ -163,23 +168,41 @@ presentation, application, domain, and infrastructure layers.
 // From GenerateFeatureCommand.execute()
 final executionContext = context.factory.createExecutionContext(argResults!);
 const variableBuilder = FeatureVariableBuilder();
-final rawVars = await
-variableBuilder.buildFromContext
-(
-context: executionContext,
-interactive: interactive,
-outputDir: outputDir,
+final rawVars = await variableBuilder.buildFromContext(
+  context: executionContext,
+  interactive: interactive,
+  outputDir: outputDir,
 );
 
-final request = FeatureGenerationRequest(
-name: rawVars['name'] as String,
-feature: rawVars['feature'] as String? ?? 'home',
-screenType: ScreenType.tryFromKey(rawVars['screen_type'] as String?),
-// ... other properties
-outputDirectory: targetDir,
-dryRun: context.planMode
-,
+// Resolve output directory
+final outputDirResult = await context.pathResolver.resolveOutputDirectory(
+  context,
+  outputDir,
 );
+final targetDir = outputDirResult.path!.absolute;
+
+// Get generation handler from service container
+final handler = context.getService<GenerationCommandHandler>();
+
+// Extract properties from rawVars and construct request
+final request = FeatureGenerationRequest(
+  name: rawVars['name'] as String,
+  feature: rawVars['feature'] as String? ?? 'home',
+  screenType: ScreenType.tryFromKey(
+    rawVars['screen_type'] as String?,
+    defaultValue: ScreenType.empty,
+  ) ?? ScreenType.empty,
+  withViewModel: rawVars['with_viewmodel'] as bool? ?? false,
+  withTests: rawVars['with_tests'] as bool? ?? true,
+  withValidation: rawVars['with_validation'] as bool? ?? false,
+  withNavigation: rawVars['with_navigation'] as bool? ?? false,
+  preset: rawVars['preset'] as String? ?? 'starter',
+  outputDirectory: targetDir,
+  dryRun: context.planMode,
+);
+
+// Generate feature
+final result = await handler.execute(request);
 ```
 
 #### 3. Handler Routing
@@ -189,7 +212,8 @@ dryRun: context.planMode
 **Process**:
 
 - Receives `GenerationRequestDto`
-- Routes to appropriate use case based on `mode` property
+- Looks up the mode profile from the profiles map (single source of truth)
+- Executes using the strategy from the profile
 - Converts `GenerationResultDto` to `CommandResult`
 
 **Code Example**:
@@ -197,9 +221,18 @@ dryRun: context.planMode
 ```dart
 // From GenerationCommandHandler
 Future<CommandResult> execute(GenerationRequestDto request) async {
-  final result = await _registry.execute(request);
-  final strategy = _registry.getStrategy(request.mode);
-  return _convertToCommandResult(result, request.mode, strategy);
+  final profile = _profiles[request.mode];
+  if (profile == null) {
+    return CommandResult.error(
+      message: 'No profile found for generation mode: ${request.mode.key}',
+      suggestion: 'Verify that the generation mode is properly registered',
+      errorCode: ErrorCode.invalidArgumentValue,
+    );
+  }
+
+  // Execute using the strategy from the profile (single source of truth)
+  final result = await profile.strategy.execute(request);
+  return _convertToCommandResult(result, request.mode, profile.strategy);
 }
 ```
 
@@ -208,15 +241,16 @@ Future<CommandResult> execute(GenerationRequestDto request) async {
 **Location**: `GenerateFeatureUseCase`, `GenerateServiceUseCase`, or `GenerateProjectUseCase`
 
 All generation use cases delegate to the `IWorkflowOrchestrator`, which applies
-mode-specific workflows:
+mode-specific workflows. The orchestrator receives a `GenerationModeProfile` that
+provides all mode-specific dependencies (brick ID, variable processor).
 
 - **Features/Services** (Simple Flow inside orchestrator):
-    1. Get brick from repository
-    2. Process variables through pipeline
+    1. Get brick from repository (using brick ID from profile)
+    2. Process variables through pipeline (using processor from profile)
     3. Validate variables
     4. Generate using engine
 - **Projects** (Complex Flow inside orchestrator):
-    1. Use workflow orchestrator
+    1. Use workflow orchestrator with profile
     2. Orchestrator handles multi-step generation
     3. Supports nested generation (features, services within project)
 
@@ -224,19 +258,15 @@ mode-specific workflows:
 
 ```dart
 // From GenerateFeatureUseCase.execute()
-final result = await
-_workflowOrchestrator.executeWorkflow
-(
-mode: GenerationMode.feature,
-variables: request.toJson(),
-outputDirectory: request.outputDirectory,
-dryRun: request.dryRun,
+// The use case receives a profile that contains all mode-specific configuration
+final result = await _workflowOrchestrator.executeWorkflow(
+  profile: _profile,  // Profile contains brick ID, processor, and strategy
+  variables: request.toJson(),
+  outputDirectory: request.outputDirectory,
+  dryRun: request.dryRun,
 );
 
-return GenerationResultDto.fromResult
-(
-result
-);
+return GenerationResultDto.fromResult(result);
 ```
 
 **Code Example** (Project):
@@ -244,52 +274,46 @@ result
 ```dart
 // From GenerateProjectUseCase.execute()
 // Uses workflow orchestrator for complex multi-step generation
-final result = await
-_workflowOrchestrator.executeWorkflow
-(
-mode: GenerationMode.project,
-variables: request.toJson(),
-outputDirectory: request.outputDirectory,
-dryRun: request.dryRun,
+// The orchestrator gets all mode-specific dependencies from the profile
+final result = await _workflowOrchestrator.executeWorkflow(
+  profile: _profile,  // Profile provides project-specific brick ID and processor
+  variables: request.toJson(),
+  outputDirectory: request.outputDirectory,
+  dryRun: request.dryRun,
 );
 
-return GenerationResultDto.fromResult
-(
-result
-);
+return GenerationResultDto.fromResult(result);
 ```
 
 #### 5. Variable Processing
 
-**Location**: `VariableProcessingService`
+**Location**: `IVariableProcessor` implementations (`FeatureVariableProcessor`, `ServiceVariableProcessor`, `ProjectVariableProcessor`)
 
 **Process**:
 
 1. Create `GenerationContext` from raw variables
-2. Run variable derivation pipeline
+2. Run variable derivation pipeline (mode-specific)
 3. Merge derived variables with raw variables
-4. Validate against brick schema
+4. Validate against brick schema and business rules
 
 **Code Example**:
 
 ```dart
-// From VariableProcessingService.process()
-// 1. Create context
-final context = GenerationContext.fromVars(rawVars, mode: mode);
-
-// 2. Run pipeline
-var bag = VariableBag.fromMap(rawVars);
-bag = _pipeline.run
-(context, _logger);
-
-// 3. Merge
-final processed = {...rawVars, ...bag.toMap()};
-
-// 4. Validate (using processor-specific validator)
-final validationErrors = _validator.validateAll(
+// From WorkflowOrchestratorImpl.executeWorkflow()
+// The processor is obtained from the profile (single source of truth)
+final processor = profile.variableProcessor;
+final processed = await processor.process(
+  rawVars: rawVars,
+  mode: profile.mode,
   brick: brick,
-  variables: processed,
 );
+
+// The processor internally:
+// 1. Creates GenerationContext from raw variables
+// 2. Runs mode-specific variable derivation pipeline
+// 3. Merges derived variables with raw variables
+// 4. Validates using processor-specific validator
+//    (which includes both brick-level and business rule validation)
 ```
 
 #### 6. Template Discovery
@@ -333,26 +357,16 @@ final brick = Brick.fromYaml(mergedYaml, brickPath);
 **Code Example**:
 
 ```dart
-// From TemplateManager._performGeneration()
-final brickInstance = mason.Brick.path(brick.path);
-final generator = await
-mason.MasonGenerator.fromBrick
-(
-brickInstance);
-final targetDir = Directory(outputDirectory);
-final target = mason.DirectoryGeneratorTarget(targetDir);
+// From GenerationOrchestrator (used by WorkflowOrchestratorImpl)
+// The orchestrator delegates to BrickComposer/BrickOrchestrator which handles:
+// 1. Creating Mason brick instance from brick path
+// 2. Creating Mason generator from brick
+// 3. Generating files to target directory
+// 4. Returning list of generated files
 
-final generatedFiles = await generator.generate(
-target,
-vars: variables,
-logger: logger,
-fileConflictResolution: mason
-.
-FileConflictResolution
-.
-overwrite
-,
-);
+// The actual generation is handled by the foundation GenerationOrchestrator
+// which uses BrickComposer for single-brick generation and BrickOrchestrator
+// for multi-brick (project) generation
 ```
 
 #### 8. Result Propagation
@@ -369,14 +383,24 @@ overwrite
 // Use case returns GenerationResultDto
 return GenerationResultDto.fromResult(result);
 
-// Handler converts to CommandResult
+// Handler converts to CommandResult (from GenerationCommandHandler._convertToCommandResult)
+if (!result.success) {
+  final suggestion = _getErrorSuggestion(result.errorType, result.error);
+  return CommandResult.error(
+    message: result.error ?? 'Generation failed',
+    suggestion: suggestion,
+    errorCode: ErrorCode.templateGenerationFailed,
+  );
+}
+
 return CommandResult.success(
-command: 'generate ${mode.key}',
-message: '${mode.key.capitalize()} generated successfully',
-data: {
-...result.data,
-'files_generated': result.generatedFiles.length,
-},
+  command: 'generate ${mode.key}',
+  message: '${mode.key.capitalize()} generated successfully',
+  data: {
+    ...result.data,
+    'files_generated': result.generatedFiles.length,
+  },
+  nextSteps: strategy.getNextSteps(result),  // Mode-specific next steps from strategy
 );
 ```
 
@@ -583,7 +607,15 @@ generation/infrastructure/
 │  (Presentation)  │
 └────────┬─────────┘
          │
-         │ 2. Routes to Use Case
+         │ 2. Routes to Strategy (from profile)
+         │
+         ▼
+┌──────────────────┐
+│ Mode Strategy    │
+│  (Application)   │
+└────────┬─────────┘
+         │
+         │ 3. Delegates to Use Case
          │
          ▼
 ┌──────────────────┐
@@ -591,7 +623,20 @@ generation/infrastructure/
 │  (Application)   │
 └────────┬─────────┘
          │
-         │ 3. Coordinates domain services
+         │ 4. Delegates to Workflow Orchestrator
+         │    (with profile containing all dependencies)
+         │
+         ▼
+┌──────────────────┐
+│ Workflow         │
+│ Orchestrator     │
+│  (Application)   │
+└────────┬─────────┘
+         │
+         │ 5. Uses profile to get:
+         │    - Brick ID → Brick Repository
+         │    - Processor → Variable Processing
+         │    - Delegates to Generation Engine
          │
          ├─────────────────┬─────────────────┐
          │                 │                 │
@@ -599,6 +644,7 @@ generation/infrastructure/
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
 │   Variable   │  │    Brick     │  │  Generation   │
 │  Processor   │  │  Repository  │  │    Engine     │
+│ (from profile)│  │              │  │              │
 └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
@@ -612,15 +658,18 @@ generation/infrastructure/
                      │
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              VariableProcessingService                       │
+│              IVariableProcessor (from profile)              │
+│  (FeatureVariableProcessor / ServiceVariableProcessor /     │
+│   ProjectVariableProcessor)                                 │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ 1. Create GenerationContext                          │   │
-│  │ 2. Run Variable Pipeline                              │   │
+│  │ 2. Run Variable Pipeline (mode-specific)             │   │
 │  │    - FoundationPipeline (for projects)               │   │
 │  │    - FeaturePipeline (for features)                 │   │
 │  │    - ServicePipeline (for services)                  │   │
 │  │ 3. Merge derived variables                           │   │
 │  │ 4. Validate against brick schema                     │   │
+│  │ 5. Validate business rules (mode-specific)           │   │
 │  └──────────────────────────────────────────────────────┘   │
 └────────────────────┬────────────────────────────────────────┘
                      │
@@ -630,6 +679,7 @@ generation/infrastructure/
 │  { name: "home_screen", feature: "home",                   │
 │    snake_name: "home_screen",                               │
 │    pascal_name: "HomeScreen", ... }                        │
+│  + ValidationResult (success/errors)                        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -1132,6 +1182,127 @@ code.
     - The `GenerationModeStrategy<GenerationRequestDto>` for execution
 - All mode profiles are created in one place: `GenerationServicesFactory._createModeProfiles`
 
+#### GenerationModeProfile: Detailed Structure and Role
+
+**Location**: `lib/src/generation/application/modes/generation_mode_profile.dart`
+
+**Purpose**: `GenerationModeProfile` is a pure value type that serves as the **single source of
+truth** for all mode-specific components and dependencies. It encapsulates everything needed to
+configure and execute generation for a specific mode.
+
+**Class Structure**:
+
+```dart
+class GenerationModeProfile {
+  const GenerationModeProfile({
+    required this.mode,
+    required this.brickId,
+    required this.variableProcessor,
+    required this.strategy,
+  });
+
+  /// The generation mode this profile represents
+  final GenerationMode mode;
+
+  /// The brick/template identifier used for this mode
+  /// (e.g., 'project', 'feature', 'service')
+  final BrickId brickId;
+
+  /// The variable processor for this mode
+  /// Handles variable derivation, transformation, and validation
+  final IVariableProcessor variableProcessor;
+
+  /// The generation mode strategy for this mode
+  /// Encapsulates mode-specific generation execution logic
+  final GenerationModeStrategy<GenerationRequestDto> strategy;
+}
+```
+
+**Key Properties**:
+
+1. **`mode`** (`GenerationMode`):
+    - Identifies the generation mode (e.g., `GenerationMode.feature`, `GenerationMode.project`)
+    - Used for routing and mode-specific logic throughout the system
+
+2. **`brickId`** (`BrickId`):
+    - The identifier used to look up the brick/template in the brick repository
+    - Typically matches the mode name (e.g., 'feature' for feature mode, 'project' for project mode)
+    - Used by `BrickRepository` to locate the correct template
+
+3. **`variableProcessor`** (`IVariableProcessor`):
+    - Mode-specific processor that handles:
+        - Variable derivation (e.g., converting `name` to `snake_name`, `pascal_name`)
+        - Variable transformation and normalization
+        - Variable validation against brick schema and business rules
+    - Each mode has its own processor (e.g., `FeatureVariableProcessor`, `ProjectVariableProcessor`)
+
+4. **`strategy`** (`GenerationModeStrategy<GenerationRequestDto>`):
+    - Encapsulates mode-specific execution behavior
+    - Delegates to the appropriate use case (e.g., `GenerateFeatureUseCase`)
+    - Provides mode-specific next-step suggestions after successful generation
+    - Each mode has its own strategy implementation
+
+**Role in Architecture**:
+
+1. **Composition Root**: All mode profiles are created in
+   `GenerationServicesFactory._createModeProfiles()`, making it the single place where mode wiring
+   is defined.
+
+2. **Dependency Injection**: The profile provides all mode-specific dependencies to:
+    - `GenerationModeRegistry`: Uses profiles to build the strategy registry
+    - `VariableProcessorFactory`: Uses profiles to provide mode-specific processors
+    - `WorkflowOrchestrator`: Uses profiles to get brick IDs and processors
+
+3. **Decoupling**: By encapsulating mode-specific components in a profile, the system achieves:
+    - **No scattered configuration**: All mode wiring is in one place
+    - **No switch statements**: Components use the registry/profile map instead
+    - **Easy extension**: Adding a new mode only requires creating a new profile entry
+
+4. **Type Safety**: As a value type with no business logic, `GenerationModeProfile` is safe to use
+   at the application layer and only references existing abstractions (interfaces).
+
+**Usage Example**:
+
+```dart
+// In GenerationServicesFactory._registerStrategiesAndProfiles()
+// Step 1: Build mode-specific components for each mode
+final featureComponents = _buildModeComponents(
+  mode: GenerationMode.feature,
+  brickId: BrickId.feature,
+  processor: featureProcessor,
+  orchestrator: workflowOrchestrator,
+);
+
+final serviceComponents = _buildModeComponents(
+  mode: GenerationMode.service,
+  brickId: BrickId.service,
+  processor: serviceProcessor,
+  orchestrator: workflowOrchestrator,
+);
+
+final projectComponents = _buildModeComponents(
+  mode: GenerationMode.project,
+  brickId: BrickId.project,
+  processor: projectProcessor,
+  orchestrator: workflowOrchestrator,
+);
+
+// Step 2: Build the canonical profiles map - single source of truth
+final profiles = <GenerationMode, GenerationModeProfile>{
+  GenerationMode.feature: featureComponents.profile,
+  GenerationMode.service: serviceComponents.profile,
+  GenerationMode.project: projectComponents.profile,
+};
+```
+
+**Benefits of This Design**:
+
+- **Single Source of Truth**: All mode configuration is in one profile object
+- **Immutability**: As a value type, profiles are immutable and safe to share
+- **Testability**: Profiles can be easily mocked or replaced for testing
+- **Maintainability**: Adding a new mode requires only adding one profile entry
+- **Consistency**: All components use the same profile data, ensuring consistency
+
 **GenerationModeStrategy** (
 `lib/src/generation/application/strategies/generation_mode_strategy.dart`):
 
@@ -1144,12 +1315,13 @@ code.
 `lib/src/generation/application/strategies/generation_mode_registry.dart`):
 
 - Central registry mapping `GenerationMode` → `GenerationModeStrategy`
-- Can be constructed from mode profiles (preferred) or directly from strategies
+- **Must be constructed from mode profiles** (single source of truth)
 - Enables mode-agnostic command handling
 - Provides `execute(GenerationRequestDto request)` method that automatically routes requests to the
   correct strategy
 - Provides `getBrickId(GenerationMode mode)` to get brick IDs from profiles
-- All generation execution must route through this registry to ensure consistency
+- Provides `getProfile(GenerationMode mode)` to access full profile data
+- Note: The `GenerationCommandHandler` uses profiles directly, not the registry, for execution
 
 **GenerationServicesFactory** (
 `lib/src/cli/application/bootstrapping/generation_services_factory.dart`):
@@ -1157,10 +1329,11 @@ code.
 - **Composition root** for all generation-related dependencies
 - Encapsulates creation and registration of infrastructure, workflow, use cases, strategies, and
   handlers
-- **Single source of truth**: `_createModeProfiles` method creates all mode profiles in one place
-- The registry, variable processor factory, and workflow orchestrator all use the same profiles map
+- **Single source of truth**: `_registerStrategiesAndProfiles` method creates all mode profiles in one place
+- The handler, registry, and workflow orchestrator all use the same profiles map
 - Centralizes dependency wiring, making it easier to extend and test
 - Can be injected into `ServiceBootstrapper` for custom configurations (e.g., testing)
+- Uses `_buildModeComponents` to create use cases, strategies, and profiles together, breaking circular dependencies
 
 **Benefits**:
 
@@ -1179,6 +1352,7 @@ code.
 ### Example Strategy
 
 ```dart
+// From feature_generation_mode_strategy.dart
 class FeatureGenerationModeStrategy
     implements GenerationModeStrategy<FeatureGenerationRequest> {
   FeatureGenerationModeStrategy({
@@ -1231,12 +1405,11 @@ generation mode.
 components are created and one profile entry is added.
 
 **Note**: The `GenerationServicesFactory` automatically handles registration of strategies, the
-registry (from profiles), variable processor factory (from profiles), command handler, and MCP
-adapter. You only need to:
+registry (from profiles), command handler, and MCP adapter. You only need to:
 
-- Register the use case in `_registerWorkflowAndUseCases` (if created)
 - Register the variable processor in `_registerVariableProcessing` (if created)
-- Add the profile entry in `_createModeProfiles`
+- Add a `_buildModeComponents` call in `_registerStrategiesAndProfiles` to create the profile
+- The factory automatically registers the use case, strategy, and profile
 
 ## Error Modeling
 
@@ -1723,53 +1896,22 @@ import 'package:fly_cli/src/generation/foundation/foundation_enums.dart';
 /// Use case for generating widgets.
 class GenerateWidgetUseCase {
   GenerateWidgetUseCase({
-    required IBrickRepository brickRepository,
-    required IVariableProcessor variableProcessor,
-    required IGenerationEngine generationEngine,
-  })
-      : _brickRepository = brickRepository,
-        _variableProcessor = variableProcessor,
-        _generationEngine = generationEngine;
+    required IWorkflowOrchestrator workflowOrchestrator,
+    required GenerationModeProfile profile,
+  }) : _workflowOrchestrator = workflowOrchestrator,
+       _profile = profile;
 
-  final IBrickRepository _brickRepository;
-  final IVariableProcessor _variableProcessor;
-  final IGenerationEngine _generationEngine;
+  final IWorkflowOrchestrator _workflowOrchestrator;
+  final GenerationModeProfile _profile;
 
   Future<GenerationResultDto> execute(WidgetGenerationRequest request) async {
     try {
-      // 1. Get brick
-      const brickName = 'widget';
-      final brick = await _brickRepository.getBrick(brickName);
-      if (brick == null) {
-        return const GenerationResultDto(
-          success: false,
-          error: 'Brick "widget" not found',
-          data: {'brick_name': 'widget'},
-        );
-      }
-
-      // 2. Process variables
-      final processed = await _variableProcessor.process(
-        rawVars: request.toJson(),
-        mode: GenerationMode.widget,
-        brick: brick,
-      );
-
-      if (!processed.validationResult.isValid) {
-        return GenerationResultDto(
-          success: false,
-          error: 'Variable validation failed: ${processed.validationResult.errors.join(', ')}',
-          data: {
-            'validation_errors': processed.validationResult.errors,
-            'brick_name': brickName,
-          },
-        );
-      }
-
-      // 3. Generate
-      final result = await _generationEngine.generate(
-        brick: brick,
-        variables: processed.values,
+      // Delegate orchestration to the workflow orchestrator, which handles
+      // brick discovery, variable processing, validation, and generation.
+      // The orchestrator gets all mode-specific dependencies from the profile.
+      final result = await _workflowOrchestrator.executeWorkflow(
+        profile: _profile,
+        variables: request.toJson(),
         outputDirectory: request.outputDirectory,
         dryRun: request.dryRun,
       );
@@ -1778,7 +1920,8 @@ class GenerateWidgetUseCase {
     } catch (e) {
       return GenerationResultDto(
         success: false,
-        error: 'Generation failed: $e',
+        error: 'Widget generation failed: $e',
+        errorType: GenerationErrorMapper.fromException(e),
         data: {'error_type': e.runtimeType.toString()},
       );
     }
@@ -1831,7 +1974,7 @@ class WidgetGenerationModeStrategy implements GenerationModeStrategy {
 ```
 
 **Note**: With the mode strategy pattern, you no longer need to modify `GenerationCommandHandler`
-directly. The handler automatically uses the registry to find the appropriate strategy.
+directly. The handler automatically uses the profiles map to find the appropriate strategy.
 
 ### Step 10: Register Command Descriptor
 
@@ -1893,31 +2036,36 @@ variables:
 
 ### Step 12: Update Dependency Injection
 
-**Location**: `lib/src/cli/application/bootstrapping/service_bootstrapper.dart`
+**Location**: `lib/src/cli/application/bootstrapping/generation_services_factory.dart`
 
-**Add services**:
+**Add to factory**:
 
 ```dart
-// Register use case (if not already registered)
-..registerSingleton<GenerateWidgetUseCase>(
-GenerateWidgetUseCase(
-workflowOrchestrator: container.get<IWorkflowOrchestrator>(),
-),
-)
+// In GenerationServicesFactory._registerStrategiesAndProfiles()
+// Step 1: Register the variable processor (if created)
+// This should be done in _registerVariableProcessing()
 
-// Register mode strategy
-..registerSingleton<WidgetGenerationModeStrategy>(
-WidgetGenerationModeStrategy(
-useCase: container.get<GenerateWidgetUseCase>(),
-),
-)
+// Step 2: Add a _buildModeComponents call for the new mode
+final widgetComponents = _buildModeComponents(
+  mode: GenerationMode.widget,
+  brickId: BrickId.widget,
+  processor: widgetProcessor,  // From _registerVariableProcessing
+  orchestrator: workflowOrchestrator,
+);
 
-// Note: The registry is automatically created from mode profiles in
-// GenerationServicesFactory._createModeProfiles(). You only need to add
-// a new GenerationModeProfile entry there. The registry, processor factory,
-// and workflow orchestrator all use the same profiles map automatically.
-//
-// No manual registry registration needed - it's handled by the factory!
+// Step 3: Add to the profiles map
+final profiles = <GenerationMode, GenerationModeProfile>{
+  GenerationMode.feature: featureComponents.profile,
+  GenerationMode.service: serviceComponents.profile,
+  GenerationMode.project: projectComponents.profile,
+  GenerationMode.widget: widgetComponents.profile,  // Add new mode
+};
+
+// The factory automatically registers:
+// - The use case (widgetComponents.useCase)
+// - The strategy (widgetComponents.strategy)
+// - The profile (widgetComponents.profile)
+// - Updates the registry and handler with the new profile
 ```
 
 ### Step 13: Add Tests
@@ -1961,11 +2109,13 @@ void main() {
 - [ ] Variable Processor:
   `generation/application/services/processors/{type}_variable_processor.dart`
 - [ ] Use Case: `generation/application/use_cases/generate_{type}_use_case.dart`
-- [ ] Handler Method: `features/generate/common/generation_command_handler.dart` (add method)
-- [ ] Enum Update: `generation/foundation/foundation_enums.dart` (add mode)
+- [ ] Mode Strategy: `generation/application/strategies/{type}_generation_mode_strategy.dart`
+- [ ] Enum Update: `generation/foundation/foundation_enums.dart` (add mode and BrickId)
 - [ ] Brick Template: `templates/bricks/{type}/{type}/`
-- [ ] DI Registration: `generation/infrastructure/di/generation_service_container.dart`
+- [ ] DI Registration: `cli/application/bootstrapping/generation_services_factory.dart` (add to `_registerStrategiesAndProfiles`)
 - [ ] Tests: `test/features/generate/{type}/`
+
+**Note**: The handler (`GenerationCommandHandler`) does not need modification - it automatically uses the profiles map.
 
 ### Code Patterns to Follow
 
