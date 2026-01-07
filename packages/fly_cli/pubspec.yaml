@@ -41,7 +41,7 @@ dependencies:
     path: ../fly_mcp
   fly_brick_composer:
     path: ../fly_brick_composer
-  mustache_template: ^2.0.2
+  mustache_template: ^2.0.3
 
 dev_dependencies:
   test: ^1.24.6
